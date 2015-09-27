@@ -872,15 +872,33 @@ MPLAB XC16 ASSEMBLY Listing:  main.s 			page 1
   62              	
   63              	
    3              	
-   4              	;config CONFIG1, FWDTEN_OFF & JTAGEN_OFF
-   5              	;config CONFIG2, FNOSC_PRIPLL & FCKSM_CSDCMD  & POSCMOD_HS & OSCIOFNC_ON
-   6              	
-   7              	
-   8              	.text
-   9              	.global _main
-  10              	_main:
-  11 000000  00 00 02 	    call hardware_init
-  11         00 00 00 
-  12 000004  00 00 37 	    bra $
-  13              	
-  14              	.end
+   4              	
+   5              	    
+   6              	;config CONFIG1, FWDTEN_OFF & JTAGEN_OFF
+   7              	;config CONFIG2, FNOSC_PRIPLL & FCKSM_CSDCMD  & POSCMOD_HS & OSCIOFNC_ON
+   8              	
+   9              	
+  10              	.text
+  11              	.global _main
+  12              	.extern _video_buffer
+  13              	_main:
+  14 000000  00 00 02 	    call hardware_init
+  14         00 00 00 
+  15              	; test vidéo    
+  16 000004  01 00 20 	    mov #_video_buffer,W1
+  17 000006  92 01 20 	    mov #25, W2
+  18              	0:    
+  19 000008  80 02 20 	    mov #40, W0
+  20              	1:
+  21 00000a  00 00 E9 	    dec W0, W0   
+  22 00000c  80 58 78 	    mov.b W0, [W1++]
+  23 00000e  00 00 3A 	    bra nz, 1b
+  24 000010  02 01 E9 	    dec W2, W2
+  25 000012  00 00 3A 	    bra nz, 0b
+  26              	; fin test vidéo    
+  27 000014  00 00 37 	    bra $
+  28              	
+MPLAB XC16 ASSEMBLY Listing:  main.s 			page 16
+
+
+  29              	.end

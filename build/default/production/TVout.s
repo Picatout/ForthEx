@@ -1,6 +1,10 @@
+# 1 "TVout.S"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "TVout.S"
 ; vidéo NTSC B/W sur PIC24FJ64G002
 ; T2 période ligne horizontale
-; OC1 sortie sync  sur RPB4
+; OC1 sortie sync sur RPB4
 ; OC2 contrôle début sortie vidéo
 ; sortie vidéo sur RPB3
 
@@ -8,16 +12,16 @@
 .include "ntsc_const.inc"
 .include "video.inc"
 
-    
-.equ ELPFRM,  271  ; nombre de lignes par frame pair
-.equ OLPFRM,  272  ; nombre de lignes par frame impair
-.equ VIDEO,  8*ROW  ; nombre de lignes vidéo
+
+.equ ELPFRM, 271 ; nombre de lignes par frame pair
+.equ OLPFRM, 272 ; nombre de lignes par frame impair
+.equ VIDEO, 8*ROW ; nombre de lignes vidéo
 
 
 
 .data
 .global _T2counter
-_T2counter: .space 2   ; compte les interruptions T2
+_T2counter: .space 2 ; compte les interruptions T2
 line_count: .word 0xffff
 even: .byte 0xff
 
@@ -83,7 +87,7 @@ __T2Interrupt:
     mov W0, SYNC_OCRS
     mov W0, SYNC_PER
     bra 0b
-5: ; line_count==TOPLINE  activation interruption video
+5: ; line_count==TOPLINE activation interruption video
     bclr VIDEO_IFS, #VIDEO_IF
     bset VIDEO_IEC, #VIDEO_IE
     bra 0b
@@ -102,15 +106,15 @@ __T2Interrupt:
     setm.b even
     bra 0b
 
-    
+
 ;*********************
 ; interruption OC2
 ;*********************
 .extern _font
-.equ CH_ROW, W5    
+.equ CH_ROW, W5
 .equ pVIDBUF, W4
 .equ pFONT, W3
-.equ CH_COUNT, W2    
+.equ CH_COUNT, W2
 .global __OC2Interrupt
 __OC2Interrupt:
     push W0
@@ -120,23 +124,23 @@ __OC2Interrupt:
     push pVIDBUF
     push CH_ROW
     push PSVPAG
-;    mov SYNC_TMR, W0
-;    and #3, W0
-;    sl W0,#1,W0
-;    bra W0
-;    nop
-;    nop
-;    nop
-;    nop
-;    nop
-;    nop
-;    nop
-;    nop
+; mov SYNC_TMR, W0
+; and #3, W0
+; sl W0,#1,W0
+; bra W0
+; nop
+; nop
+; nop
+; nop
+; nop
+; nop
+; nop
+; nop
     mov #psvpage(_font),W0
     mov W0, PSVPAG
     mov line_count, W1
     sub #TOPLINE, W1
-    and  W1,#7,CH_ROW
+    and W1,#7,CH_ROW
     lsr W1,#3,W1
     mov #CPL, CH_COUNT
     mul.uu CH_COUNT,W0, W0
@@ -156,7 +160,7 @@ __OC2Interrupt:
     bra nz, 2b
     mov W1, VIDEO_SPIBUF
     dec CH_COUNT, CH_COUNT
-    bra nz, 1b 
+    bra nz, 1b
 3:
     btst VIDEO_SPISTAT, #SPITBF
     bra nz, 3b
@@ -171,6 +175,5 @@ __OC2Interrupt:
     bclr VIDEO_IFS, #VIDEO_IF
     retfie
 
-    
-.end
 
+.end

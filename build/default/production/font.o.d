@@ -1,3 +1,6 @@
 build/default/production/font.o:  \
-font.c  \
+font.S  \
 font.h 
+build/default/production/font.o:  \
+font.h  \
+ font.S  \

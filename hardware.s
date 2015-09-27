@@ -18,6 +18,7 @@ hardware_init:
     
     ; verouillage configuration I/O
     bset OSCCON, #IOLOCK
+    
     return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -71,9 +72,6 @@ tvout_init:
     ; activation interruption  SYNC_TIMER
     bclr SYNC_IFS, #SYNC_IF
     bset SYNC_IEC, #SYNC_IE
-    ; activation vidéo
-    bclr VIDEO_IFS, #VIDEO_IF
-    bset VIDEO_IEC, #VIDEO_IE
     ; activation timer
     bset SYNC_TMRCON, #TON
     return

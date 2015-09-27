@@ -61,11 +61,11 @@ Program Memory  [Origin = 0x200, Length = 0xa9fc]
 section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200                0x9e            0xed  (237)
-.const                       0x29e               0x328           0x4bc  (1212)
-.dinit                       0x5c6               0x2a8           0x3fc  (1020)
-.text                        0x86e               0x138           0x1d4  (468)
+.const                       0x29e               0x330           0x4c8  (1224)
+.dinit                       0x5ce               0x2a8           0x3fc  (1020)
+.text                        0x876               0x166           0x219  (537)
 
-                     Total program memory used (bytes):          0xb79  (2937) 4%
+                     Total program memory used (bytes):          0xbca  (3018) 4%
 
 
 Data Memory  [Origin = 0x800, Length = 0x2000]
@@ -105,25 +105,25 @@ External Symbols in Program Memory (by address):
                   0x00023c                  __data_init_standard
                   0x00029a                  __DefaultInterrupt
                   0x00029e                  _font
-                  0x00086e                  __T2Interrupt
-                  0x0008e6                  __OC2Interrupt
-                  0x000918                  hardware_init
-                  0x00099c                  _main
-                  0x0009a2                  __INT1Interrupt
+                  0x000876                  __T2Interrupt
+                  0x0008ee                  __OC2Interrupt
+                  0x000942                  hardware_init
+                  0x0009c2                  _main
+                  0x0009d8                  __INT1Interrupt
 
 External Symbols in Program Memory (by name):
 
                   0x00029a                  __DefaultInterrupt
-                  0x0009a2                  __INT1Interrupt
-                  0x0008e6                  __OC2Interrupt
-                  0x00086e                  __T2Interrupt
+                  0x0009d8                  __INT1Interrupt
+                  0x0008ee                  __OC2Interrupt
+                  0x000876                  __T2Interrupt
                   0x00023c                  __data_init
                   0x00023c                  __data_init_standard
                   0x00022c                  __psv_init
                   0x000200                  __resetPRI
                   0x00029e                  _font
-                  0x00099c                  _main
-                  0x000918                  hardware_init
+                  0x0009c2                  _main
+                  0x000942                  hardware_init
 
 Configuration mémoire
 
@@ -196,33 +196,31 @@ __CONFIG1
 .comment
  *(.comment)
 
-.debug_info       0x000000        0x366
+.debug_info       0x000000        0x294
  *(.debug_info)
  .debug_info      0x000000         0x7b build/default/production/main.o
  .debug_info      0x00007b         0x7f build/default/production/hardware.o
  .debug_info      0x0000fa         0x7f build/default/production/keyboard.o
  .debug_info      0x000179         0x9f build/default/production/config_bits.o
  .debug_info      0x000218         0x7c build/default/production/TVout.o
- .debug_info      0x000294         0xd2 build/default/production/font.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev     0x000000         0xb8
+.debug_abbrev     0x000000         0x6f
  *(.debug_abbrev)
  .debug_abbrev    0x000000         0x14 build/default/production/main.o
  .debug_abbrev    0x000014         0x14 build/default/production/hardware.o
  .debug_abbrev    0x000028         0x14 build/default/production/keyboard.o
  .debug_abbrev    0x00003c         0x1f build/default/production/config_bits.o
  .debug_abbrev    0x00005b         0x14 build/default/production/TVout.o
- .debug_abbrev    0x00006f         0x49 build/default/production/font.o
 
-.debug_line       0x000000        0x1bc
+.debug_line       0x000000        0x1c1
  *(.debug_line)
- .debug_line      0x000000         0x34 build/default/production/main.o
- .debug_line      0x000034         0x74 build/default/production/hardware.o
- .debug_line      0x0000a8         0x38 build/default/production/keyboard.o
- .debug_line      0x0000e0         0x24 build/default/production/config_bits.o
- .debug_line      0x000104         0x8a build/default/production/TVout.o
- .debug_line      0x00018e         0x2e build/default/production/font.o
+ .debug_line      0x000000         0x3c build/default/production/main.o
+ .debug_line      0x00003c         0x72 build/default/production/hardware.o
+ .debug_line      0x0000ae         0x38 build/default/production/keyboard.o
+ .debug_line      0x0000e6         0x24 build/default/production/config_bits.o
+ .debug_line      0x00010a         0x9d build/default/production/TVout.o
+ .debug_line      0x0001a7         0x1a build/default/production/font.o
 
 .debug_frame
  *(.debug_frame)
@@ -234,10 +232,7 @@ __CONFIG1
  *(.debug_macinfo)
 
 .debug_pubnames
-                  0x000000         0x1b
  *(.debug_pubnames)
- .debug_pubnames
-                  0x000000         0x1b build/default/production/font.o
 
 .debug_ranges
  *(.debug_ranges)
@@ -268,8 +263,8 @@ __CONFIG1
                   0x00001a          0x4 LONG 0x29a DEFINED (__T1Interrupt)?ABSOLUTE (__T1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00001c          0x4 LONG 0x29a DEFINED (__Interrupt4)?ABSOLUTE (__Interrupt4):ABSOLUTE (__DefaultInterrupt)
                   0x00001e          0x4 LONG 0x29a DEFINED (__IC2Interrupt)?ABSOLUTE (__IC2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000020          0x4 LONG 0x8e6 DEFINED (__OC2Interrupt)?ABSOLUTE (__OC2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000022          0x4 LONG 0x86e DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000020          0x4 LONG 0x8ee DEFINED (__OC2Interrupt)?ABSOLUTE (__OC2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000022          0x4 LONG 0x876 DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000024          0x4 LONG 0x29a DEFINED (__T3Interrupt)?ABSOLUTE (__T3Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000026          0x4 LONG 0x29a DEFINED (__SPI1ErrInterrupt)?ABSOLUTE (__SPI1ErrInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000028          0x4 LONG 0x29a DEFINED (__SPI1Interrupt)?ABSOLUTE (__SPI1Interrupt):ABSOLUTE (__DefaultInterrupt)
@@ -282,7 +277,7 @@ __CONFIG1
                   0x000036          0x4 LONG 0x29a DEFINED (__MI2C1Interrupt)?ABSOLUTE (__MI2C1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000038          0x4 LONG 0x29a DEFINED (__CompInterrupt)?ABSOLUTE (__CompInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00003a          0x4 LONG 0x29a DEFINED (__CNInterrupt)?ABSOLUTE (__CNInterrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00003c          0x4 LONG 0x9a2 DEFINED (__INT1Interrupt)?ABSOLUTE (__INT1Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00003c          0x4 LONG 0x9d8 DEFINED (__INT1Interrupt)?ABSOLUTE (__INT1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00003e          0x4 LONG 0x29a DEFINED (__Interrupt21)?ABSOLUTE (__Interrupt21):ABSOLUTE (__DefaultInterrupt)
                   0x000040          0x4 LONG 0x29a DEFINED (__Interrupt22)?ABSOLUTE (__Interrupt22):ABSOLUTE (__DefaultInterrupt)
                   0x000042          0x4 LONG 0x29a DEFINED (__Interrupt23)?ABSOLUTE (__Interrupt23):ABSOLUTE (__DefaultInterrupt)
@@ -396,8 +391,8 @@ __CONFIG1
                   0x00011a          0x4 LONG 0x29a DEFINED (__AltT1Interrupt)?ABSOLUTE (__AltT1Interrupt):DEFINED (__T1Interrupt)?ABSOLUTE (__T1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00011c          0x4 LONG 0x29a DEFINED (__AltInterrupt4)?ABSOLUTE (__AltInterrupt4):DEFINED (__Interrupt4)?ABSOLUTE (__Interrupt4):ABSOLUTE (__DefaultInterrupt)
                   0x00011e          0x4 LONG 0x29a DEFINED (__AltIC2Interrupt)?ABSOLUTE (__AltIC2Interrupt):DEFINED (__IC2Interrupt)?ABSOLUTE (__IC2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000120          0x4 LONG 0x8e6 DEFINED (__AltOC2Interrupt)?ABSOLUTE (__AltOC2Interrupt):DEFINED (__OC2Interrupt)?ABSOLUTE (__OC2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000122          0x4 LONG 0x86e DEFINED (__AltT2Interrupt)?ABSOLUTE (__AltT2Interrupt):DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000120          0x4 LONG 0x8ee DEFINED (__AltOC2Interrupt)?ABSOLUTE (__AltOC2Interrupt):DEFINED (__OC2Interrupt)?ABSOLUTE (__OC2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000122          0x4 LONG 0x876 DEFINED (__AltT2Interrupt)?ABSOLUTE (__AltT2Interrupt):DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000124          0x4 LONG 0x29a DEFINED (__AltT3Interrupt)?ABSOLUTE (__AltT3Interrupt):DEFINED (__T3Interrupt)?ABSOLUTE (__T3Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000126          0x4 LONG 0x29a DEFINED (__AltSPI1ErrInterrupt)?ABSOLUTE (__AltSPI1ErrInterrupt):DEFINED (__SPI1ErrInterrupt)?ABSOLUTE (__SPI1ErrInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000128          0x4 LONG 0x29a DEFINED (__AltSPI1Interrupt)?ABSOLUTE (__AltSPI1Interrupt):DEFINED (__SPI1Interrupt)?ABSOLUTE (__SPI1Interrupt):ABSOLUTE (__DefaultInterrupt)
@@ -410,7 +405,7 @@ __CONFIG1
                   0x000136          0x4 LONG 0x29a DEFINED (__AltMI2C1Interrupt)?ABSOLUTE (__AltMI2C1Interrupt):DEFINED (__MI2C1Interrupt)?ABSOLUTE (__MI2C1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000138          0x4 LONG 0x29a DEFINED (__AltCompInterrupt)?ABSOLUTE (__AltCompInterrupt):DEFINED (__CompInterrupt)?ABSOLUTE (__CompInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00013a          0x4 LONG 0x29a DEFINED (__AltCNInterrupt)?ABSOLUTE (__AltCNInterrupt):DEFINED (__CNInterrupt)?ABSOLUTE (__CNInterrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00013c          0x4 LONG 0x9a2 DEFINED (__AltINT1Interrupt)?ABSOLUTE (__AltINT1Interrupt):DEFINED (__INT1Interrupt)?ABSOLUTE (__INT1Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00013c          0x4 LONG 0x9d8 DEFINED (__AltINT1Interrupt)?ABSOLUTE (__AltINT1Interrupt):DEFINED (__INT1Interrupt)?ABSOLUTE (__INT1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00013e          0x4 LONG 0x29a DEFINED (__AltInterrupt21)?ABSOLUTE (__AltInterrupt21):DEFINED (__Interrupt21)?ABSOLUTE (__Interrupt21):ABSOLUTE (__DefaultInterrupt)
                   0x000140          0x4 LONG 0x29a DEFINED (__AltInterrupt22)?ABSOLUTE (__AltInterrupt22):DEFINED (__Interrupt22)?ABSOLUTE (__Interrupt22):ABSOLUTE (__DefaultInterrupt)
                   0x000142          0x4 LONG 0x29a DEFINED (__AltInterrupt23)?ABSOLUTE (__AltInterrupt23):DEFINED (__Interrupt23)?ABSOLUTE (__Interrupt23):ABSOLUTE (__DefaultInterrupt)
@@ -1099,15 +1094,13 @@ LOAD data_init
                   0x000060         0x12 build/default/production/config_bits.o
 
 __c30_signature
-                  0x000072         0x18
+                  0x000072         0x12
  __c30_signature
                   0x000072          0x6 build/default/production/config_bits.o
  __c30_signature
-                  0x000078          0x6 build/default/production/font.o
+                  0x000078          0x6 /opt/microchip/xc16/v1.23/bin/bin/../../lib/libpic30-elf.a(crt0_standard.o)
  __c30_signature
-                  0x00007e          0x6 /opt/microchip/xc16/v1.23/bin/bin/../../lib/libpic30-elf.a(crt0_standard.o)
- __c30_signature
-                  0x000084          0x6 /opt/microchip/xc16/v1.23/bin/bin/../../lib/libpic30-elf.a(data_init_standard.o)
+                  0x00007e          0x6 /opt/microchip/xc16/v1.23/bin/bin/../../lib/libpic30-elf.a(data_init_standard.o)
 
 .data               0x0800        0x3ee
  .data              0x0800        0x3ee build/default/production/TVout.o
@@ -1121,20 +1114,20 @@ __c30_signature
 .config_IESO      0x00abfc          0x2
  .config_IESO     0x00abfc          0x2 build/default/production/config_bits.o
 
-.const              0x829e        0x328 address de chargement 0x00029e  
- .const             0x829e        0x328 build/default/production/font.o
+.const              0x829e        0x330 address de chargement 0x00029e  
+ .const             0x829e        0x330 build/default/production/font.o
                     0x829e                  _font
 
-.dinit            0x0005c6        0x2a8
- .dinit           0x0005c6        0x2a8 data_init
+.dinit            0x0005ce        0x2a8
+ .dinit           0x0005ce        0x2a8 data_init
 
-.text             0x00086e        0x138
- .text            0x00086e         0xaa build/default/production/TVout.o
-                  0x00086e                  __T2Interrupt
-                  0x0008e6                  __OC2Interrupt
- .text            0x000918         0x84 build/default/production/hardware.o
-                  0x000918                  hardware_init
- .text            0x00099c          0x6 build/default/production/main.o
-                  0x00099c                  _main
- .text            0x0009a2          0x4 build/default/production/keyboard.o
-                  0x0009a2                  __INT1Interrupt
+.text             0x000876        0x166
+ .text            0x000876         0xcc build/default/production/TVout.o
+                  0x000876                  __T2Interrupt
+                  0x0008ee                  __OC2Interrupt
+ .text            0x000942         0x80 build/default/production/hardware.o
+                  0x000942                  hardware_init
+ .text            0x0009c2         0x16 build/default/production/main.o
+                  0x0009c2                  _main
+ .text            0x0009d8          0x4 build/default/production/keyboard.o
+                  0x0009d8                  __INT1Interrupt

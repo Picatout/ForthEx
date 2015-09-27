@@ -1,8 +1,7 @@
 build/default/production/TVout.o:  \
-TVout.S  \
-font.h 
+TVout.S 
 build/default/production/TVout.o:  \
-font.h  \
+./video.inc  \
 ./ntsc_const.inc  \
  ./hardware.inc  \
 TVout.S  \

@@ -915,86 +915,84 @@ MPLAB XC16 ASSEMBLY Listing:  hardware.s 			page 1
   18              	    
   19              	    ; verouillage configuration I/O
   20 000016  00 C0 A8 	    bset OSCCON, #IOLOCK
-  21 000018  00 00 06 	    return
-  22              	
-  23              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  24              	; initialisation générateur vidéo
-  25              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  26              	tvout_init:
-  27 00001a  00 60 A9 	    bclr VIDEO_TRIS, #VIDEO_OUT ; sortie vidéo
-  28 00001c  00 80 A9 	    bclr SYNC_TRIS, #SYNC_OUT  ; sortie sync vidéo
-  29              	    ; configuration PPS
-  30 00001e  00 00 80 	    mov VIDEO_RPOR, W0
-  31 000020  F1 0F 2E 	    mov #~(0x1f<<VIDEO_RPORbit),W1
-  32 000022  01 00 60 	    and W0,W1,W0
-  33 000024  01 A0 20 	    mov #(VIDEO_FN<<VIDEO_RPORbit), W1
-  34 000026  01 00 70 	    ior W0,W1,W0
-  35 000028  00 00 88 	    mov W0, VIDEO_RPOR
-  36 00002a  00 00 80 	    mov SYNC_RPOR, W0
-  37 00002c  01 FE 2F 	    mov #~(0x1f<<SYNC_RPORbit),W1
-  38 00002e  01 00 60 	    and W0,W1,W0
-  39 000030  21 01 20 	    mov #(SYNC_FN<<SYNC_RPORbit), W1
-  40 000032  01 00 70 	    ior W0,W1,W0
-  41 000034  00 00 88 	    mov W0, SYNC_RPOR
-  42              	    ; configuration VIDEO_SPI
-  43 000036  B0 03 20 	    mov #(3+(6<<SPRE0)+1<<MSTEN), W0
-  44 000038  00 00 88 	    mov W0, VIDEO_SPICON1
-  45 00003a  01 E0 A8 	    bset VIDEO_SPISTAT, #SPIEN
-  46 00003c  00 20 EF 	    clr VIDEO_SPIBUF
-  47              	    ; configuration output compare
-  48 00003e  70 3F 20 	    mov #HLINE, W0
-  49              	    ; période timer Fcy/15748-1
-  50 000040  00 00 88 	    mov W0, SYNC_PER
-  51 000042  00 00 88 	    mov W0, SYNC_OCRS
-  52 000044  00 00 88 	    mov W0, VIDEO_OCR
-  53 000046  A0 04 20 	    mov #HSYNC, W0
-  54 000048  00 00 88 	    mov W0, SYNC_OCR
-  55 00004a  41 00 DD 	    sl  W0, #1, W0
-  56 00004c  00 00 88 	    mov W0, VIDEO_OCRS
-  57              	    ; configuraton output compare mode 5
-  58 00004e  50 00 20 	    mov #5, W0
-  59 000050  00 00 88 	    mov W0, SYNC_OCCON
-  60 000052  00 00 88 	    mov W0, VIDEO_OCCON
-  61              	    ; configuration priorité d'interruptions
-  62              	    ; priorité 5 pour les 2
-  63 000054  F0 FF 28 	    mov #~(7<<SYNC_IPbit), W0
+  21              	    
+  22 000018  00 00 06 	    return
+  23              	
+  24              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  25              	; initialisation générateur vidéo
+  26              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  27              	tvout_init:
+  28 00001a  00 60 A9 	    bclr VIDEO_TRIS, #VIDEO_OUT ; sortie vidéo
+  29 00001c  00 80 A9 	    bclr SYNC_TRIS, #SYNC_OUT  ; sortie sync vidéo
+  30              	    ; configuration PPS
+  31 00001e  00 00 80 	    mov VIDEO_RPOR, W0
+  32 000020  F1 0F 2E 	    mov #~(0x1f<<VIDEO_RPORbit),W1
+  33 000022  01 00 60 	    and W0,W1,W0
+  34 000024  01 A0 20 	    mov #(VIDEO_FN<<VIDEO_RPORbit), W1
+  35 000026  01 00 70 	    ior W0,W1,W0
+  36 000028  00 00 88 	    mov W0, VIDEO_RPOR
+  37 00002a  00 00 80 	    mov SYNC_RPOR, W0
+  38 00002c  01 FE 2F 	    mov #~(0x1f<<SYNC_RPORbit),W1
+  39 00002e  01 00 60 	    and W0,W1,W0
+  40 000030  21 01 20 	    mov #(SYNC_FN<<SYNC_RPORbit), W1
+  41 000032  01 00 70 	    ior W0,W1,W0
+  42 000034  00 00 88 	    mov W0, SYNC_RPOR
+  43              	    ; configuration VIDEO_SPI
+  44 000036  B0 03 20 	    mov #(3+(6<<SPRE0)+1<<MSTEN), W0
+  45 000038  00 00 88 	    mov W0, VIDEO_SPICON1
+  46 00003a  01 E0 A8 	    bset VIDEO_SPISTAT, #SPIEN
+  47 00003c  00 20 EF 	    clr VIDEO_SPIBUF
+  48              	    ; configuration output compare
+  49 00003e  70 3F 20 	    mov #HLINE, W0
+  50              	    ; période timer Fcy/15748-1
+  51 000040  00 00 88 	    mov W0, SYNC_PER
+  52 000042  00 00 88 	    mov W0, SYNC_OCRS
+  53 000044  00 00 88 	    mov W0, VIDEO_OCR
+  54 000046  A0 04 20 	    mov #HSYNC, W0
+  55 000048  00 00 88 	    mov W0, SYNC_OCR
+  56 00004a  41 00 DD 	    sl  W0, #1, W0
+  57 00004c  00 00 88 	    mov W0, VIDEO_OCRS
+  58              	    ; configuraton output compare mode 5
+  59 00004e  50 00 20 	    mov #5, W0
+  60 000050  00 00 88 	    mov W0, SYNC_OCCON
+  61 000052  00 00 88 	    mov W0, VIDEO_OCCON
+  62              	    ; configuration priorité d'interruptions
+  63              	    ; priorité 5 pour les 2
 MPLAB XC16 ASSEMBLY Listing:  hardware.s 			page 17
 
 
-  64 000056  00 20 B6 	    and SYNC_IPC
-  65 000058  00 00 25 	    mov #(5<<SYNC_IPbit), W0 
-  66 00005a  00 20 B7 	    ior SYNC_IPC
-  67 00005c  F0 8F 2F 	    mov #~(7<<VIDEO_IPbit), W0
-  68 00005e  00 20 B6 	    and VIDEO_IPC
-  69 000060  00 50 20 	    mov #(5<<VIDEO_IPbit), W0
-  70 000062  00 20 B7 	    ior VIDEO_IPC
-  71              	    ; activation interruption  SYNC_TIMER
-  72 000064  00 E0 A9 	    bclr SYNC_IFS, #SYNC_IF
-  73 000066  00 E0 A8 	    bset SYNC_IEC, #SYNC_IE
-  74              	    ; activation vidéo
-  75 000068  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
-  76 00006a  00 C0 A8 	    bset VIDEO_IEC, #VIDEO_IE
-  77              	    ; activation timer
-  78 00006c  01 E0 A8 	    bset SYNC_TMRCON, #TON
-  79 00006e  00 00 06 	    return
-  80              	
+  64 000054  F0 FF 28 	    mov #~(7<<SYNC_IPbit), W0
+  65 000056  00 20 B6 	    and SYNC_IPC
+  66 000058  00 00 25 	    mov #(5<<SYNC_IPbit), W0 
+  67 00005a  00 20 B7 	    ior SYNC_IPC
+  68 00005c  F0 8F 2F 	    mov #~(7<<VIDEO_IPbit), W0
+  69 00005e  00 20 B6 	    and VIDEO_IPC
+  70 000060  00 50 20 	    mov #(5<<VIDEO_IPbit), W0
+  71 000062  00 20 B7 	    ior VIDEO_IPC
+  72              	    ; activation interruption  SYNC_TIMER
+  73 000064  00 E0 A9 	    bclr SYNC_IFS, #SYNC_IF
+  74 000066  00 E0 A8 	    bset SYNC_IEC, #SYNC_IE
+  75              	    ; activation timer
+  76 000068  01 E0 A8 	    bset SYNC_TMRCON, #TON
+  77 00006a  00 00 06 	    return
+  78              	
+  79              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  80              	; initialistaion clavier PS/2
   81              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  82              	; initialistaion clavier PS/2
-  83              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  84              	kbd_init:
-  85              	    ; PPS sélection broche pour kbd_clk
-  86 000070  F0 0F 2E 	    mov #~(0x1f<<KBD_PPSbit), W0
-  87 000072  00 20 B6 	    and KBD_RPINR
-  88 000074  00 F0 20 	    mov #(KBD_CLK<<KBD_PPSbit), W0
-  89 000076  00 20 B7 	    ior KBD_RPINR
-  90              	    ; priorité d'interruption 7
-  91 000078  70 00 20 	    mov #(7<<KBD_IPCbit), W0
-  92 00007a  00 20 B7 	    ior KBD_IPCR 
-  93              	     ; interruption sur transition négative
-  94 00007c  00 20 A8 	    bset INTCON2, #KBD_INTEP
-  95              	    ; activation interruption clavier
-  96 00007e  00 80 A9 	    bclr KBD_IFS, #KBD_IF
-  97 000080  00 80 A8 	    bset KBD_IEC, #KBD_IE
-  98 000082  00 00 06 	    return
-  99              	    
- 100              	.end
+  82              	kbd_init:
+  83              	    ; PPS sélection broche pour kbd_clk
+  84 00006c  F0 0F 2E 	    mov #~(0x1f<<KBD_PPSbit), W0
+  85 00006e  00 20 B6 	    and KBD_RPINR
+  86 000070  00 F0 20 	    mov #(KBD_CLK<<KBD_PPSbit), W0
+  87 000072  00 20 B7 	    ior KBD_RPINR
+  88              	    ; priorité d'interruption 7
+  89 000074  70 00 20 	    mov #(7<<KBD_IPCbit), W0
+  90 000076  00 20 B7 	    ior KBD_IPCR 
+  91              	     ; interruption sur transition négative
+  92 000078  00 20 A8 	    bset INTCON2, #KBD_INTEP
+  93              	    ; activation interruption clavier
+  94 00007a  00 80 A9 	    bclr KBD_IFS, #KBD_IF
+  95 00007c  00 80 A8 	    bset KBD_IEC, #KBD_IE
+  96 00007e  00 00 06 	    return
+  97              	    
+  98              	.end
