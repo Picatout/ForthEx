@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=main.s hardware.s keyboard.s config_bits.c TVout.S font.S
+SOURCEFILES_QUOTED_IF_SPACED=main.s hardware.s config_bits.c TVout.S font.S ps2.s keyboard.s qwerty.s
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/main.o ${OBJECTDIR}/hardware.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/config_bits.o ${OBJECTDIR}/TVout.o ${OBJECTDIR}/font.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/main.o.d ${OBJECTDIR}/hardware.o.d ${OBJECTDIR}/keyboard.o.d ${OBJECTDIR}/config_bits.o.d ${OBJECTDIR}/TVout.o.d ${OBJECTDIR}/font.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/main.o ${OBJECTDIR}/hardware.o ${OBJECTDIR}/config_bits.o ${OBJECTDIR}/TVout.o ${OBJECTDIR}/font.o ${OBJECTDIR}/ps2.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/qwerty.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/main.o.d ${OBJECTDIR}/hardware.o.d ${OBJECTDIR}/config_bits.o.d ${OBJECTDIR}/TVout.o.d ${OBJECTDIR}/font.o.d ${OBJECTDIR}/ps2.o.d ${OBJECTDIR}/keyboard.o.d ${OBJECTDIR}/qwerty.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/main.o ${OBJECTDIR}/hardware.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/config_bits.o ${OBJECTDIR}/TVout.o ${OBJECTDIR}/font.o
+OBJECTFILES=${OBJECTDIR}/main.o ${OBJECTDIR}/hardware.o ${OBJECTDIR}/config_bits.o ${OBJECTDIR}/TVout.o ${OBJECTDIR}/font.o ${OBJECTDIR}/ps2.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/qwerty.o
 
 # Source Files
-SOURCEFILES=main.s hardware.s keyboard.s config_bits.c TVout.S font.S
+SOURCEFILES=main.s hardware.s config_bits.c TVout.S font.S ps2.s keyboard.s qwerty.s
 
 
 CFLAGS=
@@ -116,12 +116,26 @@ ${OBJECTDIR}/hardware.o: hardware.s  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_AS_PRE)  hardware.s  -o ${OBJECTDIR}/hardware.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_PICKIT2=1  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/hardware.o.d",--defsym=__MPLAB_BUILD=1,--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PICKIT2=1,-g,--no-relax,--keep-locals,-al=${OBJECTDIR}/hardware.lst$(MP_EXTRA_AS_POST)
 	@${FIXDEPS} "${OBJECTDIR}/hardware.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
+${OBJECTDIR}/ps2.o: ps2.s  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/ps2.o.d 
+	@${RM} ${OBJECTDIR}/ps2.o 
+	${MP_CC} $(MP_EXTRA_AS_PRE)  ps2.s  -o ${OBJECTDIR}/ps2.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_PICKIT2=1  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/ps2.o.d",--defsym=__MPLAB_BUILD=1,--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PICKIT2=1,-g,--no-relax,--keep-locals,-al=${OBJECTDIR}/ps2.lst$(MP_EXTRA_AS_POST)
+	@${FIXDEPS} "${OBJECTDIR}/ps2.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
+	
 ${OBJECTDIR}/keyboard.o: keyboard.s  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/keyboard.o.d 
 	@${RM} ${OBJECTDIR}/keyboard.o 
 	${MP_CC} $(MP_EXTRA_AS_PRE)  keyboard.s  -o ${OBJECTDIR}/keyboard.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_PICKIT2=1  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/keyboard.o.d",--defsym=__MPLAB_BUILD=1,--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PICKIT2=1,-g,--no-relax,--keep-locals,-al=${OBJECTDIR}/keyboard.lst$(MP_EXTRA_AS_POST)
 	@${FIXDEPS} "${OBJECTDIR}/keyboard.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/qwerty.o: qwerty.s  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/qwerty.o.d 
+	@${RM} ${OBJECTDIR}/qwerty.o 
+	${MP_CC} $(MP_EXTRA_AS_PRE)  qwerty.s  -o ${OBJECTDIR}/qwerty.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_PICKIT2=1  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/qwerty.o.d",--defsym=__MPLAB_BUILD=1,--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PICKIT2=1,-g,--no-relax,--keep-locals,-al=${OBJECTDIR}/qwerty.lst$(MP_EXTRA_AS_POST)
+	@${FIXDEPS} "${OBJECTDIR}/qwerty.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
 else
 ${OBJECTDIR}/main.o: main.s  nbproject/Makefile-${CND_CONF}.mk
@@ -138,12 +152,26 @@ ${OBJECTDIR}/hardware.o: hardware.s  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_AS_PRE)  hardware.s  -o ${OBJECTDIR}/hardware.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/hardware.o.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax,--keep-locals,-al=${OBJECTDIR}/hardware.lst$(MP_EXTRA_AS_POST)
 	@${FIXDEPS} "${OBJECTDIR}/hardware.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
+${OBJECTDIR}/ps2.o: ps2.s  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/ps2.o.d 
+	@${RM} ${OBJECTDIR}/ps2.o 
+	${MP_CC} $(MP_EXTRA_AS_PRE)  ps2.s  -o ${OBJECTDIR}/ps2.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/ps2.o.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax,--keep-locals,-al=${OBJECTDIR}/ps2.lst$(MP_EXTRA_AS_POST)
+	@${FIXDEPS} "${OBJECTDIR}/ps2.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
+	
 ${OBJECTDIR}/keyboard.o: keyboard.s  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/keyboard.o.d 
 	@${RM} ${OBJECTDIR}/keyboard.o 
 	${MP_CC} $(MP_EXTRA_AS_PRE)  keyboard.s  -o ${OBJECTDIR}/keyboard.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/keyboard.o.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax,--keep-locals,-al=${OBJECTDIR}/keyboard.lst$(MP_EXTRA_AS_POST)
 	@${FIXDEPS} "${OBJECTDIR}/keyboard.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/qwerty.o: qwerty.s  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/qwerty.o.d 
+	@${RM} ${OBJECTDIR}/qwerty.o 
+	${MP_CC} $(MP_EXTRA_AS_PRE)  qwerty.s  -o ${OBJECTDIR}/qwerty.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/qwerty.o.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax,--keep-locals,-al=${OBJECTDIR}/qwerty.lst$(MP_EXTRA_AS_POST)
+	@${FIXDEPS} "${OBJECTDIR}/qwerty.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
 endif
 

@@ -880,220 +880,207 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
   61              	.LIST
   62              	
   63              	
-   8              	.include "ntsc_const.inc"
-   1              	
-   2              	;résolution d'image
-   3              	.equ XRES, 320
-   4              	.equ YRES, 200
-   5              	.equ BPL, (XRES/8)
-   6              	.equ ROW, (YRES/8)
-   7              	.equ TV_BUFFER, (ROW*BPL)
-   8              	
+   8              	.include "video.inc"
+   1              	; constantes liées au générateur vidéo
+   2              	    
+   3              	.equ CHAR_WIDTH,  (8)
+   4              	.equ CHAR_HEIGHT, (8)
+   5              	.equ FONT_SIZE, (101)
+   6              	.equ CPL, (50)  ; caractères pa ligne
+   7              	.equ LPS, (24)  ; ligne par écran
+   8              	;résolution d'image
+   9              	.equ XRES, (CHAR_WIDTH*CPL)
+  10              	.equ YRES, (CHAR_HEIGHT*LPS)
+  11              	.equ TV_BUFFER, (CPL*LPS)
    9              	
   10              	; constantes génération signal NTSC
   11              	.equ HFREQ, 15748 ; fréquence horizontale pour information seulement
   12              	.equ HLINE, 1015 ; PR2= période ligne horizontale
   13              	.equ HSYNC, 74  ; OC1R=47e-6*FCY-1 sync pulse horizontal
   14              	.equ HALFLINE, 507 ; période demi-ligne horizontale (VSYNC)
-  15              	.equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
-  16              	.equ TOPLINE, 40  ; première ligne visible
-  17              	
 MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 16
 
 
-  18              	
+  15              	.equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
+  16              	.equ TOPLINE, 40  ; première ligne visible
+  17              	.equ ELPFRM,  271  ; nombre de lignes par frame pair
+  18              	.equ OLPFRM,  272  ; nombre de lignes par frame impair
   19              	
   20              	
   21              	
-   9              	.include "video.inc"
-   1              	; constantes liées au générateur vidéo
-   2              	    
-   3              	.equ CHAR_WIDTH,  (8)
-   4              	.equ CHAR_HEIGHT, (8)
-   5              	.equ FONT_SIZE, (101)
-   6              	.equ CPL, (40)  ; caractères pa ligne
-   7              	.equ LPS, (25)  ; ligne par écran
-   8              	
-  10              	
-  11              	    
-  12              	.equ ELPFRM,  271  ; nombre de lignes par frame pair
-  13              	.equ OLPFRM,  272  ; nombre de lignes par frame impair
-  14              	.equ VIDEO,  8*ROW  ; nombre de lignes vidéo
-  15              	
-  16              	
-  17              	
-  18              	.data
-  19                 	.global _T2counter
-  20 0000 00 00       	_T2counter: .space 2   ; compte les interruptions T2
-  21 0002 FF FF       	line_count: .word 0xffff
-  22 0004 FF          	even: .byte 0xff
-  23                 	
-  24                 	.global _video_buffer
-  25 0005 00 00 00 00 	_video_buffer: .space TV_BUFFER
-  25      00 00 00 00 
-  25      00 00 00 00 
-  25      00 00 00 00 
-  25      00 00 00 00 
-  25      00 00 00 00 
-  25      00 00 00 00 
-  25      00 00 00 00 
-  25      00 00 00 00 
-  26                 	
-  27                 	
-  28 03ed 00          	.text
-  29              	
-  30              	;********************
-  31              	; interruption TIMER2
-  32              	;********************
-  33              	.global __T2Interrupt
-  34              	__T2Interrupt:
-  35 000000  80 1F 78 	    push W0
-  36 000002  00 20 EC 	    inc _T2counter
-  37 000004  02 20 EC 	    inc line_count
-  38 000006  00 00 32 	    bra z, 1f
-  39 000008  60 00 20 	    mov #6, W0
-  40 00000a  02 00 E3 	    cp line_count
-  41 00000c  00 00 32 	    bra z, 2f
-  42 00000e  C0 00 20 	    mov #12, W0
-  43 000010  02 00 E3 	    cp line_count
-  44 000012  00 00 32 	    bra z, 3f
-  45 000014  20 01 20 	    mov #18, W0
+  22              	
+  23              	.data
+  24                 	.global _T2counter
+  25 0000 00 00       	_T2counter: .space 2   ; compte les interruptions T2
+  26 0002 FF FF       	line_count: .word 0xffff
+  27 0004 FF          	even: .byte 0xff
+  28                 	
+  29                 	.global _video_buffer
+  30 0005 00 00 00 00 	_video_buffer: .space TV_BUFFER
+  30      00 00 00 00 
+  30      00 00 00 00 
+  30      00 00 00 00 
+  30      00 00 00 00 
+  30      00 00 00 00 
+  30      00 00 00 00 
+  30      00 00 00 00 
+  30      00 00 00 00 
+  31                 	
+  32                 	
+  33 04b5 00          	.text
+  34              	
+  35              	;********************
+  36              	; interruption TIMER2
+  37              	;********************
+  38              	.global __T2Interrupt
+  39              	__T2Interrupt:
+  40 000000  80 1F 78 	    push W0
+  41 000002  00 20 EC 	    inc _T2counter
+  42 000004  02 20 EC 	    inc line_count
+  43 000006  00 00 32 	    bra z, 1f
+  44 000008  60 00 20 	    mov #6, W0
+  45 00000a  02 00 E3 	    cp line_count
+  46 00000c  00 00 32 	    bra z, 2f
+  47 00000e  C0 00 20 	    mov #12, W0
+  48 000010  02 00 E3 	    cp line_count
+  49 000012  00 00 32 	    bra z, 3f
+  50 000014  20 01 20 	    mov #18, W0
+  51 000016  02 00 E3 	    cp line_count
+  52 000018  00 00 32 	    bra z, 4f
+  53 00001a  80 02 20 	    mov #TOPLINE, W0
+  54 00001c  02 00 E3 	    cp line_count
+  55 00001e  00 00 32 	    bra z, 5f
+  56 000020  80 0E 20 	    mov #TOPLINE+YRES, W0
+  57 000022  02 00 E3 	    cp line_count
+  58 000024  00 00 32 	    bra z, 6f
+  59 000026  F0 10 20 	    mov #ELPFRM, W0
+  60 000028  02 00 E3 	    cp line_count
+  61 00002a  00 00 32 	    bra z, 7f
+  62 00002c  00 11 20 	    mov #OLPFRM, W0
+  63 00002e  02 00 E3 	    cp line_count
 MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 17
 
 
-  46 000016  02 00 E3 	    cp line_count
-  47 000018  00 00 32 	    bra z, 4f
-  48 00001a  80 02 20 	    mov #TOPLINE, W0
-  49 00001c  02 00 E3 	    cp line_count
-  50 00001e  00 00 32 	    bra z, 5f
-  51 000020  00 0F 20 	    mov #TOPLINE+VIDEO, W0
-  52 000022  02 00 E3 	    cp line_count
-  53 000024  00 00 32 	    bra z, 6f
-  54 000026  F0 10 20 	    mov #ELPFRM, W0
-  55 000028  02 00 E3 	    cp line_count
-  56 00002a  00 00 32 	    bra z, 7f
-  57 00002c  00 11 20 	    mov #OLPFRM, W0
-  58 00002e  02 00 E3 	    cp line_count
-  59 000030  00 00 32 	    bra z, 8f
-  60              	0:
-  61 000032  00 E0 A9 	    bclr SYNC_IFS, #SYNC_IF
-  62 000034  4F 00 78 	    pop W0
-  63 000036  00 40 06 	    retfie
-  64              	1: ; line_count==0 start VSYNC 6 half line narrow neg. pulses
-  65 000038  50 02 20 	    mov #SERATION, W0
-  66 00003a  00 00 88 	    mov W0, SYNC_OCR
-  67 00003c  B0 1F 20 	    mov #HALFLINE, W0
-  68 00003e  00 00 88 	    mov W0, SYNC_OCRS
-  69 000040  00 00 88 	    mov W0, SYNC_PER
-  70 000042  00 00 37 	    bra 0b
-  71              	2: ; line_count==6 , 6 half line large neg. pulses
-  72 000044  60 1D 20 	    mov #(HALFLINE-SERATION), W0
-  73 000046  00 00 88 	    mov W0, SYNC_OCR
-  74 000048  00 00 37 	    bra 0b
-  75              	3: ; line_count==12 , 6 half line narrow neg. pulses
-  76 00004a  50 02 20 	    mov #SERATION, W0
-  77 00004c  00 00 88 	    mov W0, SYNC_OCR
-  78 00004e  00 00 37 	    bra 0b
-  79              	4: ; line_count==18 , end of VSYNC
-  80 000050  A0 04 20 	    mov #HSYNC, W0
-  81 000052  00 00 88 	    mov W0, SYNC_OCR
-  82 000054  70 3F 20 	    mov #HLINE, W0
-  83 000056  00 00 88 	    mov W0, SYNC_OCRS
-  84 000058  00 00 88 	    mov W0, SYNC_PER
-  85 00005a  00 00 37 	    bra 0b
-  86              	5: ; line_count==TOPLINE  activation interruption video
-  87 00005c  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
-  88 00005e  00 C0 A8 	    bset VIDEO_IEC, #VIDEO_IE
-  89 000060  00 00 37 	    bra 0b
-  90              	6: ; line_count==TOPLINE+VIDEDO désactivaion int. video
-  91 000062  00 C0 A9 	    bclr VIDEO_IEC, #VIDEO_IE
-  92 000064  00 00 37 	    bra 0b
-  93              	7: ; line_count==ELPFRM
-  94 000066  00 00 EB 	    clr W0
-  95 000068  04 40 E3 	    cp.b even
-  96 00006a  00 00 32 	    bra z, 0b
-  97 00006c  02 A0 EF 	    setm line_count
-  98 00006e  04 60 EF 	    clr.b even
-  99 000070  00 00 37 	    bra 0b
- 100              	8: ;line_count==OLPFRM
- 101 000072  02 A0 EF 	    setm line_count
- 102 000074  04 E0 EF 	    setm.b even
+  64 000030  00 00 32 	    bra z, 8f
+  65              	0:
+  66 000032  00 E0 A9 	    bclr SYNC_IFS, #SYNC_IF
+  67 000034  4F 00 78 	    pop W0
+  68 000036  00 40 06 	    retfie
+  69              	1: ; line_count==0 start VSYNC 6 half line narrow neg. pulses
+  70 000038  50 02 20 	    mov #SERATION, W0
+  71 00003a  00 00 88 	    mov W0, SYNC_OCR
+  72 00003c  B0 1F 20 	    mov #HALFLINE, W0
+  73 00003e  00 00 88 	    mov W0, SYNC_OCRS
+  74 000040  00 00 88 	    mov W0, SYNC_PER
+  75 000042  00 00 37 	    bra 0b
+  76              	2: ; line_count==6 , 6 half line large neg. pulses
+  77 000044  60 1D 20 	    mov #(HALFLINE-SERATION), W0
+  78 000046  00 00 88 	    mov W0, SYNC_OCR
+  79 000048  00 00 37 	    bra 0b
+  80              	3: ; line_count==12 , 6 half line narrow neg. pulses
+  81 00004a  50 02 20 	    mov #SERATION, W0
+  82 00004c  00 00 88 	    mov W0, SYNC_OCR
+  83 00004e  00 00 37 	    bra 0b
+  84              	4: ; line_count==18 , end of VSYNC
+  85 000050  A0 04 20 	    mov #HSYNC, W0
+  86 000052  00 00 88 	    mov W0, SYNC_OCR
+  87 000054  70 3F 20 	    mov #HLINE, W0
+  88 000056  00 00 88 	    mov W0, SYNC_OCRS
+  89 000058  00 00 88 	    mov W0, SYNC_PER
+  90 00005a  00 00 37 	    bra 0b
+  91              	5: ; line_count==TOPLINE  activation interruption video
+  92 00005c  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
+  93 00005e  00 C0 A8 	    bset VIDEO_IEC, #VIDEO_IE
+  94 000060  00 00 37 	    bra 0b
+  95              	6: ; line_count==TOPLINE+VIDEDO désactivaion int. video
+  96 000062  00 C0 A9 	    bclr VIDEO_IEC, #VIDEO_IE
+  97 000064  00 00 37 	    bra 0b
+  98              	7: ; line_count==ELPFRM
+  99 000066  00 00 EB 	    clr W0
+ 100 000068  04 40 E3 	    cp.b even
+ 101 00006a  00 00 32 	    bra z, 0b
+ 102 00006c  02 A0 EF 	    setm line_count
+ 103 00006e  04 60 EF 	    clr.b even
+ 104 000070  00 00 37 	    bra 0b
+ 105              	8: ;line_count==OLPFRM
+ 106 000072  02 A0 EF 	    setm line_count
+ 107 000074  04 E0 EF 	    setm.b even
+ 108 000076  00 00 37 	    bra 0b
+ 109              	
+ 110              	    
+ 111              	;*********************
+ 112              	; interruption OC2
+ 113              	;*********************
+ 114              	.extern _font
+ 115              	.equ CH_ROW, W5    
+ 116              	.equ pVIDBUF, W4
+ 117              	.equ pFONT, W3
+ 118              	.equ CH_COUNT, W2    
+ 119              	.global __OC2Interrupt
+ 120              	__OC2Interrupt:
 MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 18
 
 
- 103 000076  00 00 37 	    bra 0b
- 104              	
- 105              	    
- 106              	;*********************
- 107              	; interruption OC2
- 108              	;*********************
- 109              	.extern _font
- 110              	.equ CH_ROW, W5    
- 111              	.equ pVIDBUF, W4
- 112              	.equ pFONT, W3
- 113              	.equ CH_COUNT, W2    
- 114              	.global __OC2Interrupt
- 115              	__OC2Interrupt:
- 116 000078  80 1F 78 	    push W0
- 117 00007a  81 1F 78 	    push W1
- 118 00007c  82 1F 78 	    push CH_COUNT
- 119 00007e  83 1F 78 	    push pFONT
- 120 000080  84 1F 78 	    push pVIDBUF
- 121 000082  85 1F 78 	    push CH_ROW
- 122 000084  00 00 F8 	    push PSVPAG
- 123              	;    mov SYNC_TMR, W0
- 124              	;    and #3, W0
- 125              	;    sl W0,#1,W0
- 126              	;    bra W0
- 127              	;    nop
- 128              	;    nop
- 129              	;    nop
- 130              	;    nop
- 131              	;    nop
+ 121 000078  80 1F 78 	    push W0
+ 122 00007a  81 1F 78 	    push W1
+ 123 00007c  82 1F 78 	    push CH_COUNT
+ 124 00007e  83 1F 78 	    push pFONT
+ 125 000080  84 1F 78 	    push pVIDBUF
+ 126 000082  85 1F 78 	    push CH_ROW
+ 127 000084  00 00 F8 	    push PSVPAG
+ 128              	;    mov SYNC_TMR, W0
+ 129              	;    and #3, W0
+ 130              	;    sl W0,#1,W0
+ 131              	;    bra W0
  132              	;    nop
  133              	;    nop
  134              	;    nop
- 135 000086  00 00 20 	    mov #psvpage(_font),W0
- 136 000088  00 00 88 	    mov W0, PSVPAG
- 137 00008a  01 00 80 	    mov line_count, W1
- 138 00008c  81 02 B1 	    sub #TOPLINE, W1
- 139 00008e  E7 82 60 	    and  W1,#7,CH_ROW
- 140 000090  C3 08 DE 	    lsr W1,#3,W1
- 141 000092  82 02 20 	    mov #CPL, CH_COUNT
- 142 000094  00 10 B8 	    mul.uu CH_COUNT,W0, W0
- 143 000096  04 00 20 	    mov #_video_buffer, pVIDBUF
- 144 000098  04 02 40 	    add W0, pVIDBUF, pVIDBUF
- 145              	 1:
- 146 00009a  03 00 20 	    mov #psvoffset(_font), pFONT
- 147 00009c  34 40 78 	    mov.b [pVIDBUF++], W0
- 148 00009e  00 80 FB 	    ze W0,W0
- 149 0000a0  43 00 DD 	    sl W0, #3, W0
- 150 0000a2  80 81 41 	    add pFONT,W0,pFONT
- 151 0000a4  85 81 41 	    add pFONT,CH_ROW, pFONT
- 152 0000a6  93 40 78 	    mov.b [pFONT],W1
- 153 0000a8  81 80 FB 	    ze W1, W1
- 154              	2:
- 155 0000aa  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
- 156 0000ac  00 00 3A 	    bra nz, 2b
- 157 0000ae  01 00 88 	    mov W1, VIDEO_SPIBUF
- 158 0000b0  02 01 E9 	    dec CH_COUNT, CH_COUNT
- 159 0000b2  00 00 3A 	    bra nz, 1b 
+ 135              	;    nop
+ 136              	;    nop
+ 137              	;    nop
+ 138              	;    nop
+ 139              	;    nop
+ 140 000086  00 00 20 	    mov #psvpage(_font),W0
+ 141 000088  00 00 88 	    mov W0, PSVPAG
+ 142 00008a  01 00 80 	    mov line_count, W1
+ 143 00008c  81 02 B1 	    sub #TOPLINE, W1
+ 144 00008e  E7 82 60 	    and  W1,#7,CH_ROW
+ 145 000090  C3 08 DE 	    lsr W1,#3,W1
+ 146 000092  22 03 20 	    mov #CPL, CH_COUNT
+ 147 000094  01 10 B8 	    mul.uu CH_COUNT,W1, W0
+ 148 000096  04 00 20 	    mov #_video_buffer, pVIDBUF
+ 149 000098  04 02 40 	    add W0, pVIDBUF, pVIDBUF
+ 150              	 1:
+ 151 00009a  03 00 20 	    mov #psvoffset(_font), pFONT
+ 152 00009c  34 40 78 	    mov.b [pVIDBUF++], W0
+ 153 00009e  00 80 FB 	    ze W0,W0
+ 154 0000a0  43 00 DD 	    sl W0, #3, W0
+ 155 0000a2  80 81 41 	    add pFONT,W0,pFONT
+ 156 0000a4  85 81 41 	    add pFONT,CH_ROW, pFONT
+ 157 0000a6  93 40 78 	    mov.b [pFONT],W1
+ 158 0000a8  81 80 FB 	    ze W1, W1
+ 159              	2:
+ 160 0000aa  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
+ 161 0000ac  00 00 3A 	    bra nz, 2b
+ 162 0000ae  01 00 88 	    mov W1, VIDEO_SPIBUF
+ 163 0000b0  02 01 E9 	    dec CH_COUNT, CH_COUNT
+ 164 0000b2  00 00 3A 	    bra nz, 1b 
+ 165              	3:
+ 166 0000b4  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
+ 167 0000b6  00 00 3A 	    bra nz, 3b
+ 168 0000b8  00 20 EF 	    clr VIDEO_SPIBUF
+ 169 0000ba  00 00 F9 	    pop PSVPAG
+ 170 0000bc  CF 02 78 	    pop CH_ROW
+ 171 0000be  4F 02 78 	    pop pVIDBUF
+ 172 0000c0  CF 01 78 	    pop pFONT
+ 173 0000c2  4F 01 78 	    pop CH_COUNT
+ 174 0000c4  CF 00 78 	    pop W1
+ 175 0000c6  4F 00 78 	    pop W0
+ 176 0000c8  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
+ 177 0000ca  00 40 06 	    retfie
 MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 19
 
 
- 160              	3:
- 161 0000b4  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
- 162 0000b6  00 00 3A 	    bra nz, 3b
- 163 0000b8  00 20 EF 	    clr VIDEO_SPIBUF
- 164 0000ba  00 00 F9 	    pop PSVPAG
- 165 0000bc  CF 02 78 	    pop CH_ROW
- 166 0000be  4F 02 78 	    pop pVIDBUF
- 167 0000c0  CF 01 78 	    pop pFONT
- 168 0000c2  4F 01 78 	    pop CH_COUNT
- 169 0000c4  CF 00 78 	    pop W1
- 170 0000c6  4F 00 78 	    pop W0
- 171 0000c8  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
- 172 0000ca  00 40 06 	    retfie
- 173              	
- 174              	    
- 175              	.end
+ 178              	
+ 179              	    
+ 180              	.end

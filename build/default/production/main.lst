@@ -877,7 +877,7 @@ MPLAB XC16 ASSEMBLY Listing:  main.s 			page 1
    6              	;config CONFIG1, FWDTEN_OFF & JTAGEN_OFF
    7              	;config CONFIG2, FNOSC_PRIPLL & FCKSM_CSDCMD  & POSCMOD_HS & OSCIOFNC_ON
    8              	
-   9              	
+   9              	    
   10              	.text
   11              	.global _main
   12              	.extern _video_buffer
@@ -885,20 +885,51 @@ MPLAB XC16 ASSEMBLY Listing:  main.s 			page 1
   14 000000  00 00 02 	    call hardware_init
   14         00 00 00 
   15              	; test vidéo    
-  16 000004  01 00 20 	    mov #_video_buffer,W1
-  17 000006  92 01 20 	    mov #25, W2
-  18              	0:    
-  19 000008  80 02 20 	    mov #40, W0
-  20              	1:
-  21 00000a  00 00 E9 	    dec W0, W0   
-  22 00000c  80 58 78 	    mov.b W0, [W1++]
-  23 00000e  00 00 3A 	    bra nz, 1b
-  24 000010  02 01 E9 	    dec W2, W2
-  25 000012  00 00 3A 	    bra nz, 0b
-  26              	; fin test vidéo    
-  27 000014  00 00 37 	    bra $
-  28              	
+  16 000004  00 00 20 	    mov #psvpage(quick), W0
+  17 000006  00 00 88 	    mov W0, PSVPAG
+  18 000008  01 00 20 	    mov #psvoffset(quick), W1
+  19 00000a  02 00 20 	    mov #_video_buffer,W2
+  20 00000c  00 00 EB 	    clr W0
+  21              	1:
+  22 00000e  31 40 78 	    mov.b [W1++], W0
+  23 000010  00 80 FB 	    ze W0,W0
+  24 000012  00 00 32 	    bra z, 2f
+  25 000014  00 02 B1 	    sub #32, W0
+  26 000016  00 59 78 	    mov.b W0, [W2++]
+  27 000018  00 00 37 	    bra 1b
+  28              	2:    
 MPLAB XC16 ASSEMBLY Listing:  main.s 			page 16
 
 
-  29              	.end
+  29              	; fin test vidéo
+  30              	; test clavier
+  31              	3:    
+  32 00001a  00 00 02 	    call kbd_count
+  32         00 00 00 
+  33 00001e  00 01 B0 	    add #16,W0
+  34 000020  00 49 78 	    mov.b W0, [W2]
+  35 000022  00 00 37 	    bra 3b
+  36 000024  00 00 37 	    bra .
+  37              	    
+  38              	;test string
+  39              	quick:
+  40 000026  30 31 00 	.ascii "01234567890123456789012345678901234567890123456789"    
+  40         32 33 00 
+  40         34 35 00 
+  40         36 37 00 
+  40         38 39 00 
+  40         30 31 00 
+  40         32 33 00 
+  40         34 35 00 
+  40         36 37 00 
+  41 000058  54 68 00 	.asciz "The quick brown fox jumps over the lazy dog." 
+  41         65 20 00 
+  41         71 75 00 
+  41         69 63 00 
+  41         6B 20 00 
+  41         62 72 00 
+  41         6F 77 00 
+  41         6E 20 00 
+  41         66 6F 00 
+  42              	    
+  43            00 00 	.end

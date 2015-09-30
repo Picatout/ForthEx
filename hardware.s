@@ -2,6 +2,11 @@
     
 .include "hardware.inc"
 .include "ntsc_const.inc"    
+
+.data 
+.global systicks    
+systicks:
+.word 0
     
 .text
 .global hardware_init
@@ -10,7 +15,7 @@ hardware_init:
     clr CLKDIV  ; pas de post-div Fcy=Fosc/2
     bset OSCCON, #NOSC0
     bset OSCCON, #CLKLOCK ; verrouillage clock
-    bclr INTCON1, #NSTDIS; interruption multi-niveaux
+    bclr INTCON1, #NSTDIS ; interruption multi-niveaux
     setm TRISB      ; port tous en entrée
     setm AD1PCFG    ; désactivation entrées analogiques
     call tvout_init
@@ -81,18 +86,31 @@ tvout_init:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 kbd_init:
     ; PPS sélection broche pour kbd_clk
+    ; interruption externe
     mov #~(0x1f<<KBD_PPSbit), W0
     and KBD_RPINR
     mov #(KBD_CLK<<KBD_PPSbit), W0
     ior KBD_RPINR
+    ; polarité interruption transition négative
+    bset KBD_INTCON, #KBD_INTEP
     ; priorité d'interruption 7
     mov #(7<<KBD_IPCbit), W0
-    ior KBD_IPCR 
-     ; interruption sur transition négative
-    bset INTCON2, #KBD_INTEP
+    ior KBD_IPC 
     ; activation interruption clavier
     bclr KBD_IFS, #KBD_IF
     bset KBD_IEC, #KBD_IE
+    ; initialisation TIMER1
+    ; mise à jour systicks
+    ; et traitement file clavier
+    mov #15999, W0
+    mov W0, PR1
+    mov #~(7<<T1IP0), W0
+    and IPC0
+    mov #(3<<T1IP0), W0
+    ior IPC0
+    bclr IFS0, #T1IF
+    bset IEC0, #T1IE
+    bset T1CON, #TON
     return
     
 .end

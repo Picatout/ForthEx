@@ -9,13 +9,18 @@
 ; sortie vidéo sur RPB3
 
 .include "hardware.inc"
-.include "ntsc_const.inc"
 .include "video.inc"
 
-
+; constantes génération signal NTSC
+.equ HFREQ, 15748 ; fréquence horizontale pour information seulement
+.equ HLINE, 1015 ; PR2= période ligne horizontale
+.equ HSYNC, 74 ; OC1R=47e-6*FCY-1 sync pulse horizontal
+.equ HALFLINE, 507 ; période demi-ligne horizontale (VSYNC)
+.equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
+.equ TOPLINE, 40 ; première ligne visible
 .equ ELPFRM, 271 ; nombre de lignes par frame pair
 .equ OLPFRM, 272 ; nombre de lignes par frame impair
-.equ VIDEO, 8*ROW ; nombre de lignes vidéo
+
 
 
 
@@ -52,7 +57,7 @@ __T2Interrupt:
     mov #TOPLINE, W0
     cp line_count
     bra z, 5f
-    mov #TOPLINE+VIDEO, W0
+    mov #TOPLINE+YRES, W0
     cp line_count
     bra z, 6f
     mov #ELPFRM, W0
@@ -143,7 +148,7 @@ __OC2Interrupt:
     and W1,#7,CH_ROW
     lsr W1,#3,W1
     mov #CPL, CH_COUNT
-    mul.uu CH_COUNT,W0, W0
+    mul.uu CH_COUNT,W1, W0
     mov #_video_buffer, pVIDBUF
     add W0, pVIDBUF, pVIDBUF
  1:
