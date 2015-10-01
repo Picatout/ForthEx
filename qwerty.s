@@ -1,4 +1,4 @@
-;
+;****************************************************************************
 ; Copyright 2015, Jacques Deschênes
 ; This file is part of ForthEx.
 ;
@@ -15,6 +15,7 @@
 ;     You should have received a copy of the GNU General Public License
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
+;****************************************************************************
 
 ; NOM: qwerty.inc
 ; DESCRIPTION: table de transcription scancode vers clavier QWERTY
@@ -103,4 +104,11 @@ shifted:
 .byte 0x4a,'?'
 .byte 0,0
 
+extended:
+.byte R_CTRL, 
+.byte R_ALT, 
+    
+    
+.byte 0,0    
+    
 .end

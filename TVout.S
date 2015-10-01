@@ -1,3 +1,21 @@
+;****************************************************************************
+; Copyright 2015, Jacques Deschênes
+; This file is part of ForthEx.
+;
+;     ForthEx is free software: you can redistribute it and/or modify
+;     it under the terms of the GNU General Public License as published by
+;     the Free Software Foundation, either version 3 of the License, or
+;     (at your option) any later version.
+;
+;     ForthEx is distributed in the hope that it will be useful,
+;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;     GNU General Public License for more details.
+;
+;     You should have received a copy of the GNU General Public License
+;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+;
+;****************************************************************************
 ; vidéo NTSC B/W sur PIC24FJ64G002
 ; T2 période ligne horizontale
 ; OC1 sortie sync  sur RPB4
@@ -6,16 +24,13 @@
 
 .include "hardware.inc"
 .include "video.inc"
-
+.if VIDEO_STD==NTSC
+.include "ntsc_const.inc"    
+.else
+.include "pal_const.inc"
+.endif
+    
 ; constantes génération signal NTSC
-.equ HFREQ, 15748 ; fréquence horizontale pour information seulement
-.equ HLINE, 1015 ; PR2= période ligne horizontale
-.equ HSYNC, 74  ; OC1R=47e-6*FCY-1 sync pulse horizontal
-.equ HALFLINE, 507 ; période demi-ligne horizontale (VSYNC)
-.equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
-.equ TOPLINE, 40  ; première ligne visible
-.equ ELPFRM,  271  ; nombre de lignes par frame pair
-.equ OLPFRM,  272  ; nombre de lignes par frame impair
 
 
 
@@ -125,18 +140,17 @@ __OC2Interrupt:
     push pVIDBUF
     push CH_ROW
     push PSVPAG
-;    mov SYNC_TMR, W0
-;    and #3, W0
-;    sl W0,#1,W0
-;    bra W0
-;    nop
-;    nop
-;    nop
-;    nop
-;    nop
-;    nop
-;    nop
-;    nop
+    mov SYNC_TMR, W0
+    and W0, #3, W0
+    sl W0,#1, W0
+    bra W0
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
     mov #psvpage(_font),W0
     mov W0, PSVPAG
     mov line_count, W1

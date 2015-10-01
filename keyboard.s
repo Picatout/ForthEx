@@ -1,4 +1,4 @@
-;
+;****************************************************************************
 ; Copyright 2015, Jacques Deschênes
 ; This file is part of ForthEx.
 ;
@@ -15,7 +15,7 @@
 ;     You should have received a copy of the GNU General Public License
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
-
+;****************************************************************************
 ;
 ; Fichier: keyboard.s
 ; Description: transcription code clavier PS/2 en ASCII
@@ -38,11 +38,88 @@ kbd_tail:
 key_state:    
 .byte 0
     
-.text    
-.global kbd_count
-kbd_count:
-    mov kbd_head, W0
-    sub kbd_tail, WREG
+.text
+    
+;;;;;;;;;;;;;;;;;;;;;;;
+; retourne le code clavier
+; dans W0 sinon retourne 0
+;;;;;;;;;;;;;;;;;;;;;;;
+get_code:
+    clr W0
+    mov kbd_head, W1
+    cp  kbd_queue
+    bra eq, gc_exit
+    mov #kbd_queue,W2
+    add W1,W2,W2
+    inc kbd_head
+    mov #(KBD_QUEUE_SIZE-1), W0
+    and kbd_head
+    mov.b [W2], W0
+    ze W0,W0
+gc_exit:
+    return
+    
+;;;;;;;;;;;;;;;;;;;;;;;
+; retourne un caractère
+; si disponible
+; sortie: W0
+;;;;;;;;;;;;;;;;;;;;;;;    
+.global kbd_get
+kbd_get:
+    push PSVPAG
+    call get_code
+    cp0 W0
+    bra eq, get_exit   
+    ;code clavier touche étendue?
+    mov #SC_XKEY, W1
+    cp W1,W0
+    bra neq 1f
+    bset key_state, #F_XKEY
+    call get_code
+    cp0 W0
+    bra eq, get_exit
+1:
+    ;code clavier relâchement touche?
+    mov #SC_KEYREL, W1
+    cp W1, W0
+    bra neq 2f
+    bset key_state, #F_KEYREL
+    call get_code
+    cp0 W0
+    bra eq, get_exit
+2:
+    ; ignore le relâchement de touche
+    btsc key_state, #F_KEYREL
+    bra 8f
+    ; recherche code clavier dans les tables
+    ; table qwerty
+    mov #psvpage(qwerty), W2
+    mov W2, PSVPAG
+    mov #psvoffset(qwerty), W2
+3:
+    mov [W2],W1
+    cp0 W1
+    bra eq, 5f
+    inc W2,W2
+    cp.b [W2]
+    bra eq, code_match
+    inc W2,W2
+    bra 3b
+code_match:
+    mov.b [W2],W0
+    ze W0,W0
+    bra 9f
+5:  ; table shifted
+
+8:
+    clr W0
+9:
+    push W0
+    mov #~((1<<F_KEYREL)|(1<<F_XKEY)),W0
+    and key_state
+    pop W0
+get_exit:
+    pop PSVPAG
     return
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -3,16 +3,52 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
 
    1              	# 1 "TVout.S"
    2              	# 1 "<built-in>"
-   1              	; vidéo NTSC B/W sur PIC24FJ64G002
+   1              	;****************************************************************************
    0              	
    0              	
-   2              	; T2 période ligne horizontale
-   3              	; OC1 sortie sync  sur RPB4
-   4              	; OC2 contrôle début sortie vidéo
-   5              	; sortie vidéo sur RPB3
-   6              	
-   7              	.include "hardware.inc"
-   1              	.include "p24Fxxxx.inc"
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	; vidéo NTSC B/W sur PIC24FJ64G002
+  20              	; T2 période ligne horizontale
+  21              	; OC1 sortie sync  sur RPB4
+  22              	; OC2 contrôle début sortie vidéo
+  23              	; sortie vidéo sur RPB3
+  24              	
+  25              	.include "hardware.inc"
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	.include "p24Fxxxx.inc"
    1              	.ifdef __24F04KA200
    2              	.include "p24F04KA200.inc"
    3              	.equ VALID_ID,1
@@ -22,6 +58,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
    7              	.include "p24F04KA201.inc"
    8              	.equ VALID_ID,1
    9              	.endif
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 2
+
+
   10              	
   11              	.ifdef __24F04KL100
   12              	.include "p24F04KL100.inc"
@@ -58,9 +97,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
   43              	.equ VALID_ID,1
   44              	.endif
   45              	
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 2
-
-
   46              	.ifdef __24F08KL302
   47              	.include "p24F08KL302.inc"
   48              	.equ VALID_ID,1
@@ -82,6 +118,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
   64              	.endif
   65              	
   66              	.ifdef __24F08KM102
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 3
+
+
   67              	.include "p24F08KM102.inc"
   68              	.equ VALID_ID,1
   69              	.endif
@@ -118,9 +157,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  100              	
  101              	.ifdef __24F16KA304
  102              	.include "p24F16KA304.inc"
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 3
-
-
  103              	.equ VALID_ID,1
  104              	.endif
  105              	
@@ -142,6 +178,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  121              	.ifdef __24F16KM104
  122              	.include "p24F16KM104.inc"
  123              	.equ VALID_ID,1
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 4
+
+
  124              	.endif
  125              	
  126              	.ifdef __24F16KM202
@@ -178,9 +217,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  157              	.include "p24FJ1024GA610.inc"
  158              	.equ VALID_ID,1
  159              	.endif
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 4
-
-
  160              	
  161              	.ifdef __24FJ1024GB606
  162              	.include "p24FJ1024GB606.inc"
@@ -202,6 +238,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  178              	.equ VALID_ID,1
  179              	.endif
  180              	
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 5
+
+
  181              	.ifdef __24FJ128DA206
  182              	.include "p24FJ128DA206.inc"
  183              	.equ VALID_ID,1
@@ -238,9 +277,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  214              	.endif
  215              	
  216              	.ifdef __24FJ128GA110
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 5
-
-
  217              	.include "p24FJ128GA110.inc"
  218              	.equ VALID_ID,1
  219              	.endif
@@ -262,6 +298,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  235              	
  236              	.ifdef __24FJ128GA308
  237              	.include "p24FJ128GA308.inc"
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 6
+
+
  238              	.equ VALID_ID,1
  239              	.endif
  240              	
@@ -298,9 +337,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  271              	.ifdef __24FJ128GB106
  272              	.include "p24FJ128GB106.inc"
  273              	.equ VALID_ID,1
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 6
-
-
  274              	.endif
  275              	
  276              	.ifdef __24FJ128GB108
@@ -322,6 +358,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  292              	.include "p24FJ128GB204.inc"
  293              	.equ VALID_ID,1
  294              	.endif
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 7
+
+
  295              	
  296              	.ifdef __24FJ128GB206
  297              	.include "p24FJ128GB206.inc"
@@ -358,9 +397,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  328              	.equ VALID_ID,1
  329              	.endif
  330              	
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 7
-
-
  331              	.ifdef __24FJ128GC006
  332              	.include "p24FJ128GC006.inc"
  333              	.equ VALID_ID,1
@@ -382,6 +418,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  349              	.endif
  350              	
  351              	.ifdef __24FJ16MC101
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 8
+
+
  352              	.include "p24FJ16MC101.inc"
  353              	.equ VALID_ID,1
  354              	.endif
@@ -418,9 +457,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  385              	
  386              	.ifdef __24FJ192GB110
  387              	.include "p24FJ192GB110.inc"
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 8
-
-
  388              	.equ VALID_ID,1
  389              	.endif
  390              	
@@ -442,6 +478,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  406              	.ifdef __24FJ256DA210
  407              	.include "p24FJ256DA210.inc"
  408              	.equ VALID_ID,1
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 9
+
+
  409              	.endif
  410              	
  411              	.ifdef __24FJ256GA106
@@ -478,9 +517,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  442              	.include "p24FJ256GA606.inc"
  443              	.equ VALID_ID,1
  444              	.endif
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 9
-
-
  445              	
  446              	.ifdef __24FJ256GA610
  447              	.include "p24FJ256GA610.inc"
@@ -502,6 +538,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  463              	.equ VALID_ID,1
  464              	.endif
  465              	
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 10
+
+
  466              	.ifdef __24FJ256GB206
  467              	.include "p24FJ256GB206.inc"
  468              	.equ VALID_ID,1
@@ -538,9 +577,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  499              	.endif
  500              	
  501              	.ifdef __24FJ32GA002
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 10
-
-
  502              	.include "p24FJ32GA002.inc"
  503              	.equ VALID_ID,1
  504              	.endif
@@ -562,6 +598,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  520              	
  521              	.ifdef __24FJ32GB002
  522              	.include "p24FJ32GB002.inc"
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 11
+
+
  523              	.equ VALID_ID,1
  524              	.endif
  525              	
@@ -598,9 +637,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  556              	.ifdef __24FJ512GA606
  557              	.include "p24FJ512GA606.inc"
  558              	.equ VALID_ID,1
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 11
-
-
  559              	.endif
  560              	
  561              	.ifdef __24FJ512GA610
@@ -622,6 +658,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  577              	.include "p24FJ64GA002.inc"
    1              	;==========================================================================
    2              	;  PIC24FJ64GA002 Standard Assembly Include File
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 12
+
+
    3              	; 
    4              	;  (c) Copyright 2014 Microchip Technology, All rights reserved
    5              	;  Part support version v1.23.A(26-Sep-2014)
@@ -658,9 +697,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  605              	
  606              	.ifdef __24FJ64GA104
  607              	.include "p24FJ64GA104.inc"
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 12
-
-
  608              	.equ VALID_ID,1
  609              	.endif
  610              	
@@ -682,6 +718,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  626              	.ifdef __24FJ64GA202
  627              	.include "p24FJ64GA202.inc"
  628              	.equ VALID_ID,1
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 13
+
+
  629              	.endif
  630              	
  631              	.ifdef __24FJ64GA204
@@ -718,9 +757,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  662              	.include "p24FJ64GA412.inc"
  663              	.equ VALID_ID,1
  664              	.endif
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 13
-
-
  665              	
  666              	.ifdef __24FJ64GB002
  667              	.include "p24FJ64GB002.inc"
@@ -742,6 +778,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  683              	.equ VALID_ID,1
  684              	.endif
  685              	
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 14
+
+
  686              	.ifdef __24FJ64GB110
  687              	.include "p24FJ64GB110.inc"
  688              	.equ VALID_ID,1
@@ -778,9 +817,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  719              	.endif
  720              	
  721              	.ifdef __24FJ64GC010
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 14
-
-
  722              	.include "p24FJ64GC010.inc"
  723              	.equ VALID_ID,1
  724              	.endif
@@ -802,6 +838,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  740              	
  741              	.ifdef __24FV08KM101
  742              	.include "p24FV08KM101.inc"
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 15
+
+
  743              	.equ VALID_ID,1
  744              	.endif
  745              	
@@ -838,9 +877,6 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  776              	.ifdef __24FV16KM102
  777              	.include "p24FV16KM102.inc"
  778              	.equ VALID_ID,1
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 15
-
-
  779              	.endif
  780              	
  781              	.ifdef __24FV16KM104
@@ -862,6 +898,9 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  797              	.include "p24FV32KA301.inc"
  798              	.equ VALID_ID,1
  799              	.endif
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 16
+
+
  800              	
  801              	.ifdef __24FV32KA302
  802              	.include "p24FV32KA302.inc"
@@ -876,211 +915,262 @@ MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 1
  811              	.ifndef VALID_ID
  812              	.error "processor ID not specified in generic include file"
  813              	.endif
-   2              	
-  61              	.LIST
-  62              	
-  63              	
-   8              	.include "video.inc"
-   1              	; constantes liées au générateur vidéo
-   2              	    
-   3              	.equ CHAR_WIDTH,  (8)
-   4              	.equ CHAR_HEIGHT, (8)
-   5              	.equ FONT_SIZE, (101)
-   6              	.equ CPL, (50)  ; caractères pa ligne
-   7              	.equ LPS, (24)  ; ligne par écran
-   8              	;résolution d'image
-   9              	.equ XRES, (CHAR_WIDTH*CPL)
-  10              	.equ YRES, (CHAR_HEIGHT*LPS)
-  11              	.equ TV_BUFFER, (CPL*LPS)
-   9              	
-  10              	; constantes génération signal NTSC
-  11              	.equ HFREQ, 15748 ; fréquence horizontale pour information seulement
-  12              	.equ HLINE, 1015 ; PR2= période ligne horizontale
-  13              	.equ HSYNC, 74  ; OC1R=47e-6*FCY-1 sync pulse horizontal
-  14              	.equ HALFLINE, 507 ; période demi-ligne horizontale (VSYNC)
-MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 16
-
-
-  15              	.equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
-  16              	.equ TOPLINE, 40  ; première ligne visible
-  17              	.equ ELPFRM,  271  ; nombre de lignes par frame pair
-  18              	.equ OLPFRM,  272  ; nombre de lignes par frame impair
-  19              	
   20              	
-  21              	
-  22              	
-  23              	.data
-  24                 	.global _T2counter
-  25 0000 00 00       	_T2counter: .space 2   ; compte les interruptions T2
-  26 0002 FF FF       	line_count: .word 0xffff
-  27 0004 FF          	even: .byte 0xff
-  28                 	
-  29                 	.global _video_buffer
-  30 0005 00 00 00 00 	_video_buffer: .space TV_BUFFER
-  30      00 00 00 00 
-  30      00 00 00 00 
-  30      00 00 00 00 
-  30      00 00 00 00 
-  30      00 00 00 00 
-  30      00 00 00 00 
-  30      00 00 00 00 
-  30      00 00 00 00 
-  31                 	
-  32                 	
-  33 04b5 00          	.text
-  34              	
-  35              	;********************
-  36              	; interruption TIMER2
-  37              	;********************
-  38              	.global __T2Interrupt
-  39              	__T2Interrupt:
-  40 000000  80 1F 78 	    push W0
-  41 000002  00 20 EC 	    inc _T2counter
-  42 000004  02 20 EC 	    inc line_count
-  43 000006  00 00 32 	    bra z, 1f
-  44 000008  60 00 20 	    mov #6, W0
-  45 00000a  02 00 E3 	    cp line_count
-  46 00000c  00 00 32 	    bra z, 2f
-  47 00000e  C0 00 20 	    mov #12, W0
-  48 000010  02 00 E3 	    cp line_count
-  49 000012  00 00 32 	    bra z, 3f
-  50 000014  20 01 20 	    mov #18, W0
-  51 000016  02 00 E3 	    cp line_count
-  52 000018  00 00 32 	    bra z, 4f
-  53 00001a  80 02 20 	    mov #TOPLINE, W0
-  54 00001c  02 00 E3 	    cp line_count
-  55 00001e  00 00 32 	    bra z, 5f
-  56 000020  80 0E 20 	    mov #TOPLINE+YRES, W0
-  57 000022  02 00 E3 	    cp line_count
-  58 000024  00 00 32 	    bra z, 6f
-  59 000026  F0 10 20 	    mov #ELPFRM, W0
-  60 000028  02 00 E3 	    cp line_count
-  61 00002a  00 00 32 	    bra z, 7f
-  62 00002c  00 11 20 	    mov #OLPFRM, W0
-  63 00002e  02 00 E3 	    cp line_count
+  84              	.LIST
+  85              	
+  86              	
+  26              	.include "video.inc"
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	
+  20              	; constantes liées au générateur de caractères
+  21              	    
+  22              	.equ CHAR_WIDTH,  (8)
+  23              	.equ CHAR_HEIGHT, (8)
+  24              	.equ FONT_SIZE, (101)
+  25              	; caractères pa ligne    
+  26              	.equ CPL, (50)
+  27              	; ligne par écran    
+  28              	.equ LPS, (24)  
+  29              	;résolution d'image
+  30              	.equ XRES, (CHAR_WIDTH*CPL)
+  31              	.equ YRES, (CHAR_HEIGHT*LPS)
+  32              	 ; grandeur du tampon vidéo    
+  33              	.equ TV_BUFFER, (CPL*LPS)
+  27              	.if VIDEO_STD==NTSC
+  28              	.include "ntsc_const.inc"    
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
 MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 17
 
 
-  64 000030  00 00 32 	    bra z, 8f
-  65              	0:
-  66 000032  00 E0 A9 	    bclr SYNC_IFS, #SYNC_IF
-  67 000034  4F 00 78 	    pop W0
-  68 000036  00 40 06 	    retfie
-  69              	1: ; line_count==0 start VSYNC 6 half line narrow neg. pulses
-  70 000038  50 02 20 	    mov #SERATION, W0
-  71 00003a  00 00 88 	    mov W0, SYNC_OCR
-  72 00003c  B0 1F 20 	    mov #HALFLINE, W0
-  73 00003e  00 00 88 	    mov W0, SYNC_OCRS
-  74 000040  00 00 88 	    mov W0, SYNC_PER
-  75 000042  00 00 37 	    bra 0b
-  76              	2: ; line_count==6 , 6 half line large neg. pulses
-  77 000044  60 1D 20 	    mov #(HALFLINE-SERATION), W0
-  78 000046  00 00 88 	    mov W0, SYNC_OCR
-  79 000048  00 00 37 	    bra 0b
-  80              	3: ; line_count==12 , 6 half line narrow neg. pulses
-  81 00004a  50 02 20 	    mov #SERATION, W0
-  82 00004c  00 00 88 	    mov W0, SYNC_OCR
-  83 00004e  00 00 37 	    bra 0b
-  84              	4: ; line_count==18 , end of VSYNC
-  85 000050  A0 04 20 	    mov #HSYNC, W0
-  86 000052  00 00 88 	    mov W0, SYNC_OCR
-  87 000054  70 3F 20 	    mov #HLINE, W0
-  88 000056  00 00 88 	    mov W0, SYNC_OCRS
-  89 000058  00 00 88 	    mov W0, SYNC_PER
-  90 00005a  00 00 37 	    bra 0b
-  91              	5: ; line_count==TOPLINE  activation interruption video
-  92 00005c  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
-  93 00005e  00 C0 A8 	    bset VIDEO_IEC, #VIDEO_IE
-  94 000060  00 00 37 	    bra 0b
-  95              	6: ; line_count==TOPLINE+VIDEDO désactivaion int. video
-  96 000062  00 C0 A9 	    bclr VIDEO_IEC, #VIDEO_IE
-  97 000064  00 00 37 	    bra 0b
-  98              	7: ; line_count==ELPFRM
-  99 000066  00 00 EB 	    clr W0
- 100 000068  04 40 E3 	    cp.b even
- 101 00006a  00 00 32 	    bra z, 0b
- 102 00006c  02 A0 EF 	    setm line_count
- 103 00006e  04 60 EF 	    clr.b even
- 104 000070  00 00 37 	    bra 0b
- 105              	8: ;line_count==OLPFRM
- 106 000072  02 A0 EF 	    setm line_count
- 107 000074  04 E0 EF 	    setm.b even
- 108 000076  00 00 37 	    bra 0b
- 109              	
- 110              	    
- 111              	;*********************
- 112              	; interruption OC2
- 113              	;*********************
- 114              	.extern _font
- 115              	.equ CH_ROW, W5    
- 116              	.equ pVIDBUF, W4
- 117              	.equ pFONT, W3
- 118              	.equ CH_COUNT, W2    
- 119              	.global __OC2Interrupt
- 120              	__OC2Interrupt:
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	
+  20              	; constantes génération signal NTSC
+  21              	.equ HFREQ, 15748 ; fréquence horizontale pour information seulement
+  22              	.equ HLINE, 1015 ; PR2= période ligne horizontale
+  23              	.equ HSYNC, 74  ; OC1R=47e-6*FCY-1 sync pulse horizontal
+  24              	.equ HALFLINE, 507 ; période demi-ligne horizontale (VSYNC)
+  25              	.equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
+  26              	.equ TOPLINE, 40  ; première ligne visible
+  27              	.equ ELPFRM,  271  ; nombre de lignes par frame pair
+  28              	.equ OLPFRM,  272  ; nombre de lignes par frame impair
+  29              	.equ VIDEO_DLY, 50 ; délais déclenche interruption video=HSYNC+VIDEO_DLY
+  30              	
+  31              	
+  32              	
+  33              	
+  29              	.else
+  30              	.include "pal_const.inc"
+  31              	.endif
+  32              	    
+  33              	; constantes génération signal NTSC
+  34              	
+  35              	
+  36              	
+  37              	
+  38              	.data
+  39                 	.global _T2counter
+  40 0000 00 00       	_T2counter: .space 2   ; compte les interruptions T2
+  41 0002 FF FF       	line_count: .word 0xffff
+  42 0004 FF          	even: .byte 0xff
+  43                 	
+  44                 	.global _video_buffer
+  45 0005 00 00 00 00 	_video_buffer: .space TV_BUFFER
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  46                 	
+  47                 	
 MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 18
 
 
- 121 000078  80 1F 78 	    push W0
- 122 00007a  81 1F 78 	    push W1
- 123 00007c  82 1F 78 	    push CH_COUNT
- 124 00007e  83 1F 78 	    push pFONT
- 125 000080  84 1F 78 	    push pVIDBUF
- 126 000082  85 1F 78 	    push CH_ROW
- 127 000084  00 00 F8 	    push PSVPAG
- 128              	;    mov SYNC_TMR, W0
- 129              	;    and #3, W0
- 130              	;    sl W0,#1,W0
- 131              	;    bra W0
- 132              	;    nop
- 133              	;    nop
- 134              	;    nop
- 135              	;    nop
- 136              	;    nop
- 137              	;    nop
- 138              	;    nop
- 139              	;    nop
- 140 000086  00 00 20 	    mov #psvpage(_font),W0
- 141 000088  00 00 88 	    mov W0, PSVPAG
- 142 00008a  01 00 80 	    mov line_count, W1
- 143 00008c  81 02 B1 	    sub #TOPLINE, W1
- 144 00008e  E7 82 60 	    and  W1,#7,CH_ROW
- 145 000090  C3 08 DE 	    lsr W1,#3,W1
- 146 000092  22 03 20 	    mov #CPL, CH_COUNT
- 147 000094  01 10 B8 	    mul.uu CH_COUNT,W1, W0
- 148 000096  04 00 20 	    mov #_video_buffer, pVIDBUF
- 149 000098  04 02 40 	    add W0, pVIDBUF, pVIDBUF
- 150              	 1:
- 151 00009a  03 00 20 	    mov #psvoffset(_font), pFONT
- 152 00009c  34 40 78 	    mov.b [pVIDBUF++], W0
- 153 00009e  00 80 FB 	    ze W0,W0
- 154 0000a0  43 00 DD 	    sl W0, #3, W0
- 155 0000a2  80 81 41 	    add pFONT,W0,pFONT
- 156 0000a4  85 81 41 	    add pFONT,CH_ROW, pFONT
- 157 0000a6  93 40 78 	    mov.b [pFONT],W1
- 158 0000a8  81 80 FB 	    ze W1, W1
- 159              	2:
- 160 0000aa  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
- 161 0000ac  00 00 3A 	    bra nz, 2b
- 162 0000ae  01 00 88 	    mov W1, VIDEO_SPIBUF
- 163 0000b0  02 01 E9 	    dec CH_COUNT, CH_COUNT
- 164 0000b2  00 00 3A 	    bra nz, 1b 
- 165              	3:
- 166 0000b4  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
- 167 0000b6  00 00 3A 	    bra nz, 3b
- 168 0000b8  00 20 EF 	    clr VIDEO_SPIBUF
- 169 0000ba  00 00 F9 	    pop PSVPAG
- 170 0000bc  CF 02 78 	    pop CH_ROW
- 171 0000be  4F 02 78 	    pop pVIDBUF
- 172 0000c0  CF 01 78 	    pop pFONT
- 173 0000c2  4F 01 78 	    pop CH_COUNT
- 174 0000c4  CF 00 78 	    pop W1
- 175 0000c6  4F 00 78 	    pop W0
- 176 0000c8  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
- 177 0000ca  00 40 06 	    retfie
+  48 04b5 00          	.text
+  49              	
+  50              	;********************
+  51              	; interruption TIMER2
+  52              	;********************
+  53              	.global __T2Interrupt
+  54              	__T2Interrupt:
+  55 000000  80 1F 78 	    push W0
+  56 000002  00 20 EC 	    inc _T2counter
+  57 000004  02 20 EC 	    inc line_count
+  58 000006  00 00 32 	    bra z, 1f
+  59 000008  60 00 20 	    mov #6, W0
+  60 00000a  02 00 E3 	    cp line_count
+  61 00000c  00 00 32 	    bra z, 2f
+  62 00000e  C0 00 20 	    mov #12, W0
+  63 000010  02 00 E3 	    cp line_count
+  64 000012  00 00 32 	    bra z, 3f
+  65 000014  20 01 20 	    mov #18, W0
+  66 000016  02 00 E3 	    cp line_count
+  67 000018  00 00 32 	    bra z, 4f
+  68 00001a  80 02 20 	    mov #TOPLINE, W0
+  69 00001c  02 00 E3 	    cp line_count
+  70 00001e  00 00 32 	    bra z, 5f
+  71 000020  80 0E 20 	    mov #TOPLINE+YRES, W0
+  72 000022  02 00 E3 	    cp line_count
+  73 000024  00 00 32 	    bra z, 6f
+  74 000026  F0 10 20 	    mov #ELPFRM, W0
+  75 000028  02 00 E3 	    cp line_count
+  76 00002a  00 00 32 	    bra z, 7f
+  77 00002c  00 11 20 	    mov #OLPFRM, W0
+  78 00002e  02 00 E3 	    cp line_count
+  79 000030  00 00 32 	    bra z, 8f
+  80              	0:
+  81 000032  00 E0 A9 	    bclr SYNC_IFS, #SYNC_IF
+  82 000034  4F 00 78 	    pop W0
+  83 000036  00 40 06 	    retfie
+  84              	1: ; line_count==0 start VSYNC 6 half line narrow neg. pulses
+  85 000038  50 02 20 	    mov #SERATION, W0
+  86 00003a  00 00 88 	    mov W0, SYNC_OCR
+  87 00003c  B0 1F 20 	    mov #HALFLINE, W0
+  88 00003e  00 00 88 	    mov W0, SYNC_OCRS
+  89 000040  00 00 88 	    mov W0, SYNC_PER
+  90 000042  00 00 37 	    bra 0b
+  91              	2: ; line_count==6 , 6 half line large neg. pulses
+  92 000044  60 1D 20 	    mov #(HALFLINE-SERATION), W0
+  93 000046  00 00 88 	    mov W0, SYNC_OCR
+  94 000048  00 00 37 	    bra 0b
+  95              	3: ; line_count==12 , 6 half line narrow neg. pulses
+  96 00004a  50 02 20 	    mov #SERATION, W0
+  97 00004c  00 00 88 	    mov W0, SYNC_OCR
+  98 00004e  00 00 37 	    bra 0b
+  99              	4: ; line_count==18 , end of VSYNC
+ 100 000050  A0 04 20 	    mov #HSYNC, W0
+ 101 000052  00 00 88 	    mov W0, SYNC_OCR
+ 102 000054  70 3F 20 	    mov #HLINE, W0
+ 103 000056  00 00 88 	    mov W0, SYNC_OCRS
+ 104 000058  00 00 88 	    mov W0, SYNC_PER
 MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 19
 
 
- 178              	
- 179              	    
- 180              	.end
+ 105 00005a  00 00 37 	    bra 0b
+ 106              	5: ; line_count==TOPLINE  activation interruption video
+ 107 00005c  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
+ 108 00005e  00 C0 A8 	    bset VIDEO_IEC, #VIDEO_IE
+ 109 000060  00 00 37 	    bra 0b
+ 110              	6: ; line_count==TOPLINE+VIDEDO désactivaion int. video
+ 111 000062  00 C0 A9 	    bclr VIDEO_IEC, #VIDEO_IE
+ 112 000064  00 00 37 	    bra 0b
+ 113              	7: ; line_count==ELPFRM
+ 114 000066  00 00 EB 	    clr W0
+ 115 000068  04 40 E3 	    cp.b even
+ 116 00006a  00 00 32 	    bra z, 0b
+ 117 00006c  02 A0 EF 	    setm line_count
+ 118 00006e  04 60 EF 	    clr.b even
+ 119 000070  00 00 37 	    bra 0b
+ 120              	8: ;line_count==OLPFRM
+ 121 000072  02 A0 EF 	    setm line_count
+ 122 000074  04 E0 EF 	    setm.b even
+ 123 000076  00 00 37 	    bra 0b
+ 124              	
+ 125              	    
+ 126              	;*********************
+ 127              	; interruption OC2
+ 128              	;*********************
+ 129              	.extern _font
+ 130              	.equ CH_ROW, W5    
+ 131              	.equ pVIDBUF, W4
+ 132              	.equ pFONT, W3
+ 133              	.equ CH_COUNT, W2    
+ 134              	.global __OC2Interrupt
+ 135              	__OC2Interrupt:
+ 136 000078  80 1F 78 	    push W0
+ 137 00007a  81 1F 78 	    push W1
+ 138 00007c  82 1F 78 	    push CH_COUNT
+ 139 00007e  83 1F 78 	    push pFONT
+ 140 000080  84 1F 78 	    push pVIDBUF
+ 141 000082  85 1F 78 	    push CH_ROW
+ 142 000084  00 00 F8 	    push PSVPAG
+ 143 000086  00 00 80 	    mov SYNC_TMR, W0
+ 144 000088  63 00 60 	    and W0, #3, W0
+ 145 00008a  41 00 DD 	    sl W0,#1, W0
+ 146 00008c  00 60 01 	    bra W0
+ 147 00008e  00 00 00 	    nop
+ 148 000090  00 00 00 	    nop
+ 149 000092  00 00 00 	    nop
+ 150 000094  00 00 00 	    nop
+ 151 000096  00 00 00 	    nop
+ 152 000098  00 00 00 	    nop
+ 153 00009a  00 00 00 	    nop
+ 154 00009c  00 00 20 	    mov #psvpage(_font),W0
+ 155 00009e  00 00 88 	    mov W0, PSVPAG
+ 156 0000a0  01 00 80 	    mov line_count, W1
+ 157 0000a2  81 02 B1 	    sub #TOPLINE, W1
+ 158 0000a4  E7 82 60 	    and  W1,#7,CH_ROW
+ 159 0000a6  C3 08 DE 	    lsr W1,#3,W1
+ 160 0000a8  22 03 20 	    mov #CPL, CH_COUNT
+ 161 0000aa  01 10 B8 	    mul.uu CH_COUNT,W1, W0
+MPLAB XC16 ASSEMBLY Listing:  build/default/production/TVout.s 			page 20
+
+
+ 162 0000ac  04 00 20 	    mov #_video_buffer, pVIDBUF
+ 163 0000ae  04 02 40 	    add W0, pVIDBUF, pVIDBUF
+ 164              	 1:
+ 165 0000b0  03 00 20 	    mov #psvoffset(_font), pFONT
+ 166 0000b2  34 40 78 	    mov.b [pVIDBUF++], W0
+ 167 0000b4  00 80 FB 	    ze W0,W0
+ 168 0000b6  43 00 DD 	    sl W0, #3, W0
+ 169 0000b8  80 81 41 	    add pFONT,W0,pFONT
+ 170 0000ba  85 81 41 	    add pFONT,CH_ROW, pFONT
+ 171 0000bc  93 40 78 	    mov.b [pFONT],W1
+ 172 0000be  81 80 FB 	    ze W1, W1
+ 173              	2:
+ 174 0000c0  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
+ 175 0000c2  00 00 3A 	    bra nz, 2b
+ 176 0000c4  01 00 88 	    mov W1, VIDEO_SPIBUF
+ 177 0000c6  02 01 E9 	    dec CH_COUNT, CH_COUNT
+ 178 0000c8  00 00 3A 	    bra nz, 1b 
+ 179              	3:
+ 180 0000ca  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
+ 181 0000cc  00 00 3A 	    bra nz, 3b
+ 182 0000ce  00 20 EF 	    clr VIDEO_SPIBUF
+ 183 0000d0  00 00 F9 	    pop PSVPAG
+ 184 0000d2  CF 02 78 	    pop CH_ROW
+ 185 0000d4  4F 02 78 	    pop pVIDBUF
+ 186 0000d6  CF 01 78 	    pop pFONT
+ 187 0000d8  4F 01 78 	    pop CH_COUNT
+ 188 0000da  CF 00 78 	    pop W1
+ 189 0000dc  4F 00 78 	    pop W0
+ 190 0000de  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
+ 191 0000e0  00 40 06 	    retfie
+ 192              	
+ 193              	    
+ 194              	.end

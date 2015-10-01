@@ -1,8 +1,30 @@
+;****************************************************************************
+; Copyright 2015, Jacques Deschênes
+; This file is part of ForthEx.
+;
+;     ForthEx is free software: you can redistribute it and/or modify
+;     it under the terms of the GNU General Public License as published by
+;     the Free Software Foundation, either version 3 of the License, or
+;     (at your option) any later version.
+;
+;     ForthEx is distributed in the hope that it will be useful,
+;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;     GNU General Public License for more details.
+;
+;     You should have received a copy of the GNU General Public License
+;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+;
+;****************************************************************************
 ; hardware setup
     
 .include "hardware.inc"
+.if VIDEO_STD==NTSC
 .include "ntsc_const.inc"    
-
+.else
+.include "pal_const.inc"
+.endif
+    
 .data 
 .global systicks    
 systicks:
@@ -58,7 +80,7 @@ tvout_init:
     mov W0, VIDEO_OCR
     mov #HSYNC, W0
     mov W0, SYNC_OCR
-    sl  W0, #1, W0
+    add  #VIDEO_DLY, W0
     mov W0, VIDEO_OCRS
     ; configuraton output compare mode 5
     mov #5, W0

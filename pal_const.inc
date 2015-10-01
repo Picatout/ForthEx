@@ -17,17 +17,16 @@
 ;
 ;****************************************************************************
 
-; constantes génération signal NTSC
-.equ HFREQ, 15748 ; fréquence horizontale pour information seulement
-.equ HLINE, 1015 ; PR2= période ligne horizontale
+; constante pour génération signal vidéo standard PAL
+    
+.equ HFREQ, 15625 ; fréquence horizontale pour information seulement
+.equ HLINE, 1023 ; PR2= période ligne horizontale
 .equ HSYNC, 74  ; OC1R=47e-6*FCY-1 sync pulse horizontal
-.equ HALFLINE, 507 ; période demi-ligne horizontale (VSYNC)
+.equ HALFLINE, 511 ; période demi-ligne horizontale (VSYNC)
 .equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
-.equ TOPLINE, 40  ; première ligne visible
-.equ ELPFRM,  271  ; nombre de lignes par frame pair
-.equ OLPFRM,  272  ; nombre de lignes par frame impair
-.equ VIDEO_DLY, 50 ; délais déclenche interruption video=HSYNC+VIDEO_DLY
+.equ TOPLINE, 64  ; première ligne visible
+.equ ELPFRM,  321  ; nombre de lignes par frame pair
+.equ OLPFRM,  322   ; nombre de lignes par frame impair
+.equ VIDEO_DLY, 66 ; délais déclenche interruption video=HSYNC+VIDEO_DLY
 
-
-
-
+    

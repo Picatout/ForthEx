@@ -1,7 +1,7 @@
 MPLAB XC16 ASSEMBLY Listing:  qwerty.s 			page 1
 
 
-   1              	;
+   1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
    3              	; This file is part of ForthEx.
    4              	;
@@ -18,137 +18,139 @@ MPLAB XC16 ASSEMBLY Listing:  qwerty.s 			page 1
   15              	;     You should have received a copy of the GNU General Public License
   16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
   17              	;
-  18              	
-  19              	; NOM: qwerty.inc
-  20              	; DESCRIPTION: table de transcription scancode vers clavier QWERTY
-  21              	
-  22              	.include "ps2.inc"
-   1              	;
-   2              	; Copyright 2015, Jacques Deschênes
-   3              	; This file is part of ForthEx.
-   4              	;
-   5              	;     ForthEx is free software: you can redistribute it and/or modify
-   6              	;     it under the terms of the GNU General Public License as published by
-   7              	;     the Free Software Foundation, either version 3 of the License, or
-   8              	;     (at your option) any later version.
-   9              	;
-  10              	;     ForthEx is distributed in the hope that it will be useful,
-  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
-  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  13              	;     GNU General Public License for more details.
-  14              	;
-  15              	;     You should have received a copy of the GNU General Public License
-  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
-  17              	;
-  18              	
-  19              	;NOM: ps2.inc
-  20              	;DESCRIPTION: constante reliée au clavier PS/2
-  21              	;DATE: 2015-09-28
+  18              	;****************************************************************************
+  19              	
+  20              	; NOM: qwerty.inc
+  21              	; DESCRIPTION: table de transcription scancode vers clavier QWERTY
   22              	
-  23              	 ;codes claviers
-  24              	.equ SC_BREAK, 0xF0
-  25              	.equ SC_XTKEY, 0xE0
-  26              	.equ L_SHIFT,  0x12
-  27              	.equ R_SHIFT,  0x59
-  28              	.equ L_CTRL,   0x14
-  29              	.equ L_ALT,    0x11
-  30              	.equ ENTER,    0x5A
-  31              	    
-  32              	;indicateurs booléins
-  33              	.equ F_SHIFT, 0
-  34              	.equ F_CTRL, 1
-  35              	.equ F_ALT, 2
+  23              	.include "ps2.inc"
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	
+  20              	;NOM: ps2.inc
+  21              	;DESCRIPTION: constante reliée au clavier PS/2
+  22              	;DATE: 2015-09-28
+  23              	
+  24              	 ;codes claviers
+  25              	.equ SC_BREAK, 0xF0
+  26              	.equ SC_XTKEY, 0xE0
+  27              	.equ L_SHIFT,  0x12
+  28              	.equ R_SHIFT,  0x59
+  29              	.equ L_CTRL,   0x14
+  30              	.equ L_ALT,    0x11
+  31              	.equ ENTER,    0x5A
+  32              	    
+  33              	;indicateurs booléins
+  34              	.equ F_SHIFT, 0
 MPLAB XC16 ASSEMBLY Listing:  qwerty.s 			page 2
 
 
-  36              	.equ F_CAPS, 3
-  37              	.equ F_NUM,  4
-  38              	
-  39              	.equ PS2_QUEUE_SIZE, 32
-  23              	
-  24              	.global qwerty, shifted
-  25              	    
-  26              	.section .const psv 
-  27                 	    
-  28                 	qwerty:
-  29 0000 1C 61       	.byte 0x1c,'a'
-  30 0002 32 62       	.byte 0x32,'b'
-  31 0004 21 63       	.byte 0x21,'c'
-  32 0006 23 64       	.byte 0x23,'d'
-  33 0008 24 65       	.byte 0x24,'e'
-  34 000a 2B 66       	.byte 0x2b,'f'
-  35 000c 34 67       	.byte 0x34,'g'
-  36 000e 33 68       	.byte 0x33,'h'
-  37 0010 43 69       	.byte 0x43,'i'
-  38 0012 3B 6A       	.byte 0x3b,'j'
-  39 0014 42 6B       	.byte 0x42,'k'
-  40 0016 4B 6C       	.byte 0x4b,'l'
-  41 0018 3A 6D       	.byte 0x3a,'m'
-  42 001a 31 6E       	.byte 0x31,'n'
-  43 001c 44 6F       	.byte 0x44,'o'
-  44 001e 4D 70       	.byte 0x4d,'p'
-  45 0020 15 71       	.byte 0x15,'q'
-  46 0022 2D 72       	.byte 0x2d,'r'
-  47 0024 1B 73       	.byte 0x1b,'s'
-  48 0026 2C 74       	.byte 0x2c,'t'
-  49 0028 3C 75       	.byte 0x3c,'u'
-  50 002a 2A 76       	.byte 0x2a,'v'
-  51 002c 1D 77       	.byte 0x1d,'w'
-  52 002e 22 78       	.byte 0x22,'x'
-  53 0030 35 79       	.byte 0x35,'y'
-  54 0032 1A 7A       	.byte 0x1a,'z'
-  55 0034 45 30       	.byte 0x45,'0'
-  56 0036 16 31       	.byte 0x16,'1'
-  57 0038 1E 32       	.byte 0x1e,'2'
-  58 003a 26 33       	.byte 0x26,'3'
-  59 003c 25 34       	.byte 0x25,'4'
-  60 003e 2E 35       	.byte 0x2e,'5'
-  61 0040 36 36       	.byte 0x36,'6'
-  62 0042 3D 37       	.byte 0x3d,'7'
-  63 0044 3E 38       	.byte 0x3e,'8'
-  64 0046 46 39       	.byte 0x46,'9'
-  65 0048 29 20       	.byte 0x29,' '
-  66 004a 4E 2D       	.byte 0x4e,'-'
-  67 004c 55 3D       	.byte 0x55,'='
-  68 004e 0E 60       	.byte 0x0e,'`'
-  69 0050 0D 09       	.byte 0x0d,'\t'
-  70 0052 54 5B       	.byte 0x54,'['
-  71 0054 5B 5D       	.byte 0x5b,']'
-  72 0056 4C 3B       	.byte 0x4c,';'
-  73 0058 41 2C       	.byte 0x41,','
-  74 005a 49 2E       	.byte 0x49,'.'
-  75 005c 4A 2F       	.byte 0x4a,'/'
+  35              	.equ F_CTRL, 1
+  36              	.equ F_ALT, 2
+  37              	.equ F_CAPS, 3
+  38              	.equ F_NUM,  4
+  39              	
+  40              	.equ PS2_QUEUE_SIZE, 32
+  24              	
+  25              	.global qwerty, shifted
+  26              	    
+  27              	.section .const psv 
+  28                 	    
+  29                 	qwerty:
+  30 0000 1C 61       	.byte 0x1c,'a'
+  31 0002 32 62       	.byte 0x32,'b'
+  32 0004 21 63       	.byte 0x21,'c'
+  33 0006 23 64       	.byte 0x23,'d'
+  34 0008 24 65       	.byte 0x24,'e'
+  35 000a 2B 66       	.byte 0x2b,'f'
+  36 000c 34 67       	.byte 0x34,'g'
+  37 000e 33 68       	.byte 0x33,'h'
+  38 0010 43 69       	.byte 0x43,'i'
+  39 0012 3B 6A       	.byte 0x3b,'j'
+  40 0014 42 6B       	.byte 0x42,'k'
+  41 0016 4B 6C       	.byte 0x4b,'l'
+  42 0018 3A 6D       	.byte 0x3a,'m'
+  43 001a 31 6E       	.byte 0x31,'n'
+  44 001c 44 6F       	.byte 0x44,'o'
+  45 001e 4D 70       	.byte 0x4d,'p'
+  46 0020 15 71       	.byte 0x15,'q'
+  47 0022 2D 72       	.byte 0x2d,'r'
+  48 0024 1B 73       	.byte 0x1b,'s'
+  49 0026 2C 74       	.byte 0x2c,'t'
+  50 0028 3C 75       	.byte 0x3c,'u'
+  51 002a 2A 76       	.byte 0x2a,'v'
+  52 002c 1D 77       	.byte 0x1d,'w'
+  53 002e 22 78       	.byte 0x22,'x'
+  54 0030 35 79       	.byte 0x35,'y'
+  55 0032 1A 7A       	.byte 0x1a,'z'
+  56 0034 45 30       	.byte 0x45,'0'
+  57 0036 16 31       	.byte 0x16,'1'
+  58 0038 1E 32       	.byte 0x1e,'2'
+  59 003a 26 33       	.byte 0x26,'3'
+  60 003c 25 34       	.byte 0x25,'4'
+  61 003e 2E 35       	.byte 0x2e,'5'
+  62 0040 36 36       	.byte 0x36,'6'
+  63 0042 3D 37       	.byte 0x3d,'7'
+  64 0044 3E 38       	.byte 0x3e,'8'
+  65 0046 46 39       	.byte 0x46,'9'
+  66 0048 29 20       	.byte 0x29,' '
+  67 004a 4E 2D       	.byte 0x4e,'-'
+  68 004c 55 3D       	.byte 0x55,'='
+  69 004e 0E 60       	.byte 0x0e,'`'
+  70 0050 0D 09       	.byte 0x0d,'\t'
+  71 0052 54 5B       	.byte 0x54,'['
+  72 0054 5B 5D       	.byte 0x5b,']'
+  73 0056 4C 3B       	.byte 0x4c,';'
+  74 0058 41 2C       	.byte 0x41,','
 MPLAB XC16 ASSEMBLY Listing:  qwerty.s 			page 3
 
 
-  76 005e 66 08       	.byte 0x66,8    ; BACKSPACE
-  77 0060 0D 09       	.byte 0x0d,9    ; TAB
-  78 0062 5A 0D       	.byte 0x5a,'\r' ; CR
-  79 0064 76 1B       	.byte 0x76,27   ; ESC
-  80 0066 00 00       	.byte 0,0
-  81                 	
-  82                 	shifted:
-  83 0068 0E 7E       	.byte 0x0e,'~'
-  84 006a 16 21       	.byte 0x16,'!'
-  85 006c 1E 40       	.byte 0x1e,'@'
-  86 006e 26 23       	.byte 0x26,'#'
-  87 0070 25 24       	.byte 0x25,'$'
-  88 0072 2E 25       	.byte 0x2e,'%'
-  89 0074 36 5E       	.byte 0x36,'^'
-  90 0076 3D 26       	.byte 0x3d,'&'
-  91 0078 3E 2A       	.byte 0x3e,'*'
-  92 007a 46 28       	.byte 0x46,'('
-  93 007c 45 29       	.byte 0x45,')'
-  94 007e 4E 5F       	.byte 0x4e,'_'
-  95 0080 64 7B       	.byte 0x64,'{'    
-  96 0082 55 2B       	.byte 0x55,'+'
-  97 0084 5B 7D       	.byte 0x5b,'}'    
-  98 0086 5D 5C       	.byte 0x5d,'\\'
-  99 0088 4C 3A       	.byte 0x4c,':'
- 100 008a 52 22       	.byte 0x52,'"'
- 101 008c 41 3C       	.byte 0x41,'<'
- 102 008e 49 3E       	.byte 0x49,'>'
- 103 0090 4A 3F       	.byte 0x4a,'?'
- 104 0092 00 00       	.byte 0,0
- 105                 	
- 106                 	.end
+  75 005a 49 2E       	.byte 0x49,'.'
+  76 005c 4A 2F       	.byte 0x4a,'/'
+  77 005e 66 08       	.byte 0x66,8    ; BACKSPACE
+  78 0060 0D 09       	.byte 0x0d,9    ; TAB
+  79 0062 5A 0D       	.byte 0x5a,'\r' ; CR
+  80 0064 76 1B       	.byte 0x76,27   ; ESC
+  81 0066 00 00       	.byte 0,0
+  82                 	
+  83                 	shifted:
+  84 0068 0E 7E       	.byte 0x0e,'~'
+  85 006a 16 21       	.byte 0x16,'!'
+  86 006c 1E 40       	.byte 0x1e,'@'
+  87 006e 26 23       	.byte 0x26,'#'
+  88 0070 25 24       	.byte 0x25,'$'
+  89 0072 2E 25       	.byte 0x2e,'%'
+  90 0074 36 5E       	.byte 0x36,'^'
+  91 0076 3D 26       	.byte 0x3d,'&'
+  92 0078 3E 2A       	.byte 0x3e,'*'
+  93 007a 46 28       	.byte 0x46,'('
+  94 007c 45 29       	.byte 0x45,')'
+  95 007e 4E 5F       	.byte 0x4e,'_'
+  96 0080 64 7B       	.byte 0x64,'{'    
+  97 0082 55 2B       	.byte 0x55,'+'
+  98 0084 5B 7D       	.byte 0x5b,'}'    
+  99 0086 5D 5C       	.byte 0x5d,'\\'
+ 100 0088 4C 3A       	.byte 0x4c,':'
+ 101 008a 52 22       	.byte 0x52,'"'
+ 102 008c 41 3C       	.byte 0x41,'<'
+ 103 008e 49 3E       	.byte 0x49,'>'
+ 104 0090 4A 3F       	.byte 0x4a,'?'
+ 105 0092 00 00       	.byte 0,0
+ 106                 	
+ 107                 	.end

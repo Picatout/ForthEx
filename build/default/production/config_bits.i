@@ -3,11 +3,7 @@
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "config_bits.c"
-
-
-
-
-
+# 24 "config_bits.c"
 # 1 "/opt/microchip/xc16/v1.23/bin/bin/../../support/generic/h/xc.h" 1 3 4
 # 618 "/opt/microchip/xc16/v1.23/bin/bin/../../support/generic/h/xc.h" 3 4
 # 1 "/opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/h/p24FJ64GA002.h" 1 3 4
@@ -3025,7 +3021,7 @@ extern __attribute__((space(prog))) unsigned int _CONFIG2;
 # 9821 "/opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/h/p24FJ64GA002.h" 3 4
 extern __attribute__((space(prog))) unsigned int _CONFIG1;
 # 619 "/opt/microchip/xc16/v1.23/bin/bin/../../support/generic/h/xc.h" 2 3 4
-# 7 "config_bits.c" 2
+# 25 "config_bits.c" 2
 
 
 #pragma config POSCMOD = HS
