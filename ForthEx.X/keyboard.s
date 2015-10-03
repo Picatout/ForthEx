@@ -25,9 +25,13 @@
 
 .include "hardware.inc"    
 .include "video.inc"
-.include "ps2.inc"    
-
+.include "ps2.inc"
+.include "keyboard.inc"    
+.include "gen_macros.inc"
+    
+ 
 .equ KBD_QUEUE_SIZE, 32    
+ 
 .data
 kbd_queue:
 .space KBD_QUEUE_SIZE    
@@ -39,16 +43,18 @@ key_state:
 .byte 0
     
 .text
-    
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ; retourne le code clavier
 ; dans W0 sinon retourne 0
 ;;;;;;;;;;;;;;;;;;;;;;;
+.global get_code    
 get_code:
     clr W0
     mov kbd_head, W1
-    cp  kbd_queue
-    bra eq, gc_exit
+    mov kbd_tail, W2
+    cp  W1,W2
+    bra eq, 1f
     mov #kbd_queue,W2
     add W1,W2,W2
     inc kbd_head
@@ -56,8 +62,32 @@ get_code:
     and kbd_head
     mov.b [W2], W0
     ze W0,W0
-gc_exit:
+1:
     return
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+; recherche code clavier
+; dans la table
+; entrée: W2=index table    
+;         W0=scancode recherché
+; sortie: W1 contient caractère
+;         W1=0 si scancode pas dans la table
+; modifie: W1,W2,W3    
+;;;;;;;;;;;;;;;;;;;;;;;;;
+search_table:
+1:
+    mov [W2++], W1
+    cp0 W1
+    bra eq, 2f
+    mov W1, W3
+    ze W3,W3
+    cp W3,W0
+    bra neq, 1b
+    swap W1
+    ze W1,W1
+2: ; pas trouvé
+    return
+
     
 ;;;;;;;;;;;;;;;;;;;;;;;
 ; retourne un caractère
@@ -65,11 +95,12 @@ gc_exit:
 ; sortie: W0
 ;;;;;;;;;;;;;;;;;;;;;;;    
 .global kbd_get
+
 kbd_get:
     push PSVPAG
     call get_code
     cp0 W0
-    bra eq, get_exit   
+    bra eq, exit_empty   
     ;code clavier touche étendue?
     mov #SC_XKEY, W1
     cp W1,W0
@@ -77,7 +108,7 @@ kbd_get:
     bset key_state, #F_XKEY
     call get_code
     cp0 W0
-    bra eq, get_exit
+    bra eq, exit_empty
 1:
     ;code clavier relâchement touche?
     mov #SC_KREL, W1
@@ -86,46 +117,70 @@ kbd_get:
     bset key_state, #F_KREL
     call get_code
     cp0 W0
-    bra eq, get_exit
+    bra eq, exit_empty
 2:
-    ; ignore le relâchement de touche
-    btsc key_state, #F_KREL
-    bra 8f
-    ; recherche code clavier dans les tables
-    ; table qwerty
-    mov #psvpage(qwerty), W2
-    mov W2, PSVPAG
-    mov #psvoffset(qwerty), W2
-3:
-    mov [W2],W1
+    btss key_state, #F_XKEY
+    bra 3f
+    set_psv extended, W2
+    call search_table
     cp0 W1
-    bra eq, 5f
-    inc W2,W2
-    mov.b [W2], W3
-    ze W3,W3
-    cp.b W2, W0
-    bra eq, code_match
-    inc W2,W2
-    bra 3b
-code_match:
-    mov.b [W2],W0
-    ze W0,W0
-    bra 9f
-5:  ; table shifted
-
-8:
+    bra eq, 3f
+    ; scancode trouvé dans la table 'extended'
+    bra filter_key
+3:  
+    btss key_state, #F_SHIFT
+    bra 4f
+    set_psv shifted, W2
+    call search_table
+    cp0 W1
+    bra eq, 4f
+    ; scancode trouvé dans la table 'shifted'
+    bra filter_key
+4:  
+    set_psv ascii, W2
+    call search_table
+    cp0 W1
+    bra eq, exit_badkey
+    ; scancode trouvé dans la table 'ascii'
+filter_key:
+    mov W1,W0
+    mov #'a', W1
+    cp W0,W1
+    bra ltu, 5f
+    mov #'z', W1
+    cp W0, W1
+    bra gtu, 5f
+    ;lettre
+    btsc key_state, #F_KREL
+    bra exit_ignore_it
+    btsc key_state, #F_SHIFT
+    sub #32,W0
+    bra exit_goodkey
+5:
+    mov #VK_SHIFT, W1
+    cp W0,W1
+    bra neq, 6f
+    bclr key_state, #F_SHIFT
+    btss key_state, #F_KREL
+    bset key_state, #F_SHIFT
+    bra exit_ignore_it
+6:
+    
+exit_ignore_it:    
+exit_badkey: ;sortie touche refusée
     clr W0
-9:
-    push W0
+exit_goodkey:  ; sortie touche acceptée
     bclr key_state, #F_KREL
     bclr key_state, #F_XKEY
-    pop W0
-get_exit:
+exit_empty: ; sortie file vide
     pop PSVPAG
     return
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; interruption TIMER1
+; incrémente SYSTICK
+; et traitement primaire
+; file ps2_queue vers kbd_queue
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .extern systicks

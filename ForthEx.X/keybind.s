@@ -17,17 +17,18 @@
 ;
 ;****************************************************************************
 
-; NOM: qwerty.inc
-; DESCRIPTION: table de transcription scancode vers clavier QWERTY
+; NOM: keybind.s
+; DESCRIPTION: table de transcription scancode set 2 vers ASCII
+; REF: http://www.computer-engineering.org/ps2keyboard/scancodes2.html 
     
 .include "ps2.inc"
 .include "keyboard.inc"
     
-.global qwerty, shifted
+.global ascii, shifted, extended
     
 .section .const psv 
     
-qwerty:
+ascii:
 .byte 0x1c,'a'
 .byte 0x32,'b'
 .byte 0x21,'c'
@@ -79,6 +80,10 @@ qwerty:
 .byte 0x0d,9    ; TAB
 .byte 0x5a,'\r' ; CR
 .byte 0x76,27   ; ESC
+.byte L_SHIFT, VK_SHIFT
+.byte R_SHIFT, VK_SHIFT    
+.byte L_CTRL,  VK_CTRL    
+.byte L_ALT,   VK_ALT    
 .byte 0,0
 
 shifted:
@@ -103,10 +108,6 @@ shifted:
 .byte 0x41,'<'
 .byte 0x49,'>'
 .byte 0x4a,'?'
-.byte L_SHIFT, VK_SHIFT
-.byte R_SHIFT, VK_SHIFT    
-.byte L_CTRL,  VK_CTRL    
-.byte L_ALT,   VK_ALT    
 .byte 0,0
 
 extended:

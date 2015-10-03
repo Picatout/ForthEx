@@ -28,7 +28,7 @@ Command:
   build/default/production/font.o \
   build/default/production/ps2.o \
   build/default/production/keyboard.o \
-  build/default/production/qwerty.o \
+  build/default/production/keybind.o \
   --defsym=__MPLAB_BUILD=1 \
   -Tp24FJ64GA002.gld.00 \
   --stack=16 \
@@ -63,20 +63,20 @@ Program Memory  [Origin = 0x200, Length = 0xa9fc]
 section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200                0x9e            0xed  (237)
-.const                       0x29e               0x400           0x600  (1536)
-.dinit                       0x69e               0x334           0x4ce  (1230)
-.text                        0x9d2               0x234           0x34e  (846)
+.const                       0x29e               0x4b6           0x711  (1809)
+.dinit                       0x754               0x374           0x52e  (1326)
+.text                        0xac8               0x382           0x543  (1347)
 
-                     Total program memory used (bytes):          0xf09  (3849) 5%
+                     Total program memory used (bytes):         0x126f  (4719) 7%
 
 
 Data Memory  [Origin = 0x800, Length = 0x2000]
 
 section                    address      alignment gaps    total length  (dec)
 -------                    -------      --------------    -------------------
-.data                        0x800                   0           0x4b8  (1208)
+.data                        0x800                   0           0x504  (1284)
 
-                        Total data memory used (bytes):          0x4b8  (1208) 14%
+                        Total data memory used (bytes):          0x504  (1284) 15%
 
 
 Dynamic Memory Usage
@@ -84,22 +84,28 @@ Dynamic Memory Usage
 region                     address                      maximum length  (dec)
 ------                     -------                      ---------------------
 heap                             0                                   0  (0)
-stack                        0xcb8                              0x1b48  (6984)
+stack                        0xd04                              0x1afc  (6908)
 
-                        Maximum dynamic memory (bytes):         0x1b48  (6984)
+                        Maximum dynamic memory (bytes):         0x1afc  (6908)
 
 
 External Symbols in Data Memory (by address):
 
                     0x0800                  _T2counter
                     0x0805                  _video_buffer
-                    0x0cb6                  systicks
+                    0x0cb8                  ps2_queue
+                    0x0cd8                  ps2_head
+                    0x0cda                  ps2_tail
+                    0x0d02                  systicks
 
 External Symbols in Data Memory (by name):
 
                     0x0800                  _T2counter
                     0x0805                  _video_buffer
-                    0x0cb6                  systicks
+                    0x0cd8                  ps2_head
+                    0x0cb8                  ps2_queue
+                    0x0cda                  ps2_tail
+                    0x0d02                  systicks
 
 External Symbols in Program Memory (by address):
 
@@ -109,25 +115,39 @@ External Symbols in Program Memory (by address):
                   0x00023c                  __data_init_standard
                   0x00029a                  __DefaultInterrupt
                   0x00029e                  _font
-                  0x0009d2                  cls
-                  0x0009dc                  __T2Interrupt
-                  0x000a54                  __OC2Interrupt
-                  0x000abe                  _main
-                  0x000b74                  hardware_init
+                  0x00069e                  ascii
+                  0x00070e                  shifted
+                  0x00073a                  extended
+                  0x000ac8                  get_code
+                  0x000af6                  kbd_get
+                  0x000b86                  __T1Interrupt
+                  0x000bda                  cls
+                  0x000be4                  __T2Interrupt
+                  0x000c5c                  __OC2Interrupt
+                  0x000cc6                  _main
+                  0x000d8e                  hardware_init
+                  0x000e20                  __INT1Interrupt
 
 External Symbols in Program Memory (by name):
 
                   0x00029a                  __DefaultInterrupt
-                  0x000a54                  __OC2Interrupt
-                  0x0009dc                  __T2Interrupt
+                  0x000e20                  __INT1Interrupt
+                  0x000c5c                  __OC2Interrupt
+                  0x000b86                  __T1Interrupt
+                  0x000be4                  __T2Interrupt
                   0x00023c                  __data_init
                   0x00023c                  __data_init_standard
                   0x00022c                  __psv_init
                   0x000200                  __resetPRI
                   0x00029e                  _font
-                  0x000abe                  _main
-                  0x0009d2                  cls
-                  0x000b74                  hardware_init
+                  0x000cc6                  _main
+                  0x00069e                  ascii
+                  0x000bda                  cls
+                  0x00073a                  extended
+                  0x000ac8                  get_code
+                  0x000d8e                  hardware_init
+                  0x000af6                  kbd_get
+                  0x00070e                  shifted
 
 Configuration mémoire
 
@@ -151,7 +171,7 @@ LOAD build/default/production/TVout.o
 LOAD build/default/production/font.o
 LOAD build/default/production/ps2.o
 LOAD build/default/production/keyboard.o
-LOAD build/default/production/qwerty.o
+LOAD build/default/production/keybind.o
                     0x0001                  __MPLAB_BUILD = 0x1
 LOAD /opt/microchip/xc16/v1.23/bin/bin/../../lib/PIC24F/libpPIC24Fxxx-elf.a
 LOAD /opt/microchip/xc16/v1.23/bin/bin/../../lib/libfx-elf.a
@@ -202,31 +222,35 @@ __CONFIG1
 .comment
  *(.comment)
 
-.debug_info       0x000000        0x235
+.debug_info       0x000000        0x33e
  *(.debug_info)
  .debug_info      0x000000         0x83 build/default/production/main.o
  .debug_info      0x000083         0x87 build/default/production/hardware.o
  .debug_info      0x00010a         0xa7 build/default/production/config_bits.o
  .debug_info      0x0001b1         0x84 build/default/production/TVout.o
+ .debug_info      0x000235         0x82 build/default/production/ps2.o
+ .debug_info      0x0002b7         0x87 build/default/production/keyboard.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev     0x000000         0x5b
+.debug_abbrev     0x000000         0x83
  *(.debug_abbrev)
  .debug_abbrev    0x000000         0x14 build/default/production/main.o
  .debug_abbrev    0x000014         0x14 build/default/production/hardware.o
  .debug_abbrev    0x000028         0x1f build/default/production/config_bits.o
  .debug_abbrev    0x000047         0x14 build/default/production/TVout.o
+ .debug_abbrev    0x00005b         0x14 build/default/production/ps2.o
+ .debug_abbrev    0x00006f         0x14 build/default/production/keyboard.o
 
-.debug_line       0x000000        0x1f6
+.debug_line       0x000000        0x2c5
  *(.debug_line)
- .debug_line      0x000000         0x42 build/default/production/main.o
- .debug_line      0x000042         0x7d build/default/production/hardware.o
- .debug_line      0x0000bf         0x24 build/default/production/config_bits.o
- .debug_line      0x0000e3         0xab build/default/production/TVout.o
- .debug_line      0x00018e         0x1a build/default/production/font.o
- .debug_line      0x0001a8         0x1a build/default/production/ps2.o
- .debug_line      0x0001c2         0x1a build/default/production/keyboard.o
- .debug_line      0x0001dc         0x1a build/default/production/qwerty.o
+ .debug_line      0x000000         0x46 build/default/production/main.o
+ .debug_line      0x000046         0x7d build/default/production/hardware.o
+ .debug_line      0x0000c3         0x24 build/default/production/config_bits.o
+ .debug_line      0x0000e7         0xab build/default/production/TVout.o
+ .debug_line      0x000192         0x1a build/default/production/font.o
+ .debug_line      0x0001ac         0x46 build/default/production/ps2.o
+ .debug_line      0x0001f2         0xb9 build/default/production/keyboard.o
+ .debug_line      0x0002ab         0x1a build/default/production/keybind.o
 
 .debug_frame
  *(.debug_frame)
@@ -243,7 +267,7 @@ __CONFIG1
 .debug_ranges
  *(.debug_ranges)
 
-.debug_aranges    0x000000         0x48
+.debug_aranges    0x000000         0x78
  *(.debug_aranges)
  .debug_aranges
                   0x000000         0x18 build/default/production/main.o
@@ -251,6 +275,10 @@ __CONFIG1
                   0x000018         0x18 build/default/production/hardware.o
  .debug_aranges
                   0x000030         0x18 build/default/production/TVout.o
+ .debug_aranges
+                  0x000048         0x18 build/default/production/ps2.o
+ .debug_aranges
+                  0x000060         0x18 build/default/production/keyboard.o
 
 .ivt              0x000004         0xfc
                   0x000004          0x4 LONG 0x29a DEFINED (__ReservedTrap0)?ABSOLUTE (__ReservedTrap0):ABSOLUTE (__DefaultInterrupt)
@@ -264,11 +292,11 @@ __CONFIG1
                   0x000014          0x4 LONG 0x29a DEFINED (__INT0Interrupt)?ABSOLUTE (__INT0Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000016          0x4 LONG 0x29a DEFINED (__IC1Interrupt)?ABSOLUTE (__IC1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000018          0x4 LONG 0x29a DEFINED (__OC1Interrupt)?ABSOLUTE (__OC1Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00001a          0x4 LONG 0x29a DEFINED (__T1Interrupt)?ABSOLUTE (__T1Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00001a          0x4 LONG 0xb86 DEFINED (__T1Interrupt)?ABSOLUTE (__T1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00001c          0x4 LONG 0x29a DEFINED (__Interrupt4)?ABSOLUTE (__Interrupt4):ABSOLUTE (__DefaultInterrupt)
                   0x00001e          0x4 LONG 0x29a DEFINED (__IC2Interrupt)?ABSOLUTE (__IC2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000020          0x4 LONG 0xa54 DEFINED (__OC2Interrupt)?ABSOLUTE (__OC2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000022          0x4 LONG 0x9dc DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000020          0x4 LONG 0xc5c DEFINED (__OC2Interrupt)?ABSOLUTE (__OC2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000022          0x4 LONG 0xbe4 DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000024          0x4 LONG 0x29a DEFINED (__T3Interrupt)?ABSOLUTE (__T3Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000026          0x4 LONG 0x29a DEFINED (__SPI1ErrInterrupt)?ABSOLUTE (__SPI1ErrInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000028          0x4 LONG 0x29a DEFINED (__SPI1Interrupt)?ABSOLUTE (__SPI1Interrupt):ABSOLUTE (__DefaultInterrupt)
@@ -281,7 +309,7 @@ __CONFIG1
                   0x000036          0x4 LONG 0x29a DEFINED (__MI2C1Interrupt)?ABSOLUTE (__MI2C1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000038          0x4 LONG 0x29a DEFINED (__CompInterrupt)?ABSOLUTE (__CompInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00003a          0x4 LONG 0x29a DEFINED (__CNInterrupt)?ABSOLUTE (__CNInterrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00003c          0x4 LONG 0x29a DEFINED (__INT1Interrupt)?ABSOLUTE (__INT1Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00003c          0x4 LONG 0xe20 DEFINED (__INT1Interrupt)?ABSOLUTE (__INT1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00003e          0x4 LONG 0x29a DEFINED (__Interrupt21)?ABSOLUTE (__Interrupt21):ABSOLUTE (__DefaultInterrupt)
                   0x000040          0x4 LONG 0x29a DEFINED (__Interrupt22)?ABSOLUTE (__Interrupt22):ABSOLUTE (__DefaultInterrupt)
                   0x000042          0x4 LONG 0x29a DEFINED (__Interrupt23)?ABSOLUTE (__Interrupt23):ABSOLUTE (__DefaultInterrupt)
@@ -392,11 +420,11 @@ __CONFIG1
                   0x000114          0x4 LONG 0x29a DEFINED (__AltINT0Interrupt)?ABSOLUTE (__AltINT0Interrupt):DEFINED (__INT0Interrupt)?ABSOLUTE (__INT0Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000116          0x4 LONG 0x29a DEFINED (__AltIC1Interrupt)?ABSOLUTE (__AltIC1Interrupt):DEFINED (__IC1Interrupt)?ABSOLUTE (__IC1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000118          0x4 LONG 0x29a DEFINED (__AltOC1Interrupt)?ABSOLUTE (__AltOC1Interrupt):DEFINED (__OC1Interrupt)?ABSOLUTE (__OC1Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00011a          0x4 LONG 0x29a DEFINED (__AltT1Interrupt)?ABSOLUTE (__AltT1Interrupt):DEFINED (__T1Interrupt)?ABSOLUTE (__T1Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00011a          0x4 LONG 0xb86 DEFINED (__AltT1Interrupt)?ABSOLUTE (__AltT1Interrupt):DEFINED (__T1Interrupt)?ABSOLUTE (__T1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00011c          0x4 LONG 0x29a DEFINED (__AltInterrupt4)?ABSOLUTE (__AltInterrupt4):DEFINED (__Interrupt4)?ABSOLUTE (__Interrupt4):ABSOLUTE (__DefaultInterrupt)
                   0x00011e          0x4 LONG 0x29a DEFINED (__AltIC2Interrupt)?ABSOLUTE (__AltIC2Interrupt):DEFINED (__IC2Interrupt)?ABSOLUTE (__IC2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000120          0x4 LONG 0xa54 DEFINED (__AltOC2Interrupt)?ABSOLUTE (__AltOC2Interrupt):DEFINED (__OC2Interrupt)?ABSOLUTE (__OC2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000122          0x4 LONG 0x9dc DEFINED (__AltT2Interrupt)?ABSOLUTE (__AltT2Interrupt):DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000120          0x4 LONG 0xc5c DEFINED (__AltOC2Interrupt)?ABSOLUTE (__AltOC2Interrupt):DEFINED (__OC2Interrupt)?ABSOLUTE (__OC2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000122          0x4 LONG 0xbe4 DEFINED (__AltT2Interrupt)?ABSOLUTE (__AltT2Interrupt):DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000124          0x4 LONG 0x29a DEFINED (__AltT3Interrupt)?ABSOLUTE (__AltT3Interrupt):DEFINED (__T3Interrupt)?ABSOLUTE (__T3Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000126          0x4 LONG 0x29a DEFINED (__AltSPI1ErrInterrupt)?ABSOLUTE (__AltSPI1ErrInterrupt):DEFINED (__SPI1ErrInterrupt)?ABSOLUTE (__SPI1ErrInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000128          0x4 LONG 0x29a DEFINED (__AltSPI1Interrupt)?ABSOLUTE (__AltSPI1Interrupt):DEFINED (__SPI1Interrupt)?ABSOLUTE (__SPI1Interrupt):ABSOLUTE (__DefaultInterrupt)
@@ -409,7 +437,7 @@ __CONFIG1
                   0x000136          0x4 LONG 0x29a DEFINED (__AltMI2C1Interrupt)?ABSOLUTE (__AltMI2C1Interrupt):DEFINED (__MI2C1Interrupt)?ABSOLUTE (__MI2C1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000138          0x4 LONG 0x29a DEFINED (__AltCompInterrupt)?ABSOLUTE (__AltCompInterrupt):DEFINED (__CompInterrupt)?ABSOLUTE (__CompInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00013a          0x4 LONG 0x29a DEFINED (__AltCNInterrupt)?ABSOLUTE (__AltCNInterrupt):DEFINED (__CNInterrupt)?ABSOLUTE (__CNInterrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00013c          0x4 LONG 0x29a DEFINED (__AltINT1Interrupt)?ABSOLUTE (__AltINT1Interrupt):DEFINED (__INT1Interrupt)?ABSOLUTE (__INT1Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00013c          0x4 LONG 0xe20 DEFINED (__AltINT1Interrupt)?ABSOLUTE (__AltINT1Interrupt):DEFINED (__INT1Interrupt)?ABSOLUTE (__INT1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00013e          0x4 LONG 0x29a DEFINED (__AltInterrupt21)?ABSOLUTE (__AltInterrupt21):DEFINED (__Interrupt21)?ABSOLUTE (__Interrupt21):ABSOLUTE (__DefaultInterrupt)
                   0x000140          0x4 LONG 0x29a DEFINED (__AltInterrupt22)?ABSOLUTE (__AltInterrupt22):DEFINED (__Interrupt22)?ABSOLUTE (__Interrupt22):ABSOLUTE (__DefaultInterrupt)
                   0x000142          0x4 LONG 0x29a DEFINED (__AltInterrupt23)?ABSOLUTE (__AltInterrupt23):DEFINED (__Interrupt23)?ABSOLUTE (__Interrupt23):ABSOLUTE (__DefaultInterrupt)
@@ -1093,25 +1121,30 @@ LOAD default_isr
 LOAD data_init
 
 .debug_pubtypes
-                  0x000048         0x12
+                  0x000078         0x12
  .debug_pubtypes
-                  0x000048         0x12 build/default/production/config_bits.o
+                  0x000078         0x12 build/default/production/config_bits.o
 
 __c30_signature
-                  0x00005a         0x12
+                  0x00008a         0x12
  __c30_signature
-                  0x00005a          0x6 build/default/production/config_bits.o
+                  0x00008a          0x6 build/default/production/config_bits.o
  __c30_signature
-                  0x000060          0x6 /opt/microchip/xc16/v1.23/bin/bin/../../lib/libpic30-elf.a(crt0_standard.o)
+                  0x000090          0x6 /opt/microchip/xc16/v1.23/bin/bin/../../lib/libpic30-elf.a(crt0_standard.o)
  __c30_signature
-                  0x000066          0x6 /opt/microchip/xc16/v1.23/bin/bin/../../lib/libpic30-elf.a(data_init_standard.o)
+                  0x000096          0x6 /opt/microchip/xc16/v1.23/bin/bin/../../lib/libpic30-elf.a(data_init_standard.o)
 
-.data               0x0800        0x4b8
+.data               0x0800        0x504
  .data              0x0800        0x4b6 build/default/production/TVout.o
                     0x0800                  _T2counter
                     0x0805                  _video_buffer
- .data              0x0cb6          0x2 build/default/production/hardware.o
-                    0x0cb6                  systicks
+ .data              0x0cb6         0x26 build/default/production/ps2.o
+                    0x0cb8                  ps2_queue
+                    0x0cd8                  ps2_head
+                    0x0cda                  ps2_tail
+ .data              0x0cdc         0x26 build/default/production/keyboard.o
+ .data              0x0d02          0x2 build/default/production/hardware.o
+                    0x0d02                  systicks
 
 .config_JTAGEN    0x00abfe          0x2
  .config_JTAGEN
@@ -1120,19 +1153,29 @@ __c30_signature
 .config_IESO      0x00abfc          0x2
  .config_IESO     0x00abfc          0x2 build/default/production/config_bits.o
 
-.const              0x829e        0x400 address de chargement 0x00029e  
+.const              0x829e        0x4b6 address de chargement 0x00029e  
  .const             0x829e        0x400 build/default/production/font.o
                     0x829e                  _font
+ .const             0x869e         0xb6 build/default/production/keybind.o
+                    0x869e                  ascii
+                    0x870e                  shifted
+                    0x873a                  extended
 
-.dinit            0x00069e        0x334
- .dinit           0x00069e        0x334 data_init
+.dinit            0x000754        0x374
+ .dinit           0x000754        0x374 data_init
 
-.text             0x0009d2        0x234
- .text            0x0009d2         0xec build/default/production/TVout.o
-                  0x0009d2                  cls
-                  0x0009dc                  __T2Interrupt
-                  0x000a54                  __OC2Interrupt
- .text            0x000abe         0xb6 build/default/production/main.o
-                  0x000abe                  _main
- .text            0x000b74         0x92 build/default/production/hardware.o
-                  0x000b74                  hardware_init
+.text             0x000ac8        0x382
+ .text            0x000ac8        0x112 build/default/production/keyboard.o
+                  0x000ac8                  get_code
+                  0x000af6                  kbd_get
+                  0x000b86                  __T1Interrupt
+ .text            0x000bda         0xec build/default/production/TVout.o
+                  0x000bda                  cls
+                  0x000be4                  __T2Interrupt
+                  0x000c5c                  __OC2Interrupt
+ .text            0x000cc6         0xc8 build/default/production/main.o
+                  0x000cc6                  _main
+ .text            0x000d8e         0x92 build/default/production/hardware.o
+                  0x000d8e                  hardware_init
+ .text            0x000e20         0x2a build/default/production/ps2.o
+                  0x000e20                  __INT1Interrupt

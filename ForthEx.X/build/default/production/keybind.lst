@@ -1,0 +1,303 @@
+MPLAB XC16 ASSEMBLY Listing:  keybind.s 			page 1
+
+
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	
+  20              	; NOM: keybind.s
+  21              	; DESCRIPTION: table de transcription scancode set 2 vers ASCII
+  22              	; REF: http://www.computer-engineering.org/ps2keyboard/scancodes2.html 
+  23              	    
+  24              	.include "ps2.inc"
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	
+  20              	;NOM: ps2.inc
+  21              	;DESCRIPTION: constante reliée au clavier PS/2
+  22              	;DATE: 2015-09-28
+  23              	.ifndef PS2_INC
+  24              	.equ PS2_INC, 1
+  25              	
+  26              	 ;codes touches contrôles
+  27              	.equ SC_KREL,  0xF0
+  28              	.equ SC_XKEY,  0xE0
+  29              	.equ L_SHIFT,  0x12
+  30              	.equ R_SHIFT,  0x59
+  31              	.equ L_CTRL,   0x14
+  32              	.equ L_ALT,    0x11
+  33              	.equ ENTER,    0x5A
+MPLAB XC16 ASSEMBLY Listing:  keybind.s 			page 2
+
+
+  34              	.equ CAPS,     0x58
+  35              	.equ SCROLL,   0x7E
+  36              	.equ NUM,      0x77
+  37              	.equ ESC,      0x76
+  38              	.equ F1,       0x05
+  39              	.equ F2,       0x06
+  40              	.equ F3,       0x04
+  41              	.equ F4,       0x0C
+  42              	.equ F5,       0x03
+  43              	.equ F6,       0x0B
+  44              	.equ F7,       0x83 
+  45              	.equ F8,       0x0A
+  46              	.equ F9,       0x01
+  47              	.equ F10,      0x09
+  48              	.equ F11,      0x78
+  49              	.equ F12,      0x07
+  50              	 ; touches clavier numérique
+  51              	.equ KP0,      0x70
+  52              	.equ KP1,      0x69
+  53              	.equ KP2,      0x72
+  54              	.equ KP3,      0x7A
+  55              	.equ KP4,      0x6B
+  56              	.equ KP5,      0x73
+  57              	.equ KP6,      0x74
+  58              	.equ KP7,      0x6C
+  59              	.equ KP8,      0x75
+  60              	.equ KP9,      0x7D
+  61              	.equ KPDOT,    0x71
+  62              	.equ KPPLUS,   0x79
+  63              	.equ KPMINUS,  0x7B
+  64              	.equ KPSTAR,   0x7C
+  65              	; code étendus (précédé de 0xE0) 
+  66              	.equ R_CTRL,   0x14
+  67              	.equ L_GUI,    0x1f
+  68              	.equ R_GUI,    0x27
+  69              	.equ R_ALT,    0x11
+  70              	.equ APPS,     0x2f 
+  71              	.equ INSERT,   0x70
+  72              	.equ HOME,     0x6C
+  73              	.equ PGUP,     0x7D
+  74              	.equ DEL,      0x71
+  75              	.equ END,      0x69
+  76              	.equ PGDN,     0x7A
+  77              	.equ UP,       0x75
+  78              	.equ DOWN,     0x72
+  79              	.equ LEFT,     0x6B
+  80              	.equ RIGHT,    0x74
+  81              	.equ KPSLH,    0x4A
+  82              	.equ KPENT,    0x5A 
+  83              	 
+  84              	;indicateurs booléens dans key_state
+  85              	.equ F_SHIFT, 0 ; touche majuscule enfoncée
+  86              	.equ F_CTRL, 1  ; touche ctrl enfoncée
+  87              	.equ F_ALT, 2   ; touche alt enfoncée
+  88              	.equ F_CAPS, 3  ; FixMaj actif
+  89              	.equ F_NUM,  4  ; clavier numérique actif
+  90              	.equ F_XKEY, 5 ; touche étendue
+MPLAB XC16 ASSEMBLY Listing:  keybind.s 			page 3
+
+
+  91              	.equ F_KREL, 6 ; relâchement touche
+  92              	; grandeur file interface PS/2 
+  93              	.equ PS2_QUEUE_SIZE, 32
+  94              	.endif
+  95              	
+  25              	.include "keyboard.inc"
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	;
+  20              	; Fichier: keyboard.inc
+  21              	; Description: constantes pour les touches retournées par kbd_get
+  22              	; Auteur: Jacques Deschênes
+  23              	; Date: 2015-10-01
+  24              	; Les touches non associées à un caractères ASCII
+  25              	; on une valeur inférieure à 32 ou supérieure à 127
+  26              	.ifndef KBD_INC
+  27              	.equ KBD_INC, 1
+  28              	    
+  29              	;Nom			valeur	    Description
+  30              	.equ VK_BACK,		8	    ;	Backspace
+  31              	.equ VK_ESCAPE,		27	    ;	Esc
+  32              	.equ VK_RETURN,		13	    ; touche Entrée    
+  33              	.equ VK_CTRL,           128         ; touche contrôle droite ou gauche
+  34              	.equ VK_SHIFT,          129         ; touche maj. droite ou gauche
+  35              	.equ VK_ALT,            130         ; touche ALT gauche ou droite
+  36              	.equ VK_CAPS,           131         ; touche fix Maj. 
+  37              	.equ VK_TAB,		9           ; touche tabulation
+  38              	.equ VK_DEL,            132         ; touche Suppr
+  39              	.equ VK_INS,		133	    ; touche Inser
+  40              	.equ VK_HOME,		134	    ; touche début fichier
+  41              	.equ VK_END,		135	    ; touche fin de fichier
+  42              	.equ VK_UP,		136	    ; flèche vers le haut
+  43              	.equ VK_DOWN,		137	    ; flèvhe vers le bas
+  44              	.equ VK_LEFT,		138	    ; flèche vers la gauche
+  45              	.equ VK_RIGHT,		139	    ; flèche vers le bas
+  46              	.equ VK_PGUP,		140	    ; page vers le haut
+  47              	.equ VK_PGDN,		141	    ; page vers le bas
+  48              	.equ VK_F1,		150	    ; fonction F1
+  49              	.equ VK_F2,		151	    ; fonction F2
+  50              	.equ VK_F3,		152	    ; fonction F3
+  51              	.equ VK_F4,		153	    ; fonction F4
+MPLAB XC16 ASSEMBLY Listing:  keybind.s 			page 4
+
+
+  52              	.equ VK_F5,		154	    ; fonction F5
+  53              	.equ VK_F6,		155	    ; fonction F6
+  54              	.equ VK_F7,		156	    ; fonction F7
+  55              	.equ VK_F8,		157	    ; fonction F8
+  56              	.equ VK_F9,		158	    ; fonction F9
+  57              	.equ VK_F10,		159	    ; fonction F10
+  58              	.equ VK_F11,		160	    ; fonction F11
+  59              	.equ VK_F12,		161	    ; fonction F12    
+  60              	
+  61              	.endif
+  62              	    
+  26              	    
+  27              	.global ascii, shifted, extended
+  28              	    
+  29              	.section .const psv 
+  30                 	    
+  31                 	ascii:
+  32 0000 1C 61       	.byte 0x1c,'a'
+  33 0002 32 62       	.byte 0x32,'b'
+  34 0004 21 63       	.byte 0x21,'c'
+  35 0006 23 64       	.byte 0x23,'d'
+  36 0008 24 65       	.byte 0x24,'e'
+  37 000a 2B 66       	.byte 0x2b,'f'
+  38 000c 34 67       	.byte 0x34,'g'
+  39 000e 33 68       	.byte 0x33,'h'
+  40 0010 43 69       	.byte 0x43,'i'
+  41 0012 3B 6A       	.byte 0x3b,'j'
+  42 0014 42 6B       	.byte 0x42,'k'
+  43 0016 4B 6C       	.byte 0x4b,'l'
+  44 0018 3A 6D       	.byte 0x3a,'m'
+  45 001a 31 6E       	.byte 0x31,'n'
+  46 001c 44 6F       	.byte 0x44,'o'
+  47 001e 4D 70       	.byte 0x4d,'p'
+  48 0020 15 71       	.byte 0x15,'q'
+  49 0022 2D 72       	.byte 0x2d,'r'
+  50 0024 1B 73       	.byte 0x1b,'s'
+  51 0026 2C 74       	.byte 0x2c,'t'
+  52 0028 3C 75       	.byte 0x3c,'u'
+  53 002a 2A 76       	.byte 0x2a,'v'
+  54 002c 1D 77       	.byte 0x1d,'w'
+  55 002e 22 78       	.byte 0x22,'x'
+  56 0030 35 79       	.byte 0x35,'y'
+  57 0032 1A 7A       	.byte 0x1a,'z'
+  58 0034 45 30       	.byte 0x45,'0'
+  59 0036 16 31       	.byte 0x16,'1'
+  60 0038 1E 32       	.byte 0x1e,'2'
+  61 003a 26 33       	.byte 0x26,'3'
+  62 003c 25 34       	.byte 0x25,'4'
+  63 003e 2E 35       	.byte 0x2e,'5'
+  64 0040 36 36       	.byte 0x36,'6'
+  65 0042 3D 37       	.byte 0x3d,'7'
+  66 0044 3E 38       	.byte 0x3e,'8'
+  67 0046 46 39       	.byte 0x46,'9'
+  68 0048 29 20       	.byte 0x29,' '
+  69 004a 4E 2D       	.byte 0x4e,'-'
+  70 004c 55 3D       	.byte 0x55,'='
+  71 004e 0E 60       	.byte 0x0e,'`'
+MPLAB XC16 ASSEMBLY Listing:  keybind.s 			page 5
+
+
+  72 0050 0D 09       	.byte 0x0d,'\t'
+  73 0052 54 5B       	.byte 0x54,'['
+  74 0054 5B 5D       	.byte 0x5b,']'
+  75 0056 4C 3B       	.byte 0x4c,';'
+  76 0058 41 2C       	.byte 0x41,','
+  77 005a 49 2E       	.byte 0x49,'.'
+  78 005c 4A 2F       	.byte 0x4a,'/'
+  79 005e 66 08       	.byte 0x66,8    ; BACKSPACE
+  80 0060 0D 09       	.byte 0x0d,9    ; TAB
+  81 0062 5A 0D       	.byte 0x5a,'\r' ; CR
+  82 0064 76 1B       	.byte 0x76,27   ; ESC
+  83 0066 12 81       	.byte L_SHIFT, VK_SHIFT
+  84 0068 59 81       	.byte R_SHIFT, VK_SHIFT    
+  85 006a 14 80       	.byte L_CTRL,  VK_CTRL    
+  86 006c 11 82       	.byte L_ALT,   VK_ALT    
+  87 006e 00 00       	.byte 0,0
+  88                 	
+  89                 	shifted:
+  90 0070 0E 7E       	.byte 0x0e,'~'
+  91 0072 16 21       	.byte 0x16,'!'
+  92 0074 1E 40       	.byte 0x1e,'@'
+  93 0076 26 23       	.byte 0x26,'#'
+  94 0078 25 24       	.byte 0x25,'$'
+  95 007a 2E 25       	.byte 0x2e,'%'
+  96 007c 36 5E       	.byte 0x36,'^'
+  97 007e 3D 26       	.byte 0x3d,'&'
+  98 0080 3E 2A       	.byte 0x3e,'*'
+  99 0082 46 28       	.byte 0x46,'('
+ 100 0084 45 29       	.byte 0x45,')'
+ 101 0086 4E 5F       	.byte 0x4e,'_'
+ 102 0088 64 7B       	.byte 0x64,'{'    
+ 103 008a 55 2B       	.byte 0x55,'+'
+ 104 008c 5B 7D       	.byte 0x5b,'}'    
+ 105 008e 5D 5C       	.byte 0x5d,'\\'
+ 106 0090 4C 3A       	.byte 0x4c,':'
+ 107 0092 52 22       	.byte 0x52,'"'
+ 108 0094 41 3C       	.byte 0x41,'<'
+ 109 0096 49 3E       	.byte 0x49,'>'
+ 110 0098 4A 3F       	.byte 0x4a,'?'
+ 111 009a 00 00       	.byte 0,0
+ 112                 	
+ 113                 	extended:
+ 114 009c 14 80       	.byte R_CTRL, VK_CTRL
+ 115 009e 11 82       	.byte R_ALT,  VK_ALT
+ 116 00a0 70 85       	.byte INSERT, VK_INS
+ 117 00a2 6C 86       	.byte HOME,   VK_HOME
+ 118 00a4 7D 8C       	.byte PGUP,   VK_PGUP
+ 119 00a6 71 84       	.byte DEL,    VK_DEL
+ 120 00a8 69 87       	.byte END,    VK_END
+ 121 00aa 7A 8D       	.byte PGDN,   VK_PGDN
+ 122 00ac 75 88       	.byte UP,     VK_UP
+ 123 00ae 72 89       	.byte DOWN,   VK_DOWN
+ 124 00b0 6B 8A       	.byte LEFT,   VK_LEFT
+ 125 00b2 74 8B       	.byte RIGHT,  VK_RIGHT
+ 126 00b4 00 00       	.byte 0,0    
+ 127                 	    
+ 128                 	.end
+MPLAB XC16 ASSEMBLY Listing:  keybind.s 			page 6
+
+

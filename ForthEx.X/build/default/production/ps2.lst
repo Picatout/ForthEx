@@ -1013,4 +1013,62 @@ MPLAB XC16 ASSEMBLY Listing:  ps2.s 			page 1
   92              	; grandeur file interface PS/2 
   93              	.equ PS2_QUEUE_SIZE, 32
   94              	.endif
-  95              	.end
+  95              	
+  24              	    
+  25              	.equ SHFT_INIT, 0x0400
+  26              	    
+  27              	.global ps2_queue, ps2_head, ps2_tail
+MPLAB XC16 ASSEMBLY Listing:  ps2.s 			page 18
+
+
+  28              	.data
+  29                 	ps2_shiftin:    
+  30 0000 00 04       	.word  SHFT_INIT   
+  31                 	ps2_queue:
+  32 0002 00 00 00 00 	.space PS2_QUEUE_SIZE     
+  32      00 00 00 00 
+  32      00 00 00 00 
+  32      00 00 00 00 
+  32      00 00 00 00 
+  32      00 00 00 00 
+  32      00 00 00 00 
+  32      00 00 00 00 
+  33                 	ps2_head:
+  34 0022 00 00       	.word 0
+  35                 	ps2_tail:
+  36 0024 00 00       	.word 0
+  37                 	    
+  38                 	.text
+  39              	 
+  40              	 ; interruption signal clock
+  41              	 ; du clavier sur INT1
+  42              	.global __INT1Interrupt
+  43              	__INT1Interrupt:
+  44 000000  80 1F 78 	    push W0
+  45 000002  81 1F 78 	    push W1
+  46              	    ; lecture du bit sur ligne PS/2 data
+  47 000004  00 00 80 	    mov KBD_PORT, W0
+  48 000006  00 E0 A3 	    btst.c W0,#KBD_DAT
+  49 000008  00 A0 D7 	    rrc ps2_shiftin
+  50 00000a  00 00 39 	    bra nc, 1f
+  51              	;    ; si le carry==1 les 11 bits sont lus
+  52              	;    ; sauvegarde dans ps2_queue
+  53 00000c  00 00 20 	    mov #ps2_queue, W0
+  54 00000e  01 00 80 	    mov ps2_tail, W1
+  55 000010  81 00 40 	    add W0, W1, W1
+  56 000012  00 00 80 	    mov ps2_shiftin,W0
+  57 000014  45 00 DE 	    lsr W0,#5,W0
+  58 000016  80 08 78 	    mov W0,[W1]
+  59              	;    ; ajustement de l'index fin de queue
+  60 000018  00 A0 EC 	    inc2 ps2_tail
+  61 00001a  F0 01 20 	    mov #(PS2_QUEUE_SIZE-1), W0
+  62 00001c  00 20 B6 	    and ps2_tail
+  63              	;    ; réinitialisation registre réception
+  64 00001e  00 40 20 	    mov #SHFT_INIT, W0
+  65 000020  00 00 88 	    mov W0, ps2_shiftin
+  66              	1:    
+  67 000022  CF 00 78 	    pop W1
+  68 000024  4F 00 78 	    pop W0
+  69 000026  00 80 A9 	    bclr KBD_IFS, #KBD_IF
+  70 000028  00 40 06 	    retfie
+  71              	.end    

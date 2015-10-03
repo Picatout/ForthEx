@@ -913,74 +913,120 @@ MPLAB XC16 ASSEMBLY Listing:  main.s 			page 1
   87              	.LIST
   88              	.endif
   89              	
-  21              	
+  21              	.include "gen_macros.inc"
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	
+  20              	;Fichier: gen_macro.inc
+  21              	;Description:  définition de macros d'usage général
+  22              	;Date: 2015-10-02
+  23              	.ifndef GEN_MACCRO
+  24              	.equ GEN_MACRO, 1
+  25              	
+  26              	.macro set_psv table, reg
+  27              	    mov #psvpage(\table), \reg
+  28              	    mov \reg, PSVPAG
+  29              	    mov #psvoffset(\table), \reg
+  30              	.endm
+  31              	
+  32              	.endif
+  33              	
   22              	
   23              	    
   24              	;config CONFIG1, FWDTEN_OFF & JTAGEN_OFF
   25              	;config CONFIG2, FNOSC_PRIPLL & FCKSM_CSDCMD  & POSCMOD_HS & OSCIOFNC_ON
   26              	
-  27              	    
-  28              	.text
-  29              	.global _main
-  30              	.extern _video_buffer
-  31              	_main:
-  32 000000  00 00 02 	    call hardware_init
-  32         00 00 00 
-  33              	; test vidéo
-  34 000004  00 00 02 	    call cls
-  34         00 00 00 
-  35 000008  00 00 20 	    mov #psvpage(quick), W0
-  36 00000a  00 00 88 	    mov W0, PSVPAG
-  37 00000c  01 00 20 	    mov #psvoffset(quick), W1
-  38 00000e  02 00 20 	    mov #_video_buffer,W2
-  39 000010  00 00 EB 	    clr W0
-  40              	1:
-  41 000012  31 40 78 	    mov.b [W1++], W0
-  42 000014  00 80 FB 	    ze W0,W0
-  43 000016  00 00 32 	    bra z, 2f
-  44 000018  00 59 78 	    mov.b W0, [W2++]
-  45 00001a  00 00 37 	    bra 1b
-  46              	2:    
-  47              	; fin test vidéo
-  48              	; test clavier
-  49              	3:    
-  50              	;    call kbd_get
-  51              	;    add #48,W0
-  52              	;    mov.b W0, [W2]
-  53              	;    bra 3b
-  54 00001c  00 00 37 	    bra .
-  55              	    
-  56              	;test string
-  57              	quick:
-  58 00001e  30 31 00 	.ascii "01234567890123456789012345678901234567890123456789"    
-  58         32 33 00 
-  58         34 35 00 
-  58         36 37 00 
-  58         38 39 00 
-  58         30 31 00 
+  27              	.extern kbd_get
+  28              	.extern _video_buffer
+  29              	.extern get_code
+  30              	
+  31              	    
+  32              	.text
 MPLAB XC16 ASSEMBLY Listing:  main.s 			page 17
 
 
-  58         32 33 00 
-  58         34 35 00 
-  58         36 37 00 
-  59 000050  54 48 00 	.ascii "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.      "
-  59         45 20 00 
-  59         51 55 00 
-  59         49 43 00 
-  59         4B 20 00 
-  59         42 52 00 
-  59         4F 57 00 
-  59         4E 20 00 
-  59         46 4F 00 
-  60 000082  54 68 00 	.asciz "The quick brown fox jumps over the lazy dog.      " 
-  60         65 20 00 
-  60         71 75 00 
-  60         69 63 00 
-  60         6B 20 00 
-  60         62 72 00 
-  60         6F 77 00 
-  60         6E 20 00 
-  60         66 6F 00 
-  61              	    
-  62            00 00 	.end
+  33              	.global _main
+  34              	    
+  35              	_main:
+  36 000000  00 00 02 	    call hardware_init
+  36         00 00 00 
+  37              	; test vidéo
+  38 000004  00 00 02 	    call cls
+  38         00 00 00 
+  39 000008  01 00 20 	    set_psv quick, W1
+  39         01 00 88 
+  39         01 00 20 
+  40 00000e  02 00 20 	    mov #_video_buffer,W2
+  41 000010  00 00 EB 	    clr W0
+  42              	1:
+  43 000012  31 40 78 	    mov.b [W1++], W0
+  44 000014  00 80 FB 	    ze W0,W0
+  45 000016  00 00 32 	    bra z, 2f
+  46 000018  00 59 78 	    mov.b W0, [W2++]
+  47 00001a  00 00 37 	    bra 1b
+  48              	2:    
+  49              	; fin test vidéo
+  50              	; test clavier
+  51              	3:  
+  52 00001c  82 1F 78 	    push W2
+  53 00001e  00 00 02 	    call kbd_get
+  53         00 00 00 
+  54 000022  4F 01 78 	    pop W2
+  55 000024  00 00 E0 	    cp0 W0
+  56 000026  00 00 32 	    bra eq, 3b
+  57 000028  F0 07 B2 	    and #127, W0
+  58 00002a  00 49 78 	    mov.b W0, [W2]
+  59 00002c  00 00 37 	    bra 3b
+  60              	    
+  61 00002e  00 00 37 	    bra .
+  62              	    
+  63              	;test string
+  64              	quick:
+  65 000030  30 31 00 	.ascii "01234567890123456789012345678901234567890123456789"    
+  65         32 33 00 
+  65         34 35 00 
+  65         36 37 00 
+  65         38 39 00 
+  65         30 31 00 
+  65         32 33 00 
+  65         34 35 00 
+  65         36 37 00 
+  66 000062  54 48 00 	.ascii "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.      "
+  66         45 20 00 
+  66         51 55 00 
+  66         49 43 00 
+  66         4B 20 00 
+  66         42 52 00 
+  66         4F 57 00 
+  66         4E 20 00 
+  66         46 4F 00 
+  67 000094  54 68 00 	.asciz "The quick brown fox jumps over the lazy dog.      " 
+  67         65 20 00 
+MPLAB XC16 ASSEMBLY Listing:  main.s 			page 18
+
+
+  67         71 75 00 
+  67         69 63 00 
+  67         6B 20 00 
+  67         62 72 00 
+  67         6F 77 00 
+  67         6E 20 00 
+  67         66 6F 00 
+  68              	    
+  69            00 00 	.end

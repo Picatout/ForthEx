@@ -28,6 +28,7 @@
 
 .include "hardware.inc"
 .include "video.inc"
+.include "gen_macros.inc"
 .if VIDEO_STD==NTSC
 .include "ntsc_const.inc"
 .else

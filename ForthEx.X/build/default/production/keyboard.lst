@@ -957,7 +957,7 @@ MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 1
   35              	.equ TV_BUFFER, (CPL*LPS)
   36              	
   37              	.endif
-  28              	.include "ps2.inc"    
+  28              	.include "ps2.inc"
 MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 17
 
 
@@ -1058,4 +1058,350 @@ MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 1
   92              	; grandeur file interface PS/2 
   93              	.equ PS2_QUEUE_SIZE, 32
   94              	.endif
-  95              	.end
+  95              	
+  29              	.include "keyboard.inc"    
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 19
+
+
+  19              	;
+  20              	; Fichier: keyboard.inc
+  21              	; Description: constantes pour les touches retournées par kbd_get
+  22              	; Auteur: Jacques Deschênes
+  23              	; Date: 2015-10-01
+  24              	; Les touches non associées à un caractères ASCII
+  25              	; on une valeur inférieure à 32 ou supérieure à 127
+  26              	.ifndef KBD_INC
+  27              	.equ KBD_INC, 1
+  28              	    
+  29              	;Nom			valeur	    Description
+  30              	.equ VK_BACK,		8	    ;	Backspace
+  31              	.equ VK_ESCAPE,		27	    ;	Esc
+  32              	.equ VK_RETURN,		13	    ; touche Entrée    
+  33              	.equ VK_CTRL,           128         ; touche contrôle droite ou gauche
+  34              	.equ VK_SHIFT,          129         ; touche maj. droite ou gauche
+  35              	.equ VK_ALT,            130         ; touche ALT gauche ou droite
+  36              	.equ VK_CAPS,           131         ; touche fix Maj. 
+  37              	.equ VK_TAB,		9           ; touche tabulation
+  38              	.equ VK_DEL,            132         ; touche Suppr
+  39              	.equ VK_INS,		133	    ; touche Inser
+  40              	.equ VK_HOME,		134	    ; touche début fichier
+  41              	.equ VK_END,		135	    ; touche fin de fichier
+  42              	.equ VK_UP,		136	    ; flèche vers le haut
+  43              	.equ VK_DOWN,		137	    ; flèvhe vers le bas
+  44              	.equ VK_LEFT,		138	    ; flèche vers la gauche
+  45              	.equ VK_RIGHT,		139	    ; flèche vers le bas
+  46              	.equ VK_PGUP,		140	    ; page vers le haut
+  47              	.equ VK_PGDN,		141	    ; page vers le bas
+  48              	.equ VK_F1,		150	    ; fonction F1
+  49              	.equ VK_F2,		151	    ; fonction F2
+  50              	.equ VK_F3,		152	    ; fonction F3
+  51              	.equ VK_F4,		153	    ; fonction F4
+  52              	.equ VK_F5,		154	    ; fonction F5
+  53              	.equ VK_F6,		155	    ; fonction F6
+  54              	.equ VK_F7,		156	    ; fonction F7
+  55              	.equ VK_F8,		157	    ; fonction F8
+  56              	.equ VK_F9,		158	    ; fonction F9
+  57              	.equ VK_F10,		159	    ; fonction F10
+  58              	.equ VK_F11,		160	    ; fonction F11
+  59              	.equ VK_F12,		161	    ; fonction F12    
+  60              	
+  61              	.endif
+  62              	    
+  30              	.include "gen_macros.inc"
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 20
+
+
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	
+  20              	;Fichier: gen_macro.inc
+  21              	;Description:  définition de macros d'usage général
+  22              	;Date: 2015-10-02
+  23              	.ifndef GEN_MACCRO
+  24              	.equ GEN_MACRO, 1
+  25              	
+  26              	.macro set_psv table, reg
+  27              	    mov #psvpage(\table), \reg
+  28              	    mov \reg, PSVPAG
+  29              	    mov #psvoffset(\table), \reg
+  30              	.endm
+  31              	
+  32              	.endif
+  33              	
+  31              	    
+  32              	 
+  33              	.equ KBD_QUEUE_SIZE, 32    
+  34              	 
+  35              	.data
+  36                 	kbd_queue:
+  37 0000 00 00 00 00 	.space KBD_QUEUE_SIZE    
+  37      00 00 00 00 
+  37      00 00 00 00 
+  37      00 00 00 00 
+  37      00 00 00 00 
+  37      00 00 00 00 
+  37      00 00 00 00 
+  37      00 00 00 00 
+  38                 	kbd_head:
+  39 0020 00 00       	.word 0
+  40                 	kbd_tail:
+  41 0022 00 00       	.word 0
+  42                 	key_state:    
+  43 0024 00          	.byte 0
+  44                 	    
+  45 0025 00          	.text
+  46              	
+  47              	;;;;;;;;;;;;;;;;;;;;;;;
+  48              	; retourne le code clavier
+  49              	; dans W0 sinon retourne 0
+  50              	;;;;;;;;;;;;;;;;;;;;;;;
+  51              	.global get_code    
+  52              	get_code:
+  53 000000  00 00 EB 	    clr W0
+  54 000002  01 00 80 	    mov kbd_head, W1
+  55 000004  02 00 80 	    mov kbd_tail, W2
+  56 000006  02 08 E1 	    cp  W1,W2
+  57 000008  00 00 32 	    bra eq, 1f
+  58 00000a  02 00 20 	    mov #kbd_queue,W2
+  59 00000c  02 81 40 	    add W1,W2,W2
+MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 21
+
+
+  60 00000e  20 20 EC 	    inc kbd_head
+  61 000010  F0 01 20 	    mov #(KBD_QUEUE_SIZE-1), W0
+  62 000012  20 20 B6 	    and kbd_head
+  63 000014  12 40 78 	    mov.b [W2], W0
+  64 000016  00 80 FB 	    ze W0,W0
+  65              	1:
+  66 000018  00 00 06 	    return
+  67              	
+  68              	;;;;;;;;;;;;;;;;;;;;;;;;
+  69              	; recherche code clavier
+  70              	; dans la table
+  71              	; entrée: W2=index table    
+  72              	;         W0=scancode recherché
+  73              	; sortie: W1 contient caractère
+  74              	;         W1=0 si scancode pas dans la table
+  75              	; modifie: W1,W2,W3    
+  76              	;;;;;;;;;;;;;;;;;;;;;;;;;
+  77              	search_table:
+  78              	1:
+  79 00001a  B2 00 78 	    mov [W2++], W1
+  80 00001c  01 00 E0 	    cp0 W1
+  81 00001e  00 00 32 	    bra eq, 2f
+  82 000020  81 01 78 	    mov W1, W3
+  83 000022  83 81 FB 	    ze W3,W3
+  84 000024  00 18 E1 	    cp W3,W0
+  85 000026  00 00 3A 	    bra neq, 1b
+  86 000028  01 80 FD 	    swap W1
+  87 00002a  81 80 FB 	    ze W1,W1
+  88              	2: ; pas trouvé
+  89 00002c  00 00 06 	    return
+  90              	
+  91              	    
+  92              	;;;;;;;;;;;;;;;;;;;;;;;
+  93              	; retourne un caractère
+  94              	; si disponible
+  95              	; sortie: W0
+  96              	;;;;;;;;;;;;;;;;;;;;;;;    
+  97              	.global kbd_get
+  98              	
+  99              	kbd_get:
+ 100 00002e  00 00 F8 	    push PSVPAG
+ 101 000030  00 00 02 	    call get_code
+ 101         00 00 00 
+ 102 000034  00 00 E0 	    cp0 W0
+ 103 000036  00 00 32 	    bra eq, exit_empty   
+ 104              	    ;code clavier touche étendue?
+ 105 000038  01 0E 20 	    mov #SC_XKEY, W1
+ 106 00003a  00 08 E1 	    cp W1,W0
+ 107 00003c  00 00 3A 	    bra neq, 1f
+ 108 00003e  24 A0 A8 	    bset key_state, #F_XKEY
+ 109 000040  00 00 02 	    call get_code
+ 109         00 00 00 
+ 110 000044  00 00 E0 	    cp0 W0
+ 111 000046  00 00 32 	    bra eq, exit_empty
+ 112              	1:
+ 113              	    ;code clavier relâchement touche?
+ 114 000048  01 0F 20 	    mov #SC_KREL, W1
+MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 22
+
+
+ 115 00004a  00 08 E1 	    cp W1, W0
+ 116 00004c  00 00 3A 	    bra neq, 2f
+ 117 00004e  24 C0 A8 	    bset key_state, #F_KREL
+ 118 000050  00 00 02 	    call get_code
+ 118         00 00 00 
+ 119 000054  00 00 E0 	    cp0 W0
+ 120 000056  00 00 32 	    bra eq, exit_empty
+ 121              	2:
+ 122 000058  24 A0 AE 	    btss key_state, #F_XKEY
+ 123 00005a  00 00 37 	    bra 3f
+ 124 00005c  02 00 20 	    set_psv extended, W2
+ 124         02 00 88 
+ 124         02 00 20 
+ 125 000062  00 00 02 	    call search_table
+ 125         00 00 00 
+ 126 000066  01 00 E0 	    cp0 W1
+ 127 000068  00 00 32 	    bra eq, 3f
+ 128              	    ; scancode trouvé dans la table 'extended'
+ 129 00006a  00 00 37 	    bra filter_key
+ 130              	3:  
+ 131 00006c  24 00 AE 	    btss key_state, #F_SHIFT
+ 132 00006e  00 00 37 	    bra 4f
+ 133 000070  02 00 20 	    set_psv shifted, W2
+ 133         02 00 88 
+ 133         02 00 20 
+ 134 000076  00 00 02 	    call search_table
+ 134         00 00 00 
+ 135 00007a  01 00 E0 	    cp0 W1
+ 136 00007c  00 00 32 	    bra eq, 4f
+ 137              	    ; scancode trouvé dans la table 'shifted'
+ 138 00007e  00 00 37 	    bra filter_key
+ 139              	4:  
+ 140 000080  02 00 20 	    set_psv ascii, W2
+ 140         02 00 88 
+ 140         02 00 20 
+ 141 000086  00 00 02 	    call search_table
+ 141         00 00 00 
+ 142 00008a  01 00 E0 	    cp0 W1
+ 143 00008c  00 00 32 	    bra eq, exit_badkey
+ 144              	    ; scancode trouvé dans la table 'ascii'
+ 145              	filter_key:
+ 146 00008e  01 00 78 	    mov W1,W0
+ 147 000090  11 06 20 	    mov #'a', W1
+ 148 000092  01 00 E1 	    cp W0,W1
+ 149 000094  00 00 39 	    bra ltu, 5f
+ 150 000096  A1 07 20 	    mov #'z', W1
+ 151 000098  01 00 E1 	    cp W0, W1
+ 152 00009a  00 00 3E 	    bra gtu, 5f
+ 153              	    ;lettre
+ 154 00009c  24 C0 AF 	    btsc key_state, #F_KREL
+ 155 00009e  00 00 37 	    bra exit_ignore_it
+ 156 0000a0  24 00 AF 	    btsc key_state, #F_SHIFT
+ 157 0000a2  00 02 B1 	    sub #32,W0
+ 158 0000a4  00 00 37 	    bra exit_goodkey
+ 159              	5:
+ 160 0000a6  11 08 20 	    mov #VK_SHIFT, W1
+ 161 0000a8  01 00 E1 	    cp W0,W1
+MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 23
+
+
+ 162 0000aa  00 00 3A 	    bra neq, 6f
+ 163 0000ac  24 00 A9 	    bclr key_state, #F_SHIFT
+ 164 0000ae  24 C0 AE 	    btss key_state, #F_KREL
+ 165 0000b0  24 00 A8 	    bset key_state, #F_SHIFT
+ 166 0000b2  00 00 37 	    bra exit_ignore_it
+ 167              	6:
+ 168              	    
+ 169              	exit_ignore_it:    
+ 170              	exit_badkey: ;sortie touche refusée
+ 171 0000b4  00 00 EB 	    clr W0
+ 172              	exit_goodkey:  ; sortie touche acceptée
+ 173 0000b6  24 C0 A9 	    bclr key_state, #F_KREL
+ 174 0000b8  24 A0 A9 	    bclr key_state, #F_XKEY
+ 175              	exit_empty: ; sortie file vide
+ 176 0000ba  00 00 F9 	    pop PSVPAG
+ 177 0000bc  00 00 06 	    return
+ 178              	    
+ 179              	;;;;;;;;;;;;;;;;;;;;;;;;;
+ 180              	; interruption TIMER1
+ 181              	; incrémente SYSTICK
+ 182              	; et traitement primaire
+ 183              	; file ps2_queue vers kbd_queue
+ 184              	;;;;;;;;;;;;;;;;;;;;;;;;;
+ 185              	
+ 186              	.extern systicks
+ 187              	.extern ps2_head
+ 188              	.extern ps2_tail    
+ 189              	.extern ps2_queue  
+ 190              	    
+ 191              	.global __T1Interrupt   
+ 192              	__T1Interrupt:
+ 193 0000be  80 1F 78 	    push W0
+ 194 0000c0  81 1F 78 	    push W1
+ 195 0000c2  82 1F 78 	    push W2
+ 196 0000c4  83 1F 78 	    push W3
+ 197 0000c6  00 20 EC 	    inc systicks
+ 198 0000c8  00 00 80 	    mov ps2_head, W0
+ 199 0000ca  00 00 E3 	    cp ps2_tail
+ 200 0000cc  00 00 32 	    bra z, isr_exit
+ 201 0000ce  01 00 20 	    mov #ps2_queue, W1
+ 202 0000d0  81 00 40 	    add W0, W1, W1
+ 203 0000d2  11 00 78 	    mov [W1], W0
+ 204 0000d4  00 00 D1 	    lsr W0,W0
+ 205 0000d6  00 00 31 	    bra c, 9f ; start bit doit-être zéro
+ 206 0000d8  00 90 A3 	    btst.c W0, #9
+ 207 0000da  00 00 39 	    bra nc, 9f ; stop bit doit-être 1
+ 208 0000dc  80 01 EB 	    clr W3
+ 209 0000de  F0 1F B2 	    and #0x1ff, W0
+ 210 0000e0  02 00 20 	    mov #0, W2
+ 211              	1:
+ 212 0000e2  00 10 A5 	    btst.c W0,W2
+ 213 0000e4  00 00 39 	    bra nc, 2f
+ 214 0000e6  83 01 E8 	    inc W3,W3
+ 215              	2:    
+ 216 0000e8  02 01 E8 	    inc W2,W2
+ 217 0000ea  69 10 E1 	    cp W2, #9
+ 218 0000ec  00 00 3A 	    bra neq, 1b
+MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 24
+
+
+ 219              	    ; paritée impaire, W3 doit-être impaire.
+ 220 0000ee  03 00 A6 	    btss W3,#0
+ 221 0000f0  00 00 37 	    bra 9f
+ 222 0000f2  01 00 20 	    mov #kbd_queue, W1
+ 223 0000f4  02 00 80 	    mov kbd_tail, W2
+ 224 0000f6  81 00 41 	    add W2,W1,W1
+ 225 0000f8  80 48 78 	    mov.b W0,[W1]
+ 226 0000fa  12 00 B0 	    add #1,W2
+ 227 0000fc  F2 01 B2 	    and #(KBD_QUEUE_SIZE-1),W2
+ 228 0000fe  02 00 88 	    mov W2, kbd_tail
+ 229              	9:    
+ 230              	    ;incrémente ps2_head
+ 231 000100  00 A0 EC 	    inc2 ps2_head
+ 232 000102  F0 01 20 	    mov #(PS2_QUEUE_SIZE-1), W0
+ 233 000104  00 20 B6 	    and ps2_head
+ 234              	isr_exit:
+ 235 000106  CF 01 78 	    pop W3
+ 236 000108  4F 01 78 	    pop W2
+ 237 00010a  CF 00 78 	    pop W1
+ 238 00010c  4F 00 78 	    pop W0
+ 239 00010e  00 60 A9 	    bclr IFS0, #T1IF
+ 240 000110  00 40 06 	    retfie
+ 241              	    
+ 242              	.end

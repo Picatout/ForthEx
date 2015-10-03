@@ -30,13 +30,13 @@ LIBS:atmel
 LIBS:contrib
 LIBS:valves
 LIBS:forthEx-cache
-EELAYER 25 0
+EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title ""
-Date "12 sep 2015"
+Date "2 oct 2015"
 Rev ""
 Comp ""
 Comment1 ""
@@ -472,7 +472,7 @@ L PS/2 J4
 U 1 1 557C962A
 P 8750 2000
 F 0 "J4" H 8750 1650 60  0000 C CNN
-F 1 "PS/2" H 8750 2450 60  0000 C CNN
+F 1 "miniDIN-6" H 8750 2450 60  0000 C CNN
 F 2 "~" H 8750 2000 60  0000 C CNN
 F 3 "~" H 8750 2000 60  0000 C CNN
 	1    8750 2000
