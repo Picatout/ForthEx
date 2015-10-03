@@ -1282,73 +1282,73 @@ MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 1
  127 000064  00 00 02 	    call search_table
  127         00 00 00 
  128 000068  00 00 E0 	    cp0 W0
- 129 00006a  00 00 32 	    bra eq, try_shifted
+ 129 00006a  00 00 32 	    bra eq, try_xmod_key
  130              	    ; scancode trouvé dans la table 'extended'
- 131 00006c  00 00 37 	    bra exit_goodkey
- 132              	try_shifted:  ; recherche table 'shifted'
- 133 00006e  24 00 AE 	    btss key_state, #F_SHIFT
- 134 000070  00 00 37 	    bra try_ascii
- 135 000072  02 00 20 	    set_psv shifted, W2
- 135         02 00 88 
- 135         02 00 20 
- 136 000078  00 00 02 	    call search_table
- 136         00 00 00 
- 137 00007c  00 00 E0 	    cp0 W0
- 138 00007e  00 00 32 	    bra eq, try_ascii
- 139              	    ; scancode trouvé dans la table 'shifted'
- 140 000080  00 00 37 	    bra exit_goodkey
- 141              	try_ascii:  ; recherche table 'ascii'
- 142 000082  02 00 20 	    set_psv ascii, W2
- 142         02 00 88 
- 142         02 00 20 
- 143 000088  00 00 02 	    call search_table
- 143         00 00 00 
- 144 00008c  00 00 E0 	    cp0 W0
- 145 00008e  00 00 32 	    bra eq, try_ext_key
- 146              	    ; scancode trouvé dans la table 'ascii'
- 147 000090  11 06 20 	    mov #'a', W1
- 148 000092  01 00 E1 	    cp W0,W1
- 149 000094  00 00 39 	    bra ltu, exit_goodkey
- 150 000096  A1 07 20 	    mov #'z', W1
- 151 000098  01 00 E1 	    cp W0, W1
- 152 00009a  00 00 3E 	    bra gtu, exit_goodkey
- 153              	    ;lettre
- 154 00009c  24 C0 AF 	    btsc key_state, #F_KREL
- 155 00009e  00 00 37 	    bra exit_ignore_it
- 156 0000a0  24 60 AE 	    btss key_state, #F_CAPS
- 157 0000a2  00 50 A2 	    btg  W0, #5 
- 158 0000a4  24 00 AF 	    btsc key_state, #F_SHIFT
+ 131 00006c  00 00 37 	    bra kbd_goodkey
+ 132              	try_xmod_key:
+ 133 00006e  02 00 20 	    set_psv xmod, W2
+ 133         02 00 88 
+ 133         02 00 20 
+ 134 000074  00 00 02 	    call search_table
+ 134         00 00 00 
+ 135 000078  00 00 E0 	    cp0 W0
+ 136 00007a  00 00 32 	    bra eq, kbd_ignore_It
+ 137 00007c  00 00 37 	    bra mod_switch
+ 138              	try_shifted:  ; recherche table 'shifted'
+ 139 00007e  24 00 AE 	    btss key_state, #F_SHIFT
+ 140 000080  00 00 37 	    bra try_ascii
+ 141 000082  02 00 20 	    set_psv shifted, W2
+ 141         02 00 88 
+ 141         02 00 20 
+ 142 000088  00 00 02 	    call search_table
+ 142         00 00 00 
+ 143 00008c  00 00 E0 	    cp0 W0
+ 144 00008e  00 00 32 	    bra eq, try_ascii
+ 145              	    ; scancode trouvé dans la table 'shifted'
+ 146 000090  00 00 37 	    bra kbd_goodkey
+ 147              	try_ascii:  ; recherche table 'ascii'
+ 148 000092  02 00 20 	    set_psv ascii, W2
+ 148         02 00 88 
+ 148         02 00 20 
+ 149 000098  00 00 02 	    call search_table
+ 149         00 00 00 
+ 150 00009c  00 00 E0 	    cp0 W0
+ 151 00009e  00 00 32 	    bra eq, try_ext_key
+ 152              	    ; scancode trouvé dans la table 'ascii'
+ 153 0000a0  11 06 20 	    mov #'a', W1
+ 154 0000a2  01 00 E1 	    cp W0,W1
+ 155 0000a4  00 00 39 	    bra ltu, kbd_goodkey
 MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 23
 
 
- 159 0000a6  00 50 A2 	    btg W0, #5
- 160 0000a8  00 00 37 	    bra exit_goodkey
- 161              	try_ext_key:
- 162 0000aa  02 00 20 	    set_psv extended, W2
- 162         02 00 88 
- 162         02 00 20 
- 163 0000b0  00 00 02 	    call search_table
- 163         00 00 00 
- 164 0000b4  00 00 E0 	    cp0 W0
- 165 0000b6  00 00 32 	    bra eq, try_mod_key
- 166 0000b8  00 00 37 	    bra exit_goodkey
- 167              	try_mod_key:
- 168 0000ba  02 00 20 	    set_psv mod, W2
+ 156 0000a6  A1 07 20 	    mov #'z', W1
+ 157 0000a8  01 00 E1 	    cp W0, W1
+ 158 0000aa  00 00 3E 	    bra gtu, kbd_goodkey
+ 159              	    ;lettre
+ 160 0000ac  24 C0 AF 	    btsc key_state, #F_KREL
+ 161 0000ae  00 00 37 	    bra kbd_ignore_It
+ 162 0000b0  24 60 AE 	    btss key_state, #F_CAPS
+ 163 0000b2  00 50 A2 	    btg  W0, #5 
+ 164 0000b4  24 00 AF 	    btsc key_state, #F_SHIFT
+ 165 0000b6  00 50 A2 	    btg W0, #5
+ 166 0000b8  00 00 37 	    bra kbd_goodkey
+ 167              	try_ext_key:
+ 168 0000ba  02 00 20 	    set_psv extended, W2
  168         02 00 88 
  168         02 00 20 
  169 0000c0  00 00 02 	    call search_table
  169         00 00 00 
  170 0000c4  00 00 E0 	    cp0 W0
- 171 0000c6  00 00 32 	    bra eq, try_xmod_key
- 172 0000c8  00 00 37 	    bra mod_switch
- 173              	try_xmod_key:
- 174 0000ca  02 00 20 	    set_psv xmod, W2
+ 171 0000c6  00 00 32 	    bra eq, try_mod_key
+ 172 0000c8  00 00 37 	    bra kbd_goodkey
+ 173              	try_mod_key:
+ 174 0000ca  02 00 20 	    set_psv mod, W2
  174         02 00 88 
  174         02 00 20 
  175 0000d0  00 00 02 	    call search_table
  175         00 00 00 
  176 0000d4  00 00 E0 	    cp0 W0
- 177 0000d6  00 00 32 	    bra eq, exit_ignore_it
+ 177 0000d6  00 00 32 	    bra eq, kbd_ignore_It
  178              	mod_switch:
  179 0000d8  11 08 20 	    mov #VK_SHIFT, W1
  180 0000da  01 00 E1 	    cp W0,W1
@@ -1356,14 +1356,14 @@ MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 1
  182 0000de  24 00 A9 	    bclr key_state, #F_SHIFT
  183 0000e0  24 C0 AE 	    btss key_state, #F_KREL
  184 0000e2  24 00 A8 	    bset key_state, #F_SHIFT
- 185 0000e4  00 00 37 	    bra exit_ignore_it
+ 185 0000e4  00 00 37 	    bra kbd_ignore_It
  186              	6:
  187 0000e6  31 08 20 	    mov #VK_CAPS, W1
  188 0000e8  01 00 E1 	    cp W0,W1
  189 0000ea  00 00 3A 	    bra neq, 7f
  190 0000ec  24 C0 AE 	    btss key_state, #F_KREL
  191 0000ee  24 60 AA 	    btg key_state, #F_CAPS
- 192 0000f0  00 00 37 	    bra exit_ignore_it
+ 192 0000f0  00 00 37 	    bra kbd_ignore_It
  193              	7:  
  194 0000f2  01 08 20 	    mov #VK_CTRL, W1
  195 0000f4  01 00 E1 	    cp W0, W1
@@ -1371,91 +1371,90 @@ MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 1
  197 0000f8  24 20 A9 	    bclr key_state, #F_CTRL
  198 0000fa  24 C0 AE 	    btss key_state, #F_KREL
  199 0000fc  24 20 A8 	    bset key_state, #F_CTRL
- 200 0000fe  00 00 37 	    bra exit_ignore_it
+ 200 0000fe  00 00 37 	    bra kbd_ignore_It
  201              	8:
  202 000100  21 08 20 	    mov #VK_ALT, W1
  203 000102  01 00 E1 	    cp W0,W1
- 204 000104  00 00 3A 	    bra neq, exit_ignore_it
+ 204 000104  00 00 3A 	    bra neq, kbd_ignore_It
  205 000106  24 40 A9 	    bclr key_state, #F_ALT
  206 000108  24 C0 AE 	    btss key_state, #F_KREL
 MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 24
 
 
  207 00010a  24 20 A8 	    bset key_state, #F_CTRL
- 208              	exit_ignore_it:    
- 209              	exit_badkey: ;sortie touche refusée
- 210 00010c  00 00 EB 	    clr W0
- 211              	exit_goodkey:  ; sortie touche acceptée
- 212 00010e  24 C0 A9 	    bclr key_state, #F_KREL
- 213 000110  24 A0 A9 	    bclr key_state, #F_XKEY
- 214              	kbd_no_key: ; sortie file vide
- 215 000112  00 00 F9 	    pop PSVPAG
- 216 000114  00 00 06 	    return
- 217              	    
- 218              	;;;;;;;;;;;;;;;;;;;;;;;;;
- 219              	; interruption TIMER1
- 220              	; incrémente SYSTICK
- 221              	; et traitement primaire
- 222              	; file ps2_queue vers kbd_queue
- 223              	;;;;;;;;;;;;;;;;;;;;;;;;;
- 224              	
- 225              	.extern systicks
- 226              	.extern ps2_head
- 227              	.extern ps2_tail    
- 228              	.extern ps2_queue  
- 229              	    
- 230              	.global __T1Interrupt   
- 231              	__T1Interrupt:
- 232 000116  80 1F 78 	    push W0
- 233 000118  81 1F 78 	    push W1
- 234 00011a  82 1F 78 	    push W2
- 235 00011c  83 1F 78 	    push W3
- 236 00011e  00 20 EC 	    inc systicks
- 237 000120  00 00 80 	    mov ps2_head, W0
- 238 000122  00 00 E3 	    cp ps2_tail
- 239 000124  00 00 32 	    bra z, isr_exit
- 240 000126  01 00 20 	    mov #ps2_queue, W1
- 241 000128  81 00 40 	    add W0, W1, W1
- 242 00012a  11 00 78 	    mov [W1], W0
- 243 00012c  00 00 D1 	    lsr W0,W0
- 244 00012e  00 00 31 	    bra c, 9f ; start bit doit-être zéro
- 245 000130  00 90 A3 	    btst.c W0, #9
- 246 000132  00 00 39 	    bra nc, 9f ; stop bit doit-être 1
- 247 000134  80 01 EB 	    clr W3
- 248 000136  F0 1F B2 	    and #0x1ff, W0
- 249 000138  02 00 20 	    mov #0, W2
- 250              	1:
- 251 00013a  00 10 A5 	    btst.c W0,W2
- 252 00013c  00 00 39 	    bra nc, 2f
- 253 00013e  83 01 E8 	    inc W3,W3
- 254              	2:    
- 255 000140  02 01 E8 	    inc W2,W2
- 256 000142  69 10 E1 	    cp W2, #9
- 257 000144  00 00 3A 	    bra neq, 1b
- 258              	    ; paritée impaire, W3 doit-être impaire.
- 259 000146  03 00 A6 	    btss W3,#0
- 260 000148  00 00 37 	    bra 9f
- 261 00014a  01 00 20 	    mov #kbd_queue, W1
- 262 00014c  02 00 80 	    mov kbd_tail, W2
- 263 00014e  81 00 41 	    add W2,W1,W1
+ 208              	kbd_ignore_It:    
+ 209 00010c  00 00 EB 	    clr W0
+ 210              	kbd_goodkey:  ; sortie touche acceptée
+ 211 00010e  24 C0 A9 	    bclr key_state, #F_KREL
+ 212 000110  24 A0 A9 	    bclr key_state, #F_XKEY
+ 213              	kbd_no_key: ; sortie file vide
+ 214 000112  00 00 F9 	    pop PSVPAG
+ 215 000114  00 00 06 	    return
+ 216              	    
+ 217              	;;;;;;;;;;;;;;;;;;;;;;;;;
+ 218              	; interruption TIMER1
+ 219              	; incrémente SYSTICK
+ 220              	; et traitement primaire
+ 221              	; file ps2_queue vers kbd_queue
+ 222              	;;;;;;;;;;;;;;;;;;;;;;;;;
+ 223              	
+ 224              	.extern systicks
+ 225              	.extern ps2_head
+ 226              	.extern ps2_tail    
+ 227              	.extern ps2_queue  
+ 228              	    
+ 229              	.global __T1Interrupt   
+ 230              	__T1Interrupt:
+ 231 000116  80 1F 78 	    push W0
+ 232 000118  81 1F 78 	    push W1
+ 233 00011a  82 1F 78 	    push W2
+ 234 00011c  83 1F 78 	    push W3
+ 235 00011e  00 20 EC 	    inc systicks
+ 236 000120  00 00 80 	    mov ps2_head, W0
+ 237 000122  00 00 E3 	    cp ps2_tail
+ 238 000124  00 00 32 	    bra z, isr_exit
+ 239 000126  01 00 20 	    mov #ps2_queue, W1
+ 240 000128  81 00 40 	    add W0, W1, W1
+ 241 00012a  11 00 78 	    mov [W1], W0
+ 242 00012c  00 00 D1 	    lsr W0,W0
+ 243 00012e  00 00 31 	    bra c, 9f ; start bit doit-être zéro
+ 244 000130  00 90 A3 	    btst.c W0, #9
+ 245 000132  00 00 39 	    bra nc, 9f ; stop bit doit-être 1
+ 246 000134  80 01 EB 	    clr W3
+ 247 000136  F0 1F B2 	    and #0x1ff, W0
+ 248 000138  02 00 20 	    mov #0, W2
+ 249              	1:
+ 250 00013a  00 10 A5 	    btst.c W0,W2
+ 251 00013c  00 00 39 	    bra nc, 2f
+ 252 00013e  83 01 E8 	    inc W3,W3
+ 253              	2:    
+ 254 000140  02 01 E8 	    inc W2,W2
+ 255 000142  69 10 E1 	    cp W2, #9
+ 256 000144  00 00 3A 	    bra neq, 1b
+ 257              	    ; paritée impaire, W3 doit-être impaire.
+ 258 000146  03 00 A6 	    btss W3,#0
+ 259 000148  00 00 37 	    bra 9f
+ 260 00014a  01 00 20 	    mov #kbd_queue, W1
+ 261 00014c  02 00 80 	    mov kbd_tail, W2
+ 262 00014e  81 00 41 	    add W2,W1,W1
+ 263 000150  80 48 78 	    mov.b W0,[W1]
 MPLAB XC16 ASSEMBLY Listing:  keyboard.s 			page 25
 
 
- 264 000150  80 48 78 	    mov.b W0,[W1]
- 265 000152  12 00 B0 	    add #1,W2
- 266 000154  F2 01 B2 	    and #(KBD_QUEUE_SIZE-1),W2
- 267 000156  02 00 88 	    mov W2, kbd_tail
- 268              	9:    
- 269              	    ;incrémente ps2_head
- 270 000158  00 A0 EC 	    inc2 ps2_head
- 271 00015a  F0 01 20 	    mov #(PS2_QUEUE_SIZE-1), W0
- 272 00015c  00 20 B6 	    and ps2_head
- 273              	isr_exit:
- 274 00015e  CF 01 78 	    pop W3
- 275 000160  4F 01 78 	    pop W2
- 276 000162  CF 00 78 	    pop W1
- 277 000164  4F 00 78 	    pop W0
- 278 000166  00 60 A9 	    bclr IFS0, #T1IF
- 279 000168  00 40 06 	    retfie
- 280              	    
- 281              	.end
+ 264 000152  12 00 B0 	    add #1,W2
+ 265 000154  F2 01 B2 	    and #(KBD_QUEUE_SIZE-1),W2
+ 266 000156  02 00 88 	    mov W2, kbd_tail
+ 267              	9:    
+ 268              	    ;incrémente ps2_head
+ 269 000158  00 A0 EC 	    inc2 ps2_head
+ 270 00015a  F0 01 20 	    mov #(PS2_QUEUE_SIZE-1), W0
+ 271 00015c  00 20 B6 	    and ps2_head
+ 272              	isr_exit:
+ 273 00015e  CF 01 78 	    pop W3
+ 274 000160  4F 01 78 	    pop W2
+ 275 000162  CF 00 78 	    pop W1
+ 276 000164  4F 00 78 	    pop W0
+ 277 000166  00 60 A9 	    bclr IFS0, #T1IF
+ 278 000168  00 40 06 	    retfie
+ 279              	    
+ 280              	.end

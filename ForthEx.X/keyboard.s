@@ -126,9 +126,15 @@ kbd_get:
     set_psv extended, W2
     call search_table
     cp0 W0
-    bra eq, try_shifted
+    bra eq, try_xmod_key
     ; scancode trouvé dans la table 'extended'
-    bra exit_goodkey
+    bra kbd_goodkey
+try_xmod_key:
+    set_psv xmod, W2
+    call search_table
+    cp0 W0
+    bra eq, kbd_ignore_It
+    bra mod_switch
 try_shifted:  ; recherche table 'shifted'
     btss key_state, #F_SHIFT
     bra try_ascii
@@ -137,7 +143,7 @@ try_shifted:  ; recherche table 'shifted'
     cp0 W0
     bra eq, try_ascii
     ; scancode trouvé dans la table 'shifted'
-    bra exit_goodkey
+    bra kbd_goodkey
 try_ascii:  ; recherche table 'ascii'
     set_psv ascii, W2
     call search_table
@@ -146,35 +152,29 @@ try_ascii:  ; recherche table 'ascii'
     ; scancode trouvé dans la table 'ascii'
     mov #'a', W1
     cp W0,W1
-    bra ltu, exit_goodkey
+    bra ltu, kbd_goodkey
     mov #'z', W1
     cp W0, W1
-    bra gtu, exit_goodkey
+    bra gtu, kbd_goodkey
     ;lettre
     btsc key_state, #F_KREL
-    bra exit_ignore_it
+    bra kbd_ignore_It
     btss key_state, #F_CAPS
     btg  W0, #5 
     btsc key_state, #F_SHIFT
     btg W0, #5
-    bra exit_goodkey
+    bra kbd_goodkey
 try_ext_key:
     set_psv extended, W2
     call search_table
     cp0 W0
     bra eq, try_mod_key
-    bra exit_goodkey
+    bra kbd_goodkey
 try_mod_key:
     set_psv mod, W2
     call search_table
     cp0 W0
-    bra eq, try_xmod_key
-    bra mod_switch
-try_xmod_key:
-    set_psv xmod, W2
-    call search_table
-    cp0 W0
-    bra eq, exit_ignore_it
+    bra eq, kbd_ignore_It
 mod_switch:
     mov #VK_SHIFT, W1
     cp W0,W1
@@ -182,14 +182,14 @@ mod_switch:
     bclr key_state, #F_SHIFT
     btss key_state, #F_KREL
     bset key_state, #F_SHIFT
-    bra exit_ignore_it
+    bra kbd_ignore_It
 6:
     mov #VK_CAPS, W1
     cp W0,W1
     bra neq, 7f
     btss key_state, #F_KREL
     btg key_state, #F_CAPS
-    bra exit_ignore_it
+    bra kbd_ignore_It
 7:  
     mov #VK_CTRL, W1
     cp W0, W1
@@ -197,18 +197,17 @@ mod_switch:
     bclr key_state, #F_CTRL
     btss key_state, #F_KREL
     bset key_state, #F_CTRL
-    bra exit_ignore_it
+    bra kbd_ignore_It
 8:
     mov #VK_ALT, W1
     cp W0,W1
-    bra neq, exit_ignore_it
+    bra neq, kbd_ignore_It
     bclr key_state, #F_ALT
     btss key_state, #F_KREL
     bset key_state, #F_CTRL
-exit_ignore_it:    
-exit_badkey: ;sortie touche refusée
+kbd_ignore_It:    
     clr W0
-exit_goodkey:  ; sortie touche acceptée
+kbd_goodkey:  ; sortie touche acceptée
     bclr key_state, #F_KREL
     bclr key_state, #F_XKEY
 kbd_no_key: ; sortie file vide
