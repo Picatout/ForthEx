@@ -938,89 +938,91 @@ MPLAB XC16 ASSEMBLY Listing:  ps2.s 			page 1
   20              	;NOM: ps2.inc
   21              	;DESCRIPTION: constante reliée au clavier PS/2
   22              	;DATE: 2015-09-28
-  23              	.ifndef PS2_INC
-  24              	.equ PS2_INC, 1
-  25              	
-  26              	 ;codes touches contrôles
-  27              	.equ SC_KREL,  0xF0
-  28              	.equ SC_XKEY,  0xE0
-  29              	.equ L_SHIFT,  0x12
-  30              	.equ R_SHIFT,  0x59
-  31              	.equ L_CTRL,   0x14
-  32              	.equ L_ALT,    0x11
-  33              	.equ ENTER,    0x5A
-  34              	.equ CAPS,     0x58
-  35              	.equ SCROLL,   0x7E
-  36              	.equ NUM,      0x77
-  37              	.equ ESC,      0x76
-  38              	.equ F1,       0x05
-  39              	.equ F2,       0x06
-  40              	.equ F3,       0x04
-  41              	.equ F4,       0x0C
-  42              	.equ F5,       0x03
+  23              	;REF: http://www.computer-engineering.org/ps2keyboard/scancodes2.html 
+  24              	    
+  25              	.ifndef PS2_INC
+  26              	.equ PS2_INC, 1
+  27              	
+  28              	 ;codes touches contrôles
+  29              	.equ SC_KREL,  0xF0 ; touche relâchée
+  30              	.equ SC_XKEY,  0xE0 ; code étendu
+  31              	.equ L_SHIFT,  0x12
+  32              	.equ R_SHIFT,  0x59
+  33              	.equ L_CTRL,   0x14
+  34              	.equ L_ALT,    0x11
+  35              	.equ ENTER,    0x5A
+  36              	.equ CAPS,     0x58
+  37              	.equ SCROLL,   0x7E
+  38              	.equ NUM,      0x77
+  39              	.equ ESC,      0x76
+  40              	.equ F1,       0x05
+  41              	.equ F2,       0x06
+  42              	.equ F3,       0x04
 MPLAB XC16 ASSEMBLY Listing:  ps2.s 			page 17
 
 
-  43              	.equ F6,       0x0B
-  44              	.equ F7,       0x83 
-  45              	.equ F8,       0x0A
-  46              	.equ F9,       0x01
-  47              	.equ F10,      0x09
-  48              	.equ F11,      0x78
-  49              	.equ F12,      0x07
-  50              	 ; touches clavier numérique
-  51              	.equ KP0,      0x70
-  52              	.equ KP1,      0x69
-  53              	.equ KP2,      0x72
-  54              	.equ KP3,      0x7A
-  55              	.equ KP4,      0x6B
-  56              	.equ KP5,      0x73
-  57              	.equ KP6,      0x74
-  58              	.equ KP7,      0x6C
-  59              	.equ KP8,      0x75
-  60              	.equ KP9,      0x7D
-  61              	.equ KPDOT,    0x71
-  62              	.equ KPPLUS,   0x79
-  63              	.equ KPMINUS,  0x7B
-  64              	.equ KPSTAR,   0x7C
-  65              	; code étendus (précédé de 0xE0) 
-  66              	.equ R_CTRL,   0x14
-  67              	.equ L_GUI,    0x1f
-  68              	.equ R_GUI,    0x27
-  69              	.equ R_ALT,    0x11
-  70              	.equ APPS,     0x2f 
-  71              	.equ INSERT,   0x70
-  72              	.equ HOME,     0x6C
-  73              	.equ PGUP,     0x7D
-  74              	.equ DEL,      0x71
-  75              	.equ END,      0x69
-  76              	.equ PGDN,     0x7A
-  77              	.equ UP,       0x75
-  78              	.equ DOWN,     0x72
-  79              	.equ LEFT,     0x6B
-  80              	.equ RIGHT,    0x74
-  81              	.equ KPSLH,    0x4A
-  82              	.equ KPENT,    0x5A 
-  83              	 
-  84              	;indicateurs booléens dans key_state
-  85              	.equ F_SHIFT, 0 ; touche majuscule enfoncée
-  86              	.equ F_CTRL, 1  ; touche ctrl enfoncée
-  87              	.equ F_ALT, 2   ; touche alt enfoncée
-  88              	.equ F_CAPS, 3  ; FixMaj actif
-  89              	.equ F_NUM,  4  ; clavier numérique actif
-  90              	.equ F_XKEY, 5 ; touche étendue
-  91              	.equ F_KREL, 6 ; relâchement touche
-  92              	; grandeur file interface PS/2 
-  93              	.equ PS2_QUEUE_SIZE, 32
-  94              	.endif
-  95              	
+  43              	.equ F4,       0x0C
+  44              	.equ F5,       0x03
+  45              	.equ F6,       0x0B
+  46              	.equ F7,       0x83 
+  47              	.equ F8,       0x0A
+  48              	.equ F9,       0x01
+  49              	.equ F10,      0x09
+  50              	.equ F11,      0x78
+  51              	.equ F12,      0x07
+  52              	 ; touches clavier numérique
+  53              	.equ KP0,      0x70
+  54              	.equ KP1,      0x69
+  55              	.equ KP2,      0x72
+  56              	.equ KP3,      0x7A
+  57              	.equ KP4,      0x6B
+  58              	.equ KP5,      0x73
+  59              	.equ KP6,      0x74
+  60              	.equ KP7,      0x6C
+  61              	.equ KP8,      0x75
+  62              	.equ KP9,      0x7D
+  63              	.equ KPDOT,    0x71
+  64              	.equ KPPLUS,   0x79
+  65              	.equ KPMINUS,  0x7B
+  66              	.equ KPSTAR,   0x7C
+  67              	; code étendus (précédé de 0xE0) 
+  68              	.equ R_CTRL,   0x14
+  69              	.equ L_GUI,    0x1f
+  70              	.equ R_GUI,    0x27
+  71              	.equ R_ALT,    0x11
+  72              	.equ APPS,     0x2f 
+  73              	.equ INSERT,   0x70
+  74              	.equ HOME,     0x6C
+  75              	.equ PGUP,     0x7D
+  76              	.equ DEL,      0x71
+  77              	.equ END,      0x69
+  78              	.equ PGDN,     0x7A
+  79              	.equ UP,       0x75
+  80              	.equ DOWN,     0x72
+  81              	.equ LEFT,     0x6B
+  82              	.equ RIGHT,    0x74
+  83              	.equ KPSLH,    0x4A
+  84              	.equ KPENT,    0x5A 
+  85              	 
+  86              	;indicateurs booléens dans key_state
+  87              	.equ F_SHIFT, 0 ; touche majuscule enfoncée
+  88              	.equ F_CTRL, 1  ; touche ctrl enfoncée
+  89              	.equ F_ALT, 2   ; touche alt enfoncée
+  90              	.equ F_CAPS, 3  ; FixMaj actif
+  91              	.equ F_NUM,  4  ; clavier numérique actif
+  92              	.equ F_XKEY, 5 ; touche étendue
+  93              	.equ F_KREL, 6 ; relâchement touche
+  94              	; grandeur file interface PS/2 
+  95              	.equ PS2_QUEUE_SIZE, 32
+  96              	.endif
+  97              	
   24              	    
   25              	.equ SHFT_INIT, 0x0400
-  26              	    
-  27              	.global ps2_queue, ps2_head, ps2_tail
 MPLAB XC16 ASSEMBLY Listing:  ps2.s 			page 18
 
 
+  26              	    
+  27              	.global ps2_queue, ps2_head, ps2_tail
   28              	.data
   29                 	ps2_shiftin:    
   30 0000 00 04       	.word  SHFT_INIT   

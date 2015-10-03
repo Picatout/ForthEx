@@ -24,7 +24,7 @@
 .include "ps2.inc"
 .include "keyboard.inc"
     
-.global ascii, shifted, extended
+.global ascii, shifted, extended, mod , xmod
     
 .section .const psv 
     
@@ -76,16 +76,16 @@ ascii:
 .byte 0x41,','
 .byte 0x49,'.'
 .byte 0x4a,'/'
+.byte 0x52,'\''
+.byte 0x5d,'|'    
 .byte 0x66,8    ; BACKSPACE
 .byte 0x0d,9    ; TAB
 .byte 0x5a,'\r' ; CR
 .byte 0x76,27   ; ESC
-.byte L_SHIFT, VK_SHIFT
-.byte R_SHIFT, VK_SHIFT    
-.byte L_CTRL,  VK_CTRL    
-.byte L_ALT,   VK_ALT    
 .byte 0,0
 
+; touche ascii avec un symbole différent
+; lorsque la touche 'Maj' est enfoncée
 shifted:
 .byte 0x0e,'~'
 .byte 0x16,'!'
@@ -99,7 +99,7 @@ shifted:
 .byte 0x46,'('
 .byte 0x45,')'
 .byte 0x4e,'_'
-.byte 0x64,'{'    
+.byte 0x54,'{'    
 .byte 0x55,'+'
 .byte 0x5b,'}'    
 .byte 0x5d,'\\'
@@ -110,9 +110,24 @@ shifted:
 .byte 0x4a,'?'
 .byte 0,0
 
-extended:
+; touche d'altération    
+mod:
+.byte L_SHIFT, VK_SHIFT
+.byte R_SHIFT, VK_SHIFT    
+.byte L_CTRL,  VK_CTRL    
+.byte L_ALT,   VK_ALT
+.byte CAPS,    VK_CAPS    
+.byte 0,0
+
+; touche d'altération avec
+; code étendu
+xmod:
 .byte R_CTRL, VK_CTRL
 .byte R_ALT,  VK_ALT
+.byte 0,0    
+    
+; touches avec un code étendu    
+extended:
 .byte INSERT, VK_INS
 .byte HOME,   VK_HOME
 .byte PGUP,   VK_PGUP

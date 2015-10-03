@@ -25,7 +25,8 @@
 ; on une valeur inférieure à 32 ou supérieure à 127
 .ifndef KBD_INC
 .equ KBD_INC, 1
-    
+
+; touches qui ne corespondes pas un symbole ASCII    
 ;Nom			valeur	    Description
 .equ VK_BACK,		8	    ;	Backspace
 .equ VK_ESCAPE,		27	    ;	Esc

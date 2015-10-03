@@ -20,12 +20,14 @@
 ;NOM: ps2.inc
 ;DESCRIPTION: constante reliée au clavier PS/2
 ;DATE: 2015-09-28
+;REF: http://www.computer-engineering.org/ps2keyboard/scancodes2.html 
+    
 .ifndef PS2_INC
 .equ PS2_INC, 1
 
  ;codes touches contrôles
-.equ SC_KREL,  0xF0
-.equ SC_XKEY,  0xE0
+.equ SC_KREL,  0xF0 ; touche relâchée
+.equ SC_XKEY,  0xE0 ; code étendu
 .equ L_SHIFT,  0x12
 .equ R_SHIFT,  0x59
 .equ L_CTRL,   0x14

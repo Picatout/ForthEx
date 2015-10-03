@@ -69,22 +69,22 @@ get_code:
 ; recherche code clavier
 ; dans la table
 ; entrée: W2=index table    
-;         W0=scancode recherché
-; sortie: W1 contient caractère
-;         W1=0 si scancode pas dans la table
-; modifie: W1,W2,W3    
+;         W1=scancode recherché
+; sortie: W0 contient caractère
+;         W0=0 si scancode pas dans la table
+; modifie: W0,W2,W3    
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 search_table:
 1:
-    mov [W2++], W1
-    cp0 W1
+    mov [W2++], W0
+    cp0 W0
     bra eq, 2f
-    mov W1, W3
+    mov W0, W3
     ze W3,W3
-    cp W3,W0
+    cp W3,W1
     bra neq, 1b
-    swap W1
-    ze W1,W1
+    swap W0
+    ze W0,W0
 2: ; pas trouvé
     return
 
@@ -100,7 +100,7 @@ kbd_get:
     push PSVPAG
     call get_code
     cp0 W0
-    bra eq, exit_empty   
+    bra eq, kbd_no_key   
     ;code clavier touche étendue?
     mov #SC_XKEY, W1
     cp W1,W0
@@ -108,7 +108,7 @@ kbd_get:
     bset key_state, #F_XKEY
     call get_code
     cp0 W0
-    bra eq, exit_empty
+    bra eq, kbd_no_key
 1:
     ;code clavier relâchement touche?
     mov #SC_KREL, W1
@@ -117,46 +117,65 @@ kbd_get:
     bset key_state, #F_KREL
     call get_code
     cp0 W0
-    bra eq, exit_empty
+    bra eq, kbd_no_key
 2:
+    mov W0,W1
     btss key_state, #F_XKEY
-    bra 3f
+    bra try_shifted
+    ; recherche table 'extended'
     set_psv extended, W2
     call search_table
-    cp0 W1
-    bra eq, 3f
+    cp0 W0
+    bra eq, try_shifted
     ; scancode trouvé dans la table 'extended'
-    bra filter_key
-3:  
+    bra exit_goodkey
+try_shifted:  ; recherche table 'shifted'
     btss key_state, #F_SHIFT
-    bra 4f
+    bra try_ascii
     set_psv shifted, W2
     call search_table
-    cp0 W1
-    bra eq, 4f
+    cp0 W0
+    bra eq, try_ascii
     ; scancode trouvé dans la table 'shifted'
-    bra filter_key
-4:  
+    bra exit_goodkey
+try_ascii:  ; recherche table 'ascii'
     set_psv ascii, W2
     call search_table
-    cp0 W1
-    bra eq, exit_badkey
+    cp0 W0
+    bra eq, try_ext_key
     ; scancode trouvé dans la table 'ascii'
-filter_key:
-    mov W1,W0
     mov #'a', W1
     cp W0,W1
-    bra ltu, 5f
+    bra ltu, exit_goodkey
     mov #'z', W1
     cp W0, W1
-    bra gtu, 5f
+    bra gtu, exit_goodkey
     ;lettre
     btsc key_state, #F_KREL
     bra exit_ignore_it
+    btss key_state, #F_CAPS
+    btg  W0, #5 
     btsc key_state, #F_SHIFT
-    sub #32,W0
+    btg W0, #5
     bra exit_goodkey
-5:
+try_ext_key:
+    set_psv extended, W2
+    call search_table
+    cp0 W0
+    bra eq, try_mod_key
+    bra exit_goodkey
+try_mod_key:
+    set_psv mod, W2
+    call search_table
+    cp0 W0
+    bra eq, try_xmod_key
+    bra mod_switch
+try_xmod_key:
+    set_psv xmod, W2
+    call search_table
+    cp0 W0
+    bra eq, exit_ignore_it
+mod_switch:
     mov #VK_SHIFT, W1
     cp W0,W1
     bra neq, 6f
@@ -165,14 +184,34 @@ filter_key:
     bset key_state, #F_SHIFT
     bra exit_ignore_it
 6:
-    
+    mov #VK_CAPS, W1
+    cp W0,W1
+    bra neq, 7f
+    btss key_state, #F_KREL
+    btg key_state, #F_CAPS
+    bra exit_ignore_it
+7:  
+    mov #VK_CTRL, W1
+    cp W0, W1
+    bra neq, 8f
+    bclr key_state, #F_CTRL
+    btss key_state, #F_KREL
+    bset key_state, #F_CTRL
+    bra exit_ignore_it
+8:
+    mov #VK_ALT, W1
+    cp W0,W1
+    bra neq, exit_ignore_it
+    bclr key_state, #F_ALT
+    btss key_state, #F_KREL
+    bset key_state, #F_CTRL
 exit_ignore_it:    
 exit_badkey: ;sortie touche refusée
     clr W0
 exit_goodkey:  ; sortie touche acceptée
     bclr key_state, #F_KREL
     bclr key_state, #F_XKEY
-exit_empty: ; sortie file vide
+kbd_no_key: ; sortie file vide
     pop PSVPAG
     return
     
