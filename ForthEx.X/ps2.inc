@@ -25,9 +25,12 @@
 .ifndef PS2_INC
 .equ PS2_INC, 1
 
- ;codes touches contrôles
+
+.equ SC_BATOK, 0xAA ; basic assurance test OK
+.equ SC_ERROR, 0xFC ; erreur clavier
 .equ SC_KREL,  0xF0 ; touche relâchée
 .equ SC_XKEY,  0xE0 ; code étendu
+ ;codes touches contrôles
 .equ L_SHIFT,  0x12
 .equ R_SHIFT,  0x59
 .equ L_CTRL,   0x14

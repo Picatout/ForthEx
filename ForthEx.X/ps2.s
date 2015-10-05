@@ -22,12 +22,12 @@
 .include "hardware.inc"
 .include "ps2.inc"
     
-.equ SHFT_INIT, 0x0400
+.equ SENTRY, 0x0400
     
 .global ps2_queue, ps2_head, ps2_tail
 .data
 ps2_shiftin:    
-.word  SHFT_INIT   
+.word  0
 ps2_queue:
 .space PS2_QUEUE_SIZE     
 ps2_head:
@@ -36,7 +36,12 @@ ps2_tail:
 .word 0
     
 .text
- 
+.global ps2_init    
+ps2_init:
+    mov #SENTRY, W0
+    mov W0, ps2_shiftin
+    return
+    
  ; interruption signal clock
  ; du clavier sur INT1
 .global __INT1Interrupt
@@ -61,7 +66,7 @@ __INT1Interrupt:
     mov #(PS2_QUEUE_SIZE-1), W0
     and ps2_tail
 ;    ; réinitialisation registre réception
-    mov #SHFT_INIT, W0
+    mov #SENTRY, W0
     mov W0, ps2_shiftin
 1:    
     pop W1

@@ -16,25 +16,49 @@
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
-
+;NOM: core.s
+;Description: base pour le système Forth
+;Date: 2015-10-03
+ 
 .include "hardware.inc"
-.include "gen_macros.inc"
 .include "core.inc"
+.include "gen_macros.inc"
     
-;config CONFIG1, FWDTEN_OFF & JTAGEN_OFF
-;config CONFIG2, FNOSC_PRIPLL & FCKSM_CSDCMD  & POSCMOD_HS & OSCIOFNC_ON
+.global pstack, rstack, user
+    
+.data
+user: ; variables utilisateur
+.space 20
+    
+.section _pstack, bss, address(PSV_BASE-RSTK_SIZE-DSTK_SIZE)    
+pstack:
+.space DSTK_SIZE
 
-.extern kbd_get
-.extern _video_buffer
-.extern get_code
-.extern cold
+.section _rstack, bss, address(PSV_BASE-RSTK_SIZE)
+rstack:
+.space RSTK_SIZE
     
-.text
     
-.global _main
-    
-_main:
+
+.section .user_init, code  
+.global __reset    
+__reset: 
     call hardware_init
+    ; nettoyage RAM à zéro
+    mov #RAM_BASE, W1
+    mov #((RAM_SIZE/2)-1),W2
+    repeat W2
+    clr [W1++]
+    ; initialisation Forth
+    mov #rstack, RSP
+    mov #(PSV_BASE), W0
+    mov W0, SPLIM
+    mov #pstack, DSP
+    mov #user, UP
+    mov DSP, [UP+PBASE]
+    mov RSP, [UP+RBASE]
+    mov #10, W0
+    mov W0, [UP+BASE]
 ; test vidéo
     call cls
     set_psv quick, W1
@@ -66,5 +90,17 @@ quick:
 .ascii "01234567890123456789012345678901234567890123456789"    
 .ascii "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.      "
 .asciz "The quick brown fox jumps over the lazy dog.      " 
+
+   
+.global __DefaultInterrupt
+__DefaultInterrupt:
+    reset
+    
+.global next    
+next:
+    mov [IP++], W
+    goto W
+ 
     
 .end
+

@@ -33,16 +33,21 @@ systicks:
 .text
 .global hardware_init
 hardware_init:
-    bset CORCON, #PSV ; vue de la mémoire programme à l'adresse 0x8000
-    clr CLKDIV  ; pas de post-div Fcy=Fosc/2
+    bclr CORCON, #PSV
+    clr W0
+    mov W0, PSVPAG
+    bset CORCON, #PSV ; espace programme visible en RAM
+    clr CLKDIV
     bset OSCCON, #NOSC0
     bset OSCCON, #CLKLOCK ; verrouillage clock
     bclr INTCON1, #NSTDIS ; interruption multi-niveaux
-    setm TRISB      ; port tous en entrée
+    setm TRISA      ; port A tout en entrée
+    setm TRISB      ; port B tout en entrée
+    setm CNPU1       ;activation pullup
+    setm CNPU2
     setm AD1PCFG    ; désactivation entrées analogiques
     call tvout_init
     call kbd_init
-    
     ; verouillage configuration I/O
     bset OSCCON, #IOLOCK
     
@@ -96,6 +101,7 @@ tvout_init:
     and VIDEO_IPC
     mov #(5<<VIDEO_IPbit), W0
     ior VIDEO_IPC
+    call tvsync_init
     ; activation interruption  SYNC_TIMER
     bclr SYNC_IFS, #SYNC_IF
     bset SYNC_IEC, #SYNC_IE
@@ -130,6 +136,7 @@ kbd_init:
     and IPC0
     mov #(3<<T1IP0), W0
     ior IPC0
+    call ps2_init
     bclr IFS0, #T1IF
     bset IEC0, #T1IE
     bset T1CON, #TON

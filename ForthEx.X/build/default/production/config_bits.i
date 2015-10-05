@@ -3043,6 +3043,3 @@ extern __attribute__((space(prog))) unsigned int _CONFIG1;
 #pragma config GWRP = OFF
 #pragma config GCP = OFF
 #pragma config JTAGEN = OFF
-
-
-extern int main();

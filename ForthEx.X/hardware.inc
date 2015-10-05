@@ -23,6 +23,10 @@
 
 .NOLIST
 
+.equ RAM_SIZE, 0x2000
+.equ RAM_BASE, 0x800
+.equ PSV_BASE, 0x2800
+    
 ; sortie vidéo
 .equ NTSC, 1
 .equ PAL, 2

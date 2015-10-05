@@ -26,6 +26,7 @@
 ; OC2 contrôle début sortie vidéo
 ; sortie vidéo sur RPB3
 
+
 .include "hardware.inc"
 .include "video.inc"
 .include "gen_macros.inc"
@@ -51,6 +52,12 @@ _video_buffer: .space TV_BUFFER
 
 
 .text
+.global tvsync_init
+tvsync_init:
+    setm line_count
+    setm.b even
+    return
+
 ;;;;;;;;;;;;;;;;;;
 ; nettoie écran
 ;;;;;;;;;;;;;;;;;;
@@ -61,6 +68,7 @@ cls:
     repeat #(TV_BUFFER-1)
     mov.b W0,[W1++]
     return
+
 
 ;********************
 ; interruption TIMER2

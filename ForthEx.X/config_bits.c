@@ -45,4 +45,3 @@
 #pragma config JTAGEN = OFF             // JTAG Port Enable (JTAG port is disabled)
 
 
-extern int main();
