@@ -45,6 +45,7 @@ ps2_init:
  ; interruption signal clock
  ; du clavier sur INT1
 .global __INT1Interrupt
+ INT
 __INT1Interrupt:
     push W0
     push W1

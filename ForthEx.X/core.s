@@ -39,24 +39,29 @@ rstack:
 .space RSTK_SIZE
     
     
+INT    
+.global __DefaultInterrupt
+__DefaultInterrupt:
+    reset
 
-.section .user_init, code  
+.section .start code   
 .global __reset    
 __reset: 
-    call hardware_init
-    ; nettoyage RAM à zéro
-    mov #RAM_BASE, W1
-    mov #((RAM_SIZE/2)-1),W2
-    repeat W2
-    clr [W1++]
-    ; initialisation Forth
+;    mov #RAM_BASE, W0
+;    mov #(RAM_SIZE/2-1), W1
+;    repeat W1
+;    clr [W0++]
+    ; modification du pointeur 
+    ; de pile des retours
     mov #rstack, RSP
+    mov #user, UP
+    ; conserve adresse de la pile
+    mov RSP, [UP+RBASE]
+    call hardware_init
     mov #(PSV_BASE), W0
     mov W0, SPLIM
     mov #pstack, DSP
-    mov #user, UP
     mov DSP, [UP+PBASE]
-    mov RSP, [UP+RBASE]
     mov #10, W0
     mov W0, [UP+BASE]
 ; test vidéo
@@ -84,18 +89,18 @@ __reset:
     bra 3b
     
     bra .
-    
+
+.section .const psv   
 ;test string
 quick:
 .ascii "01234567890123456789012345678901234567890123456789"    
 .ascii "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.      "
 .asciz "The quick brown fox jumps over the lazy dog.      " 
 
+  
    
-.global __DefaultInterrupt
-__DefaultInterrupt:
-    reset
-    
+
+.text    
 .global next    
 next:
     mov [IP++], W

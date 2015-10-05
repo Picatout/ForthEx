@@ -3344,9 +3344,38 @@
   88              	.equ KBD_IPCbit, INT1IP0
   89              	.equ KBD_INTEP, INT1EP
   90              	.equ KBD_INTCON, INTCON2
-  91              	.LIST
-  92              	.endif
-  93              	
+  91              	
+  92              	; interface SPI RAM et EEPROM
+  93              	.equ SRAM_SEL, RB10    
+  94              	.equ EEPROM_SEL, RB9
+  95              	.equ STR_CLK,   RB8
+  96              	.equ STR_MOSI,  RB6
+  97              	.equ STR_MISO,  RB7
+  98              	.equ STR_RPINR, RPINR20
+  99              	.equ STR_SDI_PPSbit, SDI1R0
+ 100              	.equ STR_CLK_FN, 8
+ 101              	.equ STR_SDO_FN, 7
+ 102              	.equ STR_SDO_RPOR, RPOR3
+ 103              	.equ STR_SDO_RPORbit, RP7R0    
+ 104              	.equ STR_CLK_RPOR, RPOR4
+ 105              	.equ STR_CLK_RPORbit, RP8R0    
+ 106              	.equ STR_PORT, PORTB
+ 107              	.equ STR_TRIS, TRISB
+ 108              	.equ STR_LAT, LATB
+ 109              	.equ STR_SPICON1, SPI1CON1    
+ 110              	.equ STR_SPICON2, SPI1CON2
+ 111              	.equ STR_SPISTAT, SPI1STAT
+ 112              	.equ STR_SPIBUF,  SPI1BUF    
+ 113              	
+ 114              	.LIST
+ 115              	    
+ 116              	.macro INT
+ 117              	.section .int code
+ 118              	.endm
+ 119              	    
+ 120              	
+ 121              	.endif
+ 122              	
   24              	.include "core.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -3487,99 +3516,104 @@
   39      00 00 00 00 
   40                 	    
   41                 	    
-  42                 	
-  43                 	.section .user_init, code  
-  44              	.global __reset    
-  45              	__reset: 
-  46 000000  00 00 02 	    call hardware_init
-  46         00 00 00 
-  47              	    ; nettoyage RAM à zéro
-  48 000004  01 80 20 	    mov #RAM_BASE, W1
-  49 000006  F2 FF 20 	    mov #((RAM_SIZE/2)-1),W2
-  50 000008  02 80 09 	    repeat W2
-  51 00000a  80 18 EB 	    clr [W1++]
-  52              	    ; initialisation Forth
-  53 00000c  0F 00 20 	    mov #rstack, RSP
-  54 00000e  00 80 22 	    mov #(PSV_BASE), W0
-  55 000010  00 00 88 	    mov W0, SPLIM
-  56 000012  0E 00 20 	    mov #pstack, DSP
-  57 000014  09 00 20 	    mov #user, UP
-  58 000016  9E 04 98 	    mov DSP, [UP+PBASE]
-  59 000018  8F 04 98 	    mov RSP, [UP+RBASE]
-  60 00001a  A0 00 20 	    mov #10, W0
-  61 00001c  A0 04 98 	    mov W0, [UP+BASE]
-  62              	; test vidéo
-  63 00001e  00 00 02 	    call cls
-  63         00 00 00 
-  64 000022  01 00 20 	    set_psv quick, W1
-  64         01 00 88 
-  64         01 00 20 
-  65 000028  02 00 20 	    mov #_video_buffer,W2
-  66 00002a  00 00 EB 	    clr W0
-  67              	1:
-  68 00002c  31 40 78 	    mov.b [W1++], W0
-  69 00002e  00 80 FB 	    ze W0,W0
-  70 000030  00 00 32 	    bra z, 2f
-  71 000032  00 59 78 	    mov.b W0, [W2++]
-  72 000034  00 00 37 	    bra 1b
-  73              	2:    
-  74              	; fin test vidéo
-  75              	; test clavier
-  76              	3:  
-  77 000036  82 1F 78 	    push W2
-  78 000038  00 00 02 	    call kbd_get
-  78         00 00 00 
-  79 00003c  4F 01 78 	    pop W2
-  80 00003e  00 00 E0 	    cp0 W0
-  81 000040  00 00 32 	    bra eq, 3b
-  82 000042  F0 07 B2 	    and #127, W0
-  83 000044  00 49 78 	    mov.b W0, [W2]
-  84 000046  00 00 37 	    bra 3b
-  85              	    
-  86 000048  00 00 37 	    bra .
-  87              	    
-  88              	;test string
-  89              	quick:
-  90 00004a  30 31 00 	.ascii "01234567890123456789012345678901234567890123456789"    
-  90         32 33 00 
-  90         34 35 00 
-  90         36 37 00 
-  90         38 39 00 
-  90         30 31 00 
-  90         32 33 00 
-  90         34 35 00 
-  90         36 37 00 
-  91 00007c  54 48 00 	.ascii "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.      "
-  91         45 20 00 
-  91         51 55 00 
-  91         49 43 00 
-  91         4B 20 00 
-  91         42 52 00 
-  91         4F 57 00 
-  91         4E 20 00 
-  91         46 4F 00 
-  92 0000ae  54 68 00 	.asciz "The quick brown fox jumps over the lazy dog.      " 
-  92         65 20 00 
-  92         71 75 00 
-  92         69 63 00 
-  92         6B 20 00 
-  92         62 72 00 
-  92         6F 77 00 
-  92         6E 20 00 
-  92         66 6F 00 
-  93              	
-  94              	   
-  95            00 00 	.global __DefaultInterrupt
-  96              	__DefaultInterrupt:
-  97 0000e2  00 00 FE 	    reset
-  98              	    
-  99              	.global next    
- 100              	next:
- 101 0000e4  B8 05 78 	    mov [IP++], W
- 102 0000e6  0B 40 01 	    goto W
- 103              	 
- 104              	    
- 105              	.end
+  42                 	INT    
+  43              	.global __DefaultInterrupt
+  44              	__DefaultInterrupt:
+  45 000000  00 00 FE 	    reset
+  46              	
+  47              	.section .start code   
+  48              	.global __reset    
+  49              	__reset: 
+  50              	;    mov #RAM_BASE, W0
+  51              	;    mov #(RAM_SIZE/2-1), W1
+  52              	;    repeat W1
+  53              	;    clr [W0++]
+  54              	    ; modification du pointeur 
+  55              	    ; de pile des retours
+  56 000000  0F 00 20 	    mov #rstack, RSP
+  57 000002  09 00 20 	    mov #user, UP
+  58              	    ; conserve adresse de la pile
+  59 000004  8F 04 98 	    mov RSP, [UP+RBASE]
+  60 000006  00 00 02 	    call hardware_init
+  60         00 00 00 
+  61 00000a  00 80 22 	    mov #(PSV_BASE), W0
+  62 00000c  00 00 88 	    mov W0, SPLIM
+  63 00000e  0E 00 20 	    mov #pstack, DSP
+  64 000010  9E 04 98 	    mov DSP, [UP+PBASE]
+  65 000012  A0 00 20 	    mov #10, W0
+  66 000014  A0 04 98 	    mov W0, [UP+BASE]
+  67              	; test vidéo
+  68 000016  00 00 02 	    call cls
+  68         00 00 00 
+  69 00001a  01 00 20 	    set_psv quick, W1
+  69         01 00 88 
+  69         01 00 20 
+  70 000020  02 00 20 	    mov #_video_buffer,W2
+  71 000022  00 00 EB 	    clr W0
+  72              	1:
+  73 000024  31 40 78 	    mov.b [W1++], W0
+  74 000026  00 80 FB 	    ze W0,W0
+  75 000028  00 00 32 	    bra z, 2f
+  76 00002a  00 59 78 	    mov.b W0, [W2++]
+  77 00002c  00 00 37 	    bra 1b
+  78              	2:    
+  79              	; fin test vidéo
+  80              	; test clavier
+  81              	3:  
+  82 00002e  82 1F 78 	    push W2
+  83 000030  00 00 02 	    call kbd_get
+  83         00 00 00 
+  84 000034  4F 01 78 	    pop W2
+  85 000036  00 00 E0 	    cp0 W0
+  86 000038  00 00 32 	    bra eq, 3b
+  87 00003a  F0 07 B2 	    and #127, W0
+  88 00003c  00 49 78 	    mov.b W0, [W2]
+  89 00003e  00 00 37 	    bra 3b
+  90              	    
+  91 000040  00 00 37 	    bra .
+  92              	
+  93              	.section .const psv   
+  94                 	;test string
+  95                 	quick:
+  96 0000 30 31 32 33 	.ascii "01234567890123456789012345678901234567890123456789"    
+  96      34 35 36 37 
+  96      38 39 30 31 
+  96      32 33 34 35 
+  96      36 37 38 39 
+  96      30 31 32 33 
+  96      34 35 36 37 
+  96      38 39 30 31 
+  96      32 33 34 35 
+  97 0032 54 48 45 20 	.ascii "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.      "
+  97      51 55 49 43 
+  97      4B 20 42 52 
+  97      4F 57 4E 20 
+  97      46 4F 58 20 
+  97      4A 55 4D 50 
+  97      53 20 4F 56 
+  97      45 52 20 54 
+  97      48 45 20 4C 
+  98 0064 54 68 65 20 	.asciz "The quick brown fox jumps over the lazy dog.      " 
+  98      71 75 69 63 
+  98      6B 20 62 72 
+  98      6F 77 6E 20 
+  98      66 6F 78 20 
+  98      6A 75 6D 70 
+  98      73 20 6F 76 
+  98      65 72 20 74 
+  98      68 65 20 6C 
+  99                 	
+ 100                 	  
+ 101                 	   
+ 102                 	
+ 103 0097 00          	.text    
+ 104              	.global next    
+ 105              	next:
+ 106 000000  B8 05 78 	    mov [IP++], W
+ 107 000002  0B 40 01 	    goto W
+ 108              	 
+ 109              	    
+ 110              	.end
 DEFINED SYMBOLS
                             *ABS*:00000000 ./gen_macros.inc
                             *ABS*:00000000 ./core.inc
@@ -4621,6 +4655,16 @@ DEFINED SYMBOLS
       ./hardware.inc:86     *ABS*:00000004 KBD_IE
       ./hardware.inc:88     *ABS*:00000000 KBD_IPCbit
       ./hardware.inc:89     *ABS*:00000001 KBD_INTEP
+      ./hardware.inc:93     *ABS*:0000000a SRAM_SEL
+      ./hardware.inc:94     *ABS*:00000009 EEPROM_SEL
+      ./hardware.inc:95     *ABS*:00000008 STR_CLK
+      ./hardware.inc:96     *ABS*:00000006 STR_MOSI
+      ./hardware.inc:97     *ABS*:00000007 STR_MISO
+      ./hardware.inc:99     *ABS*:00000000 STR_SDI_PPSbit
+      ./hardware.inc:100    *ABS*:00000008 STR_CLK_FN
+      ./hardware.inc:101    *ABS*:00000007 STR_SDO_FN
+      ./hardware.inc:103    *ABS*:00000008 STR_SDO_RPORbit
+      ./hardware.inc:105    *ABS*:00000000 STR_CLK_RPORbit
           ./core.inc:34     *ABS*:00000002 CELL_SIZE
           ./core.inc:35     *ABS*:00000040 DSTK_SIZE
           ./core.inc:36     *ABS*:00000080 RSTK_SIZE
@@ -4632,92 +4676,90 @@ DEFINED SYMBOLS
               core.s:34     _pstack:00000000 pstack
               core.s:38     _rstack:00000000 rstack
               core.s:30     .data:00000000 user
-              core.s:45     .user_init:00000000 __reset
-              core.s:89     .user_init:0000004a quick
-              core.s:67     .user_init:0000002c L11
-              core.s:73     .user_init:00000036 L21
-              core.s:76     .user_init:00000036 L31
-              core.s:86     .user_init:00000048 L0
-              core.s:96     .user_init:000000e2 __DefaultInterrupt
-              core.s:100    .user_init:000000e4 next
+              core.s:44     .int:00000000 __DefaultInterrupt
+              core.s:49     .start:00000000 __reset
+              core.s:95     .const:00000000 quick
+              core.s:72     .start:00000024 L11
+              core.s:78     .start:0000002e L21
+              core.s:81     .start:0000002e L31
+              core.s:91     .start:00000040 L0
+              core.s:105    .text:00000000 next
                       .debug_line:00000000 .L0
                       .debug_line:00000024 .L0
-              core.s:105    .debug_line:0000005a .L0
-              core.s:46     .user_init:00000000 .L0
-              core.s:48     .user_init:00000004 .L0
-              core.s:46     .user_init:00000000 .L0
-              core.s:49     .user_init:00000006 .L0
-              core.s:48     .user_init:00000004 .L0
-              core.s:50     .user_init:00000008 .L0
-              core.s:49     .user_init:00000006 .L0
-              core.s:51     .user_init:0000000a .L0
-              core.s:50     .user_init:00000008 .L0
-              core.s:53     .user_init:0000000c .L0
-              core.s:51     .user_init:0000000a .L0
-              core.s:54     .user_init:0000000e .L0
-              core.s:53     .user_init:0000000c .L0
-              core.s:55     .user_init:00000010 .L0
-              core.s:54     .user_init:0000000e .L0
-              core.s:56     .user_init:00000012 .L0
-              core.s:55     .user_init:00000010 .L0
-              core.s:57     .user_init:00000014 .L0
-              core.s:56     .user_init:00000012 .L0
-              core.s:58     .user_init:00000016 .L0
-              core.s:57     .user_init:00000014 .L0
-              core.s:59     .user_init:00000018 .L0
-              core.s:58     .user_init:00000016 .L0
-              core.s:60     .user_init:0000001a .L0
-              core.s:59     .user_init:00000018 .L0
-              core.s:61     .user_init:0000001c .L0
-              core.s:60     .user_init:0000001a .L0
-              core.s:63     .user_init:0000001e .L0
-              core.s:61     .user_init:0000001c .L0
-              core.s:64     .user_init:00000022 .L0
-              core.s:63     .user_init:0000001e .L0
-              core.s:65     .user_init:00000028 .L0
-              core.s:64     .user_init:00000022 .L0
-              core.s:66     .user_init:0000002a .L0
-              core.s:65     .user_init:00000028 .L0
-              core.s:68     .user_init:0000002c .L0
-              core.s:66     .user_init:0000002a .L0
-              core.s:69     .user_init:0000002e .L0
-              core.s:68     .user_init:0000002c .L0
-              core.s:70     .user_init:00000030 .L0
-              core.s:69     .user_init:0000002e .L0
-              core.s:71     .user_init:00000032 .L0
-              core.s:70     .user_init:00000030 .L0
-              core.s:72     .user_init:00000034 .L0
-              core.s:71     .user_init:00000032 .L0
-              core.s:77     .user_init:00000036 .L0
-              core.s:72     .user_init:00000034 .L0
-              core.s:78     .user_init:00000038 .L0
-              core.s:77     .user_init:00000036 .L0
-              core.s:79     .user_init:0000003c .L0
-              core.s:78     .user_init:00000038 .L0
-              core.s:80     .user_init:0000003e .L0
-              core.s:79     .user_init:0000003c .L0
-              core.s:81     .user_init:00000040 .L0
-              core.s:80     .user_init:0000003e .L0
-              core.s:82     .user_init:00000042 .L0
-              core.s:81     .user_init:00000040 .L0
-              core.s:83     .user_init:00000044 .L0
-              core.s:82     .user_init:00000042 .L0
-              core.s:84     .user_init:00000046 .L0
-              core.s:83     .user_init:00000044 .L0
-              core.s:86     .user_init:00000048 .L0
-              core.s:84     .user_init:00000046 .L0
-              core.s:97     .user_init:000000e2 .L0
-              core.s:86     .user_init:00000048 .L0
-              core.s:101    .user_init:000000e4 .L0
-              core.s:97     .user_init:000000e2 .L0
-              core.s:102    .user_init:000000e6 .L0
-              core.s:101    .user_init:000000e4 .L0
-              core.s:105    .user_init:000000e8 .L0
-              core.s:102    .user_init:000000e6 .L0
-                       .user_init:00000000 .L0
-              core.s:105    .user_init:000000e8 .L0
+              core.s:110    .debug_line:0000006e .L0
+              core.s:106    .text:00000000 .L0
+              core.s:107    .text:00000002 .L0
+              core.s:106    .text:00000000 .L0
+              core.s:110    .text:00000004 .L0
+              core.s:107    .text:00000002 .L0
+              core.s:56     .start:00000000 .L0
+              core.s:57     .start:00000002 .L0
+              core.s:56     .start:00000000 .L0
+              core.s:59     .start:00000004 .L0
+              core.s:57     .start:00000002 .L0
+              core.s:60     .start:00000006 .L0
+              core.s:59     .start:00000004 .L0
+              core.s:61     .start:0000000a .L0
+              core.s:60     .start:00000006 .L0
+              core.s:62     .start:0000000c .L0
+              core.s:61     .start:0000000a .L0
+              core.s:63     .start:0000000e .L0
+              core.s:62     .start:0000000c .L0
+              core.s:64     .start:00000010 .L0
+              core.s:63     .start:0000000e .L0
+              core.s:65     .start:00000012 .L0
+              core.s:64     .start:00000010 .L0
+              core.s:66     .start:00000014 .L0
+              core.s:65     .start:00000012 .L0
+              core.s:68     .start:00000016 .L0
+              core.s:66     .start:00000014 .L0
+              core.s:69     .start:0000001a .L0
+              core.s:68     .start:00000016 .L0
+              core.s:70     .start:00000020 .L0
+              core.s:69     .start:0000001a .L0
+              core.s:71     .start:00000022 .L0
+              core.s:70     .start:00000020 .L0
+              core.s:73     .start:00000024 .L0
+              core.s:71     .start:00000022 .L0
+              core.s:74     .start:00000026 .L0
+              core.s:73     .start:00000024 .L0
+              core.s:75     .start:00000028 .L0
+              core.s:74     .start:00000026 .L0
+              core.s:76     .start:0000002a .L0
+              core.s:75     .start:00000028 .L0
+              core.s:77     .start:0000002c .L0
+              core.s:76     .start:0000002a .L0
+              core.s:82     .start:0000002e .L0
+              core.s:77     .start:0000002c .L0
+              core.s:83     .start:00000030 .L0
+              core.s:82     .start:0000002e .L0
+              core.s:84     .start:00000034 .L0
+              core.s:83     .start:00000030 .L0
+              core.s:85     .start:00000036 .L0
+              core.s:84     .start:00000034 .L0
+              core.s:86     .start:00000038 .L0
+              core.s:85     .start:00000036 .L0
+              core.s:87     .start:0000003a .L0
+              core.s:86     .start:00000038 .L0
+              core.s:88     .start:0000003c .L0
+              core.s:87     .start:0000003a .L0
+              core.s:89     .start:0000003e .L0
+              core.s:88     .start:0000003c .L0
+              core.s:91     .start:00000040 .L0
+              core.s:89     .start:0000003e .L0
+              core.s:93     .start:00000042 .L0
+              core.s:91     .start:00000040 .L0
+              core.s:45     .int:00000000 .L0
+              core.s:47     .int:00000002 .L0
+              core.s:45     .int:00000000 .L0
+                            .text:00000000 .L0
+              core.s:110    .text:00000004 .L0
+                           .start:00000000 .L0
+              core.s:93     .start:00000042 .L0
+                             .int:00000000 .L0
+              core.s:47     .int:00000002 .L0
                       .debug_info:00000000 .L0
-                      .debug_info:00000083 .L0
+                      .debug_info:0000007b .L0
 
 UNDEFINED SYMBOLS
 SPLIM
@@ -6227,6 +6269,26 @@ EQUATE SYMBOLS
                       KBD_IPCbit = 0x0
                        KBD_INTEP = 0x1
                       KBD_INTCON = INTCON2
+                        SRAM_SEL = 0xa
+                      EEPROM_SEL = 0x9
+                         STR_CLK = 0x8
+                        STR_MOSI = 0x6
+                        STR_MISO = 0x7
+                       STR_RPINR = RPINR20
+                  STR_SDI_PPSbit = 0x0
+                      STR_CLK_FN = 0x8
+                      STR_SDO_FN = 0x7
+                    STR_SDO_RPOR = RPOR3
+                 STR_SDO_RPORbit = 0x8
+                    STR_CLK_RPOR = RPOR4
+                 STR_CLK_RPORbit = 0x0
+                        STR_PORT = PORTB
+                        STR_TRIS = TRISB
+                         STR_LAT = LATB
+                     STR_SPICON1 = SPI1CON1
+                     STR_SPICON2 = SPI1CON2
+                     STR_SPISTAT = SPI1STAT
+                      STR_SPIBUF = SPI1BUF
                        CELL_SIZE = 0x2
                        DSTK_SIZE = 0x40
                        RSTK_SIZE = 0x80

@@ -74,6 +74,7 @@ cls:
 ; interruption TIMER2
 ;********************
 .global __T2Interrupt
+INT
 __T2Interrupt:
     push W0
     inc _T2counter

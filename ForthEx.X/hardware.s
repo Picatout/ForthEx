@@ -48,6 +48,7 @@ hardware_init:
     setm AD1PCFG    ; désactivation entrées analogiques
     call tvout_init
     call kbd_init
+    call store_init
     ; verouillage configuration I/O
     bset OSCCON, #IOLOCK
     
@@ -141,6 +142,40 @@ kbd_init:
     bset IEC0, #T1IE
     bset T1CON, #TON
     return
+
+;;;;;;;;;;;;;;;;;;;;;;;
+; initialisation SPI
+; interface SPIRAM et
+; SPIEERPOM 
+;;;;;;;;;;;;;;;;;;;;;;;    
+store_init:
+    ; changement de direction des broches en sorties
+    mov #((1<<SRAM_SEL)+(1<<EEPROM_SEL)+(1<<STR_CLK)+(1<<STR_MOSI)), W0
+    ior STR_LAT
+    com W0,W0
+    and STR_TRIS
+    ;sélection des PPS
+    ; signal MISO
+    mov #~(0x1f<<STR_SDI_PPSbit), W0
+    and STR_RPINR
+    mov #(STR_MISO<<STR_SDI_PPSbit), W0
+    ior STR_RPINR
+    ; signal STR_CLK
+    mov #~(0x1f<<STR_CLK_RPORbit), W0
+    and STR_CLK_RPOR
+    mov #(STR_CLK_FN<<STR_CLK_RPORbit),W0
+    ior STR_CLK_RPOR
+    ; signal STR_MOSI
+    mov #~(0x1f<<STR_SDO_RPORbit), W0
+    and STR_SDO_RPOR
+    mov #(STR_SDO_FN<<STR_SDO_RPORbit),W0
+    ior STR_SDO_RPOR
+    ; configuration SPI
+    mov #(3+(6<<SPRE0)+1<<MSTEN), W0 ; clock 8Mhz
+    mov W0, STR_SPICON1
+    bset STR_SPISTAT, #SPIEN
+    return
+    
     
 .end
 

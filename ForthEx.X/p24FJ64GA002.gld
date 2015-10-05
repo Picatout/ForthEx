@@ -113,6 +113,7 @@ SECTIONS
   */
   .text :
   {
+        *(.start);
         *(.init);
         *(.user_init);
         KEEP (*(.handle));
@@ -138,6 +139,21 @@ SECTIONS
         *(usercode);
   } >program
 
+  /*
+  **  .isr
+  **  section pour regrouper toutes
+  **  les routines d'exception et de
+  **  services d'interrutpion
+  */
+  .int :
+  {
+        *(.int);
+  }> program
+
+  .start :
+  {
+       *(.start);
+  } > program
 
   /*
   ** User-Defined Constants in Program Memory

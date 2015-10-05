@@ -88,6 +88,35 @@
 .equ KBD_IPCbit, INT1IP0
 .equ KBD_INTEP, INT1EP
 .equ KBD_INTCON, INTCON2
+
+; interface SPI RAM et EEPROM
+.equ SRAM_SEL, RB10    
+.equ EEPROM_SEL, RB9
+.equ STR_CLK,   RB8
+.equ STR_MOSI,  RB6
+.equ STR_MISO,  RB7
+.equ STR_RPINR, RPINR20
+.equ STR_SDI_PPSbit, SDI1R0
+.equ STR_CLK_FN, 8
+.equ STR_SDO_FN, 7
+.equ STR_SDO_RPOR, RPOR3
+.equ STR_SDO_RPORbit, RP7R0    
+.equ STR_CLK_RPOR, RPOR4
+.equ STR_CLK_RPORbit, RP8R0    
+.equ STR_PORT, PORTB
+.equ STR_TRIS, TRISB
+.equ STR_LAT, LATB
+.equ STR_SPICON1, SPI1CON1    
+.equ STR_SPICON2, SPI1CON2
+.equ STR_SPISTAT, SPI1STAT
+.equ STR_SPIBUF,  SPI1BUF    
+
 .LIST
+    
+.macro INT
+.section .int code
+.endm
+    
+
 .endif
 

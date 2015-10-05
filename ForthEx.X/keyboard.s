@@ -225,7 +225,7 @@ kbd_no_key: ; sortie file vide
 .extern ps2_head
 .extern ps2_tail    
 .extern ps2_queue  
-    
+INT    
 .global __T1Interrupt   
 __T1Interrupt:
     push W0

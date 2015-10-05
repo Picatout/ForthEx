@@ -70,6 +70,7 @@ cls:
 ; interruption TIMER2
 ;********************
 .global __T2Interrupt
+INT    
 __T2Interrupt:
     push W0
     inc _T2counter
@@ -150,7 +151,7 @@ __T2Interrupt:
 .equ pVIDBUF, W4
 .equ pFONT, W3
 .equ CH_COUNT, W2    
-.global __OC2Interrupt
+.global __OC2Interrupt    
 __OC2Interrupt:
     push W0
     push W1
