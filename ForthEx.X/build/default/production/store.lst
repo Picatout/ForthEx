@@ -16,9 +16,12 @@
   16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
   17              	;
   18              	;****************************************************************************
-  19              	; hardware setup
-  20              	    
-  21              	.include "hardware.inc"
+  19              	
+  20              	;NOM: store.s
+  21              	;Description:  interface avec les mémoire externe SPIRAM et SPIEEPROM
+  22              	;Date: 2015-10-06
+  23              	    
+  24              	.include "hardware.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
    3              	; This file is part of ForthEx.
@@ -3379,103 +3382,52 @@
  125              	 
  126              	.endif
  127              	
-  22              	.if VIDEO_STD==NTSC
-  23              	.include "ntsc_const.inc"    
-   1              	;****************************************************************************
-   2              	; Copyright 2015, Jacques Deschênes
-   3              	; This file is part of ForthEx.
-   4              	;
-   5              	;     ForthEx is free software: you can redistribute it and/or modify
-   6              	;     it under the terms of the GNU General Public License as published by
-   7              	;     the Free Software Foundation, either version 3 of the License, or
-   8              	;     (at your option) any later version.
-   9              	;
-  10              	;     ForthEx is distributed in the hope that it will be useful,
-  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
-  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  13              	;     GNU General Public License for more details.
-  14              	;
-  15              	;     You should have received a copy of the GNU General Public License
-  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
-  17              	;
-  18              	;****************************************************************************
-  19              	
-  20              	; constantes génération signal NTSC
-  21              	; REF: http://www.ntsc-tv.com/
-  22              	.ifndef NTSC_CONST
-  23              	.equ NTSC_CONST, 1
-  24              	    
-  25              	.equ HFREQ, 15748 ; fréquence horizontale pour information seulement
-  26              	.equ HLINE, 1015 ; PR2= période ligne horizontale
-  27              	.equ HSYNC, 74  ; OC1R=47e-6*FCY-1 sync pulse horizontal
-  28              	.equ HALFLINE, 507 ; période demi-ligne horizontale (VSYNC)
-  29              	.equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
-  30              	.equ TOPLINE, 40  ; première ligne visible
-  31              	.equ ELPFRM,  271  ; nombre de lignes par frame pair
-  32              	.equ OLPFRM,  272  ; nombre de lignes par frame impair
-  33              	.equ VIDEO_DLY, 50 ; délais déclenche interruption video=HSYNC+VIDEO_DLY
-  34              	
-  35              	.endif
-  36              	
-  37              	
-  24              	.else
-  25              	.include "pal_const.inc"
-  26              	.endif
-  27              	    
-  28              	.data 
-  29                 	.global systicks    
-  30                 	systicks:
-  31 0000 00 00       	.word 0
-  32                 	    
-  33                 	.text
-  34              	.global hardware_init
-  35              	hardware_init:
-  36 000000  00 40 A9 	    bclr CORCON, #PSV
-  37 000002  00 00 EB 	    clr W0
-  38 000004  00 00 88 	    mov W0, PSVPAG
-  39 000006  00 40 A8 	    bset CORCON, #PSV ; espace programme visible en RAM
-  40 000008  00 20 EF 	    clr CLKDIV
-  41 00000a  01 00 A8 	    bset OSCCON, #NOSC0
-  42 00000c  00 E0 A8 	    bset OSCCON, #CLKLOCK ; verrouillage clock
-  43 00000e  01 E0 A9 	    bclr INTCON1, #NSTDIS ; interruption multi-niveaux
-  44 000010  00 A0 EF 	    setm TRISA      ; port A tout en entrée
-  45 000012  00 A0 EF 	    setm TRISB      ; port B tout en entrée
-  46 000014  00 A0 EF 	    setm CNPU1       ;activation pullup
-  47 000016  00 A0 EF 	    setm CNPU2
-  48 000018  00 A0 EF 	    setm AD1PCFG    ; désactivation entrées analogiques
-  49 00001a  00 00 02 	    call tvout_init
-  49         00 00 00 
-  50 00001e  00 00 02 	    call ps2_init
-  50         00 00 00 
-  51 000022  00 00 02 	    call store_init
-  51         00 00 00 
-  52              	    ; verouillage configuration I/O
-  53 000026  00 C0 A8 	    bset OSCCON, #IOLOCK
-  54              	    
-  55 000028  00 00 06 	    return
-  56              	
-  57              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  58              	;  délais en millisecondes
-  59              	;  entrée: W0 délais
-  60              	; utilise W0,W1
-  61              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-  62              	.global delay_msec    
-  63              	delay_msec:    
-  64 00002a  01 00 80 	    mov systicks, W1
-  65 00002c  80 80 40 	    add W1,W0,W1
-  66              	 1:
-  67 00002e  00 00 80 	    mov systicks, W0
-  68 000030  01 00 E1 	    cp W0, W1
-  69 000032  00 00 3A 	    bra neq, 1b
-  70 000034  00 00 06 	    return
-  71              	
-  72              	.end
+  25              	    
+  26              	    
+  27              	 .text
+  28              	 
+  29              	 ;;;;;;;;;;;;;;;;;;;;;;;
+  30              	; initialisation SPI
+  31              	; interface SPIRAM et
+  32              	; SPIEERPOM 
+  33              	;;;;;;;;;;;;;;;;;;;;;;; 
+  34              	.global store_init 
+  35              	store_init:
+  36              	    ; changement de direction des broches en sorties
+  37 000000  00 74 20 	    mov #((1<<SRAM_SEL)+(1<<EEPROM_SEL)+(1<<STR_CLK)+(1<<STR_MOSI)), W0
+  38 000002  00 20 B7 	    ior STR_LAT
+  39 000004  00 80 EA 	    com W0,W0
+  40 000006  00 20 B6 	    and STR_TRIS
+  41              	    ;sélection des PPS
+  42              	    ; signal MISO
+  43 000008  00 FE 2F 	    mov #~(0x1f<<STR_SDI_PPSbit), W0
+  44 00000a  00 20 B6 	    and STR_RPINR
+  45 00000c  70 00 20 	    mov #(STR_MISO<<STR_SDI_PPSbit), W0
+  46 00000e  00 20 B7 	    ior STR_RPINR
+  47              	    ; signal STR_CLK
+  48 000010  00 FE 2F 	    mov #~(0x1f<<STR_CLK_RPORbit), W0
+  49 000012  00 20 B6 	    and STR_CLK_RPOR
+  50 000014  80 00 20 	    mov #(STR_CLK_FN<<STR_CLK_RPORbit),W0
+  51 000016  00 20 B7 	    ior STR_CLK_RPOR
+  52              	    ; signal STR_MOSI
+  53 000018  F0 0F 2E 	    mov #~(0x1f<<STR_SDO_RPORbit), W0
+  54 00001a  00 20 B6 	    and STR_SDO_RPOR
+  55 00001c  00 70 20 	    mov #(STR_SDO_FN<<STR_SDO_RPORbit),W0
+  56 00001e  00 20 B7 	    ior STR_SDO_RPOR
+  57              	    ; configuration SPI
+  58 000020  B0 03 20 	    mov #(3+(6<<SPRE0)+1<<MSTEN), W0 ; clock 8Mhz
+  59 000022  00 00 88 	    mov W0, STR_SPICON1
+  60 000024  01 E0 A8 	    bset STR_SPISTAT, #SPIEN
+  61 000026  00 00 06 	    return
+  62              	
+  63              	 
+  64              	 
+  65              	 .end
 DEFINED SYMBOLS
-                            *ABS*:00000000 ./ntsc_const.inc
                             *ABS*:00000000 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc
                             *ABS*:00000000 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24Fxxxx.inc
                             *ABS*:00000000 ./hardware.inc
-                            *ABS*:00000000 hardware.s
+                            *ABS*:00000000 store.s
                             *ABS*:00000001 __MPLAB_BUILD
                             *ABS*:00000001 __24FJ64GA002
                             *ABS*:00000001 __PIC24F
@@ -4520,98 +4472,70 @@ DEFINED SYMBOLS
       ./hardware.inc:101    *ABS*:00000007 STR_SDO_FN
       ./hardware.inc:103    *ABS*:00000008 STR_SDO_RPORbit
       ./hardware.inc:105    *ABS*:00000000 STR_CLK_RPORbit
-    ./ntsc_const.inc:23     *ABS*:00000001 NTSC_CONST
-    ./ntsc_const.inc:25     *ABS*:00003d84 HFREQ
-    ./ntsc_const.inc:26     *ABS*:000003f7 HLINE
-    ./ntsc_const.inc:27     *ABS*:0000004a HSYNC
-    ./ntsc_const.inc:28     *ABS*:000001fb HALFLINE
-    ./ntsc_const.inc:29     *ABS*:00000025 SERATION
-    ./ntsc_const.inc:30     *ABS*:00000028 TOPLINE
-    ./ntsc_const.inc:31     *ABS*:0000010f ELPFRM
-    ./ntsc_const.inc:32     *ABS*:00000110 OLPFRM
-    ./ntsc_const.inc:33     *ABS*:00000032 VIDEO_DLY
-          hardware.s:30     .data:00000000 systicks
-          hardware.s:35     .text:00000000 hardware_init
-          hardware.s:63     .text:0000002a delay_msec
-          hardware.s:66     .text:0000002e L11
+             store.s:35     .text:00000000 store_init
                       .debug_line:00000000 .L0
-                      .debug_line:00000028 .L0
-          hardware.s:72     .debug_line:00000050 .L0
-          hardware.s:36     .text:00000000 .L0
-          hardware.s:37     .text:00000002 .L0
-          hardware.s:36     .text:00000000 .L0
-          hardware.s:38     .text:00000004 .L0
-          hardware.s:37     .text:00000002 .L0
-          hardware.s:39     .text:00000006 .L0
-          hardware.s:38     .text:00000004 .L0
-          hardware.s:40     .text:00000008 .L0
-          hardware.s:39     .text:00000006 .L0
-          hardware.s:41     .text:0000000a .L0
-          hardware.s:40     .text:00000008 .L0
-          hardware.s:42     .text:0000000c .L0
-          hardware.s:41     .text:0000000a .L0
-          hardware.s:43     .text:0000000e .L0
-          hardware.s:42     .text:0000000c .L0
-          hardware.s:44     .text:00000010 .L0
-          hardware.s:43     .text:0000000e .L0
-          hardware.s:45     .text:00000012 .L0
-          hardware.s:44     .text:00000010 .L0
-          hardware.s:46     .text:00000014 .L0
-          hardware.s:45     .text:00000012 .L0
-          hardware.s:47     .text:00000016 .L0
-          hardware.s:46     .text:00000014 .L0
-          hardware.s:48     .text:00000018 .L0
-          hardware.s:47     .text:00000016 .L0
-          hardware.s:49     .text:0000001a .L0
-          hardware.s:48     .text:00000018 .L0
-          hardware.s:50     .text:0000001e .L0
-          hardware.s:49     .text:0000001a .L0
-          hardware.s:51     .text:00000022 .L0
-          hardware.s:50     .text:0000001e .L0
-          hardware.s:53     .text:00000026 .L0
-          hardware.s:51     .text:00000022 .L0
-          hardware.s:55     .text:00000028 .L0
-          hardware.s:53     .text:00000026 .L0
-          hardware.s:64     .text:0000002a .L0
-          hardware.s:55     .text:00000028 .L0
-          hardware.s:65     .text:0000002c .L0
-          hardware.s:64     .text:0000002a .L0
-          hardware.s:67     .text:0000002e .L0
-          hardware.s:65     .text:0000002c .L0
-          hardware.s:68     .text:00000030 .L0
-          hardware.s:67     .text:0000002e .L0
-          hardware.s:69     .text:00000032 .L0
-          hardware.s:68     .text:00000030 .L0
-          hardware.s:70     .text:00000034 .L0
-          hardware.s:69     .text:00000032 .L0
-          hardware.s:72     .text:00000036 .L0
-          hardware.s:70     .text:00000034 .L0
+                      .debug_line:00000025 .L0
+             store.s:65     .debug_line:00000047 .L0
+             store.s:37     .text:00000000 .L0
+             store.s:38     .text:00000002 .L0
+             store.s:37     .text:00000000 .L0
+             store.s:39     .text:00000004 .L0
+             store.s:38     .text:00000002 .L0
+             store.s:40     .text:00000006 .L0
+             store.s:39     .text:00000004 .L0
+             store.s:43     .text:00000008 .L0
+             store.s:40     .text:00000006 .L0
+             store.s:44     .text:0000000a .L0
+             store.s:43     .text:00000008 .L0
+             store.s:45     .text:0000000c .L0
+             store.s:44     .text:0000000a .L0
+             store.s:46     .text:0000000e .L0
+             store.s:45     .text:0000000c .L0
+             store.s:48     .text:00000010 .L0
+             store.s:46     .text:0000000e .L0
+             store.s:49     .text:00000012 .L0
+             store.s:48     .text:00000010 .L0
+             store.s:50     .text:00000014 .L0
+             store.s:49     .text:00000012 .L0
+             store.s:51     .text:00000016 .L0
+             store.s:50     .text:00000014 .L0
+             store.s:53     .text:00000018 .L0
+             store.s:51     .text:00000016 .L0
+             store.s:54     .text:0000001a .L0
+             store.s:53     .text:00000018 .L0
+             store.s:55     .text:0000001c .L0
+             store.s:54     .text:0000001a .L0
+             store.s:56     .text:0000001e .L0
+             store.s:55     .text:0000001c .L0
+             store.s:58     .text:00000020 .L0
+             store.s:56     .text:0000001e .L0
+             store.s:59     .text:00000022 .L0
+             store.s:58     .text:00000020 .L0
+             store.s:60     .text:00000024 .L0
+             store.s:59     .text:00000022 .L0
+             store.s:61     .text:00000026 .L0
+             store.s:60     .text:00000024 .L0
+             store.s:65     .text:00000028 .L0
+             store.s:61     .text:00000026 .L0
                             .text:00000000 .L0
-          hardware.s:72     .text:00000036 .L0
+             store.s:65     .text:00000028 .L0
                       .debug_info:00000000 .L0
-                      .debug_info:00000087 .L0
+                      .debug_info:00000084 .L0
 
 UNDEFINED SYMBOLS
-PSVPAG
-CORCON
-CNPU1
-CNPU2
-INTCON1
-TRISA
+SPI1STAT
+SPI1CON1
 TRISB
-AD1PCFG
-OSCCON
-CLKDIV
-tvout_init
-ps2_init
-store_init
+LATB
+RPINR20
+RPOR3
+RPOR4
 
 EQUATE SYMBOLS
-                ./ntsc_const.inc = 0x0
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc = 0x0
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24Fxxxx.inc = 0x0
                   ./hardware.inc = 0x0
-                      hardware.s = 0x0
+                         store.s = 0x0
                    __MPLAB_BUILD = 0x1
                    __24FJ64GA002 = 0x1
                         __PIC24F = 0x1
@@ -6125,13 +6049,3 @@ EQUATE SYMBOLS
                      STR_SPICON2 = SPI1CON2
                      STR_SPISTAT = SPI1STAT
                       STR_SPIBUF = SPI1BUF
-                      NTSC_CONST = 0x1
-                           HFREQ = 0x3d84
-                           HLINE = 0x3f7
-                           HSYNC = 0x4a
-                        HALFLINE = 0x1fb
-                        SERATION = 0x25
-                         TOPLINE = 0x28
-                          ELPFRM = 0x10f
-                          OLPFRM = 0x110
-                       VIDEO_DLY = 0x32

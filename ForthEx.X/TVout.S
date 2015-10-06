@@ -48,12 +48,65 @@ _video_buffer: .space TV_BUFFER
 
 
 .text
-.global tvsync_init
-tvsync_init:
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; initialisation générateur vidéo
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.global tvout_init
+tvout_init:
+    bclr VIDEO_TRIS, #VIDEO_OUT ; sortie vidéo
+    bclr SYNC_TRIS, #SYNC_OUT  ; sortie sync vidéo
+    ; configuration PPS
+    mov VIDEO_RPOR, W0
+    mov #~(0x1f<<VIDEO_RPORbit),W1
+    and W0,W1,W0
+    mov #(VIDEO_FN<<VIDEO_RPORbit), W1
+    ior W0,W1,W0
+    mov W0, VIDEO_RPOR
+    mov SYNC_RPOR, W0
+    mov #~(0x1f<<SYNC_RPORbit),W1
+    and W0,W1,W0
+    mov #(SYNC_FN<<SYNC_RPORbit), W1
+    ior W0,W1,W0
+    mov W0, SYNC_RPOR
+    ; configuration VIDEO_SPI
+    mov #(3+(6<<SPRE0)+1<<MSTEN), W0
+    mov W0, VIDEO_SPICON1
+    bset VIDEO_SPISTAT, #SPIEN
+    clr VIDEO_SPIBUF
+    ; configuration output compare
+    mov #HLINE, W0
+    ; période timer Fcy/15748-1
+    mov W0, SYNC_PER
+    mov W0, SYNC_OCRS
+    mov W0, VIDEO_OCR
+    mov #HSYNC, W0
+    mov W0, SYNC_OCR
+    add  #VIDEO_DLY, W0
+    mov W0, VIDEO_OCRS
+    ; configuraton output compare mode 5
+    mov #5, W0
+    mov W0, SYNC_OCCON
+    mov W0, VIDEO_OCCON
+    ; configuration priorité d'interruptions
+    ; priorité 5 pour les 2
+    mov #~(7<<SYNC_IPbit), W0
+    and SYNC_IPC
+    mov #(5<<SYNC_IPbit), W0 
+    ior SYNC_IPC
+    mov #~(7<<VIDEO_IPbit), W0
+    and VIDEO_IPC
+    mov #(5<<VIDEO_IPbit), W0
+    ior VIDEO_IPC
     setm line_count
     setm.b even
+    ; activation interruption  SYNC_TIMER
+    bclr SYNC_IFS, #SYNC_IF
+    bset SYNC_IEC, #SYNC_IE
+    ; activation timer
+    bset SYNC_TMRCON, #TON
     return
-    
+
+   
 ;;;;;;;;;;;;;;;;;;
 ; nettoie écran
 ;;;;;;;;;;;;;;;;;; 

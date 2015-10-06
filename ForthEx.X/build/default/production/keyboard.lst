@@ -3371,14 +3371,19 @@
  112              	.equ STR_SPIBUF,  SPI1BUF    
  113              	
  114              	.LIST
- 115              	    
- 116              	.macro INT
- 117              	.section .int code
- 118              	.endm
- 119              	    
+ 115              	 
+ 116              	; section pour regrouper les routine ISR    
+ 117              	.macro INT  
+ 118              	.section .int code
+ 119              	.endm
  120              	
- 121              	.endif
- 122              	
+ 121              	; section pour regrouper les entrées du dictionnarie 
+ 122              	.macro SYSDICT  
+ 123              	.section .sysdict code
+ 124              	.endm
+ 125              	 
+ 126              	.endif
+ 127              	
   27              	.include "video.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
