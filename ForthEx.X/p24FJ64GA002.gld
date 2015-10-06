@@ -118,8 +118,7 @@ SECTIONS
         *(.user_init);
         KEEP (*(.handle));
         KEEP (*(.isr*));
-        *(.libc) *(.libm) *(.libdsp);  /* keep together in this order */
-        *(.lib*);
+        *(.sysdict);
   } >program
 
 
@@ -150,9 +149,19 @@ SECTIONS
         *(.int);
   }> program
 
+  /* section réservée à la routine __reset */
   .start :
   {
        *(.start);
+  } > program
+
+  /* section réservée au dictionnaire
+  ** du système Forth
+  ** 
+  */
+  .sysdict :
+  {
+       *(.sysdict);
   } > program
 
   /*

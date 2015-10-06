@@ -3368,14 +3368,19 @@
  112              	.equ STR_SPIBUF,  SPI1BUF    
  113              	
  114              	.LIST
- 115              	    
- 116              	.macro INT
- 117              	.section .int code
- 118              	.endm
- 119              	    
+ 115              	 
+ 116              	; section pour regrouper les routine ISR    
+ 117              	.macro INT  
+ 118              	.section .int code
+ 119              	.endm
  120              	
- 121              	.endif
- 122              	
+ 121              	; section pour regrouper les entrées du dictionnarie 
+ 122              	.macro SYSDICT  
+ 123              	.section .sysdict code
+ 124              	.endm
+ 125              	 
+ 126              	.endif
+ 127              	
   24              	.include "core.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -3524,53 +3529,53 @@
   47              	.section .start code   
   48              	.global __reset    
   49              	__reset: 
-  50              	;    mov #RAM_BASE, W0
-  51              	;    mov #(RAM_SIZE/2-1), W1
-  52              	;    repeat W1
-  53              	;    clr [W0++]
+  50 000000  00 80 20 	    mov #RAM_BASE, W0
+  51 000002  F1 FF 20 	    mov #(RAM_SIZE/2-1), W1
+  52 000004  01 80 09 	    repeat W1
+  53 000006  00 18 EB 	    clr [W0++]
   54              	    ; modification du pointeur 
   55              	    ; de pile des retours
-  56 000000  0F 00 20 	    mov #rstack, RSP
-  57 000002  09 00 20 	    mov #user, UP
+  56 000008  0F 00 20 	    mov #rstack, RSP
+  57 00000a  09 00 20 	    mov #user, UP
   58              	    ; conserve adresse de la pile
-  59 000004  8F 04 98 	    mov RSP, [UP+RBASE]
-  60 000006  00 00 02 	    call hardware_init
+  59 00000c  8F 04 98 	    mov RSP, [UP+RBASE]
+  60 00000e  00 00 02 	    call hardware_init
   60         00 00 00 
-  61 00000a  00 80 22 	    mov #(PSV_BASE), W0
-  62 00000c  00 00 88 	    mov W0, SPLIM
-  63 00000e  0E 00 20 	    mov #pstack, DSP
-  64 000010  9E 04 98 	    mov DSP, [UP+PBASE]
-  65 000012  A0 00 20 	    mov #10, W0
-  66 000014  A0 04 98 	    mov W0, [UP+BASE]
+  61 000012  00 80 22 	    mov #(PSV_BASE), W0
+  62 000014  00 00 88 	    mov W0, SPLIM
+  63 000016  0E 00 20 	    mov #pstack, DSP
+  64 000018  9E 04 98 	    mov DSP, [UP+PBASE]
+  65 00001a  A0 00 20 	    mov #10, W0
+  66 00001c  A0 04 98 	    mov W0, [UP+BASE]
   67              	; test vidéo
-  68 000016  00 00 02 	    call cls
+  68 00001e  00 00 02 	    call cls
   68         00 00 00 
-  69 00001a  01 00 20 	    set_psv quick, W1
+  69 000022  01 00 20 	    set_psv quick, W1
   69         01 00 88 
   69         01 00 20 
-  70 000020  02 00 20 	    mov #_video_buffer,W2
-  71 000022  00 00 EB 	    clr W0
+  70 000028  02 00 20 	    mov #_video_buffer,W2
+  71 00002a  00 00 EB 	    clr W0
   72              	1:
-  73 000024  31 40 78 	    mov.b [W1++], W0
-  74 000026  00 80 FB 	    ze W0,W0
-  75 000028  00 00 32 	    bra z, 2f
-  76 00002a  00 59 78 	    mov.b W0, [W2++]
-  77 00002c  00 00 37 	    bra 1b
+  73 00002c  31 40 78 	    mov.b [W1++], W0
+  74 00002e  00 80 FB 	    ze W0,W0
+  75 000030  00 00 32 	    bra z, 2f
+  76 000032  00 59 78 	    mov.b W0, [W2++]
+  77 000034  00 00 37 	    bra 1b
   78              	2:    
   79              	; fin test vidéo
   80              	; test clavier
   81              	3:  
-  82 00002e  82 1F 78 	    push W2
-  83 000030  00 00 02 	    call kbd_get
+  82 000036  82 1F 78 	    push W2
+  83 000038  00 00 02 	    call kbd_get
   83         00 00 00 
-  84 000034  4F 01 78 	    pop W2
-  85 000036  00 00 E0 	    cp0 W0
-  86 000038  00 00 32 	    bra eq, 3b
-  87 00003a  F0 07 B2 	    and #127, W0
-  88 00003c  00 49 78 	    mov.b W0, [W2]
-  89 00003e  00 00 37 	    bra 3b
+  84 00003c  4F 01 78 	    pop W2
+  85 00003e  00 00 E0 	    cp0 W0
+  86 000040  00 00 32 	    bra eq, 3b
+  87 000042  F0 07 B2 	    and #127, W0
+  88 000044  00 49 78 	    mov.b W0, [W2]
+  89 000046  00 00 37 	    bra 3b
   90              	    
-  91 000040  00 00 37 	    bra .
+  91 000048  00 00 37 	    bra .
   92              	
   93              	.section .const psv   
   94                 	;test string
@@ -4679,83 +4684,91 @@ DEFINED SYMBOLS
               core.s:44     .int:00000000 __DefaultInterrupt
               core.s:49     .start:00000000 __reset
               core.s:95     .const:00000000 quick
-              core.s:72     .start:00000024 L11
-              core.s:78     .start:0000002e L21
-              core.s:81     .start:0000002e L31
-              core.s:91     .start:00000040 L0
+              core.s:72     .start:0000002c L11
+              core.s:78     .start:00000036 L21
+              core.s:81     .start:00000036 L31
+              core.s:91     .start:00000048 L0
               core.s:105    .text:00000000 next
                       .debug_line:00000000 .L0
                       .debug_line:00000024 .L0
-              core.s:110    .debug_line:0000006e .L0
+              core.s:110    .debug_line:00000072 .L0
               core.s:106    .text:00000000 .L0
               core.s:107    .text:00000002 .L0
               core.s:106    .text:00000000 .L0
               core.s:110    .text:00000004 .L0
               core.s:107    .text:00000002 .L0
-              core.s:56     .start:00000000 .L0
-              core.s:57     .start:00000002 .L0
-              core.s:56     .start:00000000 .L0
-              core.s:59     .start:00000004 .L0
-              core.s:57     .start:00000002 .L0
-              core.s:60     .start:00000006 .L0
-              core.s:59     .start:00000004 .L0
-              core.s:61     .start:0000000a .L0
-              core.s:60     .start:00000006 .L0
-              core.s:62     .start:0000000c .L0
-              core.s:61     .start:0000000a .L0
-              core.s:63     .start:0000000e .L0
-              core.s:62     .start:0000000c .L0
-              core.s:64     .start:00000010 .L0
-              core.s:63     .start:0000000e .L0
-              core.s:65     .start:00000012 .L0
-              core.s:64     .start:00000010 .L0
-              core.s:66     .start:00000014 .L0
-              core.s:65     .start:00000012 .L0
-              core.s:68     .start:00000016 .L0
-              core.s:66     .start:00000014 .L0
-              core.s:69     .start:0000001a .L0
-              core.s:68     .start:00000016 .L0
-              core.s:70     .start:00000020 .L0
-              core.s:69     .start:0000001a .L0
-              core.s:71     .start:00000022 .L0
-              core.s:70     .start:00000020 .L0
-              core.s:73     .start:00000024 .L0
-              core.s:71     .start:00000022 .L0
-              core.s:74     .start:00000026 .L0
-              core.s:73     .start:00000024 .L0
-              core.s:75     .start:00000028 .L0
-              core.s:74     .start:00000026 .L0
-              core.s:76     .start:0000002a .L0
-              core.s:75     .start:00000028 .L0
-              core.s:77     .start:0000002c .L0
-              core.s:76     .start:0000002a .L0
-              core.s:82     .start:0000002e .L0
-              core.s:77     .start:0000002c .L0
-              core.s:83     .start:00000030 .L0
-              core.s:82     .start:0000002e .L0
-              core.s:84     .start:00000034 .L0
-              core.s:83     .start:00000030 .L0
-              core.s:85     .start:00000036 .L0
-              core.s:84     .start:00000034 .L0
-              core.s:86     .start:00000038 .L0
-              core.s:85     .start:00000036 .L0
-              core.s:87     .start:0000003a .L0
-              core.s:86     .start:00000038 .L0
-              core.s:88     .start:0000003c .L0
-              core.s:87     .start:0000003a .L0
-              core.s:89     .start:0000003e .L0
-              core.s:88     .start:0000003c .L0
-              core.s:91     .start:00000040 .L0
-              core.s:89     .start:0000003e .L0
-              core.s:93     .start:00000042 .L0
-              core.s:91     .start:00000040 .L0
+              core.s:50     .start:00000000 .L0
+              core.s:51     .start:00000002 .L0
+              core.s:50     .start:00000000 .L0
+              core.s:52     .start:00000004 .L0
+              core.s:51     .start:00000002 .L0
+              core.s:53     .start:00000006 .L0
+              core.s:52     .start:00000004 .L0
+              core.s:56     .start:00000008 .L0
+              core.s:53     .start:00000006 .L0
+              core.s:57     .start:0000000a .L0
+              core.s:56     .start:00000008 .L0
+              core.s:59     .start:0000000c .L0
+              core.s:57     .start:0000000a .L0
+              core.s:60     .start:0000000e .L0
+              core.s:59     .start:0000000c .L0
+              core.s:61     .start:00000012 .L0
+              core.s:60     .start:0000000e .L0
+              core.s:62     .start:00000014 .L0
+              core.s:61     .start:00000012 .L0
+              core.s:63     .start:00000016 .L0
+              core.s:62     .start:00000014 .L0
+              core.s:64     .start:00000018 .L0
+              core.s:63     .start:00000016 .L0
+              core.s:65     .start:0000001a .L0
+              core.s:64     .start:00000018 .L0
+              core.s:66     .start:0000001c .L0
+              core.s:65     .start:0000001a .L0
+              core.s:68     .start:0000001e .L0
+              core.s:66     .start:0000001c .L0
+              core.s:69     .start:00000022 .L0
+              core.s:68     .start:0000001e .L0
+              core.s:70     .start:00000028 .L0
+              core.s:69     .start:00000022 .L0
+              core.s:71     .start:0000002a .L0
+              core.s:70     .start:00000028 .L0
+              core.s:73     .start:0000002c .L0
+              core.s:71     .start:0000002a .L0
+              core.s:74     .start:0000002e .L0
+              core.s:73     .start:0000002c .L0
+              core.s:75     .start:00000030 .L0
+              core.s:74     .start:0000002e .L0
+              core.s:76     .start:00000032 .L0
+              core.s:75     .start:00000030 .L0
+              core.s:77     .start:00000034 .L0
+              core.s:76     .start:00000032 .L0
+              core.s:82     .start:00000036 .L0
+              core.s:77     .start:00000034 .L0
+              core.s:83     .start:00000038 .L0
+              core.s:82     .start:00000036 .L0
+              core.s:84     .start:0000003c .L0
+              core.s:83     .start:00000038 .L0
+              core.s:85     .start:0000003e .L0
+              core.s:84     .start:0000003c .L0
+              core.s:86     .start:00000040 .L0
+              core.s:85     .start:0000003e .L0
+              core.s:87     .start:00000042 .L0
+              core.s:86     .start:00000040 .L0
+              core.s:88     .start:00000044 .L0
+              core.s:87     .start:00000042 .L0
+              core.s:89     .start:00000046 .L0
+              core.s:88     .start:00000044 .L0
+              core.s:91     .start:00000048 .L0
+              core.s:89     .start:00000046 .L0
+              core.s:93     .start:0000004a .L0
+              core.s:91     .start:00000048 .L0
               core.s:45     .int:00000000 .L0
               core.s:47     .int:00000002 .L0
               core.s:45     .int:00000000 .L0
                             .text:00000000 .L0
               core.s:110    .text:00000004 .L0
                            .start:00000000 .L0
-              core.s:93     .start:00000042 .L0
+              core.s:93     .start:0000004a .L0
                              .int:00000000 .L0
               core.s:47     .int:00000002 .L0
                       .debug_info:00000000 .L0

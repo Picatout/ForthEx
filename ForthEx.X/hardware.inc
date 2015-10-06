@@ -112,11 +112,16 @@
 .equ STR_SPIBUF,  SPI1BUF    
 
 .LIST
-    
-.macro INT
+ 
+; section pour regrouper les routine ISR    
+.macro INT  
 .section .int code
 .endm
-    
 
+; section pour regrouper les entrées du dictionnarie 
+.macro SYSDICT  
+.section .sysdict code
+.endm
+ 
 .endif
 

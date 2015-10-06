@@ -36,12 +36,42 @@ ps2_tail:
 .word 0
     
 .text
-.global ps2_init    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; initialistaion interface clavier PS/2
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.global ps2_init
 ps2_init:
+    ; PPS sélection broche pour kbd_clk
+    ; interruption externe
+    mov #~(0x1f<<KBD_PPSbit), W0
+    and KBD_RPINR
+    mov #(KBD_CLK<<KBD_PPSbit), W0
+    ior KBD_RPINR
+    ; polarité interruption transition négative
+    bset KBD_INTCON, #KBD_INTEP
+    ; priorité d'interruption 7
+    mov #(7<<KBD_IPCbit), W0
+    ior KBD_IPC 
+    ; activation interruption clavier
+    bclr KBD_IFS, #KBD_IF
+    bset KBD_IEC, #KBD_IE
+    ; initialisation TIMER1
+    ; mise à jour systicks
+    ; et traitement file clavier
+    mov #15999, W0
+    mov W0, PR1
+    mov #~(7<<T1IP0), W0
+    and IPC0
+    mov #(3<<T1IP0), W0
+    ior IPC0
     mov #SENTRY, W0
     mov W0, ps2_shiftin
+    bclr IFS0, #T1IF
+    bset IEC0, #T1IE
+    bset T1CON, #TON
     return
-    
+
+   
  ; interruption signal clock
  ; du clavier sur INT1
 .global __INT1Interrupt

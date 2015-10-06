@@ -47,10 +47,10 @@ __DefaultInterrupt:
 .section .start code   
 .global __reset    
 __reset: 
-;    mov #RAM_BASE, W0
-;    mov #(RAM_SIZE/2-1), W1
-;    repeat W1
-;    clr [W0++]
+    mov #RAM_BASE, W0
+    mov #(RAM_SIZE/2-1), W1
+    repeat W1
+    clr [W0++]
     ; modification du pointeur 
     ; de pile des retours
     mov #rstack, RSP
