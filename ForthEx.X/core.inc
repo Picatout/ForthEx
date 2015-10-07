@@ -25,26 +25,31 @@
 .equ DSP, W14 ; pile arguments
 .equ R, W13 ; sommet pile retour
 .equ T, W12 ; sommet pile arguments
-.equ W, W11 ; pointeur paramètres
+.equ WP, W11 ; pointeur paramètres
 .equ X, W10 ; pointeur d'adresse
 .equ UP, W9  ; pointeur variables utilisateur
 .equ IP, W8 ; pointeur d'instruction 
 .equ I, W7  ; compteur de boucle    
     
 .equ CELL_SIZE, 2
-.equ DSTK_SIZE, 64
-.equ RSTK_SIZE, 128
+.equ DSTK_SIZE, 32*CELL_SIZE
+.equ RSTK_SIZE, 64*CELL_SIZE
 
 ;offset variables utilisateurs
 .equ RBASE, 0  ; adresse début pile retours
 .equ PBASE, 2  ; adresse début pile paramètres
 .equ BASE, 4   ; base numérique
 .equ HERE, 6   ; valeur du pointeur HERE
-    
+.equ LATEST, 8 ; pointeur dernière définition    
     
 ;;;;;;;;;;;;    
 ; macros
 ;;;;;;;;;;;;
+.macro NEXT
+    mov [IP++], WP
+    goto WP
+.endm    
+    
 .macro DPUSH  
     mov T, [++DSP]
 .endm
@@ -53,11 +58,13 @@
     mov [DSP--], T
 .endm
     
-.macro RPUSH
+.macro RPUSH reg
     push R
+    mov \reg, R
 .endm
     
-.macro RPOP
+.macro RPOP reg
+    mov R, \reg
     pop R
 .endm
     
@@ -66,5 +73,32 @@
     DPOP
     mov W0, [++DSP]
 .endm
+
     
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+; macro empruntée et modifiée, à partir de Jones Forth    
+;REF: http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
+; Flags
+.equ F_IMMED,0x80
+.equ F_HIDDEN,0x20
+.equ F_LENMASK,0x1f	; length mask
+
+; Store the chain of links.
+.equ link,0
+
+.macro DEFWORD name, namelen, flags=0, label
+    .section .sysdict psv
+    .align 2
+    .global name_\label
+name_\label :
+    .word link		; lien vers élément précédent du dictionnaire
+    .equ link, name_\label
+    .byte \flags+\namelen	; flags + length byte
+    .ascii "\name"		; the name
+    .align 2		; padding to next 2 byte boundary
+    .global \label
+\label :
+	; list of word pointers follow
+.endm
+	
     

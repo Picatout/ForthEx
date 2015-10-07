@@ -116,12 +116,9 @@
 ; section pour regrouper les routine ISR    
 .macro INT  
 .section .int code
+.align 2
 .endm
 
-; section pour regrouper les entrées du dictionnarie 
-.macro SYSDICT  
-.section .sysdict code
-.endm
- 
+
 .endif
 

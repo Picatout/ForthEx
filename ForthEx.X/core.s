@@ -34,7 +34,7 @@ user: ; variables utilisateur
 pstack:
 .space DSTK_SIZE
 
-.section _rstack, bss, address(PSV_BASE-RSTK_SIZE)
+.section _rstack,stack, address(PSV_BASE-RSTK_SIZE)
 rstack:
 .space RSTK_SIZE
     
@@ -47,6 +47,7 @@ __DefaultInterrupt:
 .section .start code   
 .global __reset    
 __reset: 
+    ; mise à zéro de la RAM
     mov #RAM_BASE, W0
     mov #(RAM_SIZE/2-1), W1
     repeat W1
@@ -64,8 +65,27 @@ __reset:
     mov DSP, [UP+PBASE]
     mov #10, W0
     mov W0, [UP+BASE]
+    mov #psvoffset(test_video), W0
+    mov W0, [UP+LATEST]
+    mov #psvoffset(TEST), IP
+    NEXT
+
+
+.section .const psv   
+;test string
+quick:
+.ascii "01234567890123456789012345678901234567890123456789"    
+.ascii "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.      "
+.asciz "The quick brown fox jumps over the lazy dog.      " 
+
+    
+    
+DEFWORD TEST,4,,TEST
+.word  CLS, test_video
+.text
+.global test_video    
+test_video:    
 ; test vidéo
-    call cls
     set_psv quick, W1
     mov #_video_buffer,W2
     clr W0
@@ -87,25 +107,21 @@ __reset:
     and #127, W0
     mov.b W0, [W2]
     bra 3b
+
+DEFWORD ENTER,5,,docol
+.word ENTER    
+.text
+ENTER:
+    RPUSH IP
+    add WP,#2,IP
+    NEXT
     
-    bra .
-
-.section .const psv   
-;test string
-quick:
-.ascii "01234567890123456789012345678901234567890123456789"    
-.ascii "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.      "
-.asciz "The quick brown fox jumps over the lazy dog.      " 
-
-  
-   
-
-.text    
-.global next    
-next:
-    mov [IP++], W
-    goto W
- 
+DEFWORD EXIT,4,,exitcol
+.word EXIT
+.text
+EXIT:
+    RPOP IP
+    NEXT
     
 .end
 

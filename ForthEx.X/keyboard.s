@@ -233,6 +233,8 @@ __T1Interrupt:
     push W2
     push W3
     inc systicks
+    ;traitement file ps2_queue
+    ; ver kbd_queue
     mov ps2_head, W0
     cp ps2_tail
     bra z, isr_exit
@@ -240,9 +242,10 @@ __T1Interrupt:
     add W0, W1, W1
     mov [W1], W0
     lsr W0,W0
-    bra c, 9f ; start bit doit-être zéro
+    bra c, 9f ; rejet: start bit doit-être zéro
     btst.c W0, #9
-    bra nc, 9f ; stop bit doit-être 1
+    bra nc, 9f ; rejet: stop bit doit-être 1
+    ;vérification paritée
     clr W3
     and #0x1ff, W0
     mov #0, W2
@@ -254,9 +257,11 @@ __T1Interrupt:
     inc W2,W2
     cp W2, #9
     bra neq, 1b
-    ; paritée impaire, W3 doit-être impaire.
+    ; paritée impaire: W3 doit-être impaire.
     btss W3,#0
-    bra 9f
+    bra 9f ; rejet: mauvaise parité
+    ; tranfert code dans file
+    ; kbd_queue
     mov #kbd_queue, W1
     mov kbd_tail, W2
     add W2,W1,W1

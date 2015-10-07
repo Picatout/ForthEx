@@ -35,6 +35,7 @@
 .else
 .include "pal_const.inc"
 .endif
+.include "core.inc"
 
 ; constantes génération signal NTSC
 
@@ -42,10 +43,10 @@
 
 
 .data
-.global _T2counter
-_T2counter: .space 2 ; compte les interruptions T2
 line_count: .word 0xffff
 even: .byte 0xff
+xpos: .byte 0
+ypos: .byte 0
 
 .global _video_buffer
 _video_buffer: .space TV_BUFFER
@@ -114,13 +115,23 @@ tvout_init:
 ;;;;;;;;;;;;;;;;;;
 ; nettoie écran
 ;;;;;;;;;;;;;;;;;;
-.global cls
-cls:
+DEFWORD CLS,3,,cls
+.word CLS
+.text
+.global CLS
+CLS:
     mov #32, W0
     mov #_video_buffer, W1
     repeat #(TV_BUFFER-1)
     mov.b W0,[W1++]
-    return
+    NEXT
+
+;;;;;;;;;;;;;;;;;;;;;;
+; place caractère
+; au sommet de la pile
+; dans le buffer video
+;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 ;********************
@@ -130,7 +141,6 @@ cls:
 INT
 __T2Interrupt:
     push W0
-    inc _T2counter
     inc line_count
     bra z, 1f
     mov #6, W0
