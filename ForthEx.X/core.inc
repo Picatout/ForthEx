@@ -74,6 +74,10 @@
     mov W0, [++DSP]
 .endm
 
+.macro SYSDICT
+    .section .sysdict psv
+    .align 2
+.endm
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 ; macro empruntée et modifiée, à partir de Jones Forth    
@@ -101,4 +105,9 @@ name_\label :
 	; list of word pointers follow
 .endm
 	
+.macro CODE name
+    .text
+    .global _\name
+    _\name :
+.endm
     

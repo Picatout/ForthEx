@@ -3277,106 +3277,137 @@
  813              	.endif
   23              	
   24              	.NOLIST
-  25              	
-  26              	.equ RAM_SIZE, 0x2000
-  27              	.equ RAM_BASE, 0x800
-  28              	.equ PSV_BASE, 0x2800
-  29              	    
-  30              	; sortie vidéo
-  31              	.equ NTSC, 1
-  32              	.equ PAL, 2
-  33              	;sélection du standard vidéo NTSC ou PAL    
-  34              	.equ VIDEO_STD, NTSC
-  35              	    
-  36              	.equ VIDEO_PORT, PORTB
-  37              	.equ VIDEO_TRIS, TRISB
-  38              	.equ VIDEO_OUT,  3
-  39              	.equ VIDEO_OCR, OC2R
-  40              	.equ VIDEO_OCRS, OC2RS
-  41              	.equ VIDEO_OCCON, OC2CON
-  42              	.equ VIDEO_RPOR, RPOR1
-  43              	.equ VIDEO_RPORbit, RP3R0
-  44              	.equ VIDEO_FN,  10
-  45              	.equ VIDEO_IFS, IFS0
-  46              	.equ VIDEO_IEC, IEC0
-  47              	.equ VIDEO_IF,  OC2IF
-  48              	.equ VIDEO_IE, OC2IE
-  49              	.equ VIDEO_IPC, IPC1
-  50              	.equ VIDEO_IPbit, OC2IP0
-  51              	.equ VIDEO_SPICON1, SPI2CON1
-  52              	.equ VIDEO_SPICON2, SPI2CON2
-  53              	.equ VIDEO_SPISTAT, SPI2STAT
-  54              	.equ VIDEO_SPIBUF, SPI2BUF
-  55              	; synchronistation NTSC
-  56              	.equ SYNC_PORT, PORTB
-  57              	.equ SYNC_TRIS, TRISB
-  58              	.equ SYNC_OUT,   4
-  59              	.equ SYNC_TMR, TMR2
-  60              	.equ SYNC_TMRCON, T2CON
-  61              	.equ SYNC_PER, PR2
-  62              	.equ SYNC_OCRS,  OC1RS
-  63              	.equ SYNC_OCR, OC1R
-  64              	.equ SYNC_OCCON, OC1CON
-  65              	.equ SYNC_RPOR, RPOR2
-  66              	.equ SYNC_RPORbit, RP4R0
-  67              	.equ SYNC_FN,   18
-  68              	.equ SYNC_IFS, IFS0
-  69              	.equ SYNC_IEC, IEC0
-  70              	.equ SYNC_IF,  T2IF
-  71              	.equ SYNC_IE,  T2IE
-  72              	.equ SYNC_IPC, IPC1
-  73              	.equ SYNC_IPbit, T2IP0
-  74              	
-  75              	; clavier
-  76              	.equ KBD_CLK, RB15
-  77              	.equ KBD_DAT, RB14
-  78              	.equ KBD_PORT, PORTB
-  79              	.equ KBD_LAT, LATB
-  80              	.equ KBD_TRIS, TRISB
-  81              	.equ KBD_RPINR, RPINR0
-  82              	.equ KBD_PPSbit, INT1R0
-  83              	.equ KBD_IFS, IFS1
-  84              	.equ KBD_IF, INT1IF
-  85              	.equ KBD_IEC, IEC1
-  86              	.equ KBD_IE, INT1IE
-  87              	.equ KBD_IPC, IPC5
-  88              	.equ KBD_IPCbit, INT1IP0
-  89              	.equ KBD_INTEP, INT1EP
-  90              	.equ KBD_INTCON, INTCON2
-  91              	
-  92              	; interface SPI RAM et EEPROM
-  93              	.equ SRAM_SEL, RB10    
-  94              	.equ EEPROM_SEL, RB9
-  95              	.equ STR_CLK,   RB8
-  96              	.equ STR_MOSI,  RB6
-  97              	.equ STR_MISO,  RB7
-  98              	.equ STR_RPINR, RPINR20
-  99              	.equ STR_SDI_PPSbit, SDI1R0
- 100              	.equ STR_CLK_FN, 8
- 101              	.equ STR_SDO_FN, 7
- 102              	.equ STR_SDO_RPOR, RPOR3
- 103              	.equ STR_SDO_RPORbit, RP7R0    
- 104              	.equ STR_CLK_RPOR, RPOR4
- 105              	.equ STR_CLK_RPORbit, RP8R0    
- 106              	.equ STR_PORT, PORTB
- 107              	.equ STR_TRIS, TRISB
- 108              	.equ STR_LAT, LATB
- 109              	.equ STR_SPICON1, SPI1CON1    
- 110              	.equ STR_SPICON2, SPI1CON2
- 111              	.equ STR_SPISTAT, SPI1STAT
- 112              	.equ STR_SPIBUF,  SPI1BUF    
- 113              	
- 114              	.LIST
- 115              	 
- 116              	; section pour regrouper les routine ISR    
- 117              	.macro INT  
- 118              	.section .int code
- 119              	.align 2
- 120              	.endm
- 121              	
- 122              	
- 123              	.endif
- 124              	
+  25              	.equ FCY, 16000000
+  26              	    
+  27              	.equ RAM_SIZE, 0x2000
+  28              	.equ RAM_BASE, 0x800
+  29              	.equ PSV_BASE, 0x2800
+  30              	    
+  31              	; sortie vidéo
+  32              	.equ NTSC, 1
+  33              	.equ PAL, 2
+  34              	;sélection du standard vidéo NTSC ou PAL    
+  35              	.equ VIDEO_STD, NTSC
+  36              	    
+  37              	.equ VIDEO_PORT, PORTB
+  38              	.equ VIDEO_TRIS, TRISB
+  39              	.equ VIDEO_OUT,  3
+  40              	.equ VIDEO_OCR, OC2R
+  41              	.equ VIDEO_OCRS, OC2RS
+  42              	.equ VIDEO_OCCON, OC2CON
+  43              	.equ VIDEO_RPOR, RPOR1
+  44              	.equ VIDEO_RPORbit, RP3R0
+  45              	.equ VIDEO_FN,  10
+  46              	.equ VIDEO_IFS, IFS0
+  47              	.equ VIDEO_IEC, IEC0
+  48              	.equ VIDEO_IF,  OC2IF
+  49              	.equ VIDEO_IE, OC2IE
+  50              	.equ VIDEO_IPC, IPC1
+  51              	.equ VIDEO_IPbit, OC2IP0
+  52              	.equ VIDEO_SPICON1, SPI2CON1
+  53              	.equ VIDEO_SPICON2, SPI2CON2
+  54              	.equ VIDEO_SPISTAT, SPI2STAT
+  55              	.equ VIDEO_SPIBUF, SPI2BUF
+  56              	; synchronistation NTSC
+  57              	.equ SYNC_PORT, PORTB
+  58              	.equ SYNC_TRIS, TRISB
+  59              	.equ SYNC_OUT,   4
+  60              	.equ SYNC_TMR, TMR2
+  61              	.equ SYNC_TMRCON, T2CON
+  62              	.equ SYNC_PER, PR2
+  63              	.equ SYNC_OCRS,  OC1RS
+  64              	.equ SYNC_OCR, OC1R
+  65              	.equ SYNC_OCCON, OC1CON
+  66              	.equ SYNC_RPOR, RPOR2
+  67              	.equ SYNC_RPORbit, RP4R0
+  68              	.equ SYNC_FN,   18
+  69              	.equ SYNC_IFS, IFS0
+  70              	.equ SYNC_IEC, IEC0
+  71              	.equ SYNC_IF,  T2IF
+  72              	.equ SYNC_IE,  T2IE
+  73              	.equ SYNC_IPC, IPC1
+  74              	.equ SYNC_IPbit, T2IP0
+  75              	
+  76              	; clavier
+  77              	.equ KBD_CLK, RB15
+  78              	.equ KBD_DAT, RB14
+  79              	.equ KBD_PORT, PORTB
+  80              	.equ KBD_LAT, LATB
+  81              	.equ KBD_TRIS, TRISB
+  82              	.equ KBD_RPINR, RPINR0
+  83              	.equ KBD_PPSbit, INT1R0
+  84              	.equ KBD_IFS, IFS1
+  85              	.equ KBD_IF, INT1IF
+  86              	.equ KBD_IEC, IEC1
+  87              	.equ KBD_IE, INT1IE
+  88              	.equ KBD_IPC, IPC5
+  89              	.equ KBD_IPCbit, INT1IP0
+  90              	.equ KBD_INTEP, INT1EP
+  91              	.equ KBD_INTCON, INTCON2
+  92              	
+  93              	; interface SPI RAM et EEPROM
+  94              	.equ SRAM_SEL, RB10    
+  95              	.equ EEPROM_SEL, RB9
+  96              	.equ STR_CLK,   RB8
+  97              	.equ STR_MOSI,  RB6
+  98              	.equ STR_MISO,  RB7
+  99              	.equ STR_RPINR, RPINR20
+ 100              	.equ STR_SDI_PPSbit, SDI1R0
+ 101              	.equ STR_CLK_FN, 8
+ 102              	.equ STR_SDO_FN, 7
+ 103              	.equ STR_SDO_RPOR, RPOR3
+ 104              	.equ STR_SDO_RPORbit, RP7R0    
+ 105              	.equ STR_CLK_RPOR, RPOR4
+ 106              	.equ STR_CLK_RPORbit, RP8R0    
+ 107              	.equ STR_PORT, PORTB
+ 108              	.equ STR_TRIS, TRISB
+ 109              	.equ STR_LAT, LATB
+ 110              	.equ STR_SPICON1, SPI1CON1    
+ 111              	.equ STR_SPICON2, SPI1CON2
+ 112              	.equ STR_SPISTAT, SPI1STAT
+ 113              	.equ STR_SPIBUF,  SPI1BUF    
+ 114              	
+ 115              	; communication port série
+ 116              	.equ  SER_PORT, PORTB
+ 117              	.equ  SER_LAT,  LATB
+ 118              	.equ  SER_TRIS, TRISB
+ 119              	.equ  SER_TX_OUT, 13  ; pin RP13
+ 120              	.equ  SER_RX_INP, 12  ; pin RP12  
+ 121              	.equ  SER_MODE, U1MODE
+ 122              	.equ  SER_STA,  U1STA
+ 123              	.equ  SER_BRG,  U1BRG
+ 124              	.equ  SER_TXREG, U1TXREG
+ 125              	.equ  SER_RXREG, U1RXREG
+ 126              	.equ  SER_RX_PPSbit, U1RXR0
+ 127              	.equ  SER_RX_RPINR, RPINR18
+ 128              	.equ  SER_TX_FN, 3
+ 129              	.equ  SER_TX_RPOR,  RPOR6  
+ 130              	.equ  SER_TX_PPSbit, RP13R0    
+ 131              	.equ  SER_TX_IFS, IFS0
+ 132              	.equ  SER_TX_IF,  U1TXIF
+ 133              	.equ  SER_TX_IEC, IEC0
+ 134              	.equ  SER_TX_IE,  U1TXIE
+ 135              	.equ  SER_TX_IPC,  IPC3
+ 136              	.equ  SER_TX_IPbit, U1TXIP0  
+ 137              	.equ  SER_RX_IFS, IFS0
+ 138              	.equ  SER_RX_IF,  U1RXIF
+ 139              	.equ  SER_RX_IEC, IEC0
+ 140              	.equ  SER_RX_IE,  U1RXIE
+ 141              	.equ  SER_RX_IPC, IPC2
+ 142              	.equ  SER_RX_IPbit, U1RXIP0
+ 143              	    
+ 144              	    
+ 145              	.LIST
+ 146              	 
+ 147              	; section pour regrouper les routine ISR    
+ 148              	.macro INT  
+ 149              	.section .int code
+ 150              	.align 2
+ 151              	.endm
+ 152              	
+ 153              	
+ 154              	.endif
+ 155              	
   23              	.include "ps2.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -4584,41 +4615,53 @@ DEFINED SYMBOLS
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc:2671   *ABS*:00003fff JTAGEN_OFF
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc:2672   *ABS*:00007fff JTAGEN_ON
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24Fxxxx.inc:578    *ABS*:00000001 VALID_ID
-      ./hardware.inc:26     *ABS*:00002000 RAM_SIZE
-      ./hardware.inc:27     *ABS*:00000800 RAM_BASE
-      ./hardware.inc:28     *ABS*:00002800 PSV_BASE
-      ./hardware.inc:31     *ABS*:00000001 NTSC
-      ./hardware.inc:32     *ABS*:00000002 PAL
-      ./hardware.inc:34     *ABS*:00000001 VIDEO_STD
-      ./hardware.inc:38     *ABS*:00000003 VIDEO_OUT
-      ./hardware.inc:43     *ABS*:00000008 VIDEO_RPORbit
-      ./hardware.inc:44     *ABS*:0000000a VIDEO_FN
-      ./hardware.inc:47     *ABS*:00000006 VIDEO_IF
-      ./hardware.inc:48     *ABS*:00000006 VIDEO_IE
-      ./hardware.inc:50     *ABS*:00000008 VIDEO_IPbit
-      ./hardware.inc:58     *ABS*:00000004 SYNC_OUT
-      ./hardware.inc:66     *ABS*:00000000 SYNC_RPORbit
-      ./hardware.inc:67     *ABS*:00000012 SYNC_FN
-      ./hardware.inc:70     *ABS*:00000007 SYNC_IF
-      ./hardware.inc:71     *ABS*:00000007 SYNC_IE
-      ./hardware.inc:73     *ABS*:0000000c SYNC_IPbit
-      ./hardware.inc:76     *ABS*:0000000f KBD_CLK
-      ./hardware.inc:77     *ABS*:0000000e KBD_DAT
-      ./hardware.inc:82     *ABS*:00000008 KBD_PPSbit
-      ./hardware.inc:84     *ABS*:00000004 KBD_IF
-      ./hardware.inc:86     *ABS*:00000004 KBD_IE
-      ./hardware.inc:88     *ABS*:00000000 KBD_IPCbit
-      ./hardware.inc:89     *ABS*:00000001 KBD_INTEP
-      ./hardware.inc:93     *ABS*:0000000a SRAM_SEL
-      ./hardware.inc:94     *ABS*:00000009 EEPROM_SEL
-      ./hardware.inc:95     *ABS*:00000008 STR_CLK
-      ./hardware.inc:96     *ABS*:00000006 STR_MOSI
-      ./hardware.inc:97     *ABS*:00000007 STR_MISO
-      ./hardware.inc:99     *ABS*:00000000 STR_SDI_PPSbit
-      ./hardware.inc:100    *ABS*:00000008 STR_CLK_FN
-      ./hardware.inc:101    *ABS*:00000007 STR_SDO_FN
-      ./hardware.inc:103    *ABS*:00000008 STR_SDO_RPORbit
-      ./hardware.inc:105    *ABS*:00000000 STR_CLK_RPORbit
+      ./hardware.inc:25     *ABS*:00f42400 FCY
+      ./hardware.inc:27     *ABS*:00002000 RAM_SIZE
+      ./hardware.inc:28     *ABS*:00000800 RAM_BASE
+      ./hardware.inc:29     *ABS*:00002800 PSV_BASE
+      ./hardware.inc:32     *ABS*:00000001 NTSC
+      ./hardware.inc:33     *ABS*:00000002 PAL
+      ./hardware.inc:35     *ABS*:00000001 VIDEO_STD
+      ./hardware.inc:39     *ABS*:00000003 VIDEO_OUT
+      ./hardware.inc:44     *ABS*:00000008 VIDEO_RPORbit
+      ./hardware.inc:45     *ABS*:0000000a VIDEO_FN
+      ./hardware.inc:48     *ABS*:00000006 VIDEO_IF
+      ./hardware.inc:49     *ABS*:00000006 VIDEO_IE
+      ./hardware.inc:51     *ABS*:00000008 VIDEO_IPbit
+      ./hardware.inc:59     *ABS*:00000004 SYNC_OUT
+      ./hardware.inc:67     *ABS*:00000000 SYNC_RPORbit
+      ./hardware.inc:68     *ABS*:00000012 SYNC_FN
+      ./hardware.inc:71     *ABS*:00000007 SYNC_IF
+      ./hardware.inc:72     *ABS*:00000007 SYNC_IE
+      ./hardware.inc:74     *ABS*:0000000c SYNC_IPbit
+      ./hardware.inc:77     *ABS*:0000000f KBD_CLK
+      ./hardware.inc:78     *ABS*:0000000e KBD_DAT
+      ./hardware.inc:83     *ABS*:00000008 KBD_PPSbit
+      ./hardware.inc:85     *ABS*:00000004 KBD_IF
+      ./hardware.inc:87     *ABS*:00000004 KBD_IE
+      ./hardware.inc:89     *ABS*:00000000 KBD_IPCbit
+      ./hardware.inc:90     *ABS*:00000001 KBD_INTEP
+      ./hardware.inc:94     *ABS*:0000000a SRAM_SEL
+      ./hardware.inc:95     *ABS*:00000009 EEPROM_SEL
+      ./hardware.inc:96     *ABS*:00000008 STR_CLK
+      ./hardware.inc:97     *ABS*:00000006 STR_MOSI
+      ./hardware.inc:98     *ABS*:00000007 STR_MISO
+      ./hardware.inc:100    *ABS*:00000000 STR_SDI_PPSbit
+      ./hardware.inc:101    *ABS*:00000008 STR_CLK_FN
+      ./hardware.inc:102    *ABS*:00000007 STR_SDO_FN
+      ./hardware.inc:104    *ABS*:00000008 STR_SDO_RPORbit
+      ./hardware.inc:106    *ABS*:00000000 STR_CLK_RPORbit
+      ./hardware.inc:119    *ABS*:0000000d SER_TX_OUT
+      ./hardware.inc:120    *ABS*:0000000c SER_RX_INP
+      ./hardware.inc:126    *ABS*:00000000 SER_RX_PPSbit
+      ./hardware.inc:128    *ABS*:00000003 SER_TX_FN
+      ./hardware.inc:130    *ABS*:00000008 SER_TX_PPSbit
+      ./hardware.inc:132    *ABS*:0000000c SER_TX_IF
+      ./hardware.inc:134    *ABS*:0000000c SER_TX_IE
+      ./hardware.inc:136    *ABS*:00000000 SER_TX_IPbit
+      ./hardware.inc:138    *ABS*:0000000b SER_RX_IF
+      ./hardware.inc:140    *ABS*:0000000b SER_RX_IE
+      ./hardware.inc:142    *ABS*:0000000c SER_RX_IPbit
            ./ps2.inc:26     *ABS*:00000001 PS2_INC
            ./ps2.inc:29     *ABS*:000000aa SC_BATOK
            ./ps2.inc:30     *ABS*:000000fc SC_ERROR
@@ -6242,6 +6285,7 @@ EQUATE SYMBOLS
                       JTAGEN_OFF = 0x3fff
                        JTAGEN_ON = 0x7fff
                         VALID_ID = 0x1
+                             FCY = 0xf42400
                         RAM_SIZE = 0x2000
                         RAM_BASE = 0x800
                         PSV_BASE = 0x2800
@@ -6320,6 +6364,33 @@ EQUATE SYMBOLS
                      STR_SPICON2 = SPI1CON2
                      STR_SPISTAT = SPI1STAT
                       STR_SPIBUF = SPI1BUF
+                        SER_PORT = PORTB
+                         SER_LAT = LATB
+                        SER_TRIS = TRISB
+                      SER_TX_OUT = 0xd
+                      SER_RX_INP = 0xc
+                        SER_MODE = U1MODE
+                         SER_STA = U1STA
+                         SER_BRG = U1BRG
+                       SER_TXREG = U1TXREG
+                       SER_RXREG = U1RXREG
+                   SER_RX_PPSbit = 0x0
+                    SER_RX_RPINR = RPINR18
+                       SER_TX_FN = 0x3
+                     SER_TX_RPOR = RPOR6
+                   SER_TX_PPSbit = 0x8
+                      SER_TX_IFS = IFS0
+                       SER_TX_IF = 0xc
+                      SER_TX_IEC = IEC0
+                       SER_TX_IE = 0xc
+                      SER_TX_IPC = IPC3
+                    SER_TX_IPbit = 0x0
+                      SER_RX_IFS = IFS0
+                       SER_RX_IF = 0xb
+                      SER_RX_IEC = IEC0
+                       SER_RX_IE = 0xb
+                      SER_RX_IPC = IPC2
+                    SER_RX_IPbit = 0xc
                          PS2_INC = 0x1
                         SC_BATOK = 0xaa
                         SC_ERROR = 0xfc

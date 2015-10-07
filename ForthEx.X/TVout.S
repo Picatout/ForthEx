@@ -110,12 +110,8 @@ tvout_init:
   
 ;;;;;;;;;;;;;;;;;;
 ; nettoie écran
-;;;;;;;;;;;;;;;;;; 
-DEFWORD CLS,3,,cls
-.word CLS
-.text
-.global CLS    
-CLS:
+;;;;;;;;;;;;;;;;;;
+CODE cls  
     mov #32, W0
     mov #_video_buffer, W1
     repeat #(TV_BUFFER-1)

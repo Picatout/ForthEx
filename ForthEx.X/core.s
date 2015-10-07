@@ -65,7 +65,7 @@ __reset:
     mov DSP, [UP+PBASE]
     mov #10, W0
     mov W0, [UP+BASE]
-    mov #psvoffset(test_video), W0
+    mov #psvoffset(sys_latest), W0
     mov W0, [UP+LATEST]
     mov #psvoffset(TEST), IP
     NEXT
@@ -81,10 +81,8 @@ quick:
     
     
 DEFWORD TEST,4,,TEST
-.word  CLS, test_video
-.text
-.global test_video    
-test_video:    
+.word  _cls, _test
+CODE test    
 ; test vidéo
     set_psv quick, W1
     mov #_video_buffer,W2
@@ -108,20 +106,30 @@ test_video:
     mov.b W0, [W2]
     bra 3b
 
+DEFWORD CLS,3,,CLS
+.word _cls
+
+    
 DEFWORD ENTER,5,,docol
-.word ENTER    
-.text
-ENTER:
+.word _enter    
+CODE enter
     RPUSH IP
     add WP,#2,IP
     NEXT
     
 DEFWORD EXIT,4,,exitcol
-.word EXIT
-.text
-EXIT:
+.word _exit
+CODE exit
     RPOP IP
     NEXT
+
+    
+    
+SYSDICT
+.global sys_latest
+sys_latest:
+.word link
+    
     
 .end
 

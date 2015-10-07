@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=hardware.s TVout.S font.S ps2.s keyboard.s keybind.s core.s config_bits.c store.s
+SOURCEFILES_QUOTED_IF_SPACED=hardware.s TVout.S font.S ps2.s keyboard.s keybind.s core.s config_bits.c store.s serial.s
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/hardware.o ${OBJECTDIR}/TVout.o ${OBJECTDIR}/font.o ${OBJECTDIR}/ps2.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/keybind.o ${OBJECTDIR}/core.o ${OBJECTDIR}/config_bits.o ${OBJECTDIR}/store.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/hardware.o.d ${OBJECTDIR}/TVout.o.d ${OBJECTDIR}/font.o.d ${OBJECTDIR}/ps2.o.d ${OBJECTDIR}/keyboard.o.d ${OBJECTDIR}/keybind.o.d ${OBJECTDIR}/core.o.d ${OBJECTDIR}/config_bits.o.d ${OBJECTDIR}/store.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/hardware.o ${OBJECTDIR}/TVout.o ${OBJECTDIR}/font.o ${OBJECTDIR}/ps2.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/keybind.o ${OBJECTDIR}/core.o ${OBJECTDIR}/config_bits.o ${OBJECTDIR}/store.o ${OBJECTDIR}/serial.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/hardware.o.d ${OBJECTDIR}/TVout.o.d ${OBJECTDIR}/font.o.d ${OBJECTDIR}/ps2.o.d ${OBJECTDIR}/keyboard.o.d ${OBJECTDIR}/keybind.o.d ${OBJECTDIR}/core.o.d ${OBJECTDIR}/config_bits.o.d ${OBJECTDIR}/store.o.d ${OBJECTDIR}/serial.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/hardware.o ${OBJECTDIR}/TVout.o ${OBJECTDIR}/font.o ${OBJECTDIR}/ps2.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/keybind.o ${OBJECTDIR}/core.o ${OBJECTDIR}/config_bits.o ${OBJECTDIR}/store.o
+OBJECTFILES=${OBJECTDIR}/hardware.o ${OBJECTDIR}/TVout.o ${OBJECTDIR}/font.o ${OBJECTDIR}/ps2.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/keybind.o ${OBJECTDIR}/core.o ${OBJECTDIR}/config_bits.o ${OBJECTDIR}/store.o ${OBJECTDIR}/serial.o
 
 # Source Files
-SOURCEFILES=hardware.s TVout.S font.S ps2.s keyboard.s keybind.s core.s config_bits.c store.s
+SOURCEFILES=hardware.s TVout.S font.S ps2.s keyboard.s keybind.s core.s config_bits.c store.s serial.s
 
 
 CFLAGS=
@@ -144,6 +144,13 @@ ${OBJECTDIR}/store.o: store.s  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_AS_PRE)  store.s  -o ${OBJECTDIR}/store.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_PICKIT2=1  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/store.o.d",--defsym=__MPLAB_BUILD=1,--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PICKIT2=1,-g,--no-relax,--keep-locals,-acnlsd=${OBJECTDIR}/store.lst$(MP_EXTRA_AS_POST)
 	@${FIXDEPS} "${OBJECTDIR}/store.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
+${OBJECTDIR}/serial.o: serial.s  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/serial.o.d 
+	@${RM} ${OBJECTDIR}/serial.o 
+	${MP_CC} $(MP_EXTRA_AS_PRE)  serial.s  -o ${OBJECTDIR}/serial.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_PICKIT2=1  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/serial.o.d",--defsym=__MPLAB_BUILD=1,--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PICKIT2=1,-g,--no-relax,--keep-locals,-acnlsd=${OBJECTDIR}/serial.lst$(MP_EXTRA_AS_POST)
+	@${FIXDEPS} "${OBJECTDIR}/serial.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
+	
 else
 ${OBJECTDIR}/hardware.o: hardware.s  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -186,6 +193,13 @@ ${OBJECTDIR}/store.o: store.s  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/store.o 
 	${MP_CC} $(MP_EXTRA_AS_PRE)  store.s  -o ${OBJECTDIR}/store.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/store.o.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax,--keep-locals,-acnlsd=${OBJECTDIR}/store.lst$(MP_EXTRA_AS_POST)
 	@${FIXDEPS} "${OBJECTDIR}/store.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/serial.o: serial.s  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/serial.o.d 
+	@${RM} ${OBJECTDIR}/serial.o 
+	${MP_CC} $(MP_EXTRA_AS_PRE)  serial.s  -o ${OBJECTDIR}/serial.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -omf=elf -save-temps=obj -Wa,-MD,"${OBJECTDIR}/serial.o.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax,--keep-locals,-acnlsd=${OBJECTDIR}/serial.lst$(MP_EXTRA_AS_POST)
+	@${FIXDEPS} "${OBJECTDIR}/serial.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
 endif
 

@@ -22,7 +22,8 @@
 .include "p24Fxxxx.inc"
 
 .NOLIST
-
+.equ FCY, 16000000
+    
 .equ RAM_SIZE, 0x2000
 .equ RAM_BASE, 0x800
 .equ PSV_BASE, 0x2800
@@ -111,6 +112,36 @@
 .equ STR_SPISTAT, SPI1STAT
 .equ STR_SPIBUF,  SPI1BUF    
 
+; communication port série
+.equ  SER_PORT, PORTB
+.equ  SER_LAT,  LATB
+.equ  SER_TRIS, TRISB
+.equ  SER_TX_OUT, 13  ; pin RP13
+.equ  SER_RX_INP, 12  ; pin RP12  
+.equ  SER_MODE, U1MODE
+.equ  SER_STA,  U1STA
+.equ  SER_BRG,  U1BRG
+.equ  SER_TXREG, U1TXREG
+.equ  SER_RXREG, U1RXREG
+.equ  SER_RX_PPSbit, U1RXR0
+.equ  SER_RX_RPINR, RPINR18
+.equ  SER_TX_FN, 3
+.equ  SER_TX_RPOR,  RPOR6  
+.equ  SER_TX_PPSbit, RP13R0    
+.equ  SER_TX_IFS, IFS0
+.equ  SER_TX_IF,  U1TXIF
+.equ  SER_TX_IEC, IEC0
+.equ  SER_TX_IE,  U1TXIE
+.equ  SER_TX_IPC,  IPC3
+.equ  SER_TX_IPbit, U1TXIP0  
+.equ  SER_RX_IFS, IFS0
+.equ  SER_RX_IF,  U1RXIF
+.equ  SER_RX_IEC, IEC0
+.equ  SER_RX_IE,  U1RXIE
+.equ  SER_RX_IPC, IPC2
+.equ  SER_RX_IPbit, U1RXIP0
+    
+    
 .LIST
  
 ; section pour regrouper les routine ISR    

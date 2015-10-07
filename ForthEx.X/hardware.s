@@ -49,6 +49,7 @@ hardware_init:
     call tvout_init
     call ps2_init
     call store_init
+    call serial_init
     ; verouillage configuration I/O
     bset OSCCON, #IOLOCK
     

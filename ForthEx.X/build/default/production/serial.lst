@@ -16,9 +16,12 @@
   16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
   17              	;
   18              	;****************************************************************************
-  19              	; hardware setup
-  20              	    
-  21              	.include "hardware.inc"
+  19              	
+  20              	;NOM: serial.s
+  21              	;Description:  communication port sériel RS232 via USART
+  22              	;Date: 2015-10-07
+  23              	    
+  24              	.include "hardware.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
    3              	; This file is part of ForthEx.
@@ -3407,8 +3410,120 @@
  153              	
  154              	.endif
  155              	
-  22              	.if VIDEO_STD==NTSC
-  23              	.include "ntsc_const.inc"    
+  25              	.include "core.inc"
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	;NOM: core.inc
+  20              	;Description: définition de base pour le système Forth
+  21              	;Date: 2015-10-03
+  22              	    
+  23              	; utilisation des registres    
+  24              	.equ RSP, W15 ; pile retours
+  25              	.equ DSP, W14 ; pile arguments
+  26              	.equ R, W13 ; sommet pile retour
+  27              	.equ T, W12 ; sommet pile arguments
+  28              	.equ WP, W11 ; pointeur paramètres
+  29              	.equ X, W10 ; pointeur d'adresse
+  30              	.equ UP, W9  ; pointeur variables utilisateur
+  31              	.equ IP, W8 ; pointeur d'instruction 
+  32              	.equ I, W7  ; compteur de boucle    
+  33              	    
+  34              	.equ CELL_SIZE, 2
+  35              	.equ DSTK_SIZE, 32*CELL_SIZE
+  36              	.equ RSTK_SIZE, 64*CELL_SIZE
+  37              	
+  38              	;offset variables utilisateurs
+  39              	.equ RBASE, 0  ; adresse début pile retours
+  40              	.equ PBASE, 2  ; adresse début pile paramètres
+  41              	.equ BASE, 4   ; base numérique
+  42              	.equ HERE, 6   ; valeur du pointeur HERE
+  43              	.equ LATEST, 8 ; pointeur dernière définition    
+  44              	    
+  45              	;;;;;;;;;;;;    
+  46              	; macros
+  47              	;;;;;;;;;;;;
+  48              	.macro NEXT
+  49              	    mov [IP++], WP
+  50              	    goto WP
+  51              	.endm    
+  52              	    
+  53              	.macro DPUSH  
+  54              	    mov T, [++DSP]
+  55              	.endm
+  56              	    
+  57              	.macro DPOP
+  58              	    mov [DSP--], T
+  59              	.endm
+  60              	    
+  61              	.macro RPUSH reg
+  62              	    push R
+  63              	    mov \reg, R
+  64              	.endm
+  65              	    
+  66              	.macro RPOP reg
+  67              	    mov R, \reg
+  68              	    pop R
+  69              	.endm
+  70              	    
+  71              	.macro DSWAP
+  72              	    mov T, W0
+  73              	    DPOP
+  74              	    mov W0, [++DSP]
+  75              	.endm
+  76              	
+  77              	.macro SYSDICT
+  78              	    .section .sysdict psv
+  79              	    .align 2
+  80              	.endm
+  81              	    
+  82              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+  83              	; macro empruntée et modifiée, à partir de Jones Forth    
+  84              	;REF: http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
+  85              	; Flags
+  86              	.equ F_IMMED,0x80
+  87              	.equ F_HIDDEN,0x20
+  88              	.equ F_LENMASK,0x1f	; length mask
+  89              	
+  90              	; Store the chain of links.
+  91              	.equ link,0
+  92              	
+  93              	.macro DEFWORD name, namelen, flags=0, label
+  94              	    .section .sysdict psv
+  95              	    .align 2
+  96              	    .global name_\label
+  97              	name_\label :
+  98              	    .word link		; lien vers élément précédent du dictionnaire
+  99              	    .equ link, name_\label
+ 100              	    .byte \flags+\namelen	; flags + length byte
+ 101              	    .ascii "\name"		; the name
+ 102              	    .align 2		; padding to next 2 byte boundary
+ 103              	    .global \label
+ 104              	\label :
+ 105              		; list of word pointers follow
+ 106              	.endm
+ 107              		
+ 108              	.macro CODE name
+ 109              	    .text
+ 110              	    .global _\name
+ 111              	    _\name :
+ 112              	.endm
+  26              	.include "serial.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
    3              	; This file is part of ForthEx.
@@ -3428,84 +3543,111 @@
   17              	;
   18              	;****************************************************************************
   19              	
-  20              	; constantes génération signal NTSC
-  21              	; REF: http://www.ntsc-tv.com/
-  22              	.ifndef NTSC_CONST
-  23              	.equ NTSC_CONST, 1
-  24              	    
-  25              	.equ HFREQ, 15748 ; fréquence horizontale pour information seulement
-  26              	.equ HLINE, 1015 ; PR2= période ligne horizontale
-  27              	.equ HSYNC, 74  ; OC1R=47e-6*FCY-1 sync pulse horizontal
-  28              	.equ HALFLINE, 507 ; période demi-ligne horizontale (VSYNC)
-  29              	.equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
-  30              	.equ TOPLINE, 40  ; première ligne visible
-  31              	.equ ELPFRM,  271  ; nombre de lignes par frame pair
-  32              	.equ OLPFRM,  272  ; nombre de lignes par frame impair
-  33              	.equ VIDEO_DLY, 50 ; délais déclenche interruption video=HSYNC+VIDEO_DLY
-  34              	
-  35              	.endif
-  36              	
-  37              	
-  24              	.else
-  25              	.include "pal_const.inc"
-  26              	.endif
+  20              	;NOM: serial.inc
+  21              	;Description:  communication port sériel RS232 via USART
+  22              	;Date: 2015-10-07
+  23              	
+  24              	.equ  XON,  17
+  25              	.equ  XOFF, 19
   27              	    
-  28              	.data 
-  29                 	.global systicks    
-  30                 	systicks:
-  31 0000 00 00       	.word 0
-  32                 	    
-  33                 	.text
-  34              	.global hardware_init
-  35              	hardware_init:
-  36 000000  00 40 A9 	    bclr CORCON, #PSV
-  37 000002  00 00 EB 	    clr W0
-  38 000004  00 00 88 	    mov W0, PSVPAG
-  39 000006  00 40 A8 	    bset CORCON, #PSV ; espace programme visible en RAM
-  40 000008  00 20 EF 	    clr CLKDIV
-  41 00000a  01 00 A8 	    bset OSCCON, #NOSC0
-  42 00000c  00 E0 A8 	    bset OSCCON, #CLKLOCK ; verrouillage clock
-  43 00000e  01 E0 A9 	    bclr INTCON1, #NSTDIS ; interruption multi-niveaux
-  44 000010  00 A0 EF 	    setm TRISA      ; port A tout en entrée
-  45 000012  00 A0 EF 	    setm TRISB      ; port B tout en entrée
-  46 000014  00 A0 EF 	    setm CNPU1       ;activation pullup
-  47 000016  00 A0 EF 	    setm CNPU2
-  48 000018  00 A0 EF 	    setm AD1PCFG    ; désactivation entrées analogiques
-  49 00001a  00 00 02 	    call tvout_init
-  49         00 00 00 
-  50 00001e  00 00 02 	    call ps2_init
-  50         00 00 00 
-  51 000022  00 00 02 	    call store_init
-  51         00 00 00 
-  52 000026  00 00 02 	    call serial_init
-  52         00 00 00 
-  53              	    ; verouillage configuration I/O
-  54 00002a  00 C0 A8 	    bset OSCCON, #IOLOCK
-  55              	    
-  56 00002c  00 00 06 	    return
-  57              	
-  58              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  59              	;  délais en millisecondes
-  60              	;  entrée: W0 délais
-  61              	; utilise W0,W1
-  62              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-  63              	.global delay_msec    
-  64              	delay_msec:    
-  65 00002e  01 00 80 	    mov systicks, W1
-  66 000030  80 80 40 	    add W1,W0,W1
-  67              	 1:
-  68 000032  00 00 80 	    mov systicks, W0
-  69 000034  01 00 E1 	    cp W0, W1
-  70 000036  00 00 3A 	    bra neq, 1b
-  71 000038  00 00 06 	    return
-  72              	
-  73              	.end
+  28              	
+  29              	.equ BUFF_SIZE, 16    
+  30              	.data
+  31 0000 00 00 00 00 	rx_queue: .space BUFF_SIZE
+  31      00 00 00 00 
+  31      00 00 00 00 
+  31      00 00 00 00 
+  32 0010 00 00 00 00 	tx_queue: .space BUFF_SIZE
+  32      00 00 00 00 
+  32      00 00 00 00 
+  32      00 00 00 00 
+  33 0020 00          	rx_head:  .space 1
+  34 0021 00          	rx_tail:  .space 1
+  35 0022 00          	tx_head:  .space 1
+  36 0023 00          	tx_tail:  .space 1
+  37                 	  
+  38                 	 
+  39                 	.text
+  40              	    
+  41              	.global serial_init
+  42              	serial_init:
+  43              	    ; mettre broche en mode sortie
+  44 000000  F0 FF 2D 	    mov #~(1<<SER_TX_OUT), W0
+  45 000002  00 20 B6 	    and SER_TRIS
+  46              	    ; sélection PPS pour transmission
+  47 000004  F0 0F 2E 	    mov #~(0x1f<<SER_TX_PPSbit), W0
+  48 000006  00 20 B6 	    and SER_TX_RPOR
+  49 000008  00 30 20 	    mov #(SER_TX_FN<<SER_TX_PPSbit), W0
+  50 00000a  00 20 B7 	    ior SER_TX_RPOR
+  51              	    ; sélection PPS pour réception
+  52 00000c  00 FE 2F 	    mov #~(0x1f<<SER_RX_PPSbit), W0
+  53 00000e  00 20 B6 	    and SER_RX_RPINR
+  54 000010  C0 00 20 	    mov #(SER_RX_INP<<SER_RX_PPSbit), W0
+  55 000012  00 20 B7 	    ior SER_RX_RPINR
+  56              	    ; baud rate 9600
+  57 000014  70 06 20 	    mov #(FCY/(16*9600)-1), W0
+  58 000016  00 00 88 	    mov W0, SER_BRG
+  59              	    ; activation  8 bits, 1 stop, pas de paritée
+  60 000018  00 00 28 	    mov #(1<<15), W0
+  61 00001a  00 00 88 	    mov W0, SER_MODE
+  62              	    ;priorisation interruption
+  63 00001c  80 FF 2F 	    mov #~(7<<SER_TX_IPbit), W0
+  64 00001e  00 20 B6 	    and SER_TX_IPC
+  65 000020  30 00 20 	    mov #(3<<SER_TX_IPbit), W0
+  66 000022  00 20 B7 	    ior SER_TX_IPC
+  67 000024  F0 FF 28 	    mov #~(7<<SER_RX_IPbit), W0
+  68 000026  00 20 B6 	    and SER_RX_IPC
+  69 000028  00 00 23 	    mov #(3<<SER_RX_IPbit), W0
+  70 00002a  00 20 B7 	    ior SER_RX_IPC
+  71              	    ; activation interrupts
+  72 00002c  01 80 A9 	    bclr SER_TX_IFS, #SER_TX_IF
+  73 00002e  01 80 A8 	    bset SER_TX_IEC, #SER_TX_IE
+  74 000030  01 60 A9 	    bclr SER_RX_IFS, #SER_RX_IF
+  75 000032  01 60 A8 	    bset SER_RX_IEC, #SER_RX_IE
+  76 000034  10 01 20 	    mov #XON, W0
+  77 000036  00 00 88 	    mov W0, SER_TXREG
+  78 000038  00 00 06 	    return
+  79              	 
+  80              	    
+  81              	CODE ser_put
+  82 00003a  01 20 AF 	1:  btsc SER_STA, #UTXBF
+  83 00003c  00 00 37 	    bra 1b
+  84 00003e  0C 00 88 	    mov T, SER_TXREG
+  85 000040  2E 06 78 	    DPOP
+  86 000042  B8 05 78 	    NEXT
+  86         0B 40 01 
+  87              	    
+  88              	CODE ser_get
+  89 000046  0C 2F 78 	    DPUSH
+  90 000048  00 06 EB 	    clr T
+  91 00004a  00 00 AF 	    btsc SER_STA, #URXDA
+  92 00004c  0C 00 80 	    mov SER_RXREG, T
+  93 00004e  B8 05 78 	    NEXT
+  93         0B 40 01 
+  94              	    
+  95              	    
+  96              	    
+  97              	INT
+  98              	.global __U1RXInterrupt
+  99              	__U1RXInterrupt:
+ 100              	    
+ 101 000000  01 60 A9 	    bclr  SER_RX_IFS, #SER_RX_IF
+ 102 000002  00 40 06 	    retfie
+ 103              	    
+ 104              	    
+ 105              	.global __U1TXInterrupt
+ 106              	__U1TXInterrupt:
+ 107              	    
+ 108 000004  01 80 A9 	    bclr SER_TX_IFS, #SER_TX_IF
+ 109 000006  00 40 06 	    retfie
+ 110              	.end
 DEFINED SYMBOLS
-                            *ABS*:00000000 ./ntsc_const.inc
+                            *ABS*:00000000 ./serial.inc
+                            *ABS*:00000000 ./core.inc
                             *ABS*:00000000 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc
                             *ABS*:00000000 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24Fxxxx.inc
                             *ABS*:00000000 ./hardware.inc
-                            *ABS*:00000000 hardware.s
+                            *ABS*:00000000 serial.s
                             *ABS*:00000001 __MPLAB_BUILD
                             *ABS*:00000001 __24FJ64GA002
                             *ABS*:00000001 __PIC24F
@@ -4562,101 +4704,152 @@ DEFINED SYMBOLS
       ./hardware.inc:138    *ABS*:0000000b SER_RX_IF
       ./hardware.inc:140    *ABS*:0000000b SER_RX_IE
       ./hardware.inc:142    *ABS*:0000000c SER_RX_IPbit
-    ./ntsc_const.inc:23     *ABS*:00000001 NTSC_CONST
-    ./ntsc_const.inc:25     *ABS*:00003d84 HFREQ
-    ./ntsc_const.inc:26     *ABS*:000003f7 HLINE
-    ./ntsc_const.inc:27     *ABS*:0000004a HSYNC
-    ./ntsc_const.inc:28     *ABS*:000001fb HALFLINE
-    ./ntsc_const.inc:29     *ABS*:00000025 SERATION
-    ./ntsc_const.inc:30     *ABS*:00000028 TOPLINE
-    ./ntsc_const.inc:31     *ABS*:0000010f ELPFRM
-    ./ntsc_const.inc:32     *ABS*:00000110 OLPFRM
-    ./ntsc_const.inc:33     *ABS*:00000032 VIDEO_DLY
-          hardware.s:30     .data:00000000 systicks
-          hardware.s:35     .text:00000000 hardware_init
-          hardware.s:64     .text:0000002e delay_msec
-          hardware.s:67     .text:00000032 L11
+          ./core.inc:34     *ABS*:00000002 CELL_SIZE
+          ./core.inc:35     *ABS*:00000040 DSTK_SIZE
+          ./core.inc:36     *ABS*:00000080 RSTK_SIZE
+          ./core.inc:39     *ABS*:00000000 RBASE
+          ./core.inc:40     *ABS*:00000002 PBASE
+          ./core.inc:41     *ABS*:00000004 BASE
+          ./core.inc:42     *ABS*:00000006 HERE
+          ./core.inc:43     *ABS*:00000008 LATEST
+          ./core.inc:86     *ABS*:00000080 F_IMMED
+          ./core.inc:87     *ABS*:00000020 F_HIDDEN
+          ./core.inc:88     *ABS*:0000001f F_LENMASK
+          ./core.inc:91     *ABS*:00000000 link
+        ./serial.inc:24     *ABS*:00000011 XON
+        ./serial.inc:25     *ABS*:00000013 XOFF
+            serial.s:29     *ABS*:00000010 BUFF_SIZE
+            serial.s:31     .data:00000000 rx_queue
+            serial.s:32     .data:00000010 tx_queue
+            serial.s:33     .data:00000020 rx_head
+            serial.s:34     .data:00000021 rx_tail
+            serial.s:35     .data:00000022 tx_head
+            serial.s:36     .data:00000023 tx_tail
+            serial.s:42     .text:00000000 serial_init
+            serial.s:81     .text:0000003a _ser_put
+            serial.s:82     .text:0000003a L11
+            serial.s:88     .text:00000046 _ser_get
+            serial.s:99     .int:00000000 __U1RXInterrupt
+            serial.s:106    .int:00000004 __U1TXInterrupt
                       .debug_line:00000000 .L0
-                      .debug_line:00000028 .L0
-          hardware.s:73     .debug_line:00000051 .L0
-          hardware.s:36     .text:00000000 .L0
-          hardware.s:37     .text:00000002 .L0
-          hardware.s:36     .text:00000000 .L0
-          hardware.s:38     .text:00000004 .L0
-          hardware.s:37     .text:00000002 .L0
-          hardware.s:39     .text:00000006 .L0
-          hardware.s:38     .text:00000004 .L0
-          hardware.s:40     .text:00000008 .L0
-          hardware.s:39     .text:00000006 .L0
-          hardware.s:41     .text:0000000a .L0
-          hardware.s:40     .text:00000008 .L0
-          hardware.s:42     .text:0000000c .L0
-          hardware.s:41     .text:0000000a .L0
-          hardware.s:43     .text:0000000e .L0
-          hardware.s:42     .text:0000000c .L0
-          hardware.s:44     .text:00000010 .L0
-          hardware.s:43     .text:0000000e .L0
-          hardware.s:45     .text:00000012 .L0
-          hardware.s:44     .text:00000010 .L0
-          hardware.s:46     .text:00000014 .L0
-          hardware.s:45     .text:00000012 .L0
-          hardware.s:47     .text:00000016 .L0
-          hardware.s:46     .text:00000014 .L0
-          hardware.s:48     .text:00000018 .L0
-          hardware.s:47     .text:00000016 .L0
-          hardware.s:49     .text:0000001a .L0
-          hardware.s:48     .text:00000018 .L0
-          hardware.s:50     .text:0000001e .L0
-          hardware.s:49     .text:0000001a .L0
-          hardware.s:51     .text:00000022 .L0
-          hardware.s:50     .text:0000001e .L0
-          hardware.s:52     .text:00000026 .L0
-          hardware.s:51     .text:00000022 .L0
-          hardware.s:54     .text:0000002a .L0
-          hardware.s:52     .text:00000026 .L0
-          hardware.s:56     .text:0000002c .L0
-          hardware.s:54     .text:0000002a .L0
-          hardware.s:65     .text:0000002e .L0
-          hardware.s:56     .text:0000002c .L0
-          hardware.s:66     .text:00000030 .L0
-          hardware.s:65     .text:0000002e .L0
-          hardware.s:68     .text:00000032 .L0
-          hardware.s:66     .text:00000030 .L0
-          hardware.s:69     .text:00000034 .L0
-          hardware.s:68     .text:00000032 .L0
-          hardware.s:70     .text:00000036 .L0
-          hardware.s:69     .text:00000034 .L0
-          hardware.s:71     .text:00000038 .L0
-          hardware.s:70     .text:00000036 .L0
-          hardware.s:73     .text:0000003a .L0
-          hardware.s:71     .text:00000038 .L0
+                      .debug_line:00000026 .L0
+            serial.s:110    .debug_line:0000006e .L0
+            serial.s:101    .int:00000000 .L0
+            serial.s:102    .int:00000002 .L0
+            serial.s:101    .int:00000000 .L0
+            serial.s:108    .int:00000004 .L0
+            serial.s:102    .int:00000002 .L0
+            serial.s:109    .int:00000006 .L0
+            serial.s:108    .int:00000004 .L0
+            serial.s:110    .int:00000008 .L0
+            serial.s:109    .int:00000006 .L0
+            serial.s:44     .text:00000000 .L0
+            serial.s:45     .text:00000002 .L0
+            serial.s:44     .text:00000000 .L0
+            serial.s:47     .text:00000004 .L0
+            serial.s:45     .text:00000002 .L0
+            serial.s:48     .text:00000006 .L0
+            serial.s:47     .text:00000004 .L0
+            serial.s:49     .text:00000008 .L0
+            serial.s:48     .text:00000006 .L0
+            serial.s:50     .text:0000000a .L0
+            serial.s:49     .text:00000008 .L0
+            serial.s:52     .text:0000000c .L0
+            serial.s:50     .text:0000000a .L0
+            serial.s:53     .text:0000000e .L0
+            serial.s:52     .text:0000000c .L0
+            serial.s:54     .text:00000010 .L0
+            serial.s:53     .text:0000000e .L0
+            serial.s:55     .text:00000012 .L0
+            serial.s:54     .text:00000010 .L0
+            serial.s:57     .text:00000014 .L0
+            serial.s:55     .text:00000012 .L0
+            serial.s:58     .text:00000016 .L0
+            serial.s:57     .text:00000014 .L0
+            serial.s:60     .text:00000018 .L0
+            serial.s:58     .text:00000016 .L0
+            serial.s:61     .text:0000001a .L0
+            serial.s:60     .text:00000018 .L0
+            serial.s:63     .text:0000001c .L0
+            serial.s:61     .text:0000001a .L0
+            serial.s:64     .text:0000001e .L0
+            serial.s:63     .text:0000001c .L0
+            serial.s:65     .text:00000020 .L0
+            serial.s:64     .text:0000001e .L0
+            serial.s:66     .text:00000022 .L0
+            serial.s:65     .text:00000020 .L0
+            serial.s:67     .text:00000024 .L0
+            serial.s:66     .text:00000022 .L0
+            serial.s:68     .text:00000026 .L0
+            serial.s:67     .text:00000024 .L0
+            serial.s:69     .text:00000028 .L0
+            serial.s:68     .text:00000026 .L0
+            serial.s:70     .text:0000002a .L0
+            serial.s:69     .text:00000028 .L0
+            serial.s:72     .text:0000002c .L0
+            serial.s:70     .text:0000002a .L0
+            serial.s:73     .text:0000002e .L0
+            serial.s:72     .text:0000002c .L0
+            serial.s:74     .text:00000030 .L0
+            serial.s:73     .text:0000002e .L0
+            serial.s:75     .text:00000032 .L0
+            serial.s:74     .text:00000030 .L0
+            serial.s:76     .text:00000034 .L0
+            serial.s:75     .text:00000032 .L0
+            serial.s:77     .text:00000036 .L0
+            serial.s:76     .text:00000034 .L0
+            serial.s:78     .text:00000038 .L0
+            serial.s:77     .text:00000036 .L0
+            serial.s:82     .text:0000003a .L0
+            serial.s:78     .text:00000038 .L0
+            serial.s:83     .text:0000003c .L0
+            serial.s:82     .text:0000003a .L0
+            serial.s:84     .text:0000003e .L0
+            serial.s:83     .text:0000003c .L0
+            serial.s:85     .text:00000040 .L0
+            serial.s:84     .text:0000003e .L0
+            serial.s:86     .text:00000042 .L0
+            serial.s:85     .text:00000040 .L0
+            serial.s:89     .text:00000046 .L0
+            serial.s:86     .text:00000042 .L0
+            serial.s:90     .text:00000048 .L0
+            serial.s:89     .text:00000046 .L0
+            serial.s:91     .text:0000004a .L0
+            serial.s:90     .text:00000048 .L0
+            serial.s:92     .text:0000004c .L0
+            serial.s:91     .text:0000004a .L0
+            serial.s:93     .text:0000004e .L0
+            serial.s:92     .text:0000004c .L0
+            serial.s:97     .text:00000052 .L0
+            serial.s:93     .text:0000004e .L0
+                             .int:00000000 .L0
+            serial.s:110    .int:00000008 .L0
                             .text:00000000 .L0
-          hardware.s:73     .text:0000003a .L0
+            serial.s:97     .text:00000052 .L0
                       .debug_info:00000000 .L0
-                      .debug_info:00000087 .L0
+                      .debug_info:0000007d .L0
 
 UNDEFINED SYMBOLS
-PSVPAG
-CORCON
-CNPU1
-CNPU2
-INTCON1
-TRISA
+IFS0
+IEC0
+IPC2
+IPC3
+U1MODE
+U1STA
+U1TXREG
+U1RXREG
+U1BRG
 TRISB
-AD1PCFG
-OSCCON
-CLKDIV
-tvout_init
-ps2_init
-store_init
-serial_init
+RPINR18
+RPOR6
 
 EQUATE SYMBOLS
-                ./ntsc_const.inc = 0x0
+                    ./serial.inc = 0x0
+                      ./core.inc = 0x0
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc = 0x0
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24Fxxxx.inc = 0x0
                   ./hardware.inc = 0x0
-                      hardware.s = 0x0
+                        serial.s = 0x0
                    __MPLAB_BUILD = 0x1
                    __24FJ64GA002 = 0x1
                         __PIC24F = 0x1
@@ -6198,13 +6391,18 @@ EQUATE SYMBOLS
                        SER_RX_IE = 0xb
                       SER_RX_IPC = IPC2
                     SER_RX_IPbit = 0xc
-                      NTSC_CONST = 0x1
-                           HFREQ = 0x3d84
-                           HLINE = 0x3f7
-                           HSYNC = 0x4a
-                        HALFLINE = 0x1fb
-                        SERATION = 0x25
-                         TOPLINE = 0x28
-                          ELPFRM = 0x10f
-                          OLPFRM = 0x110
-                       VIDEO_DLY = 0x32
+                       CELL_SIZE = 0x2
+                       DSTK_SIZE = 0x40
+                       RSTK_SIZE = 0x80
+                           RBASE = 0x0
+                           PBASE = 0x2
+                            BASE = 0x4
+                            HERE = 0x6
+                          LATEST = 0x8
+                         F_IMMED = 0x80
+                        F_HIDDEN = 0x20
+                       F_LENMASK = 0x1f
+                            link = 0x0
+                             XON = 0x11
+                            XOFF = 0x13
+                       BUFF_SIZE = 0x10
