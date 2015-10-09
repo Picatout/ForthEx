@@ -45,6 +45,7 @@
 .data
 line_count: .word 0xffff
 even: .byte 0xff
+.align 2
 xpos: .byte 0
 ypos: .byte 0
 
@@ -115,11 +116,12 @@ tvout_init:
 ;;;;;;;;;;;;;;;;;;
 ; nettoie écran
 ;;;;;;;;;;;;;;;;;;
-CODE cls
-    mov #32, W0
+DEFCODE CLS,3,,CLS
+    mov #0x2020, W0
     mov #_video_buffer, W1
-    repeat #(TV_BUFFER-1)
-    mov.b W0,[W1++]
+    repeat #(TV_BUFFER/2-1)
+    mov W0,[W1++]
+    clr xpos ; xpos=0, ypos=0
     NEXT
 
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -127,6 +129,22 @@ CODE cls
 ; au sommet de la pile
 ; dans le buffer video
 ;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE EMIT,4,,EMIT
+    mov.b #CPL, W0
+    mul.b ypos
+    mov.b xpos, WREG
+    ze W0,W0
+    add W0,W2,W0
+    mov #_video_buffer, W1
+    add W0,W1,W1
+    mov.b T, [W1]
+    DPOP
+    NEXT
+
+DEFCODE SPACE,5,,SPACE
+    DPUSH
+    mov #32, T
+    bra EMIT
 
 
 

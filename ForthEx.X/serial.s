@@ -26,11 +26,11 @@
 .include "serial.inc"
     
 
-.equ BUFF_SIZE, 16
+.equ QUEUE_SIZE, 16
     
 .data
-rx_queue: .space BUFF_SIZE
-tx_queue: .space BUFF_SIZE
+rx_queue: .space QUEUE_SIZE
+tx_queue: .space QUEUE_SIZE
 rx_head:  .space 1
 rx_tail:  .space 1
 tx_head:  .space 1
@@ -58,7 +58,7 @@ serial_init:
     mov #(FCY/(16*9600)-1), W0
     mov W0, SER_BRG
     ; activation  8 bits, 1 stop, pas de paritée
-    bset SER_MOD, #UARTEN
+    bset SER_MODE, #UARTEN
     bset SER_STA, #UTXEN
     ;priorisation interruption
     mov #~(7<<SER_TX_IPbit), W0
@@ -79,18 +79,46 @@ serial_init:
     return
  
     
-CODE ser_put
-1:  btsc SER_STA, #UTXBF
-    bra 1b
-    mov T, SER_TXREG
+DEFCODE SEMIT,5,,SEMIT
+    mov #QUEUE_SIZE, W0
+1:
+    cp.b tx_tail
+    bra eq, 1b ; file pleine
+    mov.b tx_tail, WREG
+    ze W0,W0
+    mov #tx_queue, W1
+    add W0,W1,W1
+    mov.b T, [W1]
+    btss SER_STA, #TRMT
+    bset SER_TX_IFS, #SER_TX_IF
     DPOP
     NEXT
     
-CODE ser_get
+DEFCODE SGET,4,,SGET
     DPUSH
     clr T
-    btsc SER_STA, #URXDA
-    mov SER_RXREG, T
+    mov.b rx_head, WREG
+    cp.b  rx_tail
+    bra neq, 1f
+    ze W0,W0
+    cp W0, #QUEUE_SIZE
+    bra neq, 2f
+    clr rx_head  ; remet rx_head et rx_tail à zéro
+0:    
+    btsc SER_STA, #UTXBF
+    bra 0b
+    mov #XON, W0
+    mov W0, SER_TXREG
+    bra 2f
+1:    
+    ze W0,W0
+    mov #rx_queue, W1
+    add W0,W1,W1
+    mov.b [W1], T
+    inc.b rx_head
+    mov #QUEUE_SIZE, W0
+    cp.b rx_head
+2:    
     NEXT
     
     
@@ -98,33 +126,52 @@ CODE ser_get
 INT
 .global __U1RXInterrupt
 __U1RXInterrupt:
-    mov #rx_queue, W0
-    add.b rx_tail, WREG
-    mov SER_RXBUF, W1
-    ze W1
-    mov.b W1, [W0]
+    bclr  SER_RX_IFS, #SER_RX_IF
+    push W0
+    push W1
+    mov.b rx_tail, WREG
+    ze W0,W0
+    cp W0, #QUEUE_SIZE ; PIC24F <#lit5>, PIC24E <#lit8>
+    bra eq, 0f
+    mov #rx_queue, W1
+    add W0,W1,W1
+    mov SER_RXREG, W0
+    mov.b W0, [W1]
     inc.b rx_tail
-    mov #(BUFF_SIZE-1), W0
-    and.b rx_tail
-    mov rx_tail, W0
-    cp W0, #(BUFF_SIZE-4)
+    mov #(QUEUE_SIZE-4), W0
+    cp.b rx_tail
     bra ltu, 1f
-    btsc SER_STA, #TXBF
+0:    
+    btsc SER_STA, #UTXBF
     bra 1f
-    mov #XON, W0
+    mov #XOFF, W0
     mov W0, SER_TXREG
 1:    
-    bclr  SER_RX_IFS, #SER_RX_IF
+    pop W1
+    pop W0
     retfie
     
     
 .global __U1TXInterrupt
 __U1TXInterrupt:
-    mov tx_head, W0
-    cp  tx_tail
-    bra eq, 2f
-    
-2:    
     bclr SER_TX_IFS, #SER_TX_IF
+    push W0
+    push W1
+    mov.b tx_head,WREG
+    cp.b  tx_tail
+    bra eq, 2f ; file vide
+    ze W0,W0
+    mov #tx_queue, W1
+    add W0,W1,W1
+    mov.b [W1],W0
+    mov W0, SER_TXREG
+    inc.b tx_head
+    mov #(QUEUE_SIZE), W0
+    cp.b tx_head
+    bra ltu, 2f
+    clr tx_head  ; remet tx_head et tx_tail à zéro
+2:    
+    pop W1
+    pop W0
     retfie
 .end

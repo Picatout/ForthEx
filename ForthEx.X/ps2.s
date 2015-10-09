@@ -77,8 +77,9 @@ ps2_init:
 .global __INT1Interrupt
  INT
 __INT1Interrupt:
-    push W0
-    push W1
+;    push W0
+;    push W1
+    push.s
     ; lecture du bit sur ligne PS/2 data
     mov KBD_PORT, W0
     btst.c W0,#KBD_DAT
@@ -100,8 +101,9 @@ __INT1Interrupt:
     mov #SENTRY, W0
     mov W0, ps2_shiftin
 1:    
-    pop W1
-    pop W0
+;    pop W1
+;    pop W0
+    pop.s
     bclr KBD_IFS, #KBD_IF
     retfie
 .end    

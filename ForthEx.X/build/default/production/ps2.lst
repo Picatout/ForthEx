@@ -3572,34 +3572,36 @@
   77              	.global __INT1Interrupt
   78              	 INT
   79              	__INT1Interrupt:
-  80 000000  80 1F 78 	    push W0
-  81 000002  81 1F 78 	    push W1
-  82              	    ; lecture du bit sur ligne PS/2 data
-  83 000004  00 00 80 	    mov KBD_PORT, W0
-  84 000006  00 E0 A3 	    btst.c W0,#KBD_DAT
-  85 000008  00 A0 D7 	    rrc ps2_shiftin
-  86 00000a  00 00 39 	    bra nc, 1f
-  87              	;    ; si le carry==1 les 11 bits sont lus
-  88              	;    ; sauvegarde dans ps2_queue
-  89 00000c  00 00 20 	    mov #ps2_queue, W0
-  90 00000e  01 00 80 	    mov ps2_tail, W1
-  91 000010  81 00 40 	    add W0, W1, W1
-  92 000012  00 00 80 	    mov ps2_shiftin,W0
-  93 000014  45 00 DE 	    lsr W0,#5,W0
-  94 000016  80 08 78 	    mov W0,[W1]
-  95              	;    ; ajustement de l'index fin de queue
-  96 000018  00 A0 EC 	    inc2 ps2_tail
-  97 00001a  F0 01 20 	    mov #(PS2_QUEUE_SIZE-1), W0
-  98 00001c  00 20 B6 	    and ps2_tail
-  99              	;    ; réinitialisation registre réception
- 100 00001e  00 40 20 	    mov #SENTRY, W0
- 101 000020  00 00 88 	    mov W0, ps2_shiftin
- 102              	1:    
- 103 000022  CF 00 78 	    pop W1
- 104 000024  4F 00 78 	    pop W0
- 105 000026  00 80 A9 	    bclr KBD_IFS, #KBD_IF
- 106 000028  00 40 06 	    retfie
- 107              	.end    
+  80              	;    push W0
+  81              	;    push W1
+  82 000000  00 A0 FE 	    push.s
+  83              	    ; lecture du bit sur ligne PS/2 data
+  84 000002  00 00 80 	    mov KBD_PORT, W0
+  85 000004  00 E0 A3 	    btst.c W0,#KBD_DAT
+  86 000006  00 A0 D7 	    rrc ps2_shiftin
+  87 000008  00 00 39 	    bra nc, 1f
+  88              	;    ; si le carry==1 les 11 bits sont lus
+  89              	;    ; sauvegarde dans ps2_queue
+  90 00000a  00 00 20 	    mov #ps2_queue, W0
+  91 00000c  01 00 80 	    mov ps2_tail, W1
+  92 00000e  81 00 40 	    add W0, W1, W1
+  93 000010  00 00 80 	    mov ps2_shiftin,W0
+  94 000012  45 00 DE 	    lsr W0,#5,W0
+  95 000014  80 08 78 	    mov W0,[W1]
+  96              	;    ; ajustement de l'index fin de queue
+  97 000016  00 A0 EC 	    inc2 ps2_tail
+  98 000018  F0 01 20 	    mov #(PS2_QUEUE_SIZE-1), W0
+  99 00001a  00 20 B6 	    and ps2_tail
+ 100              	;    ; réinitialisation registre réception
+ 101 00001c  00 40 20 	    mov #SENTRY, W0
+ 102 00001e  00 00 88 	    mov W0, ps2_shiftin
+ 103              	1:    
+ 104              	;    pop W1
+ 105              	;    pop W0
+ 106 000020  00 80 FE 	    pop.s
+ 107 000022  00 80 A9 	    bclr KBD_IFS, #KBD_IF
+ 108 000024  00 40 06 	    retfie
+ 109              	.end    
 DEFINED SYMBOLS
                             *ABS*:00000000 ./ps2.inc
                             *ABS*:00000000 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc
@@ -4734,53 +4736,49 @@ DEFINED SYMBOLS
                ps2.s:29     .data:00000000 ps2_shiftin
                ps2.s:43     .text:00000000 ps2_init
                ps2.s:79     .int:00000000 __INT1Interrupt
-               ps2.s:102    .int:00000022 L11
+               ps2.s:103    .int:00000020 L11
                       .debug_line:00000000 .L0
                       .debug_line:00000023 .L0
-               ps2.s:107    .debug_line:0000006a .L0
-               ps2.s:80     .int:00000000 .L0
-               ps2.s:81     .int:00000002 .L0
-               ps2.s:80     .int:00000000 .L0
-               ps2.s:83     .int:00000004 .L0
-               ps2.s:81     .int:00000002 .L0
-               ps2.s:84     .int:00000006 .L0
-               ps2.s:83     .int:00000004 .L0
-               ps2.s:85     .int:00000008 .L0
-               ps2.s:84     .int:00000006 .L0
-               ps2.s:86     .int:0000000a .L0
-               ps2.s:85     .int:00000008 .L0
-               ps2.s:89     .int:0000000c .L0
-               ps2.s:86     .int:0000000a .L0
-               ps2.s:90     .int:0000000e .L0
-               ps2.s:89     .int:0000000c .L0
-               ps2.s:91     .int:00000010 .L0
-               ps2.s:90     .int:0000000e .L0
-               ps2.s:92     .int:00000012 .L0
-               ps2.s:91     .int:00000010 .L0
-               ps2.s:93     .int:00000014 .L0
-               ps2.s:92     .int:00000012 .L0
-               ps2.s:94     .int:00000016 .L0
-               ps2.s:93     .int:00000014 .L0
-               ps2.s:96     .int:00000018 .L0
-               ps2.s:94     .int:00000016 .L0
-               ps2.s:97     .int:0000001a .L0
-               ps2.s:96     .int:00000018 .L0
-               ps2.s:98     .int:0000001c .L0
-               ps2.s:97     .int:0000001a .L0
-               ps2.s:100    .int:0000001e .L0
-               ps2.s:98     .int:0000001c .L0
-               ps2.s:101    .int:00000020 .L0
-               ps2.s:100    .int:0000001e .L0
-               ps2.s:103    .int:00000022 .L0
-               ps2.s:101    .int:00000020 .L0
-               ps2.s:104    .int:00000024 .L0
-               ps2.s:103    .int:00000022 .L0
-               ps2.s:105    .int:00000026 .L0
-               ps2.s:104    .int:00000024 .L0
-               ps2.s:106    .int:00000028 .L0
-               ps2.s:105    .int:00000026 .L0
-               ps2.s:107    .int:0000002a .L0
-               ps2.s:106    .int:00000028 .L0
+               ps2.s:109    .debug_line:00000068 .L0
+               ps2.s:82     .int:00000000 .L0
+               ps2.s:84     .int:00000002 .L0
+               ps2.s:82     .int:00000000 .L0
+               ps2.s:85     .int:00000004 .L0
+               ps2.s:84     .int:00000002 .L0
+               ps2.s:86     .int:00000006 .L0
+               ps2.s:85     .int:00000004 .L0
+               ps2.s:87     .int:00000008 .L0
+               ps2.s:86     .int:00000006 .L0
+               ps2.s:90     .int:0000000a .L0
+               ps2.s:87     .int:00000008 .L0
+               ps2.s:91     .int:0000000c .L0
+               ps2.s:90     .int:0000000a .L0
+               ps2.s:92     .int:0000000e .L0
+               ps2.s:91     .int:0000000c .L0
+               ps2.s:93     .int:00000010 .L0
+               ps2.s:92     .int:0000000e .L0
+               ps2.s:94     .int:00000012 .L0
+               ps2.s:93     .int:00000010 .L0
+               ps2.s:95     .int:00000014 .L0
+               ps2.s:94     .int:00000012 .L0
+               ps2.s:97     .int:00000016 .L0
+               ps2.s:95     .int:00000014 .L0
+               ps2.s:98     .int:00000018 .L0
+               ps2.s:97     .int:00000016 .L0
+               ps2.s:99     .int:0000001a .L0
+               ps2.s:98     .int:00000018 .L0
+               ps2.s:101    .int:0000001c .L0
+               ps2.s:99     .int:0000001a .L0
+               ps2.s:102    .int:0000001e .L0
+               ps2.s:101    .int:0000001c .L0
+               ps2.s:106    .int:00000020 .L0
+               ps2.s:102    .int:0000001e .L0
+               ps2.s:107    .int:00000022 .L0
+               ps2.s:106    .int:00000020 .L0
+               ps2.s:108    .int:00000024 .L0
+               ps2.s:107    .int:00000022 .L0
+               ps2.s:109    .int:00000026 .L0
+               ps2.s:108    .int:00000024 .L0
                ps2.s:46     .text:00000000 .L0
                ps2.s:47     .text:00000002 .L0
                ps2.s:46     .text:00000000 .L0
@@ -4825,7 +4823,7 @@ DEFINED SYMBOLS
                ps2.s:78     .text:0000002a .L0
                ps2.s:72     .text:00000028 .L0
                              .int:00000000 .L0
-               ps2.s:107    .int:0000002a .L0
+               ps2.s:109    .int:00000026 .L0
                             .text:00000000 .L0
                ps2.s:78     .text:0000002a .L0
                       .debug_info:00000000 .L0

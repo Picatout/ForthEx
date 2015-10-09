@@ -216,11 +216,10 @@ kbd_no_key: ; sortie file vide
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; interruption TIMER1
-; incrémente SYSTICK
+; incrémente 'systicks'
 ; et traitement primaire
 ; file ps2_queue vers kbd_queue
 ;;;;;;;;;;;;;;;;;;;;;;;;;
-
 .extern systicks
 .extern ps2_head
 .extern ps2_tail    
@@ -231,34 +230,30 @@ __T1Interrupt:
     push W0
     push W1
     push W2
-    push W3
     inc systicks
     ;traitement file ps2_queue
-    ; ver kbd_queue
+    ;vers file kbd_queue
     mov ps2_head, W0
     cp ps2_tail
-    bra z, isr_exit
+    bra z, isr_exit ; file ps2_queue vide
     mov #ps2_queue, W1
     add W0, W1, W1
+    btss [W1], #10
+    bra nc, 9f ; rejet: stop bit doit-être 1
     mov [W1], W0
     lsr W0,W0
     bra c, 9f ; rejet: start bit doit-être zéro
-    btst.c W0, #9
-    bra nc, 9f ; rejet: stop bit doit-être 1
     ;vérification paritée
-    clr W3
-    and #0x1ff, W0
-    mov #0, W2
+    clr W1 ; compte les bits à 1
+    mov #8, W2 ; test bits <8:0>
 1:
     btst.c W0,W2
-    bra nc, 2f
-    inc W3,W3
+    addc #0, W1 
 2:    
-    inc W2,W2
-    cp W2, #9
-    bra neq, 1b
+    dec W2,W2
+    bra nn, 1b
     ; paritée impaire: W3 doit-être impaire.
-    btss W3,#0
+    btss W1,#0
     bra 9f ; rejet: mauvaise parité
     ; tranfert code dans file
     ; kbd_queue
@@ -267,7 +262,7 @@ __T1Interrupt:
     add W2,W1,W1
     mov.b W0,[W1]
     add #1,W2
-    and #(KBD_QUEUE_SIZE-1),W2
+    and #(KBD_QUEUE_SIZE-1),W2 ; arg1 <#lit10>
     mov W2, kbd_tail
 9:    
     ;incrémente ps2_head
@@ -275,7 +270,6 @@ __T1Interrupt:
     mov #(PS2_QUEUE_SIZE-1), W0
     and ps2_head
 isr_exit:
-    pop W3
     pop W2
     pop W1
     pop W0

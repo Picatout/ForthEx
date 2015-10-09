@@ -13,7 +13,7 @@
 ;     GNU General Public License for more details.
 ;
 ;     You should have received a copy of the GNU General Public License
-;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+;     along with ForthEx.  If not, see <http:;www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
 ;NOM: core.inc
@@ -80,8 +80,9 @@
 .endm
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
-; macro empruntée et modifiée, à partir de Jones Forth    
-;REF: http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
+; macros empruntée et modifiée, à partir de Jones Forth    
+;REF: http:;www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
+
 ; Flags
 .equ F_IMMED,0x80
 .equ F_HIDDEN,0x20
@@ -89,7 +90,7 @@
 
 ; Store the chain of links.
 .equ link,0
-
+;macro utilisée pour créer les entête des mots de haut niveaux.
 .macro DEFWORD name, namelen, flags=0, label
     .section .sysdict psv
     .align 2
@@ -102,12 +103,46 @@ name_\label :
     .align 2		; padding to next 2 byte boundary
     .global \label
 \label :
+    .word ENTER
 	; list of word pointers follow
 .endm
-	
-.macro CODE name
-    .text
-    .global _\name
-    _\name :
+
+; macro utilisée pour créer les entêtes des mots en code machine	
+.macro DEFCODE name, namelen, flags=0, label
+	.section .sysdict psv
+	.align 2
+	.global name_\label
+name_\label :
+	.word link		; link
+	.set link,name_\label
+	.byte \flags+\namelen	; flags + length byte
+	.ascii "\name"		; the name
+	.align 2		; padding to next 4 byte boundary
+	.global \label
+\label :
+	.word code_\label	; codeword
+	.text
+	.global code_\label
+code_\label :			; assembler code follows
 .endm
-    
+ 
+; macro utilisée pour créer des variables
+.macro DEFVAR name, namelen, flags=0, label, initial=0
+	DEFCODE \name,\namelen,\flags,\label
+	DPUSH
+	mov var_\name, T
+	NEXT
+	.data
+	.align 2
+var_\name :
+	.word \initial
+.endm
+
+	
+; macro utilisée pour créer des constantes
+.macro DEFCONST name, namelen, flags=0, label, value
+	DEFCODE \name,\namelen,\flags,\label
+	DPUSH
+	mov #\value, T
+	NEXT
+.endm

@@ -69,22 +69,38 @@ __reset:
     mov W0, [UP+LATEST]
     mov #psvoffset(TEST), IP
     NEXT
-
+    
 
 .section .const psv   
 ;test string
-quick:
-.ascii "01234567890123456789012345678901234567890123456789"    
-.ascii "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.      "
-.asciz "The quick brown fox jumps over the lazy dog.      " 
+version:
+.asciz "ForthEx V0.1"    
+    
+
+.text    
+ENTER:
+    RPUSH IP
+    mov [IP],IP
+    NEXT
+    
+DEFCODE EXIT,4,,EXIT
+    RPOP IP
+    NEXT
 
     
+;DEFWORD TEST,4,,TEST
+.section .sysdict psv
+TEST:
+.word  code_CLS, code_INFINITE, EXIT
+
+DEFCODE INFINITE,4,,INFINITE
+    bra .
     
-DEFWORD TEST,4,,TEST
-.word  _cls, _test
-CODE test    
+    
+.text    
 ; test vidéo
-    set_psv quick, W1
+test_video:    
+    set_psv version, W1
     mov #_video_buffer,W2
     clr W0
 1:
@@ -106,22 +122,8 @@ CODE test
     mov.b W0, [W2]
     bra 3b
 
-DEFWORD CLS,3,,CLS
-.word _cls
 
-    
-DEFWORD ENTER,5,,docol
-.word _enter    
-CODE enter
-    RPUSH IP
-    add WP,#2,IP
-    NEXT
-    
-DEFWORD EXIT,4,,exitcol
-.word _exit
-CODE exit
-    RPOP IP
-    NEXT
+
 
     
     
