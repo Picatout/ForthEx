@@ -112,20 +112,52 @@ tvout_init:
 ;;;;;;;;;;;;;;;;;;
 ; nettoie écran
 ;;;;;;;;;;;;;;;;;;
-DEFCODE "CLS",3,,CLS  
+DEFCODE "CLS",3,,CLS   ; ( -- )
     mov #0x2020, W0
     mov #_video_buffer, W1
     repeat #(TV_BUFFER/2-1)
     mov W0,[W1++]
     clr xpos  ; xpos=0, ypos=0
     NEXT
- 
+
+;;;;;;;;;;;;;;;;;;;;;;
+; définie position X
+; du curseur texte
+;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "XPOS",4,, XPOS  ; ( n -- )
+    mov #CPL, W0
+    cp T, W0
+    bra ltu, 1f
+    mov #(CPL-1), T
+ 1:
+    mov T, W0
+    mov.b WREG,xpos
+    DPOP
+    NEXT
+
+;;;;;;;;;;;;;;;;;;;;;;
+; définie position Y
+; du curseur texte
+;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "YPOS",4,,YPOS  ; ( n -- )
+    cp T, #LPS
+    bra ltu, 1f
+    mov #(LPS-1), T
+1:
+    mov T, W0
+    mov.b WREG,ypos
+    DPOP
+    NEXT
+    
+DEFWORD "CURPOS",6,,CURPOS  ; ( ny nx -- )
+.word XPOS, YPOS, EXIT
+    
 ;;;;;;;;;;;;;;;;;;;;;;
 ; place caractère 
 ; au sommet de la pile
 ; dans le buffer video    
 ;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "EMIT",4,,EMIT
+DEFCODE "EMIT",4,,EMIT  ; ( c -- )
     mov.b #CPL, W0
     mul.b ypos
     mov.b xpos, WREG
@@ -133,13 +165,14 @@ DEFCODE "EMIT",4,,EMIT
     add W0,W2,W0
     mov #_video_buffer, W1
     add W0,W1,W1
-    mov.b T, [W1]
+    mov.b T, [W1+0]
     DPOP
     inc.b xpos
     mov #CPL, W0
     cp.b xpos
     bra neq, 1f
-    clr xpos
+crlf:    
+    clr.b xpos
     inc.b ypos
     mov #LPS, W0
     cp.b ypos
@@ -147,13 +180,26 @@ DEFCODE "EMIT",4,,EMIT
     bra code_SCROLLUP
 1:    
     NEXT
-    
-DEFCODE "BL",2,,BL
+
+;;;;;;;;;;;;;;;;;;;
+; retour à la ligne
+;;;;;;;;;;;;;;;;;;;;
+DEFCODE "CR",2,,CR  ; ( -- )
+    bra crlf
+
+;;;;;;;;;;;;;;;;;;;;;;
+; imprime un espace
+;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "BL",2,,BL   ; ( -- )
     DPUSH
     mov #32, T
     bra code_EMIT
-    
-DEFCODE "SCROLLUP",8,,SCROLLUP
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; défile écran vers le haut
+; d'une ligne texte.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "SCROLLUP",8,,SCROLLUP  ; ( -- )
     mov #_video_buffer, W1
     mov #CPL, W0
     add W0,W1,W2
@@ -162,8 +208,35 @@ DEFCODE "SCROLLUP",8,,SCROLLUP
     lsr W3,W3
     repeat W3
     mov [W2++],[W1++]
+    DPUSH
+    mov #(LPS-1), T
+    bra code_CLRLN
+    
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; efface la ligne indiquée
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "CLRLN",5,,CLRLN    ; ( n -- )
+    mov #_video_buffer, W2
+    mov #LPS, W0
+    cp T, W0
+    bra geu, 1f
+    mov #CPL, W0
+    mul.uu T, W0,W0
+    add W0, W2,W2
+    mov #0x2020, W0
+    repeat #(CPL/2-1)
+    mov W0, [W2++]
+1:    
+    DPOP
     NEXT
- 
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; imprime une chaîne de
+; caractère à l'écran
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
+.word LIT, 0, DODO, DUP, CFETCH, EMIT, DOLOOP,TYPE+8,EXIT     
     
 ;********************
 ; interruption TIMER2

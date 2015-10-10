@@ -24,6 +24,8 @@
 .else
 .include "pal_const.inc"
 .endif
+
+.include "core.inc"
     
 .data 
 .global systicks    
@@ -57,19 +59,16 @@ hardware_init:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  délais en millisecondes
-;  entrée: W0 délais
-; utilise W0,W1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-.global delay_msec    
-delay_msec:    
-    mov systicks, W1
-    add W1,W0,W1
- 1:
+DEFCODE "MSEC",4,,MSEC  ; ( n -- )
     mov systicks, W0
-    cp W0, W1
-    bra neq, 1b
-    return
-
+    add W0,T,W0
+0:    
+    cp systicks
+    bra neq, 0b
+    DPOP
+    NEXT
+    
 .end
 
 

@@ -19,7 +19,11 @@
 ;NOM: core.s
 ;Description: base pour le système Forth
 ;Date: 2015-10-03
- 
+;REF: http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt
+;   http://www.bradrodriguez.com/papers/
+;   msp430 camelForth source code: http://www.camelforth.com/download.php?view.25
+
+    
 .include "hardware.inc"
 .include "core.inc"
 .include "gen_macros.inc"
@@ -77,57 +81,127 @@ __reset:
 version:
 .asciz "ForthEx V0.1"    
     
-.text    
+.text
+.global DOCOLON    
 DOCOLON:
     RPUSH IP
     mov WP,IP
     NEXT
+
+DEFCODE "EXECUTE",7,,DOCODE
+    mov T, WP
+    DPOP
+    goto WP
     
 DEFCODE "EXIT",4,,EXIT
     RPOP IP
     NEXT
 
-DEFCODE "DOLIT",2,,DOLIT
+DEFCODE "LIT",5,,LIT  ; ( -- n )
     DPUSH
-    mov [IP++], T
+    mov [IP+0], T
+    inc2 IP, IP
     NEXT
 
-DEFCODE "DOBRA",5,,DOBRA
-    mov [IP++], W0
-    goto W0
+DEFCODE "CLIT",4,,CLIT  ; ( -- c )
+    DPUSH
+    mov.b [IP+0], T
+    inc2 IP, IP
+    ze T,T
+    NEXT
+
+DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
+    mov.b [T+0], T
+    ze T, T
+    NEXT
     
-DEFCODE "DO0BRA",6,,DO0BRA
-    mov T, W1
+DEFCODE "C!",2,,CSTORE  ; ( c-addr c -- )
+    ze T, W0
     DPOP
-    cp0 W1
+    mov.b W0,[T+0]
+    DPOP
+    NEXT
+    
+; branchement inconditionnel    
+DEFCODE "DOBRA",5,,DOBRA  ; ( -- )
+    mov [IP++], IP
+
+; branchement si T==0    
+DEFCODE "DO0BRA",6,,DO0BRA ; ( n -- )
+    mov T, W0
+    DPOP
+    cp0 W0
     bra nz, 1f
-    mov [IP++], W0
-    goto W0
+    mov [IP+0], IP
+    NEXT   
 1:
-    inc2 IP
+    inc2 IP,IP
     NEXT
 
-DEFCODE "DODO",4,,DODO
-    RPUSH
-    mov I, RP
+; exécution de DO    
+DEFCODE "DODO",4,,DODO ; ( n  n -- ) R( -- n n )
+    RPUSH I
     mov T, I
     DPOP
-    RPUSH
-    mov T, RP
+    RPUSH T
     DPOP
-    
     NEXT
 
-DEFCODE "DOLOOP",6,,DOLOOP
+; exécution de LOOP   
+DEFCODE "DOLOOP",6,,DOLOOP  ; ( -- )  R( n n -- )
+    inc I, I
+    cp I, R
+    bra eq, 1f
+    mov [IP+0], IP
+1:
+    RPOP I
+    RDROP    
+    NEXT
+
+; empile compteur de boucle    
+DEFCODE "I",1,,DOI  ; ( -- n )
     DPUSH
     mov I, T
+    NEXT
+
+DEFCODE "DUP",3,,DUP ; ( n -- n n )
+    DPUSH
+    NEXT
     
+DEFCODE "DROP",4,,DROP ; ( n -- )
+    DPOP
+    NEXT
+
+DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
+    mov T, W0
+    mov [DSP+0], T
+    mov W0, [DSP+0]
+    NEXT
+
+DEFCODE "ROT",3,,ROT
+    mov T, W0
+    mov [DSP+0], T
+    mov [DSP-2], W1
+    mov W1, [DSP+0]
+    mov W0, [DSP-2]
+    NEXT
+    
+DEFCODE "OVER",4,,OVER
+    DPUSH
+    mov [DSP-2],T
+    NEXT
     
 DEFWORD "TEST",4,,TEST   
-.word  CLS,OK,INFLOOP
+.word  CLS,HOME,OK,LIT,1000, MSEC,HOME,OKOFF, LIT,1000, MSEC, DOBRA, TEST+4
+
+DEFWORD "HOME",5,,HOME
+.word LIT,0,LIT,0,CURPOS,EXIT
+    
+DEFWORD "OKOFF",6,,OKOFF
+.word BL,BL,BL,EXIT 
     
 DEFWORD "OK",2,,OK
-.word BL,DOLIT, 'O', EMIT, DOLIT,'K',EMIT, EXIT    
+.word BL,LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
 DEFCODE "INFLOOP",7,,INFLOOP
     bra .

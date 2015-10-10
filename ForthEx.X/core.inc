@@ -19,6 +19,9 @@
 ;NOM: core.inc
 ;Description: définition de base pour le système Forth
 ;Date: 2015-10-03
+ 
+.ifndef CORE_INC
+.equ CORE_INC, 1
     
 ; utilisation des registres    
 .equ RSP, W15 ; pile retours
@@ -41,6 +44,7 @@
 .equ BASE, 4   ; base numérique
 .equ HERE, 6   ; valeur du pointeur HERE
 .equ LATEST, 8 ; pointeur dernière définition    
+.equ PAD, 10   ; pointeur vers PAD
     
 ;;;;;;;;;;;;    
 ; macros
@@ -50,6 +54,11 @@
     mov [WP++], W0
     goto W0
 .endm    
+ 
+.macro SET_EVEN reg
+    btsc \reg, #0
+    inc \reg, \reg
+.endm
     
 .macro DPUSH  
     mov T, [++DSP]
@@ -69,12 +78,10 @@
     pop R
 .endm
     
-.macro DSWAP
-    mov T, W0
-    DPOP
-    mov W0, [++DSP]
+.macro RDROP
+    pop R
 .endm
-
+    
 .macro SYSDICT
     .section .sysdict psv
     .align 2
@@ -148,3 +155,7 @@ var_\name :
 	mov #\value, T
 	NEXT
 .endm
+
+.endif
+	
+	
