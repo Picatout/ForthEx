@@ -3460,105 +3460,107 @@
   47              	;;;;;;;;;;;;
   48              	.macro NEXT
   49              	    mov [IP++], WP
-  50              	    goto WP
-  51              	.endm    
-  52              	    
-  53              	.macro DPUSH  
-  54              	    mov T, [++DSP]
-  55              	.endm
-  56              	    
-  57              	.macro DPOP
-  58              	    mov [DSP--], T
-  59              	.endm
-  60              	    
-  61              	.macro RPUSH reg
-  62              	    push R
-  63              	    mov \reg, R
-  64              	.endm
-  65              	    
-  66              	.macro RPOP reg
-  67              	    mov R, \reg
-  68              	    pop R
-  69              	.endm
-  70              	    
-  71              	.macro DSWAP
-  72              	    mov T, W0
-  73              	    DPOP
-  74              	    mov W0, [++DSP]
-  75              	.endm
-  76              	
-  77              	.macro SYSDICT
-  78              	    .section .sysdict psv
-  79              	    .align 2
-  80              	.endm
-  81              	    
-  82              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
-  83              	; macros empruntée et modifiée, à partir de Jones Forth    
-  84              	;REF: http:;www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
-  85              	
-  86              	; Flags
-  87              	.equ F_IMMED,0x80
-  88              	.equ F_HIDDEN,0x20
-  89              	.equ F_LENMASK,0x1f	; length mask
-  90              	
-  91              	; Store the chain of links.
-  92              	.equ link,0
-  93              	;macro utilisée pour créer les entête des mots de haut niveaux.
-  94              	.macro DEFWORD name, namelen, flags=0, label
-  95              	    .section .sysdict psv
-  96              	    .align 2
-  97              	    .global name_\label
-  98              	name_\label :
-  99              	    .word link		; lien vers élément précédent du dictionnaire
- 100              	    .equ link, name_\label
- 101              	    .byte \flags+\namelen	; flags + length byte
- 102              	    .ascii "\name"		; the name
- 103              	    .align 2		; padding to next 2 byte boundary
- 104              	    .global \label
- 105              	\label :
- 106              	    .word ENTER
- 107              		; list of word pointers follow
- 108              	.endm
- 109              	
- 110              	; macro utilisée pour créer les entêtes des mots en code machine	
- 111              	.macro DEFCODE name, namelen, flags=0, label
- 112              		.section .sysdict psv
- 113              		.align 2
- 114              		.global name_\label
- 115              	name_\label :
- 116              		.word link		; link
- 117              		.set link,name_\label
- 118              		.byte \flags+\namelen	; flags + length byte
- 119              		.ascii "\name"		; the name
- 120              		.align 2		; padding to next 4 byte boundary
- 121              		.global \label
- 122              	\label :
- 123              		.word code_\label	; codeword
- 124              		.text
- 125              		.global code_\label
- 126              	code_\label :			; assembler code follows
- 127              	.endm
- 128              	 
- 129              	; macro utilisée pour créer des variables
- 130              	.macro DEFVAR name, namelen, flags=0, label, initial=0
- 131              		DEFCODE \name,\namelen,\flags,\label
- 132              		DPUSH
- 133              		mov var_\name, T
- 134              		NEXT
- 135              		.data
- 136              		.align 2
- 137              	var_\name :
- 138              		.word \initial
- 139              	.endm
- 140              	
- 141              		
- 142              	; macro utilisée pour créer des constantes
- 143              	.macro DEFCONST name, namelen, flags=0, label, value
- 144              		DEFCODE \name,\namelen,\flags,\label
- 145              		DPUSH
- 146              		mov #\value, T
- 147              		NEXT
- 148              	.endm
+  50              	    mov [WP++], W0
+  51              	    goto W0
+  52              	.endm    
+  53              	    
+  54              	.macro DPUSH  
+  55              	    mov T, [++DSP]
+  56              	.endm
+  57              	    
+  58              	.macro DPOP
+  59              	    mov [DSP--], T
+  60              	.endm
+  61              	    
+  62              	.macro RPUSH reg
+  63              	    push R
+  64              	    mov \reg, R
+  65              	.endm
+  66              	    
+  67              	.macro RPOP reg
+  68              	    mov R, \reg
+  69              	    pop R
+  70              	.endm
+  71              	    
+  72              	.macro DSWAP
+  73              	    mov T, W0
+  74              	    DPOP
+  75              	    mov W0, [++DSP]
+  76              	.endm
+  77              	
+  78              	.macro SYSDICT
+  79              	    .section .sysdict psv
+  80              	    .align 2
+  81              	.endm
+  82              	    
+  83              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+  84              	; macros empruntée et modifiée, à partir de Jones Forth    
+  85              	;REF: http:;www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
+  86              	
+  87              	; Flags
+  88              	.equ F_IMMED,0x80
+  89              	.equ F_HIDDEN,0x20
+  90              	.equ F_LENMASK,0x1f	; length mask
+  91              	
+  92              	; Store the chain of links.
+  93              	.equ link,0
+  94              	;macro utilisée pour créer les entête des mots de haut niveaux.
+  95              	.macro DEFWORD name, namelen, flags=0, label
+  96              	    .section .sysdict psv
+  97              	    .align 2
+  98              	    .global name_\label
+  99              	name_\label :
+ 100              	    .word link		; lien vers élément précédent du dictionnaire
+ 101              	    .equ link, name_\label
+ 102              	    .byte \flags+\namelen	; flags + length byte
+ 103              	    .ascii "\name"		; the name
+ 104              	    .align 2		; padding to next 2 byte boundary
+ 105              	    .global \label
+ 106              	\label :
+ 107              	    .word handle(DOCOLON)
+ 108              		;pfa:  list of word pointers follow
+ 109              	.endm
+ 110              	
+ 111              	; macro utilisée pour créer les entêtes des mots en code machine	
+ 112              	.macro DEFCODE name, namelen, flags=0, label
+ 113              		.section .sysdict psv
+ 114              		.align 2
+ 115              		.global name_\label
+ 116              	name_\label :
+ 117              		.word link		; link
+ 118              		.set link,name_\label
+ 119              		.byte \flags+\namelen	; flags + length byte
+ 120              		.ascii "\name"		; the name
+ 121              		.align 2		; padding to next 4 byte boundary
+ 122              		.global \label
+ 123              	\label :
+ 124              		.word handle(code_\label)	; codeword
+ 125              		.text
+ 126              		.global code_\label
+ 127              	code_\label :			;pfa,  assembler code follows
+ 128              		
+ 129              	.endm
+ 130              	 
+ 131              	; macro utilisée pour créer des variables
+ 132              	.macro DEFVAR name, namelen, flags=0, label, initial=0
+ 133              		DEFCODE \name,\namelen,\flags,\label
+ 134              		DPUSH
+ 135              		mov var_\name, T
+ 136              		NEXT
+ 137              		.data
+ 138              		.align 2
+ 139              	var_\name :
+ 140              		.word \initial
+ 141              	.endm
+ 142              	
+ 143              		
+ 144              	; macro utilisée pour créer des constantes
+ 145              	.macro DEFCONST name, namelen, flags=0, label, value
+ 146              		DEFCODE \name,\namelen,\flags,\label
+ 147              		DPUSH
+ 148              		mov #\value, T
+ 149              		NEXT
+ 150              	.endm
   26              	.include "serial.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -3646,7 +3648,7 @@
   79 000038  00 00 06 	    return
   80              	 
   81              	    
-  82              	DEFCODE SEMIT,5,,SEMIT
+  82              	DEFCODE "SEMIT",5,,SEMIT
   83 00003a  00 01 20 	    mov #QUEUE_SIZE, W0
   84              	1:
   85 00003c  23 40 E3 	    cp.b tx_tail
@@ -3660,35 +3662,37 @@
   93 00004c  01 80 A8 	    bset SER_TX_IFS, #SER_TX_IF
   94 00004e  2E 06 78 	    DPOP
   95 000050  B8 05 78 	    NEXT
-  95         0B 40 01 
+  95         3B 00 78 
+  95         00 40 01 
   96              	    
-  97              	DEFCODE SGET,4,,SGET
-  98 000054  0C 2F 78 	    DPUSH
-  99 000056  00 06 EB 	    clr T
- 100 000058  20 C0 BF 	    mov.b rx_head, WREG
- 101 00005a  21 40 E3 	    cp.b  rx_tail
- 102 00005c  00 00 3A 	    bra neq, 1f
- 103 00005e  00 80 FB 	    ze W0,W0
- 104 000060  70 00 E1 	    cp W0, #QUEUE_SIZE
- 105 000062  00 00 3A 	    bra neq, 2f
- 106 000064  20 20 EF 	    clr rx_head  ; remet rx_head et rx_tail à zéro
+  97              	DEFCODE "SGET",4,,SGET
+  98 000056  0C 2F 78 	    DPUSH
+  99 000058  00 06 EB 	    clr T
+ 100 00005a  20 C0 BF 	    mov.b rx_head, WREG
+ 101 00005c  21 40 E3 	    cp.b  rx_tail
+ 102 00005e  00 00 3A 	    bra neq, 1f
+ 103 000060  00 80 FB 	    ze W0,W0
+ 104 000062  70 00 E1 	    cp W0, #QUEUE_SIZE
+ 105 000064  00 00 3A 	    bra neq, 2f
+ 106 000066  20 20 EF 	    clr rx_head  ; remet rx_head et rx_tail à zéro
  107              	0:    
- 108 000066  01 20 AF 	    btsc SER_STA, #UTXBF
- 109 000068  00 00 37 	    bra 0b
- 110 00006a  10 01 20 	    mov #XON, W0
- 111 00006c  00 00 88 	    mov W0, SER_TXREG
- 112 00006e  00 00 37 	    bra 2f
+ 108 000068  01 20 AF 	    btsc SER_STA, #UTXBF
+ 109 00006a  00 00 37 	    bra 0b
+ 110 00006c  10 01 20 	    mov #XON, W0
+ 111 00006e  00 00 88 	    mov W0, SER_TXREG
+ 112 000070  00 00 37 	    bra 2f
  113              	1:    
- 114 000070  00 80 FB 	    ze W0,W0
- 115 000072  01 00 20 	    mov #rx_queue, W1
- 116 000074  81 00 40 	    add W0,W1,W1
- 117 000076  11 46 78 	    mov.b [W1], T
- 118 000078  20 60 EC 	    inc.b rx_head
- 119 00007a  00 01 20 	    mov #QUEUE_SIZE, W0
- 120 00007c  20 40 E3 	    cp.b rx_head
+ 114 000072  00 80 FB 	    ze W0,W0
+ 115 000074  01 00 20 	    mov #rx_queue, W1
+ 116 000076  81 00 40 	    add W0,W1,W1
+ 117 000078  11 46 78 	    mov.b [W1], T
+ 118 00007a  20 60 EC 	    inc.b rx_head
+ 119 00007c  00 01 20 	    mov #QUEUE_SIZE, W0
+ 120 00007e  20 40 E3 	    cp.b rx_head
  121              	2:    
- 122 00007e  B8 05 78 	    NEXT
- 122         0B 40 01 
+ 122 000080  B8 05 78 	    NEXT
+ 122         3B 00 78 
+ 122         00 40 01 
  123              	    
  124              	    
  125              	    
@@ -4815,9 +4819,9 @@ DEFINED SYMBOLS
           ./core.inc:41     *ABS*:00000004 BASE
           ./core.inc:42     *ABS*:00000006 HERE
           ./core.inc:43     *ABS*:00000008 LATEST
-          ./core.inc:87     *ABS*:00000080 F_IMMED
-          ./core.inc:88     *ABS*:00000020 F_HIDDEN
-          ./core.inc:89     *ABS*:0000001f F_LENMASK
+          ./core.inc:88     *ABS*:00000080 F_IMMED
+          ./core.inc:89     *ABS*:00000020 F_HIDDEN
+          ./core.inc:90     *ABS*:0000001f F_LENMASK
             serial.s:97     .sysdict:0000000a link
         ./serial.inc:24     *ABS*:00000011 XON
         ./serial.inc:25     *ABS*:00000013 XOFF
@@ -4835,10 +4839,10 @@ DEFINED SYMBOLS
             serial.s:84     .text:0000003c L11
             serial.s:97     .sysdict:0000000a name_SGET
             serial.s:97     .sysdict:00000012 SGET
-            serial.s:97     .text:00000054 code_SGET
-            serial.s:113    .text:00000070 L12
-            serial.s:121    .text:0000007e L21
-            serial.s:107    .text:00000066 L1
+            serial.s:97     .text:00000056 code_SGET
+            serial.s:113    .text:00000072 L12
+            serial.s:121    .text:00000080 L21
+            serial.s:107    .text:00000068 L1
             serial.s:128    .int:00000000 __U1RXInterrupt
             serial.s:144    .int:0000001e L2
             serial.s:149    .int:00000026 L13
@@ -5011,56 +5015,56 @@ DEFINED SYMBOLS
             serial.s:93     .text:0000004c .L0
             serial.s:95     .text:00000050 .L0
             serial.s:94     .text:0000004e .L0
-            serial.s:98     .text:00000054 .L0
+            serial.s:98     .text:00000056 .L0
             serial.s:95     .text:00000050 .L0
-            serial.s:99     .text:00000056 .L0
-            serial.s:98     .text:00000054 .L0
-            serial.s:100    .text:00000058 .L0
-            serial.s:99     .text:00000056 .L0
-            serial.s:101    .text:0000005a .L0
-            serial.s:100    .text:00000058 .L0
-            serial.s:102    .text:0000005c .L0
-            serial.s:101    .text:0000005a .L0
-            serial.s:103    .text:0000005e .L0
-            serial.s:102    .text:0000005c .L0
-            serial.s:104    .text:00000060 .L0
-            serial.s:103    .text:0000005e .L0
-            serial.s:105    .text:00000062 .L0
-            serial.s:104    .text:00000060 .L0
-            serial.s:106    .text:00000064 .L0
-            serial.s:105    .text:00000062 .L0
-            serial.s:108    .text:00000066 .L0
-            serial.s:106    .text:00000064 .L0
-            serial.s:109    .text:00000068 .L0
-            serial.s:108    .text:00000066 .L0
-            serial.s:110    .text:0000006a .L0
-            serial.s:109    .text:00000068 .L0
-            serial.s:111    .text:0000006c .L0
-            serial.s:110    .text:0000006a .L0
-            serial.s:112    .text:0000006e .L0
-            serial.s:111    .text:0000006c .L0
-            serial.s:114    .text:00000070 .L0
-            serial.s:112    .text:0000006e .L0
-            serial.s:115    .text:00000072 .L0
-            serial.s:114    .text:00000070 .L0
-            serial.s:116    .text:00000074 .L0
-            serial.s:115    .text:00000072 .L0
-            serial.s:117    .text:00000076 .L0
-            serial.s:116    .text:00000074 .L0
-            serial.s:118    .text:00000078 .L0
-            serial.s:117    .text:00000076 .L0
-            serial.s:119    .text:0000007a .L0
-            serial.s:118    .text:00000078 .L0
-            serial.s:120    .text:0000007c .L0
-            serial.s:119    .text:0000007a .L0
-            serial.s:122    .text:0000007e .L0
-            serial.s:120    .text:0000007c .L0
-            serial.s:126    .text:00000082 .L0
-            serial.s:122    .text:0000007e .L0
+            serial.s:99     .text:00000058 .L0
+            serial.s:98     .text:00000056 .L0
+            serial.s:100    .text:0000005a .L0
+            serial.s:99     .text:00000058 .L0
+            serial.s:101    .text:0000005c .L0
+            serial.s:100    .text:0000005a .L0
+            serial.s:102    .text:0000005e .L0
+            serial.s:101    .text:0000005c .L0
+            serial.s:103    .text:00000060 .L0
+            serial.s:102    .text:0000005e .L0
+            serial.s:104    .text:00000062 .L0
+            serial.s:103    .text:00000060 .L0
+            serial.s:105    .text:00000064 .L0
+            serial.s:104    .text:00000062 .L0
+            serial.s:106    .text:00000066 .L0
+            serial.s:105    .text:00000064 .L0
+            serial.s:108    .text:00000068 .L0
+            serial.s:106    .text:00000066 .L0
+            serial.s:109    .text:0000006a .L0
+            serial.s:108    .text:00000068 .L0
+            serial.s:110    .text:0000006c .L0
+            serial.s:109    .text:0000006a .L0
+            serial.s:111    .text:0000006e .L0
+            serial.s:110    .text:0000006c .L0
+            serial.s:112    .text:00000070 .L0
+            serial.s:111    .text:0000006e .L0
+            serial.s:114    .text:00000072 .L0
+            serial.s:112    .text:00000070 .L0
+            serial.s:115    .text:00000074 .L0
+            serial.s:114    .text:00000072 .L0
+            serial.s:116    .text:00000076 .L0
+            serial.s:115    .text:00000074 .L0
+            serial.s:117    .text:00000078 .L0
+            serial.s:116    .text:00000076 .L0
+            serial.s:118    .text:0000007a .L0
+            serial.s:117    .text:00000078 .L0
+            serial.s:119    .text:0000007c .L0
+            serial.s:118    .text:0000007a .L0
+            serial.s:120    .text:0000007e .L0
+            serial.s:119    .text:0000007c .L0
+            serial.s:122    .text:00000080 .L0
+            serial.s:120    .text:0000007e .L0
+            serial.s:126    .text:00000086 .L0
+            serial.s:122    .text:00000080 .L0
                              .int:00000000 .L0
             serial.s:177    .int:00000052 .L0
                             .text:00000000 .L0
-            serial.s:126    .text:00000082 .L0
+            serial.s:126    .text:00000086 .L0
                       .debug_info:00000000 .L0
                       .debug_info:0000007d .L0
 

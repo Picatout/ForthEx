@@ -47,7 +47,8 @@
 ;;;;;;;;;;;;
 .macro NEXT
     mov [IP++], WP
-    goto WP
+    mov [WP++], W0
+    goto W0
 .endm    
     
 .macro DPUSH  
@@ -103,8 +104,8 @@ name_\label :
     .align 2		; padding to next 2 byte boundary
     .global \label
 \label :
-    .word ENTER
-	; list of word pointers follow
+    .word handle(DOCOLON)
+	;pfa:  list of word pointers follow
 .endm
 
 ; macro utilisée pour créer les entêtes des mots en code machine	
@@ -120,10 +121,11 @@ name_\label :
 	.align 2		; padding to next 4 byte boundary
 	.global \label
 \label :
-	.word code_\label	; codeword
+	.word handle(code_\label)	; codeword
 	.text
 	.global code_\label
-code_\label :			; assembler code follows
+code_\label :			;pfa,  assembler code follows
+	
 .endm
  
 ; macro utilisée pour créer des variables

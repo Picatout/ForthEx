@@ -116,7 +116,7 @@ tvout_init:
 ;;;;;;;;;;;;;;;;;;
 ; nettoie écran
 ;;;;;;;;;;;;;;;;;;
-DEFCODE CLS,3,,CLS
+DEFCODE "CLS",3,,CLS
     mov #0x2020, W0
     mov #_video_buffer, W1
     repeat #(TV_BUFFER/2-1)
@@ -129,7 +129,7 @@ DEFCODE CLS,3,,CLS
 ; au sommet de la pile
 ; dans le buffer video
 ;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE EMIT,4,,EMIT
+DEFCODE "EMIT",4,,EMIT
     mov.b #CPL, W0
     mul.b ypos
     mov.b xpos, WREG
@@ -139,13 +139,34 @@ DEFCODE EMIT,4,,EMIT
     add W0,W1,W1
     mov.b T, [W1]
     DPOP
+    inc.b xpos
+    mov #CPL, W0
+    cp.b xpos
+    bra neq, 1f
+    clr xpos
+    inc.b ypos
+    mov #LPS, W0
+    cp.b ypos
+    bra neq, 1f
+    bra code_SCROLLUP
+1:
     NEXT
 
-DEFCODE SPACE,5,,SPACE
+DEFCODE "BL",2,,BL
     DPUSH
     mov #32, T
-    bra EMIT
+    bra code_EMIT
 
+DEFCODE "SCROLLUP",8,,SCROLLUP
+    mov #_video_buffer, W1
+    mov #CPL, W0
+    add W0,W1,W2
+    mov #TV_BUFFER, W3
+    sub W0,W3,W3
+    lsr W3,W3
+    repeat W3
+    mov [W2++],[W1++]
+    NEXT
 
 
 ;********************

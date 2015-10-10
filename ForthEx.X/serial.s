@@ -79,7 +79,7 @@ serial_init:
     return
  
     
-DEFCODE SEMIT,5,,SEMIT
+DEFCODE "SEMIT",5,,SEMIT
     mov #QUEUE_SIZE, W0
 1:
     cp.b tx_tail
@@ -94,7 +94,7 @@ DEFCODE SEMIT,5,,SEMIT
     DPOP
     NEXT
     
-DEFCODE SGET,4,,SGET
+DEFCODE "SGET",4,,SGET
     DPUSH
     clr T
     mov.b rx_head, WREG

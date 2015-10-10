@@ -44,7 +44,8 @@ INT
 __DefaultInterrupt:
     reset
 
-.section .start code   
+.section .start code
+.align 2    
 .global __reset    
 __reset: 
     ; mise à zéro de la RAM
@@ -67,67 +68,75 @@ __reset:
     mov W0, [UP+BASE]
     mov #psvoffset(sys_latest), W0
     mov W0, [UP+LATEST]
-    mov #psvoffset(TEST), IP
+    mov #psvoffset(ENTRY), IP
     NEXT
     
 
-.section .const psv   
+.section .const psv       
 ;test string
 version:
 .asciz "ForthEx V0.1"    
     
-
 .text    
-ENTER:
+DOCOLON:
     RPUSH IP
-    mov [IP],IP
+    mov WP,IP
     NEXT
     
-DEFCODE EXIT,4,,EXIT
+DEFCODE "EXIT",4,,EXIT
     RPOP IP
     NEXT
 
-    
-;DEFWORD TEST,4,,TEST
-.section .sysdict psv
-TEST:
-.word  code_CLS, code_INFINITE, EXIT
+DEFCODE "DOLIT",2,,DOLIT
+    DPUSH
+    mov [IP++], T
+    NEXT
 
-DEFCODE INFINITE,4,,INFINITE
+DEFCODE "DOBRA",5,,DOBRA
+    mov [IP++], W0
+    goto W0
+    
+DEFCODE "DO0BRA",6,,DO0BRA
+    mov T, W1
+    DPOP
+    cp0 W1
+    bra nz, 1f
+    mov [IP++], W0
+    goto W0
+1:
+    inc2 IP
+    NEXT
+
+DEFCODE "DODO",4,,DODO
+    RPUSH
+    mov I, RP
+    mov T, I
+    DPOP
+    RPUSH
+    mov T, RP
+    DPOP
+    
+    NEXT
+
+DEFCODE "DOLOOP",6,,DOLOOP
+    DPUSH
+    mov I, T
+    
+    
+DEFWORD "TEST",4,,TEST   
+.word  CLS,OK,INFLOOP
+    
+DEFWORD "OK",2,,OK
+.word BL,DOLIT, 'O', EMIT, DOLIT,'K',EMIT, EXIT    
+
+DEFCODE "INFLOOP",7,,INFLOOP
     bra .
     
     
-.text    
-; test vidéo
-test_video:    
-    set_psv version, W1
-    mov #_video_buffer,W2
-    clr W0
-1:
-    mov.b [W1++], W0
-    ze W0,W0
-    bra z, 2f
-    mov.b W0, [W2++]
-    bra 1b
-2:    
-; fin test vidéo
-; test clavier
-3:  
-    push W2
-    call kbd_get
-    pop W2
-    cp0 W0
-    bra eq, 3b
-    and #127, W0
-    mov.b W0, [W2]
-    bra 3b
-
-
-
-
-    
-    
 SYSDICT
+.global ENTRY
+ENTRY: 
+.word TEST
 .global sys_latest
 sys_latest:
 .word link
