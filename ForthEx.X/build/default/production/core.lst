@@ -3383,8 +3383,8 @@
  123              	.equ  SER_MODE, U1MODE
  124              	.equ  SER_STA,  U1STA
  125              	.equ  SER_BRG,  U1BRG
- 126              	.equ  SER_TXREG, U1TXREG
- 127              	.equ  SER_RXREG, U1RXREG
+ 126              	.equ  SER_TXREG, U1TXREGL
+ 127              	.equ  SER_RXREG, U1RXREGL
  128              	.equ  SER_RX_PPSbit, U1RXR0
  129              	.equ  SER_RX_RPINR, RPINR18
  130              	.equ  SER_TX_FN, 3
@@ -3690,7 +3690,7 @@
   82      56 30 2E 31 
   82      00 
   83                 	    
-  84 000d 00          	.text
+  84                 	.text
   85              	.global DOCOLON    
   86              	DOCOLON:
   87 000000  8D 1F 78 	    RPUSH IP
@@ -3754,137 +3754,176 @@
  129              	    
  130              	; branchement si T==0    
  131              	DEFCODE "DO0BRA",6,,DO0BRA ; ( n -- )
- 132 000056  0C 00 78 	    mov T, W0
+ 132 000056  0C 00 E0 	    cp0 T
  133 000058  2E 06 78 	    DPOP
- 134 00005a  00 00 E0 	    cp0 W0
- 135 00005c  00 00 3A 	    bra nz, 1f
- 136 00005e  18 04 78 	    mov [IP], IP
- 137 000060  B8 05 78 	    NEXT   
- 137         3B 00 78 
- 137         00 40 01 
- 138              	1:
- 139 000066  08 84 E8 	    inc2 IP,IP
- 140 000068  B8 05 78 	    NEXT
- 140         3B 00 78 
- 140         00 40 01 
- 141              	
- 142              	; exécution de DO    
- 143              	DEFCODE "DODO",4,,DODO ; ( n  n -- ) R( -- n n )
- 144 00006e  8D 1F 78 	    RPUSH I
- 144         87 06 78 
- 145 000072  8C 03 78 	    mov T, I
- 146 000074  2E 06 78 	    DPOP
- 147 000076  8D 1F 78 	    RPUSH T
- 147         8C 06 78 
- 148 00007a  2E 06 78 	    DPOP
- 149 00007c  B8 05 78 	    NEXT
- 149         3B 00 78 
- 149         00 40 01 
- 150              	
- 151              	; exécution de LOOP   
- 152              	DEFCODE "DOLOOP",6,,DOLOOP  ; ( -- )  R( n n -- )
- 153 000082  87 03 E8 	    inc I, I
- 154 000084  0D 38 E1 	    cp I, R
- 155 000086  00 00 32 	    bra eq, 1f
- 156 000088  08 04 90 	    mov [IP+0], IP
- 157              	1:
- 158 00008a  8D 03 78 	    RPOP I
- 158         CF 06 78 
- 159 00008e  CF 06 78 	    RDROP    
- 160 000090  B8 05 78 	    NEXT
- 160         3B 00 78 
- 160         00 40 01 
- 161              	
- 162              	; empile compteur de boucle    
- 163              	DEFCODE "I",1,,DOI  ; ( -- n )
- 164 000096  0C 2F 78 	    DPUSH
- 165 000098  07 06 78 	    mov I, T
- 166 00009a  B8 05 78 	    NEXT
- 166         3B 00 78 
- 166         00 40 01 
- 167              	
- 168              	DEFCODE "DUP",3,,DUP ; ( n -- n n )
- 169 0000a0  0C 2F 78 	    DPUSH
- 170 0000a2  B8 05 78 	    NEXT
- 170         3B 00 78 
- 170         00 40 01 
- 171              	    
- 172              	DEFCODE "DROP",4,,DROP ; ( n -- )
- 173 0000a8  2E 06 78 	    DPOP
- 174 0000aa  B8 05 78 	    NEXT
- 174         3B 00 78 
- 174         00 40 01 
- 175              	
- 176              	DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
- 177 0000b0  0C 00 78 	    mov T, W0
- 178 0000b2  0E 06 90 	    mov [DSP+0], T
- 179 0000b4  00 07 98 	    mov W0, [DSP+0]
- 180 0000b6  B8 05 78 	    NEXT
- 180         3B 00 78 
- 180         00 40 01 
- 181              	
- 182              	DEFCODE "ROT",3,,ROT
- 183 0000bc  0C 00 78 	    mov T, W0
- 184 0000be  0E 06 90 	    mov [DSP+0], T
- 185 0000c0  FE B8 97 	    mov [DSP-2], W1
- 186 0000c2  01 07 98 	    mov W1, [DSP+0]
- 187 0000c4  70 BF 9F 	    mov W0, [DSP-2]
- 188 0000c6  B8 05 78 	    NEXT
- 188         3B 00 78 
- 188         00 40 01 
- 189              	    
- 190              	DEFCODE "OVER",4,,OVER
- 191 0000cc  0C 2F 78 	    DPUSH
- 192 0000ce  7E BE 97 	    mov [DSP-2],T
- 193 0000d0  B8 05 78 	    NEXT
- 193         3B 00 78 
- 193         00 40 01 
- 194              	    
- 195              	DEFWORD "TEST",4,,TEST   
- 196 00a2 00 00 00 00 	.word  CLS,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,DOBRA, TEST+4
- 196      00 00 00 00 
- 196      4D 01 00 00 
- 196      00 00 00 00 
- 196      00 00 4D 01 
- 196      00 00 00 00 
- 196      04 00 
- 197                 	    
- 198 00bc 00 00 05 48 	DEFWORD "HOME",5,,HOME
- 198      4F 4D 45 00 
- 198      00 00 
- 199 00c6 00 00 00 00 	.word LIT,0,LIT,0,CURPOS,EXIT
- 199      00 00 00 00 
- 199      00 00 00 00 
- 200                 	    
- 201 00d2 00 00 06 4F 	DEFWORD "OKOFF",6,,OKOFF
- 201      4B 4F 46 46 
- 201      00 00 
- 202 00dc 00 00 00 00 	.word BL,BL,EXIT 
- 202      00 00 
- 203                 	    
- 204 00e2 00 00 02 4F 	DEFWORD "OK",2,,OK
- 204      4B 00 00 00 
- 205 00ea 00 00 4F 00 	.word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
- 205      00 00 00 00 
- 205      4B 00 00 00 
+ 134 00005a  00 00 3A 	    bra nz, 1f
+ 135 00005c  18 04 78 	    mov [IP], IP
+ 136 00005e  B8 05 78 	    NEXT   
+ 136         3B 00 78 
+ 136         00 40 01 
+ 137              	1:
+ 138 000064  08 84 E8 	    inc2 IP,IP
+ 139 000066  B8 05 78 	    NEXT
+ 139         3B 00 78 
+ 139         00 40 01 
+ 140              	
+ 141              	; exécution de DO    
+ 142              	DEFCODE "DODO",4,,DODO ; ( n  n -- ) R( -- n n )
+ 143 00006c  8D 1F 78 	    RPUSH I
+ 143         87 06 78 
+ 144 000070  8C 03 78 	    mov T, I
+ 145 000072  2E 06 78 	    DPOP
+ 146 000074  8D 1F 78 	    RPUSH T
+ 146         8C 06 78 
+ 147 000078  2E 06 78 	    DPOP
+ 148 00007a  B8 05 78 	    NEXT
+ 148         3B 00 78 
+ 148         00 40 01 
+ 149              	
+ 150              	; exécution de LOOP   
+ 151              	DEFCODE "DOLOOP",6,,DOLOOP  ; ( -- )  R( n n -- )
+ 152 000080  87 03 E8 	    inc I, I
+ 153 000082  0D 38 E1 	    cp I, R
+ 154 000084  00 00 32 	    bra eq, 1f
+ 155 000086  08 04 90 	    mov [IP+0], IP
+ 156              	1:
+ 157 000088  8D 03 78 	    RPOP I
+ 157         CF 06 78 
+ 158 00008c  CF 06 78 	    RDROP    
+ 159 00008e  B8 05 78 	    NEXT
+ 159         3B 00 78 
+ 159         00 40 01 
+ 160              	
+ 161              	; empile compteur de boucle    
+ 162              	DEFCODE "I",1,,DOI  ; ( -- n )
+ 163 000094  0C 2F 78 	    DPUSH
+ 164 000096  07 06 78 	    mov I, T
+ 165 000098  B8 05 78 	    NEXT
+ 165         3B 00 78 
+ 165         00 40 01 
+ 166              	
+ 167              	DEFCODE "DUP",3,,DUP ; ( n -- n n )
+ 168 00009e  0C 2F 78 	    DPUSH
+ 169 0000a0  B8 05 78 	    NEXT
+ 169         3B 00 78 
+ 169         00 40 01 
+ 170              	    
+ 171              	DEFCODE "DROP",4,,DROP ; ( n -- )
+ 172 0000a6  2E 06 78 	    DPOP
+ 173 0000a8  B8 05 78 	    NEXT
+ 173         3B 00 78 
+ 173         00 40 01 
+ 174              	
+ 175              	DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
+ 176 0000ae  0C 00 78 	    mov T, W0
+ 177 0000b0  0E 06 90 	    mov [DSP+0], T
+ 178 0000b2  00 07 98 	    mov W0, [DSP+0]
+ 179 0000b4  B8 05 78 	    NEXT
+ 179         3B 00 78 
+ 179         00 40 01 
+ 180              	
+ 181              	DEFCODE "ROT",3,,ROT
+ 182 0000ba  0C 00 78 	    mov T, W0
+ 183 0000bc  0E 06 90 	    mov [DSP+0], T
+ 184 0000be  FE B8 97 	    mov [DSP-2], W1
+ 185 0000c0  01 07 98 	    mov W1, [DSP+0]
+ 186 0000c2  70 BF 9F 	    mov W0, [DSP-2]
+ 187 0000c4  B8 05 78 	    NEXT
+ 187         3B 00 78 
+ 187         00 40 01 
+ 188              	    
+ 189              	DEFCODE "OVER",4,,OVER
+ 190 0000ca  0C 2F 78 	    DPUSH
+ 191 0000cc  7E BE 97 	    mov [DSP-2],T
+ 192 0000ce  B8 05 78 	    NEXT
+ 192         3B 00 78 
+ 192         00 40 01 
+ 193              	
+ 194              	; MATH
+ 195              	DEFCODE "1+",1,,INC1
+ 196 0000d4  1C 00 B0 	    add #1, T
+ 197 0000d6  B8 05 78 	    NEXT
+ 197         3B 00 78 
+ 197         00 40 01 
+ 198              	    
+ 199              	DEFWORD "TEST",4,,TEST   
+ 200 00aa 00 00 00 00 	.word  CLS,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,DOBRA, TEST+6
+ 200      00 00 00 00 
+ 200      4D 01 00 00 
+ 200      00 00 00 00 
+ 200      00 00 4D 01 
+ 200      00 00 00 00 
+ 200      06 00 
+ 201                 	
+ 202 00c4 00 00 07 53 	DEFWORD "SERTEST",7,,SERTEST
+ 202      45 52 54 45 
+ 202      53 54 00 00 
+ 203 00d0 00 00 00 00 	.word MSG,LIT,1000,MSEC,DOBRA,SERTEST+2    
+ 203      E8 03 00 00 
+ 203      00 00 02 00 
+ 204                 	    
+ 205 00dc 00 00 05 48 	DEFWORD "HOME",5,,HOME
+ 205      4F 4D 45 00 
  205      00 00 
- 206                 	
+ 206 00e6 00 00 00 00 	.word LIT,0,LIT,0,CURPOS,EXIT
+ 206      00 00 00 00 
+ 206      00 00 00 00 
  207                 	    
- 208 00f8 00 00 07 49 	DEFCODE "INFLOOP",7,,INFLOOP
- 208      4E 46 4C 4F 
- 208      4F 50 00 00 
- 209 0000d6  00 00 37 	    bra .
- 210              	    
- 211              	SYSDICT
- 212                 	.global ENTRY
- 213                 	ENTRY: 
- 214 0104 00 00       	.word TEST
- 215                 	.global sys_latest
- 216                 	sys_latest:
- 217 0106 00 00       	.word link
- 218                 	    
- 219                 	    
- 220                 	.end
+ 208 00f2 00 00 06 4F 	DEFWORD "OKOFF",6,,OKOFF
+ 208      4B 4F 46 46 
+ 208      00 00 
+ 209 00fc 00 00 00 00 	.word BL,BL,EXIT 
+ 209      00 00 
+ 210                 	    
+ 211 0102 00 00 02 4F 	DEFWORD "OK",2,,OK
+ 211      4B 00 00 00 
+ 212 010a 00 00 4F 00 	.word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
+ 212      00 00 00 00 
+ 212      4B 00 00 00 
+ 212      00 00 
+ 213                 	
+ 214                 	.section .const psv
+ 215                 	quick:
+ 216 000d 54 68 65 20 	.asciz "The quick brown fox jump over the lazy dog.\r\n"
+ 216      71 75 69 63 
+ 216      6B 20 62 72 
+ 216      6F 77 6E 20 
+ 216      66 6F 78 20 
+ 216      6A 75 6D 70 
+ 216      20 6F 76 65 
+ 216      72 20 74 68 
+ 216      65 20 6C 61 
+ 217 003b 00          	DEFWORD "MSG",3,,MSG
+ 218 0120 00 00 00 00 	.word LIT,quick,ZTYPE, EXIT    
+ 218      00 00 00 00 
+ 219                 	
+ 220 0128 00 00 05 5A 	DEFWORD "ZTYPE",5,,ZTYPE
+ 220      54 59 50 45 
+ 220      00 00 
+ 221 0132 00 00 00 00 	.word DUP,CFETCH,DUP,DO0BRA,ZTYPEOUT,SEMIT,INC1,DOBRA,ZTYPE+2
+ 221      00 00 00 00 
+ 221      00 00 00 00 
+ 221      00 00 00 00 
+ 221      02 00 
+ 222                 	ZTYPEOUT:
+ 223 0144 00 00 00 00 	.word DROP,DROP, EXIT     
+ 223      00 00 
+ 224                 	    
+ 225 014a 00 00 07 49 	DEFCODE "INFLOOP",7,,INFLOOP
+ 225      4E 46 4C 4F 
+ 225      4F 50 00 00 
+ 226 0000dc  00 00 37 	    bra .
+ 227              	    
+ 228              	SYSDICT
+ 229                 	.global ENTRY
+ 230                 	ENTRY: 
+ 231 0156 00 00       	.word SERTEST
+ 232                 	.global sys_latest
+ 233                 	sys_latest:
+ 234 0158 00 00       	.word link
+ 235                 	    
+ 236                 	    
+ 237                 	.end
 DEFINED SYMBOLS
                             *ABS*:00000000 ./gen_macros.inc
                             *ABS*:00000000 ./core.inc
@@ -4962,7 +5001,7 @@ DEFINED SYMBOLS
           ./core.inc:95     *ABS*:00000080 F_IMMED
           ./core.inc:96     *ABS*:00000020 F_HIDDEN
           ./core.inc:97     *ABS*:0000001f F_LENMASK
-              core.s:208    .sysdict:000000f8 link
+              core.s:225    .sysdict:0000014a link
     ./gen_macros.inc:24     *ABS*:00000001 GEN_MACRO
               core.s:38     _pstack:00000000 pstack
               core.s:42     _rstack:00000000 rstack
@@ -4970,8 +5009,8 @@ DEFINED SYMBOLS
                             *ABS*:00000002 __ext_attr__rstack
               core.s:48     .int:00000000 __DefaultInterrupt
               core.s:54     .start:00000000 __reset
-              core.s:216    .sysdict:00000106 sys_latest
-              core.s:213    .sysdict:00000104 ENTRY
+              core.s:233    .sysdict:00000158 sys_latest
+              core.s:230    .sysdict:00000156 ENTRY
               core.s:81     .const:00000000 version
               core.s:86     .text:00000000 DOCOLON
               core.s:91     .sysdict:00000000 name_DOCODE
@@ -4998,47 +5037,58 @@ DEFINED SYMBOLS
               core.s:131    .sysdict:00000042 name_DO0BRA
               core.s:131    .sysdict:0000004c DO0BRA
               core.s:131    .text:00000056 code_DO0BRA
-              core.s:138    .text:00000066 L11
-              core.s:143    .sysdict:0000004e name_DODO
-              core.s:143    .sysdict:00000056 DODO
-              core.s:143    .text:0000006e code_DODO
-              core.s:152    .sysdict:00000058 name_DOLOOP
-              core.s:152    .sysdict:00000062 DOLOOP
-              core.s:152    .text:00000082 code_DOLOOP
-              core.s:157    .text:0000008a L12
-              core.s:163    .sysdict:00000064 name_DOI
-              core.s:163    .sysdict:00000068 DOI
-              core.s:163    .text:00000096 code_DOI
-              core.s:168    .sysdict:0000006a name_DUP
-              core.s:168    .sysdict:00000070 DUP
-              core.s:168    .text:000000a0 code_DUP
-              core.s:172    .sysdict:00000072 name_DROP
-              core.s:172    .sysdict:0000007a DROP
-              core.s:172    .text:000000a8 code_DROP
-              core.s:176    .sysdict:0000007c name_SWAP
-              core.s:176    .sysdict:00000084 SWAP
-              core.s:176    .text:000000b0 code_SWAP
-              core.s:182    .sysdict:00000086 name_ROT
-              core.s:182    .sysdict:0000008c ROT
-              core.s:182    .text:000000bc code_ROT
-              core.s:190    .sysdict:0000008e name_OVER
-              core.s:190    .sysdict:00000096 OVER
-              core.s:190    .text:000000cc code_OVER
-              core.s:195    .sysdict:00000098 name_TEST
-              core.s:195    .sysdict:000000a0 TEST
-              core.s:198    .sysdict:000000c4 HOME
-              core.s:204    .sysdict:000000e8 OK
-              core.s:201    .sysdict:000000da OKOFF
-              core.s:198    .sysdict:000000bc name_HOME
-              core.s:201    .sysdict:000000d2 name_OKOFF
-              core.s:204    .sysdict:000000e2 name_OK
-              core.s:208    .sysdict:000000f8 name_INFLOOP
-              core.s:208    .sysdict:00000102 INFLOOP
-              core.s:195    .text:000000d6 code_INFLOOP
-              core.s:209    .text:000000d6 L0
+              core.s:137    .text:00000064 L11
+              core.s:142    .sysdict:0000004e name_DODO
+              core.s:142    .sysdict:00000056 DODO
+              core.s:142    .text:0000006c code_DODO
+              core.s:151    .sysdict:00000058 name_DOLOOP
+              core.s:151    .sysdict:00000062 DOLOOP
+              core.s:151    .text:00000080 code_DOLOOP
+              core.s:156    .text:00000088 L12
+              core.s:162    .sysdict:00000064 name_DOI
+              core.s:162    .sysdict:00000068 DOI
+              core.s:162    .text:00000094 code_DOI
+              core.s:167    .sysdict:0000006a name_DUP
+              core.s:167    .sysdict:00000070 DUP
+              core.s:167    .text:0000009e code_DUP
+              core.s:171    .sysdict:00000072 name_DROP
+              core.s:171    .sysdict:0000007a DROP
+              core.s:171    .text:000000a6 code_DROP
+              core.s:175    .sysdict:0000007c name_SWAP
+              core.s:175    .sysdict:00000084 SWAP
+              core.s:175    .text:000000ae code_SWAP
+              core.s:181    .sysdict:00000086 name_ROT
+              core.s:181    .sysdict:0000008c ROT
+              core.s:181    .text:000000ba code_ROT
+              core.s:189    .sysdict:0000008e name_OVER
+              core.s:189    .sysdict:00000096 OVER
+              core.s:189    .text:000000ca code_OVER
+              core.s:195    .sysdict:00000098 name_INC1
+              core.s:195    .sysdict:0000009e INC1
+              core.s:195    .text:000000d4 code_INC1
+              core.s:199    .sysdict:000000a0 name_TEST
+              core.s:199    .sysdict:000000a8 TEST
+              core.s:205    .sysdict:000000e4 HOME
+              core.s:211    .sysdict:00000108 OK
+              core.s:208    .sysdict:000000fa OKOFF
+              core.s:202    .sysdict:000000c4 name_SERTEST
+              core.s:202    .sysdict:000000ce SERTEST
+              core.s:217    .sysdict:0000011e MSG
+              core.s:205    .sysdict:000000dc name_HOME
+              core.s:208    .sysdict:000000f2 name_OKOFF
+              core.s:211    .sysdict:00000102 name_OK
+              core.s:215    .const:0000000d quick
+              core.s:217    .sysdict:00000118 name_MSG
+              core.s:220    .sysdict:00000130 ZTYPE
+              core.s:220    .sysdict:00000128 name_ZTYPE
+              core.s:222    .sysdict:00000144 ZTYPEOUT
+              core.s:225    .sysdict:0000014a name_INFLOOP
+              core.s:225    .sysdict:00000154 INFLOOP
+              core.s:199    .text:000000dc code_INFLOOP
+              core.s:226    .text:000000dc L0
                       .debug_line:00000000 .L0
                       .debug_line:00000024 .L0
-              core.s:220    .debug_line:000000a9 .L0
+              core.s:237    .debug_line:000000aa .L0
               core.s:87     .text:00000000 .L0
               core.s:88     .text:00000004 .L0
               core.s:87     .text:00000000 .L0
@@ -5102,62 +5152,62 @@ DEFINED SYMBOLS
               core.s:134    .text:0000005a .L0
               core.s:136    .text:0000005e .L0
               core.s:135    .text:0000005c .L0
-              core.s:137    .text:00000060 .L0
+              core.s:138    .text:00000064 .L0
               core.s:136    .text:0000005e .L0
               core.s:139    .text:00000066 .L0
-              core.s:137    .text:00000060 .L0
-              core.s:140    .text:00000068 .L0
+              core.s:138    .text:00000064 .L0
+              core.s:143    .text:0000006c .L0
               core.s:139    .text:00000066 .L0
-              core.s:144    .text:0000006e .L0
-              core.s:140    .text:00000068 .L0
+              core.s:144    .text:00000070 .L0
+              core.s:143    .text:0000006c .L0
               core.s:145    .text:00000072 .L0
-              core.s:144    .text:0000006e .L0
+              core.s:144    .text:00000070 .L0
               core.s:146    .text:00000074 .L0
               core.s:145    .text:00000072 .L0
-              core.s:147    .text:00000076 .L0
+              core.s:147    .text:00000078 .L0
               core.s:146    .text:00000074 .L0
               core.s:148    .text:0000007a .L0
-              core.s:147    .text:00000076 .L0
-              core.s:149    .text:0000007c .L0
+              core.s:147    .text:00000078 .L0
+              core.s:152    .text:00000080 .L0
               core.s:148    .text:0000007a .L0
               core.s:153    .text:00000082 .L0
-              core.s:149    .text:0000007c .L0
+              core.s:152    .text:00000080 .L0
               core.s:154    .text:00000084 .L0
               core.s:153    .text:00000082 .L0
               core.s:155    .text:00000086 .L0
               core.s:154    .text:00000084 .L0
-              core.s:156    .text:00000088 .L0
+              core.s:157    .text:00000088 .L0
               core.s:155    .text:00000086 .L0
-              core.s:158    .text:0000008a .L0
-              core.s:156    .text:00000088 .L0
+              core.s:158    .text:0000008c .L0
+              core.s:157    .text:00000088 .L0
               core.s:159    .text:0000008e .L0
-              core.s:158    .text:0000008a .L0
-              core.s:160    .text:00000090 .L0
+              core.s:158    .text:0000008c .L0
+              core.s:163    .text:00000094 .L0
               core.s:159    .text:0000008e .L0
               core.s:164    .text:00000096 .L0
-              core.s:160    .text:00000090 .L0
+              core.s:163    .text:00000094 .L0
               core.s:165    .text:00000098 .L0
               core.s:164    .text:00000096 .L0
-              core.s:166    .text:0000009a .L0
+              core.s:168    .text:0000009e .L0
               core.s:165    .text:00000098 .L0
               core.s:169    .text:000000a0 .L0
-              core.s:166    .text:0000009a .L0
-              core.s:170    .text:000000a2 .L0
+              core.s:168    .text:0000009e .L0
+              core.s:172    .text:000000a6 .L0
               core.s:169    .text:000000a0 .L0
               core.s:173    .text:000000a8 .L0
-              core.s:170    .text:000000a2 .L0
-              core.s:174    .text:000000aa .L0
+              core.s:172    .text:000000a6 .L0
+              core.s:176    .text:000000ae .L0
               core.s:173    .text:000000a8 .L0
               core.s:177    .text:000000b0 .L0
-              core.s:174    .text:000000aa .L0
+              core.s:176    .text:000000ae .L0
               core.s:178    .text:000000b2 .L0
               core.s:177    .text:000000b0 .L0
               core.s:179    .text:000000b4 .L0
               core.s:178    .text:000000b2 .L0
-              core.s:180    .text:000000b6 .L0
+              core.s:182    .text:000000ba .L0
               core.s:179    .text:000000b4 .L0
               core.s:183    .text:000000bc .L0
-              core.s:180    .text:000000b6 .L0
+              core.s:182    .text:000000ba .L0
               core.s:184    .text:000000be .L0
               core.s:183    .text:000000bc .L0
               core.s:185    .text:000000c0 .L0
@@ -5166,18 +5216,20 @@ DEFINED SYMBOLS
               core.s:185    .text:000000c0 .L0
               core.s:187    .text:000000c4 .L0
               core.s:186    .text:000000c2 .L0
-              core.s:188    .text:000000c6 .L0
+              core.s:190    .text:000000ca .L0
               core.s:187    .text:000000c4 .L0
               core.s:191    .text:000000cc .L0
-              core.s:188    .text:000000c6 .L0
+              core.s:190    .text:000000ca .L0
               core.s:192    .text:000000ce .L0
               core.s:191    .text:000000cc .L0
-              core.s:193    .text:000000d0 .L0
+              core.s:196    .text:000000d4 .L0
               core.s:192    .text:000000ce .L0
-              core.s:209    .text:000000d6 .L0
-              core.s:193    .text:000000d0 .L0
-              core.s:211    .text:000000d8 .L0
-              core.s:209    .text:000000d6 .L0
+              core.s:197    .text:000000d6 .L0
+              core.s:196    .text:000000d4 .L0
+              core.s:226    .text:000000dc .L0
+              core.s:197    .text:000000d6 .L0
+              core.s:228    .text:000000de .L0
+              core.s:226    .text:000000dc .L0
               core.s:56     .start:00000000 .L0
               core.s:57     .start:00000002 .L0
               core.s:56     .start:00000000 .L0
@@ -5219,7 +5271,7 @@ DEFINED SYMBOLS
               core.s:51     .int:00000002 .L0
               core.s:49     .int:00000000 .L0
                             .text:00000000 .L0
-              core.s:211    .text:000000d8 .L0
+              core.s:228    .text:000000de .L0
                            .start:00000000 .L0
               core.s:79     .start:0000002a .L0
                              .int:00000000 .L0
@@ -5235,6 +5287,7 @@ MSEC
 CURPOS
 BL
 EMIT
+SEMIT
 
 EQUATE SYMBOLS
                 ./gen_macros.inc = 0x0
@@ -6767,8 +6820,8 @@ EQUATE SYMBOLS
                         SER_MODE = U1MODE
                          SER_STA = U1STA
                          SER_BRG = U1BRG
-                       SER_TXREG = U1TXREG
-                       SER_RXREG = U1RXREG
+                       SER_TXREG = U1TXREGL
+                       SER_RXREG = U1RXREGL
                    SER_RX_PPSbit = 0x0
                     SER_RX_RPINR = RPINR18
                        SER_TX_FN = 0x3

@@ -129,9 +129,8 @@ DEFCODE "DOBRA",5,,DOBRA  ; ( -- )
     
 ; branchement si T==0    
 DEFCODE "DO0BRA",6,,DO0BRA ; ( n -- )
-    mov T, W0
+    cp0 T
     DPOP
-    cp0 W0
     bra nz, 1f
     mov [IP], IP
     NEXT   
@@ -191,9 +190,17 @@ DEFCODE "OVER",4,,OVER
     DPUSH
     mov [DSP-2],T
     NEXT
+
+; MATH
+DEFCODE "1+",1,,INC1
+    add #1, T
+    NEXT
     
 DEFWORD "TEST",4,,TEST   
-.word  CLS,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,DOBRA, TEST+4
+.word  CLS,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,DOBRA, TEST+6
+
+DEFWORD "SERTEST",7,,SERTEST
+.word MSG,LIT,1000,MSEC,DOBRA,SERTEST+2    
     
 DEFWORD "HOME",5,,HOME
 .word LIT,0,LIT,0,CURPOS,EXIT
@@ -204,6 +211,16 @@ DEFWORD "OKOFF",6,,OKOFF
 DEFWORD "OK",2,,OK
 .word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
+.section .const psv
+quick:
+.asciz "The quick brown fox jump over the lazy dog.\r\n"
+DEFWORD "MSG",3,,MSG
+.word LIT,quick,ZTYPE, EXIT    
+
+DEFWORD "ZTYPE",5,,ZTYPE
+.word DUP,CFETCH,DUP,DO0BRA,ZTYPEOUT,SEMIT,INC1,DOBRA,ZTYPE+2
+ZTYPEOUT:
+.word DROP,DROP, EXIT     
     
 DEFCODE "INFLOOP",7,,INFLOOP
     bra .
@@ -211,7 +228,7 @@ DEFCODE "INFLOOP",7,,INFLOOP
 SYSDICT
 .global ENTRY
 ENTRY: 
-.word TEST
+.word SERTEST
 .global sys_latest
 sys_latest:
 .word link

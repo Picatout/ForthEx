@@ -24,13 +24,14 @@
 .include "hardware.inc"
 .include "core.inc"
 .include "serial.inc"
-    
+.include "core.inc"    
 
 .equ QUEUE_SIZE, 16
     
 .data
 rx_queue: .space QUEUE_SIZE
 tx_queue: .space QUEUE_SIZE
+tx_wait:  .space 2 ; nombre de caractère à transmettre 
 rx_head:  .space 1
 rx_tail:  .space 1
 tx_head:  .space 1
@@ -42,8 +43,7 @@ tx_tail:  .space 1
 .global serial_init
 serial_init:
     ; mettre broche en mode sortie
-    mov #~(1<<SER_TX_OUT), W0
-    and SER_TRIS
+    bclr SER_TRIS, #SER_TX_OUT
     ; sélection PPS pour transmission
     mov #~(0x1f<<SER_TX_PPSbit), W0
     and SER_TX_RPOR
@@ -59,7 +59,6 @@ serial_init:
     mov W0, SER_BRG
     ; activation  8 bits, 1 stop, pas de paritée
     bset SER_MODE, #UARTEN
-    bset SER_STA, #UTXEN
     ;priorisation interruption
     mov #~(7<<SER_TX_IPbit), W0
     and SER_TX_IPC
@@ -75,23 +74,29 @@ serial_init:
     bclr SER_RX_IFS, #SER_RX_IF
     bset SER_RX_IEC, #SER_RX_IE
     mov #XON, W0
-    mov W0, SER_TXREG
+    mov.b WREG, SER_TXREG
+    bset SER_STA, #UTXEN
     return
  
     
 DEFCODE "SEMIT",5,,SEMIT
     mov #QUEUE_SIZE, W0
 1:
-    cp.b tx_tail
-    bra eq, 1b ; file pleine
+    btsc SER_STA, #TRMT
+    ; on s'arrure que la transmission aura lieu
+    bset SER_TX_IFS, #SER_TX_IF     
+    cp tx_wait
+    bra eq, 1b
     mov.b tx_tail, WREG
     ze W0,W0
     mov #tx_queue, W1
     add W0,W1,W1
     mov.b T, [W1]
-    btss SER_STA, #TRMT
-    bset SER_TX_IFS, #SER_TX_IF
     DPOP
+    inc tx_wait
+    inc.b tx_tail
+    mov #(QUEUE_SIZE-1), W0
+    and.b tx_tail
     NEXT
     
 DEFCODE "SGET",4,,SGET
@@ -150,26 +155,27 @@ __U1RXInterrupt:
     pop W1
     pop W0
     retfie
-    
-    
+ 
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
+ ; interruption transmission sérielle  
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .global __U1TXInterrupt
 __U1TXInterrupt:
     bclr SER_TX_IFS, #SER_TX_IF
     push W0
     push W1
+    cp0 tx_wait
+    bra z, 2f
     mov.b tx_head,WREG
-    cp.b  tx_tail
-    bra eq, 2f ; file vide
     ze W0,W0
     mov #tx_queue, W1
     add W0,W1,W1
     mov.b [W1],W0
-    mov W0, SER_TXREG
+    mov.b WREG, SER_TXREG
+    dec tx_wait
     inc.b tx_head
-    mov #(QUEUE_SIZE), W0
-    cp.b tx_head
-    bra ltu, 2f
-    clr tx_head  ; remet tx_head et tx_tail à zéro
+    mov #(QUEUE_SIZE-1), W0
+    and.b tx_head
 2:    
     pop W1
     pop W0
