@@ -124,15 +124,16 @@ DEFCODE "C!",2,,CSTORE  ; ( c-addr c -- )
     
 ; branchement inconditionnel    
 DEFCODE "DOBRA",5,,DOBRA  ; ( -- )
-    mov [IP++], IP
-
+    mov [IP], IP
+    NEXT
+    
 ; branchement si T==0    
 DEFCODE "DO0BRA",6,,DO0BRA ; ( n -- )
     mov T, W0
     DPOP
     cp0 W0
     bra nz, 1f
-    mov [IP+0], IP
+    mov [IP], IP
     NEXT   
 1:
     inc2 IP,IP
@@ -192,20 +193,20 @@ DEFCODE "OVER",4,,OVER
     NEXT
     
 DEFWORD "TEST",4,,TEST   
-.word  CLS,HOME,OK,LIT,1000, MSEC,HOME,OKOFF, LIT,1000, MSEC, DOBRA, TEST+4
-
+.word  CLS,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,DOBRA, TEST+4
+    
 DEFWORD "HOME",5,,HOME
 .word LIT,0,LIT,0,CURPOS,EXIT
     
 DEFWORD "OKOFF",6,,OKOFF
-.word BL,BL,BL,EXIT 
+.word BL,BL,EXIT 
     
 DEFWORD "OK",2,,OK
-.word BL,LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
+.word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
+    
 DEFCODE "INFLOOP",7,,INFLOOP
     bra .
-    
     
 SYSDICT
 .global ENTRY

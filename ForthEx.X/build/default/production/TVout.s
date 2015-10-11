@@ -61,6 +61,7 @@ _video_buffer: .space TV_BUFFER
 tvout_init:
     bclr VIDEO_TRIS, #VIDEO_OUT ; sortie vidéo
     bclr SYNC_TRIS, #SYNC_OUT ; sortie sync vidéo
+    bclr VIDEO_TRIS, #VIDEO_PORCH ; seuil video
     ; configuration PPS
     mov VIDEO_RPOR, W0
     mov #~(0x1f<<VIDEO_RPORbit),W1
@@ -346,6 +347,7 @@ __OC2Interrupt:
     nop
     nop
     nop
+    bset VIDEO_LAT, #VIDEO_PORCH
     mov #psvpage(_font),W0
     mov W0, PSVPAG
     mov line_count, W1
@@ -382,6 +384,7 @@ __OC2Interrupt:
     pop CH_COUNT
     pop W1
     pop W0
+    bclr VIDEO_LAT,#VIDEO_PORCH
     bclr VIDEO_IFS, #VIDEO_IF
     retfie
 

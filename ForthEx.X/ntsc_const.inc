@@ -27,7 +27,7 @@
 .equ HSYNC, 74  ; OC1R=47e-6*FCY-1 sync pulse horizontal
 .equ HALFLINE, 507 ; période demi-ligne horizontale (VSYNC)
 .equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
-.equ TOPLINE, 40  ; première ligne visible
+.equ TOPLINE, 44  ; première ligne visible
 .equ ELPFRM,  271  ; nombre de lignes par frame pair
 .equ OLPFRM,  272  ; nombre de lignes par frame impair
 .equ VIDEO_DLY, 50 ; délais déclenche interruption video=HSYNC+VIDEO_DLY

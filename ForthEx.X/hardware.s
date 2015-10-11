@@ -29,8 +29,10 @@
     
 .data 
 .global systicks    
-systicks:
-.word 0
+systicks: ; compteur de millisecondes
+.space 2
+seed: ; PRNG 32 bits    
+.space 4
     
 .text
 .global hardware_init
@@ -68,7 +70,53 @@ DEFCODE "MSEC",4,,MSEC  ; ( n -- )
     bra neq, 0b
     DPOP
     NEXT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; générateur pseudo hazard
+; génère un nombre de 16 bits
+;  si seed impaire incrémente
+;  ensuite Sn=(Sn-1)*3/2
+;  on ne garde que le bit
+;  le moins significatif
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "RAND",4,,RAND
+    clr W2
+    mov #15,W3
+0:
+    btss seed,#0
+    bra 1f
+    inc seed
+    bra nc, 1f
+    inc seed+2
+ 1:
+    sl seed,WREG
+    mov W0,W1
+    rlc seed+2, WREG
+    exch W0,W1
+    add seed
+    mov W1,W0
+    addc seed+2
+    lsr seed+2,
+    rrc seed
+    lsr seed, WREG
+    rrc W3,W3
+    dec W4,W4
+    bra c, 1b
+    DPUSH
+    mov W3,T
+    NEXT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+;initialisation variable seed
+; utilisation de l'ADC
+; on ne garde que le bit 
+; le plus faible de chaque
+; lecture.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCODE "SRAND",5,,SRAND
+    ; initialisation du convertisseur
     
+    NEXT
 .end
 
 

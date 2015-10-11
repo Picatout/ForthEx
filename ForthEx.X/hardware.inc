@@ -35,7 +35,9 @@
 .equ VIDEO_STD, NTSC
     
 .equ VIDEO_PORT, PORTB
+.equ VIDEO_LAT, LATB    
 .equ VIDEO_TRIS, TRISB
+.equ VIDEO_PORCH,2    
 .equ VIDEO_OUT,  3
 .equ VIDEO_OCR, OC2R
 .equ VIDEO_OCRS, OC2RS
