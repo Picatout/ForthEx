@@ -31,12 +31,13 @@
 .data
 rx_queue: .space QUEUE_SIZE
 tx_queue: .space QUEUE_SIZE
-tx_wait:  .space 2 ; nombre de caractère à transmettre 
-rx_head:  .space 1
-rx_tail:  .space 1
+tx_wait:  .space 2 ; nombre de caractères dans tx_queue 
 tx_head:  .space 1
 tx_tail:  .space 1
-  
+rx_in:	  .space 2 ; nombre de caractère dans rx_queue
+rx_head:  .space 1
+rx_tail:  .space 1
+ 
  
 .text
     
@@ -80,13 +81,19 @@ serial_init:
  
     
 DEFCODE "SEMIT",5,,SEMIT
+    cp0 tx_wait
+    bra neq, 0f
+    btsc SER_STA, #UTXBF
+    bra 0f
+    mov T, SER_TXREG
+    DPOP
+    bra 3f
+0:    
     mov #QUEUE_SIZE, W0
 1:
-    btsc SER_STA, #TRMT
-    ; on s'arrure que la transmission aura lieu
-    bset SER_TX_IFS, #SER_TX_IF     
     cp tx_wait
     bra eq, 1b
+2:    
     mov.b tx_tail, WREG
     ze W0,W0
     mov #tx_queue, W1
@@ -97,33 +104,30 @@ DEFCODE "SEMIT",5,,SEMIT
     inc.b tx_tail
     mov #(QUEUE_SIZE-1), W0
     and.b tx_tail
+;    btsc SER_STA, #TRMT
+;    bset SER_TX_IFS, #SER_TX_IF
+3:    
     NEXT
     
 DEFCODE "SGET",4,,SGET
     DPUSH
-    clr T
-    mov.b rx_head, WREG
-    cp.b  rx_tail
-    bra neq, 1f
-    ze W0,W0
-    cp W0, #QUEUE_SIZE
-    bra neq, 2f
-    clr rx_head  ; remet rx_head et rx_tail à zéro
 0:    
-    btsc SER_STA, #UTXBF
+    cp0 rx_in
+    bra nz, 1f
+;    mov #XON, W0
+;    btss SER_STA, #UTXBF
+;    mov.b WREG, SER_TXREG
     bra 0b
-    mov #XON, W0
-    mov W0, SER_TXREG
-    bra 2f
-1:    
+1:
+    mov.b rx_head, WREG
     ze W0,W0
     mov #rx_queue, W1
     add W0,W1,W1
     mov.b [W1], T
+    dec rx_in
     inc.b rx_head
-    mov #QUEUE_SIZE, W0
-    cp.b rx_head
-2:    
+    mov #(QUEUE_SIZE-1), W0
+    and.b rx_head
     NEXT
     
     
@@ -136,21 +140,23 @@ __U1RXInterrupt:
     push W1
     mov.b rx_tail, WREG
     ze W0,W0
-    cp W0, #QUEUE_SIZE ; PIC24F <#lit5>, PIC24E <#lit8>
-    bra eq, 0f
     mov #rx_queue, W1
     add W0,W1,W1
+    btss SER_STA, #URXDA
+    bra 1f
     mov SER_RXREG, W0
     mov.b W0, [W1]
+    inc rx_in
     inc.b rx_tail
-    mov #(QUEUE_SIZE-4), W0
-    cp.b rx_tail
-    bra ltu, 1f
-0:    
-    btsc SER_STA, #UTXBF
-    bra 1f
-    mov #XOFF, W0
-    mov W0, SER_TXREG
+    mov #(QUEUE_SIZE-1), W0
+    and.b rx_tail
+;    mov #(QUEUE_SIZE-4), W0
+;    cp rx_in
+;    bra ltu, 1f   
+;    btsc SER_STA, #UTXBF
+;    bra 1f
+;    mov #XOFF, W0
+;    mov.b WREG, SER_TXREG
 1:    
     pop W1
     pop W0

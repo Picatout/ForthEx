@@ -3612,160 +3612,166 @@
   33      00 00 00 00 
   33      00 00 00 00 
   33      00 00 00 00 
-  34 0020 00 00       	tx_wait:  .space 2 ; nombre de caractère à transmettre 
-  35 0022 00          	rx_head:  .space 1
-  36 0023 00          	rx_tail:  .space 1
-  37 0024 00          	tx_head:  .space 1
-  38 0025 00          	tx_tail:  .space 1
-  39                 	  
+  34 0020 00 00       	tx_wait:  .space 2 ; nombre de caractères dans tx_queue 
+  35 0022 00          	tx_head:  .space 1
+  36 0023 00          	tx_tail:  .space 1
+  37 0024 00 00       	rx_in:	  .space 2 ; nombre de caractère dans rx_queue
+  38 0026 00          	rx_head:  .space 1
+  39 0027 00          	rx_tail:  .space 1
   40                 	 
-  41                 	.text
-  42              	    
-  43              	.global serial_init
-  44              	serial_init:
-  45              	    ; mettre broche en mode sortie
-  46 000000  01 A0 A9 	    bclr SER_TRIS, #SER_TX_OUT
-  47              	    ; sélection PPS pour transmission
-  48 000002  F0 0F 2E 	    mov #~(0x1f<<SER_TX_PPSbit), W0
-  49 000004  00 20 B6 	    and SER_TX_RPOR
-  50 000006  00 30 20 	    mov #(SER_TX_FN<<SER_TX_PPSbit), W0
-  51 000008  00 20 B7 	    ior SER_TX_RPOR
-  52              	    ; sélection PPS pour réception
-  53 00000a  00 FE 2F 	    mov #~(0x1f<<SER_RX_PPSbit), W0
-  54 00000c  00 20 B6 	    and SER_RX_RPINR
-  55 00000e  C0 00 20 	    mov #(SER_RX_INP<<SER_RX_PPSbit), W0
-  56 000010  00 20 B7 	    ior SER_RX_RPINR
-  57              	    ; baud rate 9600
-  58 000012  70 06 20 	    mov #(FCY/(16*9600)-1), W0
-  59 000014  00 00 88 	    mov W0, SER_BRG
-  60              	    ; activation  8 bits, 1 stop, pas de paritée
-  61 000016  01 E0 A8 	    bset SER_MODE, #UARTEN
-  62              	    ;priorisation interruption
-  63 000018  80 FF 2F 	    mov #~(7<<SER_TX_IPbit), W0
-  64 00001a  00 20 B6 	    and SER_TX_IPC
-  65 00001c  30 00 20 	    mov #(3<<SER_TX_IPbit), W0
-  66 00001e  00 20 B7 	    ior SER_TX_IPC
-  67 000020  F0 FF 28 	    mov #~(7<<SER_RX_IPbit), W0
-  68 000022  00 20 B6 	    and SER_RX_IPC
-  69 000024  00 00 23 	    mov #(3<<SER_RX_IPbit), W0
-  70 000026  00 20 B7 	    ior SER_RX_IPC
-  71              	    ; activation interrupts
-  72 000028  01 80 A9 	    bclr SER_TX_IFS, #SER_TX_IF
-  73 00002a  01 80 A8 	    bset SER_TX_IEC, #SER_TX_IE
-  74 00002c  01 60 A9 	    bclr SER_RX_IFS, #SER_RX_IF
-  75 00002e  01 60 A8 	    bset SER_RX_IEC, #SER_RX_IE
-  76 000030  10 01 20 	    mov #XON, W0
-  77 000032  00 E0 B7 	    mov.b WREG, SER_TXREG
-  78 000034  01 40 A8 	    bset SER_STA, #UTXEN
-  79 000036  00 00 06 	    return
-  80              	 
-  81              	    
-  82              	DEFCODE "SEMIT",5,,SEMIT
-  83 000038  00 01 20 	    mov #QUEUE_SIZE, W0
-  84              	1:
-  85 00003a  01 00 AF 	    btsc SER_STA, #TRMT
-  86              	    ; on s'arrure que la transmission aura lieu
-  87 00003c  01 80 A8 	    bset SER_TX_IFS, #SER_TX_IF     
-  88 00003e  20 00 E3 	    cp tx_wait
-  89 000040  00 00 32 	    bra eq, 1b
-  90 000042  25 C0 BF 	    mov.b tx_tail, WREG
-  91 000044  00 80 FB 	    ze W0,W0
-  92 000046  01 00 20 	    mov #tx_queue, W1
-  93 000048  81 00 40 	    add W0,W1,W1
-  94 00004a  8C 48 78 	    mov.b T, [W1]
-  95 00004c  2E 06 78 	    DPOP
-  96 00004e  20 20 EC 	    inc tx_wait
-  97 000050  25 60 EC 	    inc.b tx_tail
-  98 000052  F0 00 20 	    mov #(QUEUE_SIZE-1), W0
-  99 000054  25 60 B6 	    and.b tx_tail
- 100 000056  B8 05 78 	    NEXT
- 100         3B 00 78 
- 100         00 40 01 
- 101              	    
- 102              	DEFCODE "SGET",4,,SGET
- 103 00005c  0C 2F 78 	    DPUSH
- 104 00005e  00 06 EB 	    clr T
- 105 000060  22 C0 BF 	    mov.b rx_head, WREG
- 106 000062  23 40 E3 	    cp.b  rx_tail
- 107 000064  00 00 3A 	    bra neq, 1f
- 108 000066  00 80 FB 	    ze W0,W0
- 109 000068  70 00 E1 	    cp W0, #QUEUE_SIZE
- 110 00006a  00 00 3A 	    bra neq, 2f
- 111 00006c  22 20 EF 	    clr rx_head  ; remet rx_head et rx_tail à zéro
- 112              	0:    
- 113 00006e  01 20 AF 	    btsc SER_STA, #UTXBF
- 114 000070  00 00 37 	    bra 0b
- 115 000072  10 01 20 	    mov #XON, W0
- 116 000074  00 00 88 	    mov W0, SER_TXREG
- 117 000076  00 00 37 	    bra 2f
- 118              	1:    
- 119 000078  00 80 FB 	    ze W0,W0
- 120 00007a  01 00 20 	    mov #rx_queue, W1
- 121 00007c  81 00 40 	    add W0,W1,W1
- 122 00007e  11 46 78 	    mov.b [W1], T
- 123 000080  22 60 EC 	    inc.b rx_head
- 124 000082  00 01 20 	    mov #QUEUE_SIZE, W0
- 125 000084  22 40 E3 	    cp.b rx_head
- 126              	2:    
- 127 000086  B8 05 78 	    NEXT
- 127         3B 00 78 
- 127         00 40 01 
- 128              	    
- 129              	    
- 130              	    
- 131              	INT
- 132              	.global __U1RXInterrupt
- 133              	__U1RXInterrupt:
- 134 000000  01 60 A9 	    bclr  SER_RX_IFS, #SER_RX_IF
- 135 000002  80 1F 78 	    push W0
- 136 000004  81 1F 78 	    push W1
- 137 000006  23 C0 BF 	    mov.b rx_tail, WREG
- 138 000008  00 80 FB 	    ze W0,W0
- 139 00000a  70 00 E1 	    cp W0, #QUEUE_SIZE ; PIC24F <#lit5>, PIC24E <#lit8>
- 140 00000c  00 00 32 	    bra eq, 0f
- 141 00000e  01 00 20 	    mov #rx_queue, W1
- 142 000010  81 00 40 	    add W0,W1,W1
- 143 000012  00 00 80 	    mov SER_RXREG, W0
- 144 000014  80 48 78 	    mov.b W0, [W1]
- 145 000016  23 60 EC 	    inc.b rx_tail
- 146 000018  C0 00 20 	    mov #(QUEUE_SIZE-4), W0
- 147 00001a  23 40 E3 	    cp.b rx_tail
- 148 00001c  00 00 39 	    bra ltu, 1f
- 149              	0:    
- 150 00001e  01 20 AF 	    btsc SER_STA, #UTXBF
- 151 000020  00 00 37 	    bra 1f
- 152 000022  30 01 20 	    mov #XOFF, W0
- 153 000024  00 00 88 	    mov W0, SER_TXREG
- 154              	1:    
- 155 000026  CF 00 78 	    pop W1
- 156 000028  4F 00 78 	    pop W0
- 157 00002a  00 40 06 	    retfie
- 158              	 
- 159              	 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
- 160              	 ; interruption transmission sérielle  
- 161              	 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 162              	.global __U1TXInterrupt
- 163              	__U1TXInterrupt:
- 164 00002c  01 80 A9 	    bclr SER_TX_IFS, #SER_TX_IF
- 165 00002e  80 1F 78 	    push W0
- 166 000030  81 1F 78 	    push W1
- 167 000032  20 00 E2 	    cp0 tx_wait
- 168 000034  00 00 32 	    bra z, 2f
- 169 000036  24 C0 BF 	    mov.b tx_head,WREG
- 170 000038  00 80 FB 	    ze W0,W0
- 171 00003a  01 00 20 	    mov #tx_queue, W1
- 172 00003c  81 00 40 	    add W0,W1,W1
- 173 00003e  11 40 78 	    mov.b [W1],W0
- 174 000040  00 E0 B7 	    mov.b WREG, SER_TXREG
- 175 000042  20 20 ED 	    dec tx_wait
- 176 000044  24 60 EC 	    inc.b tx_head
- 177 000046  F0 00 20 	    mov #(QUEUE_SIZE-1), W0
- 178 000048  24 60 B6 	    and.b tx_head
- 179              	2:    
- 180 00004a  CF 00 78 	    pop W1
- 181 00004c  4F 00 78 	    pop W0
- 182 00004e  00 40 06 	    retfie
- 183              	.end
+  41                 	 
+  42                 	.text
+  43              	    
+  44              	.global serial_init
+  45              	serial_init:
+  46              	    ; mettre broche en mode sortie
+  47 000000  01 A0 A9 	    bclr SER_TRIS, #SER_TX_OUT
+  48              	    ; sélection PPS pour transmission
+  49 000002  F0 0F 2E 	    mov #~(0x1f<<SER_TX_PPSbit), W0
+  50 000004  00 20 B6 	    and SER_TX_RPOR
+  51 000006  00 30 20 	    mov #(SER_TX_FN<<SER_TX_PPSbit), W0
+  52 000008  00 20 B7 	    ior SER_TX_RPOR
+  53              	    ; sélection PPS pour réception
+  54 00000a  00 FE 2F 	    mov #~(0x1f<<SER_RX_PPSbit), W0
+  55 00000c  00 20 B6 	    and SER_RX_RPINR
+  56 00000e  C0 00 20 	    mov #(SER_RX_INP<<SER_RX_PPSbit), W0
+  57 000010  00 20 B7 	    ior SER_RX_RPINR
+  58              	    ; baud rate 9600
+  59 000012  70 06 20 	    mov #(FCY/(16*9600)-1), W0
+  60 000014  00 00 88 	    mov W0, SER_BRG
+  61              	    ; activation  8 bits, 1 stop, pas de paritée
+  62 000016  01 E0 A8 	    bset SER_MODE, #UARTEN
+  63              	    ;priorisation interruption
+  64 000018  80 FF 2F 	    mov #~(7<<SER_TX_IPbit), W0
+  65 00001a  00 20 B6 	    and SER_TX_IPC
+  66 00001c  30 00 20 	    mov #(3<<SER_TX_IPbit), W0
+  67 00001e  00 20 B7 	    ior SER_TX_IPC
+  68 000020  F0 FF 28 	    mov #~(7<<SER_RX_IPbit), W0
+  69 000022  00 20 B6 	    and SER_RX_IPC
+  70 000024  00 00 23 	    mov #(3<<SER_RX_IPbit), W0
+  71 000026  00 20 B7 	    ior SER_RX_IPC
+  72              	    ; activation interrupts
+  73 000028  01 80 A9 	    bclr SER_TX_IFS, #SER_TX_IF
+  74 00002a  01 80 A8 	    bset SER_TX_IEC, #SER_TX_IE
+  75 00002c  01 60 A9 	    bclr SER_RX_IFS, #SER_RX_IF
+  76 00002e  01 60 A8 	    bset SER_RX_IEC, #SER_RX_IE
+  77 000030  10 01 20 	    mov #XON, W0
+  78 000032  00 E0 B7 	    mov.b WREG, SER_TXREG
+  79 000034  01 40 A8 	    bset SER_STA, #UTXEN
+  80 000036  00 00 06 	    return
+  81              	 
+  82              	    
+  83              	DEFCODE "SEMIT",5,,SEMIT
+  84 000038  20 00 E2 	    cp0 tx_wait
+  85 00003a  00 00 3A 	    bra neq, 0f
+  86 00003c  01 20 AF 	    btsc SER_STA, #UTXBF
+  87 00003e  00 00 37 	    bra 0f
+  88 000040  0C 00 88 	    mov T, SER_TXREG
+  89 000042  2E 06 78 	    DPOP
+  90 000044  00 00 37 	    bra 3f
+  91              	0:    
+  92 000046  00 01 20 	    mov #QUEUE_SIZE, W0
+  93              	1:
+  94 000048  20 00 E3 	    cp tx_wait
+  95 00004a  00 00 32 	    bra eq, 1b
+  96              	2:    
+  97 00004c  23 C0 BF 	    mov.b tx_tail, WREG
+  98 00004e  00 80 FB 	    ze W0,W0
+  99 000050  01 00 20 	    mov #tx_queue, W1
+ 100 000052  81 00 40 	    add W0,W1,W1
+ 101 000054  8C 48 78 	    mov.b T, [W1]
+ 102 000056  2E 06 78 	    DPOP
+ 103 000058  20 20 EC 	    inc tx_wait
+ 104 00005a  23 60 EC 	    inc.b tx_tail
+ 105 00005c  F0 00 20 	    mov #(QUEUE_SIZE-1), W0
+ 106 00005e  23 60 B6 	    and.b tx_tail
+ 107              	;    btsc SER_STA, #TRMT
+ 108              	;    bset SER_TX_IFS, #SER_TX_IF
+ 109              	3:    
+ 110 000060  B8 05 78 	    NEXT
+ 110         3B 00 78 
+ 110         00 40 01 
+ 111              	    
+ 112              	DEFCODE "SGET",4,,SGET
+ 113 000066  0C 2F 78 	    DPUSH
+ 114              	0:    
+ 115 000068  24 00 E2 	    cp0 rx_in
+ 116 00006a  00 00 3A 	    bra nz, 1f
+ 117              	;    mov #XON, W0
+ 118              	;    btss SER_STA, #UTXBF
+ 119              	;    mov.b WREG, SER_TXREG
+ 120 00006c  00 00 37 	    bra 0b
+ 121              	1:
+ 122 00006e  26 C0 BF 	    mov.b rx_head, WREG
+ 123 000070  00 80 FB 	    ze W0,W0
+ 124 000072  01 00 20 	    mov #rx_queue, W1
+ 125 000074  81 00 40 	    add W0,W1,W1
+ 126 000076  11 46 78 	    mov.b [W1], T
+ 127 000078  24 20 ED 	    dec rx_in
+ 128 00007a  26 60 EC 	    inc.b rx_head
+ 129 00007c  F0 00 20 	    mov #(QUEUE_SIZE-1), W0
+ 130 00007e  26 60 B6 	    and.b rx_head
+ 131 000080  B8 05 78 	    NEXT
+ 131         3B 00 78 
+ 131         00 40 01 
+ 132              	    
+ 133              	    
+ 134              	    
+ 135              	INT
+ 136              	.global __U1RXInterrupt
+ 137              	__U1RXInterrupt:
+ 138 000000  01 60 A9 	    bclr  SER_RX_IFS, #SER_RX_IF
+ 139 000002  80 1F 78 	    push W0
+ 140 000004  81 1F 78 	    push W1
+ 141 000006  27 C0 BF 	    mov.b rx_tail, WREG
+ 142 000008  00 80 FB 	    ze W0,W0
+ 143 00000a  01 00 20 	    mov #rx_queue, W1
+ 144 00000c  81 00 40 	    add W0,W1,W1
+ 145 00000e  00 00 AE 	    btss SER_STA, #URXDA
+ 146 000010  00 00 37 	    bra 1f
+ 147 000012  00 00 80 	    mov SER_RXREG, W0
+ 148 000014  80 48 78 	    mov.b W0, [W1]
+ 149 000016  24 20 EC 	    inc rx_in
+ 150 000018  27 60 EC 	    inc.b rx_tail
+ 151 00001a  F0 00 20 	    mov #(QUEUE_SIZE-1), W0
+ 152 00001c  27 60 B6 	    and.b rx_tail
+ 153              	;    mov #(QUEUE_SIZE-4), W0
+ 154              	;    cp rx_in
+ 155              	;    bra ltu, 1f   
+ 156              	;    btsc SER_STA, #UTXBF
+ 157              	;    bra 1f
+ 158              	;    mov #XOFF, W0
+ 159              	;    mov.b WREG, SER_TXREG
+ 160              	1:    
+ 161 00001e  CF 00 78 	    pop W1
+ 162 000020  4F 00 78 	    pop W0
+ 163 000022  00 40 06 	    retfie
+ 164              	 
+ 165              	 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
+ 166              	 ; interruption transmission sérielle  
+ 167              	 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 168              	.global __U1TXInterrupt
+ 169              	__U1TXInterrupt:
+ 170 000024  01 80 A9 	    bclr SER_TX_IFS, #SER_TX_IF
+ 171 000026  80 1F 78 	    push W0
+ 172 000028  81 1F 78 	    push W1
+ 173 00002a  20 00 E2 	    cp0 tx_wait
+ 174 00002c  00 00 32 	    bra z, 2f
+ 175 00002e  22 C0 BF 	    mov.b tx_head,WREG
+ 176 000030  00 80 FB 	    ze W0,W0
+ 177 000032  01 00 20 	    mov #tx_queue, W1
+ 178 000034  81 00 40 	    add W0,W1,W1
+ 179 000036  11 40 78 	    mov.b [W1],W0
+ 180 000038  00 E0 B7 	    mov.b WREG, SER_TXREG
+ 181 00003a  20 20 ED 	    dec tx_wait
+ 182 00003c  22 60 EC 	    inc.b tx_head
+ 183 00003e  F0 00 20 	    mov #(QUEUE_SIZE-1), W0
+ 184 000040  22 60 B6 	    and.b tx_head
+ 185              	2:    
+ 186 000042  CF 00 78 	    pop W1
+ 187 000044  4F 00 78 	    pop W0
+ 188 000046  00 40 06 	    retfie
+ 189              	.end
 DEFINED SYMBOLS
                             *ABS*:00000000 ./core.inc
                             *ABS*:00000000 ./serial.inc
@@ -4844,254 +4850,242 @@ DEFINED SYMBOLS
           ./core.inc:95     *ABS*:00000080 F_IMMED
           ./core.inc:96     *ABS*:00000020 F_HIDDEN
           ./core.inc:97     *ABS*:0000001f F_LENMASK
-            serial.s:102    .sysdict:0000000a link
+            serial.s:112    .sysdict:0000000a link
         ./serial.inc:24     *ABS*:00000011 XON
         ./serial.inc:25     *ABS*:00000013 XOFF
             serial.s:29     *ABS*:00000010 QUEUE_SIZE
             serial.s:32     .data:00000000 rx_queue
             serial.s:33     .data:00000010 tx_queue
             serial.s:34     .data:00000020 tx_wait
-            serial.s:35     .data:00000022 rx_head
-            serial.s:36     .data:00000023 rx_tail
-            serial.s:37     .data:00000024 tx_head
-            serial.s:38     .data:00000025 tx_tail
-            serial.s:44     .text:00000000 serial_init
-            serial.s:82     .sysdict:00000000 name_SEMIT
-            serial.s:82     .sysdict:00000008 SEMIT
-            serial.s:82     .text:00000038 code_SEMIT
-            serial.s:84     .text:0000003a L11
-            serial.s:102    .sysdict:0000000a name_SGET
-            serial.s:102    .sysdict:00000012 SGET
-            serial.s:102    .text:0000005c code_SGET
-            serial.s:118    .text:00000078 L12
-            serial.s:126    .text:00000086 L21
-            serial.s:112    .text:0000006e L1
-            serial.s:133    .int:00000000 __U1RXInterrupt
-            serial.s:149    .int:0000001e L2
-            serial.s:154    .int:00000026 L13
-            serial.s:163    .int:0000002c __U1TXInterrupt
-            serial.s:179    .int:0000004a L22
+            serial.s:35     .data:00000022 tx_head
+            serial.s:36     .data:00000023 tx_tail
+            serial.s:37     .data:00000024 rx_in
+            serial.s:38     .data:00000026 rx_head
+            serial.s:39     .data:00000027 rx_tail
+            serial.s:45     .text:00000000 serial_init
+            serial.s:83     .sysdict:00000000 name_SEMIT
+            serial.s:83     .sysdict:00000008 SEMIT
+            serial.s:83     .text:00000038 code_SEMIT
+            serial.s:91     .text:00000046 L1
+            serial.s:109    .text:00000060 L31
+            serial.s:93     .text:00000048 L11
+            serial.s:96     .text:0000004c L21
+            serial.s:112    .sysdict:0000000a name_SGET
+            serial.s:112    .sysdict:00000012 SGET
+            serial.s:112    .text:00000066 code_SGET
+            serial.s:114    .text:00000068 L2
+            serial.s:121    .text:0000006e L12
+            serial.s:137    .int:00000000 __U1RXInterrupt
+            serial.s:160    .int:0000001e L13
+            serial.s:169    .int:00000024 __U1TXInterrupt
+            serial.s:185    .int:00000042 L22
                       .debug_line:00000000 .L0
                       .debug_line:00000026 .L0
-            serial.s:183    .debug_line:000000ad .L0
-            serial.s:134    .int:00000000 .L0
-            serial.s:135    .int:00000002 .L0
-            serial.s:134    .int:00000000 .L0
-            serial.s:136    .int:00000004 .L0
-            serial.s:135    .int:00000002 .L0
-            serial.s:137    .int:00000006 .L0
-            serial.s:136    .int:00000004 .L0
-            serial.s:138    .int:00000008 .L0
-            serial.s:137    .int:00000006 .L0
-            serial.s:139    .int:0000000a .L0
-            serial.s:138    .int:00000008 .L0
-            serial.s:140    .int:0000000c .L0
-            serial.s:139    .int:0000000a .L0
-            serial.s:141    .int:0000000e .L0
-            serial.s:140    .int:0000000c .L0
-            serial.s:142    .int:00000010 .L0
-            serial.s:141    .int:0000000e .L0
-            serial.s:143    .int:00000012 .L0
-            serial.s:142    .int:00000010 .L0
-            serial.s:144    .int:00000014 .L0
-            serial.s:143    .int:00000012 .L0
-            serial.s:145    .int:00000016 .L0
-            serial.s:144    .int:00000014 .L0
-            serial.s:146    .int:00000018 .L0
-            serial.s:145    .int:00000016 .L0
-            serial.s:147    .int:0000001a .L0
-            serial.s:146    .int:00000018 .L0
-            serial.s:148    .int:0000001c .L0
-            serial.s:147    .int:0000001a .L0
-            serial.s:150    .int:0000001e .L0
-            serial.s:148    .int:0000001c .L0
-            serial.s:151    .int:00000020 .L0
-            serial.s:150    .int:0000001e .L0
-            serial.s:152    .int:00000022 .L0
-            serial.s:151    .int:00000020 .L0
-            serial.s:153    .int:00000024 .L0
-            serial.s:152    .int:00000022 .L0
-            serial.s:155    .int:00000026 .L0
-            serial.s:153    .int:00000024 .L0
-            serial.s:156    .int:00000028 .L0
-            serial.s:155    .int:00000026 .L0
-            serial.s:157    .int:0000002a .L0
-            serial.s:156    .int:00000028 .L0
-            serial.s:164    .int:0000002c .L0
-            serial.s:157    .int:0000002a .L0
-            serial.s:165    .int:0000002e .L0
-            serial.s:164    .int:0000002c .L0
-            serial.s:166    .int:00000030 .L0
-            serial.s:165    .int:0000002e .L0
-            serial.s:167    .int:00000032 .L0
-            serial.s:166    .int:00000030 .L0
-            serial.s:168    .int:00000034 .L0
-            serial.s:167    .int:00000032 .L0
-            serial.s:169    .int:00000036 .L0
-            serial.s:168    .int:00000034 .L0
-            serial.s:170    .int:00000038 .L0
-            serial.s:169    .int:00000036 .L0
-            serial.s:171    .int:0000003a .L0
-            serial.s:170    .int:00000038 .L0
-            serial.s:172    .int:0000003c .L0
-            serial.s:171    .int:0000003a .L0
-            serial.s:173    .int:0000003e .L0
-            serial.s:172    .int:0000003c .L0
-            serial.s:174    .int:00000040 .L0
-            serial.s:173    .int:0000003e .L0
-            serial.s:175    .int:00000042 .L0
-            serial.s:174    .int:00000040 .L0
-            serial.s:176    .int:00000044 .L0
-            serial.s:175    .int:00000042 .L0
-            serial.s:177    .int:00000046 .L0
-            serial.s:176    .int:00000044 .L0
-            serial.s:178    .int:00000048 .L0
-            serial.s:177    .int:00000046 .L0
-            serial.s:180    .int:0000004a .L0
-            serial.s:178    .int:00000048 .L0
-            serial.s:181    .int:0000004c .L0
-            serial.s:180    .int:0000004a .L0
-            serial.s:182    .int:0000004e .L0
-            serial.s:181    .int:0000004c .L0
-            serial.s:183    .int:00000050 .L0
-            serial.s:182    .int:0000004e .L0
-            serial.s:46     .text:00000000 .L0
-            serial.s:48     .text:00000002 .L0
-            serial.s:46     .text:00000000 .L0
-            serial.s:49     .text:00000004 .L0
-            serial.s:48     .text:00000002 .L0
-            serial.s:50     .text:00000006 .L0
-            serial.s:49     .text:00000004 .L0
-            serial.s:51     .text:00000008 .L0
-            serial.s:50     .text:00000006 .L0
-            serial.s:53     .text:0000000a .L0
-            serial.s:51     .text:00000008 .L0
-            serial.s:54     .text:0000000c .L0
-            serial.s:53     .text:0000000a .L0
-            serial.s:55     .text:0000000e .L0
-            serial.s:54     .text:0000000c .L0
-            serial.s:56     .text:00000010 .L0
-            serial.s:55     .text:0000000e .L0
-            serial.s:58     .text:00000012 .L0
-            serial.s:56     .text:00000010 .L0
-            serial.s:59     .text:00000014 .L0
-            serial.s:58     .text:00000012 .L0
-            serial.s:61     .text:00000016 .L0
-            serial.s:59     .text:00000014 .L0
-            serial.s:63     .text:00000018 .L0
-            serial.s:61     .text:00000016 .L0
-            serial.s:64     .text:0000001a .L0
-            serial.s:63     .text:00000018 .L0
-            serial.s:65     .text:0000001c .L0
-            serial.s:64     .text:0000001a .L0
-            serial.s:66     .text:0000001e .L0
-            serial.s:65     .text:0000001c .L0
-            serial.s:67     .text:00000020 .L0
-            serial.s:66     .text:0000001e .L0
-            serial.s:68     .text:00000022 .L0
-            serial.s:67     .text:00000020 .L0
-            serial.s:69     .text:00000024 .L0
-            serial.s:68     .text:00000022 .L0
-            serial.s:70     .text:00000026 .L0
-            serial.s:69     .text:00000024 .L0
-            serial.s:72     .text:00000028 .L0
-            serial.s:70     .text:00000026 .L0
-            serial.s:73     .text:0000002a .L0
-            serial.s:72     .text:00000028 .L0
-            serial.s:74     .text:0000002c .L0
-            serial.s:73     .text:0000002a .L0
-            serial.s:75     .text:0000002e .L0
-            serial.s:74     .text:0000002c .L0
-            serial.s:76     .text:00000030 .L0
-            serial.s:75     .text:0000002e .L0
-            serial.s:77     .text:00000032 .L0
-            serial.s:76     .text:00000030 .L0
-            serial.s:78     .text:00000034 .L0
-            serial.s:77     .text:00000032 .L0
-            serial.s:79     .text:00000036 .L0
-            serial.s:78     .text:00000034 .L0
-            serial.s:83     .text:00000038 .L0
-            serial.s:79     .text:00000036 .L0
+            serial.s:189    .debug_line:000000a8 .L0
+            serial.s:138    .int:00000000 .L0
+            serial.s:139    .int:00000002 .L0
+            serial.s:138    .int:00000000 .L0
+            serial.s:140    .int:00000004 .L0
+            serial.s:139    .int:00000002 .L0
+            serial.s:141    .int:00000006 .L0
+            serial.s:140    .int:00000004 .L0
+            serial.s:142    .int:00000008 .L0
+            serial.s:141    .int:00000006 .L0
+            serial.s:143    .int:0000000a .L0
+            serial.s:142    .int:00000008 .L0
+            serial.s:144    .int:0000000c .L0
+            serial.s:143    .int:0000000a .L0
+            serial.s:145    .int:0000000e .L0
+            serial.s:144    .int:0000000c .L0
+            serial.s:146    .int:00000010 .L0
+            serial.s:145    .int:0000000e .L0
+            serial.s:147    .int:00000012 .L0
+            serial.s:146    .int:00000010 .L0
+            serial.s:148    .int:00000014 .L0
+            serial.s:147    .int:00000012 .L0
+            serial.s:149    .int:00000016 .L0
+            serial.s:148    .int:00000014 .L0
+            serial.s:150    .int:00000018 .L0
+            serial.s:149    .int:00000016 .L0
+            serial.s:151    .int:0000001a .L0
+            serial.s:150    .int:00000018 .L0
+            serial.s:152    .int:0000001c .L0
+            serial.s:151    .int:0000001a .L0
+            serial.s:161    .int:0000001e .L0
+            serial.s:152    .int:0000001c .L0
+            serial.s:162    .int:00000020 .L0
+            serial.s:161    .int:0000001e .L0
+            serial.s:163    .int:00000022 .L0
+            serial.s:162    .int:00000020 .L0
+            serial.s:170    .int:00000024 .L0
+            serial.s:163    .int:00000022 .L0
+            serial.s:171    .int:00000026 .L0
+            serial.s:170    .int:00000024 .L0
+            serial.s:172    .int:00000028 .L0
+            serial.s:171    .int:00000026 .L0
+            serial.s:173    .int:0000002a .L0
+            serial.s:172    .int:00000028 .L0
+            serial.s:174    .int:0000002c .L0
+            serial.s:173    .int:0000002a .L0
+            serial.s:175    .int:0000002e .L0
+            serial.s:174    .int:0000002c .L0
+            serial.s:176    .int:00000030 .L0
+            serial.s:175    .int:0000002e .L0
+            serial.s:177    .int:00000032 .L0
+            serial.s:176    .int:00000030 .L0
+            serial.s:178    .int:00000034 .L0
+            serial.s:177    .int:00000032 .L0
+            serial.s:179    .int:00000036 .L0
+            serial.s:178    .int:00000034 .L0
+            serial.s:180    .int:00000038 .L0
+            serial.s:179    .int:00000036 .L0
+            serial.s:181    .int:0000003a .L0
+            serial.s:180    .int:00000038 .L0
+            serial.s:182    .int:0000003c .L0
+            serial.s:181    .int:0000003a .L0
+            serial.s:183    .int:0000003e .L0
+            serial.s:182    .int:0000003c .L0
+            serial.s:184    .int:00000040 .L0
+            serial.s:183    .int:0000003e .L0
+            serial.s:186    .int:00000042 .L0
+            serial.s:184    .int:00000040 .L0
+            serial.s:187    .int:00000044 .L0
+            serial.s:186    .int:00000042 .L0
+            serial.s:188    .int:00000046 .L0
+            serial.s:187    .int:00000044 .L0
+            serial.s:189    .int:00000048 .L0
+            serial.s:188    .int:00000046 .L0
+            serial.s:47     .text:00000000 .L0
+            serial.s:49     .text:00000002 .L0
+            serial.s:47     .text:00000000 .L0
+            serial.s:50     .text:00000004 .L0
+            serial.s:49     .text:00000002 .L0
+            serial.s:51     .text:00000006 .L0
+            serial.s:50     .text:00000004 .L0
+            serial.s:52     .text:00000008 .L0
+            serial.s:51     .text:00000006 .L0
+            serial.s:54     .text:0000000a .L0
+            serial.s:52     .text:00000008 .L0
+            serial.s:55     .text:0000000c .L0
+            serial.s:54     .text:0000000a .L0
+            serial.s:56     .text:0000000e .L0
+            serial.s:55     .text:0000000c .L0
+            serial.s:57     .text:00000010 .L0
+            serial.s:56     .text:0000000e .L0
+            serial.s:59     .text:00000012 .L0
+            serial.s:57     .text:00000010 .L0
+            serial.s:60     .text:00000014 .L0
+            serial.s:59     .text:00000012 .L0
+            serial.s:62     .text:00000016 .L0
+            serial.s:60     .text:00000014 .L0
+            serial.s:64     .text:00000018 .L0
+            serial.s:62     .text:00000016 .L0
+            serial.s:65     .text:0000001a .L0
+            serial.s:64     .text:00000018 .L0
+            serial.s:66     .text:0000001c .L0
+            serial.s:65     .text:0000001a .L0
+            serial.s:67     .text:0000001e .L0
+            serial.s:66     .text:0000001c .L0
+            serial.s:68     .text:00000020 .L0
+            serial.s:67     .text:0000001e .L0
+            serial.s:69     .text:00000022 .L0
+            serial.s:68     .text:00000020 .L0
+            serial.s:70     .text:00000024 .L0
+            serial.s:69     .text:00000022 .L0
+            serial.s:71     .text:00000026 .L0
+            serial.s:70     .text:00000024 .L0
+            serial.s:73     .text:00000028 .L0
+            serial.s:71     .text:00000026 .L0
+            serial.s:74     .text:0000002a .L0
+            serial.s:73     .text:00000028 .L0
+            serial.s:75     .text:0000002c .L0
+            serial.s:74     .text:0000002a .L0
+            serial.s:76     .text:0000002e .L0
+            serial.s:75     .text:0000002c .L0
+            serial.s:77     .text:00000030 .L0
+            serial.s:76     .text:0000002e .L0
+            serial.s:78     .text:00000032 .L0
+            serial.s:77     .text:00000030 .L0
+            serial.s:79     .text:00000034 .L0
+            serial.s:78     .text:00000032 .L0
+            serial.s:80     .text:00000036 .L0
+            serial.s:79     .text:00000034 .L0
+            serial.s:84     .text:00000038 .L0
+            serial.s:80     .text:00000036 .L0
             serial.s:85     .text:0000003a .L0
-            serial.s:83     .text:00000038 .L0
-            serial.s:87     .text:0000003c .L0
+            serial.s:84     .text:00000038 .L0
+            serial.s:86     .text:0000003c .L0
             serial.s:85     .text:0000003a .L0
-            serial.s:88     .text:0000003e .L0
-            serial.s:87     .text:0000003c .L0
-            serial.s:89     .text:00000040 .L0
-            serial.s:88     .text:0000003e .L0
-            serial.s:90     .text:00000042 .L0
-            serial.s:89     .text:00000040 .L0
-            serial.s:91     .text:00000044 .L0
-            serial.s:90     .text:00000042 .L0
+            serial.s:87     .text:0000003e .L0
+            serial.s:86     .text:0000003c .L0
+            serial.s:88     .text:00000040 .L0
+            serial.s:87     .text:0000003e .L0
+            serial.s:89     .text:00000042 .L0
+            serial.s:88     .text:00000040 .L0
+            serial.s:90     .text:00000044 .L0
+            serial.s:89     .text:00000042 .L0
             serial.s:92     .text:00000046 .L0
-            serial.s:91     .text:00000044 .L0
-            serial.s:93     .text:00000048 .L0
+            serial.s:90     .text:00000044 .L0
+            serial.s:94     .text:00000048 .L0
             serial.s:92     .text:00000046 .L0
-            serial.s:94     .text:0000004a .L0
-            serial.s:93     .text:00000048 .L0
-            serial.s:95     .text:0000004c .L0
-            serial.s:94     .text:0000004a .L0
-            serial.s:96     .text:0000004e .L0
-            serial.s:95     .text:0000004c .L0
-            serial.s:97     .text:00000050 .L0
-            serial.s:96     .text:0000004e .L0
-            serial.s:98     .text:00000052 .L0
-            serial.s:97     .text:00000050 .L0
-            serial.s:99     .text:00000054 .L0
-            serial.s:98     .text:00000052 .L0
-            serial.s:100    .text:00000056 .L0
-            serial.s:99     .text:00000054 .L0
-            serial.s:103    .text:0000005c .L0
-            serial.s:100    .text:00000056 .L0
-            serial.s:104    .text:0000005e .L0
-            serial.s:103    .text:0000005c .L0
-            serial.s:105    .text:00000060 .L0
-            serial.s:104    .text:0000005e .L0
-            serial.s:106    .text:00000062 .L0
-            serial.s:105    .text:00000060 .L0
-            serial.s:107    .text:00000064 .L0
-            serial.s:106    .text:00000062 .L0
-            serial.s:108    .text:00000066 .L0
-            serial.s:107    .text:00000064 .L0
-            serial.s:109    .text:00000068 .L0
-            serial.s:108    .text:00000066 .L0
-            serial.s:110    .text:0000006a .L0
-            serial.s:109    .text:00000068 .L0
-            serial.s:111    .text:0000006c .L0
-            serial.s:110    .text:0000006a .L0
-            serial.s:113    .text:0000006e .L0
-            serial.s:111    .text:0000006c .L0
-            serial.s:114    .text:00000070 .L0
-            serial.s:113    .text:0000006e .L0
-            serial.s:115    .text:00000072 .L0
-            serial.s:114    .text:00000070 .L0
-            serial.s:116    .text:00000074 .L0
-            serial.s:115    .text:00000072 .L0
-            serial.s:117    .text:00000076 .L0
-            serial.s:116    .text:00000074 .L0
-            serial.s:119    .text:00000078 .L0
-            serial.s:117    .text:00000076 .L0
-            serial.s:120    .text:0000007a .L0
-            serial.s:119    .text:00000078 .L0
-            serial.s:121    .text:0000007c .L0
-            serial.s:120    .text:0000007a .L0
-            serial.s:122    .text:0000007e .L0
-            serial.s:121    .text:0000007c .L0
-            serial.s:123    .text:00000080 .L0
-            serial.s:122    .text:0000007e .L0
-            serial.s:124    .text:00000082 .L0
-            serial.s:123    .text:00000080 .L0
-            serial.s:125    .text:00000084 .L0
-            serial.s:124    .text:00000082 .L0
-            serial.s:127    .text:00000086 .L0
-            serial.s:125    .text:00000084 .L0
-            serial.s:131    .text:0000008c .L0
-            serial.s:127    .text:00000086 .L0
+            serial.s:95     .text:0000004a .L0
+            serial.s:94     .text:00000048 .L0
+            serial.s:97     .text:0000004c .L0
+            serial.s:95     .text:0000004a .L0
+            serial.s:98     .text:0000004e .L0
+            serial.s:97     .text:0000004c .L0
+            serial.s:99     .text:00000050 .L0
+            serial.s:98     .text:0000004e .L0
+            serial.s:100    .text:00000052 .L0
+            serial.s:99     .text:00000050 .L0
+            serial.s:101    .text:00000054 .L0
+            serial.s:100    .text:00000052 .L0
+            serial.s:102    .text:00000056 .L0
+            serial.s:101    .text:00000054 .L0
+            serial.s:103    .text:00000058 .L0
+            serial.s:102    .text:00000056 .L0
+            serial.s:104    .text:0000005a .L0
+            serial.s:103    .text:00000058 .L0
+            serial.s:105    .text:0000005c .L0
+            serial.s:104    .text:0000005a .L0
+            serial.s:106    .text:0000005e .L0
+            serial.s:105    .text:0000005c .L0
+            serial.s:110    .text:00000060 .L0
+            serial.s:106    .text:0000005e .L0
+            serial.s:113    .text:00000066 .L0
+            serial.s:110    .text:00000060 .L0
+            serial.s:115    .text:00000068 .L0
+            serial.s:113    .text:00000066 .L0
+            serial.s:116    .text:0000006a .L0
+            serial.s:115    .text:00000068 .L0
+            serial.s:120    .text:0000006c .L0
+            serial.s:116    .text:0000006a .L0
+            serial.s:122    .text:0000006e .L0
+            serial.s:120    .text:0000006c .L0
+            serial.s:123    .text:00000070 .L0
+            serial.s:122    .text:0000006e .L0
+            serial.s:124    .text:00000072 .L0
+            serial.s:123    .text:00000070 .L0
+            serial.s:125    .text:00000074 .L0
+            serial.s:124    .text:00000072 .L0
+            serial.s:126    .text:00000076 .L0
+            serial.s:125    .text:00000074 .L0
+            serial.s:127    .text:00000078 .L0
+            serial.s:126    .text:00000076 .L0
+            serial.s:128    .text:0000007a .L0
+            serial.s:127    .text:00000078 .L0
+            serial.s:129    .text:0000007c .L0
+            serial.s:128    .text:0000007a .L0
+            serial.s:130    .text:0000007e .L0
+            serial.s:129    .text:0000007c .L0
+            serial.s:131    .text:00000080 .L0
+            serial.s:130    .text:0000007e .L0
+            serial.s:135    .text:00000086 .L0
+            serial.s:131    .text:00000080 .L0
                              .int:00000000 .L0
-            serial.s:183    .int:00000050 .L0
+            serial.s:189    .int:00000048 .L0
                             .text:00000000 .L0
-            serial.s:131    .text:0000008c .L0
+            serial.s:135    .text:00000086 .L0
                       .debug_info:00000000 .L0
                       .debug_info:0000007d .L0
 

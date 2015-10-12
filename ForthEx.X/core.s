@@ -79,7 +79,7 @@ __reset:
 .section .const psv       
 ;test string
 version:
-.asciz "ForthEx V0.1"    
+.asciz "ForthEx V0.1\r\n"    
     
 .text
 .global DOCOLON    
@@ -200,7 +200,7 @@ DEFWORD "TEST",4,,TEST
 .word  CLS,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,DOBRA, TEST+6
 
 DEFWORD "SERTEST",7,,SERTEST
-.word MSG,LIT,1000,MSEC,DOBRA,SERTEST+2    
+.word CLS,MSG,SGET,SEMIT,DOBRA,SERTEST+6    
     
 DEFWORD "HOME",5,,HOME
 .word LIT,0,LIT,0,CURPOS,EXIT
@@ -214,8 +214,9 @@ DEFWORD "OK",2,,OK
 .section .const psv
 quick:
 .asciz "The quick brown fox jump over the lazy dog.\r\n"
+
 DEFWORD "MSG",3,,MSG
-.word LIT,quick,ZTYPE, EXIT    
+.word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
 
 DEFWORD "ZTYPE",5,,ZTYPE
 .word DUP,CFETCH,DUP,DO0BRA,ZTYPEOUT,SEMIT,INC1,DOBRA,ZTYPE+2
