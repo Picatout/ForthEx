@@ -78,10 +78,10 @@ ascii:
 .byte 0x4a,'/'
 .byte 0x52,'\''
 .byte 0x5d,'|'    
-.byte 0x66,8    ; BACKSPACE
-.byte 0x0d,9    ; TAB
-.byte 0x5a,'\r' ; CR
-.byte 0x76,27   ; ESC
+.byte 0x66,VK_BACK    ; BACKSPACE
+.byte 0x0d,VK_TAB    ; TAB
+.byte 0x5a,VK_RETURN ; CR
+.byte 0x76,VK_ESCAPE   ; ESC
 .byte 0,0
 
 ; touche ascii avec un symbole différent
@@ -138,6 +138,7 @@ extended:
 .byte DOWN,   VK_DOWN
 .byte LEFT,   VK_LEFT
 .byte RIGHT,  VK_RIGHT
+.byte KPENT,  VK_RETURN    
 .byte 0,0    
     
 .end

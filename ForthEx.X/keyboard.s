@@ -21,14 +21,14 @@
 ; Description: transcription code clavier PS/2 en ASCII
 ; Auteur: Jacques Deschênes
 ; Date: 2015-09-28
-;
+; REF: http://www.computer-engineering.org/ps2keyboard/scancodes2.html
 
 .include "hardware.inc"    
 .include "video.inc"
 .include "ps2.inc"
 .include "keyboard.inc"    
 .include "gen_macros.inc"
-    
+.include "core.inc"    
  
 .equ KBD_QUEUE_SIZE, 32    
  
@@ -41,179 +41,7 @@ kbd_tail:
 .word 0
 key_state:    
 .byte 0
-    
-.text
-
-;;;;;;;;;;;;;;;;;;;;;;;
-; retourne le code clavier
-; dans W0 sinon retourne 0
-;;;;;;;;;;;;;;;;;;;;;;;
-.global get_code    
-get_code:
-    clr W0
-    mov kbd_head, W1
-    mov kbd_tail, W2
-    cp  W1,W2
-    bra eq, 1f
-    mov #kbd_queue,W2
-    add W1,W2,W2
-    inc kbd_head
-    mov #(KBD_QUEUE_SIZE-1), W0
-    and kbd_head
-    mov.b [W2], W0
-    ze W0,W0
-1:
-    return
-
-;;;;;;;;;;;;;;;;;;;;;;;;
-; recherche code clavier
-; dans la table
-; entrée: W2=index table    
-;         W1=scancode recherché
-; sortie: W0 contient caractère
-;         W0=0 si scancode pas dans la table
-; modifie: W0,W2,W3    
-;;;;;;;;;;;;;;;;;;;;;;;;;
-search_table:
-1:
-    mov [W2++], W0
-    cp0 W0
-    bra eq, 2f
-    mov W0, W3
-    ze W3,W3
-    cp W3,W1
-    bra neq, 1b
-    swap W0
-    ze W0,W0
-2: ; pas trouvé
-    return
-
-    
-;;;;;;;;;;;;;;;;;;;;;;;
-; retourne un caractère
-; si disponible
-; sortie: W0
-;;;;;;;;;;;;;;;;;;;;;;;    
-.global kbd_get
-
-kbd_get:
-    push PSVPAG
-    call get_code
-    cp0 W0
-    bra eq, kbd_no_key   
-    ;code clavier touche étendue?
-    mov #SC_XKEY, W1
-    cp W1,W0
-    bra neq, 1f
-    bset key_state, #F_XKEY
-    call get_code
-    cp0 W0
-    bra eq, kbd_no_key
-1:
-    ;code clavier relâchement touche?
-    mov #SC_KREL, W1
-    cp W1, W0
-    bra neq, 2f
-    bset key_state, #F_KREL
-    call get_code
-    cp0 W0
-    bra eq, kbd_no_key
-2:
-    mov W0,W1
-    btss key_state, #F_XKEY
-    bra try_shifted
-    ; recherche table 'extended'
-    set_psv extended, W2
-    call search_table
-    cp0 W0
-    bra eq, try_xmod_key
-    ; scancode trouvé dans la table 'extended'
-    bra kbd_goodkey
-try_xmod_key:
-    set_psv xmod, W2
-    call search_table
-    cp0 W0
-    bra eq, kbd_ignore_It
-    bra mod_switch
-try_shifted:  ; recherche table 'shifted'
-    btss key_state, #F_SHIFT
-    bra try_ascii
-    set_psv shifted, W2
-    call search_table
-    cp0 W0
-    bra eq, try_ascii
-    ; scancode trouvé dans la table 'shifted'
-    bra kbd_goodkey
-try_ascii:  ; recherche table 'ascii'
-    set_psv ascii, W2
-    call search_table
-    cp0 W0
-    bra eq, try_ext_key
-    ; scancode trouvé dans la table 'ascii'
-    mov #'a', W1
-    cp W0,W1
-    bra ltu, kbd_goodkey
-    mov #'z', W1
-    cp W0, W1
-    bra gtu, kbd_goodkey
-    ;lettre
-    btsc key_state, #F_KREL
-    bra kbd_ignore_It
-    btss key_state, #F_CAPS
-    btg  W0, #5 
-    btsc key_state, #F_SHIFT
-    btg W0, #5
-    bra kbd_goodkey
-try_ext_key:
-    set_psv extended, W2
-    call search_table
-    cp0 W0
-    bra eq, try_mod_key
-    bra kbd_goodkey
-try_mod_key:
-    set_psv mod, W2
-    call search_table
-    cp0 W0
-    bra eq, kbd_ignore_It
-mod_switch:
-    mov #VK_SHIFT, W1
-    cp W0,W1
-    bra neq, 6f
-    bclr key_state, #F_SHIFT
-    btss key_state, #F_KREL
-    bset key_state, #F_SHIFT
-    bra kbd_ignore_It
-6:
-    mov #VK_CAPS, W1
-    cp W0,W1
-    bra neq, 7f
-    btss key_state, #F_KREL
-    btg key_state, #F_CAPS
-    bra kbd_ignore_It
-7:  
-    mov #VK_CTRL, W1
-    cp W0, W1
-    bra neq, 8f
-    bclr key_state, #F_CTRL
-    btss key_state, #F_KREL
-    bset key_state, #F_CTRL
-    bra kbd_ignore_It
-8:
-    mov #VK_ALT, W1
-    cp W0,W1
-    bra neq, kbd_ignore_It
-    bclr key_state, #F_ALT
-    btss key_state, #F_KREL
-    bset key_state, #F_CTRL
-kbd_ignore_It:    
-    clr W0
-kbd_goodkey:  ; sortie touche acceptée
-    bclr key_state, #F_KREL
-    bclr key_state, #F_XKEY
-kbd_no_key: ; sortie file vide
-    pop PSVPAG
-    return
-    
+ 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; interruption TIMER1
 ; incrémente 'systicks'
@@ -275,6 +103,213 @@ isr_exit:
     pop W0
     bclr IFS0, #T1IF
     retfie
+    
+.text
+
+;;;;;;;;;;;;;;;;;;;;;;;
+; retourne le code clavier
+; dans W0 sinon retourne 0
+;;;;;;;;;;;;;;;;;;;;;;;
+.global get_code    
+get_code:
+    clr W0
+    mov kbd_head, W1
+    mov kbd_tail, W2
+    cp  W1,W2
+    bra eq, 1f
+    mov #kbd_queue,W2
+    add W1,W2,W2
+    inc kbd_head
+    mov #(KBD_QUEUE_SIZE-1), W0
+    and kbd_head
+    mov.b [W2], W0
+    ze W0,W0
+1:
+    return
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+; recherche code clavier
+; dans la table
+; entrée: W2=index table    
+;         W1=scancode recherché
+; sortie: W0 contient caractère
+;         W0=0 si scancode pas dans la table
+; modifie: W0,W2,W3    
+;;;;;;;;;;;;;;;;;;;;;;;;;
+search_table:
+1:
+    mov [W2++], W0
+    cp0 W0
+    bra eq, 2f
+    mov W0, W3
+    ze W3,W3
+    cp W3,W1
+    bra neq, 1b
+    swap W0
+    ze W0,W0
+2: ; pas trouvé
+    return
+
+    
+;;;;;;;;;;;;;;;;;;;;;;;
+; retourne un caractère
+; si disponible sinon 0
+; sortie: W0
+;;;;;;;;;;;;;;;;;;;;;;; 
+; Cette routine est complexe car une touche peut-être composée
+; de plusieurs codes. 
+; Lorsqu'une touche est relâchée son scancode est précédé du code 0xF0
+; Certaines touches ont un scancode étendu, i.e. le premier code est 0xE0
+; Lorsqu'une touche à code étendu est relaché il y a 3 codes envoyés
+; par le clavier  0xE0, 0xF0 suivit du code de la touche.
+; exemple touche <HOME>  lorsqu'elle est enfoncée le clavier envoie 0xE0,0x6C
+; lorsqu'elle est relâchée le clavier envoie 0xE0,0xF0,0x6C
+; référence scancode: http://www.computer-engineering.org/ps2keyboard/scancodes2.html    
+; Le décodage est partiel sinon la routine serait encore plus complexe. 
+; Les rela?hements de touches sont ignorés sauf pour <CTRL>,<ALT>,<SHIFT>     
+.global kbd_get
+kbd_get:
+    push PSVPAG
+    call get_code
+    cp0 W0
+    bra eq, kbd_no_key   
+    ;code clavier touche étendue?
+    mov #SC_XKEY, W1
+    cp W1,W0
+    bra neq, 1f
+    bset key_state, #F_XKEY
+    call get_code
+    cp0 W0
+    bra eq, kbd_no_key
+1:
+    ;code clavier relâchement touche?
+    mov #SC_KREL, W1
+    cp W0,W1
+    bra neq, 2f
+    bset key_state, #F_KREL
+    call get_code
+    cp0 W0
+    bra eq, kbd_no_key
+2:
+    mov W0,W1
+    btss key_state, #F_KREL
+    bra 3f
+    btsc key_state, #F_XKEY
+    bra try_xmod_key
+    bra try_mod_key
+3:    
+    btss key_state, #F_XKEY
+    bra try_shifted
+    ; recherche table 'extended'
+    set_psv extended, W2
+    call search_table
+    cp0 W0
+    bra eq, try_xmod_key
+    ; scancode trouvé dans la table 'extended'
+    bra kbd_goodkey
+try_xmod_key:
+    set_psv xmod, W2
+    call search_table
+    cp0 W0
+    bra eq, kbd_ignore_it
+    bra mod_switch
+try_shifted:  ; recherche table 'shifted'
+    btss key_state, #F_SHIFT
+    bra try_ascii
+    set_psv shifted, W2
+    call search_table
+    cp0 W0
+    bra nz, kbd_goodkey
+try_ascii:  ; recherche table 'ascii'
+    set_psv ascii, W2
+    call search_table
+    cp0 W0
+    bra eq, try_mod_key
+    ; scancode trouvé dans la table 'ascii'
+    mov #'a', W1
+    cp W0,W1
+    bra ltu, kbd_goodkey
+    mov #'z', W1
+    cp W0, W1
+    bra gtu, kbd_goodkey
+    ;lettre
+    btss key_state, #F_CAPS
+    btg  W0, #5 
+    btsc key_state, #F_SHIFT
+    btg W0, #5
+    bra kbd_goodkey
+try_mod_key:
+    set_psv mod, W2
+    call search_table
+    cp0 W0
+    bra eq, kbd_ignore_it
+mod_switch:
+    mov #VK_SHIFT, W1
+    cp W0,W1
+    bra neq, 6f
+    bclr key_state, #F_SHIFT
+    btss key_state, #F_KREL
+    bset key_state, #F_SHIFT
+    bra kbd_ignore_it
+6:
+    mov #VK_CAPS, W1
+    cp W0,W1
+    bra neq, 7f
+    btss key_state, #F_KREL
+    btg key_state, #F_CAPS
+    bra kbd_ignore_it
+7:  
+    mov #VK_CTRL, W1
+    cp W0, W1
+    bra neq, 8f
+    bclr key_state, #F_CTRL
+    btss key_state, #F_KREL
+    bset key_state, #F_CTRL
+    bra kbd_ignore_it
+8:
+    mov #VK_ALT, W1
+    cp W0,W1
+    bra neq, kbd_ignore_it
+    bclr key_state, #F_ALT
+    btss key_state, #F_KREL
+    bset key_state, #F_CTRL
+kbd_ignore_it:    
+    clr W0
+kbd_goodkey:  ; sortie touche acceptée
+    bclr key_state, #F_KREL
+    bclr key_state, #F_XKEY
+kbd_no_key: ; sortie file vide
+    pop PSVPAG
+    return
+
+;;;;;;;;;;;;;;;;;;;;;;
+; définitions Forth
+;;;;;;;;;;;;;;;;;;;;;;    
+    
+DEFCODE "?KEY",4,,QKEY  ; ( -- 0 | T c )
+    call kbd_get
+    DPUSH
+    mov W0, T
+    cp0 W0
+    bra eq, 1f
+    DPUSH
+    setm T
+1:    
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;
+; attend une touche
+; du clavier
+;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCODE "KEY",3,,KEY ; ( -- c)
+0:
+    call kbd_get
+    cp0 W0
+    bra z, 0b
+    DPUSH
+    mov W0, T
+    NEXT
+    
     
 .end
     

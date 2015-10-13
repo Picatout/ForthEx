@@ -3693,386 +3693,453 @@
  158              	
  159              	.endif
  160              		
-  35              	    
-  36              	; constantes génération signal NTSC
-  37              	
-  38              	
-  39              	
-  40              	
-  41              	.data
-  42 0000 FF FF       	line_count: .word 0xffff
-  43 0002 FF          	even: .byte 0xff
-  44 0003 00          	.align 2 
-  45 0004 00          	xpos: .byte 0
-  46 0005 00          	ypos: .byte 0
-  47                 	 
-  48                 	.global _video_buffer
-  49 0006 00 00 00 00 	_video_buffer: .space TV_BUFFER
-  49      00 00 00 00 
-  49      00 00 00 00 
-  49      00 00 00 00 
-  49      00 00 00 00 
-  49      00 00 00 00 
-  49      00 00 00 00 
-  49      00 00 00 00 
-  49      00 00 00 00 
-  50                 	
-  51                 	
-  52                 	.text
-  53              	 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  54              	; initialisation générateur vidéo
-  55              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  56              	.global tvout_init
-  57              	tvout_init:
-  58 000000  00 60 A9 	    bclr VIDEO_TRIS, #VIDEO_OUT ; sortie vidéo
-  59 000002  00 80 A9 	    bclr SYNC_TRIS, #SYNC_OUT  ; sortie sync vidéo
-  60 000004  00 40 A9 	    bclr VIDEO_TRIS, #VIDEO_PORCH ; seuil video
-  61              	    ; configuration PPS
-  62 000006  00 00 80 	    mov VIDEO_RPOR, W0
-  63 000008  F1 0F 2E 	    mov #~(0x1f<<VIDEO_RPORbit),W1
-  64 00000a  01 00 60 	    and W0,W1,W0
-  65 00000c  01 A0 20 	    mov #(VIDEO_FN<<VIDEO_RPORbit), W1
-  66 00000e  01 00 70 	    ior W0,W1,W0
-  67 000010  00 00 88 	    mov W0, VIDEO_RPOR
-  68 000012  00 00 80 	    mov SYNC_RPOR, W0
-  69 000014  01 FE 2F 	    mov #~(0x1f<<SYNC_RPORbit),W1
-  70 000016  01 00 60 	    and W0,W1,W0
-  71 000018  21 01 20 	    mov #(SYNC_FN<<SYNC_RPORbit), W1
-  72 00001a  01 00 70 	    ior W0,W1,W0
-  73 00001c  00 00 88 	    mov W0, SYNC_RPOR
-  74              	    ; configuration VIDEO_SPI
-  75 00001e  B0 03 20 	    mov #(3+(6<<SPRE0)+1<<MSTEN), W0
-  76 000020  00 00 88 	    mov W0, VIDEO_SPICON1
-  77 000022  01 E0 A8 	    bset VIDEO_SPISTAT, #SPIEN
-  78 000024  00 20 EF 	    clr VIDEO_SPIBUF
-  79              	    ; configuration output compare
-  80 000026  70 3F 20 	    mov #HLINE, W0
-  81              	    ; période timer Fcy/15748-1
-  82 000028  00 00 88 	    mov W0, SYNC_PER
-  83 00002a  00 00 88 	    mov W0, SYNC_OCRS
-  84 00002c  00 00 88 	    mov W0, VIDEO_OCR
-  85 00002e  A0 04 20 	    mov #HSYNC, W0
-  86 000030  00 00 88 	    mov W0, SYNC_OCR
-  87 000032  20 03 B0 	    add  #VIDEO_DLY, W0
-  88 000034  00 00 88 	    mov W0, VIDEO_OCRS
-  89              	    ; configuraton output compare mode 5
-  90 000036  50 00 20 	    mov #5, W0
-  91 000038  00 00 88 	    mov W0, SYNC_OCCON
-  92 00003a  00 00 88 	    mov W0, VIDEO_OCCON
-  93              	    ; configuration priorité d'interruptions
-  94              	    ; priorité 5 pour les 2
-  95 00003c  F0 FF 28 	    mov #~(7<<SYNC_IPbit), W0
-  96 00003e  00 20 B6 	    and SYNC_IPC
-  97 000040  00 00 25 	    mov #(5<<SYNC_IPbit), W0 
-  98 000042  00 20 B7 	    ior SYNC_IPC
-  99 000044  F0 8F 2F 	    mov #~(7<<VIDEO_IPbit), W0
- 100 000046  00 20 B6 	    and VIDEO_IPC
- 101 000048  00 50 20 	    mov #(5<<VIDEO_IPbit), W0
- 102 00004a  00 20 B7 	    ior VIDEO_IPC
- 103 00004c  00 A0 EF 	    setm line_count
- 104 00004e  02 E0 EF 	    setm.b even
- 105              	    ; activation interruption  SYNC_TIMER
- 106 000050  00 E0 A9 	    bclr SYNC_IFS, #SYNC_IF
- 107 000052  00 E0 A8 	    bset SYNC_IEC, #SYNC_IE
- 108              	    ; activation timer
- 109 000054  01 E0 A8 	    bset SYNC_TMRCON, #TON
- 110 000056  00 00 06 	    return
- 111              	
- 112              	  
- 113              	;;;;;;;;;;;;;;;;;;
- 114              	; nettoie écran
- 115              	;;;;;;;;;;;;;;;;;;
- 116              	DEFCODE "CLS",3,,CLS   ; ( -- )
- 117 000058  00 02 22 	    mov #0x2020, W0
- 118 00005a  01 00 20 	    mov #_video_buffer, W1
- 119 00005c  57 02 09 	    repeat #(TV_BUFFER/2-1)
- 120 00005e  80 18 78 	    mov W0,[W1++]
- 121 000060  04 20 EF 	    clr xpos  ; xpos=0, ypos=0
- 122 000062  B8 05 78 	    NEXT
- 122         3B 00 78 
- 122         00 40 01 
- 123              	
- 124              	;;;;;;;;;;;;;;;;;;;;;;
- 125              	; définie position X
- 126              	; du curseur texte
- 127              	;;;;;;;;;;;;;;;;;;;;;;
- 128              	DEFCODE "XPOS",4,, XPOS  ; ( n -- )
- 129 000068  20 03 20 	    mov #CPL, W0
- 130 00006a  00 60 E1 	    cp T, W0
- 131 00006c  00 00 39 	    bra ltu, 1f
- 132 00006e  1C 03 20 	    mov #(CPL-1), T
- 133              	 1:
- 134 000070  0C 00 78 	    mov T, W0
- 135 000072  04 E0 B7 	    mov.b WREG,xpos
- 136 000074  2E 06 78 	    DPOP
- 137 000076  B8 05 78 	    NEXT
- 137         3B 00 78 
- 137         00 40 01 
- 138              	
- 139              	;;;;;;;;;;;;;;;;;;;;;;
- 140              	; définie position Y
- 141              	; du curseur texte
- 142              	;;;;;;;;;;;;;;;;;;;;;;;
- 143              	DEFCODE "YPOS",4,,YPOS  ; ( n -- )
- 144 00007c  78 60 E1 	    cp T, #LPS
- 145 00007e  00 00 39 	    bra ltu, 1f
- 146 000080  7C 01 20 	    mov #(LPS-1), T
- 147              	1:
- 148 000082  0C 00 78 	    mov T, W0
- 149 000084  05 E0 B7 	    mov.b WREG,ypos
- 150 000086  2E 06 78 	    DPOP
- 151 000088  B8 05 78 	    NEXT
- 151         3B 00 78 
- 151         00 40 01 
- 152              	    
- 153              	DEFWORD "CURPOS",6,,CURPOS  ; ( ny nx -- )
- 154 0028 00 00 00 00 	.word XPOS, YPOS, EXIT
- 154      00 00 
- 155                 	    
+  35              	.include "keyboard.inc"
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	;
+  20              	; Fichier: keyboard.inc
+  21              	; Description: constantes pour les touches retournées par kbd_get
+  22              	; Auteur: Jacques Deschênes
+  23              	; Date: 2015-10-01
+  24              	; Les touches non associées à un caractères ASCII
+  25              	; on une valeur inférieure à 32 ou supérieure à 127
+  26              	.ifndef KBD_INC
+  27              	.equ KBD_INC, 1
+  28              	
+  29              	; touches qui ne corespondes pas un symbole ASCII    
+  30              	;Nom			valeur	    Description
+  31              	.equ VK_BACK,		8	    ;	Backspace
+  32              	.equ VK_ESCAPE,		27	    ;	Esc
+  33              	.equ VK_RETURN,		13	    ; touche Entrée    
+  34              	.equ VK_CTRL,           128         ; touche contrôle droite ou gauche
+  35              	.equ VK_SHIFT,          129         ; touche maj. droite ou gauche
+  36              	.equ VK_ALT,            130         ; touche ALT gauche ou droite
+  37              	.equ VK_CAPS,           131         ; touche fix Maj. 
+  38              	.equ VK_TAB,		9           ; touche tabulation
+  39              	.equ VK_DEL,            132         ; touche Suppr
+  40              	.equ VK_INS,		133	    ; touche Inser
+  41              	.equ VK_HOME,		134	    ; touche début fichier
+  42              	.equ VK_END,		135	    ; touche fin de fichier
+  43              	.equ VK_UP,		136	    ; flèche vers le haut
+  44              	.equ VK_DOWN,		137	    ; flèvhe vers le bas
+  45              	.equ VK_LEFT,		138	    ; flèche vers la gauche
+  46              	.equ VK_RIGHT,		139	    ; flèche vers le bas
+  47              	.equ VK_PGUP,		140	    ; page vers le haut
+  48              	.equ VK_PGDN,		141	    ; page vers le bas
+  49              	.equ VK_F1,		150	    ; fonction F1
+  50              	.equ VK_F2,		151	    ; fonction F2
+  51              	.equ VK_F3,		152	    ; fonction F3
+  52              	.equ VK_F4,		153	    ; fonction F4
+  53              	.equ VK_F5,		154	    ; fonction F5
+  54              	.equ VK_F6,		155	    ; fonction F6
+  55              	.equ VK_F7,		156	    ; fonction F7
+  56              	.equ VK_F8,		157	    ; fonction F8
+  57              	.equ VK_F9,		158	    ; fonction F9
+  58              	.equ VK_F10,		159	    ; fonction F10
+  59              	.equ VK_F11,		160	    ; fonction F11
+  60              	.equ VK_F12,		161	    ; fonction F12    
+  61              	
+  62              	.endif
+  63              	    
+  36              	    
+  37              	.data
+  38 0000 FF FF       	line_count: .word 0xffff
+  39 0002 FF          	even: .byte 0xff
+  40 0003 00          	.align 2 
+  41 0004 00          	xpos: .byte 0
+  42 0005 00          	ypos: .byte 0
+  43                 	 
+  44                 	.global _video_buffer
+  45 0006 00 00 00 00 	_video_buffer: .space TV_BUFFER
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  46                 	
+  47                 	
+  48                 	.text
+  49              	 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  50              	; initialisation générateur vidéo
+  51              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  52              	.global tvout_init
+  53              	tvout_init:
+  54 000000  00 60 A9 	    bclr VIDEO_TRIS, #VIDEO_OUT ; sortie vidéo
+  55 000002  00 80 A9 	    bclr SYNC_TRIS, #SYNC_OUT  ; sortie sync vidéo
+  56 000004  00 40 A9 	    bclr VIDEO_TRIS, #VIDEO_PORCH ; seuil video
+  57              	    ; configuration PPS
+  58 000006  00 00 80 	    mov VIDEO_RPOR, W0
+  59 000008  F1 0F 2E 	    mov #~(0x1f<<VIDEO_RPORbit),W1
+  60 00000a  01 00 60 	    and W0,W1,W0
+  61 00000c  01 A0 20 	    mov #(VIDEO_FN<<VIDEO_RPORbit), W1
+  62 00000e  01 00 70 	    ior W0,W1,W0
+  63 000010  00 00 88 	    mov W0, VIDEO_RPOR
+  64 000012  00 00 80 	    mov SYNC_RPOR, W0
+  65 000014  01 FE 2F 	    mov #~(0x1f<<SYNC_RPORbit),W1
+  66 000016  01 00 60 	    and W0,W1,W0
+  67 000018  21 01 20 	    mov #(SYNC_FN<<SYNC_RPORbit), W1
+  68 00001a  01 00 70 	    ior W0,W1,W0
+  69 00001c  00 00 88 	    mov W0, SYNC_RPOR
+  70              	    ; configuration VIDEO_SPI
+  71 00001e  B0 03 20 	    mov #(3+(6<<SPRE0)+1<<MSTEN), W0
+  72 000020  00 00 88 	    mov W0, VIDEO_SPICON1
+  73 000022  01 E0 A8 	    bset VIDEO_SPISTAT, #SPIEN
+  74 000024  00 20 EF 	    clr VIDEO_SPIBUF
+  75              	    ; configuration output compare
+  76 000026  70 3F 20 	    mov #HLINE, W0
+  77              	    ; période timer Fcy/15748-1
+  78 000028  00 00 88 	    mov W0, SYNC_PER
+  79 00002a  00 00 88 	    mov W0, SYNC_OCRS
+  80 00002c  00 00 88 	    mov W0, VIDEO_OCR
+  81 00002e  A0 04 20 	    mov #HSYNC, W0
+  82 000030  00 00 88 	    mov W0, SYNC_OCR
+  83 000032  20 03 B0 	    add  #VIDEO_DLY, W0
+  84 000034  00 00 88 	    mov W0, VIDEO_OCRS
+  85              	    ; configuraton output compare mode 5
+  86 000036  50 00 20 	    mov #5, W0
+  87 000038  00 00 88 	    mov W0, SYNC_OCCON
+  88 00003a  00 00 88 	    mov W0, VIDEO_OCCON
+  89              	    ; configuration priorité d'interruptions
+  90              	    ; priorité 5 pour les 2
+  91 00003c  F0 FF 28 	    mov #~(7<<SYNC_IPbit), W0
+  92 00003e  00 20 B6 	    and SYNC_IPC
+  93 000040  00 00 25 	    mov #(5<<SYNC_IPbit), W0 
+  94 000042  00 20 B7 	    ior SYNC_IPC
+  95 000044  F0 8F 2F 	    mov #~(7<<VIDEO_IPbit), W0
+  96 000046  00 20 B6 	    and VIDEO_IPC
+  97 000048  00 50 20 	    mov #(5<<VIDEO_IPbit), W0
+  98 00004a  00 20 B7 	    ior VIDEO_IPC
+  99 00004c  00 A0 EF 	    setm line_count
+ 100 00004e  02 E0 EF 	    setm.b even
+ 101              	    ; activation interruption  SYNC_TIMER
+ 102 000050  00 E0 A9 	    bclr SYNC_IFS, #SYNC_IF
+ 103 000052  00 E0 A8 	    bset SYNC_IEC, #SYNC_IE
+ 104              	    ; activation timer
+ 105 000054  01 E0 A8 	    bset SYNC_TMRCON, #TON
+ 106 000056  00 00 06 	    return
+ 107              	
+ 108              	  
+ 109              	;;;;;;;;;;;;;;;;;;
+ 110              	; nettoie écran
+ 111              	;;;;;;;;;;;;;;;;;;
+ 112              	DEFCODE "CLS",3,,CLS   ; ( -- )
+ 113 000058  00 02 22 	    mov #0x2020, W0
+ 114 00005a  01 00 20 	    mov #_video_buffer, W1
+ 115 00005c  57 02 09 	    repeat #(TV_BUFFER/2-1)
+ 116 00005e  80 18 78 	    mov W0,[W1++]
+ 117 000060  04 20 EF 	    clr xpos  ; xpos=0, ypos=0
+ 118 000062  B8 05 78 	    NEXT
+ 118         3B 00 78 
+ 118         00 40 01 
+ 119              	
+ 120              	;;;;;;;;;;;;;;;;;;;;;;
+ 121              	; définie position X
+ 122              	; du curseur texte
+ 123              	;;;;;;;;;;;;;;;;;;;;;;
+ 124              	DEFCODE "XPOS",4,, XPOS  ; ( n -- )
+ 125 000068  20 03 20 	    mov #CPL, W0
+ 126 00006a  00 60 E1 	    cp T, W0
+ 127 00006c  00 00 39 	    bra ltu, 1f
+ 128 00006e  1C 03 20 	    mov #(CPL-1), T
+ 129              	 1:
+ 130 000070  0C 00 78 	    mov T, W0
+ 131 000072  04 E0 B7 	    mov.b WREG,xpos
+ 132 000074  2E 06 78 	    DPOP
+ 133 000076  B8 05 78 	    NEXT
+ 133         3B 00 78 
+ 133         00 40 01 
+ 134              	
+ 135              	;;;;;;;;;;;;;;;;;;;;;;
+ 136              	; définie position Y
+ 137              	; du curseur texte
+ 138              	;;;;;;;;;;;;;;;;;;;;;;;
+ 139              	DEFCODE "YPOS",4,,YPOS  ; ( n -- )
+ 140 00007c  78 60 E1 	    cp T, #LPS
+ 141 00007e  00 00 39 	    bra ltu, 1f
+ 142 000080  7C 01 20 	    mov #(LPS-1), T
+ 143              	1:
+ 144 000082  0C 00 78 	    mov T, W0
+ 145 000084  05 E0 B7 	    mov.b WREG,ypos
+ 146 000086  2E 06 78 	    DPOP
+ 147 000088  B8 05 78 	    NEXT
+ 147         3B 00 78 
+ 147         00 40 01 
+ 148              	    
+ 149              	DEFWORD "CURPOS",6,,CURPOS  ; ( ny nx -- )
+ 150 0028 00 00 00 00 	.word XPOS, YPOS, EXIT
+ 150      00 00 
+ 151                 	    
+ 152                 	;;;;;;;;;;;;;;;;;;;;;;
+ 153                 	; place caractère 
+ 154                 	; au sommet de la pile
+ 155                 	; dans le buffer video    
  156                 	;;;;;;;;;;;;;;;;;;;;;;
- 157                 	; place caractère 
- 158                 	; au sommet de la pile
- 159                 	; dans le buffer video    
- 160                 	;;;;;;;;;;;;;;;;;;;;;;
- 161 002e 00 00 04 45 	DEFCODE "EMIT",4,,EMIT  ; ( c -- )
- 161      4D 49 54 00 
- 161      00 00 
- 162 00008e  20 C3 B3 	    mov.b #CPL, W0
- 163 000090  05 40 BC 	    mul.b ypos
- 164 000092  04 C0 BF 	    mov.b xpos, WREG
- 165 000094  00 80 FB 	    ze W0,W0
- 166 000096  02 00 40 	    add W0,W2,W0
- 167 000098  01 00 20 	    mov #_video_buffer, W1
- 168 00009a  81 00 40 	    add W0,W1,W1
- 169 00009c  8C 40 98 	    mov.b T, [W1+0]
- 170 00009e  2E 06 78 	    DPOP
- 171 0000a0  04 60 EC 	    inc.b xpos
- 172 0000a2  20 03 20 	    mov #CPL, W0
- 173 0000a4  04 40 E3 	    cp.b xpos
- 174 0000a6  00 00 3A 	    bra neq, 1f
- 175              	crlf:    
- 176 0000a8  04 60 EF 	    clr.b xpos
- 177 0000aa  05 60 EC 	    inc.b ypos
- 178 0000ac  80 01 20 	    mov #LPS, W0
- 179 0000ae  05 40 E3 	    cp.b ypos
- 180 0000b0  00 00 3A 	    bra neq, 1f
- 181 0000b2  00 00 37 	    bra code_SCROLLUP
- 182              	1:    
- 183 0000b4  B8 05 78 	    NEXT
- 183         3B 00 78 
- 183         00 40 01 
- 184              	
- 185              	;;;;;;;;;;;;;;;;;;;
- 186              	; retour à la ligne
- 187              	;;;;;;;;;;;;;;;;;;;;
- 188              	DEFCODE "CR",2,,CR  ; ( -- )
- 189 0000ba  00 00 37 	    bra crlf
- 190              	
- 191              	;;;;;;;;;;;;;;;;;;;;;;
- 192              	; imprime un espace
+ 157 002e 00 00 04 45 	DEFCODE "EMIT",4,,EMIT  ; ( c -- )
+ 157      4D 49 54 00 
+ 157      00 00 
+ 158 00008e  6D 60 E1 	    cp T,#VK_RETURN
+ 159 000090  00 00 3A 	    bra neq, 1f
+ 160 000092  2E 06 78 	    DPOP
+ 161 000094  00 00 37 	    bra crlf
+ 162              	1:    
+ 163 000096  20 C3 B3 	    mov.b #CPL, W0
+ 164 000098  05 40 BC 	    mul.b ypos
+ 165 00009a  04 C0 BF 	    mov.b xpos, WREG
+ 166 00009c  00 80 FB 	    ze W0,W0
+ 167 00009e  02 00 40 	    add W0,W2,W0
+ 168 0000a0  01 00 20 	    mov #_video_buffer, W1
+ 169 0000a2  81 00 40 	    add W0,W1,W1
+ 170 0000a4  8C 48 78 	    mov.b T, [W1]
+ 171 0000a6  2E 06 78 	    DPOP
+ 172 0000a8  04 60 EC 	    inc.b xpos
+ 173 0000aa  20 03 20 	    mov #CPL, W0
+ 174 0000ac  04 40 E3 	    cp.b xpos
+ 175 0000ae  00 00 3A 	    bra neq, 2f
+ 176              	crlf:    
+ 177 0000b0  04 60 EF 	    clr.b xpos
+ 178 0000b2  05 60 EC 	    inc.b ypos
+ 179 0000b4  80 01 20 	    mov #LPS, W0
+ 180 0000b6  05 40 E3 	    cp.b ypos
+ 181 0000b8  00 00 39 	    bra ltu, 2f
+ 182 0000ba  05 60 ED 	    dec.b ypos
+ 183 0000bc  00 00 37 	    bra code_SCROLLUP
+ 184              	2:    
+ 185 0000be  B8 05 78 	    NEXT
+ 185         3B 00 78 
+ 185         00 40 01 
+ 186              	
+ 187              	;;;;;;;;;;;;;;;;;;;
+ 188              	; retour à la ligne
+ 189              	;;;;;;;;;;;;;;;;;;;;
+ 190              	DEFCODE "CR",2,,CR  ; ( -- )
+ 191 0000c4  00 00 37 	    bra crlf
+ 192              	
  193              	;;;;;;;;;;;;;;;;;;;;;;
- 194              	DEFCODE "BL",2,,BL   ; ( -- )
- 195 0000bc  0C 2F 78 	    DPUSH
- 196 0000be  0C 02 20 	    mov #32, T
- 197 0000c0  00 00 37 	    bra code_EMIT
- 198              	
- 199              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 200              	; défile écran vers le haut
- 201              	; d'une ligne texte.
- 202              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 203              	DEFCODE "SCROLLUP",8,,SCROLLUP  ; ( -- )
- 204 0000c2  01 00 20 	    mov #_video_buffer, W1
- 205 0000c4  20 03 20 	    mov #CPL, W0
- 206 0000c6  01 01 40 	    add W0,W1,W2
- 207 0000c8  03 4B 20 	    mov #TV_BUFFER, W3
- 208 0000ca  83 01 50 	    sub W0,W3,W3
- 209 0000cc  83 01 D1 	    lsr W3,W3
- 210 0000ce  03 80 09 	    repeat W3
- 211 0000d0  B2 18 78 	    mov [W2++],[W1++]
- 212 0000d2  0C 2F 78 	    DPUSH
- 213 0000d4  7C 01 20 	    mov #(LPS-1), T
- 214 0000d6  00 00 37 	    bra code_CLRLN
- 215              	    
- 216              	
- 217              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 218              	; efface la ligne indiquée
- 219              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 220              	DEFCODE "CLRLN",5,,CLRLN    ; ( n -- )
- 221 0000d8  02 00 20 	    mov #_video_buffer, W2
- 222 0000da  80 01 20 	    mov #LPS, W0
- 223 0000dc  00 60 E1 	    cp T, W0
- 224 0000de  00 00 31 	    bra geu, 1f
- 225 0000e0  20 03 20 	    mov #CPL, W0
- 226 0000e2  00 60 B8 	    mul.uu T, W0,W0
- 227 0000e4  02 01 40 	    add W0, W2,W2
- 228 0000e6  00 02 22 	    mov #0x2020, W0
- 229 0000e8  18 00 09 	    repeat #(CPL/2-1)
- 230 0000ea  00 19 78 	    mov W0, [W2++]
- 231              	1:    
- 232 0000ec  2E 06 78 	    DPOP
- 233 0000ee  B8 05 78 	    NEXT
- 233         3B 00 78 
- 233         00 40 01 
- 234              	    
- 235              	;;;;;;;;;;;;;;;;;;;;;;;;;;
- 236              	; imprime une chaîne de
- 237              	; caractère à l'écran
+ 194              	; imprime un espace
+ 195              	;;;;;;;;;;;;;;;;;;;;;;
+ 196              	DEFCODE "BL",2,,BL   ; ( -- )
+ 197 0000c6  0C 2F 78 	    DPUSH
+ 198 0000c8  0C 02 20 	    mov #32, T
+ 199 0000ca  00 00 37 	    bra code_EMIT
+ 200              	
+ 201              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 202              	; défile écran vers le haut
+ 203              	; d'une ligne texte.
+ 204              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 205              	DEFCODE "SCROLLUP",8,,SCROLLUP  ; ( -- )
+ 206 0000cc  01 00 20 	    mov #_video_buffer, W1
+ 207 0000ce  20 03 20 	    mov #CPL, W0
+ 208 0000d0  01 01 40 	    add W0,W1,W2
+ 209 0000d2  03 4B 20 	    mov #TV_BUFFER, W3
+ 210 0000d4  80 81 51 	    sub W3,W0,W3
+ 211 0000d6  83 01 D1 	    lsr W3,W3
+ 212 0000d8  83 01 E9 	    dec W3,W3
+ 213 0000da  03 80 09 	    repeat W3
+ 214 0000dc  B2 18 78 	    mov [W2++],[W1++]
+ 215 0000de  0C 2F 78 	    DPUSH
+ 216 0000e0  7C 01 20 	    mov #(LPS-1), T
+ 217 0000e2  00 00 37 	    bra code_CLRLN
+ 218              	    
+ 219              	
+ 220              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 221              	; efface la ligne indiquée
+ 222              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 223              	DEFCODE "CLRLN",5,,CLRLN    ; ( n -- )
+ 224 0000e4  02 00 20 	    mov #_video_buffer, W2
+ 225 0000e6  80 01 20 	    mov #LPS, W0
+ 226 0000e8  00 60 E1 	    cp T, W0
+ 227 0000ea  00 00 31 	    bra geu, 1f
+ 228 0000ec  20 03 20 	    mov #CPL, W0
+ 229 0000ee  00 60 B8 	    mul.uu T, W0,W0
+ 230 0000f0  02 01 40 	    add W0, W2,W2
+ 231 0000f2  00 02 22 	    mov #0x2020, W0
+ 232 0000f4  18 00 09 	    repeat #(CPL/2-1)
+ 233 0000f6  00 19 78 	    mov W0, [W2++]
+ 234              	1:    
+ 235 0000f8  2E 06 78 	    DPOP
+ 236 0000fa  B8 05 78 	    NEXT
+ 236         3B 00 78 
+ 236         00 40 01 
+ 237              	    
  238              	;;;;;;;;;;;;;;;;;;;;;;;;;;
- 239              	DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
- 240 006a 00 00 00 00 	.word LIT, 0, DODO, DUP, CFETCH, EMIT, DOLOOP,TYPE+8,EXIT     
- 240      00 00 00 00 
- 240      00 00 00 00 
- 240      00 00 08 00 
- 240      00 00 
- 241                 	    
- 242                 	;********************
- 243                 	; interruption TIMER2
- 244                 	;********************
- 245                 	.global __T2Interrupt
- 246                 	INT    
- 247              	__T2Interrupt:
- 248 000000  80 1F 78 	    push W0
- 249 000002  00 20 EC 	    inc line_count
- 250 000004  00 00 32 	    bra z, 1f
- 251 000006  60 00 20 	    mov #6, W0
- 252 000008  00 00 E3 	    cp line_count
- 253 00000a  00 00 32 	    bra z, 2f
- 254 00000c  C0 00 20 	    mov #12, W0
- 255 00000e  00 00 E3 	    cp line_count
- 256 000010  00 00 32 	    bra z, 3f
- 257 000012  20 01 20 	    mov #18, W0
- 258 000014  00 00 E3 	    cp line_count
- 259 000016  00 00 32 	    bra z, 4f
- 260 000018  C0 02 20 	    mov #TOPLINE, W0
- 261 00001a  00 00 E3 	    cp line_count
- 262 00001c  00 00 32 	    bra z, 5f
- 263 00001e  C0 0E 20 	    mov #TOPLINE+YRES, W0
- 264 000020  00 00 E3 	    cp line_count
- 265 000022  00 00 32 	    bra z, 6f
- 266 000024  F0 10 20 	    mov #ELPFRM, W0
- 267 000026  00 00 E3 	    cp line_count
- 268 000028  00 00 32 	    bra z, 7f
- 269 00002a  00 11 20 	    mov #OLPFRM, W0
- 270 00002c  00 00 E3 	    cp line_count
- 271 00002e  00 00 32 	    bra z, 8f
- 272              	0:
- 273 000030  00 E0 A9 	    bclr SYNC_IFS, #SYNC_IF
- 274 000032  4F 00 78 	    pop W0
- 275 000034  00 40 06 	    retfie
- 276              	1: ; line_count==0 start VSYNC 6 half line narrow neg. pulses
- 277 000036  50 02 20 	    mov #SERATION, W0
- 278 000038  00 00 88 	    mov W0, SYNC_OCR
- 279 00003a  B0 1F 20 	    mov #HALFLINE, W0
- 280 00003c  00 00 88 	    mov W0, SYNC_OCRS
- 281 00003e  00 00 88 	    mov W0, SYNC_PER
- 282 000040  00 00 37 	    bra 0b
- 283              	2: ; line_count==6 , 6 half line large neg. pulses
- 284 000042  60 1D 20 	    mov #(HALFLINE-SERATION), W0
- 285 000044  00 00 88 	    mov W0, SYNC_OCR
- 286 000046  00 00 37 	    bra 0b
- 287              	3: ; line_count==12 , 6 half line narrow neg. pulses
- 288 000048  50 02 20 	    mov #SERATION, W0
- 289 00004a  00 00 88 	    mov W0, SYNC_OCR
- 290 00004c  00 00 37 	    bra 0b
- 291              	4: ; line_count==18 , end of VSYNC
- 292 00004e  A0 04 20 	    mov #HSYNC, W0
- 293 000050  00 00 88 	    mov W0, SYNC_OCR
- 294 000052  70 3F 20 	    mov #HLINE, W0
- 295 000054  00 00 88 	    mov W0, SYNC_OCRS
- 296 000056  00 00 88 	    mov W0, SYNC_PER
- 297 000058  00 00 37 	    bra 0b
- 298              	5: ; line_count==TOPLINE  activation interruption video
- 299 00005a  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
- 300 00005c  00 C0 A8 	    bset VIDEO_IEC, #VIDEO_IE
- 301 00005e  00 00 37 	    bra 0b
- 302              	6: ; line_count==TOPLINE+VIDEDO désactivaion int. video
- 303 000060  00 C0 A9 	    bclr VIDEO_IEC, #VIDEO_IE
- 304 000062  00 00 37 	    bra 0b
- 305              	7: ; line_count==ELPFRM
- 306 000064  00 00 EB 	    clr W0
- 307 000066  02 40 E3 	    cp.b even
- 308 000068  00 00 32 	    bra z, 0b
- 309 00006a  00 A0 EF 	    setm line_count
- 310 00006c  02 60 EF 	    clr.b even
- 311 00006e  00 00 37 	    bra 0b
- 312              	8: ;line_count==OLPFRM
- 313 000070  00 A0 EF 	    setm line_count
- 314 000072  02 E0 EF 	    setm.b even
- 315 000074  00 00 37 	    bra 0b
- 316              	
- 317              	    
- 318              	;*********************
- 319              	; interruption OC2
- 320              	;*********************
- 321              	.extern _font
- 322              	.equ CH_ROW, W5    
- 323              	.equ pVIDBUF, W4
- 324              	.equ pFONT, W3
- 325              	.equ CH_COUNT, W2    
- 326              	.global __OC2Interrupt    
- 327              	__OC2Interrupt:
- 328 000076  80 1F 78 	    push W0
- 329 000078  81 1F 78 	    push W1
- 330 00007a  82 1F 78 	    push CH_COUNT
- 331 00007c  83 1F 78 	    push pFONT
- 332 00007e  84 1F 78 	    push pVIDBUF
- 333 000080  85 1F 78 	    push CH_ROW
- 334 000082  00 00 F8 	    push PSVPAG
- 335 000084  00 00 80 	    mov SYNC_TMR, W0
- 336 000086  63 00 60 	    and W0, #3, W0
- 337 000088  41 00 DD 	    sl W0,#1, W0
- 338 00008a  00 60 01 	    bra W0
- 339 00008c  00 00 00 	    nop
- 340 00008e  00 00 00 	    nop
- 341 000090  00 00 00 	    nop
- 342 000092  00 00 00 	    nop
- 343 000094  00 00 00 	    nop
- 344 000096  00 00 00 	    nop
- 345 000098  00 00 00 	    nop
- 346 00009a  00 40 A8 	    bset VIDEO_LAT, #VIDEO_PORCH
- 347 00009c  00 00 20 	    mov #psvpage(_font),W0
- 348 00009e  00 00 88 	    mov W0, PSVPAG
- 349 0000a0  01 00 80 	    mov line_count, W1
- 350 0000a2  C1 02 B1 	    sub #TOPLINE, W1
- 351 0000a4  E7 82 60 	    and  W1,#7,CH_ROW
- 352 0000a6  C3 08 DE 	    lsr W1,#3,W1
- 353 0000a8  22 03 20 	    mov #CPL, CH_COUNT
- 354 0000aa  01 10 B8 	    mul.uu CH_COUNT,W1, W0
- 355 0000ac  04 00 20 	    mov #_video_buffer, pVIDBUF
- 356 0000ae  04 02 40 	    add W0, pVIDBUF, pVIDBUF
- 357              	 1:
- 358 0000b0  03 00 20 	    mov #psvoffset(_font), pFONT
- 359 0000b2  34 40 78 	    mov.b [pVIDBUF++], W0
- 360 0000b4  00 80 FB 	    ze W0,W0
- 361 0000b6  43 00 DD 	    sl W0, #3, W0
- 362 0000b8  80 81 41 	    add pFONT,W0,pFONT
- 363 0000ba  85 81 41 	    add pFONT,CH_ROW, pFONT
- 364 0000bc  93 40 78 	    mov.b [pFONT],W1
- 365 0000be  81 80 FB 	    ze W1, W1
- 366              	2:
- 367 0000c0  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
- 368 0000c2  00 00 3A 	    bra nz, 2b
- 369 0000c4  01 00 88 	    mov W1, VIDEO_SPIBUF
- 370 0000c6  02 01 E9 	    dec CH_COUNT, CH_COUNT
- 371 0000c8  00 00 3A 	    bra nz, 1b 
- 372              	3:
- 373 0000ca  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
- 374 0000cc  00 00 3A 	    bra nz, 3b
- 375 0000ce  00 20 EF 	    clr VIDEO_SPIBUF
- 376 0000d0  00 00 F9 	    pop PSVPAG
- 377 0000d2  CF 02 78 	    pop CH_ROW
- 378 0000d4  4F 02 78 	    pop pVIDBUF
- 379 0000d6  CF 01 78 	    pop pFONT
- 380 0000d8  4F 01 78 	    pop CH_COUNT
- 381 0000da  CF 00 78 	    pop W1
- 382 0000dc  4F 00 78 	    pop W0
- 383 0000de  00 40 A9 	    bclr VIDEO_LAT,#VIDEO_PORCH
- 384 0000e0  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
- 385 0000e2  00 40 06 	    retfie
- 386              	
- 387              	    
- 388              	.end
+ 239              	; imprime une chaîne de
+ 240              	; caractère à l'écran
+ 241              	;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 242              	DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
+ 243 006a 00 00 00 00 	.word LIT, 0, DODO, DUP, CFETCH, EMIT, DOLOOP,TYPE+8,EXIT     
+ 243      00 00 00 00 
+ 243      00 00 00 00 
+ 243      00 00 08 00 
+ 243      00 00 
+ 244                 	    
+ 245                 	;********************
+ 246                 	; interruption TIMER2
+ 247                 	;********************
+ 248                 	.global __T2Interrupt
+ 249                 	INT    
+ 250              	__T2Interrupt:
+ 251 000000  80 1F 78 	    push W0
+ 252 000002  00 20 EC 	    inc line_count
+ 253 000004  00 00 32 	    bra z, 1f
+ 254 000006  60 00 20 	    mov #6, W0
+ 255 000008  00 00 E3 	    cp line_count
+ 256 00000a  00 00 32 	    bra z, 2f
+ 257 00000c  C0 00 20 	    mov #12, W0
+ 258 00000e  00 00 E3 	    cp line_count
+ 259 000010  00 00 32 	    bra z, 3f
+ 260 000012  20 01 20 	    mov #18, W0
+ 261 000014  00 00 E3 	    cp line_count
+ 262 000016  00 00 32 	    bra z, 4f
+ 263 000018  C0 02 20 	    mov #TOPLINE, W0
+ 264 00001a  00 00 E3 	    cp line_count
+ 265 00001c  00 00 32 	    bra z, 5f
+ 266 00001e  C0 0E 20 	    mov #TOPLINE+YRES, W0
+ 267 000020  00 00 E3 	    cp line_count
+ 268 000022  00 00 32 	    bra z, 6f
+ 269 000024  F0 10 20 	    mov #ELPFRM, W0
+ 270 000026  00 00 E3 	    cp line_count
+ 271 000028  00 00 32 	    bra z, 7f
+ 272 00002a  00 11 20 	    mov #OLPFRM, W0
+ 273 00002c  00 00 E3 	    cp line_count
+ 274 00002e  00 00 32 	    bra z, 8f
+ 275              	0:
+ 276 000030  00 E0 A9 	    bclr SYNC_IFS, #SYNC_IF
+ 277 000032  4F 00 78 	    pop W0
+ 278 000034  00 40 06 	    retfie
+ 279              	1: ; line_count==0 start VSYNC 6 half line narrow neg. pulses
+ 280 000036  50 02 20 	    mov #SERATION, W0
+ 281 000038  00 00 88 	    mov W0, SYNC_OCR
+ 282 00003a  B0 1F 20 	    mov #HALFLINE, W0
+ 283 00003c  00 00 88 	    mov W0, SYNC_OCRS
+ 284 00003e  00 00 88 	    mov W0, SYNC_PER
+ 285 000040  00 00 37 	    bra 0b
+ 286              	2: ; line_count==6 , 6 half line large neg. pulses
+ 287 000042  60 1D 20 	    mov #(HALFLINE-SERATION), W0
+ 288 000044  00 00 88 	    mov W0, SYNC_OCR
+ 289 000046  00 00 37 	    bra 0b
+ 290              	3: ; line_count==12 , 6 half line narrow neg. pulses
+ 291 000048  50 02 20 	    mov #SERATION, W0
+ 292 00004a  00 00 88 	    mov W0, SYNC_OCR
+ 293 00004c  00 00 37 	    bra 0b
+ 294              	4: ; line_count==18 , end of VSYNC
+ 295 00004e  A0 04 20 	    mov #HSYNC, W0
+ 296 000050  00 00 88 	    mov W0, SYNC_OCR
+ 297 000052  70 3F 20 	    mov #HLINE, W0
+ 298 000054  00 00 88 	    mov W0, SYNC_OCRS
+ 299 000056  00 00 88 	    mov W0, SYNC_PER
+ 300 000058  00 00 37 	    bra 0b
+ 301              	5: ; line_count==TOPLINE  activation interruption video
+ 302 00005a  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
+ 303 00005c  00 C0 A8 	    bset VIDEO_IEC, #VIDEO_IE
+ 304 00005e  00 00 37 	    bra 0b
+ 305              	6: ; line_count==TOPLINE+VIDEDO désactivaion int. video
+ 306 000060  00 C0 A9 	    bclr VIDEO_IEC, #VIDEO_IE
+ 307 000062  00 00 37 	    bra 0b
+ 308              	7: ; line_count==ELPFRM
+ 309 000064  00 00 EB 	    clr W0
+ 310 000066  02 40 E3 	    cp.b even
+ 311 000068  00 00 32 	    bra z, 0b
+ 312 00006a  00 A0 EF 	    setm line_count
+ 313 00006c  02 60 EF 	    clr.b even
+ 314 00006e  00 00 37 	    bra 0b
+ 315              	8: ;line_count==OLPFRM
+ 316 000070  00 A0 EF 	    setm line_count
+ 317 000072  02 E0 EF 	    setm.b even
+ 318 000074  00 00 37 	    bra 0b
+ 319              	
+ 320              	    
+ 321              	;*********************
+ 322              	; interruption OC2
+ 323              	;*********************
+ 324              	.extern _font
+ 325              	.equ CH_ROW, W5    
+ 326              	.equ pVIDBUF, W4
+ 327              	.equ pFONT, W3
+ 328              	.equ CH_COUNT, W2    
+ 329              	.global __OC2Interrupt    
+ 330              	__OC2Interrupt:
+ 331 000076  80 1F 78 	    push W0
+ 332 000078  81 1F 78 	    push W1
+ 333 00007a  82 1F 78 	    push CH_COUNT
+ 334 00007c  83 1F 78 	    push pFONT
+ 335 00007e  84 1F 78 	    push pVIDBUF
+ 336 000080  85 1F 78 	    push CH_ROW
+ 337 000082  00 00 F8 	    push PSVPAG
+ 338 000084  00 00 80 	    mov SYNC_TMR, W0
+ 339 000086  63 00 60 	    and W0, #3, W0
+ 340 000088  41 00 DD 	    sl W0,#1, W0
+ 341 00008a  00 60 01 	    bra W0
+ 342 00008c  00 00 00 	    nop
+ 343 00008e  00 00 00 	    nop
+ 344 000090  00 00 00 	    nop
+ 345 000092  00 00 00 	    nop
+ 346 000094  00 00 00 	    nop
+ 347 000096  00 00 00 	    nop
+ 348 000098  00 00 00 	    nop
+ 349 00009a  00 40 A8 	    bset VIDEO_LAT, #VIDEO_PORCH
+ 350 00009c  00 00 20 	    mov #psvpage(_font),W0
+ 351 00009e  00 00 88 	    mov W0, PSVPAG
+ 352 0000a0  01 00 80 	    mov line_count, W1
+ 353 0000a2  C1 02 B1 	    sub #TOPLINE, W1
+ 354 0000a4  E7 82 60 	    and  W1,#7,CH_ROW
+ 355 0000a6  C3 08 DE 	    lsr W1,#3,W1
+ 356 0000a8  22 03 20 	    mov #CPL, CH_COUNT
+ 357 0000aa  01 10 B8 	    mul.uu CH_COUNT,W1, W0
+ 358 0000ac  04 00 20 	    mov #_video_buffer, pVIDBUF
+ 359 0000ae  04 02 40 	    add W0, pVIDBUF, pVIDBUF
+ 360              	 1:
+ 361 0000b0  03 00 20 	    mov #psvoffset(_font), pFONT
+ 362 0000b2  34 40 78 	    mov.b [pVIDBUF++], W0
+ 363 0000b4  00 80 FB 	    ze W0,W0
+ 364 0000b6  43 00 DD 	    sl W0, #3, W0
+ 365 0000b8  80 81 41 	    add pFONT,W0,pFONT
+ 366 0000ba  85 81 41 	    add pFONT,CH_ROW, pFONT
+ 367 0000bc  93 40 78 	    mov.b [pFONT],W1
+ 368 0000be  81 80 FB 	    ze W1, W1
+ 369              	2:
+ 370 0000c0  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
+ 371 0000c2  00 00 3A 	    bra nz, 2b
+ 372 0000c4  01 00 88 	    mov W1, VIDEO_SPIBUF
+ 373 0000c6  02 01 E9 	    dec CH_COUNT, CH_COUNT
+ 374 0000c8  00 00 3A 	    bra nz, 1b 
+ 375              	3:
+ 376 0000ca  00 20 AB 	    btst VIDEO_SPISTAT, #SPITBF
+ 377 0000cc  00 00 3A 	    bra nz, 3b
+ 378 0000ce  00 20 EF 	    clr VIDEO_SPIBUF
+ 379 0000d0  00 00 F9 	    pop PSVPAG
+ 380 0000d2  CF 02 78 	    pop CH_ROW
+ 381 0000d4  4F 02 78 	    pop pVIDBUF
+ 382 0000d6  CF 01 78 	    pop pFONT
+ 383 0000d8  4F 01 78 	    pop CH_COUNT
+ 384 0000da  CF 00 78 	    pop W1
+ 385 0000dc  4F 00 78 	    pop W0
+ 386 0000de  00 40 A9 	    bclr VIDEO_LAT,#VIDEO_PORCH
+ 387 0000e0  00 C0 A9 	    bclr VIDEO_IFS, #VIDEO_IF
+ 388 0000e2  00 40 06 	    retfie
+ 389              	
+ 390              	    
+ 391              	.end
 DEFINED SYMBOLS
+                            *ABS*:00000000 ./keyboard.inc
                             *ABS*:00000000 ./core.inc
                             *ABS*:00000000 ./ntsc_const.inc
                             *ABS*:00000000 ./gen_macros.inc
@@ -5174,521 +5241,565 @@ DEFINED SYMBOLS
           ./core.inc:95     *ABS*:00000080 F_IMMED
           ./core.inc:96     *ABS*:00000020 F_HIDDEN
           ./core.inc:97     *ABS*:0000001f F_LENMASK
-             TVout.S:239    .sysdict:00000060 link
-             TVout.S:42     .data:00000000 line_count
-             TVout.S:43     .data:00000002 even
-             TVout.S:45     .data:00000004 xpos
-             TVout.S:46     .data:00000005 ypos
-             TVout.S:49     .data:00000006 _video_buffer
-             TVout.S:57     .text:00000000 tvout_init
-             TVout.S:116    .sysdict:00000000 name_CLS
-             TVout.S:116    .sysdict:00000006 CLS
-             TVout.S:116    .text:00000058 code_CLS
-             TVout.S:128    .sysdict:00000008 name_XPOS
-             TVout.S:128    .sysdict:00000010 XPOS
-             TVout.S:128    .text:00000068 code_XPOS
-             TVout.S:133    .text:00000070 L11
-             TVout.S:143    .sysdict:00000012 name_YPOS
-             TVout.S:143    .sysdict:0000001a YPOS
-             TVout.S:143    .text:0000007c code_YPOS
-             TVout.S:147    .text:00000082 L12
-             TVout.S:153    .sysdict:0000001c name_CURPOS
-             TVout.S:153    .sysdict:00000026 CURPOS
-             TVout.S:161    .sysdict:0000002e name_EMIT
-             TVout.S:161    .sysdict:00000036 EMIT
-             TVout.S:153    .text:0000008e code_EMIT
-             TVout.S:182    .text:000000b4 L13
-             TVout.S:175    .text:000000a8 crlf
-             TVout.S:203    .text:000000c2 code_SCROLLUP
-             TVout.S:188    .sysdict:00000038 name_CR
-             TVout.S:188    .sysdict:0000003e CR
-             TVout.S:188    .text:000000ba code_CR
-             TVout.S:194    .sysdict:00000040 name_BL
-             TVout.S:194    .sysdict:00000046 BL
-             TVout.S:194    .text:000000bc code_BL
-             TVout.S:203    .sysdict:00000048 name_SCROLLUP
-             TVout.S:203    .sysdict:00000054 SCROLLUP
-             TVout.S:220    .text:000000d8 code_CLRLN
-             TVout.S:220    .sysdict:00000056 name_CLRLN
-             TVout.S:220    .sysdict:0000005e CLRLN
-             TVout.S:231    .text:000000ec L14
-             TVout.S:239    .sysdict:00000060 name_TYPE
-             TVout.S:239    .sysdict:00000068 TYPE
-             TVout.S:247    .int:00000000 __T2Interrupt
-             TVout.S:276    .int:00000036 L15
-             TVout.S:283    .int:00000042 L21
-             TVout.S:287    .int:00000048 L31
-             TVout.S:291    .int:0000004e L41
-             TVout.S:298    .int:0000005a L51
-             TVout.S:302    .int:00000060 L61
-             TVout.S:305    .int:00000064 L71
-             TVout.S:312    .int:00000070 L81
-             TVout.S:272    .int:00000030 L1
-             TVout.S:327    .int:00000076 __OC2Interrupt
-             TVout.S:357    .int:000000b0 L16
-             TVout.S:366    .int:000000c0 L22
-             TVout.S:372    .int:000000ca L32
+             TVout.S:242    .sysdict:00000060 link
+      ./keyboard.inc:27     *ABS*:00000001 KBD_INC
+      ./keyboard.inc:31     *ABS*:00000008 VK_BACK
+      ./keyboard.inc:32     *ABS*:0000001b VK_ESCAPE
+      ./keyboard.inc:33     *ABS*:0000000d VK_RETURN
+      ./keyboard.inc:34     *ABS*:00000080 VK_CTRL
+      ./keyboard.inc:35     *ABS*:00000081 VK_SHIFT
+      ./keyboard.inc:36     *ABS*:00000082 VK_ALT
+      ./keyboard.inc:37     *ABS*:00000083 VK_CAPS
+      ./keyboard.inc:38     *ABS*:00000009 VK_TAB
+      ./keyboard.inc:39     *ABS*:00000084 VK_DEL
+      ./keyboard.inc:40     *ABS*:00000085 VK_INS
+      ./keyboard.inc:41     *ABS*:00000086 VK_HOME
+      ./keyboard.inc:42     *ABS*:00000087 VK_END
+      ./keyboard.inc:43     *ABS*:00000088 VK_UP
+      ./keyboard.inc:44     *ABS*:00000089 VK_DOWN
+      ./keyboard.inc:45     *ABS*:0000008a VK_LEFT
+      ./keyboard.inc:46     *ABS*:0000008b VK_RIGHT
+      ./keyboard.inc:47     *ABS*:0000008c VK_PGUP
+      ./keyboard.inc:48     *ABS*:0000008d VK_PGDN
+      ./keyboard.inc:49     *ABS*:00000096 VK_F1
+      ./keyboard.inc:50     *ABS*:00000097 VK_F2
+      ./keyboard.inc:51     *ABS*:00000098 VK_F3
+      ./keyboard.inc:52     *ABS*:00000099 VK_F4
+      ./keyboard.inc:53     *ABS*:0000009a VK_F5
+      ./keyboard.inc:54     *ABS*:0000009b VK_F6
+      ./keyboard.inc:55     *ABS*:0000009c VK_F7
+      ./keyboard.inc:56     *ABS*:0000009d VK_F8
+      ./keyboard.inc:57     *ABS*:0000009e VK_F9
+      ./keyboard.inc:58     *ABS*:0000009f VK_F10
+      ./keyboard.inc:59     *ABS*:000000a0 VK_F11
+      ./keyboard.inc:60     *ABS*:000000a1 VK_F12
+             TVout.S:38     .data:00000000 line_count
+             TVout.S:39     .data:00000002 even
+             TVout.S:41     .data:00000004 xpos
+             TVout.S:42     .data:00000005 ypos
+             TVout.S:45     .data:00000006 _video_buffer
+             TVout.S:53     .text:00000000 tvout_init
+             TVout.S:112    .sysdict:00000000 name_CLS
+             TVout.S:112    .sysdict:00000006 CLS
+             TVout.S:112    .text:00000058 code_CLS
+             TVout.S:124    .sysdict:00000008 name_XPOS
+             TVout.S:124    .sysdict:00000010 XPOS
+             TVout.S:124    .text:00000068 code_XPOS
+             TVout.S:129    .text:00000070 L11
+             TVout.S:139    .sysdict:00000012 name_YPOS
+             TVout.S:139    .sysdict:0000001a YPOS
+             TVout.S:139    .text:0000007c code_YPOS
+             TVout.S:143    .text:00000082 L12
+             TVout.S:149    .sysdict:0000001c name_CURPOS
+             TVout.S:149    .sysdict:00000026 CURPOS
+             TVout.S:157    .sysdict:0000002e name_EMIT
+             TVout.S:157    .sysdict:00000036 EMIT
+             TVout.S:149    .text:0000008e code_EMIT
+             TVout.S:162    .text:00000096 L13
+             TVout.S:176    .text:000000b0 crlf
+             TVout.S:184    .text:000000be L21
+             TVout.S:205    .text:000000cc code_SCROLLUP
+             TVout.S:190    .sysdict:00000038 name_CR
+             TVout.S:190    .sysdict:0000003e CR
+             TVout.S:190    .text:000000c4 code_CR
+             TVout.S:196    .sysdict:00000040 name_BL
+             TVout.S:196    .sysdict:00000046 BL
+             TVout.S:196    .text:000000c6 code_BL
+             TVout.S:205    .sysdict:00000048 name_SCROLLUP
+             TVout.S:205    .sysdict:00000054 SCROLLUP
+             TVout.S:223    .text:000000e4 code_CLRLN
+             TVout.S:223    .sysdict:00000056 name_CLRLN
+             TVout.S:223    .sysdict:0000005e CLRLN
+             TVout.S:234    .text:000000f8 L14
+             TVout.S:242    .sysdict:00000060 name_TYPE
+             TVout.S:242    .sysdict:00000068 TYPE
+             TVout.S:250    .int:00000000 __T2Interrupt
+             TVout.S:279    .int:00000036 L15
+             TVout.S:286    .int:00000042 L22
+             TVout.S:290    .int:00000048 L31
+             TVout.S:294    .int:0000004e L41
+             TVout.S:301    .int:0000005a L51
+             TVout.S:305    .int:00000060 L61
+             TVout.S:308    .int:00000064 L71
+             TVout.S:315    .int:00000070 L81
+             TVout.S:275    .int:00000030 L1
+             TVout.S:330    .int:00000076 __OC2Interrupt
+             TVout.S:360    .int:000000b0 L16
+             TVout.S:369    .int:000000c0 L23
+             TVout.S:375    .int:000000ca L32
                       .debug_line:00000000 .L0
                       .debug_line:00000025 .L0
-             TVout.S:388    .debug_line:00000128 .L0
-             TVout.S:248    .int:00000000 .L0
-             TVout.S:249    .int:00000002 .L0
-             TVout.S:248    .int:00000000 .L0
-             TVout.S:250    .int:00000004 .L0
-             TVout.S:249    .int:00000002 .L0
-             TVout.S:251    .int:00000006 .L0
-             TVout.S:250    .int:00000004 .L0
-             TVout.S:252    .int:00000008 .L0
-             TVout.S:251    .int:00000006 .L0
-             TVout.S:253    .int:0000000a .L0
-             TVout.S:252    .int:00000008 .L0
-             TVout.S:254    .int:0000000c .L0
-             TVout.S:253    .int:0000000a .L0
-             TVout.S:255    .int:0000000e .L0
-             TVout.S:254    .int:0000000c .L0
-             TVout.S:256    .int:00000010 .L0
-             TVout.S:255    .int:0000000e .L0
-             TVout.S:257    .int:00000012 .L0
-             TVout.S:256    .int:00000010 .L0
-             TVout.S:258    .int:00000014 .L0
-             TVout.S:257    .int:00000012 .L0
-             TVout.S:259    .int:00000016 .L0
-             TVout.S:258    .int:00000014 .L0
-             TVout.S:260    .int:00000018 .L0
-             TVout.S:259    .int:00000016 .L0
-             TVout.S:261    .int:0000001a .L0
-             TVout.S:260    .int:00000018 .L0
-             TVout.S:262    .int:0000001c .L0
-             TVout.S:261    .int:0000001a .L0
-             TVout.S:263    .int:0000001e .L0
-             TVout.S:262    .int:0000001c .L0
-             TVout.S:264    .int:00000020 .L0
-             TVout.S:263    .int:0000001e .L0
-             TVout.S:265    .int:00000022 .L0
-             TVout.S:264    .int:00000020 .L0
-             TVout.S:266    .int:00000024 .L0
-             TVout.S:265    .int:00000022 .L0
-             TVout.S:267    .int:00000026 .L0
-             TVout.S:266    .int:00000024 .L0
-             TVout.S:268    .int:00000028 .L0
-             TVout.S:267    .int:00000026 .L0
-             TVout.S:269    .int:0000002a .L0
-             TVout.S:268    .int:00000028 .L0
-             TVout.S:270    .int:0000002c .L0
-             TVout.S:269    .int:0000002a .L0
-             TVout.S:271    .int:0000002e .L0
-             TVout.S:270    .int:0000002c .L0
-             TVout.S:273    .int:00000030 .L0
-             TVout.S:271    .int:0000002e .L0
-             TVout.S:274    .int:00000032 .L0
-             TVout.S:273    .int:00000030 .L0
-             TVout.S:275    .int:00000034 .L0
-             TVout.S:274    .int:00000032 .L0
-             TVout.S:277    .int:00000036 .L0
-             TVout.S:275    .int:00000034 .L0
-             TVout.S:278    .int:00000038 .L0
-             TVout.S:277    .int:00000036 .L0
-             TVout.S:279    .int:0000003a .L0
-             TVout.S:278    .int:00000038 .L0
-             TVout.S:280    .int:0000003c .L0
-             TVout.S:279    .int:0000003a .L0
-             TVout.S:281    .int:0000003e .L0
-             TVout.S:280    .int:0000003c .L0
-             TVout.S:282    .int:00000040 .L0
-             TVout.S:281    .int:0000003e .L0
-             TVout.S:284    .int:00000042 .L0
-             TVout.S:282    .int:00000040 .L0
-             TVout.S:285    .int:00000044 .L0
-             TVout.S:284    .int:00000042 .L0
-             TVout.S:286    .int:00000046 .L0
-             TVout.S:285    .int:00000044 .L0
-             TVout.S:288    .int:00000048 .L0
-             TVout.S:286    .int:00000046 .L0
-             TVout.S:289    .int:0000004a .L0
-             TVout.S:288    .int:00000048 .L0
-             TVout.S:290    .int:0000004c .L0
-             TVout.S:289    .int:0000004a .L0
-             TVout.S:292    .int:0000004e .L0
-             TVout.S:290    .int:0000004c .L0
-             TVout.S:293    .int:00000050 .L0
-             TVout.S:292    .int:0000004e .L0
-             TVout.S:294    .int:00000052 .L0
-             TVout.S:293    .int:00000050 .L0
-             TVout.S:295    .int:00000054 .L0
-             TVout.S:294    .int:00000052 .L0
-             TVout.S:296    .int:00000056 .L0
-             TVout.S:295    .int:00000054 .L0
-             TVout.S:297    .int:00000058 .L0
-             TVout.S:296    .int:00000056 .L0
-             TVout.S:299    .int:0000005a .L0
-             TVout.S:297    .int:00000058 .L0
-             TVout.S:300    .int:0000005c .L0
-             TVout.S:299    .int:0000005a .L0
-             TVout.S:301    .int:0000005e .L0
-             TVout.S:300    .int:0000005c .L0
-             TVout.S:303    .int:00000060 .L0
-             TVout.S:301    .int:0000005e .L0
-             TVout.S:304    .int:00000062 .L0
-             TVout.S:303    .int:00000060 .L0
-             TVout.S:306    .int:00000064 .L0
-             TVout.S:304    .int:00000062 .L0
-             TVout.S:307    .int:00000066 .L0
-             TVout.S:306    .int:00000064 .L0
-             TVout.S:308    .int:00000068 .L0
-             TVout.S:307    .int:00000066 .L0
-             TVout.S:309    .int:0000006a .L0
-             TVout.S:308    .int:00000068 .L0
-             TVout.S:310    .int:0000006c .L0
-             TVout.S:309    .int:0000006a .L0
-             TVout.S:311    .int:0000006e .L0
-             TVout.S:310    .int:0000006c .L0
-             TVout.S:313    .int:00000070 .L0
-             TVout.S:311    .int:0000006e .L0
-             TVout.S:314    .int:00000072 .L0
-             TVout.S:313    .int:00000070 .L0
-             TVout.S:315    .int:00000074 .L0
-             TVout.S:314    .int:00000072 .L0
-             TVout.S:328    .int:00000076 .L0
-             TVout.S:315    .int:00000074 .L0
-             TVout.S:329    .int:00000078 .L0
-             TVout.S:328    .int:00000076 .L0
-             TVout.S:330    .int:0000007a .L0
-             TVout.S:329    .int:00000078 .L0
-             TVout.S:331    .int:0000007c .L0
-             TVout.S:330    .int:0000007a .L0
-             TVout.S:332    .int:0000007e .L0
-             TVout.S:331    .int:0000007c .L0
-             TVout.S:333    .int:00000080 .L0
-             TVout.S:332    .int:0000007e .L0
-             TVout.S:334    .int:00000082 .L0
-             TVout.S:333    .int:00000080 .L0
-             TVout.S:335    .int:00000084 .L0
-             TVout.S:334    .int:00000082 .L0
-             TVout.S:336    .int:00000086 .L0
-             TVout.S:335    .int:00000084 .L0
-             TVout.S:337    .int:00000088 .L0
-             TVout.S:336    .int:00000086 .L0
-             TVout.S:338    .int:0000008a .L0
-             TVout.S:337    .int:00000088 .L0
-             TVout.S:339    .int:0000008c .L0
-             TVout.S:338    .int:0000008a .L0
-             TVout.S:340    .int:0000008e .L0
-             TVout.S:339    .int:0000008c .L0
-             TVout.S:341    .int:00000090 .L0
-             TVout.S:340    .int:0000008e .L0
-             TVout.S:342    .int:00000092 .L0
-             TVout.S:341    .int:00000090 .L0
-             TVout.S:343    .int:00000094 .L0
-             TVout.S:342    .int:00000092 .L0
-             TVout.S:344    .int:00000096 .L0
-             TVout.S:343    .int:00000094 .L0
-             TVout.S:345    .int:00000098 .L0
-             TVout.S:344    .int:00000096 .L0
-             TVout.S:346    .int:0000009a .L0
-             TVout.S:345    .int:00000098 .L0
-             TVout.S:347    .int:0000009c .L0
-             TVout.S:346    .int:0000009a .L0
-             TVout.S:348    .int:0000009e .L0
-             TVout.S:347    .int:0000009c .L0
-             TVout.S:349    .int:000000a0 .L0
-             TVout.S:348    .int:0000009e .L0
-             TVout.S:350    .int:000000a2 .L0
-             TVout.S:349    .int:000000a0 .L0
-             TVout.S:351    .int:000000a4 .L0
-             TVout.S:350    .int:000000a2 .L0
-             TVout.S:352    .int:000000a6 .L0
-             TVout.S:351    .int:000000a4 .L0
-             TVout.S:353    .int:000000a8 .L0
-             TVout.S:352    .int:000000a6 .L0
-             TVout.S:354    .int:000000aa .L0
-             TVout.S:353    .int:000000a8 .L0
-             TVout.S:355    .int:000000ac .L0
-             TVout.S:354    .int:000000aa .L0
-             TVout.S:356    .int:000000ae .L0
-             TVout.S:355    .int:000000ac .L0
-             TVout.S:358    .int:000000b0 .L0
-             TVout.S:356    .int:000000ae .L0
-             TVout.S:359    .int:000000b2 .L0
-             TVout.S:358    .int:000000b0 .L0
-             TVout.S:360    .int:000000b4 .L0
-             TVout.S:359    .int:000000b2 .L0
-             TVout.S:361    .int:000000b6 .L0
-             TVout.S:360    .int:000000b4 .L0
-             TVout.S:362    .int:000000b8 .L0
-             TVout.S:361    .int:000000b6 .L0
-             TVout.S:363    .int:000000ba .L0
-             TVout.S:362    .int:000000b8 .L0
-             TVout.S:364    .int:000000bc .L0
-             TVout.S:363    .int:000000ba .L0
-             TVout.S:365    .int:000000be .L0
-             TVout.S:364    .int:000000bc .L0
-             TVout.S:367    .int:000000c0 .L0
-             TVout.S:365    .int:000000be .L0
-             TVout.S:368    .int:000000c2 .L0
-             TVout.S:367    .int:000000c0 .L0
-             TVout.S:369    .int:000000c4 .L0
-             TVout.S:368    .int:000000c2 .L0
-             TVout.S:370    .int:000000c6 .L0
-             TVout.S:369    .int:000000c4 .L0
-             TVout.S:371    .int:000000c8 .L0
-             TVout.S:370    .int:000000c6 .L0
-             TVout.S:373    .int:000000ca .L0
-             TVout.S:371    .int:000000c8 .L0
-             TVout.S:374    .int:000000cc .L0
-             TVout.S:373    .int:000000ca .L0
-             TVout.S:375    .int:000000ce .L0
-             TVout.S:374    .int:000000cc .L0
-             TVout.S:376    .int:000000d0 .L0
-             TVout.S:375    .int:000000ce .L0
-             TVout.S:377    .int:000000d2 .L0
-             TVout.S:376    .int:000000d0 .L0
-             TVout.S:378    .int:000000d4 .L0
-             TVout.S:377    .int:000000d2 .L0
-             TVout.S:379    .int:000000d6 .L0
-             TVout.S:378    .int:000000d4 .L0
-             TVout.S:380    .int:000000d8 .L0
-             TVout.S:379    .int:000000d6 .L0
-             TVout.S:381    .int:000000da .L0
-             TVout.S:380    .int:000000d8 .L0
-             TVout.S:382    .int:000000dc .L0
-             TVout.S:381    .int:000000da .L0
-             TVout.S:383    .int:000000de .L0
-             TVout.S:382    .int:000000dc .L0
-             TVout.S:384    .int:000000e0 .L0
-             TVout.S:383    .int:000000de .L0
-             TVout.S:385    .int:000000e2 .L0
-             TVout.S:384    .int:000000e0 .L0
-             TVout.S:388    .int:000000e4 .L0
-             TVout.S:385    .int:000000e2 .L0
-             TVout.S:58     .text:00000000 .L0
-             TVout.S:59     .text:00000002 .L0
-             TVout.S:58     .text:00000000 .L0
-             TVout.S:60     .text:00000004 .L0
-             TVout.S:59     .text:00000002 .L0
-             TVout.S:62     .text:00000006 .L0
-             TVout.S:60     .text:00000004 .L0
-             TVout.S:63     .text:00000008 .L0
-             TVout.S:62     .text:00000006 .L0
-             TVout.S:64     .text:0000000a .L0
-             TVout.S:63     .text:00000008 .L0
-             TVout.S:65     .text:0000000c .L0
-             TVout.S:64     .text:0000000a .L0
-             TVout.S:66     .text:0000000e .L0
-             TVout.S:65     .text:0000000c .L0
-             TVout.S:67     .text:00000010 .L0
-             TVout.S:66     .text:0000000e .L0
-             TVout.S:68     .text:00000012 .L0
-             TVout.S:67     .text:00000010 .L0
-             TVout.S:69     .text:00000014 .L0
-             TVout.S:68     .text:00000012 .L0
-             TVout.S:70     .text:00000016 .L0
-             TVout.S:69     .text:00000014 .L0
-             TVout.S:71     .text:00000018 .L0
-             TVout.S:70     .text:00000016 .L0
-             TVout.S:72     .text:0000001a .L0
-             TVout.S:71     .text:00000018 .L0
-             TVout.S:73     .text:0000001c .L0
-             TVout.S:72     .text:0000001a .L0
-             TVout.S:75     .text:0000001e .L0
-             TVout.S:73     .text:0000001c .L0
-             TVout.S:76     .text:00000020 .L0
-             TVout.S:75     .text:0000001e .L0
-             TVout.S:77     .text:00000022 .L0
-             TVout.S:76     .text:00000020 .L0
-             TVout.S:78     .text:00000024 .L0
-             TVout.S:77     .text:00000022 .L0
-             TVout.S:80     .text:00000026 .L0
-             TVout.S:78     .text:00000024 .L0
-             TVout.S:82     .text:00000028 .L0
-             TVout.S:80     .text:00000026 .L0
-             TVout.S:83     .text:0000002a .L0
-             TVout.S:82     .text:00000028 .L0
-             TVout.S:84     .text:0000002c .L0
-             TVout.S:83     .text:0000002a .L0
-             TVout.S:85     .text:0000002e .L0
-             TVout.S:84     .text:0000002c .L0
-             TVout.S:86     .text:00000030 .L0
-             TVout.S:85     .text:0000002e .L0
-             TVout.S:87     .text:00000032 .L0
-             TVout.S:86     .text:00000030 .L0
-             TVout.S:88     .text:00000034 .L0
-             TVout.S:87     .text:00000032 .L0
-             TVout.S:90     .text:00000036 .L0
-             TVout.S:88     .text:00000034 .L0
-             TVout.S:91     .text:00000038 .L0
-             TVout.S:90     .text:00000036 .L0
-             TVout.S:92     .text:0000003a .L0
-             TVout.S:91     .text:00000038 .L0
-             TVout.S:95     .text:0000003c .L0
-             TVout.S:92     .text:0000003a .L0
-             TVout.S:96     .text:0000003e .L0
-             TVout.S:95     .text:0000003c .L0
-             TVout.S:97     .text:00000040 .L0
-             TVout.S:96     .text:0000003e .L0
-             TVout.S:98     .text:00000042 .L0
-             TVout.S:97     .text:00000040 .L0
-             TVout.S:99     .text:00000044 .L0
-             TVout.S:98     .text:00000042 .L0
-             TVout.S:100    .text:00000046 .L0
-             TVout.S:99     .text:00000044 .L0
-             TVout.S:101    .text:00000048 .L0
-             TVout.S:100    .text:00000046 .L0
-             TVout.S:102    .text:0000004a .L0
-             TVout.S:101    .text:00000048 .L0
-             TVout.S:103    .text:0000004c .L0
-             TVout.S:102    .text:0000004a .L0
-             TVout.S:104    .text:0000004e .L0
-             TVout.S:103    .text:0000004c .L0
-             TVout.S:106    .text:00000050 .L0
-             TVout.S:104    .text:0000004e .L0
-             TVout.S:107    .text:00000052 .L0
-             TVout.S:106    .text:00000050 .L0
-             TVout.S:109    .text:00000054 .L0
-             TVout.S:107    .text:00000052 .L0
-             TVout.S:110    .text:00000056 .L0
-             TVout.S:109    .text:00000054 .L0
-             TVout.S:117    .text:00000058 .L0
-             TVout.S:110    .text:00000056 .L0
-             TVout.S:118    .text:0000005a .L0
-             TVout.S:117    .text:00000058 .L0
-             TVout.S:119    .text:0000005c .L0
-             TVout.S:118    .text:0000005a .L0
-             TVout.S:120    .text:0000005e .L0
-             TVout.S:119    .text:0000005c .L0
-             TVout.S:121    .text:00000060 .L0
-             TVout.S:120    .text:0000005e .L0
-             TVout.S:122    .text:00000062 .L0
-             TVout.S:121    .text:00000060 .L0
-             TVout.S:129    .text:00000068 .L0
-             TVout.S:122    .text:00000062 .L0
-             TVout.S:130    .text:0000006a .L0
-             TVout.S:129    .text:00000068 .L0
-             TVout.S:131    .text:0000006c .L0
-             TVout.S:130    .text:0000006a .L0
-             TVout.S:132    .text:0000006e .L0
-             TVout.S:131    .text:0000006c .L0
-             TVout.S:134    .text:00000070 .L0
-             TVout.S:132    .text:0000006e .L0
-             TVout.S:135    .text:00000072 .L0
-             TVout.S:134    .text:00000070 .L0
-             TVout.S:136    .text:00000074 .L0
-             TVout.S:135    .text:00000072 .L0
-             TVout.S:137    .text:00000076 .L0
-             TVout.S:136    .text:00000074 .L0
-             TVout.S:144    .text:0000007c .L0
-             TVout.S:137    .text:00000076 .L0
-             TVout.S:145    .text:0000007e .L0
-             TVout.S:144    .text:0000007c .L0
-             TVout.S:146    .text:00000080 .L0
-             TVout.S:145    .text:0000007e .L0
-             TVout.S:148    .text:00000082 .L0
-             TVout.S:146    .text:00000080 .L0
-             TVout.S:149    .text:00000084 .L0
-             TVout.S:148    .text:00000082 .L0
-             TVout.S:150    .text:00000086 .L0
-             TVout.S:149    .text:00000084 .L0
-             TVout.S:151    .text:00000088 .L0
-             TVout.S:150    .text:00000086 .L0
-             TVout.S:162    .text:0000008e .L0
-             TVout.S:151    .text:00000088 .L0
-             TVout.S:163    .text:00000090 .L0
-             TVout.S:162    .text:0000008e .L0
-             TVout.S:164    .text:00000092 .L0
-             TVout.S:163    .text:00000090 .L0
-             TVout.S:165    .text:00000094 .L0
-             TVout.S:164    .text:00000092 .L0
-             TVout.S:166    .text:00000096 .L0
-             TVout.S:165    .text:00000094 .L0
-             TVout.S:167    .text:00000098 .L0
-             TVout.S:166    .text:00000096 .L0
-             TVout.S:168    .text:0000009a .L0
-             TVout.S:167    .text:00000098 .L0
-             TVout.S:169    .text:0000009c .L0
-             TVout.S:168    .text:0000009a .L0
-             TVout.S:170    .text:0000009e .L0
-             TVout.S:169    .text:0000009c .L0
-             TVout.S:171    .text:000000a0 .L0
-             TVout.S:170    .text:0000009e .L0
-             TVout.S:172    .text:000000a2 .L0
-             TVout.S:171    .text:000000a0 .L0
-             TVout.S:173    .text:000000a4 .L0
-             TVout.S:172    .text:000000a2 .L0
-             TVout.S:174    .text:000000a6 .L0
-             TVout.S:173    .text:000000a4 .L0
-             TVout.S:176    .text:000000a8 .L0
-             TVout.S:174    .text:000000a6 .L0
-             TVout.S:177    .text:000000aa .L0
-             TVout.S:176    .text:000000a8 .L0
-             TVout.S:178    .text:000000ac .L0
-             TVout.S:177    .text:000000aa .L0
-             TVout.S:179    .text:000000ae .L0
-             TVout.S:178    .text:000000ac .L0
-             TVout.S:180    .text:000000b0 .L0
-             TVout.S:179    .text:000000ae .L0
-             TVout.S:181    .text:000000b2 .L0
-             TVout.S:180    .text:000000b0 .L0
-             TVout.S:183    .text:000000b4 .L0
-             TVout.S:181    .text:000000b2 .L0
-             TVout.S:189    .text:000000ba .L0
-             TVout.S:183    .text:000000b4 .L0
-             TVout.S:195    .text:000000bc .L0
-             TVout.S:189    .text:000000ba .L0
-             TVout.S:196    .text:000000be .L0
-             TVout.S:195    .text:000000bc .L0
-             TVout.S:197    .text:000000c0 .L0
-             TVout.S:196    .text:000000be .L0
-             TVout.S:204    .text:000000c2 .L0
-             TVout.S:197    .text:000000c0 .L0
-             TVout.S:205    .text:000000c4 .L0
-             TVout.S:204    .text:000000c2 .L0
-             TVout.S:206    .text:000000c6 .L0
-             TVout.S:205    .text:000000c4 .L0
-             TVout.S:207    .text:000000c8 .L0
-             TVout.S:206    .text:000000c6 .L0
-             TVout.S:208    .text:000000ca .L0
-             TVout.S:207    .text:000000c8 .L0
-             TVout.S:209    .text:000000cc .L0
-             TVout.S:208    .text:000000ca .L0
-             TVout.S:210    .text:000000ce .L0
-             TVout.S:209    .text:000000cc .L0
-             TVout.S:211    .text:000000d0 .L0
-             TVout.S:210    .text:000000ce .L0
-             TVout.S:212    .text:000000d2 .L0
-             TVout.S:211    .text:000000d0 .L0
-             TVout.S:213    .text:000000d4 .L0
-             TVout.S:212    .text:000000d2 .L0
-             TVout.S:214    .text:000000d6 .L0
-             TVout.S:213    .text:000000d4 .L0
-             TVout.S:221    .text:000000d8 .L0
-             TVout.S:214    .text:000000d6 .L0
-             TVout.S:222    .text:000000da .L0
-             TVout.S:221    .text:000000d8 .L0
-             TVout.S:223    .text:000000dc .L0
-             TVout.S:222    .text:000000da .L0
-             TVout.S:224    .text:000000de .L0
-             TVout.S:223    .text:000000dc .L0
-             TVout.S:225    .text:000000e0 .L0
-             TVout.S:224    .text:000000de .L0
-             TVout.S:226    .text:000000e2 .L0
-             TVout.S:225    .text:000000e0 .L0
-             TVout.S:227    .text:000000e4 .L0
-             TVout.S:226    .text:000000e2 .L0
-             TVout.S:228    .text:000000e6 .L0
-             TVout.S:227    .text:000000e4 .L0
-             TVout.S:229    .text:000000e8 .L0
-             TVout.S:228    .text:000000e6 .L0
-             TVout.S:230    .text:000000ea .L0
-             TVout.S:229    .text:000000e8 .L0
-             TVout.S:232    .text:000000ec .L0
-             TVout.S:230    .text:000000ea .L0
-             TVout.S:233    .text:000000ee .L0
-             TVout.S:232    .text:000000ec .L0
-             TVout.S:239    .text:000000f4 .L0
-             TVout.S:233    .text:000000ee .L0
+             TVout.S:391    .debug_line:0000012e .L0
+             TVout.S:251    .int:00000000 .L0
+             TVout.S:252    .int:00000002 .L0
+             TVout.S:251    .int:00000000 .L0
+             TVout.S:253    .int:00000004 .L0
+             TVout.S:252    .int:00000002 .L0
+             TVout.S:254    .int:00000006 .L0
+             TVout.S:253    .int:00000004 .L0
+             TVout.S:255    .int:00000008 .L0
+             TVout.S:254    .int:00000006 .L0
+             TVout.S:256    .int:0000000a .L0
+             TVout.S:255    .int:00000008 .L0
+             TVout.S:257    .int:0000000c .L0
+             TVout.S:256    .int:0000000a .L0
+             TVout.S:258    .int:0000000e .L0
+             TVout.S:257    .int:0000000c .L0
+             TVout.S:259    .int:00000010 .L0
+             TVout.S:258    .int:0000000e .L0
+             TVout.S:260    .int:00000012 .L0
+             TVout.S:259    .int:00000010 .L0
+             TVout.S:261    .int:00000014 .L0
+             TVout.S:260    .int:00000012 .L0
+             TVout.S:262    .int:00000016 .L0
+             TVout.S:261    .int:00000014 .L0
+             TVout.S:263    .int:00000018 .L0
+             TVout.S:262    .int:00000016 .L0
+             TVout.S:264    .int:0000001a .L0
+             TVout.S:263    .int:00000018 .L0
+             TVout.S:265    .int:0000001c .L0
+             TVout.S:264    .int:0000001a .L0
+             TVout.S:266    .int:0000001e .L0
+             TVout.S:265    .int:0000001c .L0
+             TVout.S:267    .int:00000020 .L0
+             TVout.S:266    .int:0000001e .L0
+             TVout.S:268    .int:00000022 .L0
+             TVout.S:267    .int:00000020 .L0
+             TVout.S:269    .int:00000024 .L0
+             TVout.S:268    .int:00000022 .L0
+             TVout.S:270    .int:00000026 .L0
+             TVout.S:269    .int:00000024 .L0
+             TVout.S:271    .int:00000028 .L0
+             TVout.S:270    .int:00000026 .L0
+             TVout.S:272    .int:0000002a .L0
+             TVout.S:271    .int:00000028 .L0
+             TVout.S:273    .int:0000002c .L0
+             TVout.S:272    .int:0000002a .L0
+             TVout.S:274    .int:0000002e .L0
+             TVout.S:273    .int:0000002c .L0
+             TVout.S:276    .int:00000030 .L0
+             TVout.S:274    .int:0000002e .L0
+             TVout.S:277    .int:00000032 .L0
+             TVout.S:276    .int:00000030 .L0
+             TVout.S:278    .int:00000034 .L0
+             TVout.S:277    .int:00000032 .L0
+             TVout.S:280    .int:00000036 .L0
+             TVout.S:278    .int:00000034 .L0
+             TVout.S:281    .int:00000038 .L0
+             TVout.S:280    .int:00000036 .L0
+             TVout.S:282    .int:0000003a .L0
+             TVout.S:281    .int:00000038 .L0
+             TVout.S:283    .int:0000003c .L0
+             TVout.S:282    .int:0000003a .L0
+             TVout.S:284    .int:0000003e .L0
+             TVout.S:283    .int:0000003c .L0
+             TVout.S:285    .int:00000040 .L0
+             TVout.S:284    .int:0000003e .L0
+             TVout.S:287    .int:00000042 .L0
+             TVout.S:285    .int:00000040 .L0
+             TVout.S:288    .int:00000044 .L0
+             TVout.S:287    .int:00000042 .L0
+             TVout.S:289    .int:00000046 .L0
+             TVout.S:288    .int:00000044 .L0
+             TVout.S:291    .int:00000048 .L0
+             TVout.S:289    .int:00000046 .L0
+             TVout.S:292    .int:0000004a .L0
+             TVout.S:291    .int:00000048 .L0
+             TVout.S:293    .int:0000004c .L0
+             TVout.S:292    .int:0000004a .L0
+             TVout.S:295    .int:0000004e .L0
+             TVout.S:293    .int:0000004c .L0
+             TVout.S:296    .int:00000050 .L0
+             TVout.S:295    .int:0000004e .L0
+             TVout.S:297    .int:00000052 .L0
+             TVout.S:296    .int:00000050 .L0
+             TVout.S:298    .int:00000054 .L0
+             TVout.S:297    .int:00000052 .L0
+             TVout.S:299    .int:00000056 .L0
+             TVout.S:298    .int:00000054 .L0
+             TVout.S:300    .int:00000058 .L0
+             TVout.S:299    .int:00000056 .L0
+             TVout.S:302    .int:0000005a .L0
+             TVout.S:300    .int:00000058 .L0
+             TVout.S:303    .int:0000005c .L0
+             TVout.S:302    .int:0000005a .L0
+             TVout.S:304    .int:0000005e .L0
+             TVout.S:303    .int:0000005c .L0
+             TVout.S:306    .int:00000060 .L0
+             TVout.S:304    .int:0000005e .L0
+             TVout.S:307    .int:00000062 .L0
+             TVout.S:306    .int:00000060 .L0
+             TVout.S:309    .int:00000064 .L0
+             TVout.S:307    .int:00000062 .L0
+             TVout.S:310    .int:00000066 .L0
+             TVout.S:309    .int:00000064 .L0
+             TVout.S:311    .int:00000068 .L0
+             TVout.S:310    .int:00000066 .L0
+             TVout.S:312    .int:0000006a .L0
+             TVout.S:311    .int:00000068 .L0
+             TVout.S:313    .int:0000006c .L0
+             TVout.S:312    .int:0000006a .L0
+             TVout.S:314    .int:0000006e .L0
+             TVout.S:313    .int:0000006c .L0
+             TVout.S:316    .int:00000070 .L0
+             TVout.S:314    .int:0000006e .L0
+             TVout.S:317    .int:00000072 .L0
+             TVout.S:316    .int:00000070 .L0
+             TVout.S:318    .int:00000074 .L0
+             TVout.S:317    .int:00000072 .L0
+             TVout.S:331    .int:00000076 .L0
+             TVout.S:318    .int:00000074 .L0
+             TVout.S:332    .int:00000078 .L0
+             TVout.S:331    .int:00000076 .L0
+             TVout.S:333    .int:0000007a .L0
+             TVout.S:332    .int:00000078 .L0
+             TVout.S:334    .int:0000007c .L0
+             TVout.S:333    .int:0000007a .L0
+             TVout.S:335    .int:0000007e .L0
+             TVout.S:334    .int:0000007c .L0
+             TVout.S:336    .int:00000080 .L0
+             TVout.S:335    .int:0000007e .L0
+             TVout.S:337    .int:00000082 .L0
+             TVout.S:336    .int:00000080 .L0
+             TVout.S:338    .int:00000084 .L0
+             TVout.S:337    .int:00000082 .L0
+             TVout.S:339    .int:00000086 .L0
+             TVout.S:338    .int:00000084 .L0
+             TVout.S:340    .int:00000088 .L0
+             TVout.S:339    .int:00000086 .L0
+             TVout.S:341    .int:0000008a .L0
+             TVout.S:340    .int:00000088 .L0
+             TVout.S:342    .int:0000008c .L0
+             TVout.S:341    .int:0000008a .L0
+             TVout.S:343    .int:0000008e .L0
+             TVout.S:342    .int:0000008c .L0
+             TVout.S:344    .int:00000090 .L0
+             TVout.S:343    .int:0000008e .L0
+             TVout.S:345    .int:00000092 .L0
+             TVout.S:344    .int:00000090 .L0
+             TVout.S:346    .int:00000094 .L0
+             TVout.S:345    .int:00000092 .L0
+             TVout.S:347    .int:00000096 .L0
+             TVout.S:346    .int:00000094 .L0
+             TVout.S:348    .int:00000098 .L0
+             TVout.S:347    .int:00000096 .L0
+             TVout.S:349    .int:0000009a .L0
+             TVout.S:348    .int:00000098 .L0
+             TVout.S:350    .int:0000009c .L0
+             TVout.S:349    .int:0000009a .L0
+             TVout.S:351    .int:0000009e .L0
+             TVout.S:350    .int:0000009c .L0
+             TVout.S:352    .int:000000a0 .L0
+             TVout.S:351    .int:0000009e .L0
+             TVout.S:353    .int:000000a2 .L0
+             TVout.S:352    .int:000000a0 .L0
+             TVout.S:354    .int:000000a4 .L0
+             TVout.S:353    .int:000000a2 .L0
+             TVout.S:355    .int:000000a6 .L0
+             TVout.S:354    .int:000000a4 .L0
+             TVout.S:356    .int:000000a8 .L0
+             TVout.S:355    .int:000000a6 .L0
+             TVout.S:357    .int:000000aa .L0
+             TVout.S:356    .int:000000a8 .L0
+             TVout.S:358    .int:000000ac .L0
+             TVout.S:357    .int:000000aa .L0
+             TVout.S:359    .int:000000ae .L0
+             TVout.S:358    .int:000000ac .L0
+             TVout.S:361    .int:000000b0 .L0
+             TVout.S:359    .int:000000ae .L0
+             TVout.S:362    .int:000000b2 .L0
+             TVout.S:361    .int:000000b0 .L0
+             TVout.S:363    .int:000000b4 .L0
+             TVout.S:362    .int:000000b2 .L0
+             TVout.S:364    .int:000000b6 .L0
+             TVout.S:363    .int:000000b4 .L0
+             TVout.S:365    .int:000000b8 .L0
+             TVout.S:364    .int:000000b6 .L0
+             TVout.S:366    .int:000000ba .L0
+             TVout.S:365    .int:000000b8 .L0
+             TVout.S:367    .int:000000bc .L0
+             TVout.S:366    .int:000000ba .L0
+             TVout.S:368    .int:000000be .L0
+             TVout.S:367    .int:000000bc .L0
+             TVout.S:370    .int:000000c0 .L0
+             TVout.S:368    .int:000000be .L0
+             TVout.S:371    .int:000000c2 .L0
+             TVout.S:370    .int:000000c0 .L0
+             TVout.S:372    .int:000000c4 .L0
+             TVout.S:371    .int:000000c2 .L0
+             TVout.S:373    .int:000000c6 .L0
+             TVout.S:372    .int:000000c4 .L0
+             TVout.S:374    .int:000000c8 .L0
+             TVout.S:373    .int:000000c6 .L0
+             TVout.S:376    .int:000000ca .L0
+             TVout.S:374    .int:000000c8 .L0
+             TVout.S:377    .int:000000cc .L0
+             TVout.S:376    .int:000000ca .L0
+             TVout.S:378    .int:000000ce .L0
+             TVout.S:377    .int:000000cc .L0
+             TVout.S:379    .int:000000d0 .L0
+             TVout.S:378    .int:000000ce .L0
+             TVout.S:380    .int:000000d2 .L0
+             TVout.S:379    .int:000000d0 .L0
+             TVout.S:381    .int:000000d4 .L0
+             TVout.S:380    .int:000000d2 .L0
+             TVout.S:382    .int:000000d6 .L0
+             TVout.S:381    .int:000000d4 .L0
+             TVout.S:383    .int:000000d8 .L0
+             TVout.S:382    .int:000000d6 .L0
+             TVout.S:384    .int:000000da .L0
+             TVout.S:383    .int:000000d8 .L0
+             TVout.S:385    .int:000000dc .L0
+             TVout.S:384    .int:000000da .L0
+             TVout.S:386    .int:000000de .L0
+             TVout.S:385    .int:000000dc .L0
+             TVout.S:387    .int:000000e0 .L0
+             TVout.S:386    .int:000000de .L0
+             TVout.S:388    .int:000000e2 .L0
+             TVout.S:387    .int:000000e0 .L0
+             TVout.S:391    .int:000000e4 .L0
+             TVout.S:388    .int:000000e2 .L0
+             TVout.S:54     .text:00000000 .L0
+             TVout.S:55     .text:00000002 .L0
+             TVout.S:54     .text:00000000 .L0
+             TVout.S:56     .text:00000004 .L0
+             TVout.S:55     .text:00000002 .L0
+             TVout.S:58     .text:00000006 .L0
+             TVout.S:56     .text:00000004 .L0
+             TVout.S:59     .text:00000008 .L0
+             TVout.S:58     .text:00000006 .L0
+             TVout.S:60     .text:0000000a .L0
+             TVout.S:59     .text:00000008 .L0
+             TVout.S:61     .text:0000000c .L0
+             TVout.S:60     .text:0000000a .L0
+             TVout.S:62     .text:0000000e .L0
+             TVout.S:61     .text:0000000c .L0
+             TVout.S:63     .text:00000010 .L0
+             TVout.S:62     .text:0000000e .L0
+             TVout.S:64     .text:00000012 .L0
+             TVout.S:63     .text:00000010 .L0
+             TVout.S:65     .text:00000014 .L0
+             TVout.S:64     .text:00000012 .L0
+             TVout.S:66     .text:00000016 .L0
+             TVout.S:65     .text:00000014 .L0
+             TVout.S:67     .text:00000018 .L0
+             TVout.S:66     .text:00000016 .L0
+             TVout.S:68     .text:0000001a .L0
+             TVout.S:67     .text:00000018 .L0
+             TVout.S:69     .text:0000001c .L0
+             TVout.S:68     .text:0000001a .L0
+             TVout.S:71     .text:0000001e .L0
+             TVout.S:69     .text:0000001c .L0
+             TVout.S:72     .text:00000020 .L0
+             TVout.S:71     .text:0000001e .L0
+             TVout.S:73     .text:00000022 .L0
+             TVout.S:72     .text:00000020 .L0
+             TVout.S:74     .text:00000024 .L0
+             TVout.S:73     .text:00000022 .L0
+             TVout.S:76     .text:00000026 .L0
+             TVout.S:74     .text:00000024 .L0
+             TVout.S:78     .text:00000028 .L0
+             TVout.S:76     .text:00000026 .L0
+             TVout.S:79     .text:0000002a .L0
+             TVout.S:78     .text:00000028 .L0
+             TVout.S:80     .text:0000002c .L0
+             TVout.S:79     .text:0000002a .L0
+             TVout.S:81     .text:0000002e .L0
+             TVout.S:80     .text:0000002c .L0
+             TVout.S:82     .text:00000030 .L0
+             TVout.S:81     .text:0000002e .L0
+             TVout.S:83     .text:00000032 .L0
+             TVout.S:82     .text:00000030 .L0
+             TVout.S:84     .text:00000034 .L0
+             TVout.S:83     .text:00000032 .L0
+             TVout.S:86     .text:00000036 .L0
+             TVout.S:84     .text:00000034 .L0
+             TVout.S:87     .text:00000038 .L0
+             TVout.S:86     .text:00000036 .L0
+             TVout.S:88     .text:0000003a .L0
+             TVout.S:87     .text:00000038 .L0
+             TVout.S:91     .text:0000003c .L0
+             TVout.S:88     .text:0000003a .L0
+             TVout.S:92     .text:0000003e .L0
+             TVout.S:91     .text:0000003c .L0
+             TVout.S:93     .text:00000040 .L0
+             TVout.S:92     .text:0000003e .L0
+             TVout.S:94     .text:00000042 .L0
+             TVout.S:93     .text:00000040 .L0
+             TVout.S:95     .text:00000044 .L0
+             TVout.S:94     .text:00000042 .L0
+             TVout.S:96     .text:00000046 .L0
+             TVout.S:95     .text:00000044 .L0
+             TVout.S:97     .text:00000048 .L0
+             TVout.S:96     .text:00000046 .L0
+             TVout.S:98     .text:0000004a .L0
+             TVout.S:97     .text:00000048 .L0
+             TVout.S:99     .text:0000004c .L0
+             TVout.S:98     .text:0000004a .L0
+             TVout.S:100    .text:0000004e .L0
+             TVout.S:99     .text:0000004c .L0
+             TVout.S:102    .text:00000050 .L0
+             TVout.S:100    .text:0000004e .L0
+             TVout.S:103    .text:00000052 .L0
+             TVout.S:102    .text:00000050 .L0
+             TVout.S:105    .text:00000054 .L0
+             TVout.S:103    .text:00000052 .L0
+             TVout.S:106    .text:00000056 .L0
+             TVout.S:105    .text:00000054 .L0
+             TVout.S:113    .text:00000058 .L0
+             TVout.S:106    .text:00000056 .L0
+             TVout.S:114    .text:0000005a .L0
+             TVout.S:113    .text:00000058 .L0
+             TVout.S:115    .text:0000005c .L0
+             TVout.S:114    .text:0000005a .L0
+             TVout.S:116    .text:0000005e .L0
+             TVout.S:115    .text:0000005c .L0
+             TVout.S:117    .text:00000060 .L0
+             TVout.S:116    .text:0000005e .L0
+             TVout.S:118    .text:00000062 .L0
+             TVout.S:117    .text:00000060 .L0
+             TVout.S:125    .text:00000068 .L0
+             TVout.S:118    .text:00000062 .L0
+             TVout.S:126    .text:0000006a .L0
+             TVout.S:125    .text:00000068 .L0
+             TVout.S:127    .text:0000006c .L0
+             TVout.S:126    .text:0000006a .L0
+             TVout.S:128    .text:0000006e .L0
+             TVout.S:127    .text:0000006c .L0
+             TVout.S:130    .text:00000070 .L0
+             TVout.S:128    .text:0000006e .L0
+             TVout.S:131    .text:00000072 .L0
+             TVout.S:130    .text:00000070 .L0
+             TVout.S:132    .text:00000074 .L0
+             TVout.S:131    .text:00000072 .L0
+             TVout.S:133    .text:00000076 .L0
+             TVout.S:132    .text:00000074 .L0
+             TVout.S:140    .text:0000007c .L0
+             TVout.S:133    .text:00000076 .L0
+             TVout.S:141    .text:0000007e .L0
+             TVout.S:140    .text:0000007c .L0
+             TVout.S:142    .text:00000080 .L0
+             TVout.S:141    .text:0000007e .L0
+             TVout.S:144    .text:00000082 .L0
+             TVout.S:142    .text:00000080 .L0
+             TVout.S:145    .text:00000084 .L0
+             TVout.S:144    .text:00000082 .L0
+             TVout.S:146    .text:00000086 .L0
+             TVout.S:145    .text:00000084 .L0
+             TVout.S:147    .text:00000088 .L0
+             TVout.S:146    .text:00000086 .L0
+             TVout.S:158    .text:0000008e .L0
+             TVout.S:147    .text:00000088 .L0
+             TVout.S:159    .text:00000090 .L0
+             TVout.S:158    .text:0000008e .L0
+             TVout.S:160    .text:00000092 .L0
+             TVout.S:159    .text:00000090 .L0
+             TVout.S:161    .text:00000094 .L0
+             TVout.S:160    .text:00000092 .L0
+             TVout.S:163    .text:00000096 .L0
+             TVout.S:161    .text:00000094 .L0
+             TVout.S:164    .text:00000098 .L0
+             TVout.S:163    .text:00000096 .L0
+             TVout.S:165    .text:0000009a .L0
+             TVout.S:164    .text:00000098 .L0
+             TVout.S:166    .text:0000009c .L0
+             TVout.S:165    .text:0000009a .L0
+             TVout.S:167    .text:0000009e .L0
+             TVout.S:166    .text:0000009c .L0
+             TVout.S:168    .text:000000a0 .L0
+             TVout.S:167    .text:0000009e .L0
+             TVout.S:169    .text:000000a2 .L0
+             TVout.S:168    .text:000000a0 .L0
+             TVout.S:170    .text:000000a4 .L0
+             TVout.S:169    .text:000000a2 .L0
+             TVout.S:171    .text:000000a6 .L0
+             TVout.S:170    .text:000000a4 .L0
+             TVout.S:172    .text:000000a8 .L0
+             TVout.S:171    .text:000000a6 .L0
+             TVout.S:173    .text:000000aa .L0
+             TVout.S:172    .text:000000a8 .L0
+             TVout.S:174    .text:000000ac .L0
+             TVout.S:173    .text:000000aa .L0
+             TVout.S:175    .text:000000ae .L0
+             TVout.S:174    .text:000000ac .L0
+             TVout.S:177    .text:000000b0 .L0
+             TVout.S:175    .text:000000ae .L0
+             TVout.S:178    .text:000000b2 .L0
+             TVout.S:177    .text:000000b0 .L0
+             TVout.S:179    .text:000000b4 .L0
+             TVout.S:178    .text:000000b2 .L0
+             TVout.S:180    .text:000000b6 .L0
+             TVout.S:179    .text:000000b4 .L0
+             TVout.S:181    .text:000000b8 .L0
+             TVout.S:180    .text:000000b6 .L0
+             TVout.S:182    .text:000000ba .L0
+             TVout.S:181    .text:000000b8 .L0
+             TVout.S:183    .text:000000bc .L0
+             TVout.S:182    .text:000000ba .L0
+             TVout.S:185    .text:000000be .L0
+             TVout.S:183    .text:000000bc .L0
+             TVout.S:191    .text:000000c4 .L0
+             TVout.S:185    .text:000000be .L0
+             TVout.S:197    .text:000000c6 .L0
+             TVout.S:191    .text:000000c4 .L0
+             TVout.S:198    .text:000000c8 .L0
+             TVout.S:197    .text:000000c6 .L0
+             TVout.S:199    .text:000000ca .L0
+             TVout.S:198    .text:000000c8 .L0
+             TVout.S:206    .text:000000cc .L0
+             TVout.S:199    .text:000000ca .L0
+             TVout.S:207    .text:000000ce .L0
+             TVout.S:206    .text:000000cc .L0
+             TVout.S:208    .text:000000d0 .L0
+             TVout.S:207    .text:000000ce .L0
+             TVout.S:209    .text:000000d2 .L0
+             TVout.S:208    .text:000000d0 .L0
+             TVout.S:210    .text:000000d4 .L0
+             TVout.S:209    .text:000000d2 .L0
+             TVout.S:211    .text:000000d6 .L0
+             TVout.S:210    .text:000000d4 .L0
+             TVout.S:212    .text:000000d8 .L0
+             TVout.S:211    .text:000000d6 .L0
+             TVout.S:213    .text:000000da .L0
+             TVout.S:212    .text:000000d8 .L0
+             TVout.S:214    .text:000000dc .L0
+             TVout.S:213    .text:000000da .L0
+             TVout.S:215    .text:000000de .L0
+             TVout.S:214    .text:000000dc .L0
+             TVout.S:216    .text:000000e0 .L0
+             TVout.S:215    .text:000000de .L0
+             TVout.S:217    .text:000000e2 .L0
+             TVout.S:216    .text:000000e0 .L0
+             TVout.S:224    .text:000000e4 .L0
+             TVout.S:217    .text:000000e2 .L0
+             TVout.S:225    .text:000000e6 .L0
+             TVout.S:224    .text:000000e4 .L0
+             TVout.S:226    .text:000000e8 .L0
+             TVout.S:225    .text:000000e6 .L0
+             TVout.S:227    .text:000000ea .L0
+             TVout.S:226    .text:000000e8 .L0
+             TVout.S:228    .text:000000ec .L0
+             TVout.S:227    .text:000000ea .L0
+             TVout.S:229    .text:000000ee .L0
+             TVout.S:228    .text:000000ec .L0
+             TVout.S:230    .text:000000f0 .L0
+             TVout.S:229    .text:000000ee .L0
+             TVout.S:231    .text:000000f2 .L0
+             TVout.S:230    .text:000000f0 .L0
+             TVout.S:232    .text:000000f4 .L0
+             TVout.S:231    .text:000000f2 .L0
+             TVout.S:233    .text:000000f6 .L0
+             TVout.S:232    .text:000000f4 .L0
+             TVout.S:235    .text:000000f8 .L0
+             TVout.S:233    .text:000000f6 .L0
+             TVout.S:236    .text:000000fa .L0
+             TVout.S:235    .text:000000f8 .L0
+             TVout.S:242    .text:00000100 .L0
+             TVout.S:236    .text:000000fa .L0
                              .int:00000000 .L0
-             TVout.S:388    .int:000000e4 .L0
+             TVout.S:391    .int:000000e4 .L0
                             .text:00000000 .L0
-             TVout.S:239    .text:000000f4 .L0
+             TVout.S:242    .text:00000100 .L0
                       .debug_info:00000000 .L0
                       .debug_info:0000007c .L0
 
@@ -5723,6 +5834,7 @@ DOLOOP
 _font
 
 EQUATE SYMBOLS
+                  ./keyboard.inc = 0x0
                       ./core.inc = 0x0
                 ./ntsc_const.inc = 0x0
                 ./gen_macros.inc = 0x0
@@ -7310,3 +7422,34 @@ EQUATE SYMBOLS
                          F_IMMED = 0x80
                         F_HIDDEN = 0x20
                        F_LENMASK = 0x1f
+                         KBD_INC = 0x1
+                         VK_BACK = 0x8
+                       VK_ESCAPE = 0x1b
+                       VK_RETURN = 0xd
+                         VK_CTRL = 0x80
+                        VK_SHIFT = 0x81
+                          VK_ALT = 0x82
+                         VK_CAPS = 0x83
+                          VK_TAB = 0x9
+                          VK_DEL = 0x84
+                          VK_INS = 0x85
+                         VK_HOME = 0x86
+                          VK_END = 0x87
+                           VK_UP = 0x88
+                         VK_DOWN = 0x89
+                         VK_LEFT = 0x8a
+                        VK_RIGHT = 0x8b
+                         VK_PGUP = 0x8c
+                         VK_PGDN = 0x8d
+                           VK_F1 = 0x96
+                           VK_F2 = 0x97
+                           VK_F3 = 0x98
+                           VK_F4 = 0x99
+                           VK_F5 = 0x9a
+                           VK_F6 = 0x9b
+                           VK_F7 = 0x9c
+                           VK_F8 = 0x9d
+                           VK_F9 = 0x9e
+                          VK_F10 = 0x9f
+                          VK_F11 = 0xa0
+                          VK_F12 = 0xa1

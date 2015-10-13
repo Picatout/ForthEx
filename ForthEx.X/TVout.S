@@ -32,12 +32,8 @@
 .include "pal_const.inc"
 .endif
 .include "core.inc"
+.include "keyboard.inc"
     
-; constantes génération signal NTSC
-
-
-
-
 .data
 line_count: .word 0xffff
 even: .byte 0xff
@@ -159,6 +155,11 @@ DEFWORD "CURPOS",6,,CURPOS  ; ( ny nx -- )
 ; dans le buffer video    
 ;;;;;;;;;;;;;;;;;;;;;;
 DEFCODE "EMIT",4,,EMIT  ; ( c -- )
+    cp T,#VK_RETURN
+    bra neq, 1f
+    DPOP
+    bra crlf
+1:    
     mov.b #CPL, W0
     mul.b ypos
     mov.b xpos, WREG
@@ -166,20 +167,21 @@ DEFCODE "EMIT",4,,EMIT  ; ( c -- )
     add W0,W2,W0
     mov #_video_buffer, W1
     add W0,W1,W1
-    mov.b T, [W1+0]
+    mov.b T, [W1]
     DPOP
     inc.b xpos
     mov #CPL, W0
     cp.b xpos
-    bra neq, 1f
+    bra neq, 2f
 crlf:    
     clr.b xpos
     inc.b ypos
     mov #LPS, W0
     cp.b ypos
-    bra neq, 1f
+    bra ltu, 2f
+    dec.b ypos
     bra code_SCROLLUP
-1:    
+2:    
     NEXT
 
 ;;;;;;;;;;;;;;;;;;;
@@ -205,8 +207,9 @@ DEFCODE "SCROLLUP",8,,SCROLLUP  ; ( -- )
     mov #CPL, W0
     add W0,W1,W2
     mov #TV_BUFFER, W3
-    sub W0,W3,W3
+    sub W3,W0,W3
     lsr W3,W3
+    dec W3,W3
     repeat W3
     mov [W2++],[W1++]
     DPUSH

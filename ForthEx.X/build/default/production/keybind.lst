@@ -45,83 +45,84 @@
   21              	;DESCRIPTION: constante reliée au clavier PS/2
   22              	;DATE: 2015-09-28
   23              	;REF: http://www.computer-engineering.org/ps2keyboard/scancodes2.html 
-  24              	    
-  25              	.ifndef PS2_INC
-  26              	.equ PS2_INC, 1
-  27              	
+  24              	; utilise scancode set 2
+  25              	    
+  26              	.ifndef PS2_INC
+  27              	.equ PS2_INC, 1
   28              	
-  29              	.equ SC_BATOK, 0xAA ; basic assurance test OK
-  30              	.equ SC_ERROR, 0xFC ; erreur clavier
-  31              	.equ SC_KREL,  0xF0 ; touche relâchée
-  32              	.equ SC_XKEY,  0xE0 ; code étendu
-  33              	 ;codes touches contrôles
-  34              	.equ L_SHIFT,  0x12
-  35              	.equ R_SHIFT,  0x59
-  36              	.equ L_CTRL,   0x14
-  37              	.equ L_ALT,    0x11
-  38              	.equ ENTER,    0x5A
-  39              	.equ CAPS,     0x58
-  40              	.equ SCROLL,   0x7E
-  41              	.equ NUM,      0x77
-  42              	.equ ESC,      0x76
-  43              	.equ F1,       0x05
-  44              	.equ F2,       0x06
-  45              	.equ F3,       0x04
-  46              	.equ F4,       0x0C
-  47              	.equ F5,       0x03
-  48              	.equ F6,       0x0B
-  49              	.equ F7,       0x83 
-  50              	.equ F8,       0x0A
-  51              	.equ F9,       0x01
-  52              	.equ F10,      0x09
-  53              	.equ F11,      0x78
-  54              	.equ F12,      0x07
-  55              	 ; touches clavier numérique
-  56              	.equ KP0,      0x70
-  57              	.equ KP1,      0x69
-  58              	.equ KP2,      0x72
-  59              	.equ KP3,      0x7A
-  60              	.equ KP4,      0x6B
-  61              	.equ KP5,      0x73
-  62              	.equ KP6,      0x74
-  63              	.equ KP7,      0x6C
-  64              	.equ KP8,      0x75
-  65              	.equ KP9,      0x7D
-  66              	.equ KPDOT,    0x71
-  67              	.equ KPPLUS,   0x79
-  68              	.equ KPMINUS,  0x7B
-  69              	.equ KPSTAR,   0x7C
-  70              	; code étendus (précédé de 0xE0) 
-  71              	.equ R_CTRL,   0x14
-  72              	.equ L_GUI,    0x1f
-  73              	.equ R_GUI,    0x27
-  74              	.equ R_ALT,    0x11
-  75              	.equ APPS,     0x2f 
-  76              	.equ INSERT,   0x70
-  77              	.equ HOME,     0x6C
-  78              	.equ PGUP,     0x7D
-  79              	.equ DEL,      0x71
-  80              	.equ END,      0x69
-  81              	.equ PGDN,     0x7A
-  82              	.equ UP,       0x75
-  83              	.equ DOWN,     0x72
-  84              	.equ LEFT,     0x6B
-  85              	.equ RIGHT,    0x74
-  86              	.equ KPSLH,    0x4A
-  87              	.equ KPENT,    0x5A 
-  88              	 
-  89              	;indicateurs booléens dans key_state
-  90              	.equ F_SHIFT, 0 ; touche majuscule enfoncée
-  91              	.equ F_CTRL, 1  ; touche ctrl enfoncée
-  92              	.equ F_ALT, 2   ; touche alt enfoncée
-  93              	.equ F_CAPS, 3  ; FixMaj actif
-  94              	.equ F_NUM,  4  ; clavier numérique actif
-  95              	.equ F_XKEY, 5 ; touche étendue
-  96              	.equ F_KREL, 6 ; relâchement touche
-  97              	; grandeur file interface PS/2 
-  98              	.equ PS2_QUEUE_SIZE, 32
-  99              	.endif
- 100              	
+  29              	
+  30              	.equ SC_BATOK, 0xAA ; basic assurance test OK
+  31              	.equ SC_ERROR, 0xFC ; erreur clavier
+  32              	.equ SC_KREL,  0xF0 ; touche relâchée
+  33              	.equ SC_XKEY,  0xE0 ; code étendu
+  34              	 ;codes touches contrôles
+  35              	.equ L_SHIFT,  0x12
+  36              	.equ R_SHIFT,  0x59
+  37              	.equ L_CTRL,   0x14
+  38              	.equ L_ALT,    0x11
+  39              	.equ ENTER,    0x5A
+  40              	.equ CAPS,     0x58
+  41              	.equ SCROLL,   0x7E
+  42              	.equ NUM,      0x77
+  43              	.equ ESC,      0x76
+  44              	.equ F1,       0x05
+  45              	.equ F2,       0x06
+  46              	.equ F3,       0x04
+  47              	.equ F4,       0x0C
+  48              	.equ F5,       0x03
+  49              	.equ F6,       0x0B
+  50              	.equ F7,       0x83 
+  51              	.equ F8,       0x0A
+  52              	.equ F9,       0x01
+  53              	.equ F10,      0x09
+  54              	.equ F11,      0x78
+  55              	.equ F12,      0x07
+  56              	 ; touches clavier numérique
+  57              	.equ KP0,      0x70
+  58              	.equ KP1,      0x69
+  59              	.equ KP2,      0x72
+  60              	.equ KP3,      0x7A
+  61              	.equ KP4,      0x6B
+  62              	.equ KP5,      0x73
+  63              	.equ KP6,      0x74
+  64              	.equ KP7,      0x6C
+  65              	.equ KP8,      0x75
+  66              	.equ KP9,      0x7D
+  67              	.equ KPDOT,    0x71
+  68              	.equ KPPLUS,   0x79
+  69              	.equ KPMINUS,  0x7B
+  70              	.equ KPSTAR,   0x7C
+  71              	; code étendus (précédé de 0xE0) 
+  72              	.equ R_CTRL,   0x14
+  73              	.equ L_GUI,    0x1f
+  74              	.equ R_GUI,    0x27
+  75              	.equ R_ALT,    0x11
+  76              	.equ APPS,     0x2f 
+  77              	.equ INSERT,   0x70
+  78              	.equ HOME,     0x6C
+  79              	.equ PGUP,     0x7D
+  80              	.equ DEL,      0x71
+  81              	.equ END,      0x69
+  82              	.equ PGDN,     0x7A
+  83              	.equ UP,       0x75
+  84              	.equ DOWN,     0x72
+  85              	.equ LEFT,     0x6B
+  86              	.equ RIGHT,    0x74
+  87              	.equ KPSLH,    0x4A
+  88              	.equ KPENT,    0x5A 
+  89              	 
+  90              	;indicateurs booléens dans key_state
+  91              	.equ F_SHIFT, 0 ; touche majuscule enfoncée
+  92              	.equ F_CTRL, 1  ; touche ctrl enfoncée
+  93              	.equ F_ALT, 2   ; touche alt enfoncée
+  94              	.equ F_CAPS, 3  ; FixMaj actif
+  95              	.equ F_NUM,  4  ; clavier numérique actif
+  96              	.equ F_XKEY, 5 ; touche étendue
+  97              	.equ F_KREL, 6 ; relâchement touche
+  98              	; grandeur file interface PS/2 
+  99              	.equ PS2_QUEUE_SIZE, 32
+ 100              	.endif
+ 101              	
   25              	.include "keyboard.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -241,10 +242,10 @@
   78 005c 4A 2F       	.byte 0x4a,'/'
   79 005e 52 27       	.byte 0x52,'\''
   80 0060 5D 7C       	.byte 0x5d,'|'    
-  81 0062 66 08       	.byte 0x66,8    ; BACKSPACE
-  82 0064 0D 09       	.byte 0x0d,9    ; TAB
-  83 0066 5A 0D       	.byte 0x5a,'\r' ; CR
-  84 0068 76 1B       	.byte 0x76,27   ; ESC
+  81 0062 66 08       	.byte 0x66,VK_BACK    ; BACKSPACE
+  82 0064 0D 09       	.byte 0x0d,VK_TAB    ; TAB
+  83 0066 5A 0D       	.byte 0x5a,VK_RETURN ; CR
+  84 0068 76 1B       	.byte 0x76,VK_ESCAPE   ; ESC
   85 006a 00 00       	.byte 0,0
   86                 	
   87                 	; touche ascii avec un symbole différent
@@ -301,9 +302,10 @@
  138 00b8 72 89       	.byte DOWN,   VK_DOWN
  139 00ba 6B 8A       	.byte LEFT,   VK_LEFT
  140 00bc 74 8B       	.byte RIGHT,  VK_RIGHT
- 141 00be 00 00       	.byte 0,0    
- 142                 	    
- 143                 	.end
+ 141 00be 5A 0D       	.byte KPENT,  VK_RETURN    
+ 142 00c0 00 00       	.byte 0,0    
+ 143                 	    
+ 144                 	.end
 DEFINED SYMBOLS
                             *ABS*:00000000 ./keyboard.inc
                             *ABS*:00000000 ./ps2.inc
@@ -313,71 +315,71 @@ DEFINED SYMBOLS
                             *ABS*:00000001 __PIC24F
                             *ABS*:00000001 __HAS_PMP
                             *ABS*:00000001 __C30ELF
-           ./ps2.inc:26     *ABS*:00000001 PS2_INC
-           ./ps2.inc:29     *ABS*:000000aa SC_BATOK
-           ./ps2.inc:30     *ABS*:000000fc SC_ERROR
-           ./ps2.inc:31     *ABS*:000000f0 SC_KREL
-           ./ps2.inc:32     *ABS*:000000e0 SC_XKEY
-           ./ps2.inc:34     *ABS*:00000012 L_SHIFT
-           ./ps2.inc:35     *ABS*:00000059 R_SHIFT
-           ./ps2.inc:36     *ABS*:00000014 L_CTRL
-           ./ps2.inc:37     *ABS*:00000011 L_ALT
-           ./ps2.inc:38     *ABS*:0000005a ENTER
-           ./ps2.inc:39     *ABS*:00000058 CAPS
-           ./ps2.inc:40     *ABS*:0000007e SCROLL
-           ./ps2.inc:41     *ABS*:00000077 NUM
-           ./ps2.inc:42     *ABS*:00000076 ESC
-           ./ps2.inc:43     *ABS*:00000005 F1
-           ./ps2.inc:44     *ABS*:00000006 F2
-           ./ps2.inc:45     *ABS*:00000004 F3
-           ./ps2.inc:46     *ABS*:0000000c F4
-           ./ps2.inc:47     *ABS*:00000003 F5
-           ./ps2.inc:48     *ABS*:0000000b F6
-           ./ps2.inc:49     *ABS*:00000083 F7
-           ./ps2.inc:50     *ABS*:0000000a F8
-           ./ps2.inc:51     *ABS*:00000001 F9
-           ./ps2.inc:52     *ABS*:00000009 F10
-           ./ps2.inc:53     *ABS*:00000078 F11
-           ./ps2.inc:54     *ABS*:00000007 F12
-           ./ps2.inc:56     *ABS*:00000070 KP0
-           ./ps2.inc:57     *ABS*:00000069 KP1
-           ./ps2.inc:58     *ABS*:00000072 KP2
-           ./ps2.inc:59     *ABS*:0000007a KP3
-           ./ps2.inc:60     *ABS*:0000006b KP4
-           ./ps2.inc:61     *ABS*:00000073 KP5
-           ./ps2.inc:62     *ABS*:00000074 KP6
-           ./ps2.inc:63     *ABS*:0000006c KP7
-           ./ps2.inc:64     *ABS*:00000075 KP8
-           ./ps2.inc:65     *ABS*:0000007d KP9
-           ./ps2.inc:66     *ABS*:00000071 KPDOT
-           ./ps2.inc:67     *ABS*:00000079 KPPLUS
-           ./ps2.inc:68     *ABS*:0000007b KPMINUS
-           ./ps2.inc:69     *ABS*:0000007c KPSTAR
-           ./ps2.inc:71     *ABS*:00000014 R_CTRL
-           ./ps2.inc:72     *ABS*:0000001f L_GUI
-           ./ps2.inc:73     *ABS*:00000027 R_GUI
-           ./ps2.inc:74     *ABS*:00000011 R_ALT
-           ./ps2.inc:75     *ABS*:0000002f APPS
-           ./ps2.inc:76     *ABS*:00000070 INSERT
-           ./ps2.inc:77     *ABS*:0000006c HOME
-           ./ps2.inc:78     *ABS*:0000007d PGUP
-           ./ps2.inc:79     *ABS*:00000071 DEL
-           ./ps2.inc:80     *ABS*:00000069 END
-           ./ps2.inc:81     *ABS*:0000007a PGDN
-           ./ps2.inc:82     *ABS*:00000075 UP
-           ./ps2.inc:83     *ABS*:00000072 DOWN
-           ./ps2.inc:84     *ABS*:0000006b LEFT
-           ./ps2.inc:85     *ABS*:00000074 RIGHT
-           ./ps2.inc:86     *ABS*:0000004a KPSLH
-           ./ps2.inc:87     *ABS*:0000005a KPENT
-           ./ps2.inc:90     *ABS*:00000000 F_SHIFT
-           ./ps2.inc:91     *ABS*:00000001 F_CTRL
-           ./ps2.inc:92     *ABS*:00000002 F_ALT
-           ./ps2.inc:93     *ABS*:00000003 F_CAPS
-           ./ps2.inc:94     *ABS*:00000004 F_NUM
-           ./ps2.inc:95     *ABS*:00000005 F_XKEY
-           ./ps2.inc:96     *ABS*:00000006 F_KREL
-           ./ps2.inc:98     *ABS*:00000020 PS2_QUEUE_SIZE
+           ./ps2.inc:27     *ABS*:00000001 PS2_INC
+           ./ps2.inc:30     *ABS*:000000aa SC_BATOK
+           ./ps2.inc:31     *ABS*:000000fc SC_ERROR
+           ./ps2.inc:32     *ABS*:000000f0 SC_KREL
+           ./ps2.inc:33     *ABS*:000000e0 SC_XKEY
+           ./ps2.inc:35     *ABS*:00000012 L_SHIFT
+           ./ps2.inc:36     *ABS*:00000059 R_SHIFT
+           ./ps2.inc:37     *ABS*:00000014 L_CTRL
+           ./ps2.inc:38     *ABS*:00000011 L_ALT
+           ./ps2.inc:39     *ABS*:0000005a ENTER
+           ./ps2.inc:40     *ABS*:00000058 CAPS
+           ./ps2.inc:41     *ABS*:0000007e SCROLL
+           ./ps2.inc:42     *ABS*:00000077 NUM
+           ./ps2.inc:43     *ABS*:00000076 ESC
+           ./ps2.inc:44     *ABS*:00000005 F1
+           ./ps2.inc:45     *ABS*:00000006 F2
+           ./ps2.inc:46     *ABS*:00000004 F3
+           ./ps2.inc:47     *ABS*:0000000c F4
+           ./ps2.inc:48     *ABS*:00000003 F5
+           ./ps2.inc:49     *ABS*:0000000b F6
+           ./ps2.inc:50     *ABS*:00000083 F7
+           ./ps2.inc:51     *ABS*:0000000a F8
+           ./ps2.inc:52     *ABS*:00000001 F9
+           ./ps2.inc:53     *ABS*:00000009 F10
+           ./ps2.inc:54     *ABS*:00000078 F11
+           ./ps2.inc:55     *ABS*:00000007 F12
+           ./ps2.inc:57     *ABS*:00000070 KP0
+           ./ps2.inc:58     *ABS*:00000069 KP1
+           ./ps2.inc:59     *ABS*:00000072 KP2
+           ./ps2.inc:60     *ABS*:0000007a KP3
+           ./ps2.inc:61     *ABS*:0000006b KP4
+           ./ps2.inc:62     *ABS*:00000073 KP5
+           ./ps2.inc:63     *ABS*:00000074 KP6
+           ./ps2.inc:64     *ABS*:0000006c KP7
+           ./ps2.inc:65     *ABS*:00000075 KP8
+           ./ps2.inc:66     *ABS*:0000007d KP9
+           ./ps2.inc:67     *ABS*:00000071 KPDOT
+           ./ps2.inc:68     *ABS*:00000079 KPPLUS
+           ./ps2.inc:69     *ABS*:0000007b KPMINUS
+           ./ps2.inc:70     *ABS*:0000007c KPSTAR
+           ./ps2.inc:72     *ABS*:00000014 R_CTRL
+           ./ps2.inc:73     *ABS*:0000001f L_GUI
+           ./ps2.inc:74     *ABS*:00000027 R_GUI
+           ./ps2.inc:75     *ABS*:00000011 R_ALT
+           ./ps2.inc:76     *ABS*:0000002f APPS
+           ./ps2.inc:77     *ABS*:00000070 INSERT
+           ./ps2.inc:78     *ABS*:0000006c HOME
+           ./ps2.inc:79     *ABS*:0000007d PGUP
+           ./ps2.inc:80     *ABS*:00000071 DEL
+           ./ps2.inc:81     *ABS*:00000069 END
+           ./ps2.inc:82     *ABS*:0000007a PGDN
+           ./ps2.inc:83     *ABS*:00000075 UP
+           ./ps2.inc:84     *ABS*:00000072 DOWN
+           ./ps2.inc:85     *ABS*:0000006b LEFT
+           ./ps2.inc:86     *ABS*:00000074 RIGHT
+           ./ps2.inc:87     *ABS*:0000004a KPSLH
+           ./ps2.inc:88     *ABS*:0000005a KPENT
+           ./ps2.inc:91     *ABS*:00000000 F_SHIFT
+           ./ps2.inc:92     *ABS*:00000001 F_CTRL
+           ./ps2.inc:93     *ABS*:00000002 F_ALT
+           ./ps2.inc:94     *ABS*:00000003 F_CAPS
+           ./ps2.inc:95     *ABS*:00000004 F_NUM
+           ./ps2.inc:96     *ABS*:00000005 F_XKEY
+           ./ps2.inc:97     *ABS*:00000006 F_KREL
+           ./ps2.inc:99     *ABS*:00000020 PS2_QUEUE_SIZE
       ./keyboard.inc:27     *ABS*:00000001 KBD_INC
       ./keyboard.inc:31     *ABS*:00000008 VK_BACK
       ./keyboard.inc:32     *ABS*:0000001b VK_ESCAPE

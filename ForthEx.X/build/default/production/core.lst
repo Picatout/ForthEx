@@ -3861,72 +3861,79 @@
  203 00d0 00 00 00 00 	.word CLS,MSG,SGET,SEMIT,DOBRA,SERTEST+6    
  203      00 00 00 00 
  203      00 00 06 00 
- 204                 	    
- 205 00dc 00 00 05 48 	DEFWORD "HOME",5,,HOME
- 205      4F 4D 45 00 
- 205      00 00 
- 206 00e6 00 00 00 00 	.word LIT,0,LIT,0,CURPOS,EXIT
+ 204                 	
+ 205 00dc 00 00 07 4B 	DEFWORD "KBDTEST",7,,KBDTEST
+ 205      42 44 54 45 
+ 205      53 54 00 00 
+ 206 00e8 00 00 00 00 	.word CLS,KEY,EMIT,DOBRA,KBDTEST+4    
  206      00 00 00 00 
- 206      00 00 00 00 
+ 206      04 00 
  207                 	    
- 208 00f2 00 00 06 4F 	DEFWORD "OKOFF",6,,OKOFF
- 208      4B 4F 46 46 
+ 208 00f2 00 00 05 48 	DEFWORD "HOME",5,,HOME
+ 208      4F 4D 45 00 
  208      00 00 
- 209 00fc 00 00 00 00 	.word BL,BL,EXIT 
- 209      00 00 
+ 209 00fc 00 00 00 00 	.word LIT,0,LIT,0,CURPOS,EXIT
+ 209      00 00 00 00 
+ 209      00 00 00 00 
  210                 	    
- 211 0102 00 00 02 4F 	DEFWORD "OK",2,,OK
- 211      4B 00 00 00 
- 212 010a 00 00 4F 00 	.word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
- 212      00 00 00 00 
- 212      4B 00 00 00 
+ 211 0108 00 00 06 4F 	DEFWORD "OKOFF",6,,OKOFF
+ 211      4B 4F 46 46 
+ 211      00 00 
+ 212 0112 00 00 00 00 	.word BL,BL,EXIT 
  212      00 00 
- 213                 	
- 214                 	.section .const psv
- 215                 	quick:
- 216 000f 54 68 65 20 	.asciz "The quick brown fox jump over the lazy dog.\r\n"
- 216      71 75 69 63 
- 216      6B 20 62 72 
- 216      6F 77 6E 20 
- 216      66 6F 78 20 
- 216      6A 75 6D 70 
- 216      20 6F 76 65 
- 216      72 20 74 68 
- 216      65 20 6C 61 
- 217                 	
- 218 003d 00          	DEFWORD "MSG",3,,MSG
- 219 0120 00 00 E8 03 	.word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
- 219      00 00 00 00 
- 219      00 00 00 00 
- 219      00 00 
+ 213                 	    
+ 214 0118 00 00 02 4F 	DEFWORD "OK",2,,OK
+ 214      4B 00 00 00 
+ 215 0120 00 00 4F 00 	.word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
+ 215      00 00 00 00 
+ 215      4B 00 00 00 
+ 215      00 00 
+ 216                 	
+ 217                 	.section .const psv
+ 218                 	quick:
+ 219 000f 54 68 65 20 	.asciz "The quick brown fox jump over the lazy dog.\r\n"
+ 219      71 75 69 63 
+ 219      6B 20 62 72 
+ 219      6F 77 6E 20 
+ 219      66 6F 78 20 
+ 219      6A 75 6D 70 
+ 219      20 6F 76 65 
+ 219      72 20 74 68 
+ 219      65 20 6C 61 
  220                 	
- 221 012e 00 00 05 5A 	DEFWORD "ZTYPE",5,,ZTYPE
- 221      54 59 50 45 
- 221      00 00 
- 222 0138 00 00 00 00 	.word DUP,CFETCH,DUP,DO0BRA,ZTYPEOUT,SEMIT,INC1,DOBRA,ZTYPE+2
+ 221 003d 00          	DEFWORD "MSG",3,,MSG
+ 222 0136 00 00 E8 03 	.word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
  222      00 00 00 00 
  222      00 00 00 00 
- 222      00 00 00 00 
- 222      02 00 
- 223                 	ZTYPEOUT:
- 224 014a 00 00 00 00 	.word DROP,DROP, EXIT     
+ 222      00 00 
+ 223                 	
+ 224 0144 00 00 05 5A 	DEFWORD "ZTYPE",5,,ZTYPE
+ 224      54 59 50 45 
  224      00 00 
- 225                 	    
- 226 0150 00 00 07 49 	DEFCODE "INFLOOP",7,,INFLOOP
- 226      4E 46 4C 4F 
- 226      4F 50 00 00 
- 227 0000dc  00 00 37 	    bra .
- 228              	    
- 229              	SYSDICT
- 230                 	.global ENTRY
- 231                 	ENTRY: 
- 232 015c 00 00       	.word SERTEST
- 233                 	.global sys_latest
- 234                 	sys_latest:
- 235 015e 00 00       	.word link
- 236                 	    
- 237                 	    
- 238                 	.end
+ 225 014e 00 00 00 00 	.word DUP,CFETCH,DUP,DO0BRA,ZTYPEOUT,SEMIT,INC1,DOBRA,ZTYPE+2
+ 225      00 00 00 00 
+ 225      00 00 00 00 
+ 225      00 00 00 00 
+ 225      02 00 
+ 226                 	ZTYPEOUT:
+ 227 0160 00 00 00 00 	.word DROP,DROP, EXIT     
+ 227      00 00 
+ 228                 	    
+ 229 0166 00 00 07 49 	DEFCODE "INFLOOP",7,,INFLOOP
+ 229      4E 46 4C 4F 
+ 229      4F 50 00 00 
+ 230 0000dc  00 00 37 	    bra .
+ 231              	    
+ 232              	SYSDICT
+ 233                 	.global ENTRY
+ 234                 	ENTRY: 
+ 235 0172 00 00       	.word KBDTEST
+ 236                 	.global sys_latest
+ 237                 	sys_latest:
+ 238 0174 00 00       	.word link
+ 239                 	    
+ 240                 	    
+ 241                 	.end
 DEFINED SYMBOLS
                             *ABS*:00000000 ./gen_macros.inc
                             *ABS*:00000000 ./core.inc
@@ -5004,7 +5011,7 @@ DEFINED SYMBOLS
           ./core.inc:95     *ABS*:00000080 F_IMMED
           ./core.inc:96     *ABS*:00000020 F_HIDDEN
           ./core.inc:97     *ABS*:0000001f F_LENMASK
-              core.s:226    .sysdict:00000150 link
+              core.s:229    .sysdict:00000166 link
     ./gen_macros.inc:24     *ABS*:00000001 GEN_MACRO
               core.s:38     _pstack:00000000 pstack
               core.s:42     _rstack:00000000 rstack
@@ -5012,8 +5019,8 @@ DEFINED SYMBOLS
                             *ABS*:00000002 __ext_attr__rstack
               core.s:48     .int:00000000 __DefaultInterrupt
               core.s:54     .start:00000000 __reset
-              core.s:234    .sysdict:0000015e sys_latest
-              core.s:231    .sysdict:0000015c ENTRY
+              core.s:237    .sysdict:00000174 sys_latest
+              core.s:234    .sysdict:00000172 ENTRY
               core.s:81     .const:00000000 version
               core.s:86     .text:00000000 DOCOLON
               core.s:91     .sysdict:00000000 name_DOCODE
@@ -5071,27 +5078,29 @@ DEFINED SYMBOLS
               core.s:195    .text:000000d4 code_INC1
               core.s:199    .sysdict:000000a0 name_TEST
               core.s:199    .sysdict:000000a8 TEST
-              core.s:205    .sysdict:000000e4 HOME
-              core.s:211    .sysdict:00000108 OK
-              core.s:208    .sysdict:000000fa OKOFF
+              core.s:208    .sysdict:000000fa HOME
+              core.s:214    .sysdict:0000011e OK
+              core.s:211    .sysdict:00000110 OKOFF
               core.s:202    .sysdict:000000c4 name_SERTEST
               core.s:202    .sysdict:000000ce SERTEST
-              core.s:218    .sysdict:0000011e MSG
-              core.s:205    .sysdict:000000dc name_HOME
-              core.s:208    .sysdict:000000f2 name_OKOFF
-              core.s:211    .sysdict:00000102 name_OK
-              core.s:215    .const:0000000f quick
-              core.s:218    .sysdict:00000118 name_MSG
-              core.s:221    .sysdict:00000136 ZTYPE
-              core.s:221    .sysdict:0000012e name_ZTYPE
-              core.s:223    .sysdict:0000014a ZTYPEOUT
-              core.s:226    .sysdict:00000150 name_INFLOOP
-              core.s:226    .sysdict:0000015a INFLOOP
+              core.s:221    .sysdict:00000134 MSG
+              core.s:205    .sysdict:000000dc name_KBDTEST
+              core.s:205    .sysdict:000000e6 KBDTEST
+              core.s:208    .sysdict:000000f2 name_HOME
+              core.s:211    .sysdict:00000108 name_OKOFF
+              core.s:214    .sysdict:00000118 name_OK
+              core.s:218    .const:0000000f quick
+              core.s:221    .sysdict:0000012e name_MSG
+              core.s:224    .sysdict:0000014c ZTYPE
+              core.s:224    .sysdict:00000144 name_ZTYPE
+              core.s:226    .sysdict:00000160 ZTYPEOUT
+              core.s:229    .sysdict:00000166 name_INFLOOP
+              core.s:229    .sysdict:00000170 INFLOOP
               core.s:199    .text:000000dc code_INFLOOP
-              core.s:227    .text:000000dc L0
+              core.s:230    .text:000000dc L0
                       .debug_line:00000000 .L0
                       .debug_line:00000024 .L0
-              core.s:238    .debug_line:000000aa .L0
+              core.s:241    .debug_line:000000aa .L0
               core.s:87     .text:00000000 .L0
               core.s:88     .text:00000004 .L0
               core.s:87     .text:00000000 .L0
@@ -5229,10 +5238,10 @@ DEFINED SYMBOLS
               core.s:192    .text:000000ce .L0
               core.s:197    .text:000000d6 .L0
               core.s:196    .text:000000d4 .L0
-              core.s:227    .text:000000dc .L0
+              core.s:230    .text:000000dc .L0
               core.s:197    .text:000000d6 .L0
-              core.s:229    .text:000000de .L0
-              core.s:227    .text:000000dc .L0
+              core.s:232    .text:000000de .L0
+              core.s:230    .text:000000dc .L0
               core.s:56     .start:00000000 .L0
               core.s:57     .start:00000002 .L0
               core.s:56     .start:00000000 .L0
@@ -5274,7 +5283,7 @@ DEFINED SYMBOLS
               core.s:51     .int:00000002 .L0
               core.s:49     .int:00000000 .L0
                             .text:00000000 .L0
-              core.s:229    .text:000000de .L0
+              core.s:232    .text:000000de .L0
                            .start:00000000 .L0
               core.s:79     .start:0000002a .L0
                              .int:00000000 .L0
@@ -5289,9 +5298,10 @@ CLS
 MSEC
 SGET
 SEMIT
+KEY
+EMIT
 CURPOS
 BL
-EMIT
 
 EQUATE SYMBOLS
                 ./gen_macros.inc = 0x0

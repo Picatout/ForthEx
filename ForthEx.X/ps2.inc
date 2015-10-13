@@ -21,6 +21,7 @@
 ;DESCRIPTION: constante reliée au clavier PS/2
 ;DATE: 2015-09-28
 ;REF: http://www.computer-engineering.org/ps2keyboard/scancodes2.html 
+; utilise scancode set 2
     
 .ifndef PS2_INC
 .equ PS2_INC, 1

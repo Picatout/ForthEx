@@ -74,8 +74,9 @@ serial_init:
     bset SER_TX_IEC, #SER_TX_IE
     bclr SER_RX_IFS, #SER_RX_IF
     bset SER_RX_IEC, #SER_RX_IE
-    mov #XON, W0
-    mov.b WREG, SER_TXREG
+    ;mov #XON, W0
+    ;mov.b WREG, SER_TXREG
+    clr.b SER_TXREG
     bset SER_STA, #UTXEN
     return
  
@@ -104,8 +105,6 @@ DEFCODE "SEMIT",5,,SEMIT
     inc.b tx_tail
     mov #(QUEUE_SIZE-1), W0
     and.b tx_tail
-;    btsc SER_STA, #TRMT
-;    bset SER_TX_IFS, #SER_TX_IF
 3:    
     NEXT
     
