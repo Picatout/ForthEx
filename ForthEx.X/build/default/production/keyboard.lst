@@ -3371,49 +3371,51 @@
  112              	.equ STR_SPICON1, SPI1CON1    
  113              	.equ STR_SPICON2, SPI1CON2
  114              	.equ STR_SPISTAT, SPI1STAT
- 115              	.equ STR_SPIBUF,  SPI1BUF    
- 116              	
- 117              	; communication port série
- 118              	.equ  SER_PORT, PORTB
- 119              	.equ  SER_LAT,  LATB
- 120              	.equ  SER_TRIS, TRISB
- 121              	.equ  SER_TX_OUT, 13  ; pin RP13
- 122              	.equ  SER_RX_INP, 12  ; pin RP12  
- 123              	.equ  SER_MODE, U1MODE
- 124              	.equ  SER_STA,  U1STA
- 125              	.equ  SER_BRG,  U1BRG
- 126              	.equ  SER_TXREG, U1TXREGL
- 127              	.equ  SER_RXREG, U1RXREGL
- 128              	.equ  SER_RX_PPSbit, U1RXR0
- 129              	.equ  SER_RX_RPINR, RPINR18
- 130              	.equ  SER_TX_FN, 3
- 131              	.equ  SER_TX_RPOR,  RPOR6  
- 132              	.equ  SER_TX_PPSbit, RP13R0    
- 133              	.equ  SER_TX_IFS, IFS0
- 134              	.equ  SER_TX_IF,  U1TXIF
- 135              	.equ  SER_TX_IEC, IEC0
- 136              	.equ  SER_TX_IE,  U1TXIE
- 137              	.equ  SER_TX_IPC,  IPC3
- 138              	.equ  SER_TX_IPbit, U1TXIP0  
- 139              	.equ  SER_RX_IFS, IFS0
- 140              	.equ  SER_RX_IF,  U1RXIF
- 141              	.equ  SER_RX_IEC, IEC0
- 142              	.equ  SER_RX_IE,  U1RXIE
- 143              	.equ  SER_RX_IPC, IPC2
- 144              	.equ  SER_RX_IPbit, U1RXIP0
- 145              	    
- 146              	    
- 147              	.LIST
- 148              	 
- 149              	; section pour regrouper les routine ISR    
- 150              	.macro INT  
- 151              	.section .int code
- 152              	.align 2
- 153              	.endm
- 154              	
- 155              	
- 156              	.endif
+ 115              	.equ STR_SPIBUF,  SPI1BUF
+ 116              	.equ STR_SPIIFS,  IFS0
+ 117              	.equ STR_SPIIF,   SPI1IF    
+ 118              	
+ 119              	; communication port série
+ 120              	.equ  SER_PORT, PORTB
+ 121              	.equ  SER_LAT,  LATB
+ 122              	.equ  SER_TRIS, TRISB
+ 123              	.equ  SER_TX_OUT, 13  ; pin RP13
+ 124              	.equ  SER_RX_INP, 12  ; pin RP12  
+ 125              	.equ  SER_MODE, U1MODE
+ 126              	.equ  SER_STA,  U1STA
+ 127              	.equ  SER_BRG,  U1BRG
+ 128              	.equ  SER_TXREG, U1TXREGL
+ 129              	.equ  SER_RXREG, U1RXREGL
+ 130              	.equ  SER_RX_PPSbit, U1RXR0
+ 131              	.equ  SER_RX_RPINR, RPINR18
+ 132              	.equ  SER_TX_FN, 3
+ 133              	.equ  SER_TX_RPOR,  RPOR6  
+ 134              	.equ  SER_TX_PPSbit, RP13R0    
+ 135              	.equ  SER_TX_IFS, IFS0
+ 136              	.equ  SER_TX_IF,  U1TXIF
+ 137              	.equ  SER_TX_IEC, IEC0
+ 138              	.equ  SER_TX_IE,  U1TXIE
+ 139              	.equ  SER_TX_IPC,  IPC3
+ 140              	.equ  SER_TX_IPbit, U1TXIP0  
+ 141              	.equ  SER_RX_IFS, IFS0
+ 142              	.equ  SER_RX_IF,  U1RXIF
+ 143              	.equ  SER_RX_IEC, IEC0
+ 144              	.equ  SER_RX_IE,  U1RXIE
+ 145              	.equ  SER_RX_IPC, IPC2
+ 146              	.equ  SER_RX_IPbit, U1RXIP0
+ 147              	    
+ 148              	    
+ 149              	.LIST
+ 150              	 
+ 151              	; section pour regrouper les routine ISR    
+ 152              	.macro INT  
+ 153              	.section .int code
+ 154              	.align 2
+ 155              	.endm
+ 156              	
  157              	
+ 158              	.endif
+ 159              	
   27              	.include "video.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -5183,17 +5185,18 @@ DEFINED SYMBOLS
       ./hardware.inc:104    *ABS*:00000007 STR_SDO_FN
       ./hardware.inc:106    *ABS*:00000008 STR_SDO_RPORbit
       ./hardware.inc:108    *ABS*:00000000 STR_CLK_RPORbit
-      ./hardware.inc:121    *ABS*:0000000d SER_TX_OUT
-      ./hardware.inc:122    *ABS*:0000000c SER_RX_INP
-      ./hardware.inc:128    *ABS*:00000000 SER_RX_PPSbit
-      ./hardware.inc:130    *ABS*:00000003 SER_TX_FN
-      ./hardware.inc:132    *ABS*:00000008 SER_TX_PPSbit
-      ./hardware.inc:134    *ABS*:0000000c SER_TX_IF
-      ./hardware.inc:136    *ABS*:0000000c SER_TX_IE
-      ./hardware.inc:138    *ABS*:00000000 SER_TX_IPbit
-      ./hardware.inc:140    *ABS*:0000000b SER_RX_IF
-      ./hardware.inc:142    *ABS*:0000000b SER_RX_IE
-      ./hardware.inc:144    *ABS*:0000000c SER_RX_IPbit
+      ./hardware.inc:117    *ABS*:0000000a STR_SPIIF
+      ./hardware.inc:123    *ABS*:0000000d SER_TX_OUT
+      ./hardware.inc:124    *ABS*:0000000c SER_RX_INP
+      ./hardware.inc:130    *ABS*:00000000 SER_RX_PPSbit
+      ./hardware.inc:132    *ABS*:00000003 SER_TX_FN
+      ./hardware.inc:134    *ABS*:00000008 SER_TX_PPSbit
+      ./hardware.inc:136    *ABS*:0000000c SER_TX_IF
+      ./hardware.inc:138    *ABS*:0000000c SER_TX_IE
+      ./hardware.inc:140    *ABS*:00000000 SER_TX_IPbit
+      ./hardware.inc:142    *ABS*:0000000b SER_RX_IF
+      ./hardware.inc:144    *ABS*:0000000b SER_RX_IE
+      ./hardware.inc:146    *ABS*:0000000c SER_RX_IPbit
          ./video.inc:22     *ABS*:00000001 VIDEO_INC
          ./video.inc:24     *ABS*:00000008 CHAR_WIDTH
          ./video.inc:25     *ABS*:00000008 CHAR_HEIGHT
@@ -7234,6 +7237,8 @@ EQUATE SYMBOLS
                      STR_SPICON2 = SPI1CON2
                      STR_SPISTAT = SPI1STAT
                       STR_SPIBUF = SPI1BUF
+                      STR_SPIIFS = IFS0
+                       STR_SPIIF = 0xa
                         SER_PORT = PORTB
                          SER_LAT = LATB
                         SER_TRIS = TRISB

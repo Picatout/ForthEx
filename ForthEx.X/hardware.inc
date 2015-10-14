@@ -112,7 +112,9 @@
 .equ STR_SPICON1, SPI1CON1    
 .equ STR_SPICON2, SPI1CON2
 .equ STR_SPISTAT, SPI1STAT
-.equ STR_SPIBUF,  SPI1BUF    
+.equ STR_SPIBUF,  SPI1BUF
+.equ STR_SPIIFS,  IFS0
+.equ STR_SPIIF,   SPI1IF    
 
 ; communication port série
 .equ  SER_PORT, PORTB

@@ -22,7 +22,15 @@
 ;Date: 2015-10-06
     
 .include "hardware.inc"
+.include "core.inc"
     
+ ; commandes SPIRAM   
+.equ WRMR, 1
+.equ RDMR, 5
+.equ RREAD, 3
+.equ RWRITE, 2
+ ; mode séquenciel SPIRAM
+.equ RMSEQ, 1    
     
  .text
  
@@ -57,11 +65,106 @@ store_init:
     ; configuration SPI
     mov #(3+(6<<SPRE0)+1<<MSTEN), W0 ; clock 8Mhz
     mov W0, STR_SPICON1
+    bset STR_SPICON2, #SPIBEN ; enhanced mode
     bset STR_SPISTAT, #SPIEN
+    ; met la SPIRAM en mode séquenctiel.
+    bclr STR_LAT, #SRAM_SEL
+    mov #WRMR, W0
+    mov.b WREG, STR_SPIBUF
+    mov #RMSEQ, W0
+    mov.b WREG, STR_SPIBUF
+1:
+    btss STR_SPISTAT, #SRMPT
+    bra 1b
+    bset STR_LAT, #SRAM_SEL
     return
 
- 
- 
+;;;;;;;;;;;;;;;;;;;;
+; envoie d'une adresse via STR_SPI
+; adresse sur dstack
+; adresse de 24 bits
+;;;;;;;;;;;;;;;;;;;;    
+spi_send_address:
+    mov T, W0
+    DPOP
+    mov.b WREG, STR_SPIBUF
+    mov T, W0
+    DPOP
+    swap W0
+    mov.b WREG, STR_SPIBUF
+    swap W0
+    mov.b WREG, STR_SPIBUF
+    return
+    
+;;;;;;;;;;;;;;;
+;  Forth words
+;;;;;;;;;;;;;;;
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; transfert un bloc d'octets de la RAM du MCU vers la RAM SPI
+; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
+; sortie aucune
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCODE "RSTORE",6,,RSTORE ; ( c-addr c-addr.D n -- )
+    bclr STR_LAT, #SRAM_SEL
+    mov #RWRITE,W0
+    mov.b WREG, STR_SPIBUF
+    mov T, W1 ; nombre d'octets
+    DPOP
+    call spi_send_address
+    mov T, W2 ; adresse bloc RAM
+    DPOP
+    mov #STR_SPIBUF, W3
+0:
+    cp0 W1
+    bra z, 1f
+    btsc STR_SPISTAT, #SPITBF
+    bra 0b
+    mov.b [W2++], [W3]
+    dec W1,W1
+    bra 0b
+1:  btss STR_SPISTAT, #SRMPT
+    bra 1b    
+    bset STR_LAT, #SRAM_SEL
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; transfert un bloc d'octets de la RAM SPI vers la RAM du MCU
+; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
+; sortie: aucune
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCODE "RLOAD",6,,RLOAD ; ( c-addr c-addr.D n -- )
+    bclr STR_LAT, #SRAM_SEL
+    mov #RREAD, W0
+    mov.b WREG, STR_SPIBUF
+    mov T, W1 ; nombre d'octets à transférer
+    DPOP
+    call spi_send_address
+    mov T, W2 ; adresse bloc RAM
+    DPOP
+    mov #STR_SPIBUF, W3
+9:    
+    btsc STR_SPISTAT, #SRXMPT
+    bra 0f
+    mov.b [W3],W0
+    bra 9b
+0:  cp0 W1
+    bra z, 3f
+1:  clr.b STR_SPIBUF
+    dec W1,W1
+    btsc STR_SPISTAT, #SPITBF
+    bra .-2
+    btsc STR_SPISTAT, #SPIRBF
+    mov.b [W3], [W2++]
+    bra 0b
+3:  btsc STR_SPISTAT, #SRXMPT
+    bra 4f
+    mov.b [W3],[W2++]
+    bra 3b
+4:
+    bset STR_LAT, #SRAM_SEL
+    NEXT
+  
  .end
     
     
