@@ -52,11 +52,10 @@ hardware_init:
     setm AD1PCFG    ; désactivation entrées analogiques
     call tvout_init
     call ps2_init
-    call store_init
     call serial_init
+    call store_init
     ; verouillage configuration I/O
     bset OSCCON, #IOLOCK
-    
     return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;

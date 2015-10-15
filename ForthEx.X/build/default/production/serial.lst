@@ -3360,7 +3360,7 @@
  103              	.equ STR_CLK_FN, 8
  104              	.equ STR_SDO_FN, 7
  105              	.equ STR_SDO_RPOR, RPOR3
- 106              	.equ STR_SDO_RPORbit, RP7R0    
+ 106              	.equ STR_SDO_RPORbit, RP6R0    
  107              	.equ STR_CLK_RPOR, RPOR4
  108              	.equ STR_CLK_RPORbit, RP8R0    
  109              	.equ STR_PORT, PORTB
@@ -3377,8 +3377,8 @@
  120              	.equ  SER_PORT, PORTB
  121              	.equ  SER_LAT,  LATB
  122              	.equ  SER_TRIS, TRISB
- 123              	.equ  SER_TX_OUT, 13  ; pin RP13
- 124              	.equ  SER_RX_INP, 12  ; pin RP12  
+ 123              	.equ  SER_TX_OUT, RB13  ; pin RP13
+ 124              	.equ  SER_RX_INP, RB12  ; pin RP12  
  125              	.equ  SER_MODE, U1MODE
  126              	.equ  SER_STA,  U1STA
  127              	.equ  SER_BRG,  U1BRG
@@ -3411,9 +3411,16 @@
  154              	.align 2
  155              	.endm
  156              	
- 157              	
- 158              	.endif
- 159              	
+ 157              	; aide au débogage
+ 158              	; affiche un caractère à l'écran 
+ 159              	.macro progress c
+ 160              	   mov #\c, W0
+ 161              	   mov.b WREG, _video_buffer
+ 162              	.endm
+ 163              	 
+ 164              	
+ 165              	.endif
+ 166              	
   25              	.include "core.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -4825,7 +4832,7 @@ DEFINED SYMBOLS
       ./hardware.inc:102    *ABS*:00000000 STR_SDI_PPSbit
       ./hardware.inc:103    *ABS*:00000008 STR_CLK_FN
       ./hardware.inc:104    *ABS*:00000007 STR_SDO_FN
-      ./hardware.inc:106    *ABS*:00000008 STR_SDO_RPORbit
+      ./hardware.inc:106    *ABS*:00000000 STR_SDO_RPORbit
       ./hardware.inc:108    *ABS*:00000000 STR_CLK_RPORbit
       ./hardware.inc:117    *ABS*:0000000a STR_SPIIF
       ./hardware.inc:123    *ABS*:0000000d SER_TX_OUT
@@ -6617,7 +6624,7 @@ EQUATE SYMBOLS
                       STR_CLK_FN = 0x8
                       STR_SDO_FN = 0x7
                     STR_SDO_RPOR = RPOR3
-                 STR_SDO_RPORbit = 0x8
+                 STR_SDO_RPORbit = 0x0
                     STR_CLK_RPOR = RPOR4
                  STR_CLK_RPORbit = 0x0
                         STR_PORT = PORTB

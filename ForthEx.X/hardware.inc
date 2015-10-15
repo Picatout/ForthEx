@@ -103,7 +103,7 @@
 .equ STR_CLK_FN, 8
 .equ STR_SDO_FN, 7
 .equ STR_SDO_RPOR, RPOR3
-.equ STR_SDO_RPORbit, RP7R0    
+.equ STR_SDO_RPORbit, RP6R0    
 .equ STR_CLK_RPOR, RPOR4
 .equ STR_CLK_RPORbit, RP8R0    
 .equ STR_PORT, PORTB
@@ -120,8 +120,8 @@
 .equ  SER_PORT, PORTB
 .equ  SER_LAT,  LATB
 .equ  SER_TRIS, TRISB
-.equ  SER_TX_OUT, 13  ; pin RP13
-.equ  SER_RX_INP, 12  ; pin RP12  
+.equ  SER_TX_OUT, RB13  ; pin RP13
+.equ  SER_RX_INP, RB12  ; pin RP12  
 .equ  SER_MODE, U1MODE
 .equ  SER_STA,  U1STA
 .equ  SER_BRG,  U1BRG
@@ -154,6 +154,13 @@
 .align 2
 .endm
 
+; aide au débogage
+; affiche un caractère à l'écran 
+.macro progress c
+   mov #\c, W0
+   mov.b WREG, _video_buffer
+.endm
+ 
 
 .endif
 

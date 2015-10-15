@@ -29,11 +29,41 @@
 .equ RDMR, 5
 .equ RREAD, 3
 .equ RWRITE, 2
- ; mode séquenciel SPIRAM
-.equ RMSEQ, 1    
-    
+ ; modes SPIRAM
+.equ RMBYTE, 0
+.equ RMPAGE, (2<<6) 
+.equ RMSEQ, (1<<6)    
+ 
+; commandes EEPROM
+.equ EWRITE, 2 
+.equ EREAD,  3
+.equ EWREN,  6
+.equ EWRDI,  4
+.equ ERDSR,  5
+.equ EWRSR,  1
+.equ EPE,    0x42
+.equ ESE,    0xD8
+.equ ECE,    0xC7
+.equ RDID,   0xAB
+.equ EDPD,   0xB9 
+
+.equ EPAGE_SIZE, 256
+ 
  .text
  
+ .macro spi_write
+    mov.b WREG, STR_SPIBUF
+    btss STR_SPISTAT, #SPIRBF
+    bra .-2
+    mov STR_SPIBUF, WREG
+.endm
+
+.macro spi_read
+    setm.b STR_SPIBUF
+    btss STR_SPISTAT, #SPIRBF
+    bra .-2
+.endm
+   
  ;;;;;;;;;;;;;;;;;;;;;;;
 ; initialisation SPI
 ; interface SPIRAM et
@@ -62,23 +92,23 @@ store_init:
     and STR_SDO_RPOR
     mov #(STR_SDO_FN<<STR_SDO_RPORbit),W0
     ior STR_SDO_RPOR
+    bclr STR_SPISTAT, #SPIEN
     ; configuration SPI
-    mov #(3+(6<<SPRE0)+1<<MSTEN), W0 ; clock 8Mhz
+    mov #(1<<MSTEN)|(6<<SPRE0)|(3<<PPRE0)|(1<<CKE), W0 ; clock 8Mhz
     mov W0, STR_SPICON1
-    bset STR_SPICON2, #SPIBEN ; enhanced mode
+;    bset STR_SPICON2, #SPIBEN ; enhanced mode
     bset STR_SPISTAT, #SPIEN
     ; met la SPIRAM en mode séquenctiel.
-    bclr STR_LAT, #SRAM_SEL
-    mov #WRMR, W0
-    mov.b WREG, STR_SPIBUF
-    mov #RMSEQ, W0
-    mov.b WREG, STR_SPIBUF
-1:
-    btss STR_SPISTAT, #SRMPT
-    bra 1b
+;    bclr STR_LAT, #SRAM_SEL
+;    mov #WRMR, W0
+;    spi_write
+;    mov #RMSEQ, W0
+;    spi_write
     bset STR_LAT, #SRAM_SEL
     return
 
+
+    
 ;;;;;;;;;;;;;;;;;;;;
 ; envoie d'une adresse via STR_SPI
 ; adresse sur dstack
@@ -87,13 +117,13 @@ store_init:
 spi_send_address:
     mov T, W0
     DPOP
-    mov.b WREG, STR_SPIBUF
+    spi_write
     mov T, W0
+    swap W0
+    spi_write
+    mov T,W0
+    spi_write
     DPOP
-    swap W0
-    mov.b WREG, STR_SPIBUF
-    swap W0
-    mov.b WREG, STR_SPIBUF
     return
     
 ;;;;;;;;;;;;;;;
@@ -108,26 +138,24 @@ spi_send_address:
 DEFCODE "RSTORE",6,,RSTORE ; ( c-addr c-addr.D n -- )
     bclr STR_LAT, #SRAM_SEL
     mov #RWRITE,W0
-    mov.b WREG, STR_SPIBUF
+    spi_write
     mov T, W1 ; nombre d'octets
     DPOP
     call spi_send_address
     mov T, W2 ; adresse bloc RAM
     DPOP
-    mov #STR_SPIBUF, W3
 0:
     cp0 W1
     bra z, 1f
-    btsc STR_SPISTAT, #SPITBF
-    bra 0b
-    mov.b [W2++], [W3]
+    mov.b [W2++], W0
+    spi_write
     dec W1,W1
     bra 0b
-1:  btss STR_SPISTAT, #SRMPT
-    bra 1b    
+1:    
     bset STR_LAT, #SRAM_SEL
     NEXT
-    
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; transfert un bloc d'octets de la RAM SPI vers la RAM du MCU
 ; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
@@ -136,35 +164,40 @@ DEFCODE "RSTORE",6,,RSTORE ; ( c-addr c-addr.D n -- )
 DEFCODE "RLOAD",6,,RLOAD ; ( c-addr c-addr.D n -- )
     bclr STR_LAT, #SRAM_SEL
     mov #RREAD, W0
-    mov.b WREG, STR_SPIBUF
+    spi_write
     mov T, W1 ; nombre d'octets à transférer
     DPOP
     call spi_send_address
     mov T, W2 ; adresse bloc RAM
     DPOP
     mov #STR_SPIBUF, W3
-9:    
-    btsc STR_SPISTAT, #SRXMPT
-    bra 0f
-    mov.b [W3],W0
-    bra 9b
-0:  cp0 W1
+0:    
+    cp0 W1
     bra z, 3f
-1:  clr.b STR_SPIBUF
-    dec W1,W1
-    btsc STR_SPISTAT, #SPITBF
-    bra .-2
-    btsc STR_SPISTAT, #SPIRBF
+    spi_read
     mov.b [W3], [W2++]
+    dec W1,W1
     bra 0b
-3:  btsc STR_SPISTAT, #SRXMPT
-    bra 4f
-    mov.b [W3],[W2++]
-    bra 3b
-4:
+3:
     bset STR_LAT, #SRAM_SEL
     NEXT
   
+    
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; enregistrement bloc RAM dans EEPROM
+; entrée: bloc-adress, ee-address, count    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "ESTORE",6,,ESTORE  ;( c-addr c-addr. n -- )
+    
+    NEXT
+    
+
+DEFCODE "ELOAD",5,,ELOAD   ; ( c-addr c-addr. n -- )
+    
+    NEXT
+    
+    
  .end
     
     

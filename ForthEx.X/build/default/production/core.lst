@@ -3363,7 +3363,7 @@
  103              	.equ STR_CLK_FN, 8
  104              	.equ STR_SDO_FN, 7
  105              	.equ STR_SDO_RPOR, RPOR3
- 106              	.equ STR_SDO_RPORbit, RP7R0    
+ 106              	.equ STR_SDO_RPORbit, RP6R0    
  107              	.equ STR_CLK_RPOR, RPOR4
  108              	.equ STR_CLK_RPORbit, RP8R0    
  109              	.equ STR_PORT, PORTB
@@ -3380,8 +3380,8 @@
  120              	.equ  SER_PORT, PORTB
  121              	.equ  SER_LAT,  LATB
  122              	.equ  SER_TRIS, TRISB
- 123              	.equ  SER_TX_OUT, 13  ; pin RP13
- 124              	.equ  SER_RX_INP, 12  ; pin RP12  
+ 123              	.equ  SER_TX_OUT, RB13  ; pin RP13
+ 124              	.equ  SER_RX_INP, RB12  ; pin RP12  
  125              	.equ  SER_MODE, U1MODE
  126              	.equ  SER_STA,  U1STA
  127              	.equ  SER_BRG,  U1BRG
@@ -3414,9 +3414,16 @@
  154              	.align 2
  155              	.endm
  156              	
- 157              	
- 158              	.endif
- 159              	
+ 157              	; aide au débogage
+ 158              	; affiche un caractère à l'écran 
+ 159              	.macro progress c
+ 160              	   mov #\c, W0
+ 161              	   mov.b WREG, _video_buffer
+ 162              	.endm
+ 163              	 
+ 164              	
+ 165              	.endif
+ 166              	
   28              	.include "core.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -3924,37 +3931,42 @@
  229 0166 00 00 07 53 	DEFWORD "STRTEST",7,,STRTEST
  229      54 52 54 45 
  229      53 54 00 00 
- 230 0172 00 00 00 00 	.word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,41,RSTORE,LIT,1000,MSEC
+ 230 0172 00 00 00 00 	.word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
  230      00 00 00 00 
  230      00 00 00 00 
  230      00 00 00 00 
  230      00 00 00 00 
- 230      00 00 29 00 
+ 230      00 00 2B 00 
  230      00 00 00 00 
- 230      E8 03 00 00 
- 231 0192 00 00 00 00 	.word CLS,LIT, _video_buffer,LIT,0,LIT,0,LIT,41,RLOAD,INFLOOP
+ 231 018e 00 00 00 00 	.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,40,RLOAD,DELAY,DOBRA, STRTEST+2
  231      00 00 00 00 
  231      00 00 00 00 
  231      00 00 00 00 
- 231      29 00 00 00 
- 231      00 00 
+ 231      00 00 28 00 
+ 231      00 00 00 00 
+ 231      00 00 02 00 
  232                 	    
- 233                 	    
- 234 01a8 00 00 07 49 	DEFCODE "INFLOOP",7,,INFLOOP
- 234      4E 46 4C 4F 
- 234      4F 50 00 00 
- 235 0000dc  00 00 37 	    bra .
- 236              	    
- 237              	SYSDICT
- 238                 	.global ENTRY
- 239                 	ENTRY: 
- 240 01b4 00 00       	.word STRTEST
- 241                 	.global sys_latest
- 242                 	sys_latest:
- 243 01b6 00 00       	.word link
- 244                 	    
- 245                 	    
- 246                 	.end
+ 233 01aa 00 00 05 44 	DEFWORD "DELAY",5,,DELAY
+ 233      45 4C 41 59 
+ 233      00 00 
+ 234 01b4 00 00 E8 03 	.word  LIT, 1000, MSEC, EXIT
+ 234      00 00 00 00 
+ 235                 	    
+ 236 01bc 00 00 07 49 	DEFCODE "INFLOOP",7,,INFLOOP
+ 236      4E 46 4C 4F 
+ 236      4F 50 00 00 
+ 237 0000dc  00 00 37 	    bra .
+ 238              	    
+ 239              	SYSDICT
+ 240                 	.global ENTRY
+ 241                 	ENTRY: 
+ 242 01c8 00 00       	.word STRTEST
+ 243                 	.global sys_latest
+ 244                 	sys_latest:
+ 245 01ca 00 00       	.word link
+ 246                 	    
+ 247                 	    
+ 248                 	.end
 DEFINED SYMBOLS
                             *ABS*:00000000 ./gen_macros.inc
                             *ABS*:00000000 ./core.inc
@@ -5006,7 +5018,7 @@ DEFINED SYMBOLS
       ./hardware.inc:102    *ABS*:00000000 STR_SDI_PPSbit
       ./hardware.inc:103    *ABS*:00000008 STR_CLK_FN
       ./hardware.inc:104    *ABS*:00000007 STR_SDO_FN
-      ./hardware.inc:106    *ABS*:00000008 STR_SDO_RPORbit
+      ./hardware.inc:106    *ABS*:00000000 STR_SDO_RPORbit
       ./hardware.inc:108    *ABS*:00000000 STR_CLK_RPORbit
       ./hardware.inc:117    *ABS*:0000000a STR_SPIIF
       ./hardware.inc:123    *ABS*:0000000d SER_TX_OUT
@@ -5033,7 +5045,7 @@ DEFINED SYMBOLS
           ./core.inc:95     *ABS*:00000080 F_IMMED
           ./core.inc:96     *ABS*:00000020 F_HIDDEN
           ./core.inc:97     *ABS*:0000001f F_LENMASK
-              core.s:234    .sysdict:000001a8 link
+              core.s:236    .sysdict:000001bc link
     ./gen_macros.inc:24     *ABS*:00000001 GEN_MACRO
               core.s:38     _pstack:00000000 pstack
               core.s:42     _rstack:00000000 rstack
@@ -5041,8 +5053,8 @@ DEFINED SYMBOLS
                             *ABS*:00000002 __ext_attr__rstack
               core.s:48     .int:00000000 __DefaultInterrupt
               core.s:54     .start:00000000 __reset
-              core.s:242    .sysdict:000001b6 sys_latest
-              core.s:239    .sysdict:000001b4 ENTRY
+              core.s:244    .sysdict:000001ca sys_latest
+              core.s:241    .sysdict:000001c8 ENTRY
               core.s:81     .const:00000000 version
               core.s:86     .text:00000000 DOCOLON
               core.s:91     .sysdict:00000000 name_DOCODE
@@ -5118,13 +5130,15 @@ DEFINED SYMBOLS
               core.s:226    .sysdict:00000160 ZTYPEOUT
               core.s:229    .sysdict:00000166 name_STRTEST
               core.s:229    .sysdict:00000170 STRTEST
-              core.s:234    .sysdict:000001b2 INFLOOP
-              core.s:234    .sysdict:000001a8 name_INFLOOP
+              core.s:233    .sysdict:000001b2 DELAY
+              core.s:233    .sysdict:000001aa name_DELAY
+              core.s:236    .sysdict:000001bc name_INFLOOP
+              core.s:236    .sysdict:000001c6 INFLOOP
               core.s:199    .text:000000dc code_INFLOOP
-              core.s:235    .text:000000dc L0
+              core.s:237    .text:000000dc L0
                       .debug_line:00000000 .L0
                       .debug_line:00000024 .L0
-              core.s:246    .debug_line:000000aa .L0
+              core.s:248    .debug_line:000000aa .L0
               core.s:87     .text:00000000 .L0
               core.s:88     .text:00000004 .L0
               core.s:87     .text:00000000 .L0
@@ -5262,10 +5276,10 @@ DEFINED SYMBOLS
               core.s:192    .text:000000ce .L0
               core.s:197    .text:000000d6 .L0
               core.s:196    .text:000000d4 .L0
-              core.s:235    .text:000000dc .L0
+              core.s:237    .text:000000dc .L0
               core.s:197    .text:000000d6 .L0
-              core.s:237    .text:000000de .L0
-              core.s:235    .text:000000dc .L0
+              core.s:239    .text:000000de .L0
+              core.s:237    .text:000000dc .L0
               core.s:56     .start:00000000 .L0
               core.s:57     .start:00000002 .L0
               core.s:56     .start:00000000 .L0
@@ -5307,7 +5321,7 @@ DEFINED SYMBOLS
               core.s:51     .int:00000002 .L0
               core.s:49     .int:00000000 .L0
                             .text:00000000 .L0
-              core.s:237    .text:000000de .L0
+              core.s:239    .text:000000de .L0
                            .start:00000000 .L0
               core.s:79     .start:0000002a .L0
                              .int:00000000 .L0
@@ -6843,7 +6857,7 @@ EQUATE SYMBOLS
                       STR_CLK_FN = 0x8
                       STR_SDO_FN = 0x7
                     STR_SDO_RPOR = RPOR3
-                 STR_SDO_RPORbit = 0x8
+                 STR_SDO_RPORbit = 0x0
                     STR_CLK_RPOR = RPOR4
                  STR_CLK_RPORbit = 0x0
                         STR_PORT = PORTB

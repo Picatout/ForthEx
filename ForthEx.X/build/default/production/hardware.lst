@@ -3357,7 +3357,7 @@
  103              	.equ STR_CLK_FN, 8
  104              	.equ STR_SDO_FN, 7
  105              	.equ STR_SDO_RPOR, RPOR3
- 106              	.equ STR_SDO_RPORbit, RP7R0    
+ 106              	.equ STR_SDO_RPORbit, RP6R0    
  107              	.equ STR_CLK_RPOR, RPOR4
  108              	.equ STR_CLK_RPORbit, RP8R0    
  109              	.equ STR_PORT, PORTB
@@ -3374,8 +3374,8 @@
  120              	.equ  SER_PORT, PORTB
  121              	.equ  SER_LAT,  LATB
  122              	.equ  SER_TRIS, TRISB
- 123              	.equ  SER_TX_OUT, 13  ; pin RP13
- 124              	.equ  SER_RX_INP, 12  ; pin RP12  
+ 123              	.equ  SER_TX_OUT, RB13  ; pin RP13
+ 124              	.equ  SER_RX_INP, RB12  ; pin RP12  
  125              	.equ  SER_MODE, U1MODE
  126              	.equ  SER_STA,  U1STA
  127              	.equ  SER_BRG,  U1BRG
@@ -3408,9 +3408,16 @@
  154              	.align 2
  155              	.endm
  156              	
- 157              	
- 158              	.endif
- 159              	
+ 157              	; aide au débogage
+ 158              	; affiche un caractère à l'écran 
+ 159              	.macro progress c
+ 160              	   mov #\c, W0
+ 161              	   mov.b WREG, _video_buffer
+ 162              	.endm
+ 163              	 
+ 164              	
+ 165              	.endif
+ 166              	
   22              	.if VIDEO_STD==NTSC
   23              	.include "ntsc_const.inc"    
    1              	;****************************************************************************
@@ -3643,80 +3650,79 @@
   53         00 00 00 
   54 00001e  00 00 02 	    call ps2_init
   54         00 00 00 
-  55 000022  00 00 02 	    call store_init
+  55 000022  00 00 02 	    call serial_init
   55         00 00 00 
-  56 000026  00 00 02 	    call serial_init
+  56 000026  00 00 02 	    call store_init
   56         00 00 00 
   57              	    ; verouillage configuration I/O
   58 00002a  00 C0 A8 	    bset OSCCON, #IOLOCK
-  59              	    
-  60 00002c  00 00 06 	    return
-  61              	
-  62              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  63              	;  délais en millisecondes
-  64              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-  65              	DEFCODE "MSEC",4,,MSEC  ; ( n -- )
-  66 00002e  00 00 80 	    mov systicks, W0
-  67 000030  0C 00 40 	    add W0,T,W0
-  68              	0:    
-  69 000032  00 00 E3 	    cp systicks
-  70 000034  00 00 3A 	    bra neq, 0b
-  71 000036  2E 06 78 	    DPOP
-  72 000038  B8 05 78 	    NEXT
-  72         3B 00 78 
-  72         00 40 01 
-  73              	
-  74              	;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  75              	; générateur pseudo hazard
-  76              	; génère un nombre de 16 bits
-  77              	;  si seed impaire incrémente
-  78              	;  ensuite Sn=(Sn-1)*3/2
-  79              	;  on ne garde que le bit
-  80              	;  le moins significatif
-  81              	;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  82              	DEFCODE "RAND",4,,RAND
-  83 00003e  00 01 EB 	    clr W2
-  84 000040  F3 00 20 	    mov #15,W3
-  85              	0:
-  86 000042  02 00 AE 	    btss seed,#0
-  87 000044  00 00 37 	    bra 1f
-  88 000046  02 20 EC 	    inc seed
-  89 000048  00 00 39 	    bra nc, 1f
-  90 00004a  04 20 EC 	    inc seed+2
-  91              	 1:
-  92 00004c  02 00 D4 	    sl seed,WREG
-  93 00004e  80 00 78 	    mov W0,W1
-  94 000050  04 80 D6 	    rlc seed+2, WREG
-  95 000052  80 00 FD 	    exch W0,W1
-  96 000054  02 20 B4 	    add seed
-  97 000056  01 00 78 	    mov W1,W0
-  98 000058  04 A0 B4 	    addc seed+2
-  99 00005a  04 20 D5 	    lsr seed+2,
- 100 00005c  02 A0 D7 	    rrc seed
- 101 00005e  02 00 D5 	    lsr seed, WREG
- 102 000060  83 81 D3 	    rrc W3,W3
- 103 000062  04 02 E9 	    dec W4,W4
- 104 000064  00 00 31 	    bra c, 1b
- 105 000066  0C 2F 78 	    DPUSH
- 106 000068  03 06 78 	    mov W3,T
- 107 00006a  B8 05 78 	    NEXT
- 107         3B 00 78 
- 107         00 40 01 
- 108              	
- 109              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
- 110              	;initialisation variable seed
- 111              	; utilisation de l'ADC
- 112              	; on ne garde que le bit 
- 113              	; le plus faible de chaque
- 114              	; lecture.
- 115              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
- 116              	DEFCODE "SRAND",5,,SRAND
- 117              	    ; initialisation du convertisseur
- 118              	    
- 119 000070  B8 05 78 	    NEXT
- 119         3B 00 78 
- 119         00 40 01 
- 120              	.end
+  59 00002c  00 00 06 	    return
+  60              	
+  61              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  62              	;  délais en millisecondes
+  63              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+  64              	DEFCODE "MSEC",4,,MSEC  ; ( n -- )
+  65 00002e  00 00 80 	    mov systicks, W0
+  66 000030  0C 00 40 	    add W0,T,W0
+  67              	0:    
+  68 000032  00 00 E3 	    cp systicks
+  69 000034  00 00 3A 	    bra neq, 0b
+  70 000036  2E 06 78 	    DPOP
+  71 000038  B8 05 78 	    NEXT
+  71         3B 00 78 
+  71         00 40 01 
+  72              	
+  73              	;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  74              	; générateur pseudo hazard
+  75              	; génère un nombre de 16 bits
+  76              	;  si seed impaire incrémente
+  77              	;  ensuite Sn=(Sn-1)*3/2
+  78              	;  on ne garde que le bit
+  79              	;  le moins significatif
+  80              	;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  81              	DEFCODE "RAND",4,,RAND
+  82 00003e  00 01 EB 	    clr W2
+  83 000040  F3 00 20 	    mov #15,W3
+  84              	0:
+  85 000042  02 00 AE 	    btss seed,#0
+  86 000044  00 00 37 	    bra 1f
+  87 000046  02 20 EC 	    inc seed
+  88 000048  00 00 39 	    bra nc, 1f
+  89 00004a  04 20 EC 	    inc seed+2
+  90              	 1:
+  91 00004c  02 00 D4 	    sl seed,WREG
+  92 00004e  80 00 78 	    mov W0,W1
+  93 000050  04 80 D6 	    rlc seed+2, WREG
+  94 000052  80 00 FD 	    exch W0,W1
+  95 000054  02 20 B4 	    add seed
+  96 000056  01 00 78 	    mov W1,W0
+  97 000058  04 A0 B4 	    addc seed+2
+  98 00005a  04 20 D5 	    lsr seed+2,
+  99 00005c  02 A0 D7 	    rrc seed
+ 100 00005e  02 00 D5 	    lsr seed, WREG
+ 101 000060  83 81 D3 	    rrc W3,W3
+ 102 000062  04 02 E9 	    dec W4,W4
+ 103 000064  00 00 31 	    bra c, 1b
+ 104 000066  0C 2F 78 	    DPUSH
+ 105 000068  03 06 78 	    mov W3,T
+ 106 00006a  B8 05 78 	    NEXT
+ 106         3B 00 78 
+ 106         00 40 01 
+ 107              	
+ 108              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+ 109              	;initialisation variable seed
+ 110              	; utilisation de l'ADC
+ 111              	; on ne garde que le bit 
+ 112              	; le plus faible de chaque
+ 113              	; lecture.
+ 114              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+ 115              	DEFCODE "SRAND",5,,SRAND
+ 116              	    ; initialisation du convertisseur
+ 117              	    
+ 118 000070  B8 05 78 	    NEXT
+ 118         3B 00 78 
+ 118         00 40 01 
+ 119              	.end
 DEFINED SYMBOLS
                             *ABS*:00000000 ./core.inc
                             *ABS*:00000000 ./ntsc_const.inc
@@ -4768,7 +4774,7 @@ DEFINED SYMBOLS
       ./hardware.inc:102    *ABS*:00000000 STR_SDI_PPSbit
       ./hardware.inc:103    *ABS*:00000008 STR_CLK_FN
       ./hardware.inc:104    *ABS*:00000007 STR_SDO_FN
-      ./hardware.inc:106    *ABS*:00000008 STR_SDO_RPORbit
+      ./hardware.inc:106    *ABS*:00000000 STR_SDO_RPORbit
       ./hardware.inc:108    *ABS*:00000000 STR_CLK_RPORbit
       ./hardware.inc:117    *ABS*:0000000a STR_SPIIF
       ./hardware.inc:123    *ABS*:0000000d SER_TX_OUT
@@ -4805,25 +4811,25 @@ DEFINED SYMBOLS
           ./core.inc:95     *ABS*:00000080 F_IMMED
           ./core.inc:96     *ABS*:00000020 F_HIDDEN
           ./core.inc:97     *ABS*:0000001f F_LENMASK
-          hardware.s:116    .sysdict:00000014 link
+          hardware.s:115    .sysdict:00000014 link
           hardware.s:32     .data:00000000 systicks
           hardware.s:34     .data:00000002 seed
           hardware.s:39     .text:00000000 hardware_init
-          hardware.s:65     .sysdict:00000000 name_MSEC
-          hardware.s:65     .sysdict:00000008 MSEC
-          hardware.s:65     .text:0000002e code_MSEC
-          hardware.s:68     .text:00000032 L1
-          hardware.s:82     .sysdict:0000000a name_RAND
-          hardware.s:82     .sysdict:00000012 RAND
-          hardware.s:82     .text:0000003e code_RAND
-          hardware.s:85     .text:00000042 L2
-          hardware.s:91     .text:0000004c L11
-          hardware.s:116    .sysdict:00000014 name_SRAND
-          hardware.s:116    .sysdict:0000001c SRAND
-          hardware.s:116    .text:00000070 code_SRAND
+          hardware.s:64     .sysdict:00000000 name_MSEC
+          hardware.s:64     .sysdict:00000008 MSEC
+          hardware.s:64     .text:0000002e code_MSEC
+          hardware.s:67     .text:00000032 L1
+          hardware.s:81     .sysdict:0000000a name_RAND
+          hardware.s:81     .sysdict:00000012 RAND
+          hardware.s:81     .text:0000003e code_RAND
+          hardware.s:84     .text:00000042 L2
+          hardware.s:90     .text:0000004c L11
+          hardware.s:115    .sysdict:00000014 name_SRAND
+          hardware.s:115    .sysdict:0000001c SRAND
+          hardware.s:115    .text:00000070 code_SRAND
                       .debug_line:00000000 .L0
                       .debug_line:00000028 .L0
-          hardware.s:120    .debug_line:0000006b .L0
+          hardware.s:119    .debug_line:0000006b .L0
           hardware.s:40     .text:00000000 .L0
           hardware.s:41     .text:00000002 .L0
           hardware.s:40     .text:00000000 .L0
@@ -4859,72 +4865,72 @@ DEFINED SYMBOLS
           hardware.s:55     .text:00000022 .L0
           hardware.s:58     .text:0000002a .L0
           hardware.s:56     .text:00000026 .L0
-          hardware.s:60     .text:0000002c .L0
+          hardware.s:59     .text:0000002c .L0
           hardware.s:58     .text:0000002a .L0
-          hardware.s:66     .text:0000002e .L0
-          hardware.s:60     .text:0000002c .L0
-          hardware.s:67     .text:00000030 .L0
-          hardware.s:66     .text:0000002e .L0
-          hardware.s:69     .text:00000032 .L0
-          hardware.s:67     .text:00000030 .L0
-          hardware.s:70     .text:00000034 .L0
-          hardware.s:69     .text:00000032 .L0
-          hardware.s:71     .text:00000036 .L0
-          hardware.s:70     .text:00000034 .L0
-          hardware.s:72     .text:00000038 .L0
-          hardware.s:71     .text:00000036 .L0
-          hardware.s:83     .text:0000003e .L0
-          hardware.s:72     .text:00000038 .L0
-          hardware.s:84     .text:00000040 .L0
-          hardware.s:83     .text:0000003e .L0
-          hardware.s:86     .text:00000042 .L0
-          hardware.s:84     .text:00000040 .L0
-          hardware.s:87     .text:00000044 .L0
-          hardware.s:86     .text:00000042 .L0
-          hardware.s:88     .text:00000046 .L0
-          hardware.s:87     .text:00000044 .L0
-          hardware.s:89     .text:00000048 .L0
-          hardware.s:88     .text:00000046 .L0
-          hardware.s:90     .text:0000004a .L0
-          hardware.s:89     .text:00000048 .L0
-          hardware.s:92     .text:0000004c .L0
-          hardware.s:90     .text:0000004a .L0
-          hardware.s:93     .text:0000004e .L0
-          hardware.s:92     .text:0000004c .L0
-          hardware.s:94     .text:00000050 .L0
-          hardware.s:93     .text:0000004e .L0
-          hardware.s:95     .text:00000052 .L0
-          hardware.s:94     .text:00000050 .L0
-          hardware.s:96     .text:00000054 .L0
-          hardware.s:95     .text:00000052 .L0
-          hardware.s:97     .text:00000056 .L0
-          hardware.s:96     .text:00000054 .L0
-          hardware.s:98     .text:00000058 .L0
-          hardware.s:97     .text:00000056 .L0
-          hardware.s:99     .text:0000005a .L0
-          hardware.s:98     .text:00000058 .L0
-          hardware.s:100    .text:0000005c .L0
-          hardware.s:99     .text:0000005a .L0
-          hardware.s:101    .text:0000005e .L0
-          hardware.s:100    .text:0000005c .L0
-          hardware.s:102    .text:00000060 .L0
-          hardware.s:101    .text:0000005e .L0
-          hardware.s:103    .text:00000062 .L0
-          hardware.s:102    .text:00000060 .L0
-          hardware.s:104    .text:00000064 .L0
-          hardware.s:103    .text:00000062 .L0
-          hardware.s:105    .text:00000066 .L0
-          hardware.s:104    .text:00000064 .L0
-          hardware.s:106    .text:00000068 .L0
-          hardware.s:105    .text:00000066 .L0
-          hardware.s:107    .text:0000006a .L0
-          hardware.s:106    .text:00000068 .L0
-          hardware.s:119    .text:00000070 .L0
-          hardware.s:107    .text:0000006a .L0
-          hardware.s:120    .text:00000076 .L0
-          hardware.s:119    .text:00000070 .L0
+          hardware.s:65     .text:0000002e .L0
+          hardware.s:59     .text:0000002c .L0
+          hardware.s:66     .text:00000030 .L0
+          hardware.s:65     .text:0000002e .L0
+          hardware.s:68     .text:00000032 .L0
+          hardware.s:66     .text:00000030 .L0
+          hardware.s:69     .text:00000034 .L0
+          hardware.s:68     .text:00000032 .L0
+          hardware.s:70     .text:00000036 .L0
+          hardware.s:69     .text:00000034 .L0
+          hardware.s:71     .text:00000038 .L0
+          hardware.s:70     .text:00000036 .L0
+          hardware.s:82     .text:0000003e .L0
+          hardware.s:71     .text:00000038 .L0
+          hardware.s:83     .text:00000040 .L0
+          hardware.s:82     .text:0000003e .L0
+          hardware.s:85     .text:00000042 .L0
+          hardware.s:83     .text:00000040 .L0
+          hardware.s:86     .text:00000044 .L0
+          hardware.s:85     .text:00000042 .L0
+          hardware.s:87     .text:00000046 .L0
+          hardware.s:86     .text:00000044 .L0
+          hardware.s:88     .text:00000048 .L0
+          hardware.s:87     .text:00000046 .L0
+          hardware.s:89     .text:0000004a .L0
+          hardware.s:88     .text:00000048 .L0
+          hardware.s:91     .text:0000004c .L0
+          hardware.s:89     .text:0000004a .L0
+          hardware.s:92     .text:0000004e .L0
+          hardware.s:91     .text:0000004c .L0
+          hardware.s:93     .text:00000050 .L0
+          hardware.s:92     .text:0000004e .L0
+          hardware.s:94     .text:00000052 .L0
+          hardware.s:93     .text:00000050 .L0
+          hardware.s:95     .text:00000054 .L0
+          hardware.s:94     .text:00000052 .L0
+          hardware.s:96     .text:00000056 .L0
+          hardware.s:95     .text:00000054 .L0
+          hardware.s:97     .text:00000058 .L0
+          hardware.s:96     .text:00000056 .L0
+          hardware.s:98     .text:0000005a .L0
+          hardware.s:97     .text:00000058 .L0
+          hardware.s:99     .text:0000005c .L0
+          hardware.s:98     .text:0000005a .L0
+          hardware.s:100    .text:0000005e .L0
+          hardware.s:99     .text:0000005c .L0
+          hardware.s:101    .text:00000060 .L0
+          hardware.s:100    .text:0000005e .L0
+          hardware.s:102    .text:00000062 .L0
+          hardware.s:101    .text:00000060 .L0
+          hardware.s:103    .text:00000064 .L0
+          hardware.s:102    .text:00000062 .L0
+          hardware.s:104    .text:00000066 .L0
+          hardware.s:103    .text:00000064 .L0
+          hardware.s:105    .text:00000068 .L0
+          hardware.s:104    .text:00000066 .L0
+          hardware.s:106    .text:0000006a .L0
+          hardware.s:105    .text:00000068 .L0
+          hardware.s:118    .text:00000070 .L0
+          hardware.s:106    .text:0000006a .L0
+          hardware.s:119    .text:00000076 .L0
+          hardware.s:118    .text:00000070 .L0
                             .text:00000000 .L0
-          hardware.s:120    .text:00000076 .L0
+          hardware.s:119    .text:00000076 .L0
                       .debug_info:00000000 .L0
                       .debug_info:00000087 .L0
 
@@ -4941,8 +4947,8 @@ OSCCON
 CLKDIV
 tvout_init
 ps2_init
-store_init
 serial_init
+store_init
 
 EQUATE SYMBOLS
                       ./core.inc = 0x0
@@ -6457,7 +6463,7 @@ EQUATE SYMBOLS
                       STR_CLK_FN = 0x8
                       STR_SDO_FN = 0x7
                     STR_SDO_RPOR = RPOR3
-                 STR_SDO_RPORbit = 0x8
+                 STR_SDO_RPORbit = 0x0
                     STR_CLK_RPOR = RPOR4
                  STR_CLK_RPORbit = 0x0
                         STR_PORT = PORTB
