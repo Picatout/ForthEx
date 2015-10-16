@@ -3570,7 +3570,7 @@
   26              	; utilisation des registres    
   27              	.equ RSP, W15 ; pile retours
   28              	.equ DSP, W14 ; pile arguments
-  29              	.equ R, W13 ; sommet pile retour
+  29              	;.equ R, W13 ; sommet pile retour
   30              	.equ T, W12 ; sommet pile arguments
   31              	.equ WP, W11 ; pointeur paramètres
   32              	.equ X, W10 ; pointeur d'adresse
@@ -3594,9 +3594,9 @@
   50              	; macros
   51              	;;;;;;;;;;;;
   52              	.macro NEXT
-  53              	    mov [IP++], WP
-  54              	    mov [WP++], W0
-  55              	    goto W0
+  53              	    mov [IP++], WP  ; WP=CFA, IP pointe vers item suivant
+  54              	    mov [WP++], W0  ; W0= adresse code, WP=PFA
+  55              	    goto W0         ; saut vers code routine
   56              	.endm    
   57              	 
   58              	.macro SET_EVEN reg
@@ -3613,95 +3613,98 @@
   69              	.endm
   70              	    
   71              	.macro RPUSH reg
-  72              	    push R
-  73              	    mov \reg, R
-  74              	.endm
-  75              	    
-  76              	.macro RPOP reg
-  77              	    mov R, \reg
-  78              	    pop R
-  79              	.endm
-  80              	    
-  81              	.macro RDROP
-  82              	    pop R
-  83              	.endm
-  84              	    
-  85              	.macro SYSDICT
-  86              	    .section .sysdict psv
-  87              	    .align 2
-  88              	.endm
-  89              	    
-  90              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
-  91              	; macros empruntée et modifiée, à partir de Jones Forth    
-  92              	;REF: http:;www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
-  93              	
-  94              	; Flags
-  95              	.equ F_IMMED,0x80
-  96              	.equ F_HIDDEN,0x20
-  97              	.equ F_LENMASK,0x1f	; length mask
-  98              	
-  99              	; Store the chain of links.
- 100              	.equ link,0
- 101              	;macro utilisée pour créer les entête des mots de haut niveaux.
- 102              	.macro DEFWORD name, namelen, flags=0, label
- 103              	    .section .sysdict psv
- 104              	    .align 2
- 105              	    .global name_\label
- 106              	name_\label :
- 107              	    .word link		; lien vers élément précédent du dictionnaire
- 108              	    .equ link, name_\label
- 109              	    .byte \flags+\namelen	; flags + length byte
- 110              	    .ascii "\name"		; the name
- 111              	    .align 2		; padding to next 2 byte boundary
- 112              	    .global \label
- 113              	\label :
- 114              	    .word handle(DOCOLON)
- 115              		;pfa:  list of word pointers follow
- 116              	.endm
- 117              	
- 118              	; macro utilisée pour créer les entêtes des mots en code machine	
- 119              	.macro DEFCODE name, namelen, flags=0, label
- 120              		.section .sysdict psv
- 121              		.align 2
- 122              		.global name_\label
- 123              	name_\label :
- 124              		.word link		; link
- 125              		.set link,name_\label
- 126              		.byte \flags+\namelen	; flags + length byte
- 127              		.ascii "\name"		; the name
- 128              		.align 2		; padding to next 4 byte boundary
- 129              		.global \label
- 130              	\label :
- 131              		.word handle(code_\label)	; codeword
- 132              		.text
- 133              		.global code_\label
- 134              	code_\label :			;pfa,  assembler code follows
- 135              		
- 136              	.endm
- 137              	 
- 138              	; macro utilisée pour créer des variables
- 139              	.macro DEFVAR name, namelen, flags=0, label, initial=0
- 140              		DEFCODE \name,\namelen,\flags,\label
- 141              		DPUSH
- 142              		mov var_\name, T
- 143              		NEXT
- 144              		.data
- 145              		.align 2
- 146              	var_\name :
- 147              		.word \initial
- 148              	.endm
- 149              	
- 150              		
- 151              	; macro utilisée pour créer des constantes
- 152              	.macro DEFCONST name, namelen, flags=0, label, value
- 153              		DEFCODE \name,\namelen,\flags,\label
- 154              		DPUSH
- 155              		mov #\value, T
- 156              		NEXT
- 157              	.endm
- 158              	
- 159              	.endif
- 160              		
+  72              	;    push R
+  73              	;    mov \reg, R    
+  74              	    push \reg
+  75              	.endm
+  76              	    
+  77              	.macro RPOP reg
+  78              	    pop \reg
+  79              	;    mov R, \reg
+  80              	;    pop R
+  81              	.endm
+  82              	    
+  83              	.macro RDROP
+  84              	    dec2 RSP,RSP
+  85              	    ; pop R
+  86              	.endm
+  87              	    
+  88              	.macro SYSDICT
+  89              	    .section .sysdict psv
+  90              	    .align 2
+  91              	.endm
+  92              	    
+  93              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+  94              	; macros empruntée et modifiée, à partir de Jones Forth    
+  95              	;REF: http:;www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
+  96              	
+  97              	; Flags
+  98              	.equ F_IMMED,0x80
+  99              	.equ F_HIDDEN,0x20
+ 100              	.equ F_LENMASK,0x1f	; length mask
+ 101              	
+ 102              	; Store the chain of links.
+ 103              	.equ link,0
+ 104              	;macro utilisée pour créer les entête des mots de haut niveaux.
+ 105              	.macro DEFWORD name, namelen, flags=0, label
+ 106              	    .section .sysdict psv
+ 107              	    .align 2
+ 108              	    .global name_\label
+ 109              	name_\label :
+ 110              	    .word link		; lien vers élément précédent du dictionnaire
+ 111              	    .equ link, name_\label
+ 112              	    .byte \flags+\namelen	; flags + length byte
+ 113              	    .ascii "\name"		; the name
+ 114              	    .align 2		; padding to next 2 byte boundary
+ 115              	    .global \label
+ 116              	\label :
+ 117              	    .word handle(DOCOLON)
+ 118              		;pfa:  list of word pointers follow
+ 119              	.endm
+ 120              	
+ 121              	; macro utilisée pour créer les entêtes des mots en code machine	
+ 122              	.macro DEFCODE name, namelen, flags=0, label
+ 123              		.section .sysdict psv
+ 124              		.align 2
+ 125              		.global name_\label
+ 126              	name_\label :
+ 127              		.word link		; link
+ 128              		.set link,name_\label
+ 129              		.byte \flags+\namelen	; flags + length byte
+ 130              		.ascii "\name"		; the name
+ 131              		.align 2		; padding to next 4 byte boundary
+ 132              		.global \label
+ 133              	\label :
+ 134              		.word handle(code_\label)	; codeword
+ 135              		.text
+ 136              		.global code_\label
+ 137              	code_\label :			;pfa,  assembler code follows
+ 138              		
+ 139              	.endm
+ 140              	 
+ 141              	; macro utilisée pour créer des variables
+ 142              	.macro DEFVAR name, namelen, flags=0, label, initial=0
+ 143              		DEFCODE \name,\namelen,\flags,\label
+ 144              		DPUSH
+ 145              		mov var_\name, T
+ 146              		NEXT
+ 147              		.data
+ 148              		.align 2
+ 149              	var_\name :
+ 150              		.word \initial
+ 151              	.endm
+ 152              	
+ 153              		
+ 154              	; macro utilisée pour créer des constantes
+ 155              	.macro DEFCONST name, namelen, flags=0, label, value
+ 156              		DEFCODE \name,\namelen,\flags,\label
+ 157              		DPUSH
+ 158              		mov #\value, T
+ 159              		NEXT
+ 160              	.endm
+ 161              	
+ 162              	.endif
+ 163              		
   35              	.include "keyboard.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -5248,9 +5251,9 @@ DEFINED SYMBOLS
           ./core.inc:45     *ABS*:00000006 HERE
           ./core.inc:46     *ABS*:00000008 LATEST
           ./core.inc:47     *ABS*:0000000a PAD
-          ./core.inc:95     *ABS*:00000080 F_IMMED
-          ./core.inc:96     *ABS*:00000020 F_HIDDEN
-          ./core.inc:97     *ABS*:0000001f F_LENMASK
+          ./core.inc:98     *ABS*:00000080 F_IMMED
+          ./core.inc:99     *ABS*:00000020 F_HIDDEN
+          ./core.inc:100    *ABS*:0000001f F_LENMASK
              TVout.S:242    .sysdict:00000060 link
       ./keyboard.inc:27     *ABS*:00000001 KBD_INC
       ./keyboard.inc:31     *ABS*:00000008 VK_BACK

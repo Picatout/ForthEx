@@ -26,7 +26,7 @@
 ; utilisation des registres    
 .equ RSP, W15 ; pile retours
 .equ DSP, W14 ; pile arguments
-.equ R, W13 ; sommet pile retour
+;.equ R, W13 ; sommet pile retour
 .equ T, W12 ; sommet pile arguments
 .equ WP, W11 ; pointeur paramètres
 .equ X, W10 ; pointeur d'adresse
@@ -50,9 +50,9 @@
 ; macros
 ;;;;;;;;;;;;
 .macro NEXT
-    mov [IP++], WP
-    mov [WP++], W0
-    goto W0
+    mov [IP++], WP  ; WP=CFA, IP pointe vers item suivant
+    mov [WP++], W0  ; W0= adresse code, WP=PFA
+    goto W0         ; saut vers code routine
 .endm    
  
 .macro SET_EVEN reg
@@ -69,17 +69,20 @@
 .endm
     
 .macro RPUSH reg
-    push R
-    mov \reg, R
+;    push R
+;    mov \reg, R    
+    push \reg
 .endm
     
 .macro RPOP reg
-    mov R, \reg
-    pop R
+    pop \reg
+;    mov R, \reg
+;    pop R
 .endm
     
 .macro RDROP
-    pop R
+    dec2 RSP,RSP
+    ; pop R
 .endm
     
 .macro SYSDICT

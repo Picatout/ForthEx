@@ -58,6 +58,14 @@ hardware_init:
     bset OSCCON, #IOLOCK
     return
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; mots forth
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "TICKS",5,,TICKS  ; ( -- n )
+    DPUSH
+    mov systicks, T
+    NEXT
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  délais en millisecondes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;    

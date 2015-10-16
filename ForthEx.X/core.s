@@ -83,8 +83,8 @@ version:
     
 .text
 .global DOCOLON    
-DOCOLON:
-    RPUSH IP
+DOCOLON: ; entre dans un mot de haut niveau (mot défini par ':')
+    RPUSH IP   
     mov WP,IP
     NEXT
 
@@ -105,20 +105,20 @@ DEFCODE "LIT",5,,LIT  ; ( -- n )
 
 DEFCODE "CLIT",4,,CLIT  ; ( -- c )
     DPUSH
-    mov.b [IP+0], T
+    mov.b [IP], T
     inc2 IP, IP
     ze T,T
     NEXT
 
 DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
-    mov.b [T+0], T
+    mov.b [T], T
     ze T, T
     NEXT
     
 DEFCODE "C!",2,,CSTORE  ; ( c-addr c -- )
     ze T, W0
     DPOP
-    mov.b W0,[T+0]
+    mov.b W0,[T]
     DPOP
     NEXT
     
@@ -150,9 +150,9 @@ DEFCODE "DODO",4,,DODO ; ( n  n -- ) R( -- n n )
 ; exécution de LOOP   
 DEFCODE "DOLOOP",6,,DOLOOP  ; ( -- )  R( n n -- )
     inc I, I
-    cp I, R
+    cp I, [DSP]
     bra eq, 1f
-    mov [IP+0], IP
+    mov [IP], IP
 1:
     RPOP I
     RDROP    
@@ -174,15 +174,15 @@ DEFCODE "DROP",4,,DROP ; ( n -- )
 
 DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
     mov T, W0
-    mov [DSP+0], T
+    mov [DSP], T
     mov W0, [DSP+0]
     NEXT
 
 DEFCODE "ROT",3,,ROT
     mov T, W0
-    mov [DSP+0], T
+    mov [DSP], T
     mov [DSP-2], W1
-    mov W1, [DSP+0]
+    mov W1, [DSP]
     mov W0, [DSP-2]
     NEXT
     
@@ -216,7 +216,7 @@ DEFWORD "OK",2,,OK
 
 .section .const psv
 quick:
-.asciz "The quick brown fox jump over the lazy dog.\r\n"
+.asciz "The quick brown fox jump over the lazy dog.\r"
 
 DEFWORD "MSG",3,,MSG
 .word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
@@ -228,7 +228,11 @@ ZTYPEOUT:
 
 DEFWORD "STRTEST",7,,STRTEST
 .word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
-.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,40,RLOAD,DELAY,DOBRA, STRTEST+2
+.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,DOBRA, STRTEST+2
+
+DEFWORD "EEPROMTEST",10,,EEPROMTEST
+.word LIT, quick, ZTYPE, LIT, _video_buffer,LIT,100,ESTORE,DELAY
+.word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,DELAY,DOBRA,EEPROMTEST+20
     
 DEFWORD "DELAY",5,,DELAY
 .word  LIT, 1000, MSEC, EXIT
@@ -239,7 +243,7 @@ DEFCODE "INFLOOP",7,,INFLOOP
 SYSDICT
 .global ENTRY
 ENTRY: 
-.word STRTEST
+.word EEPROMTEST
 .global sys_latest
 sys_latest:
 .word link

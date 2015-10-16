@@ -3490,7 +3490,7 @@
   26              	; utilisation des registres    
   27              	.equ RSP, W15 ; pile retours
   28              	.equ DSP, W14 ; pile arguments
-  29              	.equ R, W13 ; sommet pile retour
+  29              	;.equ R, W13 ; sommet pile retour
   30              	.equ T, W12 ; sommet pile arguments
   31              	.equ WP, W11 ; pointeur paramètres
   32              	.equ X, W10 ; pointeur d'adresse
@@ -3514,9 +3514,9 @@
   50              	; macros
   51              	;;;;;;;;;;;;
   52              	.macro NEXT
-  53              	    mov [IP++], WP
-  54              	    mov [WP++], W0
-  55              	    goto W0
+  53              	    mov [IP++], WP  ; WP=CFA, IP pointe vers item suivant
+  54              	    mov [WP++], W0  ; W0= adresse code, WP=PFA
+  55              	    goto W0         ; saut vers code routine
   56              	.endm    
   57              	 
   58              	.macro SET_EVEN reg
@@ -3533,95 +3533,98 @@
   69              	.endm
   70              	    
   71              	.macro RPUSH reg
-  72              	    push R
-  73              	    mov \reg, R
-  74              	.endm
-  75              	    
-  76              	.macro RPOP reg
-  77              	    mov R, \reg
-  78              	    pop R
-  79              	.endm
-  80              	    
-  81              	.macro RDROP
-  82              	    pop R
-  83              	.endm
-  84              	    
-  85              	.macro SYSDICT
-  86              	    .section .sysdict psv
-  87              	    .align 2
-  88              	.endm
-  89              	    
-  90              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
-  91              	; macros empruntée et modifiée, à partir de Jones Forth    
-  92              	;REF: http:;www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
-  93              	
-  94              	; Flags
-  95              	.equ F_IMMED,0x80
-  96              	.equ F_HIDDEN,0x20
-  97              	.equ F_LENMASK,0x1f	; length mask
-  98              	
-  99              	; Store the chain of links.
- 100              	.equ link,0
- 101              	;macro utilisée pour créer les entête des mots de haut niveaux.
- 102              	.macro DEFWORD name, namelen, flags=0, label
- 103              	    .section .sysdict psv
- 104              	    .align 2
- 105              	    .global name_\label
- 106              	name_\label :
- 107              	    .word link		; lien vers élément précédent du dictionnaire
- 108              	    .equ link, name_\label
- 109              	    .byte \flags+\namelen	; flags + length byte
- 110              	    .ascii "\name"		; the name
- 111              	    .align 2		; padding to next 2 byte boundary
- 112              	    .global \label
- 113              	\label :
- 114              	    .word handle(DOCOLON)
- 115              		;pfa:  list of word pointers follow
- 116              	.endm
- 117              	
- 118              	; macro utilisée pour créer les entêtes des mots en code machine	
- 119              	.macro DEFCODE name, namelen, flags=0, label
- 120              		.section .sysdict psv
- 121              		.align 2
- 122              		.global name_\label
- 123              	name_\label :
- 124              		.word link		; link
- 125              		.set link,name_\label
- 126              		.byte \flags+\namelen	; flags + length byte
- 127              		.ascii "\name"		; the name
- 128              		.align 2		; padding to next 4 byte boundary
- 129              		.global \label
- 130              	\label :
- 131              		.word handle(code_\label)	; codeword
- 132              		.text
- 133              		.global code_\label
- 134              	code_\label :			;pfa,  assembler code follows
- 135              		
- 136              	.endm
- 137              	 
- 138              	; macro utilisée pour créer des variables
- 139              	.macro DEFVAR name, namelen, flags=0, label, initial=0
- 140              		DEFCODE \name,\namelen,\flags,\label
- 141              		DPUSH
- 142              		mov var_\name, T
- 143              		NEXT
- 144              		.data
- 145              		.align 2
- 146              	var_\name :
- 147              		.word \initial
- 148              	.endm
- 149              	
- 150              		
- 151              	; macro utilisée pour créer des constantes
- 152              	.macro DEFCONST name, namelen, flags=0, label, value
- 153              		DEFCODE \name,\namelen,\flags,\label
- 154              		DPUSH
- 155              		mov #\value, T
- 156              		NEXT
- 157              	.endm
- 158              	
- 159              	.endif
- 160              		
+  72              	;    push R
+  73              	;    mov \reg, R    
+  74              	    push \reg
+  75              	.endm
+  76              	    
+  77              	.macro RPOP reg
+  78              	    pop \reg
+  79              	;    mov R, \reg
+  80              	;    pop R
+  81              	.endm
+  82              	    
+  83              	.macro RDROP
+  84              	    dec2 RSP,RSP
+  85              	    ; pop R
+  86              	.endm
+  87              	    
+  88              	.macro SYSDICT
+  89              	    .section .sysdict psv
+  90              	    .align 2
+  91              	.endm
+  92              	    
+  93              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+  94              	; macros empruntée et modifiée, à partir de Jones Forth    
+  95              	;REF: http:;www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
+  96              	
+  97              	; Flags
+  98              	.equ F_IMMED,0x80
+  99              	.equ F_HIDDEN,0x20
+ 100              	.equ F_LENMASK,0x1f	; length mask
+ 101              	
+ 102              	; Store the chain of links.
+ 103              	.equ link,0
+ 104              	;macro utilisée pour créer les entête des mots de haut niveaux.
+ 105              	.macro DEFWORD name, namelen, flags=0, label
+ 106              	    .section .sysdict psv
+ 107              	    .align 2
+ 108              	    .global name_\label
+ 109              	name_\label :
+ 110              	    .word link		; lien vers élément précédent du dictionnaire
+ 111              	    .equ link, name_\label
+ 112              	    .byte \flags+\namelen	; flags + length byte
+ 113              	    .ascii "\name"		; the name
+ 114              	    .align 2		; padding to next 2 byte boundary
+ 115              	    .global \label
+ 116              	\label :
+ 117              	    .word handle(DOCOLON)
+ 118              		;pfa:  list of word pointers follow
+ 119              	.endm
+ 120              	
+ 121              	; macro utilisée pour créer les entêtes des mots en code machine	
+ 122              	.macro DEFCODE name, namelen, flags=0, label
+ 123              		.section .sysdict psv
+ 124              		.align 2
+ 125              		.global name_\label
+ 126              	name_\label :
+ 127              		.word link		; link
+ 128              		.set link,name_\label
+ 129              		.byte \flags+\namelen	; flags + length byte
+ 130              		.ascii "\name"		; the name
+ 131              		.align 2		; padding to next 4 byte boundary
+ 132              		.global \label
+ 133              	\label :
+ 134              		.word handle(code_\label)	; codeword
+ 135              		.text
+ 136              		.global code_\label
+ 137              	code_\label :			;pfa,  assembler code follows
+ 138              		
+ 139              	.endm
+ 140              	 
+ 141              	; macro utilisée pour créer des variables
+ 142              	.macro DEFVAR name, namelen, flags=0, label, initial=0
+ 143              		DEFCODE \name,\namelen,\flags,\label
+ 144              		DPUSH
+ 145              		mov var_\name, T
+ 146              		NEXT
+ 147              		.data
+ 148              		.align 2
+ 149              	var_\name :
+ 150              		.word \initial
+ 151              	.endm
+ 152              	
+ 153              		
+ 154              	; macro utilisée pour créer des constantes
+ 155              	.macro DEFCONST name, namelen, flags=0, label, value
+ 156              		DEFCODE \name,\namelen,\flags,\label
+ 157              		DPUSH
+ 158              		mov #\value, T
+ 159              		NEXT
+ 160              	.endm
+ 161              	
+ 162              	.endif
+ 163              		
   29              	    
   30              	.data 
   31                 	.global systicks    
@@ -3658,71 +3661,81 @@
   58 00002a  00 C0 A8 	    bset OSCCON, #IOLOCK
   59 00002c  00 00 06 	    return
   60              	
-  61              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  62              	;  délais en millisecondes
-  63              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-  64              	DEFCODE "MSEC",4,,MSEC  ; ( n -- )
-  65 00002e  00 00 80 	    mov systicks, W0
-  66 000030  0C 00 40 	    add W0,T,W0
-  67              	0:    
-  68 000032  00 00 E3 	    cp systicks
-  69 000034  00 00 3A 	    bra neq, 0b
-  70 000036  2E 06 78 	    DPOP
-  71 000038  B8 05 78 	    NEXT
-  71         3B 00 78 
-  71         00 40 01 
-  72              	
-  73              	;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  74              	; générateur pseudo hazard
-  75              	; génère un nombre de 16 bits
-  76              	;  si seed impaire incrémente
-  77              	;  ensuite Sn=(Sn-1)*3/2
-  78              	;  on ne garde que le bit
-  79              	;  le moins significatif
-  80              	;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  81              	DEFCODE "RAND",4,,RAND
-  82 00003e  00 01 EB 	    clr W2
-  83 000040  F3 00 20 	    mov #15,W3
-  84              	0:
-  85 000042  02 00 AE 	    btss seed,#0
-  86 000044  00 00 37 	    bra 1f
-  87 000046  02 20 EC 	    inc seed
-  88 000048  00 00 39 	    bra nc, 1f
-  89 00004a  04 20 EC 	    inc seed+2
-  90              	 1:
-  91 00004c  02 00 D4 	    sl seed,WREG
-  92 00004e  80 00 78 	    mov W0,W1
-  93 000050  04 80 D6 	    rlc seed+2, WREG
-  94 000052  80 00 FD 	    exch W0,W1
-  95 000054  02 20 B4 	    add seed
-  96 000056  01 00 78 	    mov W1,W0
-  97 000058  04 A0 B4 	    addc seed+2
-  98 00005a  04 20 D5 	    lsr seed+2,
-  99 00005c  02 A0 D7 	    rrc seed
- 100 00005e  02 00 D5 	    lsr seed, WREG
- 101 000060  83 81 D3 	    rrc W3,W3
- 102 000062  04 02 E9 	    dec W4,W4
- 103 000064  00 00 31 	    bra c, 1b
- 104 000066  0C 2F 78 	    DPUSH
- 105 000068  03 06 78 	    mov W3,T
- 106 00006a  B8 05 78 	    NEXT
- 106         3B 00 78 
- 106         00 40 01 
- 107              	
- 108              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
- 109              	;initialisation variable seed
- 110              	; utilisation de l'ADC
- 111              	; on ne garde que le bit 
- 112              	; le plus faible de chaque
- 113              	; lecture.
- 114              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
- 115              	DEFCODE "SRAND",5,,SRAND
- 116              	    ; initialisation du convertisseur
- 117              	    
- 118 000070  B8 05 78 	    NEXT
- 118         3B 00 78 
- 118         00 40 01 
- 119              	.end
+  61              	;;;;;;;;;;;;;;;;;;;;;;;;;;
+  62              	; mots forth
+  63              	;;;;;;;;;;;;;;;;;;;;;;;;;;
+  64              	DEFCODE "TICKS",5,,TICKS  ; ( -- n )
+  65 00002e  0C 2F 78 	    DPUSH
+  66 000030  0C 00 80 	    mov systicks, T
+  67 000032  B8 05 78 	    NEXT
+  67         3B 00 78 
+  67         00 40 01 
+  68              	    
+  69              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  70              	;  délais en millisecondes
+  71              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+  72              	DEFCODE "MSEC",4,,MSEC  ; ( n -- )
+  73 000038  00 00 80 	    mov systicks, W0
+  74 00003a  0C 00 40 	    add W0,T,W0
+  75              	0:    
+  76 00003c  00 00 E3 	    cp systicks
+  77 00003e  00 00 3A 	    bra neq, 0b
+  78 000040  2E 06 78 	    DPOP
+  79 000042  B8 05 78 	    NEXT
+  79         3B 00 78 
+  79         00 40 01 
+  80              	
+  81              	;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  82              	; générateur pseudo hazard
+  83              	; génère un nombre de 16 bits
+  84              	;  si seed impaire incrémente
+  85              	;  ensuite Sn=(Sn-1)*3/2
+  86              	;  on ne garde que le bit
+  87              	;  le moins significatif
+  88              	;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  89              	DEFCODE "RAND",4,,RAND
+  90 000048  00 01 EB 	    clr W2
+  91 00004a  F3 00 20 	    mov #15,W3
+  92              	0:
+  93 00004c  02 00 AE 	    btss seed,#0
+  94 00004e  00 00 37 	    bra 1f
+  95 000050  02 20 EC 	    inc seed
+  96 000052  00 00 39 	    bra nc, 1f
+  97 000054  04 20 EC 	    inc seed+2
+  98              	 1:
+  99 000056  02 00 D4 	    sl seed,WREG
+ 100 000058  80 00 78 	    mov W0,W1
+ 101 00005a  04 80 D6 	    rlc seed+2, WREG
+ 102 00005c  80 00 FD 	    exch W0,W1
+ 103 00005e  02 20 B4 	    add seed
+ 104 000060  01 00 78 	    mov W1,W0
+ 105 000062  04 A0 B4 	    addc seed+2
+ 106 000064  04 20 D5 	    lsr seed+2,
+ 107 000066  02 A0 D7 	    rrc seed
+ 108 000068  02 00 D5 	    lsr seed, WREG
+ 109 00006a  83 81 D3 	    rrc W3,W3
+ 110 00006c  04 02 E9 	    dec W4,W4
+ 111 00006e  00 00 31 	    bra c, 1b
+ 112 000070  0C 2F 78 	    DPUSH
+ 113 000072  03 06 78 	    mov W3,T
+ 114 000074  B8 05 78 	    NEXT
+ 114         3B 00 78 
+ 114         00 40 01 
+ 115              	
+ 116              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+ 117              	;initialisation variable seed
+ 118              	; utilisation de l'ADC
+ 119              	; on ne garde que le bit 
+ 120              	; le plus faible de chaque
+ 121              	; lecture.
+ 122              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+ 123              	DEFCODE "SRAND",5,,SRAND
+ 124              	    ; initialisation du convertisseur
+ 125              	    
+ 126 00007a  B8 05 78 	    NEXT
+ 126         3B 00 78 
+ 126         00 40 01 
+ 127              	.end
 DEFINED SYMBOLS
                             *ABS*:00000000 ./core.inc
                             *ABS*:00000000 ./ntsc_const.inc
@@ -4808,28 +4821,31 @@ DEFINED SYMBOLS
           ./core.inc:45     *ABS*:00000006 HERE
           ./core.inc:46     *ABS*:00000008 LATEST
           ./core.inc:47     *ABS*:0000000a PAD
-          ./core.inc:95     *ABS*:00000080 F_IMMED
-          ./core.inc:96     *ABS*:00000020 F_HIDDEN
-          ./core.inc:97     *ABS*:0000001f F_LENMASK
-          hardware.s:115    .sysdict:00000014 link
+          ./core.inc:98     *ABS*:00000080 F_IMMED
+          ./core.inc:99     *ABS*:00000020 F_HIDDEN
+          ./core.inc:100    *ABS*:0000001f F_LENMASK
+          hardware.s:123    .sysdict:0000001e link
           hardware.s:32     .data:00000000 systicks
           hardware.s:34     .data:00000002 seed
           hardware.s:39     .text:00000000 hardware_init
-          hardware.s:64     .sysdict:00000000 name_MSEC
-          hardware.s:64     .sysdict:00000008 MSEC
-          hardware.s:64     .text:0000002e code_MSEC
-          hardware.s:67     .text:00000032 L1
-          hardware.s:81     .sysdict:0000000a name_RAND
-          hardware.s:81     .sysdict:00000012 RAND
-          hardware.s:81     .text:0000003e code_RAND
-          hardware.s:84     .text:00000042 L2
-          hardware.s:90     .text:0000004c L11
-          hardware.s:115    .sysdict:00000014 name_SRAND
-          hardware.s:115    .sysdict:0000001c SRAND
-          hardware.s:115    .text:00000070 code_SRAND
+          hardware.s:64     .sysdict:00000000 name_TICKS
+          hardware.s:64     .sysdict:00000008 TICKS
+          hardware.s:64     .text:0000002e code_TICKS
+          hardware.s:72     .sysdict:0000000a name_MSEC
+          hardware.s:72     .sysdict:00000012 MSEC
+          hardware.s:72     .text:00000038 code_MSEC
+          hardware.s:75     .text:0000003c L1
+          hardware.s:89     .sysdict:00000014 name_RAND
+          hardware.s:89     .sysdict:0000001c RAND
+          hardware.s:89     .text:00000048 code_RAND
+          hardware.s:92     .text:0000004c L2
+          hardware.s:98     .text:00000056 L11
+          hardware.s:123    .sysdict:0000001e name_SRAND
+          hardware.s:123    .sysdict:00000026 SRAND
+          hardware.s:123    .text:0000007a code_SRAND
                       .debug_line:00000000 .L0
                       .debug_line:00000028 .L0
-          hardware.s:119    .debug_line:0000006b .L0
+          hardware.s:127    .debug_line:0000006e .L0
           hardware.s:40     .text:00000000 .L0
           hardware.s:41     .text:00000002 .L0
           hardware.s:40     .text:00000000 .L0
@@ -4871,66 +4887,72 @@ DEFINED SYMBOLS
           hardware.s:59     .text:0000002c .L0
           hardware.s:66     .text:00000030 .L0
           hardware.s:65     .text:0000002e .L0
-          hardware.s:68     .text:00000032 .L0
+          hardware.s:67     .text:00000032 .L0
           hardware.s:66     .text:00000030 .L0
-          hardware.s:69     .text:00000034 .L0
-          hardware.s:68     .text:00000032 .L0
-          hardware.s:70     .text:00000036 .L0
-          hardware.s:69     .text:00000034 .L0
-          hardware.s:71     .text:00000038 .L0
-          hardware.s:70     .text:00000036 .L0
-          hardware.s:82     .text:0000003e .L0
-          hardware.s:71     .text:00000038 .L0
-          hardware.s:83     .text:00000040 .L0
-          hardware.s:82     .text:0000003e .L0
-          hardware.s:85     .text:00000042 .L0
-          hardware.s:83     .text:00000040 .L0
-          hardware.s:86     .text:00000044 .L0
-          hardware.s:85     .text:00000042 .L0
-          hardware.s:87     .text:00000046 .L0
-          hardware.s:86     .text:00000044 .L0
-          hardware.s:88     .text:00000048 .L0
-          hardware.s:87     .text:00000046 .L0
-          hardware.s:89     .text:0000004a .L0
-          hardware.s:88     .text:00000048 .L0
-          hardware.s:91     .text:0000004c .L0
-          hardware.s:89     .text:0000004a .L0
-          hardware.s:92     .text:0000004e .L0
-          hardware.s:91     .text:0000004c .L0
-          hardware.s:93     .text:00000050 .L0
-          hardware.s:92     .text:0000004e .L0
-          hardware.s:94     .text:00000052 .L0
-          hardware.s:93     .text:00000050 .L0
-          hardware.s:95     .text:00000054 .L0
-          hardware.s:94     .text:00000052 .L0
-          hardware.s:96     .text:00000056 .L0
-          hardware.s:95     .text:00000054 .L0
-          hardware.s:97     .text:00000058 .L0
-          hardware.s:96     .text:00000056 .L0
-          hardware.s:98     .text:0000005a .L0
-          hardware.s:97     .text:00000058 .L0
-          hardware.s:99     .text:0000005c .L0
-          hardware.s:98     .text:0000005a .L0
-          hardware.s:100    .text:0000005e .L0
-          hardware.s:99     .text:0000005c .L0
-          hardware.s:101    .text:00000060 .L0
-          hardware.s:100    .text:0000005e .L0
-          hardware.s:102    .text:00000062 .L0
-          hardware.s:101    .text:00000060 .L0
-          hardware.s:103    .text:00000064 .L0
-          hardware.s:102    .text:00000062 .L0
-          hardware.s:104    .text:00000066 .L0
-          hardware.s:103    .text:00000064 .L0
-          hardware.s:105    .text:00000068 .L0
-          hardware.s:104    .text:00000066 .L0
-          hardware.s:106    .text:0000006a .L0
-          hardware.s:105    .text:00000068 .L0
-          hardware.s:118    .text:00000070 .L0
-          hardware.s:106    .text:0000006a .L0
-          hardware.s:119    .text:00000076 .L0
-          hardware.s:118    .text:00000070 .L0
+          hardware.s:73     .text:00000038 .L0
+          hardware.s:67     .text:00000032 .L0
+          hardware.s:74     .text:0000003a .L0
+          hardware.s:73     .text:00000038 .L0
+          hardware.s:76     .text:0000003c .L0
+          hardware.s:74     .text:0000003a .L0
+          hardware.s:77     .text:0000003e .L0
+          hardware.s:76     .text:0000003c .L0
+          hardware.s:78     .text:00000040 .L0
+          hardware.s:77     .text:0000003e .L0
+          hardware.s:79     .text:00000042 .L0
+          hardware.s:78     .text:00000040 .L0
+          hardware.s:90     .text:00000048 .L0
+          hardware.s:79     .text:00000042 .L0
+          hardware.s:91     .text:0000004a .L0
+          hardware.s:90     .text:00000048 .L0
+          hardware.s:93     .text:0000004c .L0
+          hardware.s:91     .text:0000004a .L0
+          hardware.s:94     .text:0000004e .L0
+          hardware.s:93     .text:0000004c .L0
+          hardware.s:95     .text:00000050 .L0
+          hardware.s:94     .text:0000004e .L0
+          hardware.s:96     .text:00000052 .L0
+          hardware.s:95     .text:00000050 .L0
+          hardware.s:97     .text:00000054 .L0
+          hardware.s:96     .text:00000052 .L0
+          hardware.s:99     .text:00000056 .L0
+          hardware.s:97     .text:00000054 .L0
+          hardware.s:100    .text:00000058 .L0
+          hardware.s:99     .text:00000056 .L0
+          hardware.s:101    .text:0000005a .L0
+          hardware.s:100    .text:00000058 .L0
+          hardware.s:102    .text:0000005c .L0
+          hardware.s:101    .text:0000005a .L0
+          hardware.s:103    .text:0000005e .L0
+          hardware.s:102    .text:0000005c .L0
+          hardware.s:104    .text:00000060 .L0
+          hardware.s:103    .text:0000005e .L0
+          hardware.s:105    .text:00000062 .L0
+          hardware.s:104    .text:00000060 .L0
+          hardware.s:106    .text:00000064 .L0
+          hardware.s:105    .text:00000062 .L0
+          hardware.s:107    .text:00000066 .L0
+          hardware.s:106    .text:00000064 .L0
+          hardware.s:108    .text:00000068 .L0
+          hardware.s:107    .text:00000066 .L0
+          hardware.s:109    .text:0000006a .L0
+          hardware.s:108    .text:00000068 .L0
+          hardware.s:110    .text:0000006c .L0
+          hardware.s:109    .text:0000006a .L0
+          hardware.s:111    .text:0000006e .L0
+          hardware.s:110    .text:0000006c .L0
+          hardware.s:112    .text:00000070 .L0
+          hardware.s:111    .text:0000006e .L0
+          hardware.s:113    .text:00000072 .L0
+          hardware.s:112    .text:00000070 .L0
+          hardware.s:114    .text:00000074 .L0
+          hardware.s:113    .text:00000072 .L0
+          hardware.s:126    .text:0000007a .L0
+          hardware.s:114    .text:00000074 .L0
+          hardware.s:127    .text:00000080 .L0
+          hardware.s:126    .text:0000007a .L0
                             .text:00000000 .L0
-          hardware.s:119    .text:00000076 .L0
+          hardware.s:127    .text:00000080 .L0
                       .debug_info:00000000 .L0
                       .debug_info:00000087 .L0
 

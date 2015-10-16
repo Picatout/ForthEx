@@ -47,6 +47,13 @@
 .equ RDID,   0xAB
 .equ EDPD,   0xB9 
 
+;eeprom status bits
+.equ WIP, 0
+.equ WEN, 1
+.equ BP0, 2
+.equ BP1, 3
+.equ WPEN, 7
+ 
 .equ EPAGE_SIZE, 256
  
  .text
@@ -55,14 +62,31 @@
     mov.b WREG, STR_SPIBUF
     btss STR_SPISTAT, #SPIRBF
     bra .-2
-    mov STR_SPIBUF, WREG
+    mov STR_SPIBUF, W0
 .endm
 
 .macro spi_read
-    setm.b STR_SPIBUF
+    setm.b STR_SPIBUF    
     btss STR_SPISTAT, #SPIRBF
     bra .-2
 .endm
+
+.macro _enable_sram
+    bclr STR_LAT, #SRAM_SEL
+.endm
+    
+.macro _disable_sram
+    bset STR_LAT, #SRAM_SEL
+.endm
+    
+.macro _enable_eeprom
+   bclr STR_LAT, #EEPROM_SEL
+.endm
+   
+.macro _disable_eeprom
+   bset STR_LAT, #EEPROM_SEL
+.endm
+   
    
  ;;;;;;;;;;;;;;;;;;;;;;;
 ; initialisation SPI
@@ -104,7 +128,7 @@ store_init:
 ;    spi_write
 ;    mov #RMSEQ, W0
 ;    spi_write
-    bset STR_LAT, #SRAM_SEL
+;    bset STR_LAT, #SRAM_SEL
     return
 
 
@@ -125,6 +149,22 @@ spi_send_address:
     spi_write
     DPOP
     return
+ 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; vérifie si le bit WIP (Write In Progress)
+; est actif et attend
+; qu'il revienne à zéro.
+;;;;;;;;;;;;;;;;;;;;;;;;;
+wait_wip0:
+    _enable_eeprom  
+    mov #ERDSR, W0
+    spi_write
+    spi_read
+    _disable_eeprom
+    btsc STR_SPIBUF, #WIP
+    bra wait_wip0
+    return
+
     
 ;;;;;;;;;;;;;;;
 ;  Forth words
@@ -135,8 +175,8 @@ spi_send_address:
 ; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
 ; sortie aucune
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RSTORE",6,,RSTORE ; ( c-addr c-addr.D n -- )
-    bclr STR_LAT, #SRAM_SEL
+DEFCODE "RSTORE",6,,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
+    _enable_sram
     mov #RWRITE,W0
     spi_write
     mov T, W1 ; nombre d'octets
@@ -152,7 +192,7 @@ DEFCODE "RSTORE",6,,RSTORE ; ( c-addr c-addr.D n -- )
     dec W1,W1
     bra 0b
 1:    
-    bset STR_LAT, #SRAM_SEL
+    _disable_sram
     NEXT
 
 
@@ -161,8 +201,8 @@ DEFCODE "RSTORE",6,,RSTORE ; ( c-addr c-addr.D n -- )
 ; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
 ; sortie: aucune
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RLOAD",6,,RLOAD ; ( c-addr c-addr.D n -- )
-    bclr STR_LAT, #SRAM_SEL
+DEFCODE "RLOAD",6,,RLOAD ; ( addr-bloc addr-sramL addr-sramH n -- )
+    _enable_sram
     mov #RREAD, W0
     spi_write
     mov T, W1 ; nombre d'octets à transférer
@@ -179,22 +219,71 @@ DEFCODE "RLOAD",6,,RLOAD ; ( c-addr c-addr.D n -- )
     dec W1,W1
     bra 0b
 3:
-    bset STR_LAT, #SRAM_SEL
+    _disable_sram
     NEXT
   
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; enregistrement bloc RAM dans EEPROM
-; entrée: bloc-adress, ee-address, count    
+; entrée: bloc-adress, page
+; l'eeprom est organisée en 512 pages de
+; 256 octets.
+; Bien qu'il soit possible de programmer
+; un seule octet à la fois
+; cette routine est conçue pour programmer
+; une page complète.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "ESTORE",6,,ESTORE  ;( c-addr c-addr. n -- )
-    
+DEFCODE "ESTORE",6,,ESTORE  ;( addr-bloc page -- )
+    call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
+    _enable_eeprom
+    mov #EWREN, W0
+    spi_write
+    _disable_eeprom
+    nop
+    _enable_eeprom
+    mov #EWRITE, W0
+    spi_write
+    sl  T, #8, T
+    DPUSH
+    clr T
+    rlc T,T
+    call spi_send_address
+    mov T, W2 ; addr-bloc
+    DPOP
+    mov #256, W3
+1:
+    mov.b [W2++], W0
+    spi_write
+    dec W3,W3
+    bra nz, 1b
+    _disable_eeprom
     NEXT
     
-
-DEFCODE "ELOAD",5,,ELOAD   ; ( c-addr c-addr. n -- )
-    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; charque une page EEPROM
+; en mémoire RAM
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "ELOAD",5,,ELOAD   ; ( addr-bloc page -- )
+    call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
+    _enable_eeprom
+    mov #EREAD, W0
+    spi_write
+    sl  T, #8, T
+    DPUSH
+    clr T
+    rlc T,T
+    call spi_send_address
+    mov T, W2 ; addr-bloc
+    DPOP
+    mov #256, W3
+1:
+    spi_read
+    mov STR_SPIBUF, W0
+    mov.b W0, [W2++]
+    dec W3,W3
+    bra nz, 1b
+    _disable_eeprom
     NEXT
     
     
