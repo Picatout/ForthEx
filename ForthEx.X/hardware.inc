@@ -16,6 +16,41 @@
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
+
+/*
+  NOM: hardware.inc
+  DESCRIPTION: contient toutes les constantes et alias de SFR. Tout ce qui concerne
+               l'affectation des périphériques est défini dans ce fichier.
+     
+  MCU: PIC24FJ64GA002
+  FLASH: 64Ko (22Kloc)
+  RAM: 8Ko,  
+    MAP: 0x0-0x7FF SFR
+         0x800-0x27FF RAM
+         0x2800-67FF  PSV
+     
+  Utilisation des périphériques:
+     
+  - TIMER1, interruption à intervalle de 1msec. 
+     * incrémente <systicks>
+     * décrémente <tone_len>
+     * filtre données clavier de ps2_queue vers kbd_queue
+    
+  - TIMER2,  interruption synchronistaion vidéeo intervalle 63,5µsec
+    * OC1,   génération signal synchronisation NTSC
+    * OC2,   interruption pour envoie bits vidéo, intervalle 63,5µsec
+    * SPI2,  sérialisation des bits vidéo.
+     
+  - TIMER3, minuterie pour générateur audio    
+    * OC3,  PWM générateur tonalités audio, pas d'interruption
+     
+  - INT1,  interruption externe sur transition descendante décenchée par
+           signal clock du clavier PS/2. (priorité la plus élevée).
+     
+  - SPI1,  interface avec les mémoires externes RAM 23LC104 et EEPROM 25LC1024
+     
+*/
+    
 .ifndef HARD_INC
 .equ HARD_INC, 1
     
@@ -144,8 +179,22 @@
 .equ  SER_RX_IE,  U1RXIE
 .equ  SER_RX_IPC, IPC2
 .equ  SER_RX_IPbit, U1RXIP0
-    
-    
+ 
+ ;sortie audio tonalités
+ .equ AUDIO_PORT, PORTB
+ .equ AUDIO_TRIS, TRISB
+ .equ AUDIO_LAT,  LATB
+ .equ AUDIO_OUT,  RB5
+ .equ AUDIO_TMR,  TMR3
+ .equ AUDIO_TMRCON, T3CON
+ .equ AUDIO_PER,  PR3
+ .equ AUDIO_OCCON, OC3CON
+ .equ AUDIO_OCR,  OC3R
+ .equ AUDIO_OCRS, OC3RS
+ .equ AUDIO_RPOR, RPOR2
+ .equ AUDIO_PPSbit, RP5R0
+ .equ AUDIO_FN, 20
+ 
 .LIST
  
 ; section pour regrouper les routine ISR    

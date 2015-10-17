@@ -43,10 +43,45 @@
   16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
   17              	;
   18              	;****************************************************************************
-  19              	.ifndef HARD_INC
-  20              	.equ HARD_INC, 1
-  21              	    
-  22              	.include "p24Fxxxx.inc"
+  19              	
+  20              	/*
+  21              	  NOM: hardware.inc
+  22              	  DESCRIPTION: contient toutes les constantes et alias de SFR. Tout ce qui concerne
+  23              	               l'affectation des périphériques est défini dans ce fichier.
+  24              	     
+  25              	  MCU: PIC24FJ64GA002
+  26              	  FLASH: 64Ko (22Kloc)
+  27              	  RAM: 8Ko,  
+  28              	    MAP: 0x0-0x7FF SFR
+  29              	         0x800-0x27FF RAM
+  30              	         0x2800-67FF  PSV
+  31              	     
+  32              	  Utilisation des périphériques:
+  33              	     
+  34              	  - TIMER1, interruption à intervalle de 1msec. 
+  35              	     * incrémente <systicks>
+  36              	     * décrémente <tone_len>
+  37              	     * filtre données clavier de ps2_queue vers kbd_queue
+  38              	    
+  39              	  - TIMER2,  interruption synchronistaion vidéeo intervalle 63,5µsec
+  40              	    * OC1,   génération signal synchronisation NTSC
+  41              	    * OC2,   interruption pour envoie bits vidéo, intervalle 63,5µsec
+  42              	    * SPI2,  sérialisation des bits vidéo.
+  43              	     
+  44              	  - TIMER3, minuterie pour générateur audio    
+  45              	    * OC3,  PWM générateur tonalités audio, pas d'interruption
+  46              	     
+  47              	  - INT1,  interruption externe sur transition descendante décenchée par
+  48              	           signal clock du clavier PS/2. (priorité la plus élevée).
+  49              	     
+  50              	  - SPI1,  interface avec les mémoires externes RAM 23LC104 et EEPROM 25LC1024
+  51              	     
+  52              	*/
+  53              	    
+  54              	.ifndef HARD_INC
+  55              	.equ HARD_INC, 1
+  56              	    
+  57              	.include "p24Fxxxx.inc"
    1              	.ifdef __24F04KA200
    4              	.endif
    5              	
@@ -3280,150 +3315,164 @@
  811              	.ifndef VALID_ID
  812              	.error "processor ID not specified in generic include file"
  813              	.endif
-  23              	
-  24              	.NOLIST
-  25              	.equ FCY, 16000000
-  26              	    
-  27              	.equ RAM_SIZE, 0x2000
-  28              	.equ RAM_BASE, 0x800
-  29              	.equ PSV_BASE, 0x2800
-  30              	    
-  31              	; sortie vidéo
-  32              	.equ NTSC, 1
-  33              	.equ PAL, 2
-  34              	;sélection du standard vidéo NTSC ou PAL    
-  35              	.equ VIDEO_STD, NTSC
-  36              	    
-  37              	.equ VIDEO_PORT, PORTB
-  38              	.equ VIDEO_LAT, LATB    
-  39              	.equ VIDEO_TRIS, TRISB
-  40              	.equ VIDEO_PORCH,2    
-  41              	.equ VIDEO_OUT,  3
-  42              	.equ VIDEO_OCR, OC2R
-  43              	.equ VIDEO_OCRS, OC2RS
-  44              	.equ VIDEO_OCCON, OC2CON
-  45              	.equ VIDEO_RPOR, RPOR1
-  46              	.equ VIDEO_RPORbit, RP3R0
-  47              	.equ VIDEO_FN,  10
-  48              	.equ VIDEO_IFS, IFS0
-  49              	.equ VIDEO_IEC, IEC0
-  50              	.equ VIDEO_IF,  OC2IF
-  51              	.equ VIDEO_IE, OC2IE
-  52              	.equ VIDEO_IPC, IPC1
-  53              	.equ VIDEO_IPbit, OC2IP0
-  54              	.equ VIDEO_SPICON1, SPI2CON1
-  55              	.equ VIDEO_SPICON2, SPI2CON2
-  56              	.equ VIDEO_SPISTAT, SPI2STAT
-  57              	.equ VIDEO_SPIBUF, SPI2BUF
-  58              	; synchronistation NTSC
-  59              	.equ SYNC_PORT, PORTB
-  60              	.equ SYNC_TRIS, TRISB
-  61              	.equ SYNC_OUT,   4
-  62              	.equ SYNC_TMR, TMR2
-  63              	.equ SYNC_TMRCON, T2CON
-  64              	.equ SYNC_PER, PR2
-  65              	.equ SYNC_OCRS,  OC1RS
-  66              	.equ SYNC_OCR, OC1R
-  67              	.equ SYNC_OCCON, OC1CON
-  68              	.equ SYNC_RPOR, RPOR2
-  69              	.equ SYNC_RPORbit, RP4R0
-  70              	.equ SYNC_FN,   18
-  71              	.equ SYNC_IFS, IFS0
-  72              	.equ SYNC_IEC, IEC0
-  73              	.equ SYNC_IF,  T2IF
-  74              	.equ SYNC_IE,  T2IE
-  75              	.equ SYNC_IPC, IPC1
-  76              	.equ SYNC_IPbit, T2IP0
-  77              	
-  78              	; clavier
-  79              	.equ KBD_CLK, RB15
-  80              	.equ KBD_DAT, RB14
-  81              	.equ KBD_PORT, PORTB
-  82              	.equ KBD_LAT, LATB
-  83              	.equ KBD_TRIS, TRISB
-  84              	.equ KBD_RPINR, RPINR0
-  85              	.equ KBD_PPSbit, INT1R0
-  86              	.equ KBD_IFS, IFS1
-  87              	.equ KBD_IF, INT1IF
-  88              	.equ KBD_IEC, IEC1
-  89              	.equ KBD_IE, INT1IE
-  90              	.equ KBD_IPC, IPC5
-  91              	.equ KBD_IPCbit, INT1IP0
-  92              	.equ KBD_INTEP, INT1EP
-  93              	.equ KBD_INTCON, INTCON2
-  94              	
-  95              	; interface SPI RAM et EEPROM
-  96              	.equ SRAM_SEL, RB10    
-  97              	.equ EEPROM_SEL, RB9
-  98              	.equ STR_CLK,   RB8
-  99              	.equ STR_MOSI,  RB6
- 100              	.equ STR_MISO,  RB7
- 101              	.equ STR_RPINR, RPINR20
- 102              	.equ STR_SDI_PPSbit, SDI1R0
- 103              	.equ STR_CLK_FN, 8
- 104              	.equ STR_SDO_FN, 7
- 105              	.equ STR_SDO_RPOR, RPOR3
- 106              	.equ STR_SDO_RPORbit, RP6R0    
- 107              	.equ STR_CLK_RPOR, RPOR4
- 108              	.equ STR_CLK_RPORbit, RP8R0    
- 109              	.equ STR_PORT, PORTB
- 110              	.equ STR_TRIS, TRISB
- 111              	.equ STR_LAT, LATB
- 112              	.equ STR_SPICON1, SPI1CON1    
- 113              	.equ STR_SPICON2, SPI1CON2
- 114              	.equ STR_SPISTAT, SPI1STAT
- 115              	.equ STR_SPIBUF,  SPI1BUF
- 116              	.equ STR_SPIIFS,  IFS0
- 117              	.equ STR_SPIIF,   SPI1IF    
- 118              	
- 119              	; communication port série
- 120              	.equ  SER_PORT, PORTB
- 121              	.equ  SER_LAT,  LATB
- 122              	.equ  SER_TRIS, TRISB
- 123              	.equ  SER_TX_OUT, RB13  ; pin RP13
- 124              	.equ  SER_RX_INP, RB12  ; pin RP12  
- 125              	.equ  SER_MODE, U1MODE
- 126              	.equ  SER_STA,  U1STA
- 127              	.equ  SER_BRG,  U1BRG
- 128              	.equ  SER_TXREG, U1TXREGL
- 129              	.equ  SER_RXREG, U1RXREGL
- 130              	.equ  SER_RX_PPSbit, U1RXR0
- 131              	.equ  SER_RX_RPINR, RPINR18
- 132              	.equ  SER_TX_FN, 3
- 133              	.equ  SER_TX_RPOR,  RPOR6  
- 134              	.equ  SER_TX_PPSbit, RP13R0    
- 135              	.equ  SER_TX_IFS, IFS0
- 136              	.equ  SER_TX_IF,  U1TXIF
- 137              	.equ  SER_TX_IEC, IEC0
- 138              	.equ  SER_TX_IE,  U1TXIE
- 139              	.equ  SER_TX_IPC,  IPC3
- 140              	.equ  SER_TX_IPbit, U1TXIP0  
- 141              	.equ  SER_RX_IFS, IFS0
- 142              	.equ  SER_RX_IF,  U1RXIF
- 143              	.equ  SER_RX_IEC, IEC0
- 144              	.equ  SER_RX_IE,  U1RXIE
- 145              	.equ  SER_RX_IPC, IPC2
- 146              	.equ  SER_RX_IPbit, U1RXIP0
- 147              	    
- 148              	    
- 149              	.LIST
- 150              	 
- 151              	; section pour regrouper les routine ISR    
- 152              	.macro INT  
- 153              	.section .int code
- 154              	.align 2
- 155              	.endm
- 156              	
- 157              	; aide au débogage
- 158              	; affiche un caractère à l'écran 
- 159              	.macro progress c
- 160              	   mov #\c, W0
- 161              	   mov.b WREG, _video_buffer
- 162              	.endm
- 163              	 
- 164              	
- 165              	.endif
- 166              	
+  58              	
+  59              	.NOLIST
+  60              	.equ FCY, 16000000
+  61              	    
+  62              	.equ RAM_SIZE, 0x2000
+  63              	.equ RAM_BASE, 0x800
+  64              	.equ PSV_BASE, 0x2800
+  65              	    
+  66              	; sortie vidéo
+  67              	.equ NTSC, 1
+  68              	.equ PAL, 2
+  69              	;sélection du standard vidéo NTSC ou PAL    
+  70              	.equ VIDEO_STD, NTSC
+  71              	    
+  72              	.equ VIDEO_PORT, PORTB
+  73              	.equ VIDEO_LAT, LATB    
+  74              	.equ VIDEO_TRIS, TRISB
+  75              	.equ VIDEO_PORCH,2    
+  76              	.equ VIDEO_OUT,  3
+  77              	.equ VIDEO_OCR, OC2R
+  78              	.equ VIDEO_OCRS, OC2RS
+  79              	.equ VIDEO_OCCON, OC2CON
+  80              	.equ VIDEO_RPOR, RPOR1
+  81              	.equ VIDEO_RPORbit, RP3R0
+  82              	.equ VIDEO_FN,  10
+  83              	.equ VIDEO_IFS, IFS0
+  84              	.equ VIDEO_IEC, IEC0
+  85              	.equ VIDEO_IF,  OC2IF
+  86              	.equ VIDEO_IE, OC2IE
+  87              	.equ VIDEO_IPC, IPC1
+  88              	.equ VIDEO_IPbit, OC2IP0
+  89              	.equ VIDEO_SPICON1, SPI2CON1
+  90              	.equ VIDEO_SPICON2, SPI2CON2
+  91              	.equ VIDEO_SPISTAT, SPI2STAT
+  92              	.equ VIDEO_SPIBUF, SPI2BUF
+  93              	; synchronistation NTSC
+  94              	.equ SYNC_PORT, PORTB
+  95              	.equ SYNC_TRIS, TRISB
+  96              	.equ SYNC_OUT,   4
+  97              	.equ SYNC_TMR, TMR2
+  98              	.equ SYNC_TMRCON, T2CON
+  99              	.equ SYNC_PER, PR2
+ 100              	.equ SYNC_OCRS,  OC1RS
+ 101              	.equ SYNC_OCR, OC1R
+ 102              	.equ SYNC_OCCON, OC1CON
+ 103              	.equ SYNC_RPOR, RPOR2
+ 104              	.equ SYNC_RPORbit, RP4R0
+ 105              	.equ SYNC_FN,   18
+ 106              	.equ SYNC_IFS, IFS0
+ 107              	.equ SYNC_IEC, IEC0
+ 108              	.equ SYNC_IF,  T2IF
+ 109              	.equ SYNC_IE,  T2IE
+ 110              	.equ SYNC_IPC, IPC1
+ 111              	.equ SYNC_IPbit, T2IP0
+ 112              	
+ 113              	; clavier
+ 114              	.equ KBD_CLK, RB15
+ 115              	.equ KBD_DAT, RB14
+ 116              	.equ KBD_PORT, PORTB
+ 117              	.equ KBD_LAT, LATB
+ 118              	.equ KBD_TRIS, TRISB
+ 119              	.equ KBD_RPINR, RPINR0
+ 120              	.equ KBD_PPSbit, INT1R0
+ 121              	.equ KBD_IFS, IFS1
+ 122              	.equ KBD_IF, INT1IF
+ 123              	.equ KBD_IEC, IEC1
+ 124              	.equ KBD_IE, INT1IE
+ 125              	.equ KBD_IPC, IPC5
+ 126              	.equ KBD_IPCbit, INT1IP0
+ 127              	.equ KBD_INTEP, INT1EP
+ 128              	.equ KBD_INTCON, INTCON2
+ 129              	
+ 130              	; interface SPI RAM et EEPROM
+ 131              	.equ SRAM_SEL, RB10    
+ 132              	.equ EEPROM_SEL, RB9
+ 133              	.equ STR_CLK,   RB8
+ 134              	.equ STR_MOSI,  RB6
+ 135              	.equ STR_MISO,  RB7
+ 136              	.equ STR_RPINR, RPINR20
+ 137              	.equ STR_SDI_PPSbit, SDI1R0
+ 138              	.equ STR_CLK_FN, 8
+ 139              	.equ STR_SDO_FN, 7
+ 140              	.equ STR_SDO_RPOR, RPOR3
+ 141              	.equ STR_SDO_RPORbit, RP6R0    
+ 142              	.equ STR_CLK_RPOR, RPOR4
+ 143              	.equ STR_CLK_RPORbit, RP8R0    
+ 144              	.equ STR_PORT, PORTB
+ 145              	.equ STR_TRIS, TRISB
+ 146              	.equ STR_LAT, LATB
+ 147              	.equ STR_SPICON1, SPI1CON1    
+ 148              	.equ STR_SPICON2, SPI1CON2
+ 149              	.equ STR_SPISTAT, SPI1STAT
+ 150              	.equ STR_SPIBUF,  SPI1BUF
+ 151              	.equ STR_SPIIFS,  IFS0
+ 152              	.equ STR_SPIIF,   SPI1IF    
+ 153              	
+ 154              	; communication port série
+ 155              	.equ  SER_PORT, PORTB
+ 156              	.equ  SER_LAT,  LATB
+ 157              	.equ  SER_TRIS, TRISB
+ 158              	.equ  SER_TX_OUT, RB13  ; pin RP13
+ 159              	.equ  SER_RX_INP, RB12  ; pin RP12  
+ 160              	.equ  SER_MODE, U1MODE
+ 161              	.equ  SER_STA,  U1STA
+ 162              	.equ  SER_BRG,  U1BRG
+ 163              	.equ  SER_TXREG, U1TXREGL
+ 164              	.equ  SER_RXREG, U1RXREGL
+ 165              	.equ  SER_RX_PPSbit, U1RXR0
+ 166              	.equ  SER_RX_RPINR, RPINR18
+ 167              	.equ  SER_TX_FN, 3
+ 168              	.equ  SER_TX_RPOR,  RPOR6  
+ 169              	.equ  SER_TX_PPSbit, RP13R0    
+ 170              	.equ  SER_TX_IFS, IFS0
+ 171              	.equ  SER_TX_IF,  U1TXIF
+ 172              	.equ  SER_TX_IEC, IEC0
+ 173              	.equ  SER_TX_IE,  U1TXIE
+ 174              	.equ  SER_TX_IPC,  IPC3
+ 175              	.equ  SER_TX_IPbit, U1TXIP0  
+ 176              	.equ  SER_RX_IFS, IFS0
+ 177              	.equ  SER_RX_IF,  U1RXIF
+ 178              	.equ  SER_RX_IEC, IEC0
+ 179              	.equ  SER_RX_IE,  U1RXIE
+ 180              	.equ  SER_RX_IPC, IPC2
+ 181              	.equ  SER_RX_IPbit, U1RXIP0
+ 182              	 
+ 183              	 ;sortie audio tonalités
+ 184              	 .equ AUDIO_PORT, PORTB
+ 185              	 .equ AUDIO_TRIS, TRISB
+ 186              	 .equ AUDIO_LAT,  LATB
+ 187              	 .equ AUDIO_OUT,  RB5
+ 188              	 .equ AUDIO_TMR,  TMR3
+ 189              	 .equ AUDIO_TMRCON, T3CON
+ 190              	 .equ AUDIO_PER,  PR3
+ 191              	 .equ AUDIO_OCCON, OC3CON
+ 192              	 .equ AUDIO_OCR,  OC3R
+ 193              	 .equ AUDIO_OCRS, OC3RS
+ 194              	 .equ AUDIO_RPOR, RPOR2
+ 195              	 .equ AUDIO_PPSbit, RP5R0
+ 196              	 .equ AUDIO_FN, 20
+ 197              	 
+ 198              	.LIST
+ 199              	 
+ 200              	; section pour regrouper les routine ISR    
+ 201              	.macro INT  
+ 202              	.section .int code
+ 203              	.align 2
+ 204              	.endm
+ 205              	
+ 206              	; aide au débogage
+ 207              	; affiche un caractère à l'écran 
+ 208              	.macro progress c
+ 209              	   mov #\c, W0
+ 210              	   mov.b WREG, _video_buffer
+ 211              	.endm
+ 212              	 
+ 213              	
+ 214              	.endif
+ 215              	
   28              	.include "core.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -3622,365 +3671,677 @@
   31              	
   32              	.endif
   33              	
-  30              	    
-  31              	.global pstack, rstack, user
-  32              	    
-  33              	.data
-  34                 	user: ; variables utilisateur
-  35 0000 00 00 00 00 	.space 20
-  35      00 00 00 00 
-  35      00 00 00 00 
-  35      00 00 00 00 
-  35      00 00 00 00 
-  36                 	    
-  37                 	.section _pstack, bss, address(PSV_BASE-RSTK_SIZE-DSTK_SIZE)    
-  38                 	pstack:
-  39 0000 00 00 00 00 	.space DSTK_SIZE
-  39      00 00 00 00 
-  39      00 00 00 00 
-  39      00 00 00 00 
-  39      00 00 00 00 
-  39      00 00 00 00 
-  39      00 00 00 00 
-  39      00 00 00 00 
-  39      00 00 00 00 
-  40                 	
-  41                 	.section _rstack,stack, address(PSV_BASE-RSTK_SIZE)
-  42                 	rstack:
-  43 0000 00 00 00 00 	.space RSTK_SIZE
-  43      00 00 00 00 
-  43      00 00 00 00 
-  43      00 00 00 00 
-  43      00 00 00 00 
-  43      00 00 00 00 
-  43      00 00 00 00 
-  43      00 00 00 00 
-  43      00 00 00 00 
-  44                 	    
+  30              	.include "sound.inc"
+   1              	;****************************************************************************
+   2              	; Copyright 2015, Jacques Deschênes
+   3              	; This file is part of ForthEx.
+   4              	;
+   5              	;     ForthEx is free software: you can redistribute it and/or modify
+   6              	;     it under the terms of the GNU General Public License as published by
+   7              	;     the Free Software Foundation, either version 3 of the License, or
+   8              	;     (at your option) any later version.
+   9              	;
+  10              	;     ForthEx is distributed in the hope that it will be useful,
+  11              	;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  12              	;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  13              	;     GNU General Public License for more details.
+  14              	;
+  15              	;     You should have received a copy of the GNU General Public License
+  16              	;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+  17              	;
+  18              	;****************************************************************************
+  19              	
+  20              	;Nom: sound.inc
+  21              	;Description: constante utilisées pour la sortie tonalités audio.
+  22              	;Date: 2015-10-16
+  23              	
+  24              	.ifndef SOUND_INC
+  25              	.equ SOUND_INC, 1
+  26              	    
+  27              	; gamme tempérée
+  28              	; valeurs calculée pour Ftmr=2Mhz    
+  29              	.equ DO1, 30577   ; 65,406
+  30              	.equ DO1d, 28861  ; 69,29504076
+  31              	.equ RE1, 27241	  ; 73,4153238836
+  32              	.equ RE1d, 25712  ; 77,7805990417
+  33              	.equ MI1, 24269	  ; 82,4054334607
+  34              	.equ FA1, 22907	  ; 87,3052605343
+  35              	.equ FA1d, 21621  ; 92,4964313257
+  36              	.equ SOL1, 20407  ; 97,9962691323
+  37              	.equ SOL1d, 19262 ; 103,8231272949
+  38              	.equ LA1, 18181   ; 109,9964504439
+  39              	.equ LA1d, 17160  ; 116,5368393873
+  40              	.equ SI1, 16197	  ; 123,4661198572
+  41              	.equ DO2, 15288	  ; 130,8074153439
+  42              	.equ DO2d, 14430  ; 138,5852242603
+  43              	.equ R2, 13620	  ; 146,8255016948
+  44              	.equ R2d, 12856	  ; 155,5557460256
+  45              	.equ MI2, 12134	  ; 164,8050906842
+  46              	.equ FA2, 11453	  ; 174,6044013763
+  47              	.equ FA2d, 10810  ; 184,9863790822
+  48              	.equ SOL2, 10203  ; 195,9856691824
+  49              	.equ SOL2d, 9631  ; 207,638977072
+  50              	.equ LA2, 9090	  ; 219,9851906487
+  51              	.equ LA2d, 8580	  ; 233,0655100846
+  52              	.equ SI2, 8098	  ; 246,9235853143
+  53              	.equ DO3, 7644	  ; 261,6056616971
+  54              	.equ DO3d, 7215	  ; 277,1607343416
+  55              	.equ RE3, 6810	  ; 293,6407116055
+  56              	.equ R3d, 6427	  ; 311,1005883176
+  57              	.equ MI3, 6066	  ; 329,598629299
+  58              	.equ FA3, 5726	  ; 349,1965637971
+  59              	.equ FA3d, 5404	  ; 369,9597914804
+  60              	.equ SOL3, 5101	  ; 391,9576006819
+  61              	.equ SOL3d, 4815  ; 415,2633996184
+  62              	.equ LA3, 4544	  ; 439,9549613597
+  63              	.equ LA3d, 4289	  ; 466,1146833622
+  64              	.equ SI3, 4048	  ; 493,8298624349
+  65              	.equ DO4, 3821	  ; 523,1929860553
+  66              	.equ DO4d, 3607	  ; 554,3020410061
+  67              	.equ RE4, 3404	  ; 587,2608403643
+  68              	.equ R4d, 3213	  ; 622,1793699324
+  69              	.equ MI4, 3033	  ; 659,1741552686
+  70              	.equ FA4, 2862	  ; 698,3686505409
+  71              	.equ FA4d, 2702	  ; 739,893650502
+  72              	.equ SOL4, 2550	  ; 783,8877269609
+  73              	.equ SOL4d, 2407  ; 830,497691206
+  74              	.equ LA4, 2272	  ; 879,8790839251
+  75              	.equ LA4d, 2144	  ; 932,1966942552
+  76              	.equ SI4, 2024	  ; 987,6251096957
+  77              	.equ DO5, 1910	  ; 1046,3492987182
+  78              	.equ DO5d, 1803	  ; 1108,56522802
+  79              	.equ RE5, 1701	  ; 1174,480516478
+  80              	.equ RE5d, 1606	  ; 1244,3151279878
+  81              	.equ MI5, 1516	  ; 1318,302105498
+  82              	.equ FA5, 1430	  ; 1396,6883486909
+  83              	.equ FA5d, 1350	  ; 1479,735437904
+  84              	.equ SOL5, 1274	  ; 1567,7205070418
+  85              	.equ SOL5d, 1203  ; 1660,9371683905
+  86              	.equ LA5, 1135	  ; 1759,696492423
+  87              	.equ LA5d, 1071	  ; 1864,3280458625
+  88              	.equ SI5, 1011	  ; 1975,1809914695
+  89              	.equ DO6, 954	  ; 2092,6252532222
+  90              	.equ DO6d, 901	  ; 2217,0527507788
+  91              	.equ RE6, 850	  ; 2348,8787073401
+  92              	.equ RE6d, 802	  ; 2488,5430352786
+  93              	.equ MI6, 757	  ; 2636,5118041562
+  94              	.equ FA6, 715	  ; 2793,2787960314
+  95              	.equ FA6d, 674	  ; 2959,3671532434
+  96              	.equ SOL6, 636	  ; 3135,3311241752
+  97              	.equ SOL6d, 601	  ; 3321,7579128187
+  98              	.equ LA6, 567	  ; 3519,2696383149
+  99              	.equ LA6d, 535	  ; 3728,5254110091
+ 100              	.equ SI6, 505	  ; 3950,2235319477
+ 101              	.equ DO7, 476	  ; 4185,1038231573
+ 102              	.equ DO7d, 450	  ; 4433,9500964822
+ 103              	.equ RE7, 424	  ; 4697,5927692191
+ 104              	.equ RE7d, 400	  ; 4976,9116352768
+ 105              	    
+ 106              	.endif
+  31              	    
+  32              	.global pstack, rstack, user
+  33              	    
+  34              	.data
+  35                 	user: ; variables utilisateur
+  36 0000 00 00 00 00 	.space 20
+  36      00 00 00 00 
+  36      00 00 00 00 
+  36      00 00 00 00 
+  36      00 00 00 00 
+  37                 	    
+  38                 	.section _pstack, bss, address(PSV_BASE-RSTK_SIZE-DSTK_SIZE)    
+  39                 	pstack:
+  40 0000 00 00 00 00 	.space DSTK_SIZE
+  40      00 00 00 00 
+  40      00 00 00 00 
+  40      00 00 00 00 
+  40      00 00 00 00 
+  40      00 00 00 00 
+  40      00 00 00 00 
+  40      00 00 00 00 
+  40      00 00 00 00 
+  41                 	
+  42                 	.section _rstack,stack, address(PSV_BASE-RSTK_SIZE)
+  43                 	rstack:
+  44 0000 00 00 00 00 	.space RSTK_SIZE
+  44      00 00 00 00 
+  44      00 00 00 00 
+  44      00 00 00 00 
+  44      00 00 00 00 
+  44      00 00 00 00 
+  44      00 00 00 00 
+  44      00 00 00 00 
+  44      00 00 00 00 
   45                 	    
-  46                 	INT    
-  47              	.global __DefaultInterrupt
-  48              	__DefaultInterrupt:
-  49 000000  00 00 FE 	    reset
-  50              	
-  51              	.section .start code
-  52              	.align 2    
-  53              	.global __reset    
-  54              	__reset: 
-  55              	    ; mise à zéro de la RAM
-  56 000000  00 80 20 	    mov #RAM_BASE, W0
-  57 000002  F1 FF 20 	    mov #(RAM_SIZE/2-1), W1
-  58 000004  01 80 09 	    repeat W1
-  59 000006  00 18 EB 	    clr [W0++]
-  60              	    ; modification du pointeur 
-  61              	    ; de pile des retours
-  62 000008  0F 00 20 	    mov #rstack, RSP
-  63 00000a  09 00 20 	    mov #user, UP
-  64              	    ; conserve adresse de la pile
-  65 00000c  8F 04 98 	    mov RSP, [UP+RBASE]
-  66 00000e  00 00 02 	    call hardware_init
-  66         00 00 00 
-  67 000012  00 80 22 	    mov #(PSV_BASE), W0
-  68 000014  00 00 88 	    mov W0, SPLIM
-  69 000016  0E 00 20 	    mov #pstack, DSP
-  70 000018  9E 04 98 	    mov DSP, [UP+PBASE]
-  71 00001a  A0 00 20 	    mov #10, W0
-  72 00001c  A0 04 98 	    mov W0, [UP+BASE]
-  73 00001e  00 00 20 	    mov #psvoffset(sys_latest), W0
-  74 000020  C0 04 98 	    mov W0, [UP+LATEST]
-  75 000022  08 00 20 	    mov #psvoffset(ENTRY), IP
-  76 000024  B8 05 78 	    NEXT
-  76         3B 00 78 
-  76         00 40 01 
-  77              	    
-  78              	
-  79              	.section .const psv       
-  80                 	;test string
-  81                 	version:
-  82 0000 46 6F 72 74 	.asciz "ForthEx V0.1\r\n"    
-  82      68 45 78 20 
-  82      56 30 2E 31 
-  82      0D 0A 00 
-  83                 	    
-  84                 	.text
-  85              	.global DOCOLON    
-  86              	DOCOLON: ; entre dans un mot de haut niveau (mot défini par ':')
-  87 000000  88 1F 78 	    RPUSH IP   
-  88 000002  0B 04 78 	    mov WP,IP
-  89 000004  B8 05 78 	    NEXT
-  89         3B 00 78 
-  89         00 40 01 
-  90              	
-  91              	DEFCODE "EXECUTE",7,,DOCODE
-  92 00000a  8C 05 78 	    mov T, WP
-  93 00000c  2E 06 78 	    DPOP
-  94 00000e  0B 40 01 	    goto WP
-  95              	    
-  96              	DEFCODE "EXIT",4,,EXIT
-  97 000010  4F 04 78 	    RPOP IP
-  98 000012  B8 05 78 	    NEXT
-  98         3B 00 78 
-  98         00 40 01 
-  99              	
- 100              	DEFCODE "LIT",5,,LIT  ; ( -- n )
- 101 000018  0C 2F 78 	    DPUSH
- 102 00001a  08 06 90 	    mov [IP+0], T
- 103 00001c  08 84 E8 	    inc2 IP, IP
- 104 00001e  B8 05 78 	    NEXT
- 104         3B 00 78 
- 104         00 40 01 
- 105              	
- 106              	DEFCODE "CLIT",4,,CLIT  ; ( -- c )
- 107 000024  0C 2F 78 	    DPUSH
- 108 000026  18 46 78 	    mov.b [IP], T
- 109 000028  08 84 E8 	    inc2 IP, IP
- 110 00002a  0C 86 FB 	    ze T,T
- 111 00002c  B8 05 78 	    NEXT
- 111         3B 00 78 
- 111         00 40 01 
- 112              	
- 113              	DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
- 114 000032  1C 46 78 	    mov.b [T], T
- 115 000034  0C 86 FB 	    ze T, T
- 116 000036  B8 05 78 	    NEXT
+  46                 	    
+  47                 	    
+  48                 	
+  49                 	.section .const psv       
+  50                 	;test string
+  51                 	version:
+  52 0000 46 6F 72 74 	.asciz "ForthEx V0.1\r\n"    
+  52      68 45 78 20 
+  52      56 30 2E 31 
+  52      0D 0A 00 
+  53                 	    
+  54                 	.text
+  55              	.global DOCOLON    
+  56              	DOCOLON: ; entre dans un mot de haut niveau (mot défini par ':')
+  57 000000  88 1F 78 	    RPUSH IP   
+  58 000002  0B 04 78 	    mov WP,IP
+  59 000004  B8 05 78 	    NEXT
+  59         3B 00 78 
+  59         00 40 01 
+  60              	
+  61              	DEFCODE "COLD",4,,COLD ; ( -- )
+  62 00000a  00 00 FE 	    reset
+  63              	    
+  64              	
+  65              	DEFCODE "WARM",4,,WARM   ; ( -- )
+  66 00000c  0E 00 20 	    mov #pstack, DSP
+  67 00000e  0F 00 20 	    mov #rstack, RSP
+  68 000010  08 00 20 	    mov #psvoffset(ENTRY), IP
+  69 000012  B8 05 78 	    NEXT
+  69         3B 00 78 
+  69         00 40 01 
+  70              	    
+  71              	DEFCODE "EXECUTE",7,,DOCODE
+  72 000018  8C 05 78 	    mov T, WP
+  73 00001a  2E 06 78 	    DPOP
+  74 00001c  0B 40 01 	    goto WP
+  75              	    
+  76              	DEFCODE "EXIT",4,,EXIT
+  77 00001e  4F 04 78 	    RPOP IP
+  78 000020  B8 05 78 	    NEXT
+  78         3B 00 78 
+  78         00 40 01 
+  79              	
+  80              	DEFCODE "LIT",5,,LIT  ; ( -- n )
+  81 000026  0C 2F 78 	    DPUSH
+  82 000028  08 06 90 	    mov [IP+0], T
+  83 00002a  08 84 E8 	    inc2 IP, IP
+  84 00002c  B8 05 78 	    NEXT
+  84         3B 00 78 
+  84         00 40 01 
+  85              	
+  86              	DEFCODE "CLIT",4,,CLIT  ; ( -- c )
+  87 000032  0C 2F 78 	    DPUSH
+  88 000034  18 46 78 	    mov.b [IP], T
+  89 000036  08 84 E8 	    inc2 IP, IP
+  90 000038  0C 86 FB 	    ze T,T
+  91 00003a  B8 05 78 	    NEXT
+  91         3B 00 78 
+  91         00 40 01 
+  92              	
+  93              	DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
+  94 000040  1C 46 78 	    mov.b [T], T
+  95 000042  0C 86 FB 	    ze T, T
+  96 000044  B8 05 78 	    NEXT
+  96         3B 00 78 
+  96         00 40 01 
+  97              	    
+  98              	DEFCODE "C!",2,,CSTORE  ; ( c-addr c -- )
+  99 00004a  0C 80 FB 	    ze T, W0
+ 100 00004c  2E 06 78 	    DPOP
+ 101 00004e  00 4E 78 	    mov.b W0,[T]
+ 102 000050  2E 06 78 	    DPOP
+ 103 000052  B8 05 78 	    NEXT
+ 103         3B 00 78 
+ 103         00 40 01 
+ 104              	    
+ 105              	; branchement inconditionnel    
+ 106              	DEFCODE "DOBRA",5,,DOBRA  ; ( -- )
+ 107 000058  18 04 78 	    mov [IP], IP
+ 108 00005a  B8 05 78 	    NEXT
+ 108         3B 00 78 
+ 108         00 40 01 
+ 109              	    
+ 110              	; branchement si T==0    
+ 111              	DEFCODE "DO0BRA",6,,DO0BRA ; ( n -- )
+ 112 000060  0C 00 E0 	    cp0 T
+ 113 000062  2E 06 78 	    DPOP
+ 114 000064  00 00 3A 	    bra nz, 1f
+ 115 000066  18 04 78 	    mov [IP], IP
+ 116 000068  B8 05 78 	    NEXT   
  116         3B 00 78 
  116         00 40 01 
- 117              	    
- 118              	DEFCODE "C!",2,,CSTORE  ; ( c-addr c -- )
- 119 00003c  0C 80 FB 	    ze T, W0
- 120 00003e  2E 06 78 	    DPOP
- 121 000040  00 4E 78 	    mov.b W0,[T]
- 122 000042  2E 06 78 	    DPOP
- 123 000044  B8 05 78 	    NEXT
- 123         3B 00 78 
- 123         00 40 01 
- 124              	    
- 125              	; branchement inconditionnel    
- 126              	DEFCODE "DOBRA",5,,DOBRA  ; ( -- )
- 127 00004a  18 04 78 	    mov [IP], IP
- 128 00004c  B8 05 78 	    NEXT
+ 117              	1:
+ 118 00006e  08 84 E8 	    inc2 IP,IP
+ 119 000070  B8 05 78 	    NEXT
+ 119         3B 00 78 
+ 119         00 40 01 
+ 120              	
+ 121              	; exécution de DO    
+ 122              	DEFCODE "DODO",4,,DODO ; ( n  n -- ) R( -- n n )
+ 123 000076  87 1F 78 	    RPUSH I
+ 124 000078  8C 03 78 	    mov T, I
+ 125 00007a  2E 06 78 	    DPOP
+ 126 00007c  8C 1F 78 	    RPUSH T
+ 127 00007e  2E 06 78 	    DPOP
+ 128 000080  B8 05 78 	    NEXT
  128         3B 00 78 
  128         00 40 01 
- 129              	    
- 130              	; branchement si T==0    
- 131              	DEFCODE "DO0BRA",6,,DO0BRA ; ( n -- )
- 132 000052  0C 00 E0 	    cp0 T
- 133 000054  2E 06 78 	    DPOP
- 134 000056  00 00 3A 	    bra nz, 1f
- 135 000058  18 04 78 	    mov [IP], IP
- 136 00005a  B8 05 78 	    NEXT   
- 136         3B 00 78 
- 136         00 40 01 
- 137              	1:
- 138 000060  08 84 E8 	    inc2 IP,IP
- 139 000062  B8 05 78 	    NEXT
+ 129              	
+ 130              	; exécution de LOOP   
+ 131              	DEFCODE "DOLOOP",6,,DOLOOP  ; ( -- )  R( n n -- )
+ 132 000086  87 03 E8 	    inc I, I
+ 133 000088  1E 38 E1 	    cp I, [DSP]
+ 134 00008a  00 00 32 	    bra eq, 1f
+ 135 00008c  18 04 78 	    mov [IP], IP
+ 136              	1:
+ 137 00008e  CF 03 78 	    RPOP I
+ 138 000090  8F 87 E9 	    RDROP    
+ 139 000092  B8 05 78 	    NEXT
  139         3B 00 78 
  139         00 40 01 
  140              	
- 141              	; exécution de DO    
- 142              	DEFCODE "DODO",4,,DODO ; ( n  n -- ) R( -- n n )
- 143 000068  87 1F 78 	    RPUSH I
- 144 00006a  8C 03 78 	    mov T, I
- 145 00006c  2E 06 78 	    DPOP
- 146 00006e  8C 1F 78 	    RPUSH T
- 147 000070  2E 06 78 	    DPOP
- 148 000072  B8 05 78 	    NEXT
- 148         3B 00 78 
- 148         00 40 01 
- 149              	
- 150              	; exécution de LOOP   
- 151              	DEFCODE "DOLOOP",6,,DOLOOP  ; ( -- )  R( n n -- )
- 152 000078  87 03 E8 	    inc I, I
- 153 00007a  1E 38 E1 	    cp I, [DSP]
- 154 00007c  00 00 32 	    bra eq, 1f
- 155 00007e  18 04 78 	    mov [IP], IP
- 156              	1:
- 157 000080  CF 03 78 	    RPOP I
- 158 000082  8F 87 E9 	    RDROP    
- 159 000084  B8 05 78 	    NEXT
- 159         3B 00 78 
- 159         00 40 01 
- 160              	
- 161              	; empile compteur de boucle    
- 162              	DEFCODE "I",1,,DOI  ; ( -- n )
- 163 00008a  0C 2F 78 	    DPUSH
- 164 00008c  07 06 78 	    mov I, T
- 165 00008e  B8 05 78 	    NEXT
- 165         3B 00 78 
- 165         00 40 01 
- 166              	
- 167              	DEFCODE "DUP",3,,DUP ; ( n -- n n )
- 168 000094  0C 2F 78 	    DPUSH
- 169 000096  B8 05 78 	    NEXT
- 169         3B 00 78 
- 169         00 40 01 
- 170              	    
- 171              	DEFCODE "DROP",4,,DROP ; ( n -- )
- 172 00009c  2E 06 78 	    DPOP
- 173 00009e  B8 05 78 	    NEXT
- 173         3B 00 78 
- 173         00 40 01 
- 174              	
- 175              	DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
- 176 0000a4  0C 00 78 	    mov T, W0
- 177 0000a6  1E 06 78 	    mov [DSP], T
- 178 0000a8  00 07 98 	    mov W0, [DSP+0]
- 179 0000aa  B8 05 78 	    NEXT
+ 141              	; empile compteur de boucle    
+ 142              	DEFCODE "I",1,,DOI  ; ( -- n )
+ 143 000098  0C 2F 78 	    DPUSH
+ 144 00009a  07 06 78 	    mov I, T
+ 145 00009c  B8 05 78 	    NEXT
+ 145         3B 00 78 
+ 145         00 40 01 
+ 146              	
+ 147              	DEFCODE "DUP",3,,DUP ; ( n -- n n )
+ 148 0000a2  0C 2F 78 	    DPUSH
+ 149 0000a4  B8 05 78 	    NEXT
+ 149         3B 00 78 
+ 149         00 40 01 
+ 150              	
+ 151              	DEFCODE "?DUP",4,,QDUP ; ( n - n | n n )
+ 152 0000aa  0C 00 E0 	    cp0 T
+ 153 0000ac  00 00 32 	    bra z, 0f
+ 154 0000ae  0C 2F 78 	    DPUSH
+ 155 0000b0  B8 05 78 	0:  NEXT
+ 155         3B 00 78 
+ 155         00 40 01 
+ 156              	    
+ 157              	    
+ 158              	DEFCODE "DROP",4,,DROP ; ( n -- )
+ 159 0000b6  2E 06 78 	    DPOP
+ 160 0000b8  B8 05 78 	    NEXT
+ 160         3B 00 78 
+ 160         00 40 01 
+ 161              	
+ 162              	DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
+ 163 0000be  0C 00 78 	    mov T, W0
+ 164 0000c0  1E 06 78 	    mov [DSP], T
+ 165 0000c2  00 07 98 	    mov W0, [DSP+0]
+ 166 0000c4  B8 05 78 	    NEXT
+ 166         3B 00 78 
+ 166         00 40 01 
+ 167              	
+ 168              	DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
+ 169 0000ca  0C 00 78 	    mov T, W0
+ 170 0000cc  1E 06 78 	    mov [DSP], T
+ 171 0000ce  FE B8 97 	    mov [DSP-2], W1
+ 172 0000d0  01 0F 78 	    mov W1, [DSP]
+ 173 0000d2  70 BF 9F 	    mov W0, [DSP-2]
+ 174 0000d4  B8 05 78 	    NEXT
+ 174         3B 00 78 
+ 174         00 40 01 
+ 175              	    
+ 176              	DEFCODE "OVER",4,,OVER  ; ( n1 n2 -- n1 n2 n1 )
+ 177 0000da  0C 2F 78 	    DPUSH
+ 178 0000dc  7E BE 97 	    mov [DSP-2],T
+ 179 0000de  B8 05 78 	    NEXT
  179         3B 00 78 
  179         00 40 01 
- 180              	
- 181              	DEFCODE "ROT",3,,ROT
- 182 0000b0  0C 00 78 	    mov T, W0
- 183 0000b2  1E 06 78 	    mov [DSP], T
- 184 0000b4  FE B8 97 	    mov [DSP-2], W1
- 185 0000b6  01 0F 78 	    mov W1, [DSP]
- 186 0000b8  70 BF 9F 	    mov W0, [DSP-2]
- 187 0000ba  B8 05 78 	    NEXT
- 187         3B 00 78 
- 187         00 40 01 
- 188              	    
- 189              	DEFCODE "OVER",4,,OVER
- 190 0000c0  0C 2F 78 	    DPUSH
- 191 0000c2  7E BE 97 	    mov [DSP-2],T
- 192 0000c4  B8 05 78 	    NEXT
- 192         3B 00 78 
- 192         00 40 01 
- 193              	
- 194              	; MATH
- 195              	DEFCODE "1+",1,,INC1
- 196 0000ca  1C 00 B0 	    add #1, T
- 197 0000cc  B8 05 78 	    NEXT
- 197         3B 00 78 
- 197         00 40 01 
- 198              	    
- 199              	DEFWORD "TEST",4,,TEST   
- 200 00aa 00 00 00 00 	.word  CLS,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,DOBRA, TEST+6
- 200      00 00 00 00 
- 200      4D 01 00 00 
- 200      00 00 00 00 
- 200      00 00 4D 01 
- 200      00 00 00 00 
- 200      06 00 
- 201                 	
- 202 00c4 00 00 07 53 	DEFWORD "SERTEST",7,,SERTEST
- 202      45 52 54 45 
- 202      53 54 00 00 
- 203 00d0 00 00 00 00 	.word CLS,MSG,SGET,SEMIT,DOBRA,SERTEST+6    
- 203      00 00 00 00 
- 203      00 00 06 00 
- 204                 	
- 205 00dc 00 00 07 4B 	DEFWORD "KBDTEST",7,,KBDTEST
- 205      42 44 54 45 
- 205      53 54 00 00 
- 206 00e8 00 00 00 00 	.word CLS,KEY,EMIT,DOBRA,KBDTEST+4    
- 206      00 00 00 00 
- 206      04 00 
- 207                 	    
- 208 00f2 00 00 05 48 	DEFWORD "HOME",5,,HOME
- 208      4F 4D 45 00 
- 208      00 00 
- 209 00fc 00 00 00 00 	.word LIT,0,LIT,0,CURPOS,EXIT
- 209      00 00 00 00 
- 209      00 00 00 00 
- 210                 	    
- 211 0108 00 00 06 4F 	DEFWORD "OKOFF",6,,OKOFF
- 211      4B 4F 46 46 
- 211      00 00 
- 212 0112 00 00 00 00 	.word BL,BL,EXIT 
- 212      00 00 
- 213                 	    
- 214 0118 00 00 02 4F 	DEFWORD "OK",2,,OK
- 214      4B 00 00 00 
- 215 0120 00 00 4F 00 	.word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
- 215      00 00 00 00 
- 215      4B 00 00 00 
- 215      00 00 
- 216                 	
- 217                 	.section .const psv
- 218                 	quick:
- 219 000f 54 68 65 20 	.asciz "The quick brown fox jump over the lazy dog.\r"
- 219      71 75 69 63 
- 219      6B 20 62 72 
- 219      6F 77 6E 20 
- 219      66 6F 78 20 
- 219      6A 75 6D 70 
- 219      20 6F 76 65 
- 219      72 20 74 68 
- 219      65 20 6C 61 
- 220                 	
- 221                 	DEFWORD "MSG",3,,MSG
- 222 0136 00 00 E8 03 	.word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
- 222      00 00 00 00 
- 222      00 00 00 00 
- 222      00 00 
- 223                 	
- 224 0144 00 00 05 5A 	DEFWORD "ZTYPE",5,,ZTYPE
- 224      54 59 50 45 
- 224      00 00 
- 225 014e 00 00 00 00 	.word DUP,CFETCH,DUP,DO0BRA,ZTYPEOUT,EMIT,INC1,DOBRA,ZTYPE+2
- 225      00 00 00 00 
- 225      00 00 00 00 
- 225      00 00 00 00 
- 225      02 00 
- 226                 	ZTYPEOUT:
- 227 0160 00 00 00 00 	.word DROP,DROP, EXIT     
- 227      00 00 
- 228                 	
- 229 0166 00 00 07 53 	DEFWORD "STRTEST",7,,STRTEST
- 229      54 52 54 45 
- 229      53 54 00 00 
- 230 0172 00 00 00 00 	.word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
- 230      00 00 00 00 
- 230      00 00 00 00 
- 230      00 00 00 00 
- 230      00 00 00 00 
- 230      00 00 2B 00 
- 230      00 00 00 00 
- 231 018e 00 00 00 00 	.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,DOBRA, STRTEST+2
- 231      00 00 00 00 
- 231      00 00 00 00 
- 231      00 00 00 00 
- 231      00 00 2B 00 
- 231      00 00 00 00 
- 231      00 00 02 00 
- 232                 	
- 233 01aa 00 00 0A 45 	DEFWORD "EEPROMTEST",10,,EEPROMTEST
- 233      45 50 52 4F 
- 233      4D 54 45 53 
- 233      54 00 00 00 
- 234 01ba 00 00 00 00 	.word LIT, quick, ZTYPE, LIT, _video_buffer,LIT,100,ESTORE,DELAY
- 234      00 00 00 00 
- 234      00 00 00 00 
- 234      64 00 00 00 
- 234      00 00 
- 235 01cc 00 00 00 00 	.word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,DELAY,DOBRA,EEPROMTEST+20
- 235      00 00 00 00 
- 235      00 00 64 00 
- 235      00 00 00 00 
- 235      00 00 14 00 
- 236                 	    
- 237 01e0 00 00 05 44 	DEFWORD "DELAY",5,,DELAY
- 237      45 4C 41 59 
- 237      00 00 
- 238 01ea 00 00 E8 03 	.word  LIT, 1000, MSEC, EXIT
- 238      00 00 00 00 
- 239                 	    
- 240 01f2 00 00 07 49 	DEFCODE "INFLOOP",7,,INFLOOP
- 240      4E 46 4C 4F 
- 240      4F 50 00 00 
- 241 0000d2  00 00 37 	    bra .
- 242              	    
- 243              	SYSDICT
- 244                 	.global ENTRY
- 245                 	ENTRY: 
- 246 01fe 00 00       	.word EEPROMTEST
- 247                 	.global sys_latest
- 248                 	sys_latest:
- 249 0200 00 00       	.word link
- 250                 	    
- 251                 	    
- 252                 	.end
+ 180              	    
+ 181              	DEFCODE "NIP",3,,NIP   ; ( n1 n2 -- n2 )
+ 182 0000e4  2E 00 B1 	    sub #2, DSP
+ 183 0000e6  B8 05 78 	    NEXT
+ 183         3B 00 78 
+ 183         00 40 01 
+ 184              	    
+ 185              	DEFCODE ">R",2,,TOR   ;  ( n -- )  R:( -- n)
+ 186 0000ec  8C 1F 78 	    push T
+ 187 0000ee  2E 06 78 	    DPOP
+ 188 0000f0  B8 05 78 	    NEXT
+ 188         3B 00 78 
+ 188         00 40 01 
+ 189              	    
+ 190              	DEFCODE "R>",2,,RFROM  ; ( -- n ) R( n -- )
+ 191 0000f6  0C 2F 78 	    DPUSH
+ 192 0000f8  4F 06 78 	    pop T
+ 193 0000fa  B8 05 78 	    NEXT
+ 193         3B 00 78 
+ 193         00 40 01 
+ 194              	
+ 195              	DEFCODE "R@",2,,RFETCH ; ( -- n ) R ( -- )
+ 196 000100  0C 2F 78 	    DPUSH
+ 197 000102  1F 06 78 	    mov [RSP], T
+ 198 000104  B8 05 78 	    NEXT
+ 198         3B 00 78 
+ 198         00 40 01 
+ 199              	    
+ 200              	DEFCODE "SP@",3,,SPFETCH ; ( -- n )
+ 201 00010a  0C 2F 78 	    DPUSH
+ 202 00010c  0E 06 78 	    mov DSP, T
+ 203 00010e  B8 05 78 	    NEXT
+ 203         3B 00 78 
+ 203         00 40 01 
+ 204              	    
+ 205              	DEFCODE "SP!",3,,SPSTORE  ; ( n -- )
+ 206 000114  0C 07 78 	    mov T, DSP
+ 207 000116  2E 06 78 	    DPOP
+ 208 000118  B8 05 78 	    NEXT
+ 208         3B 00 78 
+ 208         00 40 01 
+ 209              	    
+ 210              	DEFCODE "RP@",3,,RPFETCH  ; ( -- n )
+ 211 00011e  0C 2F 78 	    DPUSH
+ 212 000120  0F 06 78 	    mov RSP, T
+ 213 000122  B8 05 78 	    NEXT
+ 213         3B 00 78 
+ 213         00 40 01 
+ 214              	    
+ 215              	DEFCODE "RP!",3,,RPSTORE  ; ( n -- )
+ 216 000128  8C 07 78 	    mov T, RSP
+ 217 00012a  2E 06 78 	    DPOP
+ 218 00012c  B8 05 78 	    NEXT
+ 218         3B 00 78 
+ 218         00 40 01 
+ 219              	    
+ 220              	DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 n3 -- n3 n1 n2 )
+ 221 000132  0C 00 78 	    mov T, W0
+ 222 000134  1E 06 78 	    mov [DSP], T
+ 223 000136  FE B8 97 	    mov [DSP-2], W1
+ 224 000138  70 BF 9F 	    mov W0, [DSP-2]
+ 225 00013a  01 0F 78 	    mov W1, [DSP]
+ 226 00013c  B8 05 78 	    NEXT
+ 226         3B 00 78 
+ 226         00 40 01 
+ 227              	
+ 228              	    
+ 229              	;;;;;;;
+ 230              	; MATH
+ 231              	;;;;;;;
+ 232              	DEFCODE "+",1,,PLUS   ;( n1 n2 -- n1+n2 )
+ 233 000142  1E 00 46 	    add T, [DSP], W0
+ 234 000144  2E 06 78 	    DPOP
+ 235 000146  00 06 78 	    mov W0, T
+ 236 000148  B8 05 78 	    NEXT
+ 236         3B 00 78 
+ 236         00 40 01 
+ 237              	    
+ 238              	DEFCODE "-",1,,MINUS   ; ( n1 n2 -- n1-n2 )
+ 239 00014e  0C 00 78 	    mov T, W0
+ 240 000150  2E 06 78 	    DPOP
+ 241 000152  00 06 56 	    sub T, W0, T
+ 242 000154  B8 05 78 	    NEXT
+ 242         3B 00 78 
+ 242         00 40 01 
+ 243              	    
+ 244              	DEFCODE "1+",2,,ONEPLUS ; ( n -- n ) n+1
+ 245 00015a  1C 00 B0 	    add #1, T
+ 246 00015c  B8 05 78 	    NEXT
+ 246         3B 00 78 
+ 246         00 40 01 
+ 247              	
+ 248              	DEFCODE "1-",2,,ONEMINUS  ; ( n -- n ) n-1
+ 249 000162  1C 00 B1 	    sub #1, T
+ 250 000164  B8 05 78 	    NEXT
+ 250         3B 00 78 
+ 250         00 40 01 
+ 251              	    
+ 252              	DEFCODE "2*",2,,TWOSTAR  ; ( n -- n ) 2*n
+ 253 00016a  0C 06 46 	    add T,T, T
+ 254 00016c  B8 05 78 	    NEXT
+ 254         3B 00 78 
+ 254         00 40 01 
+ 255              	    
+ 256              	DEFCODE "2/",2,,TWOSLASH ; ( n -- n ) n/2
+ 257 000172  0C 06 D1 	    lsr T,T
+ 258 000174  B8 05 78 	    NEXT
+ 258         3B 00 78 
+ 258         00 40 01 
+ 259              	    
+ 260              	DEFCODE "LSHIFT",6,,LSHIFT ; ( x1 -- x2 ) x2=x1<<1    
+ 261 00017a  0C 06 D0 	    sl T,T
+ 262 00017c  B8 05 78 	    NEXT
+ 262         3B 00 78 
+ 262         00 40 01 
+ 263              	    
+ 264              	DEFCODE "RSHIFT",6,,RSHIFT ; ( x1 -- x2 ) x2=x1>>1
+ 265 000182  0C 06 D1 	    lsr T,T
+ 266 000184  B8 05 78 	    NEXT
+ 266         3B 00 78 
+ 266         00 40 01 
+ 267              	    
+ 268              	    
+ 269              	    
+ 270              	DEFCODE "+!",2,,PLUSSTORE  ; ( n addr  -- ) [addr]=[addr]+n     
+ 271 00018a  2E 00 78 	    mov [DSP--], W0
+ 272 00018c  1C 0E 40 	    add W0, [T],[T]
+ 273 00018e  2E 06 78 	    DPOP
+ 274 000190  B8 05 78 	    NEXT
+ 274         3B 00 78 
+ 274         00 40 01 
+ 275              	    
+ 276              	DEFCODE "M+",2,,DADD  ; ( d n --  d ) simple + double
+ 277 000196  0C 00 78 	    mov T, W0
+ 278 000198  2E 06 78 	    DPOP
+ 279 00019a  1E 0F 40 	    add W0, [DSP], [DSP]
+ 280 00019c  0C 80 B0 	    addc #0, T
+ 281 00019e  B8 05 78 	    NEXT
+ 281         3B 00 78 
+ 281         00 40 01 
+ 282              	 
+ 283              	; opérations logiques bit à bit    
+ 284              	DEFCODE "AND",3,,_AND  ; ( n1 n2 -- n)  ET bit à bit
+ 285 0001a4  1E 0F 66 	    and T,[DSP],[DSP]
+ 286 0001a6  2E 06 78 	    DPOP
+ 287 0001a8  B8 05 78 	    NEXT
+ 287         3B 00 78 
+ 287         00 40 01 
+ 288              	    
+ 289              	DEFCODE "OR",2,,_OR   ; ( n1 n2 -- n ) OU bit à bit
+ 290 0001ae  1E 0F 76 	    ior T,[DSP],[DSP]
+ 291 0001b0  2E 06 78 	    DPOP
+ 292 0001b2  B8 05 78 	    NEXT
+ 292         3B 00 78 
+ 292         00 40 01 
+ 293              	    
+ 294              	DEFCODE "XOR",3,,_XOR ; ( n1 n2 -- n ) OU exclusif bit à bit
+ 295 0001b8  1E 0F 6E 	    xor T,[DSP],[DSP]
+ 296 0001ba  2E 06 78 	    DPOP
+ 297 0001bc  B8 05 78 	    NEXT
+ 297         3B 00 78 
+ 297         00 40 01 
+ 298              	    
+ 299              	    
+ 300              	DEFCODE "INVERT",6,,INVERT ; ( n -- n ) inversion des bits
+ 301 0001c2  0C 86 EA 	    com T, T
+ 302 0001c4  B8 05 78 	    NEXT
+ 302         3B 00 78 
+ 302         00 40 01 
+ 303              	    
+ 304              	DEFCODE "NEGATE",6,,NEGATE ; ( n - n ) complément à 2
+ 305 0001ca  0C 06 EA 	    neg T, T
+ 306 0001cc  B8 05 78 	    NEXT
+ 306         3B 00 78 
+ 306         00 40 01 
+ 307              	
+ 308              	; comparaisons
+ 309              	
+ 310              	DEFCODE "0=",2,,ZEROEQ  ; ( n -- f )  f=  n==0
+ 311 0001d2  1C 00 B1 	    sub #1,T
+ 312 0001d4  0C 06 5E 	    subb T,T,T
+ 313 0001d6  B8 05 78 	    NEXT
+ 313         3B 00 78 
+ 313         00 40 01 
+ 314              	    
+ 315              	DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
+ 316 0001dc  00 80 EB 	    setm W0
+ 317 0001de  0C 06 46 	    add T,T,T
+ 318 0001e0  0C 06 5E 	    subb T,T,T
+ 319 0001e2  0C 06 68 	    xor W0,T,T
+ 320 0001e4  B8 05 78 	    NEXT
+ 320         3B 00 78 
+ 320         00 40 01 
+ 321              	
+ 322              	DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
+ 323 0001ea  00 00 EB 	    clr W0
+ 324 0001ec  1E 60 E1 	    cp T, [DSP]
+ 325 0001ee  00 00 3A 	    bra nz, 1f
+ 326 0001f0  00 80 EA 	    com W0,W0
+ 327 0001f2  2E 06 78 	 1: DPOP
+ 328 0001f4  00 06 78 	    mov W0,T
+ 329 0001f6  B8 05 78 	    NEXT
+ 329         3B 00 78 
+ 329         00 40 01 
+ 330              	    
+ 331              	DEFCODE "<>",2,,NEQUAL ; ( n1 n2 -- f ) f = n1<>n2
+ 332 0001fc  00 00 EB 	    clr W0
+ 333 0001fe  1E 60 E1 	    cp T, [DSP]
+ 334 000200  00 00 32 	    bra z, 1f
+ 335 000202  00 80 EA 	    com W0,W0
+ 336 000204  2E 06 78 	1:  DPOP
+ 337 000206  00 06 78 	    mov W0, T
+ 338 000208  B8 05 78 	    NEXT
+ 338         3B 00 78 
+ 338         00 40 01 
+ 339              	    
+ 340              	    
+ 341              	    
+ 342              	    
+ 343              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 344              	;   TESTS
+ 345              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 346              	DEFWORD "TEST",4,,TEST   
+ 347 01ac 00 00 00 00 	.word  CLS,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,DOBRA, TEST+6
+ 347      00 00 00 00 
+ 347      4D 01 00 00 
+ 347      00 00 00 00 
+ 347      00 00 4D 01 
+ 347      00 00 00 00 
+ 347      06 00 
+ 348                 	
+ 349 01c6 00 00 07 53 	DEFWORD "SERTEST",7,,SERTEST
+ 349      45 52 54 45 
+ 349      53 54 00 00 
+ 350 01d2 00 00 00 00 	.word CLS,MSG,SGET,SEMIT,DOBRA,SERTEST+6    
+ 350      00 00 00 00 
+ 350      00 00 06 00 
+ 351                 	
+ 352 01de 00 00 07 4B 	DEFWORD "KBDTEST",7,,KBDTEST
+ 352      42 44 54 45 
+ 352      53 54 00 00 
+ 353 01ea 00 00 00 00 	.word CLS,KEY,EMIT,DOBRA,KBDTEST+4    
+ 353      00 00 00 00 
+ 353      04 00 
+ 354                 	    
+ 355 01f4 00 00 05 48 	DEFWORD "HOME",5,,HOME
+ 355      4F 4D 45 00 
+ 355      00 00 
+ 356 01fe 00 00 00 00 	.word LIT,0,LIT,0,CURPOS,EXIT
+ 356      00 00 00 00 
+ 356      00 00 00 00 
+ 357                 	    
+ 358 020a 00 00 06 4F 	DEFWORD "OKOFF",6,,OKOFF
+ 358      4B 4F 46 46 
+ 358      00 00 
+ 359 0214 00 00 00 00 	.word BL,BL,EXIT 
+ 359      00 00 
+ 360                 	    
+ 361 021a 00 00 02 4F 	DEFWORD "OK",2,,OK
+ 361      4B 00 00 00 
+ 362 0222 00 00 4F 00 	.word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
+ 362      00 00 00 00 
+ 362      4B 00 00 00 
+ 362      00 00 
+ 363                 	
+ 364                 	.section .const psv
+ 365                 	quick:
+ 366 000f 54 68 65 20 	.asciz "The quick brown fox jump over the lazy dog.\r"
+ 366      71 75 69 63 
+ 366      6B 20 62 72 
+ 366      6F 77 6E 20 
+ 366      66 6F 78 20 
+ 366      6A 75 6D 70 
+ 366      20 6F 76 65 
+ 366      72 20 74 68 
+ 366      65 20 6C 61 
+ 367                 	
+ 368                 	DEFWORD "MSG",3,,MSG
+ 369 0238 00 00 E8 03 	.word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
+ 369      00 00 00 00 
+ 369      00 00 00 00 
+ 369      00 00 
+ 370                 	
+ 371 0246 00 00 05 5A 	DEFWORD "ZTYPE",5,,ZTYPE
+ 371      54 59 50 45 
+ 371      00 00 
+ 372 0250 00 00 00 00 	.word DUP,CFETCH,DUP,DO0BRA,ZTYPEOUT,EMIT,ONEPLUS,DOBRA,ZTYPE+2
+ 372      00 00 00 00 
+ 372      00 00 00 00 
+ 372      00 00 00 00 
+ 372      02 00 
+ 373                 	ZTYPEOUT:
+ 374 0262 00 00 00 00 	.word DROP,DROP, EXIT     
+ 374      00 00 
+ 375                 	
+ 376 0268 00 00 07 53 	DEFWORD "STRTEST",7,,STRTEST
+ 376      54 52 54 45 
+ 376      53 54 00 00 
+ 377 0274 00 00 00 00 	.word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
+ 377      00 00 00 00 
+ 377      00 00 00 00 
+ 377      00 00 00 00 
+ 377      00 00 00 00 
+ 377      00 00 2B 00 
+ 377      00 00 00 00 
+ 378 0290 00 00 00 00 	.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,DOBRA, STRTEST+2
+ 378      00 00 00 00 
+ 378      00 00 00 00 
+ 378      00 00 00 00 
+ 378      00 00 2B 00 
+ 378      00 00 00 00 
+ 378      00 00 02 00 
+ 379                 	
+ 380 02ac 00 00 0A 45 	DEFWORD "EEPROMTEST",10,,EEPROMTEST
+ 380      45 50 52 4F 
+ 380      4D 54 45 53 
+ 380      54 00 00 00 
+ 381 02bc 00 00 00 00 	.word CLS,LIT, quick, ZTYPE, LIT, _video_buffer,LIT,100,ESTORE,SRAND,DELAY
+ 381      00 00 00 00 
+ 381      00 00 00 00 
+ 381      00 00 64 00 
+ 381      00 00 00 00 
+ 381      00 00 
+ 382 02d2 00 00 00 00 	.word CLS,LIT,100,LFSR,TONE, DELAY, LIT, _video_buffer,LIT,100,ELOAD,DOBRA,EEPROMTEST+22
+ 382      64 00 00 00 
+ 382      00 00 00 00 
+ 382      00 00 00 00 
+ 382      00 00 64 00 
+ 382      00 00 00 00 
+ 382      16 00 
+ 383                 	    
+ 384 02ec 00 00 05 44 	DEFWORD "DELAY",5,,DELAY
+ 384      45 4C 41 59 
+ 384      00 00 
+ 385 02f6 00 00 F4 01 	.word  LIT, 500, MSEC, EXIT
+ 385      00 00 00 00 
+ 386                 	    
+ 387 02fe 00 00 07 49 	DEFCODE "INFLOOP",7,,INFLOOP
+ 387      4E 46 4C 4F 
+ 387      4F 50 00 00 
+ 388 00020e  00 00 37 	    bra .
+ 389              	    
+ 390              	SYSDICT
+ 391                 	.global ENTRY
+ 392                 	ENTRY: 
+ 393 030a 00 00       	.word EEPROMTEST
+ 394                 	.global sys_latest
+ 395                 	sys_latest:
+ 396 030c 00 00       	.word link
+ 397                 	    
+ 398                 	    
+ 399                 	.end
 DEFINED SYMBOLS
+                            *ABS*:00000000 ./sound.inc
                             *ABS*:00000000 ./gen_macros.inc
                             *ABS*:00000000 ./core.inc
                             *ABS*:00000000 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc
@@ -3992,7 +4353,7 @@ DEFINED SYMBOLS
                             *ABS*:00000001 __PIC24F
                             *ABS*:00000001 __HAS_PMP
                             *ABS*:00000001 __C30ELF
-      ./hardware.inc:20     *ABS*:00000001 HARD_INC
+      ./hardware.inc:55     *ABS*:00000001 HARD_INC
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc:900    *ABS*:00000000 C
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc:901    *ABS*:00000001 Z
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc:902    *ABS*:00000002 OV
@@ -4996,55 +5357,58 @@ DEFINED SYMBOLS
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc:2671   *ABS*:00003fff JTAGEN_OFF
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc:2672   *ABS*:00007fff JTAGEN_ON
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24Fxxxx.inc:578    *ABS*:00000001 VALID_ID
-      ./hardware.inc:25     *ABS*:00f42400 FCY
-      ./hardware.inc:27     *ABS*:00002000 RAM_SIZE
-      ./hardware.inc:28     *ABS*:00000800 RAM_BASE
-      ./hardware.inc:29     *ABS*:00002800 PSV_BASE
-      ./hardware.inc:32     *ABS*:00000001 NTSC
-      ./hardware.inc:33     *ABS*:00000002 PAL
-      ./hardware.inc:35     *ABS*:00000001 VIDEO_STD
-      ./hardware.inc:40     *ABS*:00000002 VIDEO_PORCH
-      ./hardware.inc:41     *ABS*:00000003 VIDEO_OUT
-      ./hardware.inc:46     *ABS*:00000008 VIDEO_RPORbit
-      ./hardware.inc:47     *ABS*:0000000a VIDEO_FN
-      ./hardware.inc:50     *ABS*:00000006 VIDEO_IF
-      ./hardware.inc:51     *ABS*:00000006 VIDEO_IE
-      ./hardware.inc:53     *ABS*:00000008 VIDEO_IPbit
-      ./hardware.inc:61     *ABS*:00000004 SYNC_OUT
-      ./hardware.inc:69     *ABS*:00000000 SYNC_RPORbit
-      ./hardware.inc:70     *ABS*:00000012 SYNC_FN
-      ./hardware.inc:73     *ABS*:00000007 SYNC_IF
-      ./hardware.inc:74     *ABS*:00000007 SYNC_IE
-      ./hardware.inc:76     *ABS*:0000000c SYNC_IPbit
-      ./hardware.inc:79     *ABS*:0000000f KBD_CLK
-      ./hardware.inc:80     *ABS*:0000000e KBD_DAT
-      ./hardware.inc:85     *ABS*:00000008 KBD_PPSbit
-      ./hardware.inc:87     *ABS*:00000004 KBD_IF
-      ./hardware.inc:89     *ABS*:00000004 KBD_IE
-      ./hardware.inc:91     *ABS*:00000000 KBD_IPCbit
-      ./hardware.inc:92     *ABS*:00000001 KBD_INTEP
-      ./hardware.inc:96     *ABS*:0000000a SRAM_SEL
-      ./hardware.inc:97     *ABS*:00000009 EEPROM_SEL
-      ./hardware.inc:98     *ABS*:00000008 STR_CLK
-      ./hardware.inc:99     *ABS*:00000006 STR_MOSI
-      ./hardware.inc:100    *ABS*:00000007 STR_MISO
-      ./hardware.inc:102    *ABS*:00000000 STR_SDI_PPSbit
-      ./hardware.inc:103    *ABS*:00000008 STR_CLK_FN
-      ./hardware.inc:104    *ABS*:00000007 STR_SDO_FN
-      ./hardware.inc:106    *ABS*:00000000 STR_SDO_RPORbit
-      ./hardware.inc:108    *ABS*:00000000 STR_CLK_RPORbit
-      ./hardware.inc:117    *ABS*:0000000a STR_SPIIF
-      ./hardware.inc:123    *ABS*:0000000d SER_TX_OUT
-      ./hardware.inc:124    *ABS*:0000000c SER_RX_INP
-      ./hardware.inc:130    *ABS*:00000000 SER_RX_PPSbit
-      ./hardware.inc:132    *ABS*:00000003 SER_TX_FN
-      ./hardware.inc:134    *ABS*:00000008 SER_TX_PPSbit
-      ./hardware.inc:136    *ABS*:0000000c SER_TX_IF
-      ./hardware.inc:138    *ABS*:0000000c SER_TX_IE
-      ./hardware.inc:140    *ABS*:00000000 SER_TX_IPbit
-      ./hardware.inc:142    *ABS*:0000000b SER_RX_IF
-      ./hardware.inc:144    *ABS*:0000000b SER_RX_IE
-      ./hardware.inc:146    *ABS*:0000000c SER_RX_IPbit
+      ./hardware.inc:60     *ABS*:00f42400 FCY
+      ./hardware.inc:62     *ABS*:00002000 RAM_SIZE
+      ./hardware.inc:63     *ABS*:00000800 RAM_BASE
+      ./hardware.inc:64     *ABS*:00002800 PSV_BASE
+      ./hardware.inc:67     *ABS*:00000001 NTSC
+      ./hardware.inc:68     *ABS*:00000002 PAL
+      ./hardware.inc:70     *ABS*:00000001 VIDEO_STD
+      ./hardware.inc:75     *ABS*:00000002 VIDEO_PORCH
+      ./hardware.inc:76     *ABS*:00000003 VIDEO_OUT
+      ./hardware.inc:81     *ABS*:00000008 VIDEO_RPORbit
+      ./hardware.inc:82     *ABS*:0000000a VIDEO_FN
+      ./hardware.inc:85     *ABS*:00000006 VIDEO_IF
+      ./hardware.inc:86     *ABS*:00000006 VIDEO_IE
+      ./hardware.inc:88     *ABS*:00000008 VIDEO_IPbit
+      ./hardware.inc:96     *ABS*:00000004 SYNC_OUT
+      ./hardware.inc:104    *ABS*:00000000 SYNC_RPORbit
+      ./hardware.inc:105    *ABS*:00000012 SYNC_FN
+      ./hardware.inc:108    *ABS*:00000007 SYNC_IF
+      ./hardware.inc:109    *ABS*:00000007 SYNC_IE
+      ./hardware.inc:111    *ABS*:0000000c SYNC_IPbit
+      ./hardware.inc:114    *ABS*:0000000f KBD_CLK
+      ./hardware.inc:115    *ABS*:0000000e KBD_DAT
+      ./hardware.inc:120    *ABS*:00000008 KBD_PPSbit
+      ./hardware.inc:122    *ABS*:00000004 KBD_IF
+      ./hardware.inc:124    *ABS*:00000004 KBD_IE
+      ./hardware.inc:126    *ABS*:00000000 KBD_IPCbit
+      ./hardware.inc:127    *ABS*:00000001 KBD_INTEP
+      ./hardware.inc:131    *ABS*:0000000a SRAM_SEL
+      ./hardware.inc:132    *ABS*:00000009 EEPROM_SEL
+      ./hardware.inc:133    *ABS*:00000008 STR_CLK
+      ./hardware.inc:134    *ABS*:00000006 STR_MOSI
+      ./hardware.inc:135    *ABS*:00000007 STR_MISO
+      ./hardware.inc:137    *ABS*:00000000 STR_SDI_PPSbit
+      ./hardware.inc:138    *ABS*:00000008 STR_CLK_FN
+      ./hardware.inc:139    *ABS*:00000007 STR_SDO_FN
+      ./hardware.inc:141    *ABS*:00000000 STR_SDO_RPORbit
+      ./hardware.inc:143    *ABS*:00000000 STR_CLK_RPORbit
+      ./hardware.inc:152    *ABS*:0000000a STR_SPIIF
+      ./hardware.inc:158    *ABS*:0000000d SER_TX_OUT
+      ./hardware.inc:159    *ABS*:0000000c SER_RX_INP
+      ./hardware.inc:165    *ABS*:00000000 SER_RX_PPSbit
+      ./hardware.inc:167    *ABS*:00000003 SER_TX_FN
+      ./hardware.inc:169    *ABS*:00000008 SER_TX_PPSbit
+      ./hardware.inc:171    *ABS*:0000000c SER_TX_IF
+      ./hardware.inc:173    *ABS*:0000000c SER_TX_IE
+      ./hardware.inc:175    *ABS*:00000000 SER_TX_IPbit
+      ./hardware.inc:177    *ABS*:0000000b SER_RX_IF
+      ./hardware.inc:179    *ABS*:0000000b SER_RX_IE
+      ./hardware.inc:181    *ABS*:0000000c SER_RX_IPbit
+      ./hardware.inc:187    *ABS*:00000005 AUDIO_OUT
+      ./hardware.inc:195    *ABS*:00000008 AUDIO_PPSbit
+      ./hardware.inc:196    *ABS*:00000014 AUDIO_FN
           ./core.inc:24     *ABS*:00000001 CORE_INC
           ./core.inc:37     *ABS*:00000002 CELL_SIZE
           ./core.inc:38     *ABS*:00000040 DSTK_SIZE
@@ -5058,295 +5422,617 @@ DEFINED SYMBOLS
           ./core.inc:98     *ABS*:00000080 F_IMMED
           ./core.inc:99     *ABS*:00000020 F_HIDDEN
           ./core.inc:100    *ABS*:0000001f F_LENMASK
-              core.s:240    .sysdict:000001f2 link
+              core.s:387    .sysdict:000002fe link
     ./gen_macros.inc:24     *ABS*:00000001 GEN_MACRO
-              core.s:38     _pstack:00000000 pstack
-              core.s:42     _rstack:00000000 rstack
-              core.s:34     .data:00000000 user
+         ./sound.inc:25     *ABS*:00000001 SOUND_INC
+         ./sound.inc:29     *ABS*:00007771 DO1
+         ./sound.inc:30     *ABS*:000070bd DO1d
+         ./sound.inc:31     *ABS*:00006a69 RE1
+         ./sound.inc:32     *ABS*:00006470 RE1d
+         ./sound.inc:33     *ABS*:00005ecd MI1
+         ./sound.inc:34     *ABS*:0000597b FA1
+         ./sound.inc:35     *ABS*:00005475 FA1d
+         ./sound.inc:36     *ABS*:00004fb7 SOL1
+         ./sound.inc:37     *ABS*:00004b3e SOL1d
+         ./sound.inc:38     *ABS*:00004705 LA1
+         ./sound.inc:39     *ABS*:00004308 LA1d
+         ./sound.inc:40     *ABS*:00003f45 SI1
+         ./sound.inc:41     *ABS*:00003bb8 DO2
+         ./sound.inc:42     *ABS*:0000385e DO2d
+         ./sound.inc:43     *ABS*:00003534 R2
+         ./sound.inc:44     *ABS*:00003238 R2d
+         ./sound.inc:45     *ABS*:00002f66 MI2
+         ./sound.inc:46     *ABS*:00002cbd FA2
+         ./sound.inc:47     *ABS*:00002a3a FA2d
+         ./sound.inc:48     *ABS*:000027db SOL2
+         ./sound.inc:49     *ABS*:0000259f SOL2d
+         ./sound.inc:50     *ABS*:00002382 LA2
+         ./sound.inc:51     *ABS*:00002184 LA2d
+         ./sound.inc:52     *ABS*:00001fa2 SI2
+         ./sound.inc:53     *ABS*:00001ddc DO3
+         ./sound.inc:54     *ABS*:00001c2f DO3d
+         ./sound.inc:55     *ABS*:00001a9a RE3
+         ./sound.inc:56     *ABS*:0000191b R3d
+         ./sound.inc:57     *ABS*:000017b2 MI3
+         ./sound.inc:58     *ABS*:0000165e FA3
+         ./sound.inc:59     *ABS*:0000151c FA3d
+         ./sound.inc:60     *ABS*:000013ed SOL3
+         ./sound.inc:61     *ABS*:000012cf SOL3d
+         ./sound.inc:62     *ABS*:000011c0 LA3
+         ./sound.inc:63     *ABS*:000010c1 LA3d
+         ./sound.inc:64     *ABS*:00000fd0 SI3
+         ./sound.inc:65     *ABS*:00000eed DO4
+         ./sound.inc:66     *ABS*:00000e17 DO4d
+         ./sound.inc:67     *ABS*:00000d4c RE4
+         ./sound.inc:68     *ABS*:00000c8d R4d
+         ./sound.inc:69     *ABS*:00000bd9 MI4
+         ./sound.inc:70     *ABS*:00000b2e FA4
+         ./sound.inc:71     *ABS*:00000a8e FA4d
+         ./sound.inc:72     *ABS*:000009f6 SOL4
+         ./sound.inc:73     *ABS*:00000967 SOL4d
+         ./sound.inc:74     *ABS*:000008e0 LA4
+         ./sound.inc:75     *ABS*:00000860 LA4d
+         ./sound.inc:76     *ABS*:000007e8 SI4
+         ./sound.inc:77     *ABS*:00000776 DO5
+         ./sound.inc:78     *ABS*:0000070b DO5d
+         ./sound.inc:79     *ABS*:000006a5 RE5
+         ./sound.inc:80     *ABS*:00000646 RE5d
+         ./sound.inc:81     *ABS*:000005ec MI5
+         ./sound.inc:82     *ABS*:00000596 FA5
+         ./sound.inc:83     *ABS*:00000546 FA5d
+         ./sound.inc:84     *ABS*:000004fa SOL5
+         ./sound.inc:85     *ABS*:000004b3 SOL5d
+         ./sound.inc:86     *ABS*:0000046f LA5
+         ./sound.inc:87     *ABS*:0000042f LA5d
+         ./sound.inc:88     *ABS*:000003f3 SI5
+         ./sound.inc:89     *ABS*:000003ba DO6
+         ./sound.inc:90     *ABS*:00000385 DO6d
+         ./sound.inc:91     *ABS*:00000352 RE6
+         ./sound.inc:92     *ABS*:00000322 RE6d
+         ./sound.inc:93     *ABS*:000002f5 MI6
+         ./sound.inc:94     *ABS*:000002cb FA6
+         ./sound.inc:95     *ABS*:000002a2 FA6d
+         ./sound.inc:96     *ABS*:0000027c SOL6
+         ./sound.inc:97     *ABS*:00000259 SOL6d
+         ./sound.inc:98     *ABS*:00000237 LA6
+         ./sound.inc:99     *ABS*:00000217 LA6d
+         ./sound.inc:100    *ABS*:000001f9 SI6
+         ./sound.inc:101    *ABS*:000001dc DO7
+         ./sound.inc:102    *ABS*:000001c2 DO7d
+         ./sound.inc:103    *ABS*:000001a8 RE7
+         ./sound.inc:104    *ABS*:00000190 RE7d
+              core.s:39     _pstack:00000000 pstack
+              core.s:43     _rstack:00000000 rstack
+              core.s:35     .data:00000000 user
                             *ABS*:00000002 __ext_attr__rstack
-              core.s:48     .int:00000000 __DefaultInterrupt
-              core.s:54     .start:00000000 __reset
-              core.s:248    .sysdict:00000200 sys_latest
-              core.s:245    .sysdict:000001fe ENTRY
-              core.s:81     .const:00000000 version
-              core.s:86     .text:00000000 DOCOLON
-              core.s:91     .sysdict:00000000 name_DOCODE
-              core.s:91     .sysdict:0000000a DOCODE
-              core.s:91     .text:0000000a code_DOCODE
-              core.s:96     .sysdict:0000000c name_EXIT
-              core.s:96     .sysdict:00000014 EXIT
-              core.s:96     .text:00000010 code_EXIT
-              core.s:100    .sysdict:00000016 name_LIT
-              core.s:100    .sysdict:0000001c LIT
-              core.s:100    .text:00000018 code_LIT
-              core.s:106    .sysdict:0000001e name_CLIT
-              core.s:106    .sysdict:00000026 CLIT
-              core.s:106    .text:00000024 code_CLIT
-              core.s:113    .sysdict:00000028 name_CFETCH
-              core.s:113    .sysdict:0000002e CFETCH
-              core.s:113    .text:00000032 code_CFETCH
-              core.s:118    .sysdict:00000030 name_CSTORE
-              core.s:118    .sysdict:00000036 CSTORE
-              core.s:118    .text:0000003c code_CSTORE
-              core.s:126    .sysdict:00000038 name_DOBRA
-              core.s:126    .sysdict:00000040 DOBRA
-              core.s:126    .text:0000004a code_DOBRA
-              core.s:131    .sysdict:00000042 name_DO0BRA
-              core.s:131    .sysdict:0000004c DO0BRA
-              core.s:131    .text:00000052 code_DO0BRA
-              core.s:137    .text:00000060 L11
-              core.s:142    .sysdict:0000004e name_DODO
-              core.s:142    .sysdict:00000056 DODO
-              core.s:142    .text:00000068 code_DODO
-              core.s:151    .sysdict:00000058 name_DOLOOP
-              core.s:151    .sysdict:00000062 DOLOOP
-              core.s:151    .text:00000078 code_DOLOOP
-              core.s:156    .text:00000080 L12
-              core.s:162    .sysdict:00000064 name_DOI
-              core.s:162    .sysdict:00000068 DOI
-              core.s:162    .text:0000008a code_DOI
-              core.s:167    .sysdict:0000006a name_DUP
-              core.s:167    .sysdict:00000070 DUP
-              core.s:167    .text:00000094 code_DUP
-              core.s:171    .sysdict:00000072 name_DROP
-              core.s:171    .sysdict:0000007a DROP
-              core.s:171    .text:0000009c code_DROP
-              core.s:175    .sysdict:0000007c name_SWAP
-              core.s:175    .sysdict:00000084 SWAP
-              core.s:175    .text:000000a4 code_SWAP
-              core.s:181    .sysdict:00000086 name_ROT
-              core.s:181    .sysdict:0000008c ROT
-              core.s:181    .text:000000b0 code_ROT
-              core.s:189    .sysdict:0000008e name_OVER
-              core.s:189    .sysdict:00000096 OVER
-              core.s:189    .text:000000c0 code_OVER
-              core.s:195    .sysdict:00000098 name_INC1
-              core.s:195    .sysdict:0000009e INC1
-              core.s:195    .text:000000ca code_INC1
-              core.s:199    .sysdict:000000a0 name_TEST
-              core.s:199    .sysdict:000000a8 TEST
-              core.s:208    .sysdict:000000fa HOME
-              core.s:214    .sysdict:0000011e OK
-              core.s:211    .sysdict:00000110 OKOFF
-              core.s:202    .sysdict:000000c4 name_SERTEST
-              core.s:202    .sysdict:000000ce SERTEST
-              core.s:221    .sysdict:00000134 MSG
-              core.s:205    .sysdict:000000dc name_KBDTEST
-              core.s:205    .sysdict:000000e6 KBDTEST
-              core.s:208    .sysdict:000000f2 name_HOME
-              core.s:211    .sysdict:00000108 name_OKOFF
-              core.s:214    .sysdict:00000118 name_OK
-              core.s:218    .const:0000000f quick
-              core.s:221    .sysdict:0000012e name_MSG
-              core.s:224    .sysdict:0000014c ZTYPE
-              core.s:224    .sysdict:00000144 name_ZTYPE
-              core.s:226    .sysdict:00000160 ZTYPEOUT
-              core.s:229    .sysdict:00000166 name_STRTEST
-              core.s:229    .sysdict:00000170 STRTEST
-              core.s:237    .sysdict:000001e8 DELAY
-              core.s:233    .sysdict:000001aa name_EEPROMTEST
-              core.s:233    .sysdict:000001b8 EEPROMTEST
-              core.s:237    .sysdict:000001e0 name_DELAY
-              core.s:240    .sysdict:000001f2 name_INFLOOP
-              core.s:240    .sysdict:000001fc INFLOOP
-              core.s:199    .text:000000d2 code_INFLOOP
-              core.s:241    .text:000000d2 L0
+              core.s:51     .const:00000000 version
+              core.s:56     .text:00000000 DOCOLON
+              core.s:61     .sysdict:00000000 name_COLD
+              core.s:61     .sysdict:00000008 COLD
+              core.s:61     .text:0000000a code_COLD
+              core.s:65     .sysdict:0000000a name_WARM
+              core.s:65     .sysdict:00000012 WARM
+              core.s:65     .text:0000000c code_WARM
+              core.s:392    .sysdict:0000030a ENTRY
+              core.s:71     .sysdict:00000014 name_DOCODE
+              core.s:71     .sysdict:0000001e DOCODE
+              core.s:71     .text:00000018 code_DOCODE
+              core.s:76     .sysdict:00000020 name_EXIT
+              core.s:76     .sysdict:00000028 EXIT
+              core.s:76     .text:0000001e code_EXIT
+              core.s:80     .sysdict:0000002a name_LIT
+              core.s:80     .sysdict:00000030 LIT
+              core.s:80     .text:00000026 code_LIT
+              core.s:86     .sysdict:00000032 name_CLIT
+              core.s:86     .sysdict:0000003a CLIT
+              core.s:86     .text:00000032 code_CLIT
+              core.s:93     .sysdict:0000003c name_CFETCH
+              core.s:93     .sysdict:00000042 CFETCH
+              core.s:93     .text:00000040 code_CFETCH
+              core.s:98     .sysdict:00000044 name_CSTORE
+              core.s:98     .sysdict:0000004a CSTORE
+              core.s:98     .text:0000004a code_CSTORE
+              core.s:106    .sysdict:0000004c name_DOBRA
+              core.s:106    .sysdict:00000054 DOBRA
+              core.s:106    .text:00000058 code_DOBRA
+              core.s:111    .sysdict:00000056 name_DO0BRA
+              core.s:111    .sysdict:00000060 DO0BRA
+              core.s:111    .text:00000060 code_DO0BRA
+              core.s:117    .text:0000006e L11
+              core.s:122    .sysdict:00000062 name_DODO
+              core.s:122    .sysdict:0000006a DODO
+              core.s:122    .text:00000076 code_DODO
+              core.s:131    .sysdict:0000006c name_DOLOOP
+              core.s:131    .sysdict:00000076 DOLOOP
+              core.s:131    .text:00000086 code_DOLOOP
+              core.s:136    .text:0000008e L12
+              core.s:142    .sysdict:00000078 name_DOI
+              core.s:142    .sysdict:0000007c DOI
+              core.s:142    .text:00000098 code_DOI
+              core.s:147    .sysdict:0000007e name_DUP
+              core.s:147    .sysdict:00000084 DUP
+              core.s:147    .text:000000a2 code_DUP
+              core.s:151    .sysdict:00000086 name_QDUP
+              core.s:151    .sysdict:0000008e QDUP
+              core.s:151    .text:000000aa code_QDUP
+              core.s:155    .text:000000b0 L1
+              core.s:158    .sysdict:00000090 name_DROP
+              core.s:158    .sysdict:00000098 DROP
+              core.s:158    .text:000000b6 code_DROP
+              core.s:162    .sysdict:0000009a name_SWAP
+              core.s:162    .sysdict:000000a2 SWAP
+              core.s:162    .text:000000be code_SWAP
+              core.s:168    .sysdict:000000a4 name_ROT
+              core.s:168    .sysdict:000000aa ROT
+              core.s:168    .text:000000ca code_ROT
+              core.s:176    .sysdict:000000ac name_OVER
+              core.s:176    .sysdict:000000b4 OVER
+              core.s:176    .text:000000da code_OVER
+              core.s:181    .sysdict:000000b6 name_NIP
+              core.s:181    .sysdict:000000bc NIP
+              core.s:181    .text:000000e4 code_NIP
+              core.s:185    .sysdict:000000be name_TOR
+              core.s:185    .sysdict:000000c4 TOR
+              core.s:185    .text:000000ec code_TOR
+              core.s:190    .sysdict:000000c6 name_RFROM
+              core.s:190    .sysdict:000000cc RFROM
+              core.s:190    .text:000000f6 code_RFROM
+              core.s:195    .sysdict:000000ce name_RFETCH
+              core.s:195    .sysdict:000000d4 RFETCH
+              core.s:195    .text:00000100 code_RFETCH
+              core.s:200    .sysdict:000000d6 name_SPFETCH
+              core.s:200    .sysdict:000000dc SPFETCH
+              core.s:200    .text:0000010a code_SPFETCH
+              core.s:205    .sysdict:000000de name_SPSTORE
+              core.s:205    .sysdict:000000e4 SPSTORE
+              core.s:205    .text:00000114 code_SPSTORE
+              core.s:210    .sysdict:000000e6 name_RPFETCH
+              core.s:210    .sysdict:000000ec RPFETCH
+              core.s:210    .text:0000011e code_RPFETCH
+              core.s:215    .sysdict:000000ee name_RPSTORE
+              core.s:215    .sysdict:000000f4 RPSTORE
+              core.s:215    .text:00000128 code_RPSTORE
+              core.s:220    .sysdict:000000f6 name_TUCK
+              core.s:220    .sysdict:000000fe TUCK
+              core.s:220    .text:00000132 code_TUCK
+              core.s:232    .sysdict:00000100 name_PLUS
+              core.s:232    .sysdict:00000104 PLUS
+              core.s:232    .text:00000142 code_PLUS
+              core.s:238    .sysdict:00000106 name_MINUS
+              core.s:238    .sysdict:0000010a MINUS
+              core.s:238    .text:0000014e code_MINUS
+              core.s:244    .sysdict:0000010c name_ONEPLUS
+              core.s:244    .sysdict:00000112 ONEPLUS
+              core.s:244    .text:0000015a code_ONEPLUS
+              core.s:248    .sysdict:00000114 name_ONEMINUS
+              core.s:248    .sysdict:0000011a ONEMINUS
+              core.s:248    .text:00000162 code_ONEMINUS
+              core.s:252    .sysdict:0000011c name_TWOSTAR
+              core.s:252    .sysdict:00000122 TWOSTAR
+              core.s:252    .text:0000016a code_TWOSTAR
+              core.s:256    .sysdict:00000124 name_TWOSLASH
+              core.s:256    .sysdict:0000012a TWOSLASH
+              core.s:256    .text:00000172 code_TWOSLASH
+              core.s:260    .sysdict:0000012c name_LSHIFT
+              core.s:260    .sysdict:00000136 LSHIFT
+              core.s:260    .text:0000017a code_LSHIFT
+              core.s:264    .sysdict:00000138 name_RSHIFT
+              core.s:264    .sysdict:00000142 RSHIFT
+              core.s:264    .text:00000182 code_RSHIFT
+              core.s:270    .sysdict:00000144 name_PLUSSTORE
+              core.s:270    .sysdict:0000014a PLUSSTORE
+              core.s:270    .text:0000018a code_PLUSSTORE
+              core.s:276    .sysdict:0000014c name_DADD
+              core.s:276    .sysdict:00000152 DADD
+              core.s:276    .text:00000196 code_DADD
+              core.s:284    .sysdict:00000154 name__AND
+              core.s:284    .sysdict:0000015a _AND
+              core.s:284    .text:000001a4 code__AND
+              core.s:289    .sysdict:0000015c name__OR
+              core.s:289    .sysdict:00000162 _OR
+              core.s:289    .text:000001ae code__OR
+              core.s:294    .sysdict:00000164 name__XOR
+              core.s:294    .sysdict:0000016a _XOR
+              core.s:294    .text:000001b8 code__XOR
+              core.s:300    .sysdict:0000016c name_INVERT
+              core.s:300    .sysdict:00000176 INVERT
+              core.s:300    .text:000001c2 code_INVERT
+              core.s:304    .sysdict:00000178 name_NEGATE
+              core.s:304    .sysdict:00000182 NEGATE
+              core.s:304    .text:000001ca code_NEGATE
+              core.s:310    .sysdict:00000184 name_ZEROEQ
+              core.s:310    .sysdict:0000018a ZEROEQ
+              core.s:310    .text:000001d2 code_ZEROEQ
+              core.s:315    .sysdict:0000018c name_ZEROLT
+              core.s:315    .sysdict:00000192 ZEROLT
+              core.s:315    .text:000001dc code_ZEROLT
+              core.s:322    .sysdict:00000194 name_EQUAL
+              core.s:322    .sysdict:00000198 EQUAL
+              core.s:322    .text:000001ea code_EQUAL
+              core.s:327    .text:000001f2 L13
+              core.s:331    .sysdict:0000019a name_NEQUAL
+              core.s:331    .sysdict:000001a0 NEQUAL
+              core.s:331    .text:000001fc code_NEQUAL
+              core.s:336    .text:00000204 L14
+              core.s:346    .sysdict:000001a2 name_TEST
+              core.s:346    .sysdict:000001aa TEST
+              core.s:355    .sysdict:000001fc HOME
+              core.s:361    .sysdict:00000220 OK
+              core.s:358    .sysdict:00000212 OKOFF
+              core.s:349    .sysdict:000001c6 name_SERTEST
+              core.s:349    .sysdict:000001d0 SERTEST
+              core.s:368    .sysdict:00000236 MSG
+              core.s:352    .sysdict:000001de name_KBDTEST
+              core.s:352    .sysdict:000001e8 KBDTEST
+              core.s:355    .sysdict:000001f4 name_HOME
+              core.s:358    .sysdict:0000020a name_OKOFF
+              core.s:361    .sysdict:0000021a name_OK
+              core.s:365    .const:0000000f quick
+              core.s:368    .sysdict:00000230 name_MSG
+              core.s:371    .sysdict:0000024e ZTYPE
+              core.s:371    .sysdict:00000246 name_ZTYPE
+              core.s:373    .sysdict:00000262 ZTYPEOUT
+              core.s:376    .sysdict:00000268 name_STRTEST
+              core.s:376    .sysdict:00000272 STRTEST
+              core.s:384    .sysdict:000002f4 DELAY
+              core.s:380    .sysdict:000002ac name_EEPROMTEST
+              core.s:380    .sysdict:000002ba EEPROMTEST
+              core.s:384    .sysdict:000002ec name_DELAY
+              core.s:387    .sysdict:000002fe name_INFLOOP
+              core.s:387    .sysdict:00000308 INFLOOP
+              core.s:346    .text:0000020e code_INFLOOP
+              core.s:388    .text:0000020e L0
+              core.s:395    .sysdict:0000030c sys_latest
                       .debug_line:00000000 .L0
                       .debug_line:00000024 .L0
-              core.s:252    .debug_line:000000aa .L0
-              core.s:87     .text:00000000 .L0
-              core.s:88     .text:00000002 .L0
-              core.s:87     .text:00000000 .L0
-              core.s:89     .text:00000004 .L0
-              core.s:88     .text:00000002 .L0
-              core.s:92     .text:0000000a .L0
-              core.s:89     .text:00000004 .L0
-              core.s:93     .text:0000000c .L0
-              core.s:92     .text:0000000a .L0
-              core.s:94     .text:0000000e .L0
-              core.s:93     .text:0000000c .L0
-              core.s:97     .text:00000010 .L0
-              core.s:94     .text:0000000e .L0
-              core.s:98     .text:00000012 .L0
-              core.s:97     .text:00000010 .L0
-              core.s:101    .text:00000018 .L0
-              core.s:98     .text:00000012 .L0
-              core.s:102    .text:0000001a .L0
-              core.s:101    .text:00000018 .L0
-              core.s:103    .text:0000001c .L0
-              core.s:102    .text:0000001a .L0
-              core.s:104    .text:0000001e .L0
-              core.s:103    .text:0000001c .L0
-              core.s:107    .text:00000024 .L0
-              core.s:104    .text:0000001e .L0
-              core.s:108    .text:00000026 .L0
-              core.s:107    .text:00000024 .L0
-              core.s:109    .text:00000028 .L0
-              core.s:108    .text:00000026 .L0
-              core.s:110    .text:0000002a .L0
-              core.s:109    .text:00000028 .L0
-              core.s:111    .text:0000002c .L0
-              core.s:110    .text:0000002a .L0
-              core.s:114    .text:00000032 .L0
-              core.s:111    .text:0000002c .L0
-              core.s:115    .text:00000034 .L0
-              core.s:114    .text:00000032 .L0
-              core.s:116    .text:00000036 .L0
-              core.s:115    .text:00000034 .L0
-              core.s:119    .text:0000003c .L0
-              core.s:116    .text:00000036 .L0
-              core.s:120    .text:0000003e .L0
-              core.s:119    .text:0000003c .L0
-              core.s:121    .text:00000040 .L0
-              core.s:120    .text:0000003e .L0
-              core.s:122    .text:00000042 .L0
-              core.s:121    .text:00000040 .L0
-              core.s:123    .text:00000044 .L0
-              core.s:122    .text:00000042 .L0
-              core.s:127    .text:0000004a .L0
-              core.s:123    .text:00000044 .L0
-              core.s:128    .text:0000004c .L0
-              core.s:127    .text:0000004a .L0
-              core.s:132    .text:00000052 .L0
-              core.s:128    .text:0000004c .L0
-              core.s:133    .text:00000054 .L0
-              core.s:132    .text:00000052 .L0
-              core.s:134    .text:00000056 .L0
-              core.s:133    .text:00000054 .L0
-              core.s:135    .text:00000058 .L0
-              core.s:134    .text:00000056 .L0
-              core.s:136    .text:0000005a .L0
-              core.s:135    .text:00000058 .L0
-              core.s:138    .text:00000060 .L0
-              core.s:136    .text:0000005a .L0
-              core.s:139    .text:00000062 .L0
-              core.s:138    .text:00000060 .L0
-              core.s:143    .text:00000068 .L0
-              core.s:139    .text:00000062 .L0
-              core.s:144    .text:0000006a .L0
-              core.s:143    .text:00000068 .L0
-              core.s:145    .text:0000006c .L0
-              core.s:144    .text:0000006a .L0
-              core.s:146    .text:0000006e .L0
-              core.s:145    .text:0000006c .L0
-              core.s:147    .text:00000070 .L0
-              core.s:146    .text:0000006e .L0
-              core.s:148    .text:00000072 .L0
-              core.s:147    .text:00000070 .L0
-              core.s:152    .text:00000078 .L0
-              core.s:148    .text:00000072 .L0
-              core.s:153    .text:0000007a .L0
-              core.s:152    .text:00000078 .L0
-              core.s:154    .text:0000007c .L0
-              core.s:153    .text:0000007a .L0
-              core.s:155    .text:0000007e .L0
-              core.s:154    .text:0000007c .L0
-              core.s:157    .text:00000080 .L0
-              core.s:155    .text:0000007e .L0
-              core.s:158    .text:00000082 .L0
-              core.s:157    .text:00000080 .L0
-              core.s:159    .text:00000084 .L0
-              core.s:158    .text:00000082 .L0
-              core.s:163    .text:0000008a .L0
-              core.s:159    .text:00000084 .L0
-              core.s:164    .text:0000008c .L0
-              core.s:163    .text:0000008a .L0
-              core.s:165    .text:0000008e .L0
-              core.s:164    .text:0000008c .L0
-              core.s:168    .text:00000094 .L0
-              core.s:165    .text:0000008e .L0
-              core.s:169    .text:00000096 .L0
-              core.s:168    .text:00000094 .L0
-              core.s:172    .text:0000009c .L0
-              core.s:169    .text:00000096 .L0
-              core.s:173    .text:0000009e .L0
-              core.s:172    .text:0000009c .L0
-              core.s:176    .text:000000a4 .L0
-              core.s:173    .text:0000009e .L0
-              core.s:177    .text:000000a6 .L0
-              core.s:176    .text:000000a4 .L0
-              core.s:178    .text:000000a8 .L0
-              core.s:177    .text:000000a6 .L0
-              core.s:179    .text:000000aa .L0
-              core.s:178    .text:000000a8 .L0
-              core.s:182    .text:000000b0 .L0
-              core.s:179    .text:000000aa .L0
-              core.s:183    .text:000000b2 .L0
-              core.s:182    .text:000000b0 .L0
-              core.s:184    .text:000000b4 .L0
-              core.s:183    .text:000000b2 .L0
-              core.s:185    .text:000000b6 .L0
-              core.s:184    .text:000000b4 .L0
-              core.s:186    .text:000000b8 .L0
-              core.s:185    .text:000000b6 .L0
-              core.s:187    .text:000000ba .L0
-              core.s:186    .text:000000b8 .L0
-              core.s:190    .text:000000c0 .L0
-              core.s:187    .text:000000ba .L0
-              core.s:191    .text:000000c2 .L0
-              core.s:190    .text:000000c0 .L0
-              core.s:192    .text:000000c4 .L0
-              core.s:191    .text:000000c2 .L0
-              core.s:196    .text:000000ca .L0
-              core.s:192    .text:000000c4 .L0
-              core.s:197    .text:000000cc .L0
-              core.s:196    .text:000000ca .L0
-              core.s:241    .text:000000d2 .L0
-              core.s:197    .text:000000cc .L0
-              core.s:243    .text:000000d4 .L0
-              core.s:241    .text:000000d2 .L0
-              core.s:56     .start:00000000 .L0
-              core.s:57     .start:00000002 .L0
-              core.s:56     .start:00000000 .L0
-              core.s:58     .start:00000004 .L0
-              core.s:57     .start:00000002 .L0
-              core.s:59     .start:00000006 .L0
-              core.s:58     .start:00000004 .L0
-              core.s:62     .start:00000008 .L0
-              core.s:59     .start:00000006 .L0
-              core.s:63     .start:0000000a .L0
-              core.s:62     .start:00000008 .L0
-              core.s:65     .start:0000000c .L0
-              core.s:63     .start:0000000a .L0
-              core.s:66     .start:0000000e .L0
-              core.s:65     .start:0000000c .L0
-              core.s:67     .start:00000012 .L0
-              core.s:66     .start:0000000e .L0
-              core.s:68     .start:00000014 .L0
-              core.s:67     .start:00000012 .L0
-              core.s:69     .start:00000016 .L0
-              core.s:68     .start:00000014 .L0
-              core.s:70     .start:00000018 .L0
-              core.s:69     .start:00000016 .L0
-              core.s:71     .start:0000001a .L0
-              core.s:70     .start:00000018 .L0
-              core.s:72     .start:0000001c .L0
-              core.s:71     .start:0000001a .L0
-              core.s:73     .start:0000001e .L0
-              core.s:72     .start:0000001c .L0
-              core.s:74     .start:00000020 .L0
-              core.s:73     .start:0000001e .L0
-              core.s:75     .start:00000022 .L0
-              core.s:74     .start:00000020 .L0
-              core.s:76     .start:00000024 .L0
-              core.s:75     .start:00000022 .L0
-              core.s:79     .start:0000002a .L0
-              core.s:76     .start:00000024 .L0
-              core.s:49     .int:00000000 .L0
-              core.s:51     .int:00000002 .L0
-              core.s:49     .int:00000000 .L0
+              core.s:399    .debug_line:000000de .L0
+              core.s:57     .text:00000000 .L0
+              core.s:58     .text:00000002 .L0
+              core.s:57     .text:00000000 .L0
+              core.s:59     .text:00000004 .L0
+              core.s:58     .text:00000002 .L0
+              core.s:62     .text:0000000a .L0
+              core.s:59     .text:00000004 .L0
+              core.s:66     .text:0000000c .L0
+              core.s:62     .text:0000000a .L0
+              core.s:67     .text:0000000e .L0
+              core.s:66     .text:0000000c .L0
+              core.s:68     .text:00000010 .L0
+              core.s:67     .text:0000000e .L0
+              core.s:69     .text:00000012 .L0
+              core.s:68     .text:00000010 .L0
+              core.s:72     .text:00000018 .L0
+              core.s:69     .text:00000012 .L0
+              core.s:73     .text:0000001a .L0
+              core.s:72     .text:00000018 .L0
+              core.s:74     .text:0000001c .L0
+              core.s:73     .text:0000001a .L0
+              core.s:77     .text:0000001e .L0
+              core.s:74     .text:0000001c .L0
+              core.s:78     .text:00000020 .L0
+              core.s:77     .text:0000001e .L0
+              core.s:81     .text:00000026 .L0
+              core.s:78     .text:00000020 .L0
+              core.s:82     .text:00000028 .L0
+              core.s:81     .text:00000026 .L0
+              core.s:83     .text:0000002a .L0
+              core.s:82     .text:00000028 .L0
+              core.s:84     .text:0000002c .L0
+              core.s:83     .text:0000002a .L0
+              core.s:87     .text:00000032 .L0
+              core.s:84     .text:0000002c .L0
+              core.s:88     .text:00000034 .L0
+              core.s:87     .text:00000032 .L0
+              core.s:89     .text:00000036 .L0
+              core.s:88     .text:00000034 .L0
+              core.s:90     .text:00000038 .L0
+              core.s:89     .text:00000036 .L0
+              core.s:91     .text:0000003a .L0
+              core.s:90     .text:00000038 .L0
+              core.s:94     .text:00000040 .L0
+              core.s:91     .text:0000003a .L0
+              core.s:95     .text:00000042 .L0
+              core.s:94     .text:00000040 .L0
+              core.s:96     .text:00000044 .L0
+              core.s:95     .text:00000042 .L0
+              core.s:99     .text:0000004a .L0
+              core.s:96     .text:00000044 .L0
+              core.s:100    .text:0000004c .L0
+              core.s:99     .text:0000004a .L0
+              core.s:101    .text:0000004e .L0
+              core.s:100    .text:0000004c .L0
+              core.s:102    .text:00000050 .L0
+              core.s:101    .text:0000004e .L0
+              core.s:103    .text:00000052 .L0
+              core.s:102    .text:00000050 .L0
+              core.s:107    .text:00000058 .L0
+              core.s:103    .text:00000052 .L0
+              core.s:108    .text:0000005a .L0
+              core.s:107    .text:00000058 .L0
+              core.s:112    .text:00000060 .L0
+              core.s:108    .text:0000005a .L0
+              core.s:113    .text:00000062 .L0
+              core.s:112    .text:00000060 .L0
+              core.s:114    .text:00000064 .L0
+              core.s:113    .text:00000062 .L0
+              core.s:115    .text:00000066 .L0
+              core.s:114    .text:00000064 .L0
+              core.s:116    .text:00000068 .L0
+              core.s:115    .text:00000066 .L0
+              core.s:118    .text:0000006e .L0
+              core.s:116    .text:00000068 .L0
+              core.s:119    .text:00000070 .L0
+              core.s:118    .text:0000006e .L0
+              core.s:123    .text:00000076 .L0
+              core.s:119    .text:00000070 .L0
+              core.s:124    .text:00000078 .L0
+              core.s:123    .text:00000076 .L0
+              core.s:125    .text:0000007a .L0
+              core.s:124    .text:00000078 .L0
+              core.s:126    .text:0000007c .L0
+              core.s:125    .text:0000007a .L0
+              core.s:127    .text:0000007e .L0
+              core.s:126    .text:0000007c .L0
+              core.s:128    .text:00000080 .L0
+              core.s:127    .text:0000007e .L0
+              core.s:132    .text:00000086 .L0
+              core.s:128    .text:00000080 .L0
+              core.s:133    .text:00000088 .L0
+              core.s:132    .text:00000086 .L0
+              core.s:134    .text:0000008a .L0
+              core.s:133    .text:00000088 .L0
+              core.s:135    .text:0000008c .L0
+              core.s:134    .text:0000008a .L0
+              core.s:137    .text:0000008e .L0
+              core.s:135    .text:0000008c .L0
+              core.s:138    .text:00000090 .L0
+              core.s:137    .text:0000008e .L0
+              core.s:139    .text:00000092 .L0
+              core.s:138    .text:00000090 .L0
+              core.s:143    .text:00000098 .L0
+              core.s:139    .text:00000092 .L0
+              core.s:144    .text:0000009a .L0
+              core.s:143    .text:00000098 .L0
+              core.s:145    .text:0000009c .L0
+              core.s:144    .text:0000009a .L0
+              core.s:148    .text:000000a2 .L0
+              core.s:145    .text:0000009c .L0
+              core.s:149    .text:000000a4 .L0
+              core.s:148    .text:000000a2 .L0
+              core.s:152    .text:000000aa .L0
+              core.s:149    .text:000000a4 .L0
+              core.s:153    .text:000000ac .L0
+              core.s:152    .text:000000aa .L0
+              core.s:154    .text:000000ae .L0
+              core.s:153    .text:000000ac .L0
+              core.s:155    .text:000000b0 .L0
+              core.s:154    .text:000000ae .L0
+              core.s:159    .text:000000b6 .L0
+              core.s:155    .text:000000b0 .L0
+              core.s:160    .text:000000b8 .L0
+              core.s:159    .text:000000b6 .L0
+              core.s:163    .text:000000be .L0
+              core.s:160    .text:000000b8 .L0
+              core.s:164    .text:000000c0 .L0
+              core.s:163    .text:000000be .L0
+              core.s:165    .text:000000c2 .L0
+              core.s:164    .text:000000c0 .L0
+              core.s:166    .text:000000c4 .L0
+              core.s:165    .text:000000c2 .L0
+              core.s:169    .text:000000ca .L0
+              core.s:166    .text:000000c4 .L0
+              core.s:170    .text:000000cc .L0
+              core.s:169    .text:000000ca .L0
+              core.s:171    .text:000000ce .L0
+              core.s:170    .text:000000cc .L0
+              core.s:172    .text:000000d0 .L0
+              core.s:171    .text:000000ce .L0
+              core.s:173    .text:000000d2 .L0
+              core.s:172    .text:000000d0 .L0
+              core.s:174    .text:000000d4 .L0
+              core.s:173    .text:000000d2 .L0
+              core.s:177    .text:000000da .L0
+              core.s:174    .text:000000d4 .L0
+              core.s:178    .text:000000dc .L0
+              core.s:177    .text:000000da .L0
+              core.s:179    .text:000000de .L0
+              core.s:178    .text:000000dc .L0
+              core.s:182    .text:000000e4 .L0
+              core.s:179    .text:000000de .L0
+              core.s:183    .text:000000e6 .L0
+              core.s:182    .text:000000e4 .L0
+              core.s:186    .text:000000ec .L0
+              core.s:183    .text:000000e6 .L0
+              core.s:187    .text:000000ee .L0
+              core.s:186    .text:000000ec .L0
+              core.s:188    .text:000000f0 .L0
+              core.s:187    .text:000000ee .L0
+              core.s:191    .text:000000f6 .L0
+              core.s:188    .text:000000f0 .L0
+              core.s:192    .text:000000f8 .L0
+              core.s:191    .text:000000f6 .L0
+              core.s:193    .text:000000fa .L0
+              core.s:192    .text:000000f8 .L0
+              core.s:196    .text:00000100 .L0
+              core.s:193    .text:000000fa .L0
+              core.s:197    .text:00000102 .L0
+              core.s:196    .text:00000100 .L0
+              core.s:198    .text:00000104 .L0
+              core.s:197    .text:00000102 .L0
+              core.s:201    .text:0000010a .L0
+              core.s:198    .text:00000104 .L0
+              core.s:202    .text:0000010c .L0
+              core.s:201    .text:0000010a .L0
+              core.s:203    .text:0000010e .L0
+              core.s:202    .text:0000010c .L0
+              core.s:206    .text:00000114 .L0
+              core.s:203    .text:0000010e .L0
+              core.s:207    .text:00000116 .L0
+              core.s:206    .text:00000114 .L0
+              core.s:208    .text:00000118 .L0
+              core.s:207    .text:00000116 .L0
+              core.s:211    .text:0000011e .L0
+              core.s:208    .text:00000118 .L0
+              core.s:212    .text:00000120 .L0
+              core.s:211    .text:0000011e .L0
+              core.s:213    .text:00000122 .L0
+              core.s:212    .text:00000120 .L0
+              core.s:216    .text:00000128 .L0
+              core.s:213    .text:00000122 .L0
+              core.s:217    .text:0000012a .L0
+              core.s:216    .text:00000128 .L0
+              core.s:218    .text:0000012c .L0
+              core.s:217    .text:0000012a .L0
+              core.s:221    .text:00000132 .L0
+              core.s:218    .text:0000012c .L0
+              core.s:222    .text:00000134 .L0
+              core.s:221    .text:00000132 .L0
+              core.s:223    .text:00000136 .L0
+              core.s:222    .text:00000134 .L0
+              core.s:224    .text:00000138 .L0
+              core.s:223    .text:00000136 .L0
+              core.s:225    .text:0000013a .L0
+              core.s:224    .text:00000138 .L0
+              core.s:226    .text:0000013c .L0
+              core.s:225    .text:0000013a .L0
+              core.s:233    .text:00000142 .L0
+              core.s:226    .text:0000013c .L0
+              core.s:234    .text:00000144 .L0
+              core.s:233    .text:00000142 .L0
+              core.s:235    .text:00000146 .L0
+              core.s:234    .text:00000144 .L0
+              core.s:236    .text:00000148 .L0
+              core.s:235    .text:00000146 .L0
+              core.s:239    .text:0000014e .L0
+              core.s:236    .text:00000148 .L0
+              core.s:240    .text:00000150 .L0
+              core.s:239    .text:0000014e .L0
+              core.s:241    .text:00000152 .L0
+              core.s:240    .text:00000150 .L0
+              core.s:242    .text:00000154 .L0
+              core.s:241    .text:00000152 .L0
+              core.s:245    .text:0000015a .L0
+              core.s:242    .text:00000154 .L0
+              core.s:246    .text:0000015c .L0
+              core.s:245    .text:0000015a .L0
+              core.s:249    .text:00000162 .L0
+              core.s:246    .text:0000015c .L0
+              core.s:250    .text:00000164 .L0
+              core.s:249    .text:00000162 .L0
+              core.s:253    .text:0000016a .L0
+              core.s:250    .text:00000164 .L0
+              core.s:254    .text:0000016c .L0
+              core.s:253    .text:0000016a .L0
+              core.s:257    .text:00000172 .L0
+              core.s:254    .text:0000016c .L0
+              core.s:258    .text:00000174 .L0
+              core.s:257    .text:00000172 .L0
+              core.s:261    .text:0000017a .L0
+              core.s:258    .text:00000174 .L0
+              core.s:262    .text:0000017c .L0
+              core.s:261    .text:0000017a .L0
+              core.s:265    .text:00000182 .L0
+              core.s:262    .text:0000017c .L0
+              core.s:266    .text:00000184 .L0
+              core.s:265    .text:00000182 .L0
+              core.s:271    .text:0000018a .L0
+              core.s:266    .text:00000184 .L0
+              core.s:272    .text:0000018c .L0
+              core.s:271    .text:0000018a .L0
+              core.s:273    .text:0000018e .L0
+              core.s:272    .text:0000018c .L0
+              core.s:274    .text:00000190 .L0
+              core.s:273    .text:0000018e .L0
+              core.s:277    .text:00000196 .L0
+              core.s:274    .text:00000190 .L0
+              core.s:278    .text:00000198 .L0
+              core.s:277    .text:00000196 .L0
+              core.s:279    .text:0000019a .L0
+              core.s:278    .text:00000198 .L0
+              core.s:280    .text:0000019c .L0
+              core.s:279    .text:0000019a .L0
+              core.s:281    .text:0000019e .L0
+              core.s:280    .text:0000019c .L0
+              core.s:285    .text:000001a4 .L0
+              core.s:281    .text:0000019e .L0
+              core.s:286    .text:000001a6 .L0
+              core.s:285    .text:000001a4 .L0
+              core.s:287    .text:000001a8 .L0
+              core.s:286    .text:000001a6 .L0
+              core.s:290    .text:000001ae .L0
+              core.s:287    .text:000001a8 .L0
+              core.s:291    .text:000001b0 .L0
+              core.s:290    .text:000001ae .L0
+              core.s:292    .text:000001b2 .L0
+              core.s:291    .text:000001b0 .L0
+              core.s:295    .text:000001b8 .L0
+              core.s:292    .text:000001b2 .L0
+              core.s:296    .text:000001ba .L0
+              core.s:295    .text:000001b8 .L0
+              core.s:297    .text:000001bc .L0
+              core.s:296    .text:000001ba .L0
+              core.s:301    .text:000001c2 .L0
+              core.s:297    .text:000001bc .L0
+              core.s:302    .text:000001c4 .L0
+              core.s:301    .text:000001c2 .L0
+              core.s:305    .text:000001ca .L0
+              core.s:302    .text:000001c4 .L0
+              core.s:306    .text:000001cc .L0
+              core.s:305    .text:000001ca .L0
+              core.s:311    .text:000001d2 .L0
+              core.s:306    .text:000001cc .L0
+              core.s:312    .text:000001d4 .L0
+              core.s:311    .text:000001d2 .L0
+              core.s:313    .text:000001d6 .L0
+              core.s:312    .text:000001d4 .L0
+              core.s:316    .text:000001dc .L0
+              core.s:313    .text:000001d6 .L0
+              core.s:317    .text:000001de .L0
+              core.s:316    .text:000001dc .L0
+              core.s:318    .text:000001e0 .L0
+              core.s:317    .text:000001de .L0
+              core.s:319    .text:000001e2 .L0
+              core.s:318    .text:000001e0 .L0
+              core.s:320    .text:000001e4 .L0
+              core.s:319    .text:000001e2 .L0
+              core.s:323    .text:000001ea .L0
+              core.s:320    .text:000001e4 .L0
+              core.s:324    .text:000001ec .L0
+              core.s:323    .text:000001ea .L0
+              core.s:325    .text:000001ee .L0
+              core.s:324    .text:000001ec .L0
+              core.s:326    .text:000001f0 .L0
+              core.s:325    .text:000001ee .L0
+              core.s:327    .text:000001f2 .L0
+              core.s:326    .text:000001f0 .L0
+              core.s:328    .text:000001f4 .L0
+              core.s:327    .text:000001f2 .L0
+              core.s:329    .text:000001f6 .L0
+              core.s:328    .text:000001f4 .L0
+              core.s:332    .text:000001fc .L0
+              core.s:329    .text:000001f6 .L0
+              core.s:333    .text:000001fe .L0
+              core.s:332    .text:000001fc .L0
+              core.s:334    .text:00000200 .L0
+              core.s:333    .text:000001fe .L0
+              core.s:335    .text:00000202 .L0
+              core.s:334    .text:00000200 .L0
+              core.s:336    .text:00000204 .L0
+              core.s:335    .text:00000202 .L0
+              core.s:337    .text:00000206 .L0
+              core.s:336    .text:00000204 .L0
+              core.s:338    .text:00000208 .L0
+              core.s:337    .text:00000206 .L0
+              core.s:388    .text:0000020e .L0
+              core.s:338    .text:00000208 .L0
+              core.s:390    .text:00000210 .L0
+              core.s:388    .text:0000020e .L0
                             .text:00000000 .L0
-              core.s:243    .text:000000d4 .L0
-                           .start:00000000 .L0
-              core.s:79     .start:0000002a .L0
-                             .int:00000000 .L0
-              core.s:51     .int:00000002 .L0
+              core.s:390    .text:00000210 .L0
                       .debug_info:00000000 .L0
-                      .debug_info:0000007b .L0
+                      .debug_info:00000083 .L0
 
 UNDEFINED SYMBOLS
-SPLIM
-hardware_init
 CLS
 MSEC
 SGET
@@ -5359,9 +6045,13 @@ _video_buffer
 RSTORE
 RLOAD
 ESTORE
+SRAND
+LFSR
+TONE
 ELOAD
 
 EQUATE SYMBOLS
+                     ./sound.inc = 0x0
                 ./gen_macros.inc = 0x0
                       ./core.inc = 0x0
 /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc = 0x0
@@ -6913,6 +7603,19 @@ EQUATE SYMBOLS
                        SER_RX_IE = 0xb
                       SER_RX_IPC = IPC2
                     SER_RX_IPbit = 0xc
+                      AUDIO_PORT = PORTB
+                      AUDIO_TRIS = TRISB
+                       AUDIO_LAT = LATB
+                       AUDIO_OUT = 0x5
+                       AUDIO_TMR = TMR3
+                    AUDIO_TMRCON = T3CON
+                       AUDIO_PER = PR3
+                     AUDIO_OCCON = OC3CON
+                       AUDIO_OCR = OC3R
+                      AUDIO_OCRS = OC3RS
+                      AUDIO_RPOR = RPOR2
+                    AUDIO_PPSbit = 0x8
+                        AUDIO_FN = 0x14
                         CORE_INC = 0x1
                        CELL_SIZE = 0x2
                        DSTK_SIZE = 0x40
@@ -6927,4 +7630,81 @@ EQUATE SYMBOLS
                         F_HIDDEN = 0x20
                        F_LENMASK = 0x1f
                        GEN_MACRO = 0x1
+                       SOUND_INC = 0x1
+                             DO1 = 0x7771
+                            DO1d = 0x70bd
+                             RE1 = 0x6a69
+                            RE1d = 0x6470
+                             MI1 = 0x5ecd
+                             FA1 = 0x597b
+                            FA1d = 0x5475
+                            SOL1 = 0x4fb7
+                           SOL1d = 0x4b3e
+                             LA1 = 0x4705
+                            LA1d = 0x4308
+                             SI1 = 0x3f45
+                             DO2 = 0x3bb8
+                            DO2d = 0x385e
+                              R2 = 0x3534
+                             R2d = 0x3238
+                             MI2 = 0x2f66
+                             FA2 = 0x2cbd
+                            FA2d = 0x2a3a
+                            SOL2 = 0x27db
+                           SOL2d = 0x259f
+                             LA2 = 0x2382
+                            LA2d = 0x2184
+                             SI2 = 0x1fa2
+                             DO3 = 0x1ddc
+                            DO3d = 0x1c2f
+                             RE3 = 0x1a9a
+                             R3d = 0x191b
+                             MI3 = 0x17b2
+                             FA3 = 0x165e
+                            FA3d = 0x151c
+                            SOL3 = 0x13ed
+                           SOL3d = 0x12cf
+                             LA3 = 0x11c0
+                            LA3d = 0x10c1
+                             SI3 = 0xfd0
+                             DO4 = 0xeed
+                            DO4d = 0xe17
+                             RE4 = 0xd4c
+                             R4d = 0xc8d
+                             MI4 = 0xbd9
+                             FA4 = 0xb2e
+                            FA4d = 0xa8e
+                            SOL4 = 0x9f6
+                           SOL4d = 0x967
+                             LA4 = 0x8e0
+                            LA4d = 0x860
+                             SI4 = 0x7e8
+                             DO5 = 0x776
+                            DO5d = 0x70b
+                             RE5 = 0x6a5
+                            RE5d = 0x646
+                             MI5 = 0x5ec
+                             FA5 = 0x596
+                            FA5d = 0x546
+                            SOL5 = 0x4fa
+                           SOL5d = 0x4b3
+                             LA5 = 0x46f
+                            LA5d = 0x42f
+                             SI5 = 0x3f3
+                             DO6 = 0x3ba
+                            DO6d = 0x385
+                             RE6 = 0x352
+                            RE6d = 0x322
+                             MI6 = 0x2f5
+                             FA6 = 0x2cb
+                            FA6d = 0x2a2
+                            SOL6 = 0x27c
+                           SOL6d = 0x259
+                             LA6 = 0x237
+                            LA6d = 0x217
+                             SI6 = 0x1f9
+                             DO7 = 0x1dc
+                            DO7d = 0x1c2
+                             RE7 = 0x1a8
+                            RE7d = 0x190
               __ext_attr__rstack = 0x2

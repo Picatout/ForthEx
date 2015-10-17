@@ -59,6 +59,12 @@ __T1Interrupt:
     push W1
     push W2
     inc systicks
+    cp0 tone_len
+    bra z, 0f
+    dec tone_len
+    bra nz, 0f
+    bclr AUDIO_TMRCON, #TON
+0:    
     ;traitement file ps2_queue
     ;vers file kbd_queue
     mov ps2_head, W0

@@ -27,6 +27,7 @@
 .include "hardware.inc"
 .include "core.inc"
 .include "gen_macros.inc"
+.include "sound.inc"
     
 .global pstack, rstack, user
     
@@ -43,37 +44,6 @@ rstack:
 .space RSTK_SIZE
     
     
-INT    
-.global __DefaultInterrupt
-__DefaultInterrupt:
-    reset
-
-.section .start code
-.align 2    
-.global __reset    
-__reset: 
-    ; mise à zéro de la RAM
-    mov #RAM_BASE, W0
-    mov #(RAM_SIZE/2-1), W1
-    repeat W1
-    clr [W0++]
-    ; modification du pointeur 
-    ; de pile des retours
-    mov #rstack, RSP
-    mov #user, UP
-    ; conserve adresse de la pile
-    mov RSP, [UP+RBASE]
-    call hardware_init
-    mov #(PSV_BASE), W0
-    mov W0, SPLIM
-    mov #pstack, DSP
-    mov DSP, [UP+PBASE]
-    mov #10, W0
-    mov W0, [UP+BASE]
-    mov #psvoffset(sys_latest), W0
-    mov W0, [UP+LATEST]
-    mov #psvoffset(ENTRY), IP
-    NEXT
     
 
 .section .const psv       
@@ -88,6 +58,16 @@ DOCOLON: ; entre dans un mot de haut niveau (mot défini par ':')
     mov WP,IP
     NEXT
 
+DEFCODE "COLD",4,,COLD ; ( -- )
+    reset
+    
+
+DEFCODE "WARM",4,,WARM   ; ( -- )
+    mov #pstack, DSP
+    mov #rstack, RSP
+    mov #psvoffset(ENTRY), IP
+    NEXT
+    
 DEFCODE "EXECUTE",7,,DOCODE
     mov T, WP
     DPOP
@@ -167,6 +147,13 @@ DEFCODE "I",1,,DOI  ; ( -- n )
 DEFCODE "DUP",3,,DUP ; ( n -- n n )
     DPUSH
     NEXT
+
+DEFCODE "?DUP",4,,QDUP ; ( n - n | n n )
+    cp0 T
+    bra z, 0f
+    DPUSH
+0:  NEXT
+    
     
 DEFCODE "DROP",4,,DROP ; ( n -- )
     DPOP
@@ -178,7 +165,7 @@ DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
     mov W0, [DSP+0]
     NEXT
 
-DEFCODE "ROT",3,,ROT
+DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
     mov T, W0
     mov [DSP], T
     mov [DSP-2], W1
@@ -186,16 +173,176 @@ DEFCODE "ROT",3,,ROT
     mov W0, [DSP-2]
     NEXT
     
-DEFCODE "OVER",4,,OVER
+DEFCODE "OVER",4,,OVER  ; ( n1 n2 -- n1 n2 n1 )
     DPUSH
     mov [DSP-2],T
     NEXT
-
-; MATH
-DEFCODE "1+",1,,INC1
-    add #1, T
+    
+DEFCODE "NIP",3,,NIP   ; ( n1 n2 -- n2 )
+    sub #2, DSP
     NEXT
     
+DEFCODE ">R",2,,TOR   ;  ( n -- )  R:( -- n)
+    push T
+    DPOP
+    NEXT
+    
+DEFCODE "R>",2,,RFROM  ; ( -- n ) R( n -- )
+    DPUSH
+    pop T
+    NEXT
+
+DEFCODE "R@",2,,RFETCH ; ( -- n ) R ( -- )
+    DPUSH
+    mov [RSP], T
+    NEXT
+    
+DEFCODE "SP@",3,,SPFETCH ; ( -- n )
+    DPUSH
+    mov DSP, T
+    NEXT
+    
+DEFCODE "SP!",3,,SPSTORE  ; ( n -- )
+    mov T, DSP
+    DPOP
+    NEXT
+    
+DEFCODE "RP@",3,,RPFETCH  ; ( -- n )
+    DPUSH
+    mov RSP, T
+    NEXT
+    
+DEFCODE "RP!",3,,RPSTORE  ; ( n -- )
+    mov T, RSP
+    DPOP
+    NEXT
+    
+DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 n3 -- n3 n1 n2 )
+    mov T, W0
+    mov [DSP], T
+    mov [DSP-2], W1
+    mov W0, [DSP-2]
+    mov W1, [DSP]
+    NEXT
+
+    
+;;;;;;;
+; MATH
+;;;;;;;
+DEFCODE "+",1,,PLUS   ;( n1 n2 -- n1+n2 )
+    add T, [DSP], W0
+    DPOP
+    mov W0, T
+    NEXT
+    
+DEFCODE "-",1,,MINUS   ; ( n1 n2 -- n1-n2 )
+    mov T, W0
+    DPOP
+    sub T, W0, T
+    NEXT
+    
+DEFCODE "1+",2,,ONEPLUS ; ( n -- n ) n+1
+    add #1, T
+    NEXT
+
+DEFCODE "1-",2,,ONEMINUS  ; ( n -- n ) n-1
+    sub #1, T
+    NEXT
+    
+DEFCODE "2*",2,,TWOSTAR  ; ( n -- n ) 2*n
+    add T,T, T
+    NEXT
+    
+DEFCODE "2/",2,,TWOSLASH ; ( n -- n ) n/2
+    lsr T,T
+    NEXT
+    
+DEFCODE "LSHIFT",6,,LSHIFT ; ( x1 -- x2 ) x2=x1<<1    
+    sl T,T
+    NEXT
+    
+DEFCODE "RSHIFT",6,,RSHIFT ; ( x1 -- x2 ) x2=x1>>1
+    lsr T,T
+    NEXT
+    
+    
+    
+DEFCODE "+!",2,,PLUSSTORE  ; ( n addr  -- ) [addr]=[addr]+n     
+    mov [DSP--], W0
+    add W0, [T],[T]
+    DPOP
+    NEXT
+    
+DEFCODE "M+",2,,DADD  ; ( d n --  d ) simple + double
+    mov T, W0
+    DPOP
+    add W0, [DSP], [DSP]
+    addc #0, T
+    NEXT
+ 
+; opérations logiques bit à bit    
+DEFCODE "AND",3,,_AND  ; ( n1 n2 -- n)  ET bit à bit
+    and T,[DSP],[DSP]
+    DPOP
+    NEXT
+    
+DEFCODE "OR",2,,_OR   ; ( n1 n2 -- n ) OU bit à bit
+    ior T,[DSP],[DSP]
+    DPOP
+    NEXT
+    
+DEFCODE "XOR",3,,_XOR ; ( n1 n2 -- n ) OU exclusif bit à bit
+    xor T,[DSP],[DSP]
+    DPOP
+    NEXT
+    
+    
+DEFCODE "INVERT",6,,INVERT ; ( n -- n ) inversion des bits
+    com T, T
+    NEXT
+    
+DEFCODE "NEGATE",6,,NEGATE ; ( n - n ) complément à 2
+    neg T, T
+    NEXT
+
+; comparaisons
+
+DEFCODE "0=",2,,ZEROEQ  ; ( n -- f )  f=  n==0
+    sub #1,T
+    subb T,T,T
+    NEXT
+    
+DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
+    setm W0
+    add T,T,T
+    subb T,T,T
+    xor W0,T,T
+    NEXT
+
+DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
+    clr W0
+    cp T, [DSP]
+    bra nz, 1f
+    com W0,W0
+ 1: DPOP
+    mov W0,T
+    NEXT
+    
+DEFCODE "<>",2,,NEQUAL ; ( n1 n2 -- f ) f = n1<>n2
+    clr W0
+    cp T, [DSP]
+    bra z, 1f
+    com W0,W0
+1:  DPOP
+    mov W0, T
+    NEXT
+    
+    
+    
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;   TESTS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "TEST",4,,TEST   
 .word  CLS,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,DOBRA, TEST+6
 
@@ -222,7 +369,7 @@ DEFWORD "MSG",3,,MSG
 .word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
 
 DEFWORD "ZTYPE",5,,ZTYPE
-.word DUP,CFETCH,DUP,DO0BRA,ZTYPEOUT,EMIT,INC1,DOBRA,ZTYPE+2
+.word DUP,CFETCH,DUP,DO0BRA,ZTYPEOUT,EMIT,ONEPLUS,DOBRA,ZTYPE+2
 ZTYPEOUT:
 .word DROP,DROP, EXIT     
 
@@ -231,11 +378,11 @@ DEFWORD "STRTEST",7,,STRTEST
 .word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,DOBRA, STRTEST+2
 
 DEFWORD "EEPROMTEST",10,,EEPROMTEST
-.word LIT, quick, ZTYPE, LIT, _video_buffer,LIT,100,ESTORE,DELAY
-.word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,DELAY,DOBRA,EEPROMTEST+20
+.word CLS,LIT, quick, ZTYPE, LIT, _video_buffer,LIT,100,ESTORE,SRAND,DELAY
+.word CLS,LIT,100,LFSR,TONE, DELAY, LIT, _video_buffer,LIT,100,ELOAD,DOBRA,EEPROMTEST+22
     
 DEFWORD "DELAY",5,,DELAY
-.word  LIT, 1000, MSEC, EXIT
+.word  LIT, 500, MSEC, EXIT
     
 DEFCODE "INFLOOP",7,,INFLOOP
     bra .
