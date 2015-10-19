@@ -126,12 +126,11 @@ DEFCODE "CLS",3,,CLS ; ( -- )
 ; du curseur texte
 ;;;;;;;;;;;;;;;;;;;;;;
 DEFCODE "XPOS",4,, XPOS ; ( n -- )
-    mov #CPL, W0
+    mov #CPL-1,W0
     cp T, W0
-    bra ltu, 1f
-    mov #(CPL-1), T
- 1:
+    bra gtu, 1f
     mov T, W0
+ 1:
     mov.b WREG,xpos
     DPOP
     NEXT
@@ -179,12 +178,10 @@ DEFCODE "EMIT",4,,EMIT ; ( c -- )
     bra neq, 2f
 crlf:
     clr.b xpos
-    inc.b ypos
-    mov #LPS, W0
+    mov #(LPS-1), W0
     cp.b ypos
-    bra ltu, 2f
-    dec.b ypos
-    bra code_SCROLLUP
+    bra eq, code_SCROLLUP
+    inc.b ypos
 2:
     NEXT
 
@@ -244,7 +241,7 @@ DEFCODE "CLRLN",5,,CLRLN ; ( n -- )
 ; caractère à l'écran
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "TYPE",4,,TYPE ; (c-addr n+ .. )
-.word LIT, 0, DODO, DUP, CFETCH, EMIT, DOLOOP,TYPE+8,EXIT
+.word LIT, 0, DODO, DUP, CFETCH, EMIT, DOLOOP,-8,EXIT
 
 ;********************
 ; interruption TIMER2
@@ -332,6 +329,7 @@ __T2Interrupt:
 .equ CH_COUNT, W2
 .global __OC2Interrupt
 __OC2Interrupt:
+    bclr VIDEO_IFS, #VIDEO_IF
     push W0
     push W1
     push CH_COUNT
@@ -361,14 +359,14 @@ __OC2Interrupt:
     mul.uu CH_COUNT,W1, W0
     mov #_video_buffer, pVIDBUF
     add W0, pVIDBUF, pVIDBUF
- 1:
     mov #psvoffset(_font), pFONT
+ 1:
     mov.b [pVIDBUF++], W0
-    ze W0,W0
+    and #127,W0 ; caractères {0-127}
     sl W0, #3, W0
-    add pFONT,W0,pFONT
-    add pFONT,CH_ROW, pFONT
-    mov.b [pFONT],W1
+    add pFONT,W0,W1
+    add W1,CH_ROW, W1
+    mov.b [W1],W1
     ze W1, W1
 2:
     btst VIDEO_SPISTAT, #SPITBF
@@ -388,7 +386,6 @@ __OC2Interrupt:
     pop W1
     pop W0
     bclr VIDEO_LAT,#VIDEO_PORCH
-    bclr VIDEO_IFS, #VIDEO_IF
     retfie
 
 

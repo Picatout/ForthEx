@@ -3535,105 +3535,108 @@
   62              	    
   63              	.macro DPUSH  
   64              	    mov T, [++DSP]
-  65              	.endm
-  66              	    
-  67              	.macro DPOP
-  68              	    mov [DSP--], T
-  69              	.endm
-  70              	    
-  71              	.macro RPUSH reg
-  72              	;    push R
-  73              	;    mov \reg, R    
-  74              	    push \reg
-  75              	.endm
-  76              	    
-  77              	.macro RPOP reg
-  78              	    pop \reg
-  79              	;    mov R, \reg
-  80              	;    pop R
-  81              	.endm
-  82              	    
-  83              	.macro RDROP
-  84              	    dec2 RSP,RSP
-  85              	    ; pop R
-  86              	.endm
-  87              	    
-  88              	.macro SYSDICT
-  89              	    .section .sysdict psv
-  90              	    .align 2
-  91              	.endm
-  92              	    
-  93              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
-  94              	; macros empruntée et modifiée, à partir de Jones Forth    
-  95              	;REF: http:;www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
-  96              	
-  97              	; Flags
-  98              	.equ F_IMMED,0x80
-  99              	.equ F_HIDDEN,0x20
- 100              	.equ F_LENMASK,0x1f	; length mask
- 101              	
- 102              	; Store the chain of links.
- 103              	.equ link,0
- 104              	;macro utilisée pour créer les entête des mots de haut niveaux.
- 105              	.macro DEFWORD name, namelen, flags=0, label
- 106              	    .section .sysdict psv
- 107              	    .align 2
- 108              	    .global name_\label
- 109              	name_\label :
- 110              	    .word link		; lien vers élément précédent du dictionnaire
- 111              	    .equ link, name_\label
- 112              	    .byte \flags+\namelen	; flags + length byte
- 113              	    .ascii "\name"		; the name
- 114              	    .align 2		; padding to next 2 byte boundary
- 115              	    .global \label
- 116              	\label :
- 117              	    .word handle(DOCOLON)
- 118              		;pfa:  list of word pointers follow
- 119              	.endm
- 120              	
- 121              	; macro utilisée pour créer les entêtes des mots en code machine	
- 122              	.macro DEFCODE name, namelen, flags=0, label
- 123              		.section .sysdict psv
- 124              		.align 2
- 125              		.global name_\label
- 126              	name_\label :
- 127              		.word link		; link
- 128              		.set link,name_\label
- 129              		.byte \flags+\namelen	; flags + length byte
- 130              		.ascii "\name"		; the name
- 131              		.align 2		; padding to next 4 byte boundary
- 132              		.global \label
- 133              	\label :
- 134              		.word handle(code_\label)	; codeword
- 135              		.text
- 136              		.global code_\label
- 137              	code_\label :			;pfa,  assembler code follows
- 138              		
- 139              	.endm
- 140              	 
- 141              	; macro utilisée pour créer des variables
- 142              	.macro DEFVAR name, namelen, flags=0, label, initial=0
- 143              		DEFCODE \name,\namelen,\flags,\label
- 144              		DPUSH
- 145              		mov var_\name, T
- 146              		NEXT
- 147              		.data
- 148              		.align 2
- 149              	var_\name :
- 150              		.word \initial
- 151              	.endm
- 152              	
- 153              		
- 154              	; macro utilisée pour créer des constantes
- 155              	.macro DEFCONST name, namelen, flags=0, label, value
- 156              		DEFCODE \name,\namelen,\flags,\label
- 157              		DPUSH
- 158              		mov #\value, T
- 159              		NEXT
- 160              	.endm
- 161              	
- 162              	.endif
- 163              		
+  65              	    cp DSP, #RBASE
+  66              	;    bra nz, .+4
+  67              	;    reset
+  68              	.endm
+  69              	    
+  70              	.macro DPOP
+  71              	    mov [DSP--], T
+  72              	.endm
+  73              	    
+  74              	.macro RPUSH reg
+  75              	;    push R
+  76              	;    mov \reg, R    
+  77              	    push \reg
+  78              	.endm
+  79              	    
+  80              	.macro RPOP reg
+  81              	    pop \reg
+  82              	;    mov R, \reg
+  83              	;    pop R
+  84              	.endm
+  85              	    
+  86              	.macro RDROP
+  87              	    dec2 RSP,RSP
+  88              	    ; pop R
+  89              	.endm
+  90              	    
+  91              	.macro SYSDICT
+  92              	    .section .sysdict psv
+  93              	    .align 2
+  94              	.endm
+  95              	    
+  96              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+  97              	; macros empruntée et modifiée, à partir de Jones Forth    
+  98              	;REF: http:;www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
+  99              	
+ 100              	; Flags
+ 101              	.equ F_IMMED,0x80
+ 102              	.equ F_HIDDEN,0x20
+ 103              	.equ F_LENMASK,0x1f	; length mask
+ 104              	
+ 105              	; Store the chain of links.
+ 106              	.equ link,0
+ 107              	;macro utilisée pour créer les entête des mots de haut niveaux.
+ 108              	.macro DEFWORD name, namelen, flags=0, label
+ 109              	    .section .sysdict psv
+ 110              	    .align 2
+ 111              	    .global name_\label
+ 112              	name_\label :
+ 113              	    .word link		; lien vers élément précédent du dictionnaire
+ 114              	    .equ link, name_\label
+ 115              	    .byte \flags+\namelen	; flags + length byte
+ 116              	    .ascii "\name"		; the name
+ 117              	    .align 2		; padding to next 2 byte boundary
+ 118              	    .global \label
+ 119              	\label :
+ 120              	    .word handle(DOCOLON)
+ 121              		;pfa:  list of word pointers follow
+ 122              	.endm
+ 123              	
+ 124              	; macro utilisée pour créer les entêtes des mots en code machine	
+ 125              	.macro DEFCODE name, namelen, flags=0, label
+ 126              		.section .sysdict psv
+ 127              		.align 2
+ 128              		.global name_\label
+ 129              	name_\label :
+ 130              		.word link		; link
+ 131              		.set link,name_\label
+ 132              		.byte \flags+\namelen	; flags + length byte
+ 133              		.ascii "\name"		; the name
+ 134              		.align 2		; padding to next 4 byte boundary
+ 135              		.global \label
+ 136              	\label :
+ 137              		.word handle(code_\label)	; codeword
+ 138              		.text
+ 139              		.global code_\label
+ 140              	code_\label :			;pfa,  assembler code follows
+ 141              		
+ 142              	.endm
+ 143              	 
+ 144              	; macro utilisée pour créer des variables
+ 145              	.macro DEFVAR name, namelen, flags=0, label, initial=0
+ 146              		DEFCODE \name,\namelen,\flags,\label
+ 147              		DPUSH
+ 148              		mov var_\name, T
+ 149              		NEXT
+ 150              		.data
+ 151              		.align 2
+ 152              	var_\name :
+ 153              		.word \initial
+ 154              	.endm
+ 155              	
+ 156              		
+ 157              	; macro utilisée pour créer des constantes
+ 158              	.macro DEFCONST name, namelen, flags=0, label, value
+ 159              		DEFCODE \name,\namelen,\flags,\label
+ 160              		DPUSH
+ 161              		mov #\value, T
+ 162              		NEXT
+ 163              	.endm
+ 164              	
+ 165              	.endif
+ 166              		
   26              	    
   27              	 ; commandes SPIRAM   
   28              	.equ WRMR, 1
@@ -3895,23 +3898,24 @@
  246         00 00 80 
  247 0000ee  48 66 DD 	    sl  T, #8, T
  248 0000f0  0C 2F 78 	    DPUSH
- 249 0000f2  00 06 EB 	    clr T
- 250 0000f4  0C 86 D2 	    rlc T,T
- 251 0000f6  00 00 02 	    call spi_send_address
+ 248         60 70 E1 
+ 249 0000f4  00 06 EB 	    clr T
+ 250 0000f6  0C 86 D2 	    rlc T,T
+ 251 0000f8  00 00 02 	    call spi_send_address
  251         00 00 00 
- 252 0000fa  0C 01 78 	    mov T, W2 ; addr-bloc
- 253 0000fc  2E 06 78 	    DPOP
- 254 0000fe  03 10 20 	    mov #256, W3
+ 252 0000fc  0C 01 78 	    mov T, W2 ; addr-bloc
+ 253 0000fe  2E 06 78 	    DPOP
+ 254 000100  03 10 20 	    mov #256, W3
  255              	1:
- 256 000100  32 40 78 	    mov.b [W2++], W0
- 257 000102  00 E0 B7 	    spi_write
+ 256 000102  32 40 78 	    mov.b [W2++], W0
+ 257 000104  00 E0 B7 	    spi_write
  257         00 00 AE 
  257         FE FF 37 
  257         00 00 80 
- 258 00010a  83 01 E9 	    dec W3,W3
- 259 00010c  00 00 3A 	    bra nz, 1b
- 260 00010e  01 20 A8 	    _disable_eeprom
- 261 000110  B8 05 78 	    NEXT
+ 258 00010c  83 01 E9 	    dec W3,W3
+ 259 00010e  00 00 3A 	    bra nz, 1b
+ 260 000110  01 20 A8 	    _disable_eeprom
+ 261 000112  B8 05 78 	    NEXT
  261         3B 00 78 
  261         00 40 01 
  262              	    
@@ -3920,33 +3924,34 @@
  265              	; en mémoire RAM
  266              	;;;;;;;;;;;;;;;;;;;;;;;;;;;
  267              	DEFCODE "ELOAD",5,,ELOAD   ; ( addr-bloc page -- )
- 268 000116  00 00 02 	    call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
+ 268 000118  00 00 02 	    call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
  268         00 00 00 
- 269 00011a  01 20 A9 	    _enable_eeprom
- 270 00011c  30 00 20 	    mov #EREAD, W0
- 271 00011e  00 E0 B7 	    spi_write
+ 269 00011c  01 20 A9 	    _enable_eeprom
+ 270 00011e  30 00 20 	    mov #EREAD, W0
+ 271 000120  00 E0 B7 	    spi_write
  271         00 00 AE 
  271         FE FF 37 
  271         00 00 80 
- 272 000126  48 66 DD 	    sl  T, #8, T
- 273 000128  0C 2F 78 	    DPUSH
- 274 00012a  00 06 EB 	    clr T
- 275 00012c  0C 86 D2 	    rlc T,T
- 276 00012e  00 00 02 	    call spi_send_address
+ 272 000128  48 66 DD 	    sl  T, #8, T
+ 273 00012a  0C 2F 78 	    DPUSH
+ 273         60 70 E1 
+ 274 00012e  00 06 EB 	    clr T
+ 275 000130  0C 86 D2 	    rlc T,T
+ 276 000132  00 00 02 	    call spi_send_address
  276         00 00 00 
- 277 000132  0C 01 78 	    mov T, W2 ; addr-bloc
- 278 000134  2E 06 78 	    DPOP
- 279 000136  03 10 20 	    mov #256, W3
+ 277 000136  0C 01 78 	    mov T, W2 ; addr-bloc
+ 278 000138  2E 06 78 	    DPOP
+ 279 00013a  03 10 20 	    mov #256, W3
  280              	1:
- 281 000138  00 E0 EF 	    spi_read
+ 281 00013c  00 E0 EF 	    spi_read
  281         00 00 AE 
  281         FE FF 37 
- 282 00013e  00 00 80 	    mov STR_SPIBUF, W0
- 283 000140  00 59 78 	    mov.b W0, [W2++]
- 284 000142  83 01 E9 	    dec W3,W3
- 285 000144  00 00 3A 	    bra nz, 1b
- 286 000146  01 20 A8 	    _disable_eeprom
- 287 000148  B8 05 78 	    NEXT
+ 282 000142  00 00 80 	    mov STR_SPIBUF, W0
+ 283 000144  00 59 78 	    mov.b W0, [W2++]
+ 284 000146  83 01 E9 	    dec W3,W3
+ 285 000148  00 00 3A 	    bra nz, 1b
+ 286 00014a  01 20 A8 	    _disable_eeprom
+ 287 00014c  B8 05 78 	    NEXT
  287         3B 00 78 
  287         00 40 01 
  288              	    
@@ -5029,9 +5034,9 @@ DEFINED SYMBOLS
           ./core.inc:45     *ABS*:00000006 HERE
           ./core.inc:46     *ABS*:00000008 LATEST
           ./core.inc:47     *ABS*:0000000a PAD
-          ./core.inc:98     *ABS*:00000080 F_IMMED
-          ./core.inc:99     *ABS*:00000020 F_HIDDEN
-          ./core.inc:100    *ABS*:0000001f F_LENMASK
+          ./core.inc:101    *ABS*:00000080 F_IMMED
+          ./core.inc:102    *ABS*:00000020 F_HIDDEN
+          ./core.inc:103    *ABS*:0000001f F_LENMASK
              store.s:267    .sysdict:00000022 link
              store.s:28     *ABS*:00000001 WRMR
              store.s:29     *ABS*:00000005 RDMR
@@ -5084,14 +5089,14 @@ DEFINED SYMBOLS
              store.s:237    .text:000000ce code_ESTORE
              store.s:241    .text:000000da L0
              store.s:246    .text:000000ea L0
-             store.s:255    .text:00000100 L12
-             store.s:257    .text:00000106 L0
+             store.s:255    .text:00000102 L12
+             store.s:257    .text:00000108 L0
              store.s:267    .sysdict:00000022 name_ELOAD
              store.s:267    .sysdict:0000002a ELOAD
-             store.s:267    .text:00000116 code_ELOAD
-             store.s:271    .text:00000122 L0
-             store.s:280    .text:00000138 L13
-             store.s:281    .text:0000013c L0
+             store.s:267    .text:00000118 code_ELOAD
+             store.s:271    .text:00000124 L0
+             store.s:280    .text:0000013c L13
+             store.s:281    .text:00000140 L0
                       .debug_line:00000000 .L0
                       .debug_line:00000025 .L0
              store.s:290    .debug_line:000000ae .L0
@@ -5260,72 +5265,72 @@ DEFINED SYMBOLS
              store.s:246    .text:000000e6 .L0
              store.s:248    .text:000000f0 .L0
              store.s:247    .text:000000ee .L0
-             store.s:249    .text:000000f2 .L0
+             store.s:249    .text:000000f4 .L0
              store.s:248    .text:000000f0 .L0
-             store.s:250    .text:000000f4 .L0
-             store.s:249    .text:000000f2 .L0
-             store.s:251    .text:000000f6 .L0
-             store.s:250    .text:000000f4 .L0
-             store.s:252    .text:000000fa .L0
-             store.s:251    .text:000000f6 .L0
-             store.s:253    .text:000000fc .L0
-             store.s:252    .text:000000fa .L0
-             store.s:254    .text:000000fe .L0
-             store.s:253    .text:000000fc .L0
-             store.s:256    .text:00000100 .L0
-             store.s:254    .text:000000fe .L0
-             store.s:257    .text:00000102 .L0
-             store.s:256    .text:00000100 .L0
-             store.s:258    .text:0000010a .L0
-             store.s:257    .text:00000102 .L0
-             store.s:259    .text:0000010c .L0
-             store.s:258    .text:0000010a .L0
-             store.s:260    .text:0000010e .L0
-             store.s:259    .text:0000010c .L0
-             store.s:261    .text:00000110 .L0
-             store.s:260    .text:0000010e .L0
-             store.s:268    .text:00000116 .L0
-             store.s:261    .text:00000110 .L0
-             store.s:269    .text:0000011a .L0
-             store.s:268    .text:00000116 .L0
-             store.s:270    .text:0000011c .L0
-             store.s:269    .text:0000011a .L0
-             store.s:271    .text:0000011e .L0
-             store.s:270    .text:0000011c .L0
-             store.s:272    .text:00000126 .L0
-             store.s:271    .text:0000011e .L0
-             store.s:273    .text:00000128 .L0
-             store.s:272    .text:00000126 .L0
-             store.s:274    .text:0000012a .L0
-             store.s:273    .text:00000128 .L0
-             store.s:275    .text:0000012c .L0
-             store.s:274    .text:0000012a .L0
-             store.s:276    .text:0000012e .L0
-             store.s:275    .text:0000012c .L0
-             store.s:277    .text:00000132 .L0
-             store.s:276    .text:0000012e .L0
-             store.s:278    .text:00000134 .L0
-             store.s:277    .text:00000132 .L0
-             store.s:279    .text:00000136 .L0
-             store.s:278    .text:00000134 .L0
-             store.s:281    .text:00000138 .L0
-             store.s:279    .text:00000136 .L0
-             store.s:282    .text:0000013e .L0
-             store.s:281    .text:00000138 .L0
-             store.s:283    .text:00000140 .L0
-             store.s:282    .text:0000013e .L0
-             store.s:284    .text:00000142 .L0
-             store.s:283    .text:00000140 .L0
-             store.s:285    .text:00000144 .L0
-             store.s:284    .text:00000142 .L0
-             store.s:286    .text:00000146 .L0
-             store.s:285    .text:00000144 .L0
-             store.s:287    .text:00000148 .L0
-             store.s:286    .text:00000146 .L0
-             store.s:290    .text:0000014e .L0
-             store.s:287    .text:00000148 .L0
+             store.s:250    .text:000000f6 .L0
+             store.s:249    .text:000000f4 .L0
+             store.s:251    .text:000000f8 .L0
+             store.s:250    .text:000000f6 .L0
+             store.s:252    .text:000000fc .L0
+             store.s:251    .text:000000f8 .L0
+             store.s:253    .text:000000fe .L0
+             store.s:252    .text:000000fc .L0
+             store.s:254    .text:00000100 .L0
+             store.s:253    .text:000000fe .L0
+             store.s:256    .text:00000102 .L0
+             store.s:254    .text:00000100 .L0
+             store.s:257    .text:00000104 .L0
+             store.s:256    .text:00000102 .L0
+             store.s:258    .text:0000010c .L0
+             store.s:257    .text:00000104 .L0
+             store.s:259    .text:0000010e .L0
+             store.s:258    .text:0000010c .L0
+             store.s:260    .text:00000110 .L0
+             store.s:259    .text:0000010e .L0
+             store.s:261    .text:00000112 .L0
+             store.s:260    .text:00000110 .L0
+             store.s:268    .text:00000118 .L0
+             store.s:261    .text:00000112 .L0
+             store.s:269    .text:0000011c .L0
+             store.s:268    .text:00000118 .L0
+             store.s:270    .text:0000011e .L0
+             store.s:269    .text:0000011c .L0
+             store.s:271    .text:00000120 .L0
+             store.s:270    .text:0000011e .L0
+             store.s:272    .text:00000128 .L0
+             store.s:271    .text:00000120 .L0
+             store.s:273    .text:0000012a .L0
+             store.s:272    .text:00000128 .L0
+             store.s:274    .text:0000012e .L0
+             store.s:273    .text:0000012a .L0
+             store.s:275    .text:00000130 .L0
+             store.s:274    .text:0000012e .L0
+             store.s:276    .text:00000132 .L0
+             store.s:275    .text:00000130 .L0
+             store.s:277    .text:00000136 .L0
+             store.s:276    .text:00000132 .L0
+             store.s:278    .text:00000138 .L0
+             store.s:277    .text:00000136 .L0
+             store.s:279    .text:0000013a .L0
+             store.s:278    .text:00000138 .L0
+             store.s:281    .text:0000013c .L0
+             store.s:279    .text:0000013a .L0
+             store.s:282    .text:00000142 .L0
+             store.s:281    .text:0000013c .L0
+             store.s:283    .text:00000144 .L0
+             store.s:282    .text:00000142 .L0
+             store.s:284    .text:00000146 .L0
+             store.s:283    .text:00000144 .L0
+             store.s:285    .text:00000148 .L0
+             store.s:284    .text:00000146 .L0
+             store.s:286    .text:0000014a .L0
+             store.s:285    .text:00000148 .L0
+             store.s:287    .text:0000014c .L0
+             store.s:286    .text:0000014a .L0
+             store.s:290    .text:00000152 .L0
+             store.s:287    .text:0000014c .L0
                             .text:00000000 .L0
-             store.s:290    .text:0000014e .L0
+             store.s:290    .text:00000152 .L0
                       .debug_info:00000000 .L0
                       .debug_info:00000084 .L0
 

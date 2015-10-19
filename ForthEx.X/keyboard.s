@@ -55,6 +55,7 @@ key_state:
 INT    
 .global __T1Interrupt   
 __T1Interrupt:
+    bclr IFS0, #T1IF
     push W0
     push W1
     push W2
@@ -107,7 +108,6 @@ isr_exit:
     pop W2
     pop W1
     pop W0
-    bclr IFS0, #T1IF
     retfie
     
 .text
