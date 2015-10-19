@@ -337,7 +337,7 @@ __OC2Interrupt:
     push PSVPAG
     mov SYNC_TMR, W0
     and W0, #3, W0
-    sl W0,#1, W0
+    sl W0,W0
     bra W0
     nop
     nop

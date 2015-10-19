@@ -79,14 +79,12 @@ DEFCODE "EXIT",4,,EXIT
 
 DEFCODE "LIT",5,,LIT  ; ( -- n )
     DPUSH
-    mov [IP+0], T
-    inc2 IP, IP
+    mov [IP++], T
     NEXT
 
 DEFCODE "CLIT",4,,CLIT  ; ( -- c )
     DPUSH
-    mov.b [IP], T
-    inc2 IP, IP
+    mov.b [IP++], T
     ze T,T
     NEXT
 
@@ -103,39 +101,42 @@ DEFCODE "C!",2,,CSTORE  ; ( c-addr c -- )
     NEXT
     
 ; branchement inconditionnel    
-DEFCODE "DOBRA",5,,DOBRA  ; ( -- )
-    mov [IP], IP
+DEFCODE "BRANCH",5,,BRANCH  ; ( -- )
+XBRAN:
+    add IP, [IP], IP
     NEXT
     
 ; branchement si T==0    
-DEFCODE "DO0BRA",6,,DO0BRA ; ( n -- )
+DEFCODE "?BRANCH",6,,QBRANCH ; ( n -- )
     cp0 T
     DPOP
-    bra nz, 1f
-    mov [IP], IP
-    NEXT   
-1:
+    bra z, XBRAN
     inc2 IP,IP
     NEXT
 
 ; exécution de DO    
-DEFCODE "DODO",4,,DODO ; ( n  n -- ) R( -- n n )
+DEFCODE "(DO)",4,,DODO ; ( n  n -- ) R( -- n n )
     RPUSH I
     mov T, I
-    DPOP
-    RPUSH T
+    mov [DSP--],[++RSP]
+;    DPOP
+;    RPUSH T
     DPOP
     NEXT
 
 ; exécution de LOOP   
-DEFCODE "DOLOOP",6,,DOLOOP  ; ( -- )  R( n n -- )
+DEFCODE "(LOOP)",6,,DOLOOP  ; ( -- )  R( n n -- )
     inc I, I
-    cp I, [DSP]
-    bra eq, 1f
-    mov [IP], IP
+    cp I, [RSP]
+    bra z, 1f
+;    bra XBRAN
+    add IP, [IP], IP
+    NEXT
+    
 1:
-    RPOP I
+    inc2 IP,IP
     RDROP    
+    RPOP I
     NEXT
 
 ; empile compteur de boucle    
@@ -144,6 +145,19 @@ DEFCODE "I",1,,DOI  ; ( -- n )
     mov I, T
     NEXT
 
+DEFCODE "J",1,,DOJ  ; ( -- n )
+    DPUSH
+    mov [RSP-2],T
+    NEXT
+    
+DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) jette les arguments d'une boucle
+    RDROP
+    RPOP I
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+; mots manipulant les arguments sur la pile
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 DEFCODE "DUP",3,,DUP ; ( n -- n n )
     DPUSH
     NEXT
@@ -321,22 +335,57 @@ DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
 
 DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
     clr W0
-    cp T, [DSP]
+    cp T, [DSP--]
     bra nz, 1f
     com W0,W0
- 1: DPOP
+ 1: 
     mov W0,T
     NEXT
     
 DEFCODE "<>",2,,NEQUAL ; ( n1 n2 -- f ) f = n1<>n2
     clr W0
-    cp T, [DSP]
+    cp T, [DSP--]
     bra z, 1f
     com W0,W0
-1:  DPOP
+1:  
     mov W0, T
     NEXT
     
+ DEFCODE "<",1,,LESS  ; ( n1 n2 -- f) f= n1<n2
+    clr W0
+    cp T,[DSP--]
+    bra le, 1f
+    com W0,W0
+1:
+    mov W0, T
+    NEXT
+    
+DEFCODE ">",1,,GREATER  ; ( n1 n2 -- f ) f= n1>n2
+    clr W0
+    cp T,[DSP--]
+    bra ge, 1f
+    com W0,W0
+1:
+    mov W0, T
+    NEXT
+    
+DEFCODE "U<",2,,ULESS  ; (u1 u2 -- f) f= u1<u2
+    clr W0
+    cp T,[DSP--]
+    bra leu, 1f
+    com W0,W0
+1:
+    mov W0, T
+    NEXT
+    
+DEFCODE "U>",2,,UGREATER ; ( u1 u2 -- f) f=u1>u2
+    clr W0
+    cp T,[DSP--]
+    bra geu, 1f
+    com W0,W0
+1:
+    mov W0,T
+    NEXT
     
     
     
@@ -344,13 +393,13 @@ DEFCODE "<>",2,,NEQUAL ; ( n1 n2 -- f ) f = n1<>n2
 ;   TESTS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "TEST",4,,TEST   
-.word  CLS,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,DOBRA, TEST+6
+.word  CLS,MSG,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,BRANCH, -22
 
 DEFWORD "SERTEST",7,,SERTEST
-.word CLS,MSG,SGET,SEMIT,DOBRA,SERTEST+6    
+.word CLS,MSG,SGET,SEMIT,BRANCH,-6    
 
 DEFWORD "KBDTEST",7,,KBDTEST
-.word CLS,KEY,EMIT,DOBRA,KBDTEST+4    
+.word CLS,KEY,EMIT,BRANCH,-6    
     
 DEFWORD "HOME",5,,HOME
 .word LIT,0,LIT,0,CURPOS,EXIT
@@ -369,28 +418,33 @@ DEFWORD "MSG",3,,MSG
 .word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
 
 DEFWORD "ZTYPE",5,,ZTYPE
-.word DUP,CFETCH,DUP,DO0BRA,ZTYPEOUT,EMIT,ONEPLUS,DOBRA,ZTYPE+2
-ZTYPEOUT:
+.word DUP,CFETCH,DUP,QBRANCH,10,EMIT,ONEPLUS,BRANCH,-16
 .word DROP,DROP, EXIT     
 
 DEFWORD "STRTEST",7,,STRTEST
 .word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
-.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,DOBRA, STRTEST+2
+.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,BRANCH, -26
 
 DEFWORD "EEPROMTEST",10,,EEPROMTEST
-.word CLS,LIT, quick, ZTYPE, LIT, _video_buffer,LIT,100,ESTORE,SRAND,DELAY
-.word CLS,LIT,100,LFSR,TONE, DELAY, LIT, _video_buffer,LIT,100,ELOAD,DOBRA,EEPROMTEST+22
+.word CLS,LIT, quick, ZTYPE, LIT,2000,MSEC, LIT, _video_buffer,LIT,100,ESTORE
+.word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,BRANCH,-16
+
+DEFWORD "LOOPTEST",8,,LOOPTEST
+.word CLS,LIT,6,LIT,0,DODO,LIT,'A',EMIT,DOLOOP,-8,INFLOOP    
     
 DEFWORD "DELAY",5,,DELAY
 .word  LIT, 500, MSEC, EXIT
     
+;DEFWORD "INFLOOP",7,,INFLOOP
+;.word  BRANCH, -2
+
 DEFCODE "INFLOOP",7,,INFLOOP
-    bra .
+    bra .-2
     
 SYSDICT
 .global ENTRY
 ENTRY: 
-.word EEPROMTEST
+.word LOOPTEST
 .global sys_latest
 sys_latest:
 .word link
