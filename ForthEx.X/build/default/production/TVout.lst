@@ -3655,7 +3655,7 @@
   62              	    
   63              	.macro DPUSH  
   64              	    mov T, [++DSP]
-  65              	    cp DSP, #RBASE
+  65              	;    cp DSP, #RBASE
   66              	;    bra nz, .+4
   67              	;    reset
   68              	.endm
@@ -3999,47 +3999,45 @@
  192              	;;;;;;;;;;;;;;;;;;;;;;
  193              	DEFCODE "BL",2,,BL   ; ( -- )
  194 0000c0  0C 2F 78 	    DPUSH
- 194         60 70 E1 
- 195 0000c4  0C 02 20 	    mov #32, T
- 196 0000c6  00 00 37 	    bra code_EMIT
+ 195 0000c2  0C 02 20 	    mov #32, T
+ 196 0000c4  00 00 37 	    bra code_EMIT
  197              	
  198              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  199              	; défile écran vers le haut
  200              	; d'une ligne texte.
  201              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  202              	DEFCODE "SCROLLUP",8,,SCROLLUP  ; ( -- )
- 203 0000c8  01 00 20 	    mov #_video_buffer, W1
- 204 0000ca  20 03 20 	    mov #CPL, W0
- 205 0000cc  01 01 40 	    add W0,W1,W2
- 206 0000ce  03 4B 20 	    mov #TV_BUFFER, W3
- 207 0000d0  80 81 51 	    sub W3,W0,W3
- 208 0000d2  83 01 D1 	    lsr W3,W3
- 209 0000d4  83 01 E9 	    dec W3,W3
- 210 0000d6  03 80 09 	    repeat W3
- 211 0000d8  B2 18 78 	    mov [W2++],[W1++]
- 212 0000da  0C 2F 78 	    DPUSH
- 212         60 70 E1 
- 213 0000de  7C 01 20 	    mov #(LPS-1), T
- 214 0000e0  00 00 37 	    bra code_CLRLN
+ 203 0000c6  01 00 20 	    mov #_video_buffer, W1
+ 204 0000c8  20 03 20 	    mov #CPL, W0
+ 205 0000ca  01 01 40 	    add W0,W1,W2
+ 206 0000cc  03 4B 20 	    mov #TV_BUFFER, W3
+ 207 0000ce  80 81 51 	    sub W3,W0,W3
+ 208 0000d0  83 01 D1 	    lsr W3,W3
+ 209 0000d2  83 01 E9 	    dec W3,W3
+ 210 0000d4  03 80 09 	    repeat W3
+ 211 0000d6  B2 18 78 	    mov [W2++],[W1++]
+ 212 0000d8  0C 2F 78 	    DPUSH
+ 213 0000da  7C 01 20 	    mov #(LPS-1), T
+ 214 0000dc  00 00 37 	    bra code_CLRLN
  215              	    
  216              	
  217              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  218              	; efface la ligne indiquée
  219              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  220              	DEFCODE "CLRLN",5,,CLRLN    ; ( n -- )
- 221 0000e2  02 00 20 	    mov #_video_buffer, W2
- 222 0000e4  80 01 20 	    mov #LPS, W0
- 223 0000e6  00 60 E1 	    cp T, W0
- 224 0000e8  00 00 31 	    bra geu, 1f
- 225 0000ea  20 03 20 	    mov #CPL, W0
- 226 0000ec  00 60 B8 	    mul.uu T, W0,W0
- 227 0000ee  02 01 40 	    add W0, W2,W2
- 228 0000f0  00 02 22 	    mov #0x2020, W0
- 229 0000f2  18 00 09 	    repeat #(CPL/2-1)
- 230 0000f4  00 19 78 	    mov W0, [W2++]
+ 221 0000de  02 00 20 	    mov #_video_buffer, W2
+ 222 0000e0  80 01 20 	    mov #LPS, W0
+ 223 0000e2  00 60 E1 	    cp T, W0
+ 224 0000e4  00 00 31 	    bra geu, 1f
+ 225 0000e6  20 03 20 	    mov #CPL, W0
+ 226 0000e8  00 60 B8 	    mul.uu T, W0,W0
+ 227 0000ea  02 01 40 	    add W0, W2,W2
+ 228 0000ec  00 02 22 	    mov #0x2020, W0
+ 229 0000ee  18 00 09 	    repeat #(CPL/2-1)
+ 230 0000f0  00 19 78 	    mov W0, [W2++]
  231              	1:    
- 232 0000f6  2E 06 78 	    DPOP
- 233 0000f8  B8 05 78 	    NEXT
+ 232 0000f2  2E 06 78 	    DPOP
+ 233 0000f4  B8 05 78 	    NEXT
  233         3B 00 78 
  233         00 40 01 
  234              	    
@@ -5365,7 +5363,7 @@ DEFINED SYMBOLS
              TVout.S:161    .text:00000094 L13
              TVout.S:175    .text:000000ae crlf
              TVout.S:181    .text:000000b8 L21
-             TVout.S:202    .text:000000c8 code_SCROLLUP
+             TVout.S:202    .text:000000c6 code_SCROLLUP
              TVout.S:187    .sysdict:00000038 name_CR
              TVout.S:187    .sysdict:0000003e CR
              TVout.S:187    .text:000000be code_CR
@@ -5374,10 +5372,10 @@ DEFINED SYMBOLS
              TVout.S:193    .text:000000c0 code_BL
              TVout.S:202    .sysdict:00000048 name_SCROLLUP
              TVout.S:202    .sysdict:00000054 SCROLLUP
-             TVout.S:220    .text:000000e2 code_CLRLN
+             TVout.S:220    .text:000000de code_CLRLN
              TVout.S:220    .sysdict:00000056 name_CLRLN
              TVout.S:220    .sysdict:0000005e CLRLN
-             TVout.S:231    .text:000000f6 L14
+             TVout.S:231    .text:000000f2 L14
              TVout.S:239    .sysdict:00000060 name_TYPE
              TVout.S:239    .sysdict:00000068 TYPE
              TVout.S:247    .int:00000000 __T2Interrupt
@@ -5803,64 +5801,64 @@ DEFINED SYMBOLS
              TVout.S:182    .text:000000b8 .L0
              TVout.S:194    .text:000000c0 .L0
              TVout.S:188    .text:000000be .L0
-             TVout.S:195    .text:000000c4 .L0
+             TVout.S:195    .text:000000c2 .L0
              TVout.S:194    .text:000000c0 .L0
-             TVout.S:196    .text:000000c6 .L0
-             TVout.S:195    .text:000000c4 .L0
-             TVout.S:203    .text:000000c8 .L0
-             TVout.S:196    .text:000000c6 .L0
-             TVout.S:204    .text:000000ca .L0
-             TVout.S:203    .text:000000c8 .L0
-             TVout.S:205    .text:000000cc .L0
-             TVout.S:204    .text:000000ca .L0
-             TVout.S:206    .text:000000ce .L0
-             TVout.S:205    .text:000000cc .L0
-             TVout.S:207    .text:000000d0 .L0
-             TVout.S:206    .text:000000ce .L0
-             TVout.S:208    .text:000000d2 .L0
-             TVout.S:207    .text:000000d0 .L0
-             TVout.S:209    .text:000000d4 .L0
-             TVout.S:208    .text:000000d2 .L0
-             TVout.S:210    .text:000000d6 .L0
-             TVout.S:209    .text:000000d4 .L0
-             TVout.S:211    .text:000000d8 .L0
-             TVout.S:210    .text:000000d6 .L0
-             TVout.S:212    .text:000000da .L0
-             TVout.S:211    .text:000000d8 .L0
-             TVout.S:213    .text:000000de .L0
-             TVout.S:212    .text:000000da .L0
-             TVout.S:214    .text:000000e0 .L0
-             TVout.S:213    .text:000000de .L0
-             TVout.S:221    .text:000000e2 .L0
-             TVout.S:214    .text:000000e0 .L0
-             TVout.S:222    .text:000000e4 .L0
-             TVout.S:221    .text:000000e2 .L0
-             TVout.S:223    .text:000000e6 .L0
-             TVout.S:222    .text:000000e4 .L0
-             TVout.S:224    .text:000000e8 .L0
-             TVout.S:223    .text:000000e6 .L0
-             TVout.S:225    .text:000000ea .L0
-             TVout.S:224    .text:000000e8 .L0
-             TVout.S:226    .text:000000ec .L0
-             TVout.S:225    .text:000000ea .L0
-             TVout.S:227    .text:000000ee .L0
-             TVout.S:226    .text:000000ec .L0
-             TVout.S:228    .text:000000f0 .L0
-             TVout.S:227    .text:000000ee .L0
-             TVout.S:229    .text:000000f2 .L0
-             TVout.S:228    .text:000000f0 .L0
-             TVout.S:230    .text:000000f4 .L0
-             TVout.S:229    .text:000000f2 .L0
-             TVout.S:232    .text:000000f6 .L0
-             TVout.S:230    .text:000000f4 .L0
-             TVout.S:233    .text:000000f8 .L0
-             TVout.S:232    .text:000000f6 .L0
-             TVout.S:239    .text:000000fe .L0
-             TVout.S:233    .text:000000f8 .L0
+             TVout.S:196    .text:000000c4 .L0
+             TVout.S:195    .text:000000c2 .L0
+             TVout.S:203    .text:000000c6 .L0
+             TVout.S:196    .text:000000c4 .L0
+             TVout.S:204    .text:000000c8 .L0
+             TVout.S:203    .text:000000c6 .L0
+             TVout.S:205    .text:000000ca .L0
+             TVout.S:204    .text:000000c8 .L0
+             TVout.S:206    .text:000000cc .L0
+             TVout.S:205    .text:000000ca .L0
+             TVout.S:207    .text:000000ce .L0
+             TVout.S:206    .text:000000cc .L0
+             TVout.S:208    .text:000000d0 .L0
+             TVout.S:207    .text:000000ce .L0
+             TVout.S:209    .text:000000d2 .L0
+             TVout.S:208    .text:000000d0 .L0
+             TVout.S:210    .text:000000d4 .L0
+             TVout.S:209    .text:000000d2 .L0
+             TVout.S:211    .text:000000d6 .L0
+             TVout.S:210    .text:000000d4 .L0
+             TVout.S:212    .text:000000d8 .L0
+             TVout.S:211    .text:000000d6 .L0
+             TVout.S:213    .text:000000da .L0
+             TVout.S:212    .text:000000d8 .L0
+             TVout.S:214    .text:000000dc .L0
+             TVout.S:213    .text:000000da .L0
+             TVout.S:221    .text:000000de .L0
+             TVout.S:214    .text:000000dc .L0
+             TVout.S:222    .text:000000e0 .L0
+             TVout.S:221    .text:000000de .L0
+             TVout.S:223    .text:000000e2 .L0
+             TVout.S:222    .text:000000e0 .L0
+             TVout.S:224    .text:000000e4 .L0
+             TVout.S:223    .text:000000e2 .L0
+             TVout.S:225    .text:000000e6 .L0
+             TVout.S:224    .text:000000e4 .L0
+             TVout.S:226    .text:000000e8 .L0
+             TVout.S:225    .text:000000e6 .L0
+             TVout.S:227    .text:000000ea .L0
+             TVout.S:226    .text:000000e8 .L0
+             TVout.S:228    .text:000000ec .L0
+             TVout.S:227    .text:000000ea .L0
+             TVout.S:229    .text:000000ee .L0
+             TVout.S:228    .text:000000ec .L0
+             TVout.S:230    .text:000000f0 .L0
+             TVout.S:229    .text:000000ee .L0
+             TVout.S:232    .text:000000f2 .L0
+             TVout.S:230    .text:000000f0 .L0
+             TVout.S:233    .text:000000f4 .L0
+             TVout.S:232    .text:000000f2 .L0
+             TVout.S:239    .text:000000fa .L0
+             TVout.S:233    .text:000000f4 .L0
                              .int:00000000 .L0
              TVout.S:388    .int:000000e4 .L0
                             .text:00000000 .L0
-             TVout.S:239    .text:000000fe .L0
+             TVout.S:239    .text:000000fa .L0
                       .debug_info:00000000 .L0
                       .debug_info:0000007c .L0
 

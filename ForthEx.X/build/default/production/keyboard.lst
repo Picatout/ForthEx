@@ -3775,7 +3775,7 @@
   62              	    
   63              	.macro DPUSH  
   64              	    mov T, [++DSP]
-  65              	    cp DSP, #RBASE
+  65              	;    cp DSP, #RBASE
   66              	;    bra nz, .+4
   67              	;    reset
   68              	.endm
@@ -4169,15 +4169,13 @@
  296 00010a  00 00 02 	    call kbd_get
  296         00 00 00 
  297 00010e  0C 2F 78 	    DPUSH
- 297         60 70 E1 
- 298 000112  00 06 78 	    mov W0, T
- 299 000114  00 00 E0 	    cp0 W0
- 300 000116  00 00 32 	    bra eq, 1f
- 301 000118  0C 2F 78 	    DPUSH
- 301         60 70 E1 
- 302 00011c  00 86 EB 	    setm T
+ 298 000110  00 06 78 	    mov W0, T
+ 299 000112  00 00 E0 	    cp0 W0
+ 300 000114  00 00 32 	    bra eq, 1f
+ 301 000116  0C 2F 78 	    DPUSH
+ 302 000118  00 86 EB 	    setm T
  303              	1:    
- 304 00011e  B8 05 78 	    NEXT
+ 304 00011a  B8 05 78 	    NEXT
  304         3B 00 78 
  304         00 40 01 
  305              	    
@@ -4187,14 +4185,13 @@
  309              	;;;;;;;;;;;;;;;;;;;;;;;;    
  310              	DEFCODE "KEY",3,,KEY ; ( -- c)
  311              	0:
- 312 000124  00 00 02 	    call kbd_get
+ 312 000120  00 00 02 	    call kbd_get
  312         00 00 00 
- 313 000128  00 00 E0 	    cp0 W0
- 314 00012a  00 00 32 	    bra z, 0b
- 315 00012c  0C 2F 78 	    DPUSH
- 315         60 70 E1 
- 316 000130  00 06 78 	    mov W0, T
- 317 000132  B8 05 78 	    NEXT
+ 313 000124  00 00 E0 	    cp0 W0
+ 314 000126  00 00 32 	    bra z, 0b
+ 315 000128  0C 2F 78 	    DPUSH
+ 316 00012a  00 06 78 	    mov W0, T
+ 317 00012c  B8 05 78 	    NEXT
  317         3B 00 78 
  317         00 40 01 
  318              	    
@@ -5424,11 +5421,11 @@ DEFINED SYMBOLS
           keyboard.s:295    .sysdict:00000000 name_QKEY
           keyboard.s:295    .sysdict:00000008 QKEY
           keyboard.s:295    .text:0000010a code_QKEY
-          keyboard.s:303    .text:0000011e L15
+          keyboard.s:303    .text:0000011a L15
           keyboard.s:310    .sysdict:0000000a name_KEY
           keyboard.s:310    .sysdict:00000010 KEY
-          keyboard.s:310    .text:00000124 code_KEY
-          keyboard.s:311    .text:00000124 L2
+          keyboard.s:310    .text:00000120 code_KEY
+          keyboard.s:311    .text:00000120 L2
                       .debug_line:00000000 .L0
                       .debug_line:00000028 .L0
           keyboard.s:320    .debug_line:000000f4 .L0
@@ -5665,32 +5662,32 @@ DEFINED SYMBOLS
           keyboard.s:289    .text:00000108 .L0
           keyboard.s:297    .text:0000010e .L0
           keyboard.s:296    .text:0000010a .L0
-          keyboard.s:298    .text:00000112 .L0
+          keyboard.s:298    .text:00000110 .L0
           keyboard.s:297    .text:0000010e .L0
-          keyboard.s:299    .text:00000114 .L0
-          keyboard.s:298    .text:00000112 .L0
-          keyboard.s:300    .text:00000116 .L0
-          keyboard.s:299    .text:00000114 .L0
-          keyboard.s:301    .text:00000118 .L0
-          keyboard.s:300    .text:00000116 .L0
-          keyboard.s:302    .text:0000011c .L0
-          keyboard.s:301    .text:00000118 .L0
-          keyboard.s:304    .text:0000011e .L0
-          keyboard.s:302    .text:0000011c .L0
-          keyboard.s:312    .text:00000124 .L0
-          keyboard.s:304    .text:0000011e .L0
-          keyboard.s:313    .text:00000128 .L0
-          keyboard.s:312    .text:00000124 .L0
-          keyboard.s:314    .text:0000012a .L0
-          keyboard.s:313    .text:00000128 .L0
-          keyboard.s:315    .text:0000012c .L0
-          keyboard.s:314    .text:0000012a .L0
-          keyboard.s:316    .text:00000130 .L0
-          keyboard.s:315    .text:0000012c .L0
-          keyboard.s:317    .text:00000132 .L0
-          keyboard.s:316    .text:00000130 .L0
-          keyboard.s:320    .text:00000138 .L0
-          keyboard.s:317    .text:00000132 .L0
+          keyboard.s:299    .text:00000112 .L0
+          keyboard.s:298    .text:00000110 .L0
+          keyboard.s:300    .text:00000114 .L0
+          keyboard.s:299    .text:00000112 .L0
+          keyboard.s:301    .text:00000116 .L0
+          keyboard.s:300    .text:00000114 .L0
+          keyboard.s:302    .text:00000118 .L0
+          keyboard.s:301    .text:00000116 .L0
+          keyboard.s:304    .text:0000011a .L0
+          keyboard.s:302    .text:00000118 .L0
+          keyboard.s:312    .text:00000120 .L0
+          keyboard.s:304    .text:0000011a .L0
+          keyboard.s:313    .text:00000124 .L0
+          keyboard.s:312    .text:00000120 .L0
+          keyboard.s:314    .text:00000126 .L0
+          keyboard.s:313    .text:00000124 .L0
+          keyboard.s:315    .text:00000128 .L0
+          keyboard.s:314    .text:00000126 .L0
+          keyboard.s:316    .text:0000012a .L0
+          keyboard.s:315    .text:00000128 .L0
+          keyboard.s:317    .text:0000012c .L0
+          keyboard.s:316    .text:0000012a .L0
+          keyboard.s:320    .text:00000132 .L0
+          keyboard.s:317    .text:0000012c .L0
           keyboard.s:58     .int:00000000 .L0
           keyboard.s:59     .int:00000002 .L0
           keyboard.s:58     .int:00000000 .L0
@@ -5777,7 +5774,7 @@ DEFINED SYMBOLS
           keyboard.s:113    .int:00000054 .L0
           keyboard.s:111    .int:00000052 .L0
                             .text:00000000 .L0
-          keyboard.s:320    .text:00000138 .L0
+          keyboard.s:320    .text:00000132 .L0
                              .int:00000000 .L0
           keyboard.s:113    .int:00000054 .L0
                       .debug_info:00000000 .L0

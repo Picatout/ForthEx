@@ -3535,7 +3535,7 @@
   62              	    
   63              	.macro DPUSH  
   64              	    mov T, [++DSP]
-  65              	    cp DSP, #RBASE
+  65              	;    cp DSP, #RBASE
   66              	;    bra nz, .+4
   67              	;    reset
   68              	.endm
@@ -3898,24 +3898,23 @@
  246         00 00 80 
  247 0000ee  48 66 DD 	    sl  T, #8, T
  248 0000f0  0C 2F 78 	    DPUSH
- 248         60 70 E1 
- 249 0000f4  00 06 EB 	    clr T
- 250 0000f6  0C 86 D2 	    rlc T,T
- 251 0000f8  00 00 02 	    call spi_send_address
+ 249 0000f2  00 06 EB 	    clr T
+ 250 0000f4  0C 86 D2 	    rlc T,T
+ 251 0000f6  00 00 02 	    call spi_send_address
  251         00 00 00 
- 252 0000fc  0C 01 78 	    mov T, W2 ; addr-bloc
- 253 0000fe  2E 06 78 	    DPOP
- 254 000100  03 10 20 	    mov #256, W3
+ 252 0000fa  0C 01 78 	    mov T, W2 ; addr-bloc
+ 253 0000fc  2E 06 78 	    DPOP
+ 254 0000fe  03 10 20 	    mov #256, W3
  255              	1:
- 256 000102  32 40 78 	    mov.b [W2++], W0
- 257 000104  00 E0 B7 	    spi_write
+ 256 000100  32 40 78 	    mov.b [W2++], W0
+ 257 000102  00 E0 B7 	    spi_write
  257         00 00 AE 
  257         FE FF 37 
  257         00 00 80 
- 258 00010c  83 01 E9 	    dec W3,W3
- 259 00010e  00 00 3A 	    bra nz, 1b
- 260 000110  01 20 A8 	    _disable_eeprom
- 261 000112  B8 05 78 	    NEXT
+ 258 00010a  83 01 E9 	    dec W3,W3
+ 259 00010c  00 00 3A 	    bra nz, 1b
+ 260 00010e  01 20 A8 	    _disable_eeprom
+ 261 000110  B8 05 78 	    NEXT
  261         3B 00 78 
  261         00 40 01 
  262              	    
@@ -3924,34 +3923,33 @@
  265              	; en mémoire RAM
  266              	;;;;;;;;;;;;;;;;;;;;;;;;;;;
  267              	DEFCODE "ELOAD",5,,ELOAD   ; ( addr-bloc page -- )
- 268 000118  00 00 02 	    call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
+ 268 000116  00 00 02 	    call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
  268         00 00 00 
- 269 00011c  01 20 A9 	    _enable_eeprom
- 270 00011e  30 00 20 	    mov #EREAD, W0
- 271 000120  00 E0 B7 	    spi_write
+ 269 00011a  01 20 A9 	    _enable_eeprom
+ 270 00011c  30 00 20 	    mov #EREAD, W0
+ 271 00011e  00 E0 B7 	    spi_write
  271         00 00 AE 
  271         FE FF 37 
  271         00 00 80 
- 272 000128  48 66 DD 	    sl  T, #8, T
- 273 00012a  0C 2F 78 	    DPUSH
- 273         60 70 E1 
- 274 00012e  00 06 EB 	    clr T
- 275 000130  0C 86 D2 	    rlc T,T
- 276 000132  00 00 02 	    call spi_send_address
+ 272 000126  48 66 DD 	    sl  T, #8, T
+ 273 000128  0C 2F 78 	    DPUSH
+ 274 00012a  00 06 EB 	    clr T
+ 275 00012c  0C 86 D2 	    rlc T,T
+ 276 00012e  00 00 02 	    call spi_send_address
  276         00 00 00 
- 277 000136  0C 01 78 	    mov T, W2 ; addr-bloc
- 278 000138  2E 06 78 	    DPOP
- 279 00013a  03 10 20 	    mov #256, W3
+ 277 000132  0C 01 78 	    mov T, W2 ; addr-bloc
+ 278 000134  2E 06 78 	    DPOP
+ 279 000136  03 10 20 	    mov #256, W3
  280              	1:
- 281 00013c  00 E0 EF 	    spi_read
+ 281 000138  00 E0 EF 	    spi_read
  281         00 00 AE 
  281         FE FF 37 
- 282 000142  00 00 80 	    mov STR_SPIBUF, W0
- 283 000144  00 59 78 	    mov.b W0, [W2++]
- 284 000146  83 01 E9 	    dec W3,W3
- 285 000148  00 00 3A 	    bra nz, 1b
- 286 00014a  01 20 A8 	    _disable_eeprom
- 287 00014c  B8 05 78 	    NEXT
+ 282 00013e  00 00 80 	    mov STR_SPIBUF, W0
+ 283 000140  00 59 78 	    mov.b W0, [W2++]
+ 284 000142  83 01 E9 	    dec W3,W3
+ 285 000144  00 00 3A 	    bra nz, 1b
+ 286 000146  01 20 A8 	    _disable_eeprom
+ 287 000148  B8 05 78 	    NEXT
  287         3B 00 78 
  287         00 40 01 
  288              	    
@@ -5089,14 +5087,14 @@ DEFINED SYMBOLS
              store.s:237    .text:000000ce code_ESTORE
              store.s:241    .text:000000da L0
              store.s:246    .text:000000ea L0
-             store.s:255    .text:00000102 L12
-             store.s:257    .text:00000108 L0
+             store.s:255    .text:00000100 L12
+             store.s:257    .text:00000106 L0
              store.s:267    .sysdict:00000022 name_ELOAD
              store.s:267    .sysdict:0000002a ELOAD
-             store.s:267    .text:00000118 code_ELOAD
-             store.s:271    .text:00000124 L0
-             store.s:280    .text:0000013c L13
-             store.s:281    .text:00000140 L0
+             store.s:267    .text:00000116 code_ELOAD
+             store.s:271    .text:00000122 L0
+             store.s:280    .text:00000138 L13
+             store.s:281    .text:0000013c L0
                       .debug_line:00000000 .L0
                       .debug_line:00000025 .L0
              store.s:290    .debug_line:000000ae .L0
@@ -5265,72 +5263,72 @@ DEFINED SYMBOLS
              store.s:246    .text:000000e6 .L0
              store.s:248    .text:000000f0 .L0
              store.s:247    .text:000000ee .L0
-             store.s:249    .text:000000f4 .L0
+             store.s:249    .text:000000f2 .L0
              store.s:248    .text:000000f0 .L0
-             store.s:250    .text:000000f6 .L0
-             store.s:249    .text:000000f4 .L0
-             store.s:251    .text:000000f8 .L0
-             store.s:250    .text:000000f6 .L0
-             store.s:252    .text:000000fc .L0
-             store.s:251    .text:000000f8 .L0
-             store.s:253    .text:000000fe .L0
-             store.s:252    .text:000000fc .L0
-             store.s:254    .text:00000100 .L0
-             store.s:253    .text:000000fe .L0
-             store.s:256    .text:00000102 .L0
-             store.s:254    .text:00000100 .L0
-             store.s:257    .text:00000104 .L0
-             store.s:256    .text:00000102 .L0
-             store.s:258    .text:0000010c .L0
-             store.s:257    .text:00000104 .L0
-             store.s:259    .text:0000010e .L0
-             store.s:258    .text:0000010c .L0
-             store.s:260    .text:00000110 .L0
-             store.s:259    .text:0000010e .L0
-             store.s:261    .text:00000112 .L0
-             store.s:260    .text:00000110 .L0
-             store.s:268    .text:00000118 .L0
-             store.s:261    .text:00000112 .L0
-             store.s:269    .text:0000011c .L0
-             store.s:268    .text:00000118 .L0
-             store.s:270    .text:0000011e .L0
-             store.s:269    .text:0000011c .L0
-             store.s:271    .text:00000120 .L0
-             store.s:270    .text:0000011e .L0
-             store.s:272    .text:00000128 .L0
-             store.s:271    .text:00000120 .L0
-             store.s:273    .text:0000012a .L0
-             store.s:272    .text:00000128 .L0
-             store.s:274    .text:0000012e .L0
-             store.s:273    .text:0000012a .L0
-             store.s:275    .text:00000130 .L0
-             store.s:274    .text:0000012e .L0
-             store.s:276    .text:00000132 .L0
-             store.s:275    .text:00000130 .L0
-             store.s:277    .text:00000136 .L0
-             store.s:276    .text:00000132 .L0
-             store.s:278    .text:00000138 .L0
-             store.s:277    .text:00000136 .L0
-             store.s:279    .text:0000013a .L0
-             store.s:278    .text:00000138 .L0
-             store.s:281    .text:0000013c .L0
-             store.s:279    .text:0000013a .L0
-             store.s:282    .text:00000142 .L0
-             store.s:281    .text:0000013c .L0
-             store.s:283    .text:00000144 .L0
-             store.s:282    .text:00000142 .L0
-             store.s:284    .text:00000146 .L0
-             store.s:283    .text:00000144 .L0
-             store.s:285    .text:00000148 .L0
-             store.s:284    .text:00000146 .L0
-             store.s:286    .text:0000014a .L0
-             store.s:285    .text:00000148 .L0
-             store.s:287    .text:0000014c .L0
-             store.s:286    .text:0000014a .L0
-             store.s:290    .text:00000152 .L0
-             store.s:287    .text:0000014c .L0
+             store.s:250    .text:000000f4 .L0
+             store.s:249    .text:000000f2 .L0
+             store.s:251    .text:000000f6 .L0
+             store.s:250    .text:000000f4 .L0
+             store.s:252    .text:000000fa .L0
+             store.s:251    .text:000000f6 .L0
+             store.s:253    .text:000000fc .L0
+             store.s:252    .text:000000fa .L0
+             store.s:254    .text:000000fe .L0
+             store.s:253    .text:000000fc .L0
+             store.s:256    .text:00000100 .L0
+             store.s:254    .text:000000fe .L0
+             store.s:257    .text:00000102 .L0
+             store.s:256    .text:00000100 .L0
+             store.s:258    .text:0000010a .L0
+             store.s:257    .text:00000102 .L0
+             store.s:259    .text:0000010c .L0
+             store.s:258    .text:0000010a .L0
+             store.s:260    .text:0000010e .L0
+             store.s:259    .text:0000010c .L0
+             store.s:261    .text:00000110 .L0
+             store.s:260    .text:0000010e .L0
+             store.s:268    .text:00000116 .L0
+             store.s:261    .text:00000110 .L0
+             store.s:269    .text:0000011a .L0
+             store.s:268    .text:00000116 .L0
+             store.s:270    .text:0000011c .L0
+             store.s:269    .text:0000011a .L0
+             store.s:271    .text:0000011e .L0
+             store.s:270    .text:0000011c .L0
+             store.s:272    .text:00000126 .L0
+             store.s:271    .text:0000011e .L0
+             store.s:273    .text:00000128 .L0
+             store.s:272    .text:00000126 .L0
+             store.s:274    .text:0000012a .L0
+             store.s:273    .text:00000128 .L0
+             store.s:275    .text:0000012c .L0
+             store.s:274    .text:0000012a .L0
+             store.s:276    .text:0000012e .L0
+             store.s:275    .text:0000012c .L0
+             store.s:277    .text:00000132 .L0
+             store.s:276    .text:0000012e .L0
+             store.s:278    .text:00000134 .L0
+             store.s:277    .text:00000132 .L0
+             store.s:279    .text:00000136 .L0
+             store.s:278    .text:00000134 .L0
+             store.s:281    .text:00000138 .L0
+             store.s:279    .text:00000136 .L0
+             store.s:282    .text:0000013e .L0
+             store.s:281    .text:00000138 .L0
+             store.s:283    .text:00000140 .L0
+             store.s:282    .text:0000013e .L0
+             store.s:284    .text:00000142 .L0
+             store.s:283    .text:00000140 .L0
+             store.s:285    .text:00000144 .L0
+             store.s:284    .text:00000142 .L0
+             store.s:286    .text:00000146 .L0
+             store.s:285    .text:00000144 .L0
+             store.s:287    .text:00000148 .L0
+             store.s:286    .text:00000146 .L0
+             store.s:290    .text:0000014e .L0
+             store.s:287    .text:00000148 .L0
                             .text:00000000 .L0
-             store.s:290    .text:00000152 .L0
+             store.s:290    .text:0000014e .L0
                       .debug_info:00000000 .L0
                       .debug_info:00000084 .L0
 

@@ -62,7 +62,7 @@
     
 .macro DPUSH  
     mov T, [++DSP]
-    cp DSP, #RBASE
+;    cp DSP, #RBASE
 ;    bra nz, .+4
 ;    reset
 .endm

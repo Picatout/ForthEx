@@ -118,7 +118,7 @@ DEFCODE "?BRANCH",6,,QBRANCH ; ( n -- )
 DEFCODE "(DO)",4,,DODO ; ( n  n -- ) R( -- n n )
     RPUSH I
     mov T, I
-    mov [DSP--],[++RSP]
+    mov [DSP--],[RSP++]
 ;    DPOP
 ;    RPUSH T
     DPOP
@@ -127,7 +127,8 @@ DEFCODE "(DO)",4,,DODO ; ( n  n -- ) R( -- n n )
 ; exécution de LOOP   
 DEFCODE "(LOOP)",6,,DOLOOP  ; ( -- )  R( n n -- )
     inc I, I
-    cp I, [RSP]
+    mov [RSP-2],W0
+    cp I, W0
     bra z, 1f
     add IP, [IP], IP
     NEXT
@@ -428,9 +429,46 @@ DEFWORD "EEPROMTEST",10,,EEPROMTEST
 .word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,BRANCH,-16
 
 DEFWORD "LOOPTEST",8,,LOOPTEST
-.word CLS,LIT,'E',LIT,'A',DODO,DOI,EMIT,FNOP,DOLOOP,-8,INFLOOP    
+.word CLS,LIT,'Z',LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
 
-DEFCODE "NOP",3,,FNOP
+DEFCODE "DOTR",4,,DOTR
+    mov #_video_buffer,W2
+    mov #'9',W3
+    mov [RSP],W0
+    swap W0
+    swap.b W0
+    and W0,#15,W1
+    add #'0',W1
+    cp W3,W1
+    bra geu, 1f
+    add #8,W1
+1:    
+    mov.b W1,[W2++]
+    swap.b W0
+    and #15,W1
+    add #'0',W1
+    cp W3,W1
+    bra geu, 1f
+    add #8,W1
+1:    
+    mov.b W1,[W2++]
+    swap W0
+    swap.b W0
+    and #15,W1
+    add #'0',W1
+    cp W3,W1
+    bra geu, 1f
+    add W1,#8,W1
+1:
+    mov.b W1,[W2++]
+    swap.b W0
+    and W0,#15,W1
+    add #'0',W1
+    cp W3,W1
+    bra geu, 1f
+    add W1,#8,W1
+1:    
+    mov.b W1,[W2++]
     NEXT
     
 DEFWORD "CRTEST",6,,CRTEST
@@ -443,7 +481,7 @@ DEFWORD "DELAY",5,,DELAY
 ;.word  BRANCH, -2
 
 DEFCODE "INFLOOP",7,,INFLOOP
-    bra .-2
+    bra .
     
 SYSDICT
 .global ENTRY

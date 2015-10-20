@@ -3535,7 +3535,7 @@
   62              	    
   63              	.macro DPUSH  
   64              	    mov T, [++DSP]
-  65              	    cp DSP, #RBASE
+  65              	;    cp DSP, #RBASE
   66              	;    bra nz, .+4
   67              	;    reset
   68              	.endm
@@ -3757,25 +3757,24 @@
  110              	    
  111              	DEFCODE "SGET",4,,SGET
  112 000064  0C 2F 78 	    DPUSH
- 112         60 70 E1 
  113              	0:    
- 114 000068  24 00 E2 	    cp0 rx_in
- 115 00006a  00 00 3A 	    bra nz, 1f
+ 114 000066  24 00 E2 	    cp0 rx_in
+ 115 000068  00 00 3A 	    bra nz, 1f
  116              	;    mov #XON, W0
  117              	;    btss SER_STA, #UTXBF
  118              	;    mov.b WREG, SER_TXREG
- 119 00006c  00 00 37 	    bra 0b
+ 119 00006a  00 00 37 	    bra 0b
  120              	1:
- 121 00006e  26 C0 BF 	    mov.b rx_head, WREG
- 122 000070  00 80 FB 	    ze W0,W0
- 123 000072  01 00 20 	    mov #rx_queue, W1
- 124 000074  81 00 40 	    add W0,W1,W1
- 125 000076  11 46 78 	    mov.b [W1], T
- 126 000078  24 20 ED 	    dec rx_in
- 127 00007a  26 60 EC 	    inc.b rx_head
- 128 00007c  F0 00 20 	    mov #(QUEUE_SIZE-1), W0
- 129 00007e  26 60 B6 	    and.b rx_head
- 130 000080  B8 05 78 	    NEXT
+ 121 00006c  26 C0 BF 	    mov.b rx_head, WREG
+ 122 00006e  00 80 FB 	    ze W0,W0
+ 123 000070  01 00 20 	    mov #rx_queue, W1
+ 124 000072  81 00 40 	    add W0,W1,W1
+ 125 000074  11 46 78 	    mov.b [W1], T
+ 126 000076  24 20 ED 	    dec rx_in
+ 127 000078  26 60 EC 	    inc.b rx_head
+ 128 00007a  F0 00 20 	    mov #(QUEUE_SIZE-1), W0
+ 129 00007c  26 60 B6 	    and.b rx_head
+ 130 00007e  B8 05 78 	    NEXT
  130         3B 00 78 
  130         00 40 01 
  131              	    
@@ -4941,8 +4940,8 @@ DEFINED SYMBOLS
             serial.s:111    .sysdict:0000000a name_SGET
             serial.s:111    .sysdict:00000012 SGET
             serial.s:111    .text:00000064 code_SGET
-            serial.s:113    .text:00000068 L2
-            serial.s:120    .text:0000006e L12
+            serial.s:113    .text:00000066 L2
+            serial.s:120    .text:0000006c L12
             serial.s:136    .int:00000000 __U1RXInterrupt
             serial.s:159    .int:0000001e L13
             serial.s:168    .int:00000024 __U1TXInterrupt
@@ -5120,38 +5119,38 @@ DEFINED SYMBOLS
             serial.s:107    .text:0000005c .L0
             serial.s:112    .text:00000064 .L0
             serial.s:109    .text:0000005e .L0
-            serial.s:114    .text:00000068 .L0
+            serial.s:114    .text:00000066 .L0
             serial.s:112    .text:00000064 .L0
-            serial.s:115    .text:0000006a .L0
-            serial.s:114    .text:00000068 .L0
-            serial.s:119    .text:0000006c .L0
-            serial.s:115    .text:0000006a .L0
-            serial.s:121    .text:0000006e .L0
-            serial.s:119    .text:0000006c .L0
-            serial.s:122    .text:00000070 .L0
-            serial.s:121    .text:0000006e .L0
-            serial.s:123    .text:00000072 .L0
-            serial.s:122    .text:00000070 .L0
-            serial.s:124    .text:00000074 .L0
-            serial.s:123    .text:00000072 .L0
-            serial.s:125    .text:00000076 .L0
-            serial.s:124    .text:00000074 .L0
-            serial.s:126    .text:00000078 .L0
-            serial.s:125    .text:00000076 .L0
-            serial.s:127    .text:0000007a .L0
-            serial.s:126    .text:00000078 .L0
-            serial.s:128    .text:0000007c .L0
-            serial.s:127    .text:0000007a .L0
-            serial.s:129    .text:0000007e .L0
-            serial.s:128    .text:0000007c .L0
-            serial.s:130    .text:00000080 .L0
-            serial.s:129    .text:0000007e .L0
-            serial.s:134    .text:00000086 .L0
-            serial.s:130    .text:00000080 .L0
+            serial.s:115    .text:00000068 .L0
+            serial.s:114    .text:00000066 .L0
+            serial.s:119    .text:0000006a .L0
+            serial.s:115    .text:00000068 .L0
+            serial.s:121    .text:0000006c .L0
+            serial.s:119    .text:0000006a .L0
+            serial.s:122    .text:0000006e .L0
+            serial.s:121    .text:0000006c .L0
+            serial.s:123    .text:00000070 .L0
+            serial.s:122    .text:0000006e .L0
+            serial.s:124    .text:00000072 .L0
+            serial.s:123    .text:00000070 .L0
+            serial.s:125    .text:00000074 .L0
+            serial.s:124    .text:00000072 .L0
+            serial.s:126    .text:00000076 .L0
+            serial.s:125    .text:00000074 .L0
+            serial.s:127    .text:00000078 .L0
+            serial.s:126    .text:00000076 .L0
+            serial.s:128    .text:0000007a .L0
+            serial.s:127    .text:00000078 .L0
+            serial.s:129    .text:0000007c .L0
+            serial.s:128    .text:0000007a .L0
+            serial.s:130    .text:0000007e .L0
+            serial.s:129    .text:0000007c .L0
+            serial.s:134    .text:00000084 .L0
+            serial.s:130    .text:0000007e .L0
                              .int:00000000 .L0
             serial.s:188    .int:00000048 .L0
                             .text:00000000 .L0
-            serial.s:134    .text:00000086 .L0
+            serial.s:134    .text:00000084 .L0
                       .debug_info:00000000 .L0
                       .debug_info:0000007d .L0
 
