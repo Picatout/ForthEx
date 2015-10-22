@@ -3544,74 +3544,75 @@
   31              	.equ SC_ERROR, 0xFC ; erreur clavier
   32              	.equ SC_KREL,  0xF0 ; touche relâchée
   33              	.equ SC_XKEY,  0xE0 ; code étendu
-  34              	 ;codes touches contrôles
-  35              	.equ L_SHIFT,  0x12
-  36              	.equ R_SHIFT,  0x59
-  37              	.equ L_CTRL,   0x14
-  38              	.equ L_ALT,    0x11
-  39              	.equ ENTER,    0x5A
-  40              	.equ CAPS,     0x58
-  41              	.equ SCROLL,   0x7E
-  42              	.equ NUM,      0x77
-  43              	.equ ESC,      0x76
-  44              	.equ F1,       0x05
-  45              	.equ F2,       0x06
-  46              	.equ F3,       0x04
-  47              	.equ F4,       0x0C
-  48              	.equ F5,       0x03
-  49              	.equ F6,       0x0B
-  50              	.equ F7,       0x83 
-  51              	.equ F8,       0x0A
-  52              	.equ F9,       0x01
-  53              	.equ F10,      0x09
-  54              	.equ F11,      0x78
-  55              	.equ F12,      0x07
-  56              	 ; touches clavier numérique
-  57              	.equ KP0,      0x70
-  58              	.equ KP1,      0x69
-  59              	.equ KP2,      0x72
-  60              	.equ KP3,      0x7A
-  61              	.equ KP4,      0x6B
-  62              	.equ KP5,      0x73
-  63              	.equ KP6,      0x74
-  64              	.equ KP7,      0x6C
-  65              	.equ KP8,      0x75
-  66              	.equ KP9,      0x7D
-  67              	.equ KPDOT,    0x71
-  68              	.equ KPPLUS,   0x79
-  69              	.equ KPMINUS,  0x7B
-  70              	.equ KPSTAR,   0x7C
-  71              	; code étendus (précédé de 0xE0) 
-  72              	.equ R_CTRL,   0x14
-  73              	.equ L_GUI,    0x1f
-  74              	.equ R_GUI,    0x27
-  75              	.equ R_ALT,    0x11
-  76              	.equ APPS,     0x2f 
-  77              	.equ INSERT,   0x70
-  78              	.equ HOME,     0x6C
-  79              	.equ PGUP,     0x7D
-  80              	.equ DEL,      0x71
-  81              	.equ END,      0x69
-  82              	.equ PGDN,     0x7A
-  83              	.equ UP,       0x75
-  84              	.equ DOWN,     0x72
-  85              	.equ LEFT,     0x6B
-  86              	.equ RIGHT,    0x74
-  87              	.equ KPSLH,    0x4A
-  88              	.equ KPENT,    0x5A 
-  89              	 
-  90              	;indicateurs booléens dans key_state
-  91              	.equ F_SHIFT, 0 ; touche majuscule enfoncée
-  92              	.equ F_CTRL, 1  ; touche ctrl enfoncée
-  93              	.equ F_ALT, 2   ; touche alt enfoncée
-  94              	.equ F_CAPS, 3  ; FixMaj actif
-  95              	.equ F_NUM,  4  ; clavier numérique actif
-  96              	.equ F_XKEY, 5 ; touche étendue
-  97              	.equ F_KREL, 6 ; relâchement touche
-  98              	; grandeur file interface PS/2 
-  99              	.equ PS2_QUEUE_SIZE, 32
- 100              	.endif
- 101              	
+  34              	.equ SC_C,     0x21 ; scan code touche 'C'    
+  35              	 ;codes touches contrôles
+  36              	.equ L_SHIFT,  0x12
+  37              	.equ R_SHIFT,  0x59
+  38              	.equ L_CTRL,   0x14
+  39              	.equ L_ALT,    0x11
+  40              	.equ ENTER,    0x5A
+  41              	.equ CAPS,     0x58
+  42              	.equ SCROLL,   0x7E
+  43              	.equ NUM,      0x77
+  44              	.equ ESC,      0x76
+  45              	.equ F1,       0x05
+  46              	.equ F2,       0x06
+  47              	.equ F3,       0x04
+  48              	.equ F4,       0x0C
+  49              	.equ F5,       0x03
+  50              	.equ F6,       0x0B
+  51              	.equ F7,       0x83 
+  52              	.equ F8,       0x0A
+  53              	.equ F9,       0x01
+  54              	.equ F10,      0x09
+  55              	.equ F11,      0x78
+  56              	.equ F12,      0x07
+  57              	 ; touches clavier numérique
+  58              	.equ KP0,      0x70
+  59              	.equ KP1,      0x69
+  60              	.equ KP2,      0x72
+  61              	.equ KP3,      0x7A
+  62              	.equ KP4,      0x6B
+  63              	.equ KP5,      0x73
+  64              	.equ KP6,      0x74
+  65              	.equ KP7,      0x6C
+  66              	.equ KP8,      0x75
+  67              	.equ KP9,      0x7D
+  68              	.equ KPDOT,    0x71
+  69              	.equ KPPLUS,   0x79
+  70              	.equ KPMINUS,  0x7B
+  71              	.equ KPSTAR,   0x7C
+  72              	; code étendus (précédé de 0xE0) 
+  73              	.equ R_CTRL,   0x14
+  74              	.equ L_GUI,    0x1f
+  75              	.equ R_GUI,    0x27
+  76              	.equ R_ALT,    0x11
+  77              	.equ APPS,     0x2f 
+  78              	.equ INSERT,   0x70
+  79              	.equ HOME,     0x6C
+  80              	.equ PGUP,     0x7D
+  81              	.equ DEL,      0x71
+  82              	.equ END,      0x69
+  83              	.equ PGDN,     0x7A
+  84              	.equ UP,       0x75
+  85              	.equ DOWN,     0x72
+  86              	.equ LEFT,     0x6B
+  87              	.equ RIGHT,    0x74
+  88              	.equ KPSLH,    0x4A
+  89              	.equ KPENT,    0x5A 
+  90              	 
+  91              	;indicateurs booléens dans key_state
+  92              	.equ F_SHIFT, 0 ; touche majuscule enfoncée
+  93              	.equ F_CTRL, 1  ; touche ctrl enfoncée
+  94              	.equ F_ALT, 2   ; touche alt enfoncée
+  95              	.equ F_CAPS, 3  ; FixMaj actif
+  96              	.equ F_NUM,  4  ; clavier numérique actif
+  97              	.equ F_XKEY, 5 ; touche étendue
+  98              	.equ F_KREL, 6 ; relâchement touche
+  99              	; grandeur file interface PS/2 
+ 100              	.equ PS2_QUEUE_SIZE, 32
+ 101              	.endif
+ 102              	
   29              	.include "keyboard.inc"    
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
@@ -3891,11 +3892,11 @@
   37      00 00 00 00 
   37      00 00 00 00 
   38                 	kbd_head:
-  39 0020 00 00       	.word 0
+  39 0020 00 00       	.space 2
   40                 	kbd_tail:
-  41 0022 00 00       	.word 0
+  41 0022 00 00       	.space 2
   42                 	key_state:    
-  43 0024 00          	.byte 0
+  43 0024 00 00       	.space 2
   44                 	 
   45                 	;;;;;;;;;;;;;;;;;;;;;;;;;
   46                 	; interruption TIMER1
@@ -3907,7 +3908,7 @@
   52                 	.extern ps2_head
   53                 	.extern ps2_tail    
   54                 	.extern ps2_queue  
-  55 0025 00          	INT    
+  55                 	INT    
   56              	.global __T1Interrupt   
   57              	__T1Interrupt:
   58 000000  00 60 A9 	    bclr IFS0, #T1IF
@@ -3929,7 +3930,7 @@
   74 00001a  01 00 20 	    mov #ps2_queue, W1
   75 00001c  81 00 40 	    add W0, W1, W1
   76 00001e  11 A0 A6 	    btss [W1], #10
-  77 000020  00 00 39 	    bra nc, 9f ; rejet: stop bit doit-être 1
+  77 000020  00 00 37 	    bra 9f ; rejet: stop bit doit-être 1
   78 000022  11 00 78 	    mov [W1], W0
   79 000024  00 00 D1 	    lsr W0,W0
   80 000026  00 00 31 	    bra c, 9f ; rejet: start bit doit-être zéro
@@ -3942,261 +3943,281 @@
   87              	2:    
   88 000030  02 01 E9 	    dec W2,W2
   89 000032  00 00 3B 	    bra nn, 1b
-  90              	    ; paritée impaire: W3 doit-être impaire.
+  90              	    ; paritée impaire: W1 doit-être impaire.
   91 000034  01 00 A6 	    btss W1,#0
   92 000036  00 00 37 	    bra 9f ; rejet: mauvaise parité
-  93              	    ; tranfert code dans file
-  94              	    ; kbd_queue
-  95 000038  01 00 20 	    mov #kbd_queue, W1
-  96 00003a  02 00 80 	    mov kbd_tail, W2
-  97 00003c  81 00 41 	    add W2,W1,W1
-  98 00003e  80 48 78 	    mov.b W0,[W1]
-  99 000040  12 00 B0 	    add #1,W2
- 100 000042  F2 01 B2 	    and #(KBD_QUEUE_SIZE-1),W2 ; arg1 <#lit10>
- 101 000044  02 00 88 	    mov W2, kbd_tail
- 102              	9:    
- 103              	    ;incrémente ps2_head
- 104 000046  00 A0 EC 	    inc2 ps2_head
- 105 000048  F0 01 20 	    mov #(PS2_QUEUE_SIZE-1), W0
- 106 00004a  00 20 B6 	    and ps2_head
- 107              	isr_exit:
- 108 00004c  4F 01 78 	    pop W2
- 109 00004e  CF 00 78 	    pop W1
- 110 000050  4F 00 78 	    pop W0
- 111 000052  00 40 06 	    retfie
- 112              	    
- 113              	.text
- 114              	
- 115              	;;;;;;;;;;;;;;;;;;;;;;;
- 116              	; retourne le code clavier
- 117              	; dans W0 sinon retourne 0
- 118              	;;;;;;;;;;;;;;;;;;;;;;;
- 119              	.global get_code    
- 120              	get_code:
- 121 000000  00 00 EB 	    clr W0
- 122 000002  01 00 80 	    mov kbd_head, W1
- 123 000004  02 00 80 	    mov kbd_tail, W2
- 124 000006  02 08 E1 	    cp  W1,W2
- 125 000008  00 00 32 	    bra eq, 1f
- 126 00000a  02 00 20 	    mov #kbd_queue,W2
- 127 00000c  02 81 40 	    add W1,W2,W2
- 128 00000e  20 20 EC 	    inc kbd_head
- 129 000010  F0 01 20 	    mov #(KBD_QUEUE_SIZE-1), W0
- 130 000012  20 20 B6 	    and kbd_head
- 131 000014  12 40 78 	    mov.b [W2], W0
- 132 000016  00 80 FB 	    ze W0,W0
- 133              	1:
- 134 000018  00 00 06 	    return
- 135              	
- 136              	;;;;;;;;;;;;;;;;;;;;;;;;
- 137              	; recherche code clavier
- 138              	; dans la table
- 139              	; entrée: W2=index table    
- 140              	;         W1=scancode recherché
- 141              	; sortie: W0 contient caractère
- 142              	;         W0=0 si scancode pas dans la table
- 143              	; modifie: W0,W2,W3    
- 144              	;;;;;;;;;;;;;;;;;;;;;;;;;
- 145              	search_table:
- 146              	1:
- 147 00001a  32 00 78 	    mov [W2++], W0
- 148 00001c  00 00 E0 	    cp0 W0
- 149 00001e  00 00 32 	    bra eq, 2f
- 150 000020  80 01 78 	    mov W0, W3
- 151 000022  83 81 FB 	    ze W3,W3
- 152 000024  01 18 E1 	    cp W3,W1
- 153 000026  00 00 3A 	    bra neq, 1b
- 154 000028  00 80 FD 	    swap W0
- 155 00002a  00 80 FB 	    ze W0,W0
- 156              	2: ; pas trouvé
- 157 00002c  00 00 06 	    return
- 158              	
- 159              	    
- 160              	;;;;;;;;;;;;;;;;;;;;;;;
- 161              	; retourne un caractère
- 162              	; si disponible sinon 0
- 163              	; sortie: W0
- 164              	;;;;;;;;;;;;;;;;;;;;;;; 
- 165              	; Cette routine est complexe car une touche peut-être composée
- 166              	; de plusieurs codes. 
- 167              	; Lorsqu'une touche est relâchée son scancode est précédé du code 0xF0
- 168              	; Certaines touches ont un scancode étendu, i.e. le premier code est 0xE0
- 169              	; Lorsqu'une touche à code étendu est relaché il y a 3 codes envoyés
- 170              	; par le clavier  0xE0, 0xF0 suivit du code de la touche.
- 171              	; exemple touche <HOME>  lorsqu'elle est enfoncée le clavier envoie 0xE0,0x6C
- 172              	; lorsqu'elle est relâchée le clavier envoie 0xE0,0xF0,0x6C
- 173              	; référence scancode: http://www.computer-engineering.org/ps2keyboard/scancodes2.html    
- 174              	; Le décodage est partiel sinon la routine serait encore plus complexe. 
- 175              	; Les rela?hements de touches sont ignorés sauf pour <CTRL>,<ALT>,<SHIFT>     
- 176              	.global kbd_get
- 177              	kbd_get:
- 178 00002e  00 00 F8 	    push PSVPAG
- 179 000030  00 00 02 	    call get_code
- 179         00 00 00 
- 180 000034  00 00 E0 	    cp0 W0
- 181 000036  00 00 32 	    bra eq, kbd_no_key   
- 182              	    ;code clavier touche étendue?
- 183 000038  01 0E 20 	    mov #SC_XKEY, W1
- 184 00003a  00 08 E1 	    cp W1,W0
- 185 00003c  00 00 3A 	    bra neq, 1f
- 186 00003e  24 A0 A8 	    bset key_state, #F_XKEY
- 187 000040  00 00 02 	    call get_code
- 187         00 00 00 
- 188 000044  00 00 E0 	    cp0 W0
- 189 000046  00 00 32 	    bra eq, kbd_no_key
- 190              	1:
- 191              	    ;code clavier relâchement touche?
- 192 000048  01 0F 20 	    mov #SC_KREL, W1
- 193 00004a  01 00 E1 	    cp W0,W1
- 194 00004c  00 00 3A 	    bra neq, 2f
- 195 00004e  24 C0 A8 	    bset key_state, #F_KREL
- 196 000050  00 00 02 	    call get_code
- 196         00 00 00 
- 197 000054  00 00 E0 	    cp0 W0
- 198 000056  00 00 32 	    bra eq, kbd_no_key
- 199              	2:
- 200 000058  80 00 78 	    mov W0,W1
- 201 00005a  24 C0 AE 	    btss key_state, #F_KREL
- 202 00005c  00 00 37 	    bra 3f
- 203 00005e  24 A0 AF 	    btsc key_state, #F_XKEY
- 204 000060  00 00 37 	    bra try_xmod_key
- 205 000062  00 00 37 	    bra try_mod_key
- 206              	3:    
- 207 000064  24 A0 AE 	    btss key_state, #F_XKEY
- 208 000066  00 00 37 	    bra try_shifted
- 209              	    ; recherche table 'extended'
- 210 000068  02 00 20 	    set_psv extended, W2
- 210         02 00 88 
- 210         02 00 20 
- 211 00006e  00 00 02 	    call search_table
- 211         00 00 00 
- 212 000072  00 00 E0 	    cp0 W0
- 213 000074  00 00 32 	    bra eq, try_xmod_key
- 214              	    ; scancode trouvé dans la table 'extended'
- 215 000076  00 00 37 	    bra kbd_goodkey
- 216              	try_xmod_key:
- 217 000078  02 00 20 	    set_psv xmod, W2
- 217         02 00 88 
- 217         02 00 20 
- 218 00007e  00 00 02 	    call search_table
- 218         00 00 00 
- 219 000082  00 00 E0 	    cp0 W0
- 220 000084  00 00 32 	    bra eq, kbd_ignore_it
- 221 000086  00 00 37 	    bra mod_switch
- 222              	try_shifted:  ; recherche table 'shifted'
- 223 000088  24 00 AE 	    btss key_state, #F_SHIFT
- 224 00008a  00 00 37 	    bra try_ascii
- 225 00008c  02 00 20 	    set_psv shifted, W2
- 225         02 00 88 
- 225         02 00 20 
- 226 000092  00 00 02 	    call search_table
- 226         00 00 00 
- 227 000096  00 00 E0 	    cp0 W0
- 228 000098  00 00 3A 	    bra nz, kbd_goodkey
- 229              	try_ascii:  ; recherche table 'ascii'
- 230 00009a  02 00 20 	    set_psv ascii, W2
- 230         02 00 88 
- 230         02 00 20 
- 231 0000a0  00 00 02 	    call search_table
- 231         00 00 00 
- 232 0000a4  00 00 E0 	    cp0 W0
- 233 0000a6  00 00 32 	    bra eq, try_mod_key
- 234              	    ; scancode trouvé dans la table 'ascii'
- 235 0000a8  11 06 20 	    mov #'a', W1
- 236 0000aa  01 00 E1 	    cp W0,W1
- 237 0000ac  00 00 39 	    bra ltu, kbd_goodkey
- 238 0000ae  A1 07 20 	    mov #'z', W1
- 239 0000b0  01 00 E1 	    cp W0, W1
- 240 0000b2  00 00 3E 	    bra gtu, kbd_goodkey
- 241              	    ;lettre
- 242 0000b4  24 60 AE 	    btss key_state, #F_CAPS
- 243 0000b6  00 50 A2 	    btg  W0, #5 
- 244 0000b8  24 00 AF 	    btsc key_state, #F_SHIFT
- 245 0000ba  00 50 A2 	    btg W0, #5
- 246 0000bc  00 00 37 	    bra kbd_goodkey
- 247              	try_mod_key:
- 248 0000be  02 00 20 	    set_psv mod, W2
- 248         02 00 88 
- 248         02 00 20 
- 249 0000c4  00 00 02 	    call search_table
- 249         00 00 00 
- 250 0000c8  00 00 E0 	    cp0 W0
- 251 0000ca  00 00 32 	    bra eq, kbd_ignore_it
- 252              	mod_switch:
- 253 0000cc  11 08 20 	    mov #VK_SHIFT, W1
- 254 0000ce  01 00 E1 	    cp W0,W1
- 255 0000d0  00 00 3A 	    bra neq, 6f
- 256 0000d2  24 00 A9 	    bclr key_state, #F_SHIFT
- 257 0000d4  24 C0 AE 	    btss key_state, #F_KREL
- 258 0000d6  24 00 A8 	    bset key_state, #F_SHIFT
- 259 0000d8  00 00 37 	    bra kbd_ignore_it
- 260              	6:
- 261 0000da  31 08 20 	    mov #VK_CAPS, W1
- 262 0000dc  01 00 E1 	    cp W0,W1
- 263 0000de  00 00 3A 	    bra neq, 7f
- 264 0000e0  24 C0 AE 	    btss key_state, #F_KREL
- 265 0000e2  24 60 AA 	    btg key_state, #F_CAPS
- 266 0000e4  00 00 37 	    bra kbd_ignore_it
- 267              	7:  
- 268 0000e6  01 08 20 	    mov #VK_CTRL, W1
- 269 0000e8  01 00 E1 	    cp W0, W1
- 270 0000ea  00 00 3A 	    bra neq, 8f
- 271 0000ec  24 20 A9 	    bclr key_state, #F_CTRL
- 272 0000ee  24 C0 AE 	    btss key_state, #F_KREL
- 273 0000f0  24 20 A8 	    bset key_state, #F_CTRL
- 274 0000f2  00 00 37 	    bra kbd_ignore_it
- 275              	8:
- 276 0000f4  21 08 20 	    mov #VK_ALT, W1
- 277 0000f6  01 00 E1 	    cp W0,W1
- 278 0000f8  00 00 3A 	    bra neq, kbd_ignore_it
- 279 0000fa  24 40 A9 	    bclr key_state, #F_ALT
- 280 0000fc  24 C0 AE 	    btss key_state, #F_KREL
- 281 0000fe  24 20 A8 	    bset key_state, #F_CTRL
- 282              	kbd_ignore_it:    
- 283 000100  00 00 EB 	    clr W0
- 284              	kbd_goodkey:  ; sortie touche acceptée
- 285 000102  24 C0 A9 	    bclr key_state, #F_KREL
- 286 000104  24 A0 A9 	    bclr key_state, #F_XKEY
- 287              	kbd_no_key: ; sortie file vide
- 288 000106  00 00 F9 	    pop PSVPAG
- 289 000108  00 00 06 	    return
- 290              	
- 291              	;;;;;;;;;;;;;;;;;;;;;;
- 292              	; définitions Forth
- 293              	;;;;;;;;;;;;;;;;;;;;;;    
- 294              	    
- 295              	DEFCODE "?KEY",4,,QKEY  ; ( -- 0 | T c )
- 296 00010a  00 00 02 	    call kbd_get
- 296         00 00 00 
- 297 00010e  0C 2F 78 	    DPUSH
- 298 000110  00 06 78 	    mov W0, T
- 299 000112  00 00 E0 	    cp0 W0
- 300 000114  00 00 32 	    bra eq, 1f
- 301 000116  0C 2F 78 	    DPUSH
- 302 000118  00 86 EB 	    setm T
- 303              	1:    
- 304 00011a  B8 05 78 	    NEXT
- 304         3B 00 78 
- 304         00 40 01 
- 305              	    
- 306              	;;;;;;;;;;;;;;;;;;;;;;;;
- 307              	; attend une touche
- 308              	; du clavier
- 309              	;;;;;;;;;;;;;;;;;;;;;;;;    
- 310              	DEFCODE "KEY",3,,KEY ; ( -- c)
- 311              	0:
- 312 000120  00 00 02 	    call kbd_get
- 312         00 00 00 
- 313 000124  00 00 E0 	    cp0 W0
- 314 000126  00 00 32 	    bra z, 0b
- 315 000128  0C 2F 78 	    DPUSH
- 316 00012a  00 06 78 	    mov W0, T
- 317 00012c  B8 05 78 	    NEXT
- 317         3B 00 78 
- 317         00 40 01 
- 318              	    
- 319              	    
- 320              	.end
+  93 000038  F0 0F B2 	    and #255,W0
+  94              	    ; vérifie code relâchement
+  95 00003a  01 0F 20 	    mov #SC_KREL, W1
+  96 00003c  01 00 E1 	    cp  W0,W1
+  97 00003e  00 00 3A 	    bra neq, 3f
+  98 000040  24 C0 A8 	    bset key_state, #F_KREL
+  99 000042  00 00 37 	    bra 9f
+ 100              	3:  ; vérifie code étendu
+ 101 000044  01 0E 20 	    mov #SC_XKEY, W1
+ 102 000046  01 00 E1 	    cp W0,W1
+ 103 000048  00 00 3A 	    bra neq, 4f
+ 104 00004a  24 A0 A8 	    bset key_state, #F_XKEY
+ 105 00004c  00 00 37 	    bra 9f
+ 106              	4:  
+ 107              	    ; vérification CTRL
+ 108 00004e  41 01 20 	    mov #L_CTRL,W1
+ 109 000050  00 08 E1 	    cp W1, W0
+ 110 000052  00 00 3A 	    bra neq, 5f
+ 111 000054  24 20 A9 	    bclr key_state, #F_CTRL
+ 112 000056  24 C0 AE 	    btss key_state, #F_KREL
+ 113 000058  24 20 A8 	    bset key_state, #F_CTRL
+ 114 00005a  24 C0 A9 	    bclr key_state, #F_KREL
+ 115 00005c  24 A0 A9 	    bclr key_state, #F_XKEY
+ 116              	5:
+ 117 00005e  11 02 20 	    mov #SC_C, W1
+ 118 000060  00 08 E1 	    cp W1,W0
+ 119 000062  00 00 3A 	    bra neq, 8f
+ 120 000064  24 20 AE 	    btss key_state, #F_CTRL
+ 121 000066  00 00 37 	    bra 8f
+ 122 000068  00 01 EB 	    clr W2
+ 123 00006a  11 00 09 	    repeat #17
+ 124 00006c  02 00 D8 	    div.s W0,W2 ; génère une exception __MathError
+ 125              	8:    
+ 126              	    ; tranfert code dans file
+ 127              	    ; kbd_queue
+ 128 00006e  01 00 20 	    mov #kbd_queue, W1
+ 129 000070  02 00 80 	    mov kbd_tail, W2
+ 130 000072  81 00 41 	    add W2,W1,W1
+ 131 000074  80 48 78 	    mov.b W0,[W1]
+ 132 000076  12 00 B0 	    add #1,W2
+ 133 000078  F2 01 B2 	    and #(KBD_QUEUE_SIZE-1),W2 ; arg1 <#lit10>
+ 134 00007a  02 00 88 	    mov W2, kbd_tail
+ 135              	9:    
+ 136              	    ;incrémente ps2_head
+ 137 00007c  00 A0 EC 	    inc2 ps2_head
+ 138 00007e  F0 01 20 	    mov #(PS2_QUEUE_SIZE-1), W0
+ 139 000080  00 20 B6 	    and ps2_head
+ 140              	isr_exit:
+ 141 000082  4F 01 78 	    pop W2
+ 142 000084  CF 00 78 	    pop W1
+ 143 000086  4F 00 78 	    pop W0
+ 144 000088  00 40 06 	    retfie
+ 145              	    
+ 146              	.text
+ 147              	;ctrl_c_reset:
+ 148              	;    clr kbd_head
+ 149              	;    clr kbd_tail
+ 150              	;    clr ps2_head
+ 151              	;    clr ps2_tail
+ 152              	;    clr key_state
+ 153              	;    goto code_WARM
+ 154              	    
+ 155              	;;;;;;;;;;;;;;;;;;;;;;;
+ 156              	; retourne le code clavier
+ 157              	; dans W0 sinon retourne 0
+ 158              	;;;;;;;;;;;;;;;;;;;;;;;
+ 159              	.global get_code    
+ 160              	get_code:
+ 161 000000  00 00 EB 	    clr W0
+ 162 000002  01 00 80 	    mov kbd_head, W1
+ 163 000004  02 00 80 	    mov kbd_tail, W2
+ 164 000006  02 08 E1 	    cp  W1,W2
+ 165 000008  00 00 32 	    bra eq, 1f
+ 166 00000a  02 00 20 	    mov #kbd_queue,W2
+ 167 00000c  02 81 40 	    add W1,W2,W2
+ 168 00000e  20 20 EC 	    inc kbd_head
+ 169 000010  F0 01 20 	    mov #(KBD_QUEUE_SIZE-1), W0
+ 170 000012  20 20 B6 	    and kbd_head
+ 171 000014  12 40 78 	    mov.b [W2], W0
+ 172 000016  00 80 FB 	    ze W0,W0
+ 173              	1:
+ 174 000018  00 00 06 	    return
+ 175              	
+ 176              	;;;;;;;;;;;;;;;;;;;;;;;;
+ 177              	; recherche code clavier
+ 178              	; dans la table
+ 179              	; entrée: W2=index table    
+ 180              	;         W1=scancode recherché
+ 181              	; sortie: W0 contient caractère
+ 182              	;         W0=0 si scancode pas dans la table
+ 183              	; modifie: W0,W2,W3    
+ 184              	;;;;;;;;;;;;;;;;;;;;;;;;;
+ 185              	search_table:
+ 186              	1:
+ 187 00001a  32 00 78 	    mov [W2++], W0
+ 188 00001c  00 00 E0 	    cp0 W0
+ 189 00001e  00 00 32 	    bra eq, 2f
+ 190 000020  80 01 78 	    mov W0, W3
+ 191 000022  83 81 FB 	    ze W3,W3
+ 192 000024  01 18 E1 	    cp W3,W1
+ 193 000026  00 00 3A 	    bra neq, 1b
+ 194 000028  00 80 FD 	    swap W0
+ 195 00002a  00 80 FB 	    ze W0,W0
+ 196              	2: ; pas trouvé
+ 197 00002c  00 00 06 	    return
+ 198              	
+ 199              	    
+ 200              	;;;;;;;;;;;;;;;;;;;;;;;
+ 201              	; retourne un caractère
+ 202              	; si disponible sinon 0
+ 203              	; sortie: W0
+ 204              	;;;;;;;;;;;;;;;;;;;;;;; 
+ 205              	; Cette routine est complexe car une touche peut-être composée
+ 206              	; de plusieurs codes. 
+ 207              	; Lorsqu'une touche est relâchée son scancode est précédé du code 0xF0
+ 208              	; Certaines touches ont un scancode étendu, i.e. le premier code est 0xE0
+ 209              	; Lorsqu'une touche à code étendu est relaché il y a 3 codes envoyés
+ 210              	; par le clavier  0xE0, 0xF0 suivit du code de la touche.
+ 211              	; exemple touche <HOME>  lorsqu'elle est enfoncée le clavier envoie 0xE0,0x6C
+ 212              	; lorsqu'elle est relâchée le clavier envoie 0xE0,0xF0,0x6C
+ 213              	; référence scancode: http://www.computer-engineering.org/ps2keyboard/scancodes2.html    
+ 214              	; Le décodage est partiel sinon la routine serait encore plus complexe. 
+ 215              	; Les rela?hements de touches sont ignorés sauf pour <CTRL>,<ALT>,<SHIFT>     
+ 216              	.global kbd_get
+ 217              	kbd_get:
+ 218 00002e  00 00 F8 	    push PSVPAG
+ 219 000030  00 00 02 	    call get_code
+ 219         00 00 00 
+ 220 000034  00 00 E0 	    cp0 W0
+ 221 000036  00 00 32 	    bra eq, kbd_no_key   
+ 222 000038  80 00 78 	    mov W0,W1
+ 223 00003a  24 C0 AE 	    btss key_state, #F_KREL
+ 224 00003c  00 00 37 	    bra 3f
+ 225 00003e  24 A0 AF 	    btsc key_state, #F_XKEY
+ 226 000040  00 00 37 	    bra try_xmod_key
+ 227 000042  00 00 37 	    bra try_mod_key
+ 228              	3:    
+ 229 000044  24 A0 AE 	    btss key_state, #F_XKEY
+ 230 000046  00 00 37 	    bra try_shifted
+ 231              	    ; recherche table 'extended'
+ 232 000048  02 00 20 	    set_psv extended, W2
+ 232         02 00 88 
+ 232         02 00 20 
+ 233 00004e  00 00 02 	    call search_table
+ 233         00 00 00 
+ 234 000052  00 00 E0 	    cp0 W0
+ 235 000054  00 00 32 	    bra eq, try_xmod_key
+ 236              	    ; scancode trouvé dans la table 'extended'
+ 237 000056  00 00 37 	    bra kbd_goodkey
+ 238              	try_xmod_key:
+ 239 000058  02 00 20 	    set_psv xmod, W2
+ 239         02 00 88 
+ 239         02 00 20 
+ 240 00005e  00 00 02 	    call search_table
+ 240         00 00 00 
+ 241 000062  00 00 E0 	    cp0 W0
+ 242 000064  00 00 32 	    bra eq, kbd_ignore_it
+ 243 000066  00 00 37 	    bra mod_switch
+ 244              	try_shifted:  ; recherche table 'shifted'
+ 245 000068  24 00 AE 	    btss key_state, #F_SHIFT
+ 246 00006a  00 00 37 	    bra try_ascii
+ 247 00006c  02 00 20 	    set_psv shifted, W2
+ 247         02 00 88 
+ 247         02 00 20 
+ 248 000072  00 00 02 	    call search_table
+ 248         00 00 00 
+ 249 000076  00 00 E0 	    cp0 W0
+ 250 000078  00 00 3A 	    bra nz, kbd_goodkey
+ 251              	try_ascii:  ; recherche table 'ascii'
+ 252 00007a  02 00 20 	    set_psv ascii, W2
+ 252         02 00 88 
+ 252         02 00 20 
+ 253 000080  00 00 02 	    call search_table
+ 253         00 00 00 
+ 254 000084  00 00 E0 	    cp0 W0
+ 255 000086  00 00 32 	    bra eq, try_mod_key
+ 256              	    ; scancode trouvé dans la table 'ascii'
+ 257 000088  11 06 20 	    mov #'a', W1
+ 258 00008a  01 00 E1 	    cp W0,W1
+ 259 00008c  00 00 39 	    bra ltu, kbd_goodkey
+ 260 00008e  A1 07 20 	    mov #'z', W1
+ 261 000090  01 00 E1 	    cp W0, W1
+ 262 000092  00 00 3E 	    bra gtu, kbd_goodkey
+ 263              	    ;lettre
+ 264 000094  24 60 AE 	    btss key_state, #F_CAPS
+ 265 000096  00 50 A2 	    btg  W0, #5 
+ 266 000098  24 00 AF 	    btsc key_state, #F_SHIFT
+ 267 00009a  00 50 A2 	    btg W0, #5
+ 268 00009c  00 00 37 	    bra kbd_goodkey
+ 269              	try_mod_key:
+ 270 00009e  02 00 20 	    set_psv mod, W2
+ 270         02 00 88 
+ 270         02 00 20 
+ 271 0000a4  00 00 02 	    call search_table
+ 271         00 00 00 
+ 272 0000a8  00 00 E0 	    cp0 W0
+ 273 0000aa  00 00 32 	    bra eq, kbd_ignore_it
+ 274              	mod_switch:
+ 275 0000ac  11 08 20 	    mov #VK_SHIFT, W1
+ 276 0000ae  01 00 E1 	    cp W0,W1
+ 277 0000b0  00 00 3A 	    bra neq, 6f
+ 278 0000b2  24 00 A9 	    bclr key_state, #F_SHIFT
+ 279 0000b4  24 C0 AE 	    btss key_state, #F_KREL
+ 280 0000b6  24 00 A8 	    bset key_state, #F_SHIFT
+ 281 0000b8  00 00 37 	    bra kbd_ignore_it
+ 282              	6:
+ 283 0000ba  31 08 20 	    mov #VK_CAPS, W1
+ 284 0000bc  01 00 E1 	    cp W0,W1
+ 285 0000be  00 00 3A 	    bra neq, 7f
+ 286 0000c0  24 C0 AE 	    btss key_state, #F_KREL
+ 287 0000c2  24 60 AA 	    btg key_state, #F_CAPS
+ 288 0000c4  00 00 37 	    bra kbd_ignore_it
+ 289              	7:  
+ 290 0000c6  01 08 20 	    mov #VK_CTRL, W1
+ 291 0000c8  01 00 E1 	    cp W0, W1
+ 292 0000ca  00 00 3A 	    bra neq, 8f
+ 293 0000cc  24 20 A9 	    bclr key_state, #F_CTRL
+ 294 0000ce  24 C0 AE 	    btss key_state, #F_KREL
+ 295 0000d0  24 20 A8 	    bset key_state, #F_CTRL
+ 296 0000d2  00 00 37 	    bra kbd_ignore_it
+ 297              	8:
+ 298 0000d4  21 08 20 	    mov #VK_ALT, W1
+ 299 0000d6  01 00 E1 	    cp W0,W1
+ 300 0000d8  00 00 3A 	    bra neq, kbd_ignore_it
+ 301 0000da  24 40 A9 	    bclr key_state, #F_ALT
+ 302 0000dc  24 C0 AE 	    btss key_state, #F_KREL
+ 303 0000de  24 20 A8 	    bset key_state, #F_CTRL
+ 304              	kbd_ignore_it:    
+ 305 0000e0  00 00 EB 	    clr W0
+ 306              	kbd_goodkey:  ; sortie touche acceptée
+ 307 0000e2  24 C0 A9 	    bclr key_state, #F_KREL
+ 308 0000e4  24 A0 A9 	    bclr key_state, #F_XKEY
+ 309              	kbd_no_key: ; sortie file vide
+ 310 0000e6  00 00 F9 	    pop PSVPAG
+ 311 0000e8  00 00 06 	    return
+ 312              	
+ 313              	;;;;;;;;;;;;;;;;;;;;;;
+ 314              	; définitions Forth
+ 315              	;;;;;;;;;;;;;;;;;;;;;;    
+ 316              	    
+ 317              	DEFCODE "?KEY",4,,QKEY  ; ( -- 0 | T c )
+ 318 0000ea  00 00 02 	    call kbd_get
+ 318         00 00 00 
+ 319 0000ee  0C 2F 78 	    DPUSH
+ 320 0000f0  00 06 78 	    mov W0, T
+ 321 0000f2  00 00 E0 	    cp0 W0
+ 322 0000f4  00 00 32 	    bra eq, 1f
+ 323 0000f6  0C 2F 78 	    DPUSH
+ 324 0000f8  00 86 EB 	    setm T
+ 325              	1:    
+ 326 0000fa  B8 05 78 	    NEXT
+ 326         3B 00 78 
+ 326         00 40 01 
+ 327              	    
+ 328              	;;;;;;;;;;;;;;;;;;;;;;;;
+ 329              	; attend une touche
+ 330              	; du clavier
+ 331              	;;;;;;;;;;;;;;;;;;;;;;;;    
+ 332              	DEFCODE "KEY",3,,KEY ; ( -- c)
+ 333              	0:
+ 334 000100  00 00 02 	    call kbd_get
+ 334         00 00 00 
+ 335 000104  00 00 E0 	    cp0 W0
+ 336 000106  00 00 32 	    bra z, 0b
+ 337 000108  0C 2F 78 	    DPUSH
+ 338 00010a  00 06 78 	    mov W0, T
+ 339 00010c  B8 05 78 	    NEXT
+ 339         3B 00 78 
+ 339         00 40 01 
+ 340              	    
+ 341              	    
+ 342              	.end
 DEFINED SYMBOLS
                             *ABS*:00000000 ./core.inc
                             *ABS*:00000000 ./gen_macros.inc
@@ -5282,65 +5303,66 @@ DEFINED SYMBOLS
            ./ps2.inc:31     *ABS*:000000fc SC_ERROR
            ./ps2.inc:32     *ABS*:000000f0 SC_KREL
            ./ps2.inc:33     *ABS*:000000e0 SC_XKEY
-           ./ps2.inc:35     *ABS*:00000012 L_SHIFT
-           ./ps2.inc:36     *ABS*:00000059 R_SHIFT
-           ./ps2.inc:37     *ABS*:00000014 L_CTRL
-           ./ps2.inc:38     *ABS*:00000011 L_ALT
-           ./ps2.inc:39     *ABS*:0000005a ENTER
-           ./ps2.inc:40     *ABS*:00000058 CAPS
-           ./ps2.inc:41     *ABS*:0000007e SCROLL
-           ./ps2.inc:42     *ABS*:00000077 NUM
-           ./ps2.inc:43     *ABS*:00000076 ESC
-           ./ps2.inc:44     *ABS*:00000005 F1
-           ./ps2.inc:45     *ABS*:00000006 F2
-           ./ps2.inc:46     *ABS*:00000004 F3
-           ./ps2.inc:47     *ABS*:0000000c F4
-           ./ps2.inc:48     *ABS*:00000003 F5
-           ./ps2.inc:49     *ABS*:0000000b F6
-           ./ps2.inc:50     *ABS*:00000083 F7
-           ./ps2.inc:51     *ABS*:0000000a F8
-           ./ps2.inc:52     *ABS*:00000001 F9
-           ./ps2.inc:53     *ABS*:00000009 F10
-           ./ps2.inc:54     *ABS*:00000078 F11
-           ./ps2.inc:55     *ABS*:00000007 F12
-           ./ps2.inc:57     *ABS*:00000070 KP0
-           ./ps2.inc:58     *ABS*:00000069 KP1
-           ./ps2.inc:59     *ABS*:00000072 KP2
-           ./ps2.inc:60     *ABS*:0000007a KP3
-           ./ps2.inc:61     *ABS*:0000006b KP4
-           ./ps2.inc:62     *ABS*:00000073 KP5
-           ./ps2.inc:63     *ABS*:00000074 KP6
-           ./ps2.inc:64     *ABS*:0000006c KP7
-           ./ps2.inc:65     *ABS*:00000075 KP8
-           ./ps2.inc:66     *ABS*:0000007d KP9
-           ./ps2.inc:67     *ABS*:00000071 KPDOT
-           ./ps2.inc:68     *ABS*:00000079 KPPLUS
-           ./ps2.inc:69     *ABS*:0000007b KPMINUS
-           ./ps2.inc:70     *ABS*:0000007c KPSTAR
-           ./ps2.inc:72     *ABS*:00000014 R_CTRL
-           ./ps2.inc:73     *ABS*:0000001f L_GUI
-           ./ps2.inc:74     *ABS*:00000027 R_GUI
-           ./ps2.inc:75     *ABS*:00000011 R_ALT
-           ./ps2.inc:76     *ABS*:0000002f APPS
-           ./ps2.inc:77     *ABS*:00000070 INSERT
-           ./ps2.inc:78     *ABS*:0000006c HOME
-           ./ps2.inc:79     *ABS*:0000007d PGUP
-           ./ps2.inc:80     *ABS*:00000071 DEL
-           ./ps2.inc:81     *ABS*:00000069 END
-           ./ps2.inc:82     *ABS*:0000007a PGDN
-           ./ps2.inc:84     *ABS*:00000072 DOWN
-           ./ps2.inc:85     *ABS*:0000006b LEFT
-           ./ps2.inc:86     *ABS*:00000074 RIGHT
-           ./ps2.inc:87     *ABS*:0000004a KPSLH
-           ./ps2.inc:88     *ABS*:0000005a KPENT
-           ./ps2.inc:91     *ABS*:00000000 F_SHIFT
-           ./ps2.inc:92     *ABS*:00000001 F_CTRL
-           ./ps2.inc:93     *ABS*:00000002 F_ALT
-           ./ps2.inc:94     *ABS*:00000003 F_CAPS
-           ./ps2.inc:95     *ABS*:00000004 F_NUM
-           ./ps2.inc:96     *ABS*:00000005 F_XKEY
-           ./ps2.inc:97     *ABS*:00000006 F_KREL
-           ./ps2.inc:99     *ABS*:00000020 PS2_QUEUE_SIZE
+           ./ps2.inc:34     *ABS*:00000021 SC_C
+           ./ps2.inc:36     *ABS*:00000012 L_SHIFT
+           ./ps2.inc:37     *ABS*:00000059 R_SHIFT
+           ./ps2.inc:38     *ABS*:00000014 L_CTRL
+           ./ps2.inc:39     *ABS*:00000011 L_ALT
+           ./ps2.inc:40     *ABS*:0000005a ENTER
+           ./ps2.inc:41     *ABS*:00000058 CAPS
+           ./ps2.inc:42     *ABS*:0000007e SCROLL
+           ./ps2.inc:43     *ABS*:00000077 NUM
+           ./ps2.inc:44     *ABS*:00000076 ESC
+           ./ps2.inc:45     *ABS*:00000005 F1
+           ./ps2.inc:46     *ABS*:00000006 F2
+           ./ps2.inc:47     *ABS*:00000004 F3
+           ./ps2.inc:48     *ABS*:0000000c F4
+           ./ps2.inc:49     *ABS*:00000003 F5
+           ./ps2.inc:50     *ABS*:0000000b F6
+           ./ps2.inc:51     *ABS*:00000083 F7
+           ./ps2.inc:52     *ABS*:0000000a F8
+           ./ps2.inc:53     *ABS*:00000001 F9
+           ./ps2.inc:54     *ABS*:00000009 F10
+           ./ps2.inc:55     *ABS*:00000078 F11
+           ./ps2.inc:56     *ABS*:00000007 F12
+           ./ps2.inc:58     *ABS*:00000070 KP0
+           ./ps2.inc:59     *ABS*:00000069 KP1
+           ./ps2.inc:60     *ABS*:00000072 KP2
+           ./ps2.inc:61     *ABS*:0000007a KP3
+           ./ps2.inc:62     *ABS*:0000006b KP4
+           ./ps2.inc:63     *ABS*:00000073 KP5
+           ./ps2.inc:64     *ABS*:00000074 KP6
+           ./ps2.inc:65     *ABS*:0000006c KP7
+           ./ps2.inc:66     *ABS*:00000075 KP8
+           ./ps2.inc:67     *ABS*:0000007d KP9
+           ./ps2.inc:68     *ABS*:00000071 KPDOT
+           ./ps2.inc:69     *ABS*:00000079 KPPLUS
+           ./ps2.inc:70     *ABS*:0000007b KPMINUS
+           ./ps2.inc:71     *ABS*:0000007c KPSTAR
+           ./ps2.inc:73     *ABS*:00000014 R_CTRL
+           ./ps2.inc:74     *ABS*:0000001f L_GUI
+           ./ps2.inc:75     *ABS*:00000027 R_GUI
+           ./ps2.inc:76     *ABS*:00000011 R_ALT
+           ./ps2.inc:77     *ABS*:0000002f APPS
+           ./ps2.inc:78     *ABS*:00000070 INSERT
+           ./ps2.inc:79     *ABS*:0000006c HOME
+           ./ps2.inc:80     *ABS*:0000007d PGUP
+           ./ps2.inc:81     *ABS*:00000071 DEL
+           ./ps2.inc:82     *ABS*:00000069 END
+           ./ps2.inc:83     *ABS*:0000007a PGDN
+           ./ps2.inc:85     *ABS*:00000072 DOWN
+           ./ps2.inc:86     *ABS*:0000006b LEFT
+           ./ps2.inc:87     *ABS*:00000074 RIGHT
+           ./ps2.inc:88     *ABS*:0000004a KPSLH
+           ./ps2.inc:89     *ABS*:0000005a KPENT
+           ./ps2.inc:92     *ABS*:00000000 F_SHIFT
+           ./ps2.inc:93     *ABS*:00000001 F_CTRL
+           ./ps2.inc:94     *ABS*:00000002 F_ALT
+           ./ps2.inc:95     *ABS*:00000003 F_CAPS
+           ./ps2.inc:96     *ABS*:00000004 F_NUM
+           ./ps2.inc:97     *ABS*:00000005 F_XKEY
+           ./ps2.inc:98     *ABS*:00000006 F_KREL
+           ./ps2.inc:100    *ABS*:00000020 PS2_QUEUE_SIZE
       ./keyboard.inc:27     *ABS*:00000001 KBD_INC
       ./keyboard.inc:31     *ABS*:00000008 VK_BACK
       ./keyboard.inc:32     *ABS*:0000001b VK_ESCAPE
@@ -5386,7 +5408,7 @@ DEFINED SYMBOLS
           ./core.inc:101    *ABS*:00000080 F_IMMED
           ./core.inc:102    *ABS*:00000020 F_HIDDEN
           ./core.inc:103    *ABS*:0000001f F_LENMASK
-          keyboard.s:310    .sysdict:0000000a link
+          keyboard.s:332    .sysdict:0000000a link
           keyboard.s:33     *ABS*:00000020 KBD_QUEUE_SIZE
           keyboard.s:36     .data:00000000 kbd_queue
           keyboard.s:38     .data:00000020 kbd_head
@@ -5394,300 +5416,274 @@ DEFINED SYMBOLS
           keyboard.s:42     .data:00000024 key_state
           keyboard.s:57     .int:00000000 __T1Interrupt
           keyboard.s:68     .int:00000014 L1
-          keyboard.s:107    .int:0000004c isr_exit
-          keyboard.s:102    .int:00000046 L91
+          keyboard.s:140    .int:00000082 isr_exit
+          keyboard.s:135    .int:0000007c L91
           keyboard.s:84     .int:0000002c L11
           keyboard.s:87     .int:00000030 L21
-          keyboard.s:120    .text:00000000 get_code
-          keyboard.s:133    .text:00000018 L12
-          keyboard.s:145    .text:0000001a search_table
-          keyboard.s:146    .text:0000001a L13
-          keyboard.s:156    .text:0000002c L22
-          keyboard.s:177    .text:0000002e kbd_get
-          keyboard.s:287    .text:00000106 kbd_no_key
-          keyboard.s:190    .text:00000048 L14
-          keyboard.s:199    .text:00000058 L23
-          keyboard.s:206    .text:00000064 L31
-          keyboard.s:216    .text:00000078 try_xmod_key
-          keyboard.s:247    .text:000000be try_mod_key
-          keyboard.s:222    .text:00000088 try_shifted
-          keyboard.s:284    .text:00000102 kbd_goodkey
-          keyboard.s:282    .text:00000100 kbd_ignore_it
-          keyboard.s:252    .text:000000cc mod_switch
-          keyboard.s:229    .text:0000009a try_ascii
-          keyboard.s:260    .text:000000da L61
-          keyboard.s:267    .text:000000e6 L71
-          keyboard.s:275    .text:000000f4 L81
-          keyboard.s:295    .sysdict:00000000 name_QKEY
-          keyboard.s:295    .sysdict:00000008 QKEY
-          keyboard.s:295    .text:0000010a code_QKEY
-          keyboard.s:303    .text:0000011a L15
-          keyboard.s:310    .sysdict:0000000a name_KEY
-          keyboard.s:310    .sysdict:00000010 KEY
-          keyboard.s:310    .text:00000120 code_KEY
-          keyboard.s:311    .text:00000120 L2
+          keyboard.s:100    .int:00000044 L31
+          keyboard.s:106    .int:0000004e L41
+          keyboard.s:116    .int:0000005e L51
+          keyboard.s:125    .int:0000006e L81
+          keyboard.s:160    .text:00000000 get_code
+          keyboard.s:173    .text:00000018 L12
+          keyboard.s:185    .text:0000001a search_table
+          keyboard.s:186    .text:0000001a L13
+          keyboard.s:196    .text:0000002c L22
+          keyboard.s:217    .text:0000002e kbd_get
+          keyboard.s:309    .text:000000e6 kbd_no_key
+          keyboard.s:228    .text:00000044 L32
+          keyboard.s:238    .text:00000058 try_xmod_key
+          keyboard.s:269    .text:0000009e try_mod_key
+          keyboard.s:244    .text:00000068 try_shifted
+          keyboard.s:306    .text:000000e2 kbd_goodkey
+          keyboard.s:304    .text:000000e0 kbd_ignore_it
+          keyboard.s:274    .text:000000ac mod_switch
+          keyboard.s:251    .text:0000007a try_ascii
+          keyboard.s:282    .text:000000ba L61
+          keyboard.s:289    .text:000000c6 L71
+          keyboard.s:297    .text:000000d4 L82
+          keyboard.s:317    .sysdict:00000000 name_QKEY
+          keyboard.s:317    .sysdict:00000008 QKEY
+          keyboard.s:317    .text:000000ea code_QKEY
+          keyboard.s:325    .text:000000fa L14
+          keyboard.s:332    .sysdict:0000000a name_KEY
+          keyboard.s:332    .sysdict:00000010 KEY
+          keyboard.s:332    .text:00000100 code_KEY
+          keyboard.s:333    .text:00000100 L2
                       .debug_line:00000000 .L0
                       .debug_line:00000028 .L0
-          keyboard.s:320    .debug_line:000000f4 .L0
-          keyboard.s:121    .text:00000000 .L0
-          keyboard.s:122    .text:00000002 .L0
-          keyboard.s:121    .text:00000000 .L0
-          keyboard.s:123    .text:00000004 .L0
-          keyboard.s:122    .text:00000002 .L0
-          keyboard.s:124    .text:00000006 .L0
-          keyboard.s:123    .text:00000004 .L0
-          keyboard.s:125    .text:00000008 .L0
-          keyboard.s:124    .text:00000006 .L0
-          keyboard.s:126    .text:0000000a .L0
-          keyboard.s:125    .text:00000008 .L0
-          keyboard.s:127    .text:0000000c .L0
-          keyboard.s:126    .text:0000000a .L0
-          keyboard.s:128    .text:0000000e .L0
-          keyboard.s:127    .text:0000000c .L0
-          keyboard.s:129    .text:00000010 .L0
-          keyboard.s:128    .text:0000000e .L0
-          keyboard.s:130    .text:00000012 .L0
-          keyboard.s:129    .text:00000010 .L0
-          keyboard.s:131    .text:00000014 .L0
-          keyboard.s:130    .text:00000012 .L0
-          keyboard.s:132    .text:00000016 .L0
-          keyboard.s:131    .text:00000014 .L0
-          keyboard.s:134    .text:00000018 .L0
-          keyboard.s:132    .text:00000016 .L0
-          keyboard.s:147    .text:0000001a .L0
-          keyboard.s:134    .text:00000018 .L0
-          keyboard.s:148    .text:0000001c .L0
-          keyboard.s:147    .text:0000001a .L0
-          keyboard.s:149    .text:0000001e .L0
-          keyboard.s:148    .text:0000001c .L0
-          keyboard.s:150    .text:00000020 .L0
-          keyboard.s:149    .text:0000001e .L0
-          keyboard.s:151    .text:00000022 .L0
-          keyboard.s:150    .text:00000020 .L0
-          keyboard.s:152    .text:00000024 .L0
-          keyboard.s:151    .text:00000022 .L0
-          keyboard.s:153    .text:00000026 .L0
-          keyboard.s:152    .text:00000024 .L0
-          keyboard.s:154    .text:00000028 .L0
-          keyboard.s:153    .text:00000026 .L0
-          keyboard.s:155    .text:0000002a .L0
-          keyboard.s:154    .text:00000028 .L0
-          keyboard.s:157    .text:0000002c .L0
-          keyboard.s:155    .text:0000002a .L0
-          keyboard.s:178    .text:0000002e .L0
-          keyboard.s:157    .text:0000002c .L0
-          keyboard.s:179    .text:00000030 .L0
-          keyboard.s:178    .text:0000002e .L0
-          keyboard.s:180    .text:00000034 .L0
-          keyboard.s:179    .text:00000030 .L0
-          keyboard.s:181    .text:00000036 .L0
-          keyboard.s:180    .text:00000034 .L0
-          keyboard.s:183    .text:00000038 .L0
-          keyboard.s:181    .text:00000036 .L0
-          keyboard.s:184    .text:0000003a .L0
-          keyboard.s:183    .text:00000038 .L0
-          keyboard.s:185    .text:0000003c .L0
-          keyboard.s:184    .text:0000003a .L0
-          keyboard.s:186    .text:0000003e .L0
-          keyboard.s:185    .text:0000003c .L0
-          keyboard.s:187    .text:00000040 .L0
-          keyboard.s:186    .text:0000003e .L0
-          keyboard.s:188    .text:00000044 .L0
-          keyboard.s:187    .text:00000040 .L0
-          keyboard.s:189    .text:00000046 .L0
-          keyboard.s:188    .text:00000044 .L0
-          keyboard.s:192    .text:00000048 .L0
-          keyboard.s:189    .text:00000046 .L0
-          keyboard.s:193    .text:0000004a .L0
-          keyboard.s:192    .text:00000048 .L0
-          keyboard.s:194    .text:0000004c .L0
-          keyboard.s:193    .text:0000004a .L0
-          keyboard.s:195    .text:0000004e .L0
-          keyboard.s:194    .text:0000004c .L0
-          keyboard.s:196    .text:00000050 .L0
-          keyboard.s:195    .text:0000004e .L0
-          keyboard.s:197    .text:00000054 .L0
-          keyboard.s:196    .text:00000050 .L0
-          keyboard.s:198    .text:00000056 .L0
-          keyboard.s:197    .text:00000054 .L0
-          keyboard.s:200    .text:00000058 .L0
-          keyboard.s:198    .text:00000056 .L0
-          keyboard.s:201    .text:0000005a .L0
-          keyboard.s:200    .text:00000058 .L0
-          keyboard.s:202    .text:0000005c .L0
-          keyboard.s:201    .text:0000005a .L0
-          keyboard.s:203    .text:0000005e .L0
-          keyboard.s:202    .text:0000005c .L0
-          keyboard.s:204    .text:00000060 .L0
-          keyboard.s:203    .text:0000005e .L0
-          keyboard.s:205    .text:00000062 .L0
-          keyboard.s:204    .text:00000060 .L0
-          keyboard.s:207    .text:00000064 .L0
-          keyboard.s:205    .text:00000062 .L0
-          keyboard.s:208    .text:00000066 .L0
-          keyboard.s:207    .text:00000064 .L0
-          keyboard.s:210    .text:00000068 .L0
-          keyboard.s:208    .text:00000066 .L0
-          keyboard.s:211    .text:0000006e .L0
-          keyboard.s:210    .text:00000068 .L0
-          keyboard.s:212    .text:00000072 .L0
-          keyboard.s:211    .text:0000006e .L0
-          keyboard.s:213    .text:00000074 .L0
-          keyboard.s:212    .text:00000072 .L0
-          keyboard.s:215    .text:00000076 .L0
-          keyboard.s:213    .text:00000074 .L0
-          keyboard.s:217    .text:00000078 .L0
-          keyboard.s:215    .text:00000076 .L0
-          keyboard.s:218    .text:0000007e .L0
-          keyboard.s:217    .text:00000078 .L0
-          keyboard.s:219    .text:00000082 .L0
-          keyboard.s:218    .text:0000007e .L0
-          keyboard.s:220    .text:00000084 .L0
-          keyboard.s:219    .text:00000082 .L0
-          keyboard.s:221    .text:00000086 .L0
-          keyboard.s:220    .text:00000084 .L0
-          keyboard.s:223    .text:00000088 .L0
-          keyboard.s:221    .text:00000086 .L0
-          keyboard.s:224    .text:0000008a .L0
-          keyboard.s:223    .text:00000088 .L0
-          keyboard.s:225    .text:0000008c .L0
-          keyboard.s:224    .text:0000008a .L0
-          keyboard.s:226    .text:00000092 .L0
-          keyboard.s:225    .text:0000008c .L0
-          keyboard.s:227    .text:00000096 .L0
-          keyboard.s:226    .text:00000092 .L0
-          keyboard.s:228    .text:00000098 .L0
-          keyboard.s:227    .text:00000096 .L0
-          keyboard.s:230    .text:0000009a .L0
-          keyboard.s:228    .text:00000098 .L0
-          keyboard.s:231    .text:000000a0 .L0
-          keyboard.s:230    .text:0000009a .L0
-          keyboard.s:232    .text:000000a4 .L0
-          keyboard.s:231    .text:000000a0 .L0
-          keyboard.s:233    .text:000000a6 .L0
-          keyboard.s:232    .text:000000a4 .L0
-          keyboard.s:235    .text:000000a8 .L0
-          keyboard.s:233    .text:000000a6 .L0
-          keyboard.s:236    .text:000000aa .L0
-          keyboard.s:235    .text:000000a8 .L0
-          keyboard.s:237    .text:000000ac .L0
-          keyboard.s:236    .text:000000aa .L0
-          keyboard.s:238    .text:000000ae .L0
-          keyboard.s:237    .text:000000ac .L0
-          keyboard.s:239    .text:000000b0 .L0
-          keyboard.s:238    .text:000000ae .L0
-          keyboard.s:240    .text:000000b2 .L0
-          keyboard.s:239    .text:000000b0 .L0
-          keyboard.s:242    .text:000000b4 .L0
-          keyboard.s:240    .text:000000b2 .L0
-          keyboard.s:243    .text:000000b6 .L0
-          keyboard.s:242    .text:000000b4 .L0
-          keyboard.s:244    .text:000000b8 .L0
-          keyboard.s:243    .text:000000b6 .L0
-          keyboard.s:245    .text:000000ba .L0
-          keyboard.s:244    .text:000000b8 .L0
-          keyboard.s:246    .text:000000bc .L0
-          keyboard.s:245    .text:000000ba .L0
-          keyboard.s:248    .text:000000be .L0
-          keyboard.s:246    .text:000000bc .L0
-          keyboard.s:249    .text:000000c4 .L0
-          keyboard.s:248    .text:000000be .L0
-          keyboard.s:250    .text:000000c8 .L0
-          keyboard.s:249    .text:000000c4 .L0
-          keyboard.s:251    .text:000000ca .L0
-          keyboard.s:250    .text:000000c8 .L0
-          keyboard.s:253    .text:000000cc .L0
-          keyboard.s:251    .text:000000ca .L0
-          keyboard.s:254    .text:000000ce .L0
-          keyboard.s:253    .text:000000cc .L0
-          keyboard.s:255    .text:000000d0 .L0
-          keyboard.s:254    .text:000000ce .L0
-          keyboard.s:256    .text:000000d2 .L0
-          keyboard.s:255    .text:000000d0 .L0
-          keyboard.s:257    .text:000000d4 .L0
-          keyboard.s:256    .text:000000d2 .L0
-          keyboard.s:258    .text:000000d6 .L0
-          keyboard.s:257    .text:000000d4 .L0
-          keyboard.s:259    .text:000000d8 .L0
-          keyboard.s:258    .text:000000d6 .L0
-          keyboard.s:261    .text:000000da .L0
-          keyboard.s:259    .text:000000d8 .L0
-          keyboard.s:262    .text:000000dc .L0
-          keyboard.s:261    .text:000000da .L0
-          keyboard.s:263    .text:000000de .L0
-          keyboard.s:262    .text:000000dc .L0
-          keyboard.s:264    .text:000000e0 .L0
-          keyboard.s:263    .text:000000de .L0
-          keyboard.s:265    .text:000000e2 .L0
-          keyboard.s:264    .text:000000e0 .L0
-          keyboard.s:266    .text:000000e4 .L0
-          keyboard.s:265    .text:000000e2 .L0
-          keyboard.s:268    .text:000000e6 .L0
-          keyboard.s:266    .text:000000e4 .L0
-          keyboard.s:269    .text:000000e8 .L0
-          keyboard.s:268    .text:000000e6 .L0
-          keyboard.s:270    .text:000000ea .L0
-          keyboard.s:269    .text:000000e8 .L0
-          keyboard.s:271    .text:000000ec .L0
-          keyboard.s:270    .text:000000ea .L0
-          keyboard.s:272    .text:000000ee .L0
-          keyboard.s:271    .text:000000ec .L0
-          keyboard.s:273    .text:000000f0 .L0
-          keyboard.s:272    .text:000000ee .L0
-          keyboard.s:274    .text:000000f2 .L0
-          keyboard.s:273    .text:000000f0 .L0
-          keyboard.s:276    .text:000000f4 .L0
-          keyboard.s:274    .text:000000f2 .L0
-          keyboard.s:277    .text:000000f6 .L0
-          keyboard.s:276    .text:000000f4 .L0
-          keyboard.s:278    .text:000000f8 .L0
-          keyboard.s:277    .text:000000f6 .L0
-          keyboard.s:279    .text:000000fa .L0
-          keyboard.s:278    .text:000000f8 .L0
-          keyboard.s:280    .text:000000fc .L0
-          keyboard.s:279    .text:000000fa .L0
-          keyboard.s:281    .text:000000fe .L0
-          keyboard.s:280    .text:000000fc .L0
-          keyboard.s:283    .text:00000100 .L0
-          keyboard.s:281    .text:000000fe .L0
-          keyboard.s:285    .text:00000102 .L0
-          keyboard.s:283    .text:00000100 .L0
-          keyboard.s:286    .text:00000104 .L0
-          keyboard.s:285    .text:00000102 .L0
-          keyboard.s:288    .text:00000106 .L0
-          keyboard.s:286    .text:00000104 .L0
-          keyboard.s:289    .text:00000108 .L0
-          keyboard.s:288    .text:00000106 .L0
-          keyboard.s:296    .text:0000010a .L0
-          keyboard.s:289    .text:00000108 .L0
-          keyboard.s:297    .text:0000010e .L0
-          keyboard.s:296    .text:0000010a .L0
-          keyboard.s:298    .text:00000110 .L0
-          keyboard.s:297    .text:0000010e .L0
-          keyboard.s:299    .text:00000112 .L0
-          keyboard.s:298    .text:00000110 .L0
-          keyboard.s:300    .text:00000114 .L0
-          keyboard.s:299    .text:00000112 .L0
-          keyboard.s:301    .text:00000116 .L0
-          keyboard.s:300    .text:00000114 .L0
-          keyboard.s:302    .text:00000118 .L0
-          keyboard.s:301    .text:00000116 .L0
-          keyboard.s:304    .text:0000011a .L0
-          keyboard.s:302    .text:00000118 .L0
-          keyboard.s:312    .text:00000120 .L0
-          keyboard.s:304    .text:0000011a .L0
-          keyboard.s:313    .text:00000124 .L0
-          keyboard.s:312    .text:00000120 .L0
-          keyboard.s:314    .text:00000126 .L0
-          keyboard.s:313    .text:00000124 .L0
-          keyboard.s:315    .text:00000128 .L0
-          keyboard.s:314    .text:00000126 .L0
-          keyboard.s:316    .text:0000012a .L0
-          keyboard.s:315    .text:00000128 .L0
-          keyboard.s:317    .text:0000012c .L0
-          keyboard.s:316    .text:0000012a .L0
-          keyboard.s:320    .text:00000132 .L0
-          keyboard.s:317    .text:0000012c .L0
+          keyboard.s:342    .debug_line:00000101 .L0
+          keyboard.s:161    .text:00000000 .L0
+          keyboard.s:162    .text:00000002 .L0
+          keyboard.s:161    .text:00000000 .L0
+          keyboard.s:163    .text:00000004 .L0
+          keyboard.s:162    .text:00000002 .L0
+          keyboard.s:164    .text:00000006 .L0
+          keyboard.s:163    .text:00000004 .L0
+          keyboard.s:165    .text:00000008 .L0
+          keyboard.s:164    .text:00000006 .L0
+          keyboard.s:166    .text:0000000a .L0
+          keyboard.s:165    .text:00000008 .L0
+          keyboard.s:167    .text:0000000c .L0
+          keyboard.s:166    .text:0000000a .L0
+          keyboard.s:168    .text:0000000e .L0
+          keyboard.s:167    .text:0000000c .L0
+          keyboard.s:169    .text:00000010 .L0
+          keyboard.s:168    .text:0000000e .L0
+          keyboard.s:170    .text:00000012 .L0
+          keyboard.s:169    .text:00000010 .L0
+          keyboard.s:171    .text:00000014 .L0
+          keyboard.s:170    .text:00000012 .L0
+          keyboard.s:172    .text:00000016 .L0
+          keyboard.s:171    .text:00000014 .L0
+          keyboard.s:174    .text:00000018 .L0
+          keyboard.s:172    .text:00000016 .L0
+          keyboard.s:187    .text:0000001a .L0
+          keyboard.s:174    .text:00000018 .L0
+          keyboard.s:188    .text:0000001c .L0
+          keyboard.s:187    .text:0000001a .L0
+          keyboard.s:189    .text:0000001e .L0
+          keyboard.s:188    .text:0000001c .L0
+          keyboard.s:190    .text:00000020 .L0
+          keyboard.s:189    .text:0000001e .L0
+          keyboard.s:191    .text:00000022 .L0
+          keyboard.s:190    .text:00000020 .L0
+          keyboard.s:192    .text:00000024 .L0
+          keyboard.s:191    .text:00000022 .L0
+          keyboard.s:193    .text:00000026 .L0
+          keyboard.s:192    .text:00000024 .L0
+          keyboard.s:194    .text:00000028 .L0
+          keyboard.s:193    .text:00000026 .L0
+          keyboard.s:195    .text:0000002a .L0
+          keyboard.s:194    .text:00000028 .L0
+          keyboard.s:197    .text:0000002c .L0
+          keyboard.s:195    .text:0000002a .L0
+          keyboard.s:218    .text:0000002e .L0
+          keyboard.s:197    .text:0000002c .L0
+          keyboard.s:219    .text:00000030 .L0
+          keyboard.s:218    .text:0000002e .L0
+          keyboard.s:220    .text:00000034 .L0
+          keyboard.s:219    .text:00000030 .L0
+          keyboard.s:221    .text:00000036 .L0
+          keyboard.s:220    .text:00000034 .L0
+          keyboard.s:222    .text:00000038 .L0
+          keyboard.s:221    .text:00000036 .L0
+          keyboard.s:223    .text:0000003a .L0
+          keyboard.s:222    .text:00000038 .L0
+          keyboard.s:224    .text:0000003c .L0
+          keyboard.s:223    .text:0000003a .L0
+          keyboard.s:225    .text:0000003e .L0
+          keyboard.s:224    .text:0000003c .L0
+          keyboard.s:226    .text:00000040 .L0
+          keyboard.s:225    .text:0000003e .L0
+          keyboard.s:227    .text:00000042 .L0
+          keyboard.s:226    .text:00000040 .L0
+          keyboard.s:229    .text:00000044 .L0
+          keyboard.s:227    .text:00000042 .L0
+          keyboard.s:230    .text:00000046 .L0
+          keyboard.s:229    .text:00000044 .L0
+          keyboard.s:232    .text:00000048 .L0
+          keyboard.s:230    .text:00000046 .L0
+          keyboard.s:233    .text:0000004e .L0
+          keyboard.s:232    .text:00000048 .L0
+          keyboard.s:234    .text:00000052 .L0
+          keyboard.s:233    .text:0000004e .L0
+          keyboard.s:235    .text:00000054 .L0
+          keyboard.s:234    .text:00000052 .L0
+          keyboard.s:237    .text:00000056 .L0
+          keyboard.s:235    .text:00000054 .L0
+          keyboard.s:239    .text:00000058 .L0
+          keyboard.s:237    .text:00000056 .L0
+          keyboard.s:240    .text:0000005e .L0
+          keyboard.s:239    .text:00000058 .L0
+          keyboard.s:241    .text:00000062 .L0
+          keyboard.s:240    .text:0000005e .L0
+          keyboard.s:242    .text:00000064 .L0
+          keyboard.s:241    .text:00000062 .L0
+          keyboard.s:243    .text:00000066 .L0
+          keyboard.s:242    .text:00000064 .L0
+          keyboard.s:245    .text:00000068 .L0
+          keyboard.s:243    .text:00000066 .L0
+          keyboard.s:246    .text:0000006a .L0
+          keyboard.s:245    .text:00000068 .L0
+          keyboard.s:247    .text:0000006c .L0
+          keyboard.s:246    .text:0000006a .L0
+          keyboard.s:248    .text:00000072 .L0
+          keyboard.s:247    .text:0000006c .L0
+          keyboard.s:249    .text:00000076 .L0
+          keyboard.s:248    .text:00000072 .L0
+          keyboard.s:250    .text:00000078 .L0
+          keyboard.s:249    .text:00000076 .L0
+          keyboard.s:252    .text:0000007a .L0
+          keyboard.s:250    .text:00000078 .L0
+          keyboard.s:253    .text:00000080 .L0
+          keyboard.s:252    .text:0000007a .L0
+          keyboard.s:254    .text:00000084 .L0
+          keyboard.s:253    .text:00000080 .L0
+          keyboard.s:255    .text:00000086 .L0
+          keyboard.s:254    .text:00000084 .L0
+          keyboard.s:257    .text:00000088 .L0
+          keyboard.s:255    .text:00000086 .L0
+          keyboard.s:258    .text:0000008a .L0
+          keyboard.s:257    .text:00000088 .L0
+          keyboard.s:259    .text:0000008c .L0
+          keyboard.s:258    .text:0000008a .L0
+          keyboard.s:260    .text:0000008e .L0
+          keyboard.s:259    .text:0000008c .L0
+          keyboard.s:261    .text:00000090 .L0
+          keyboard.s:260    .text:0000008e .L0
+          keyboard.s:262    .text:00000092 .L0
+          keyboard.s:261    .text:00000090 .L0
+          keyboard.s:264    .text:00000094 .L0
+          keyboard.s:262    .text:00000092 .L0
+          keyboard.s:265    .text:00000096 .L0
+          keyboard.s:264    .text:00000094 .L0
+          keyboard.s:266    .text:00000098 .L0
+          keyboard.s:265    .text:00000096 .L0
+          keyboard.s:267    .text:0000009a .L0
+          keyboard.s:266    .text:00000098 .L0
+          keyboard.s:268    .text:0000009c .L0
+          keyboard.s:267    .text:0000009a .L0
+          keyboard.s:270    .text:0000009e .L0
+          keyboard.s:268    .text:0000009c .L0
+          keyboard.s:271    .text:000000a4 .L0
+          keyboard.s:270    .text:0000009e .L0
+          keyboard.s:272    .text:000000a8 .L0
+          keyboard.s:271    .text:000000a4 .L0
+          keyboard.s:273    .text:000000aa .L0
+          keyboard.s:272    .text:000000a8 .L0
+          keyboard.s:275    .text:000000ac .L0
+          keyboard.s:273    .text:000000aa .L0
+          keyboard.s:276    .text:000000ae .L0
+          keyboard.s:275    .text:000000ac .L0
+          keyboard.s:277    .text:000000b0 .L0
+          keyboard.s:276    .text:000000ae .L0
+          keyboard.s:278    .text:000000b2 .L0
+          keyboard.s:277    .text:000000b0 .L0
+          keyboard.s:279    .text:000000b4 .L0
+          keyboard.s:278    .text:000000b2 .L0
+          keyboard.s:280    .text:000000b6 .L0
+          keyboard.s:279    .text:000000b4 .L0
+          keyboard.s:281    .text:000000b8 .L0
+          keyboard.s:280    .text:000000b6 .L0
+          keyboard.s:283    .text:000000ba .L0
+          keyboard.s:281    .text:000000b8 .L0
+          keyboard.s:284    .text:000000bc .L0
+          keyboard.s:283    .text:000000ba .L0
+          keyboard.s:285    .text:000000be .L0
+          keyboard.s:284    .text:000000bc .L0
+          keyboard.s:286    .text:000000c0 .L0
+          keyboard.s:285    .text:000000be .L0
+          keyboard.s:287    .text:000000c2 .L0
+          keyboard.s:286    .text:000000c0 .L0
+          keyboard.s:288    .text:000000c4 .L0
+          keyboard.s:287    .text:000000c2 .L0
+          keyboard.s:290    .text:000000c6 .L0
+          keyboard.s:288    .text:000000c4 .L0
+          keyboard.s:291    .text:000000c8 .L0
+          keyboard.s:290    .text:000000c6 .L0
+          keyboard.s:292    .text:000000ca .L0
+          keyboard.s:291    .text:000000c8 .L0
+          keyboard.s:293    .text:000000cc .L0
+          keyboard.s:292    .text:000000ca .L0
+          keyboard.s:294    .text:000000ce .L0
+          keyboard.s:293    .text:000000cc .L0
+          keyboard.s:295    .text:000000d0 .L0
+          keyboard.s:294    .text:000000ce .L0
+          keyboard.s:296    .text:000000d2 .L0
+          keyboard.s:295    .text:000000d0 .L0
+          keyboard.s:298    .text:000000d4 .L0
+          keyboard.s:296    .text:000000d2 .L0
+          keyboard.s:299    .text:000000d6 .L0
+          keyboard.s:298    .text:000000d4 .L0
+          keyboard.s:300    .text:000000d8 .L0
+          keyboard.s:299    .text:000000d6 .L0
+          keyboard.s:301    .text:000000da .L0
+          keyboard.s:300    .text:000000d8 .L0
+          keyboard.s:302    .text:000000dc .L0
+          keyboard.s:301    .text:000000da .L0
+          keyboard.s:303    .text:000000de .L0
+          keyboard.s:302    .text:000000dc .L0
+          keyboard.s:305    .text:000000e0 .L0
+          keyboard.s:303    .text:000000de .L0
+          keyboard.s:307    .text:000000e2 .L0
+          keyboard.s:305    .text:000000e0 .L0
+          keyboard.s:308    .text:000000e4 .L0
+          keyboard.s:307    .text:000000e2 .L0
+          keyboard.s:310    .text:000000e6 .L0
+          keyboard.s:308    .text:000000e4 .L0
+          keyboard.s:311    .text:000000e8 .L0
+          keyboard.s:310    .text:000000e6 .L0
+          keyboard.s:318    .text:000000ea .L0
+          keyboard.s:311    .text:000000e8 .L0
+          keyboard.s:319    .text:000000ee .L0
+          keyboard.s:318    .text:000000ea .L0
+          keyboard.s:320    .text:000000f0 .L0
+          keyboard.s:319    .text:000000ee .L0
+          keyboard.s:321    .text:000000f2 .L0
+          keyboard.s:320    .text:000000f0 .L0
+          keyboard.s:322    .text:000000f4 .L0
+          keyboard.s:321    .text:000000f2 .L0
+          keyboard.s:323    .text:000000f6 .L0
+          keyboard.s:322    .text:000000f4 .L0
+          keyboard.s:324    .text:000000f8 .L0
+          keyboard.s:323    .text:000000f6 .L0
+          keyboard.s:326    .text:000000fa .L0
+          keyboard.s:324    .text:000000f8 .L0
+          keyboard.s:334    .text:00000100 .L0
+          keyboard.s:326    .text:000000fa .L0
+          keyboard.s:335    .text:00000104 .L0
+          keyboard.s:334    .text:00000100 .L0
+          keyboard.s:336    .text:00000106 .L0
+          keyboard.s:335    .text:00000104 .L0
+          keyboard.s:337    .text:00000108 .L0
+          keyboard.s:336    .text:00000106 .L0
+          keyboard.s:338    .text:0000010a .L0
+          keyboard.s:337    .text:00000108 .L0
+          keyboard.s:339    .text:0000010c .L0
+          keyboard.s:338    .text:0000010a .L0
+          keyboard.s:342    .text:00000112 .L0
+          keyboard.s:339    .text:0000010c .L0
           keyboard.s:58     .int:00000000 .L0
           keyboard.s:59     .int:00000002 .L0
           keyboard.s:58     .int:00000000 .L0
@@ -5743,40 +5739,94 @@ DEFINED SYMBOLS
           keyboard.s:89     .int:00000032 .L0
           keyboard.s:92     .int:00000036 .L0
           keyboard.s:91     .int:00000034 .L0
-          keyboard.s:95     .int:00000038 .L0
+          keyboard.s:93     .int:00000038 .L0
           keyboard.s:92     .int:00000036 .L0
-          keyboard.s:96     .int:0000003a .L0
-          keyboard.s:95     .int:00000038 .L0
-          keyboard.s:97     .int:0000003c .L0
-          keyboard.s:96     .int:0000003a .L0
-          keyboard.s:98     .int:0000003e .L0
-          keyboard.s:97     .int:0000003c .L0
-          keyboard.s:99     .int:00000040 .L0
-          keyboard.s:98     .int:0000003e .L0
-          keyboard.s:100    .int:00000042 .L0
-          keyboard.s:99     .int:00000040 .L0
+          keyboard.s:95     .int:0000003a .L0
+          keyboard.s:93     .int:00000038 .L0
+          keyboard.s:96     .int:0000003c .L0
+          keyboard.s:95     .int:0000003a .L0
+          keyboard.s:97     .int:0000003e .L0
+          keyboard.s:96     .int:0000003c .L0
+          keyboard.s:98     .int:00000040 .L0
+          keyboard.s:97     .int:0000003e .L0
+          keyboard.s:99     .int:00000042 .L0
+          keyboard.s:98     .int:00000040 .L0
           keyboard.s:101    .int:00000044 .L0
-          keyboard.s:100    .int:00000042 .L0
-          keyboard.s:104    .int:00000046 .L0
+          keyboard.s:99     .int:00000042 .L0
+          keyboard.s:102    .int:00000046 .L0
           keyboard.s:101    .int:00000044 .L0
-          keyboard.s:105    .int:00000048 .L0
-          keyboard.s:104    .int:00000046 .L0
-          keyboard.s:106    .int:0000004a .L0
-          keyboard.s:105    .int:00000048 .L0
-          keyboard.s:108    .int:0000004c .L0
-          keyboard.s:106    .int:0000004a .L0
-          keyboard.s:109    .int:0000004e .L0
-          keyboard.s:108    .int:0000004c .L0
-          keyboard.s:110    .int:00000050 .L0
-          keyboard.s:109    .int:0000004e .L0
-          keyboard.s:111    .int:00000052 .L0
-          keyboard.s:110    .int:00000050 .L0
-          keyboard.s:113    .int:00000054 .L0
-          keyboard.s:111    .int:00000052 .L0
+          keyboard.s:103    .int:00000048 .L0
+          keyboard.s:102    .int:00000046 .L0
+          keyboard.s:104    .int:0000004a .L0
+          keyboard.s:103    .int:00000048 .L0
+          keyboard.s:105    .int:0000004c .L0
+          keyboard.s:104    .int:0000004a .L0
+          keyboard.s:108    .int:0000004e .L0
+          keyboard.s:105    .int:0000004c .L0
+          keyboard.s:109    .int:00000050 .L0
+          keyboard.s:108    .int:0000004e .L0
+          keyboard.s:110    .int:00000052 .L0
+          keyboard.s:109    .int:00000050 .L0
+          keyboard.s:111    .int:00000054 .L0
+          keyboard.s:110    .int:00000052 .L0
+          keyboard.s:112    .int:00000056 .L0
+          keyboard.s:111    .int:00000054 .L0
+          keyboard.s:113    .int:00000058 .L0
+          keyboard.s:112    .int:00000056 .L0
+          keyboard.s:114    .int:0000005a .L0
+          keyboard.s:113    .int:00000058 .L0
+          keyboard.s:115    .int:0000005c .L0
+          keyboard.s:114    .int:0000005a .L0
+          keyboard.s:117    .int:0000005e .L0
+          keyboard.s:115    .int:0000005c .L0
+          keyboard.s:118    .int:00000060 .L0
+          keyboard.s:117    .int:0000005e .L0
+          keyboard.s:119    .int:00000062 .L0
+          keyboard.s:118    .int:00000060 .L0
+          keyboard.s:120    .int:00000064 .L0
+          keyboard.s:119    .int:00000062 .L0
+          keyboard.s:121    .int:00000066 .L0
+          keyboard.s:120    .int:00000064 .L0
+          keyboard.s:122    .int:00000068 .L0
+          keyboard.s:121    .int:00000066 .L0
+          keyboard.s:123    .int:0000006a .L0
+          keyboard.s:122    .int:00000068 .L0
+          keyboard.s:124    .int:0000006c .L0
+          keyboard.s:123    .int:0000006a .L0
+          keyboard.s:128    .int:0000006e .L0
+          keyboard.s:124    .int:0000006c .L0
+          keyboard.s:129    .int:00000070 .L0
+          keyboard.s:128    .int:0000006e .L0
+          keyboard.s:130    .int:00000072 .L0
+          keyboard.s:129    .int:00000070 .L0
+          keyboard.s:131    .int:00000074 .L0
+          keyboard.s:130    .int:00000072 .L0
+          keyboard.s:132    .int:00000076 .L0
+          keyboard.s:131    .int:00000074 .L0
+          keyboard.s:133    .int:00000078 .L0
+          keyboard.s:132    .int:00000076 .L0
+          keyboard.s:134    .int:0000007a .L0
+          keyboard.s:133    .int:00000078 .L0
+          keyboard.s:137    .int:0000007c .L0
+          keyboard.s:134    .int:0000007a .L0
+          keyboard.s:138    .int:0000007e .L0
+          keyboard.s:137    .int:0000007c .L0
+          keyboard.s:139    .int:00000080 .L0
+          keyboard.s:138    .int:0000007e .L0
+          keyboard.s:141    .int:00000082 .L0
+          keyboard.s:139    .int:00000080 .L0
+          keyboard.s:142    .int:00000084 .L0
+          keyboard.s:141    .int:00000082 .L0
+          keyboard.s:143    .int:00000086 .L0
+          keyboard.s:142    .int:00000084 .L0
+          keyboard.s:144    .int:00000088 .L0
+          keyboard.s:143    .int:00000086 .L0
+          keyboard.s:146    .int:0000008a .L0
+          keyboard.s:144    .int:00000088 .L0
                             .text:00000000 .L0
-          keyboard.s:320    .text:00000132 .L0
+          keyboard.s:342    .text:00000112 .L0
                              .int:00000000 .L0
-          keyboard.s:113    .int:00000054 .L0
+          keyboard.s:146    .int:0000008a .L0
                       .debug_info:00000000 .L0
                       .debug_info:0000007f .L0
 
@@ -7377,6 +7427,7 @@ EQUATE SYMBOLS
                         SC_ERROR = 0xfc
                          SC_KREL = 0xf0
                          SC_XKEY = 0xe0
+                            SC_C = 0x21
                          L_SHIFT = 0x12
                          R_SHIFT = 0x59
                           L_CTRL = 0x14

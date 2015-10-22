@@ -31,7 +31,7 @@
 ascii:
 .byte 0x1c,'a'
 .byte 0x32,'b'
-.byte 0x21,'c'
+.byte SC_C,'c'
 .byte 0x23,'d'
 .byte 0x24,'e'
 .byte 0x2b,'f'

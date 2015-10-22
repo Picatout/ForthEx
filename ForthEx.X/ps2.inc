@@ -31,6 +31,7 @@
 .equ SC_ERROR, 0xFC ; erreur clavier
 .equ SC_KREL,  0xF0 ; touche relâchée
 .equ SC_XKEY,  0xE0 ; code étendu
+.equ SC_C,     0x21 ; scan code touche 'C'    
  ;codes touches contrôles
 .equ L_SHIFT,  0x12
 .equ R_SHIFT,  0x59

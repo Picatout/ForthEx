@@ -22,9 +22,10 @@
   22              	;REF: http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt
   23              	;   http://www.bradrodriguez.com/papers/
   24              	;   msp430 camelForth source code: http://www.camelforth.com/download.php?view.25
-  25              	
+  25              	;   ANS FORTH 94: http://www.greenarraychips.com/home/documents/dpans94.pdf
   26              	    
-  27              	.include "hardware.inc"
+  27              	    
+  28              	.include "hardware.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
    3              	; This file is part of ForthEx.
@@ -3473,7 +3474,7 @@
  213              	
  214              	.endif
  215              	
-  28              	.include "core.inc"
+  29              	.include "core.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
    3              	; This file is part of ForthEx.
@@ -3640,7 +3641,7 @@
  164              	
  165              	.endif
  166              		
-  29              	.include "gen_macros.inc"
+  30              	.include "gen_macros.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
    3              	; This file is part of ForthEx.
@@ -3674,7 +3675,7 @@
   31              	
   32              	.endif
   33              	
-  30              	.include "sound.inc"
+  31              	.include "sound.inc"
    1              	;****************************************************************************
    2              	; Copyright 2015, Jacques Deschênes
    3              	; This file is part of ForthEx.
@@ -3781,692 +3782,653 @@
  104              	.equ RE7d, 400	  ; 4976,9116352768
  105              	    
  106              	.endif
-  31              	    
-  32              	.global pstack, rstack, user
-  33              	    
-  34              	.data
-  35                 	user: ; variables utilisateur
-  36 0000 00 00 00 00 	.space 20
-  36      00 00 00 00 
-  36      00 00 00 00 
-  36      00 00 00 00 
-  36      00 00 00 00 
-  37                 	    
-  38                 	.section _pstack, bss, address(PSV_BASE-RSTK_SIZE-DSTK_SIZE)    
-  39                 	pstack:
-  40 0000 00 00 00 00 	.space DSTK_SIZE
-  40      00 00 00 00 
-  40      00 00 00 00 
-  40      00 00 00 00 
-  40      00 00 00 00 
-  40      00 00 00 00 
-  40      00 00 00 00 
-  40      00 00 00 00 
-  40      00 00 00 00 
-  41                 	
-  42                 	.section _rstack,stack, address(PSV_BASE-RSTK_SIZE)
-  43                 	rstack:
-  44 0000 00 00 00 00 	.space RSTK_SIZE
-  44      00 00 00 00 
-  44      00 00 00 00 
-  44      00 00 00 00 
-  44      00 00 00 00 
-  44      00 00 00 00 
-  44      00 00 00 00 
-  44      00 00 00 00 
-  44      00 00 00 00 
-  45                 	    
+  32              	    
+  33              	.global pstack, rstack, user
+  34              	    
+  35              	.data
+  36                 	user: ; variables utilisateur
+  37 0000 00 00 00 00 	.space 20
+  37      00 00 00 00 
+  37      00 00 00 00 
+  37      00 00 00 00 
+  37      00 00 00 00 
+  38                 	    
+  39                 	.section _pstack, bss, address(PSV_BASE-RSTK_SIZE-DSTK_SIZE)    
+  40                 	pstack:
+  41 0000 00 00 00 00 	.space DSTK_SIZE
+  41      00 00 00 00 
+  41      00 00 00 00 
+  41      00 00 00 00 
+  41      00 00 00 00 
+  41      00 00 00 00 
+  41      00 00 00 00 
+  41      00 00 00 00 
+  41      00 00 00 00 
+  42                 	
+  43                 	.section _rstack,stack, address(PSV_BASE-RSTK_SIZE)
+  44                 	rstack:
+  45 0000 00 00 00 00 	.space RSTK_SIZE
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
+  45      00 00 00 00 
   46                 	    
   47                 	    
-  48                 	
-  49                 	.section .const psv       
-  50                 	;test string
-  51                 	version:
-  52 0000 46 6F 72 74 	.asciz "ForthEx V0.1\r\n"    
-  52      68 45 78 20 
-  52      56 30 2E 31 
-  52      0D 0A 00 
-  53                 	    
-  54                 	.text
-  55              	.global DOCOLON    
-  56              	DOCOLON: ; entre dans un mot de haut niveau (mot défini par ':')
-  57 000000  88 1F 78 	    RPUSH IP   
-  58 000002  0B 04 78 	    mov WP,IP
-  59 000004  B8 05 78 	    NEXT
-  59         3B 00 78 
-  59         00 40 01 
-  60              	
-  61              	DEFCODE "COLD",4,,COLD ; ( -- )
-  62 00000a  00 00 FE 	    reset
-  63              	    
-  64              	
-  65              	DEFCODE "WARM",4,,WARM   ; ( -- )
-  66 00000c  0E 00 20 	    mov #pstack, DSP
-  67 00000e  0F 00 20 	    mov #rstack, RSP
-  68 000010  08 00 20 	    mov #psvoffset(ENTRY), IP
-  69 000012  B8 05 78 	    NEXT
-  69         3B 00 78 
-  69         00 40 01 
-  70              	    
-  71              	DEFCODE "EXECUTE",7,,DOCODE
-  72 000018  8C 05 78 	    mov T, WP
-  73 00001a  2E 06 78 	    DPOP
-  74 00001c  0B 40 01 	    goto WP
-  75              	    
-  76              	DEFCODE "EXIT",4,,EXIT
-  77 00001e  4F 04 78 	    RPOP IP
-  78 000020  B8 05 78 	    NEXT
-  78         3B 00 78 
-  78         00 40 01 
-  79              	
-  80              	DEFCODE "LIT",5,,LIT  ; ( -- n )
-  81 000026  0C 2F 78 	    DPUSH
-  82 000028  38 06 78 	    mov [IP++], T
-  83 00002a  B8 05 78 	    NEXT
-  83         3B 00 78 
-  83         00 40 01 
-  84              	
-  85              	DEFCODE "CLIT",4,,CLIT  ; ( -- c )
-  86 000030  0C 2F 78 	    DPUSH
-  87 000032  38 46 78 	    mov.b [IP++], T
-  88 000034  0C 86 FB 	    ze T,T
-  89 000036  B8 05 78 	    NEXT
-  89         3B 00 78 
-  89         00 40 01 
-  90              	
-  91              	DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
-  92 00003c  1C 46 78 	    mov.b [T], T
-  93 00003e  0C 86 FB 	    ze T, T
-  94 000040  B8 05 78 	    NEXT
-  94         3B 00 78 
-  94         00 40 01 
-  95              	    
-  96              	DEFCODE "C!",2,,CSTORE  ; ( c-addr c -- )
-  97 000046  0C 80 FB 	    ze T, W0
-  98 000048  2E 06 78 	    DPOP
-  99 00004a  00 4E 78 	    mov.b W0,[T]
- 100 00004c  2E 06 78 	    DPOP
- 101 00004e  B8 05 78 	    NEXT
- 101         3B 00 78 
- 101         00 40 01 
- 102              	    
- 103              	; branchement inconditionnel    
- 104              	DEFCODE "BRANCH",5,,BRANCH  ; ( -- )
- 105              	XBRAN:
- 106 000054  18 04 44 	    add IP, [IP], IP
- 107 000056  B8 05 78 	    NEXT
- 107         3B 00 78 
- 107         00 40 01 
- 108              	    
- 109              	; branchement si T==0    
- 110              	DEFCODE "?BRANCH",6,,QBRANCH ; ( n -- )
- 111 00005c  0C 00 E0 	    cp0 T
- 112 00005e  2E 06 78 	    DPOP
- 113 000060  00 00 32 	    bra z, XBRAN
- 114 000062  08 84 E8 	    inc2 IP,IP
- 115 000064  B8 05 78 	    NEXT
- 115         3B 00 78 
- 115         00 40 01 
- 116              	
- 117              	; exécution de DO    
- 118              	DEFCODE "(DO)",4,,DODO ; ( n  n -- ) R( -- n n )
- 119 00006a  87 1F 78 	    RPUSH I
- 120 00006c  8C 03 78 	    mov T, I
- 121 00006e  AE 1F 78 	    mov [DSP--],[RSP++]
- 122              	;    DPOP
- 123              	;    RPUSH T
- 124 000070  2E 06 78 	    DPOP
- 125 000072  B8 05 78 	    NEXT
- 125         3B 00 78 
- 125         00 40 01 
- 126              	
- 127              	; exécution de LOOP   
- 128              	DEFCODE "(LOOP)",6,,DOLOOP  ; ( -- )  R( n n -- )
- 129 000078  87 03 E8 	    inc I, I
- 130 00007a  7F B8 97 	    mov [RSP-2],W0
- 131 00007c  00 38 E1 	    cp I, W0
- 132 00007e  00 00 32 	    bra z, 1f
- 133 000080  18 04 44 	    add IP, [IP], IP
- 134 000082  B8 05 78 	    NEXT
- 134         3B 00 78 
- 134         00 40 01 
- 135              	1:
- 136 000088  08 84 E8 	    inc2 IP,IP
- 137 00008a  8F 87 E9 	    RDROP    
- 138 00008c  CF 03 78 	    RPOP I
- 139 00008e  B8 05 78 	    NEXT
- 139         3B 00 78 
- 139         00 40 01 
- 140              	
- 141              	; empile compteur de boucle    
- 142              	DEFCODE "I",1,,DOI  ; ( -- n )
- 143 000094  0C 2F 78 	    DPUSH
- 144 000096  07 06 78 	    mov I, T
- 145 000098  B8 05 78 	    NEXT
- 145         3B 00 78 
- 145         00 40 01 
- 146              	
- 147              	DEFCODE "J",1,,DOJ  ; ( -- n )
- 148 00009e  0C 2F 78 	    DPUSH
- 149 0000a0  7F BE 97 	    mov [RSP-2],T
- 150 0000a2  B8 05 78 	    NEXT
- 150         3B 00 78 
- 150         00 40 01 
- 151              	    
- 152              	DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) jette les arguments d'une boucle
- 153 0000a8  8F 87 E9 	    RDROP
- 154 0000aa  CF 03 78 	    RPOP I
- 155 0000ac  B8 05 78 	    NEXT
- 155         3B 00 78 
- 155         00 40 01 
- 156              	    
- 157              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
- 158              	; mots manipulant les arguments sur la pile
- 159              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
- 160              	DEFCODE "DUP",3,,DUP ; ( n -- n n )
- 161 0000b2  0C 2F 78 	    DPUSH
- 162 0000b4  B8 05 78 	    NEXT
- 162         3B 00 78 
- 162         00 40 01 
- 163              	
- 164              	DEFCODE "?DUP",4,,QDUP ; ( n - n | n n )
- 165 0000ba  0C 00 E0 	    cp0 T
- 166 0000bc  00 00 32 	    bra z, 0f
- 167 0000be  0C 2F 78 	    DPUSH
- 168 0000c0  B8 05 78 	0:  NEXT
- 168         3B 00 78 
- 168         00 40 01 
- 169              	    
- 170              	    
- 171              	DEFCODE "DROP",4,,DROP ; ( n -- )
- 172 0000c6  2E 06 78 	    DPOP
- 173 0000c8  B8 05 78 	    NEXT
- 173         3B 00 78 
- 173         00 40 01 
- 174              	
- 175              	DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
- 176 0000ce  0C 00 78 	    mov T, W0
- 177 0000d0  1E 06 78 	    mov [DSP], T
- 178 0000d2  00 07 98 	    mov W0, [DSP+0]
- 179 0000d4  B8 05 78 	    NEXT
- 179         3B 00 78 
- 179         00 40 01 
- 180              	
- 181              	DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
- 182 0000da  0C 00 78 	    mov T, W0
- 183 0000dc  1E 06 78 	    mov [DSP], T
- 184 0000de  FE B8 97 	    mov [DSP-2], W1
- 185 0000e0  01 0F 78 	    mov W1, [DSP]
- 186 0000e2  70 BF 9F 	    mov W0, [DSP-2]
- 187 0000e4  B8 05 78 	    NEXT
- 187         3B 00 78 
- 187         00 40 01 
- 188              	    
- 189              	DEFCODE "OVER",4,,OVER  ; ( n1 n2 -- n1 n2 n1 )
- 190 0000ea  0C 2F 78 	    DPUSH
- 191 0000ec  7E BE 97 	    mov [DSP-2],T
- 192 0000ee  B8 05 78 	    NEXT
- 192         3B 00 78 
- 192         00 40 01 
- 193              	    
- 194              	DEFCODE "NIP",3,,NIP   ; ( n1 n2 -- n2 )
- 195 0000f4  2E 00 B1 	    sub #2, DSP
- 196 0000f6  B8 05 78 	    NEXT
- 196         3B 00 78 
- 196         00 40 01 
- 197              	    
- 198              	DEFCODE ">R",2,,TOR   ;  ( n -- )  R:( -- n)
- 199 0000fc  8C 1F 78 	    push T
- 200 0000fe  2E 06 78 	    DPOP
- 201 000100  B8 05 78 	    NEXT
- 201         3B 00 78 
- 201         00 40 01 
- 202              	    
- 203              	DEFCODE "R>",2,,RFROM  ; ( -- n ) R( n -- )
- 204 000106  0C 2F 78 	    DPUSH
- 205 000108  4F 06 78 	    pop T
- 206 00010a  B8 05 78 	    NEXT
- 206         3B 00 78 
- 206         00 40 01 
- 207              	
- 208              	DEFCODE "R@",2,,RFETCH ; ( -- n ) R ( -- )
- 209 000110  0C 2F 78 	    DPUSH
- 210 000112  1F 06 78 	    mov [RSP], T
- 211 000114  B8 05 78 	    NEXT
- 211         3B 00 78 
- 211         00 40 01 
- 212              	    
- 213              	DEFCODE "SP@",3,,SPFETCH ; ( -- n )
- 214 00011a  0C 2F 78 	    DPUSH
- 215 00011c  0E 06 78 	    mov DSP, T
- 216 00011e  B8 05 78 	    NEXT
- 216         3B 00 78 
- 216         00 40 01 
- 217              	    
- 218              	DEFCODE "SP!",3,,SPSTORE  ; ( n -- )
- 219 000124  0C 07 78 	    mov T, DSP
- 220 000126  2E 06 78 	    DPOP
- 221 000128  B8 05 78 	    NEXT
- 221         3B 00 78 
- 221         00 40 01 
- 222              	    
- 223              	DEFCODE "RP@",3,,RPFETCH  ; ( -- n )
- 224 00012e  0C 2F 78 	    DPUSH
- 225 000130  0F 06 78 	    mov RSP, T
- 226 000132  B8 05 78 	    NEXT
- 226         3B 00 78 
- 226         00 40 01 
- 227              	    
- 228              	DEFCODE "RP!",3,,RPSTORE  ; ( n -- )
- 229 000138  8C 07 78 	    mov T, RSP
- 230 00013a  2E 06 78 	    DPOP
- 231 00013c  B8 05 78 	    NEXT
- 231         3B 00 78 
- 231         00 40 01 
- 232              	    
- 233              	DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 n3 -- n3 n1 n2 )
- 234 000142  0C 00 78 	    mov T, W0
- 235 000144  1E 06 78 	    mov [DSP], T
- 236 000146  FE B8 97 	    mov [DSP-2], W1
- 237 000148  70 BF 9F 	    mov W0, [DSP-2]
- 238 00014a  01 0F 78 	    mov W1, [DSP]
- 239 00014c  B8 05 78 	    NEXT
- 239         3B 00 78 
- 239         00 40 01 
- 240              	
- 241              	    
- 242              	;;;;;;;
- 243              	; MATH
- 244              	;;;;;;;
- 245              	DEFCODE "+",1,,PLUS   ;( n1 n2 -- n1+n2 )
- 246 000152  1E 00 46 	    add T, [DSP], W0
- 247 000154  2E 06 78 	    DPOP
- 248 000156  00 06 78 	    mov W0, T
- 249 000158  B8 05 78 	    NEXT
- 249         3B 00 78 
- 249         00 40 01 
- 250              	    
- 251              	DEFCODE "-",1,,MINUS   ; ( n1 n2 -- n1-n2 )
- 252 00015e  0C 00 78 	    mov T, W0
- 253 000160  2E 06 78 	    DPOP
- 254 000162  00 06 56 	    sub T, W0, T
- 255 000164  B8 05 78 	    NEXT
- 255         3B 00 78 
- 255         00 40 01 
- 256              	    
- 257              	DEFCODE "1+",2,,ONEPLUS ; ( n -- n ) n+1
- 258 00016a  1C 00 B0 	    add #1, T
- 259 00016c  B8 05 78 	    NEXT
- 259         3B 00 78 
- 259         00 40 01 
- 260              	
- 261              	DEFCODE "1-",2,,ONEMINUS  ; ( n -- n ) n-1
- 262 000172  1C 00 B1 	    sub #1, T
- 263 000174  B8 05 78 	    NEXT
- 263         3B 00 78 
- 263         00 40 01 
- 264              	    
- 265              	DEFCODE "2*",2,,TWOSTAR  ; ( n -- n ) 2*n
- 266 00017a  0C 06 46 	    add T,T, T
- 267 00017c  B8 05 78 	    NEXT
- 267         3B 00 78 
- 267         00 40 01 
- 268              	    
- 269              	DEFCODE "2/",2,,TWOSLASH ; ( n -- n ) n/2
- 270 000182  0C 06 D1 	    lsr T,T
- 271 000184  B8 05 78 	    NEXT
- 271         3B 00 78 
- 271         00 40 01 
- 272              	    
- 273              	DEFCODE "LSHIFT",6,,LSHIFT ; ( x1 -- x2 ) x2=x1<<1    
- 274 00018a  0C 06 D0 	    sl T,T
- 275 00018c  B8 05 78 	    NEXT
- 275         3B 00 78 
- 275         00 40 01 
- 276              	    
- 277              	DEFCODE "RSHIFT",6,,RSHIFT ; ( x1 -- x2 ) x2=x1>>1
- 278 000192  0C 06 D1 	    lsr T,T
- 279 000194  B8 05 78 	    NEXT
- 279         3B 00 78 
- 279         00 40 01 
- 280              	    
- 281              	    
- 282              	    
- 283              	DEFCODE "+!",2,,PLUSSTORE  ; ( n addr  -- ) [addr]=[addr]+n     
- 284 00019a  2E 00 78 	    mov [DSP--], W0
- 285 00019c  1C 0E 40 	    add W0, [T],[T]
- 286 00019e  2E 06 78 	    DPOP
- 287 0001a0  B8 05 78 	    NEXT
- 287         3B 00 78 
- 287         00 40 01 
- 288              	    
- 289              	DEFCODE "M+",2,,DADD  ; ( d n --  d ) simple + double
- 290 0001a6  0C 00 78 	    mov T, W0
- 291 0001a8  2E 06 78 	    DPOP
- 292 0001aa  1E 0F 40 	    add W0, [DSP], [DSP]
- 293 0001ac  0C 80 B0 	    addc #0, T
- 294 0001ae  B8 05 78 	    NEXT
- 294         3B 00 78 
- 294         00 40 01 
- 295              	 
- 296              	; opérations logiques bit à bit    
- 297              	DEFCODE "AND",3,,_AND  ; ( n1 n2 -- n)  ET bit à bit
- 298 0001b4  1E 0F 66 	    and T,[DSP],[DSP]
- 299 0001b6  2E 06 78 	    DPOP
- 300 0001b8  B8 05 78 	    NEXT
- 300         3B 00 78 
- 300         00 40 01 
- 301              	    
- 302              	DEFCODE "OR",2,,_OR   ; ( n1 n2 -- n ) OU bit à bit
- 303 0001be  1E 0F 76 	    ior T,[DSP],[DSP]
- 304 0001c0  2E 06 78 	    DPOP
- 305 0001c2  B8 05 78 	    NEXT
- 305         3B 00 78 
- 305         00 40 01 
- 306              	    
- 307              	DEFCODE "XOR",3,,_XOR ; ( n1 n2 -- n ) OU exclusif bit à bit
- 308 0001c8  1E 0F 6E 	    xor T,[DSP],[DSP]
- 309 0001ca  2E 06 78 	    DPOP
- 310 0001cc  B8 05 78 	    NEXT
- 310         3B 00 78 
- 310         00 40 01 
- 311              	    
- 312              	    
- 313              	DEFCODE "INVERT",6,,INVERT ; ( n -- n ) inversion des bits
- 314 0001d2  0C 86 EA 	    com T, T
- 315 0001d4  B8 05 78 	    NEXT
- 315         3B 00 78 
- 315         00 40 01 
- 316              	    
- 317              	DEFCODE "NEGATE",6,,NEGATE ; ( n - n ) complément à 2
- 318 0001da  0C 06 EA 	    neg T, T
- 319 0001dc  B8 05 78 	    NEXT
- 319         3B 00 78 
- 319         00 40 01 
- 320              	
- 321              	; comparaisons
- 322              	
- 323              	DEFCODE "0=",2,,ZEROEQ  ; ( n -- f )  f=  n==0
- 324 0001e2  1C 00 B1 	    sub #1,T
- 325 0001e4  0C 06 5E 	    subb T,T,T
- 326 0001e6  B8 05 78 	    NEXT
- 326         3B 00 78 
- 326         00 40 01 
- 327              	    
- 328              	DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
- 329 0001ec  00 80 EB 	    setm W0
- 330 0001ee  0C 06 46 	    add T,T,T
- 331 0001f0  0C 06 5E 	    subb T,T,T
- 332 0001f2  0C 06 68 	    xor W0,T,T
- 333 0001f4  B8 05 78 	    NEXT
- 333         3B 00 78 
- 333         00 40 01 
- 334              	
- 335              	DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
- 336 0001fa  00 00 EB 	    clr W0
- 337 0001fc  2E 60 E1 	    cp T, [DSP--]
- 338 0001fe  00 00 3A 	    bra nz, 1f
- 339 000200  00 80 EA 	    com W0,W0
- 340              	 1: 
- 341 000202  00 06 78 	    mov W0,T
- 342 000204  B8 05 78 	    NEXT
- 342         3B 00 78 
- 342         00 40 01 
- 343              	    
- 344              	DEFCODE "<>",2,,NEQUAL ; ( n1 n2 -- f ) f = n1<>n2
- 345 00020a  00 00 EB 	    clr W0
- 346 00020c  2E 60 E1 	    cp T, [DSP--]
- 347 00020e  00 00 32 	    bra z, 1f
- 348 000210  00 80 EA 	    com W0,W0
- 349              	1:  
- 350 000212  00 06 78 	    mov W0, T
- 351 000214  B8 05 78 	    NEXT
- 351         3B 00 78 
- 351         00 40 01 
- 352              	    
- 353              	 DEFCODE "<",1,,LESS  ; ( n1 n2 -- f) f= n1<n2
- 354 00021a  00 00 EB 	    clr W0
- 355 00021c  2E 60 E1 	    cp T,[DSP--]
- 356 00021e  00 00 34 	    bra le, 1f
- 357 000220  00 80 EA 	    com W0,W0
- 358              	1:
- 359 000222  00 06 78 	    mov W0, T
- 360 000224  B8 05 78 	    NEXT
- 360         3B 00 78 
- 360         00 40 01 
- 361              	    
- 362              	DEFCODE ">",1,,GREATER  ; ( n1 n2 -- f ) f= n1>n2
- 363 00022a  00 00 EB 	    clr W0
- 364 00022c  2E 60 E1 	    cp T,[DSP--]
- 365 00022e  00 00 3D 	    bra ge, 1f
- 366 000230  00 80 EA 	    com W0,W0
- 367              	1:
- 368 000232  00 06 78 	    mov W0, T
- 369 000234  B8 05 78 	    NEXT
- 369         3B 00 78 
- 369         00 40 01 
- 370              	    
- 371              	DEFCODE "U<",2,,ULESS  ; (u1 u2 -- f) f= u1<u2
- 372 00023a  00 00 EB 	    clr W0
- 373 00023c  2E 60 E1 	    cp T,[DSP--]
- 374 00023e  00 00 36 	    bra leu, 1f
- 375 000240  00 80 EA 	    com W0,W0
- 376              	1:
- 377 000242  00 06 78 	    mov W0, T
- 378 000244  B8 05 78 	    NEXT
- 378         3B 00 78 
- 378         00 40 01 
- 379              	    
- 380              	DEFCODE "U>",2,,UGREATER ; ( u1 u2 -- f) f=u1>u2
- 381 00024a  00 00 EB 	    clr W0
- 382 00024c  2E 60 E1 	    cp T,[DSP--]
- 383 00024e  00 00 31 	    bra geu, 1f
- 384 000250  00 80 EA 	    com W0,W0
- 385              	1:
- 386 000252  00 06 78 	    mov W0,T
- 387 000254  B8 05 78 	    NEXT
- 387         3B 00 78 
- 387         00 40 01 
- 388              	    
- 389              	    
- 390              	    
- 391              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 392              	;   TESTS
- 393              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 394              	DEFWORD "TEST",4,,TEST   
- 395 01dc 00 00 00 00 	.word  CLS,MSG,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,BRANCH, -22
- 395      00 00 00 00 
- 395      00 00 4D 01 
- 395      00 00 00 00 
- 395      00 00 00 00 
- 395      4D 01 00 00 
- 395      00 00 EA FF 
- 396                 	
- 397 01f8 00 00 07 53 	DEFWORD "SERTEST",7,,SERTEST
- 397      45 52 54 45 
- 397      53 54 00 00 
- 398 0204 00 00 00 00 	.word CLS,MSG,SGET,SEMIT,BRANCH,-6    
+  48                 	    
+  49                 	
+  50                 	.section .const psv       
+  51                 	;test string
+  52                 	version:
+  53 0000 46 6F 72 74 	.asciz "ForthEx V0.1\r\n"    
+  53      68 45 78 20 
+  53      56 30 2E 31 
+  53      0D 0A 00 
+  54                 	    
+  55                 	.text
+  56              	.global DOCOLON    
+  57              	DOCOLON: ; entre dans un mot de haut niveau (mot défini par ':')
+  58 000000  88 1F 78 	    RPUSH IP   
+  59 000002  0B 04 78 	    mov WP,IP
+  60 000004  B8 05 78 	    NEXT
+  60         3B 00 78 
+  60         00 40 01 
+  61              	
+  62              	DEFCODE "COLD",4,,COLD ; ( -- )  démarrage à froid
+  63 00000a  00 00 FE 	    reset
+  64              	    
+  65              	
+  66              	DEFCODE "WARM",4,,WARM   ; ( -- )  démarrage à chaud
+  67              	__MathError:
+  68 00000c  0E 00 20 	    mov #pstack, DSP
+  69 00000e  0F 00 20 	    mov #rstack, RSP
+  70              	    ; à faire: doit-remettre à zéro input buffer
+  71 000010  08 00 20 	    mov #psvoffset(ENTRY), IP
+  72 000012  B8 05 78 	    NEXT
+  72         3B 00 78 
+  72         00 40 01 
+  73              	    
+  74              	DEFCODE "EXECUTE",7,,DOCODE ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
+  75 000018  8C 05 78 	    mov T, WP
+  76 00001a  2E 06 78 	    DPOP
+  77 00001c  0B 40 01 	    goto WP
+  78              	    
+  79              	DEFCODE "EXIT",4,,EXIT  ; ( -- ) (R: nest-sys -- ) 6.1.1380  sortie mot haut-niveau.
+  80 00001e  4F 04 78 	    RPOP IP
+  81 000020  B8 05 78 	    NEXT
+  81         3B 00 78 
+  81         00 40 01 
+  82              	
+  83              	DEFCODE "LIT",5,,LIT  ; ( -- x ) empile une valeur  
+  84 000026  0C 2F 78 	    DPUSH
+  85 000028  38 06 78 	    mov [IP++], T
+  86 00002a  B8 05 78 	    NEXT
+  86         3B 00 78 
+  86         00 40 01 
+  87              	
+  88              	DEFCODE "CLIT",4,,CLIT  ; ( -- c )
+  89 000030  0C 2F 78 	    DPUSH
+  90 000032  38 46 78 	    mov.b [IP++], T
+  91 000034  0C 86 FB 	    ze T,T
+  92 000036  B8 05 78 	    NEXT
+  92         3B 00 78 
+  92         00 40 01 
+  93              	
+  94              	DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
+  95 00003c  1C 46 78 	    mov.b [T], T
+  96 00003e  0C 86 FB 	    ze T, T
+  97 000040  B8 05 78 	    NEXT
+  97         3B 00 78 
+  97         00 40 01 
+  98              	    
+  99              	DEFCODE "C!",2,,CSTORE  ; ( c-addr c -- )
+ 100 000046  0C 80 FB 	    ze T, W0
+ 101 000048  2E 06 78 	    DPOP
+ 102 00004a  00 4E 78 	    mov.b W0,[T]
+ 103 00004c  2E 06 78 	    DPOP
+ 104 00004e  B8 05 78 	    NEXT
+ 104         3B 00 78 
+ 104         00 40 01 
+ 105              	    
+ 106              	; branchement inconditionnel    
+ 107              	DEFCODE "BRANCH",5,,BRANCH  ; ( -- )
+ 108              	XBRAN:
+ 109 000054  18 04 44 	    add IP, [IP], IP
+ 110 000056  B8 05 78 	    NEXT
+ 110         3B 00 78 
+ 110         00 40 01 
+ 111              	    
+ 112              	; branchement si T==0    
+ 113              	DEFCODE "?BRANCH",6,,QBRANCH ; ( n -- )
+ 114 00005c  0C 00 E0 	    cp0 T
+ 115 00005e  2E 06 78 	    DPOP
+ 116 000060  00 00 32 	    bra z, XBRAN
+ 117 000062  08 84 E8 	    inc2 IP,IP
+ 118 000064  B8 05 78 	    NEXT
+ 118         3B 00 78 
+ 118         00 40 01 
+ 119              	
+ 120              	; exécution de DO    
+ 121              	DEFCODE "(DO)",4,,DODO ; ( n  n -- ) R( -- n n )
+ 122 00006a  87 1F 78 	    RPUSH I
+ 123 00006c  8C 03 78 	    mov T, I
+ 124 00006e  AE 1F 78 	    mov [DSP--],[RSP++]
+ 125              	;    DPOP
+ 126              	;    RPUSH T
+ 127 000070  2E 06 78 	    DPOP
+ 128 000072  B8 05 78 	    NEXT
+ 128         3B 00 78 
+ 128         00 40 01 
+ 129              	
+ 130              	; exécution de LOOP   
+ 131              	DEFCODE "(LOOP)",6,,DOLOOP  ; ( -- )  R( n n -- )
+ 132 000078  87 03 E8 	    inc I, I
+ 133 00007a  7F B8 97 	    mov [RSP-2],W0
+ 134 00007c  00 38 E1 	    cp I, W0
+ 135 00007e  00 00 32 	    bra z, 1f
+ 136 000080  18 04 44 	    add IP, [IP], IP
+ 137 000082  B8 05 78 	    NEXT
+ 137         3B 00 78 
+ 137         00 40 01 
+ 138              	1:
+ 139 000088  08 84 E8 	    inc2 IP,IP
+ 140 00008a  8F 87 E9 	    RDROP    
+ 141 00008c  CF 03 78 	    RPOP I
+ 142 00008e  B8 05 78 	    NEXT
+ 142         3B 00 78 
+ 142         00 40 01 
+ 143              	
+ 144              	; empile compteur de boucle    
+ 145              	DEFCODE "I",1,,DOI  ; ( -- n )
+ 146 000094  0C 2F 78 	    DPUSH
+ 147 000096  07 06 78 	    mov I, T
+ 148 000098  B8 05 78 	    NEXT
+ 148         3B 00 78 
+ 148         00 40 01 
+ 149              	
+ 150              	DEFCODE "J",1,,DOJ  ; ( -- n )
+ 151 00009e  0C 2F 78 	    DPUSH
+ 152 0000a0  6F BE 97 	    mov [RSP-4],T
+ 153 0000a2  B8 05 78 	    NEXT
+ 153         3B 00 78 
+ 153         00 40 01 
+ 154              	    
+ 155              	DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) jette les arguments d'une boucle
+ 156 0000a8  8F 87 E9 	    RDROP
+ 157 0000aa  CF 03 78 	    RPOP I
+ 158 0000ac  B8 05 78 	    NEXT
+ 158         3B 00 78 
+ 158         00 40 01 
+ 159              	    
+ 160              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+ 161              	; mots manipulant les arguments sur la pile
+ 162              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+ 163              	DEFCODE "DUP",3,,DUP ; ( n -- n n )
+ 164 0000b2  0C 2F 78 	    DPUSH
+ 165 0000b4  B8 05 78 	    NEXT
+ 165         3B 00 78 
+ 165         00 40 01 
+ 166              	
+ 167              	DEFCODE "?DUP",4,,QDUP ; ( n - n | n n )
+ 168 0000ba  0C 00 E0 	    cp0 T
+ 169 0000bc  00 00 32 	    bra z, 0f
+ 170 0000be  0C 2F 78 	    DPUSH
+ 171 0000c0  B8 05 78 	0:  NEXT
+ 171         3B 00 78 
+ 171         00 40 01 
+ 172              	    
+ 173              	    
+ 174              	DEFCODE "DROP",4,,DROP ; ( n -- )
+ 175 0000c6  2E 06 78 	    DPOP
+ 176 0000c8  B8 05 78 	    NEXT
+ 176         3B 00 78 
+ 176         00 40 01 
+ 177              	
+ 178              	DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
+ 179 0000ce  0C 00 78 	    mov T, W0
+ 180 0000d0  1E 06 78 	    mov [DSP], T
+ 181 0000d2  00 07 98 	    mov W0, [DSP+0]
+ 182 0000d4  B8 05 78 	    NEXT
+ 182         3B 00 78 
+ 182         00 40 01 
+ 183              	
+ 184              	DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
+ 185 0000da  0C 00 78 	    mov T, W0
+ 186 0000dc  1E 06 78 	    mov [DSP], T
+ 187 0000de  FE B8 97 	    mov [DSP-2], W1
+ 188 0000e0  01 0F 78 	    mov W1, [DSP]
+ 189 0000e2  70 BF 9F 	    mov W0, [DSP-2]
+ 190 0000e4  B8 05 78 	    NEXT
+ 190         3B 00 78 
+ 190         00 40 01 
+ 191              	    
+ 192              	DEFCODE "OVER",4,,OVER  ; ( n1 n2 -- n1 n2 n1 )
+ 193 0000ea  0C 2F 78 	    DPUSH
+ 194 0000ec  7E BE 97 	    mov [DSP-2],T
+ 195 0000ee  B8 05 78 	    NEXT
+ 195         3B 00 78 
+ 195         00 40 01 
+ 196              	    
+ 197              	DEFCODE "NIP",3,,NIP   ; ( n1 n2 -- n2 )
+ 198 0000f4  2E 00 B1 	    sub #2, DSP
+ 199 0000f6  B8 05 78 	    NEXT
+ 199         3B 00 78 
+ 199         00 40 01 
+ 200              	    
+ 201              	DEFCODE ">R",2,,TOR   ;  ( n -- )  R:( -- n)
+ 202 0000fc  8C 1F 78 	    RPUSH T
+ 203 0000fe  2E 06 78 	    DPOP
+ 204 000100  B8 05 78 	    NEXT
+ 204         3B 00 78 
+ 204         00 40 01 
+ 205              	    
+ 206              	DEFCODE "R>",2,,RFROM  ; ( -- n ) R( n -- )
+ 207 000106  0C 2F 78 	    DPUSH
+ 208 000108  4F 06 78 	    RPOP T
+ 209 00010a  B8 05 78 	    NEXT
+ 209         3B 00 78 
+ 209         00 40 01 
+ 210              	
+ 211              	DEFCODE "R@",2,,RFETCH ; ( -- n ) R ( -- )
+ 212 000110  0C 2F 78 	    DPUSH
+ 213 000112  7F BE 97 	    mov [RSP-2], T
+ 214 000114  B8 05 78 	    NEXT
+ 214         3B 00 78 
+ 214         00 40 01 
+ 215              	    
+ 216              	DEFCODE "SP@",3,,SPFETCH ; ( -- n )
+ 217 00011a  0C 2F 78 	    DPUSH
+ 218 00011c  0E 06 78 	    mov DSP, T
+ 219 00011e  B8 05 78 	    NEXT
+ 219         3B 00 78 
+ 219         00 40 01 
+ 220              	    
+ 221              	DEFCODE "SP!",3,,SPSTORE  ; ( n -- )
+ 222 000124  0C 07 78 	    mov T, DSP
+ 223 000126  2E 06 78 	    DPOP
+ 224 000128  B8 05 78 	    NEXT
+ 224         3B 00 78 
+ 224         00 40 01 
+ 225              	    
+ 226              	DEFCODE "RP@",3,,RPFETCH  ; ( -- n )
+ 227 00012e  0C 2F 78 	    DPUSH
+ 228 000130  0F 06 78 	    mov RSP, T
+ 229 000132  B8 05 78 	    NEXT
+ 229         3B 00 78 
+ 229         00 40 01 
+ 230              	    
+ 231              	DEFCODE "RP!",3,,RPSTORE  ; ( n -- )
+ 232 000138  8C 07 78 	    mov T, RSP
+ 233 00013a  2E 06 78 	    DPOP
+ 234 00013c  B8 05 78 	    NEXT
+ 234         3B 00 78 
+ 234         00 40 01 
+ 235              	    
+ 236              	DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 n3 -- n3 n1 n2 )
+ 237 000142  0C 00 78 	    mov T, W0
+ 238 000144  1E 06 78 	    mov [DSP], T
+ 239 000146  FE B8 97 	    mov [DSP-2], W1
+ 240 000148  70 BF 9F 	    mov W0, [DSP-2]
+ 241 00014a  01 0F 78 	    mov W1, [DSP]
+ 242 00014c  B8 05 78 	    NEXT
+ 242         3B 00 78 
+ 242         00 40 01 
+ 243              	
+ 244              	    
+ 245              	;;;;;;;
+ 246              	; MATH
+ 247              	;;;;;;;
+ 248              	DEFCODE "+",1,,PLUS   ;( n1 n2 -- n1+n2 )
+ 249 000152  1E 00 46 	    add T, [DSP], W0
+ 250 000154  2E 06 78 	    DPOP
+ 251 000156  00 06 78 	    mov W0, T
+ 252 000158  B8 05 78 	    NEXT
+ 252         3B 00 78 
+ 252         00 40 01 
+ 253              	    
+ 254              	DEFCODE "-",1,,MINUS   ; ( n1 n2 -- n1-n2 )
+ 255 00015e  0C 00 78 	    mov T, W0
+ 256 000160  2E 06 78 	    DPOP
+ 257 000162  00 06 56 	    sub T, W0, T
+ 258 000164  B8 05 78 	    NEXT
+ 258         3B 00 78 
+ 258         00 40 01 
+ 259              	    
+ 260              	DEFCODE "1+",2,,ONEPLUS ; ( n -- n ) n+1
+ 261 00016a  1C 00 B0 	    add #1, T
+ 262 00016c  B8 05 78 	    NEXT
+ 262         3B 00 78 
+ 262         00 40 01 
+ 263              	
+ 264              	DEFCODE "1-",2,,ONEMINUS  ; ( n -- n ) n-1
+ 265 000172  1C 00 B1 	    sub #1, T
+ 266 000174  B8 05 78 	    NEXT
+ 266         3B 00 78 
+ 266         00 40 01 
+ 267              	    
+ 268              	DEFCODE "2*",2,,TWOSTAR  ; ( n -- n ) 2*n
+ 269 00017a  0C 06 46 	    add T,T, T
+ 270 00017c  B8 05 78 	    NEXT
+ 270         3B 00 78 
+ 270         00 40 01 
+ 271              	    
+ 272              	DEFCODE "2/",2,,TWOSLASH ; ( n -- n ) n/2
+ 273 000182  0C 06 D1 	    lsr T,T
+ 274 000184  B8 05 78 	    NEXT
+ 274         3B 00 78 
+ 274         00 40 01 
+ 275              	    
+ 276              	DEFCODE "LSHIFT",6,,LSHIFT ; ( x1 -- x2 ) x2=x1<<1    
+ 277 00018a  0C 06 D0 	    sl T,T
+ 278 00018c  B8 05 78 	    NEXT
+ 278         3B 00 78 
+ 278         00 40 01 
+ 279              	    
+ 280              	DEFCODE "RSHIFT",6,,RSHIFT ; ( x1 -- x2 ) x2=x1>>1
+ 281 000192  0C 06 D1 	    lsr T,T
+ 282 000194  B8 05 78 	    NEXT
+ 282         3B 00 78 
+ 282         00 40 01 
+ 283              	    
+ 284              	    
+ 285              	    
+ 286              	DEFCODE "+!",2,,PLUSSTORE  ; ( n addr  -- ) [addr]=[addr]+n     
+ 287 00019a  2E 00 78 	    mov [DSP--], W0
+ 288 00019c  1C 0E 40 	    add W0, [T],[T]
+ 289 00019e  2E 06 78 	    DPOP
+ 290 0001a0  B8 05 78 	    NEXT
+ 290         3B 00 78 
+ 290         00 40 01 
+ 291              	    
+ 292              	DEFCODE "M+",2,,DADD  ; ( d n --  d ) simple + double
+ 293 0001a6  0C 00 78 	    mov T, W0
+ 294 0001a8  2E 06 78 	    DPOP
+ 295 0001aa  1E 0F 40 	    add W0, [DSP], [DSP]
+ 296 0001ac  0C 80 B0 	    addc #0, T
+ 297 0001ae  B8 05 78 	    NEXT
+ 297         3B 00 78 
+ 297         00 40 01 
+ 298              	 
+ 299              	; opérations logiques bit à bit    
+ 300              	DEFCODE "AND",3,,_AND  ; ( n1 n2 -- n)  ET bit à bit
+ 301 0001b4  1E 0F 66 	    and T,[DSP],[DSP]
+ 302 0001b6  2E 06 78 	    DPOP
+ 303 0001b8  B8 05 78 	    NEXT
+ 303         3B 00 78 
+ 303         00 40 01 
+ 304              	    
+ 305              	DEFCODE "OR",2,,_OR   ; ( n1 n2 -- n ) OU bit à bit
+ 306 0001be  1E 0F 76 	    ior T,[DSP],[DSP]
+ 307 0001c0  2E 06 78 	    DPOP
+ 308 0001c2  B8 05 78 	    NEXT
+ 308         3B 00 78 
+ 308         00 40 01 
+ 309              	    
+ 310              	DEFCODE "XOR",3,,_XOR ; ( n1 n2 -- n ) OU exclusif bit à bit
+ 311 0001c8  1E 0F 6E 	    xor T,[DSP],[DSP]
+ 312 0001ca  2E 06 78 	    DPOP
+ 313 0001cc  B8 05 78 	    NEXT
+ 313         3B 00 78 
+ 313         00 40 01 
+ 314              	    
+ 315              	    
+ 316              	DEFCODE "INVERT",6,,INVERT ; ( n -- n ) inversion des bits
+ 317 0001d2  0C 86 EA 	    com T, T
+ 318 0001d4  B8 05 78 	    NEXT
+ 318         3B 00 78 
+ 318         00 40 01 
+ 319              	    
+ 320              	DEFCODE "NEGATE",6,,NEGATE ; ( n - n ) complément à 2
+ 321 0001da  0C 06 EA 	    neg T, T
+ 322 0001dc  B8 05 78 	    NEXT
+ 322         3B 00 78 
+ 322         00 40 01 
+ 323              	
+ 324              	; comparaisons
+ 325              	
+ 326              	DEFCODE "0=",2,,ZEROEQ  ; ( n -- f )  f=  n==0
+ 327 0001e2  1C 00 B1 	    sub #1,T
+ 328 0001e4  0C 06 5E 	    subb T,T,T
+ 329 0001e6  B8 05 78 	    NEXT
+ 329         3B 00 78 
+ 329         00 40 01 
+ 330              	    
+ 331              	DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
+ 332 0001ec  00 80 EB 	    setm W0
+ 333 0001ee  0C 06 46 	    add T,T,T
+ 334 0001f0  0C 06 5E 	    subb T,T,T
+ 335 0001f2  0C 06 68 	    xor W0,T,T
+ 336 0001f4  B8 05 78 	    NEXT
+ 336         3B 00 78 
+ 336         00 40 01 
+ 337              	
+ 338              	DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
+ 339 0001fa  00 00 EB 	    clr W0
+ 340 0001fc  2E 60 E1 	    cp T, [DSP--]
+ 341 0001fe  00 00 3A 	    bra nz, 1f
+ 342 000200  00 80 EA 	    com W0,W0
+ 343              	 1: 
+ 344 000202  00 06 78 	    mov W0,T
+ 345 000204  B8 05 78 	    NEXT
+ 345         3B 00 78 
+ 345         00 40 01 
+ 346              	    
+ 347              	DEFCODE "<>",2,,NEQUAL ; ( n1 n2 -- f ) f = n1<>n2
+ 348 00020a  00 00 EB 	    clr W0
+ 349 00020c  2E 60 E1 	    cp T, [DSP--]
+ 350 00020e  00 00 32 	    bra z, 1f
+ 351 000210  00 80 EA 	    com W0,W0
+ 352              	1:  
+ 353 000212  00 06 78 	    mov W0, T
+ 354 000214  B8 05 78 	    NEXT
+ 354         3B 00 78 
+ 354         00 40 01 
+ 355              	    
+ 356              	 DEFCODE "<",1,,LESS  ; ( n1 n2 -- f) f= n1<n2
+ 357 00021a  00 00 EB 	    clr W0
+ 358 00021c  2E 60 E1 	    cp T,[DSP--]
+ 359 00021e  00 00 34 	    bra le, 1f
+ 360 000220  00 80 EA 	    com W0,W0
+ 361              	1:
+ 362 000222  00 06 78 	    mov W0, T
+ 363 000224  B8 05 78 	    NEXT
+ 363         3B 00 78 
+ 363         00 40 01 
+ 364              	    
+ 365              	DEFCODE ">",1,,GREATER  ; ( n1 n2 -- f ) f= n1>n2
+ 366 00022a  00 00 EB 	    clr W0
+ 367 00022c  2E 60 E1 	    cp T,[DSP--]
+ 368 00022e  00 00 3D 	    bra ge, 1f
+ 369 000230  00 80 EA 	    com W0,W0
+ 370              	1:
+ 371 000232  00 06 78 	    mov W0, T
+ 372 000234  B8 05 78 	    NEXT
+ 372         3B 00 78 
+ 372         00 40 01 
+ 373              	    
+ 374              	DEFCODE "U<",2,,ULESS  ; (u1 u2 -- f) f= u1<u2
+ 375 00023a  00 00 EB 	    clr W0
+ 376 00023c  2E 60 E1 	    cp T,[DSP--]
+ 377 00023e  00 00 36 	    bra leu, 1f
+ 378 000240  00 80 EA 	    com W0,W0
+ 379              	1:
+ 380 000242  00 06 78 	    mov W0, T
+ 381 000244  B8 05 78 	    NEXT
+ 381         3B 00 78 
+ 381         00 40 01 
+ 382              	    
+ 383              	DEFCODE "U>",2,,UGREATER ; ( u1 u2 -- f) f=u1>u2
+ 384 00024a  00 00 EB 	    clr W0
+ 385 00024c  2E 60 E1 	    cp T,[DSP--]
+ 386 00024e  00 00 31 	    bra geu, 1f
+ 387 000250  00 80 EA 	    com W0,W0
+ 388              	1:
+ 389 000252  00 06 78 	    mov W0,T
+ 390 000254  B8 05 78 	    NEXT
+ 390         3B 00 78 
+ 390         00 40 01 
+ 391              	    
+ 392              	    
+ 393              	    
+ 394              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 395              	;   TESTS
+ 396              	;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 397              	DEFWORD "TEST",4,,TEST   
+ 398 01dc 00 00 00 00 	.word  CLS,MSG,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,BRANCH, -22
  398      00 00 00 00 
- 398      00 00 FA FF 
+ 398      00 00 4D 01 
+ 398      00 00 00 00 
+ 398      00 00 00 00 
+ 398      4D 01 00 00 
+ 398      00 00 EA FF 
  399                 	
- 400 0210 00 00 07 4B 	DEFWORD "KBDTEST",7,,KBDTEST
- 400      42 44 54 45 
+ 400 01f8 00 00 07 53 	DEFWORD "SERTEST",7,,SERTEST
+ 400      45 52 54 45 
  400      53 54 00 00 
- 401 021c 00 00 00 00 	.word CLS,KEY,EMIT,BRANCH,-6    
+ 401 0204 00 00 00 00 	.word CLS,MSG,SGET,SEMIT,BRANCH,-6    
  401      00 00 00 00 
- 401      FA FF 
- 402                 	    
- 403 0226 00 00 05 48 	DEFWORD "HOME",5,,HOME
- 403      4F 4D 45 00 
- 403      00 00 
- 404 0230 00 00 00 00 	.word LIT,0,LIT,0,CURPOS,EXIT
+ 401      00 00 FA FF 
+ 402                 	
+ 403 0210 00 00 07 4B 	DEFWORD "KBDTEST",7,,KBDTEST
+ 403      42 44 54 45 
+ 403      53 54 00 00 
+ 404 021c 00 00 00 00 	.word CLS,KEY,EMIT,BRANCH,-6    
  404      00 00 00 00 
- 404      00 00 00 00 
+ 404      FA FF 
  405                 	    
- 406 023c 00 00 06 4F 	DEFWORD "OKOFF",6,,OKOFF
- 406      4B 4F 46 46 
+ 406 0226 00 00 05 48 	DEFWORD "HOME",5,,HOME
+ 406      4F 4D 45 00 
  406      00 00 
- 407 0246 00 00 00 00 	.word BL,BL,EXIT 
- 407      00 00 
+ 407 0230 00 00 00 00 	.word LIT,0,LIT,0,CURPOS,EXIT
+ 407      00 00 00 00 
+ 407      00 00 00 00 
  408                 	    
- 409 024c 00 00 02 4F 	DEFWORD "OK",2,,OK
- 409      4B 00 00 00 
- 410 0254 00 00 4F 00 	.word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
- 410      00 00 00 00 
- 410      4B 00 00 00 
+ 409 023c 00 00 06 4F 	DEFWORD "OKOFF",6,,OKOFF
+ 409      4B 4F 46 46 
+ 409      00 00 
+ 410 0246 00 00 00 00 	.word SPACE,SPACE,EXIT 
  410      00 00 
- 411                 	
- 412                 	.section .const psv
- 413                 	quick:
- 414 000f 54 68 65 20 	.asciz "The quick brown fox jump over the lazy dog.\r"
- 414      71 75 69 63 
- 414      6B 20 62 72 
- 414      6F 77 6E 20 
- 414      66 6F 78 20 
- 414      6A 75 6D 70 
- 414      20 6F 76 65 
- 414      72 20 74 68 
- 414      65 20 6C 61 
- 415                 	
- 416                 	DEFWORD "MSG",3,,MSG
- 417 026a 00 00 E8 03 	.word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
- 417      00 00 00 00 
- 417      00 00 00 00 
- 417      00 00 
+ 411                 	    
+ 412 024c 00 00 02 4F 	DEFWORD "OK",2,,OK
+ 412      4B 00 00 00 
+ 413 0254 00 00 4F 00 	.word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
+ 413      00 00 00 00 
+ 413      4B 00 00 00 
+ 413      00 00 
+ 414                 	
+ 415                 	.section .const psv
+ 416                 	quick:
+ 417 000f 54 68 65 20 	.asciz "The quick brown fox jump over the lazy dog.\r"
+ 417      71 75 69 63 
+ 417      6B 20 62 72 
+ 417      6F 77 6E 20 
+ 417      66 6F 78 20 
+ 417      6A 75 6D 70 
+ 417      20 6F 76 65 
+ 417      72 20 74 68 
+ 417      65 20 6C 61 
  418                 	
- 419 0278 00 00 05 5A 	DEFWORD "ZTYPE",5,,ZTYPE
- 419      54 59 50 45 
- 419      00 00 
- 420 0282 00 00 00 00 	.word DUP,CFETCH,DUP,QBRANCH,10,EMIT,ONEPLUS,BRANCH,-16
+ 419                 	DEFWORD "MSG",3,,MSG
+ 420 026a 00 00 E8 03 	.word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
  420      00 00 00 00 
- 420      0A 00 00 00 
  420      00 00 00 00 
- 420      F0 FF 
- 421 0294 00 00 00 00 	.word DROP,DROP, EXIT     
- 421      00 00 
- 422                 	
- 423 029a 00 00 07 53 	DEFWORD "STRTEST",7,,STRTEST
- 423      54 52 54 45 
- 423      53 54 00 00 
- 424 02a6 00 00 00 00 	.word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
- 424      00 00 00 00 
- 424      00 00 00 00 
- 424      00 00 00 00 
- 424      00 00 00 00 
- 424      00 00 2B 00 
- 424      00 00 00 00 
- 425 02c2 00 00 00 00 	.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,BRANCH, -26
- 425      00 00 00 00 
- 425      00 00 00 00 
- 425      00 00 00 00 
- 425      00 00 2B 00 
- 425      00 00 00 00 
- 425      00 00 E6 FF 
- 426                 	
- 427 02de 00 00 0A 45 	DEFWORD "EEPROMTEST",10,,EEPROMTEST
- 427      45 50 52 4F 
- 427      4D 54 45 53 
- 427      54 00 00 00 
- 428 02ee 00 00 00 00 	.word CLS,LIT, quick, ZTYPE, LIT,2000,MSEC, LIT, _video_buffer,LIT,100,ESTORE
- 428      00 00 00 00 
- 428      00 00 D0 07 
+ 420      00 00 
+ 421                 	
+ 422 0278 00 00 05 5A 	DEFWORD "ZTYPE",5,,ZTYPE
+ 422      54 59 50 45 
+ 422      00 00 
+ 423 0282 00 00 00 00 	.word DUP,CFETCH,DUP,QBRANCH,10,EMIT,ONEPLUS,BRANCH,-16
+ 423      00 00 00 00 
+ 423      0A 00 00 00 
+ 423      00 00 00 00 
+ 423      F0 FF 
+ 424 0294 00 00 00 00 	.word DROP,DROP, EXIT     
+ 424      00 00 
+ 425                 	
+ 426 029a 00 00 07 53 	DEFWORD "STRTEST",7,,STRTEST
+ 426      54 52 54 45 
+ 426      53 54 00 00 
+ 427 02a6 00 00 00 00 	.word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
+ 427      00 00 00 00 
+ 427      00 00 00 00 
+ 427      00 00 00 00 
+ 427      00 00 00 00 
+ 427      00 00 2B 00 
+ 427      00 00 00 00 
+ 428 02c2 00 00 00 00 	.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,BRANCH, -26
  428      00 00 00 00 
  428      00 00 00 00 
- 428      64 00 00 00 
- 429 0306 00 00 00 00 	.word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,BRANCH,-16
- 429      00 00 00 00 
- 429      00 00 64 00 
- 429      00 00 00 00 
- 429      F0 FF 
- 430                 	
- 431 0318 00 00 08 4C 	DEFWORD "LOOPTEST",8,,LOOPTEST
- 431      4F 4F 50 54 
- 431      45 53 54 00 
- 431      00 00 
- 432 0326 00 00 00 00 	.word CLS,LIT,'Z',LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
- 432      5A 00 00 00 
- 432      41 00 00 00 
+ 428      00 00 00 00 
+ 428      00 00 2B 00 
+ 428      00 00 00 00 
+ 428      00 00 E6 FF 
+ 429                 	
+ 430 02de 00 00 0A 45 	DEFWORD "EEPROMTEST",10,,EEPROMTEST
+ 430      45 50 52 4F 
+ 430      4D 54 45 53 
+ 430      54 00 00 00 
+ 431 02ee 00 00 00 00 	.word CLS,LIT, quick, ZTYPE, LIT,2000,MSEC, LIT, _video_buffer,LIT,100,ESTORE
+ 431      00 00 00 00 
+ 431      00 00 D0 07 
+ 431      00 00 00 00 
+ 431      00 00 00 00 
+ 431      64 00 00 00 
+ 432 0306 00 00 00 00 	.word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,BRANCH,-16
  432      00 00 00 00 
- 432      00 00 FA FF 
- 432      00 00 
+ 432      00 00 64 00 
+ 432      00 00 00 00 
+ 432      F0 FF 
  433                 	
- 434 033c 00 00 04 44 	DEFCODE "DOTR",4,,DOTR
- 434      4F 54 52 00 
+ 434 0318 00 00 08 4C 	DEFWORD "LOOPTEST",8,,LOOPTEST
+ 434      4F 4F 50 54 
+ 434      45 53 54 00 
  434      00 00 
- 435 00025a  02 00 20 	    mov #_video_buffer,W2
- 436 00025c  93 03 20 	    mov #'9',W3
- 437 00025e  1F 00 78 	    mov [RSP],W0
- 438 000260  00 80 FD 	    swap W0
- 439 000262  00 C0 FD 	    swap.b W0
- 440 000264  EF 00 60 	    and W0,#15,W1
- 441 000266  01 03 B0 	    add #'0',W1
- 442 000268  01 18 E1 	    cp W3,W1
- 443 00026a  00 00 31 	    bra geu, 1f
- 444 00026c  81 00 B0 	    add #8,W1
- 445              	1:    
- 446 00026e  01 59 78 	    mov.b W1,[W2++]
- 447 000270  00 C0 FD 	    swap.b W0
- 448 000272  F1 00 B2 	    and #15,W1
- 449 000274  01 03 B0 	    add #'0',W1
- 450 000276  01 18 E1 	    cp W3,W1
- 451 000278  00 00 31 	    bra geu, 1f
- 452 00027a  81 00 B0 	    add #8,W1
- 453              	1:    
- 454 00027c  01 59 78 	    mov.b W1,[W2++]
- 455 00027e  00 80 FD 	    swap W0
- 456 000280  00 C0 FD 	    swap.b W0
- 457 000282  F1 00 B2 	    and #15,W1
- 458 000284  01 03 B0 	    add #'0',W1
- 459 000286  01 18 E1 	    cp W3,W1
- 460 000288  00 00 31 	    bra geu, 1f
- 461 00028a  E8 80 40 	    add W1,#8,W1
- 462              	1:
- 463 00028c  01 59 78 	    mov.b W1,[W2++]
- 464 00028e  00 C0 FD 	    swap.b W0
- 465 000290  EF 00 60 	    and W0,#15,W1
- 466 000292  01 03 B0 	    add #'0',W1
- 467 000294  01 18 E1 	    cp W3,W1
- 468 000296  00 00 31 	    bra geu, 1f
- 469 000298  E8 80 40 	    add W1,#8,W1
- 470              	1:    
- 471 00029a  01 59 78 	    mov.b W1,[W2++]
- 472 00029c  B8 05 78 	    NEXT
- 472         3B 00 78 
- 472         00 40 01 
- 473              	    
- 474              	DEFWORD "CRTEST",6,,CRTEST
- 475 0352 00 00 00 00 	.word CLS,LIT,'A',DUP,EMIT,CR,ONEPLUS,DUP,LIT,'X',EQUAL,QBRANCH,-18,INFLOOP    
- 475      41 00 00 00 
- 475      00 00 00 00 
- 475      00 00 00 00 
- 475      00 00 58 00 
- 475      00 00 00 00 
- 475      EE FF 00 00 
- 476                 	    
- 477 036e 00 00 05 44 	DEFWORD "DELAY",5,,DELAY
- 477      45 4C 41 59 
- 477      00 00 
- 478 0378 00 00 F4 01 	.word  LIT, 500, MSEC, EXIT
- 478      00 00 00 00 
- 479                 	    
- 480                 	;DEFWORD "INFLOOP",7,,INFLOOP
- 481                 	;.word  BRANCH, -2
- 482                 	
- 483 0380 00 00 07 49 	DEFCODE "INFLOOP",7,,INFLOOP
- 483      4E 46 4C 4F 
- 483      4F 50 00 00 
- 484 0002a2  00 00 37 	    bra .
- 485              	    
- 486              	SYSDICT
- 487                 	.global ENTRY
- 488                 	ENTRY: 
- 489 038c 00 00       	.word LOOPTEST
- 490                 	.global sys_latest
- 491                 	sys_latest:
- 492 038e 00 00       	.word link
- 493                 	    
- 494                 	    
- 495                 	.end
+ 435 0326 00 00 00 00 	.word CLS,DELAY,LIT,'Z',LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
+ 435      00 00 5A 00 
+ 435      00 00 41 00 
+ 435      00 00 00 00 
+ 435      00 00 00 00 
+ 435      FA FF 00 00 
+ 436                 	
+ 437                 	    
+ 438 033e 00 00 06 43 	DEFWORD "CRTEST",6,,CRTEST
+ 438      52 54 45 53 
+ 438      54 00 00 00 
+ 439 034a 00 00 00 00 	.word CLS,LIT,'A',DUP,EMIT,CR,ONEPLUS,DUP,LIT,'X',EQUAL,QBRANCH,-18,INFLOOP    
+ 439      41 00 00 00 
+ 439      00 00 00 00 
+ 439      00 00 00 00 
+ 439      00 00 58 00 
+ 439      00 00 00 00 
+ 439      EE FF 00 00 
+ 440                 	    
+ 441 0366 00 00 05 44 	DEFWORD "DELAY",5,,DELAY
+ 441      45 4C 41 59 
+ 441      00 00 
+ 442 0370 00 00 F4 01 	.word  LIT, 500, MSEC, EXIT
+ 442      00 00 00 00 
+ 443                 	    
+ 444                 	;DEFWORD "INFLOOP",7,,INFLOOP
+ 445                 	;.word  BRANCH, -2
+ 446                 	
+ 447 0378 00 00 07 49 	DEFCODE "INFLOOP",7,,INFLOOP
+ 447      4E 46 4C 4F 
+ 447      4F 50 00 00 
+ 448 00025a  00 00 37 	    bra .
+ 449              	    
+ 450              	SYSDICT
+ 451                 	.global ENTRY
+ 452                 	ENTRY: 
+ 453 0384 00 00       	.word LOOPTEST
+ 454                 	.global sys_latest
+ 455                 	sys_latest:
+ 456 0386 00 00       	.word link
+ 457                 	    
+ 458                 	    
+ 459                 	.end
 DEFINED SYMBOLS
                             *ABS*:00000000 ./sound.inc
                             *ABS*:00000000 ./gen_macros.inc
@@ -5549,7 +5511,7 @@ DEFINED SYMBOLS
           ./core.inc:101    *ABS*:00000080 F_IMMED
           ./core.inc:102    *ABS*:00000020 F_HIDDEN
           ./core.inc:103    *ABS*:0000001f F_LENMASK
-              core.s:483    .sysdict:00000380 link
+              core.s:447    .sysdict:00000378 link
     ./gen_macros.inc:24     *ABS*:00000001 GEN_MACRO
          ./sound.inc:25     *ABS*:00000001 SOUND_INC
          ./sound.inc:29     *ABS*:00007771 DO1
@@ -5628,686 +5590,612 @@ DEFINED SYMBOLS
          ./sound.inc:102    *ABS*:000001c2 DO7d
          ./sound.inc:103    *ABS*:000001a8 RE7
          ./sound.inc:104    *ABS*:00000190 RE7d
-              core.s:39     _pstack:00000000 pstack
-              core.s:43     _rstack:00000000 rstack
-              core.s:35     .data:00000000 user
+              core.s:40     _pstack:00000000 pstack
+              core.s:44     _rstack:00000000 rstack
+              core.s:36     .data:00000000 user
                             *ABS*:00000002 __ext_attr__rstack
-              core.s:51     .const:00000000 version
-              core.s:56     .text:00000000 DOCOLON
-              core.s:61     .sysdict:00000000 name_COLD
-              core.s:61     .sysdict:00000008 COLD
-              core.s:61     .text:0000000a code_COLD
-              core.s:65     .sysdict:0000000a name_WARM
-              core.s:65     .sysdict:00000012 WARM
-              core.s:65     .text:0000000c code_WARM
-              core.s:488    .sysdict:0000038c ENTRY
-              core.s:71     .sysdict:00000014 name_DOCODE
-              core.s:71     .sysdict:0000001e DOCODE
-              core.s:71     .text:00000018 code_DOCODE
-              core.s:76     .sysdict:00000020 name_EXIT
-              core.s:76     .sysdict:00000028 EXIT
-              core.s:76     .text:0000001e code_EXIT
-              core.s:80     .sysdict:0000002a name_LIT
-              core.s:80     .sysdict:00000030 LIT
-              core.s:80     .text:00000026 code_LIT
-              core.s:85     .sysdict:00000032 name_CLIT
-              core.s:85     .sysdict:0000003a CLIT
-              core.s:85     .text:00000030 code_CLIT
-              core.s:91     .sysdict:0000003c name_CFETCH
-              core.s:91     .sysdict:00000042 CFETCH
-              core.s:91     .text:0000003c code_CFETCH
-              core.s:96     .sysdict:00000044 name_CSTORE
-              core.s:96     .sysdict:0000004a CSTORE
-              core.s:96     .text:00000046 code_CSTORE
-              core.s:104    .sysdict:0000004c name_BRANCH
-              core.s:104    .sysdict:00000056 BRANCH
-              core.s:104    .text:00000054 code_BRANCH
-              core.s:105    .text:00000054 XBRAN
-              core.s:110    .sysdict:00000058 name_QBRANCH
-              core.s:110    .sysdict:00000062 QBRANCH
-              core.s:110    .text:0000005c code_QBRANCH
-              core.s:118    .sysdict:00000064 name_DODO
-              core.s:118    .sysdict:0000006c DODO
-              core.s:118    .text:0000006a code_DODO
-              core.s:128    .sysdict:0000006e name_DOLOOP
-              core.s:128    .sysdict:00000078 DOLOOP
-              core.s:128    .text:00000078 code_DOLOOP
-              core.s:135    .text:00000088 L11
-              core.s:142    .sysdict:0000007a name_DOI
-              core.s:142    .sysdict:0000007e DOI
-              core.s:142    .text:00000094 code_DOI
-              core.s:147    .sysdict:00000080 name_DOJ
-              core.s:147    .sysdict:00000084 DOJ
-              core.s:147    .text:0000009e code_DOJ
-              core.s:152    .sysdict:00000086 name_UNLOOP
-              core.s:152    .sysdict:00000090 UNLOOP
-              core.s:152    .text:000000a8 code_UNLOOP
-              core.s:160    .sysdict:00000092 name_DUP
-              core.s:160    .sysdict:00000098 DUP
-              core.s:160    .text:000000b2 code_DUP
-              core.s:164    .sysdict:0000009a name_QDUP
-              core.s:164    .sysdict:000000a2 QDUP
-              core.s:164    .text:000000ba code_QDUP
-              core.s:168    .text:000000c0 L1
-              core.s:171    .sysdict:000000a4 name_DROP
-              core.s:171    .sysdict:000000ac DROP
-              core.s:171    .text:000000c6 code_DROP
-              core.s:175    .sysdict:000000ae name_SWAP
-              core.s:175    .sysdict:000000b6 SWAP
-              core.s:175    .text:000000ce code_SWAP
-              core.s:181    .sysdict:000000b8 name_ROT
-              core.s:181    .sysdict:000000be ROT
-              core.s:181    .text:000000da code_ROT
-              core.s:189    .sysdict:000000c0 name_OVER
-              core.s:189    .sysdict:000000c8 OVER
-              core.s:189    .text:000000ea code_OVER
-              core.s:194    .sysdict:000000ca name_NIP
-              core.s:194    .sysdict:000000d0 NIP
-              core.s:194    .text:000000f4 code_NIP
-              core.s:198    .sysdict:000000d2 name_TOR
-              core.s:198    .sysdict:000000d8 TOR
-              core.s:198    .text:000000fc code_TOR
-              core.s:203    .sysdict:000000da name_RFROM
-              core.s:203    .sysdict:000000e0 RFROM
-              core.s:203    .text:00000106 code_RFROM
-              core.s:208    .sysdict:000000e2 name_RFETCH
-              core.s:208    .sysdict:000000e8 RFETCH
-              core.s:208    .text:00000110 code_RFETCH
-              core.s:213    .sysdict:000000ea name_SPFETCH
-              core.s:213    .sysdict:000000f0 SPFETCH
-              core.s:213    .text:0000011a code_SPFETCH
-              core.s:218    .sysdict:000000f2 name_SPSTORE
-              core.s:218    .sysdict:000000f8 SPSTORE
-              core.s:218    .text:00000124 code_SPSTORE
-              core.s:223    .sysdict:000000fa name_RPFETCH
-              core.s:223    .sysdict:00000100 RPFETCH
-              core.s:223    .text:0000012e code_RPFETCH
-              core.s:228    .sysdict:00000102 name_RPSTORE
-              core.s:228    .sysdict:00000108 RPSTORE
-              core.s:228    .text:00000138 code_RPSTORE
-              core.s:233    .sysdict:0000010a name_TUCK
-              core.s:233    .sysdict:00000112 TUCK
-              core.s:233    .text:00000142 code_TUCK
-              core.s:245    .sysdict:00000114 name_PLUS
-              core.s:245    .sysdict:00000118 PLUS
-              core.s:245    .text:00000152 code_PLUS
-              core.s:251    .sysdict:0000011a name_MINUS
-              core.s:251    .sysdict:0000011e MINUS
-              core.s:251    .text:0000015e code_MINUS
-              core.s:257    .sysdict:00000120 name_ONEPLUS
-              core.s:257    .sysdict:00000126 ONEPLUS
-              core.s:257    .text:0000016a code_ONEPLUS
-              core.s:261    .sysdict:00000128 name_ONEMINUS
-              core.s:261    .sysdict:0000012e ONEMINUS
-              core.s:261    .text:00000172 code_ONEMINUS
-              core.s:265    .sysdict:00000130 name_TWOSTAR
-              core.s:265    .sysdict:00000136 TWOSTAR
-              core.s:265    .text:0000017a code_TWOSTAR
-              core.s:269    .sysdict:00000138 name_TWOSLASH
-              core.s:269    .sysdict:0000013e TWOSLASH
-              core.s:269    .text:00000182 code_TWOSLASH
-              core.s:273    .sysdict:00000140 name_LSHIFT
-              core.s:273    .sysdict:0000014a LSHIFT
-              core.s:273    .text:0000018a code_LSHIFT
-              core.s:277    .sysdict:0000014c name_RSHIFT
-              core.s:277    .sysdict:00000156 RSHIFT
-              core.s:277    .text:00000192 code_RSHIFT
-              core.s:283    .sysdict:00000158 name_PLUSSTORE
-              core.s:283    .sysdict:0000015e PLUSSTORE
-              core.s:283    .text:0000019a code_PLUSSTORE
-              core.s:289    .sysdict:00000160 name_DADD
-              core.s:289    .sysdict:00000166 DADD
-              core.s:289    .text:000001a6 code_DADD
-              core.s:297    .sysdict:00000168 name__AND
-              core.s:297    .sysdict:0000016e _AND
-              core.s:297    .text:000001b4 code__AND
-              core.s:302    .sysdict:00000170 name__OR
-              core.s:302    .sysdict:00000176 _OR
-              core.s:302    .text:000001be code__OR
-              core.s:307    .sysdict:00000178 name__XOR
-              core.s:307    .sysdict:0000017e _XOR
-              core.s:307    .text:000001c8 code__XOR
-              core.s:313    .sysdict:00000180 name_INVERT
-              core.s:313    .sysdict:0000018a INVERT
-              core.s:313    .text:000001d2 code_INVERT
-              core.s:317    .sysdict:0000018c name_NEGATE
-              core.s:317    .sysdict:00000196 NEGATE
-              core.s:317    .text:000001da code_NEGATE
-              core.s:323    .sysdict:00000198 name_ZEROEQ
-              core.s:323    .sysdict:0000019e ZEROEQ
-              core.s:323    .text:000001e2 code_ZEROEQ
-              core.s:328    .sysdict:000001a0 name_ZEROLT
-              core.s:328    .sysdict:000001a6 ZEROLT
-              core.s:328    .text:000001ec code_ZEROLT
-              core.s:335    .sysdict:000001a8 name_EQUAL
-              core.s:335    .sysdict:000001ac EQUAL
-              core.s:335    .text:000001fa code_EQUAL
-              core.s:340    .text:00000202 L12
-              core.s:344    .sysdict:000001ae name_NEQUAL
-              core.s:344    .sysdict:000001b4 NEQUAL
-              core.s:344    .text:0000020a code_NEQUAL
-              core.s:349    .text:00000212 L13
-              core.s:353    .sysdict:000001b6 name_LESS
-              core.s:353    .sysdict:000001ba LESS
-              core.s:353    .text:0000021a code_LESS
-              core.s:358    .text:00000222 L14
-              core.s:362    .sysdict:000001bc name_GREATER
-              core.s:362    .sysdict:000001c0 GREATER
-              core.s:362    .text:0000022a code_GREATER
-              core.s:367    .text:00000232 L15
-              core.s:371    .sysdict:000001c2 name_ULESS
-              core.s:371    .sysdict:000001c8 ULESS
-              core.s:371    .text:0000023a code_ULESS
-              core.s:376    .text:00000242 L16
-              core.s:380    .sysdict:000001ca name_UGREATER
-              core.s:380    .sysdict:000001d0 UGREATER
-              core.s:380    .text:0000024a code_UGREATER
-              core.s:385    .text:00000252 L17
-              core.s:394    .sysdict:000001d2 name_TEST
-              core.s:394    .sysdict:000001da TEST
-              core.s:416    .sysdict:00000268 MSG
-              core.s:403    .sysdict:0000022e HOME
-              core.s:409    .sysdict:00000252 OK
-              core.s:406    .sysdict:00000244 OKOFF
-              core.s:397    .sysdict:000001f8 name_SERTEST
-              core.s:397    .sysdict:00000202 SERTEST
-              core.s:400    .sysdict:00000210 name_KBDTEST
-              core.s:400    .sysdict:0000021a KBDTEST
-              core.s:403    .sysdict:00000226 name_HOME
-              core.s:406    .sysdict:0000023c name_OKOFF
-              core.s:409    .sysdict:0000024c name_OK
-              core.s:413    .const:0000000f quick
-              core.s:416    .sysdict:00000262 name_MSG
-              core.s:419    .sysdict:00000280 ZTYPE
-              core.s:419    .sysdict:00000278 name_ZTYPE
-              core.s:423    .sysdict:0000029a name_STRTEST
-              core.s:423    .sysdict:000002a4 STRTEST
-              core.s:477    .sysdict:00000376 DELAY
-              core.s:427    .sysdict:000002de name_EEPROMTEST
-              core.s:427    .sysdict:000002ec EEPROMTEST
-              core.s:431    .sysdict:00000318 name_LOOPTEST
-              core.s:431    .sysdict:00000324 LOOPTEST
-              core.s:483    .sysdict:0000038a INFLOOP
-              core.s:434    .sysdict:0000033c name_DOTR
-              core.s:434    .sysdict:00000344 DOTR
-              core.s:394    .text:0000025a code_DOTR
-              core.s:445    .text:0000026e L18
-              core.s:453    .text:0000027c L19
-              core.s:462    .text:0000028c L110
-              core.s:470    .text:0000029a L111
-              core.s:474    .sysdict:00000346 name_CRTEST
-              core.s:474    .sysdict:00000350 CRTEST
-              core.s:477    .sysdict:0000036e name_DELAY
-              core.s:483    .sysdict:00000380 name_INFLOOP
-              core.s:474    .text:000002a2 code_INFLOOP
-              core.s:484    .text:000002a2 L0
-              core.s:491    .sysdict:0000038e sys_latest
+              core.s:52     .const:00000000 version
+              core.s:57     .text:00000000 DOCOLON
+              core.s:62     .sysdict:00000000 name_COLD
+              core.s:62     .sysdict:00000008 COLD
+              core.s:62     .text:0000000a code_COLD
+              core.s:66     .sysdict:0000000a name_WARM
+              core.s:66     .sysdict:00000012 WARM
+              core.s:66     .text:0000000c code_WARM
+              core.s:67     .text:0000000c __MathError
+              core.s:452    .sysdict:00000384 ENTRY
+              core.s:74     .sysdict:00000014 name_DOCODE
+              core.s:74     .sysdict:0000001e DOCODE
+              core.s:74     .text:00000018 code_DOCODE
+              core.s:79     .sysdict:00000020 name_EXIT
+              core.s:79     .sysdict:00000028 EXIT
+              core.s:79     .text:0000001e code_EXIT
+              core.s:83     .sysdict:0000002a name_LIT
+              core.s:83     .sysdict:00000030 LIT
+              core.s:83     .text:00000026 code_LIT
+              core.s:88     .sysdict:00000032 name_CLIT
+              core.s:88     .sysdict:0000003a CLIT
+              core.s:88     .text:00000030 code_CLIT
+              core.s:94     .sysdict:0000003c name_CFETCH
+              core.s:94     .sysdict:00000042 CFETCH
+              core.s:94     .text:0000003c code_CFETCH
+              core.s:99     .sysdict:00000044 name_CSTORE
+              core.s:99     .sysdict:0000004a CSTORE
+              core.s:99     .text:00000046 code_CSTORE
+              core.s:107    .sysdict:0000004c name_BRANCH
+              core.s:107    .sysdict:00000056 BRANCH
+              core.s:107    .text:00000054 code_BRANCH
+              core.s:108    .text:00000054 XBRAN
+              core.s:113    .sysdict:00000058 name_QBRANCH
+              core.s:113    .sysdict:00000062 QBRANCH
+              core.s:113    .text:0000005c code_QBRANCH
+              core.s:121    .sysdict:00000064 name_DODO
+              core.s:121    .sysdict:0000006c DODO
+              core.s:121    .text:0000006a code_DODO
+              core.s:131    .sysdict:0000006e name_DOLOOP
+              core.s:131    .sysdict:00000078 DOLOOP
+              core.s:131    .text:00000078 code_DOLOOP
+              core.s:138    .text:00000088 L11
+              core.s:145    .sysdict:0000007a name_DOI
+              core.s:145    .sysdict:0000007e DOI
+              core.s:145    .text:00000094 code_DOI
+              core.s:150    .sysdict:00000080 name_DOJ
+              core.s:150    .sysdict:00000084 DOJ
+              core.s:150    .text:0000009e code_DOJ
+              core.s:155    .sysdict:00000086 name_UNLOOP
+              core.s:155    .sysdict:00000090 UNLOOP
+              core.s:155    .text:000000a8 code_UNLOOP
+              core.s:163    .sysdict:00000092 name_DUP
+              core.s:163    .sysdict:00000098 DUP
+              core.s:163    .text:000000b2 code_DUP
+              core.s:167    .sysdict:0000009a name_QDUP
+              core.s:167    .sysdict:000000a2 QDUP
+              core.s:167    .text:000000ba code_QDUP
+              core.s:171    .text:000000c0 L1
+              core.s:174    .sysdict:000000a4 name_DROP
+              core.s:174    .sysdict:000000ac DROP
+              core.s:174    .text:000000c6 code_DROP
+              core.s:178    .sysdict:000000ae name_SWAP
+              core.s:178    .sysdict:000000b6 SWAP
+              core.s:178    .text:000000ce code_SWAP
+              core.s:184    .sysdict:000000b8 name_ROT
+              core.s:184    .sysdict:000000be ROT
+              core.s:184    .text:000000da code_ROT
+              core.s:192    .sysdict:000000c0 name_OVER
+              core.s:192    .sysdict:000000c8 OVER
+              core.s:192    .text:000000ea code_OVER
+              core.s:197    .sysdict:000000ca name_NIP
+              core.s:197    .sysdict:000000d0 NIP
+              core.s:197    .text:000000f4 code_NIP
+              core.s:201    .sysdict:000000d2 name_TOR
+              core.s:201    .sysdict:000000d8 TOR
+              core.s:201    .text:000000fc code_TOR
+              core.s:206    .sysdict:000000da name_RFROM
+              core.s:206    .sysdict:000000e0 RFROM
+              core.s:206    .text:00000106 code_RFROM
+              core.s:211    .sysdict:000000e2 name_RFETCH
+              core.s:211    .sysdict:000000e8 RFETCH
+              core.s:211    .text:00000110 code_RFETCH
+              core.s:216    .sysdict:000000ea name_SPFETCH
+              core.s:216    .sysdict:000000f0 SPFETCH
+              core.s:216    .text:0000011a code_SPFETCH
+              core.s:221    .sysdict:000000f2 name_SPSTORE
+              core.s:221    .sysdict:000000f8 SPSTORE
+              core.s:221    .text:00000124 code_SPSTORE
+              core.s:226    .sysdict:000000fa name_RPFETCH
+              core.s:226    .sysdict:00000100 RPFETCH
+              core.s:226    .text:0000012e code_RPFETCH
+              core.s:231    .sysdict:00000102 name_RPSTORE
+              core.s:231    .sysdict:00000108 RPSTORE
+              core.s:231    .text:00000138 code_RPSTORE
+              core.s:236    .sysdict:0000010a name_TUCK
+              core.s:236    .sysdict:00000112 TUCK
+              core.s:236    .text:00000142 code_TUCK
+              core.s:248    .sysdict:00000114 name_PLUS
+              core.s:248    .sysdict:00000118 PLUS
+              core.s:248    .text:00000152 code_PLUS
+              core.s:254    .sysdict:0000011a name_MINUS
+              core.s:254    .sysdict:0000011e MINUS
+              core.s:254    .text:0000015e code_MINUS
+              core.s:260    .sysdict:00000120 name_ONEPLUS
+              core.s:260    .sysdict:00000126 ONEPLUS
+              core.s:260    .text:0000016a code_ONEPLUS
+              core.s:264    .sysdict:00000128 name_ONEMINUS
+              core.s:264    .sysdict:0000012e ONEMINUS
+              core.s:264    .text:00000172 code_ONEMINUS
+              core.s:268    .sysdict:00000130 name_TWOSTAR
+              core.s:268    .sysdict:00000136 TWOSTAR
+              core.s:268    .text:0000017a code_TWOSTAR
+              core.s:272    .sysdict:00000138 name_TWOSLASH
+              core.s:272    .sysdict:0000013e TWOSLASH
+              core.s:272    .text:00000182 code_TWOSLASH
+              core.s:276    .sysdict:00000140 name_LSHIFT
+              core.s:276    .sysdict:0000014a LSHIFT
+              core.s:276    .text:0000018a code_LSHIFT
+              core.s:280    .sysdict:0000014c name_RSHIFT
+              core.s:280    .sysdict:00000156 RSHIFT
+              core.s:280    .text:00000192 code_RSHIFT
+              core.s:286    .sysdict:00000158 name_PLUSSTORE
+              core.s:286    .sysdict:0000015e PLUSSTORE
+              core.s:286    .text:0000019a code_PLUSSTORE
+              core.s:292    .sysdict:00000160 name_DADD
+              core.s:292    .sysdict:00000166 DADD
+              core.s:292    .text:000001a6 code_DADD
+              core.s:300    .sysdict:00000168 name__AND
+              core.s:300    .sysdict:0000016e _AND
+              core.s:300    .text:000001b4 code__AND
+              core.s:305    .sysdict:00000170 name__OR
+              core.s:305    .sysdict:00000176 _OR
+              core.s:305    .text:000001be code__OR
+              core.s:310    .sysdict:00000178 name__XOR
+              core.s:310    .sysdict:0000017e _XOR
+              core.s:310    .text:000001c8 code__XOR
+              core.s:316    .sysdict:00000180 name_INVERT
+              core.s:316    .sysdict:0000018a INVERT
+              core.s:316    .text:000001d2 code_INVERT
+              core.s:320    .sysdict:0000018c name_NEGATE
+              core.s:320    .sysdict:00000196 NEGATE
+              core.s:320    .text:000001da code_NEGATE
+              core.s:326    .sysdict:00000198 name_ZEROEQ
+              core.s:326    .sysdict:0000019e ZEROEQ
+              core.s:326    .text:000001e2 code_ZEROEQ
+              core.s:331    .sysdict:000001a0 name_ZEROLT
+              core.s:331    .sysdict:000001a6 ZEROLT
+              core.s:331    .text:000001ec code_ZEROLT
+              core.s:338    .sysdict:000001a8 name_EQUAL
+              core.s:338    .sysdict:000001ac EQUAL
+              core.s:338    .text:000001fa code_EQUAL
+              core.s:343    .text:00000202 L12
+              core.s:347    .sysdict:000001ae name_NEQUAL
+              core.s:347    .sysdict:000001b4 NEQUAL
+              core.s:347    .text:0000020a code_NEQUAL
+              core.s:352    .text:00000212 L13
+              core.s:356    .sysdict:000001b6 name_LESS
+              core.s:356    .sysdict:000001ba LESS
+              core.s:356    .text:0000021a code_LESS
+              core.s:361    .text:00000222 L14
+              core.s:365    .sysdict:000001bc name_GREATER
+              core.s:365    .sysdict:000001c0 GREATER
+              core.s:365    .text:0000022a code_GREATER
+              core.s:370    .text:00000232 L15
+              core.s:374    .sysdict:000001c2 name_ULESS
+              core.s:374    .sysdict:000001c8 ULESS
+              core.s:374    .text:0000023a code_ULESS
+              core.s:379    .text:00000242 L16
+              core.s:383    .sysdict:000001ca name_UGREATER
+              core.s:383    .sysdict:000001d0 UGREATER
+              core.s:383    .text:0000024a code_UGREATER
+              core.s:388    .text:00000252 L17
+              core.s:397    .sysdict:000001d2 name_TEST
+              core.s:397    .sysdict:000001da TEST
+              core.s:419    .sysdict:00000268 MSG
+              core.s:406    .sysdict:0000022e HOME
+              core.s:412    .sysdict:00000252 OK
+              core.s:409    .sysdict:00000244 OKOFF
+              core.s:400    .sysdict:000001f8 name_SERTEST
+              core.s:400    .sysdict:00000202 SERTEST
+              core.s:403    .sysdict:00000210 name_KBDTEST
+              core.s:403    .sysdict:0000021a KBDTEST
+              core.s:406    .sysdict:00000226 name_HOME
+              core.s:409    .sysdict:0000023c name_OKOFF
+              core.s:412    .sysdict:0000024c name_OK
+              core.s:416    .const:0000000f quick
+              core.s:419    .sysdict:00000262 name_MSG
+              core.s:422    .sysdict:00000280 ZTYPE
+              core.s:422    .sysdict:00000278 name_ZTYPE
+              core.s:426    .sysdict:0000029a name_STRTEST
+              core.s:426    .sysdict:000002a4 STRTEST
+              core.s:441    .sysdict:0000036e DELAY
+              core.s:430    .sysdict:000002de name_EEPROMTEST
+              core.s:430    .sysdict:000002ec EEPROMTEST
+              core.s:434    .sysdict:00000318 name_LOOPTEST
+              core.s:434    .sysdict:00000324 LOOPTEST
+              core.s:447    .sysdict:00000382 INFLOOP
+              core.s:438    .sysdict:0000033e name_CRTEST
+              core.s:438    .sysdict:00000348 CRTEST
+              core.s:441    .sysdict:00000366 name_DELAY
+              core.s:447    .sysdict:00000378 name_INFLOOP
+              core.s:397    .text:0000025a code_INFLOOP
+              core.s:448    .text:0000025a L0
+              core.s:455    .sysdict:00000386 sys_latest
                       .debug_line:00000000 .L0
                       .debug_line:00000024 .L0
-              core.s:495    .debug_line:0000011c .L0
-              core.s:57     .text:00000000 .L0
-              core.s:58     .text:00000002 .L0
-              core.s:57     .text:00000000 .L0
-              core.s:59     .text:00000004 .L0
-              core.s:58     .text:00000002 .L0
-              core.s:62     .text:0000000a .L0
-              core.s:59     .text:00000004 .L0
-              core.s:66     .text:0000000c .L0
-              core.s:62     .text:0000000a .L0
-              core.s:67     .text:0000000e .L0
-              core.s:66     .text:0000000c .L0
-              core.s:68     .text:00000010 .L0
-              core.s:67     .text:0000000e .L0
-              core.s:69     .text:00000012 .L0
-              core.s:68     .text:00000010 .L0
-              core.s:72     .text:00000018 .L0
-              core.s:69     .text:00000012 .L0
-              core.s:73     .text:0000001a .L0
-              core.s:72     .text:00000018 .L0
-              core.s:74     .text:0000001c .L0
-              core.s:73     .text:0000001a .L0
-              core.s:77     .text:0000001e .L0
-              core.s:74     .text:0000001c .L0
-              core.s:78     .text:00000020 .L0
-              core.s:77     .text:0000001e .L0
-              core.s:81     .text:00000026 .L0
-              core.s:78     .text:00000020 .L0
-              core.s:82     .text:00000028 .L0
-              core.s:81     .text:00000026 .L0
-              core.s:83     .text:0000002a .L0
-              core.s:82     .text:00000028 .L0
-              core.s:86     .text:00000030 .L0
-              core.s:83     .text:0000002a .L0
-              core.s:87     .text:00000032 .L0
-              core.s:86     .text:00000030 .L0
-              core.s:88     .text:00000034 .L0
-              core.s:87     .text:00000032 .L0
-              core.s:89     .text:00000036 .L0
-              core.s:88     .text:00000034 .L0
-              core.s:92     .text:0000003c .L0
-              core.s:89     .text:00000036 .L0
-              core.s:93     .text:0000003e .L0
-              core.s:92     .text:0000003c .L0
-              core.s:94     .text:00000040 .L0
-              core.s:93     .text:0000003e .L0
-              core.s:97     .text:00000046 .L0
-              core.s:94     .text:00000040 .L0
-              core.s:98     .text:00000048 .L0
-              core.s:97     .text:00000046 .L0
-              core.s:99     .text:0000004a .L0
-              core.s:98     .text:00000048 .L0
-              core.s:100    .text:0000004c .L0
-              core.s:99     .text:0000004a .L0
-              core.s:101    .text:0000004e .L0
-              core.s:100    .text:0000004c .L0
-              core.s:106    .text:00000054 .L0
-              core.s:101    .text:0000004e .L0
-              core.s:107    .text:00000056 .L0
-              core.s:106    .text:00000054 .L0
-              core.s:111    .text:0000005c .L0
-              core.s:107    .text:00000056 .L0
-              core.s:112    .text:0000005e .L0
-              core.s:111    .text:0000005c .L0
-              core.s:113    .text:00000060 .L0
-              core.s:112    .text:0000005e .L0
-              core.s:114    .text:00000062 .L0
-              core.s:113    .text:00000060 .L0
-              core.s:115    .text:00000064 .L0
-              core.s:114    .text:00000062 .L0
-              core.s:119    .text:0000006a .L0
-              core.s:115    .text:00000064 .L0
-              core.s:120    .text:0000006c .L0
-              core.s:119    .text:0000006a .L0
-              core.s:121    .text:0000006e .L0
-              core.s:120    .text:0000006c .L0
-              core.s:124    .text:00000070 .L0
-              core.s:121    .text:0000006e .L0
-              core.s:125    .text:00000072 .L0
-              core.s:124    .text:00000070 .L0
-              core.s:129    .text:00000078 .L0
-              core.s:125    .text:00000072 .L0
-              core.s:130    .text:0000007a .L0
-              core.s:129    .text:00000078 .L0
-              core.s:131    .text:0000007c .L0
-              core.s:130    .text:0000007a .L0
-              core.s:132    .text:0000007e .L0
-              core.s:131    .text:0000007c .L0
-              core.s:133    .text:00000080 .L0
-              core.s:132    .text:0000007e .L0
-              core.s:134    .text:00000082 .L0
-              core.s:133    .text:00000080 .L0
-              core.s:136    .text:00000088 .L0
-              core.s:134    .text:00000082 .L0
-              core.s:137    .text:0000008a .L0
-              core.s:136    .text:00000088 .L0
-              core.s:138    .text:0000008c .L0
-              core.s:137    .text:0000008a .L0
-              core.s:139    .text:0000008e .L0
-              core.s:138    .text:0000008c .L0
-              core.s:143    .text:00000094 .L0
-              core.s:139    .text:0000008e .L0
-              core.s:144    .text:00000096 .L0
-              core.s:143    .text:00000094 .L0
-              core.s:145    .text:00000098 .L0
-              core.s:144    .text:00000096 .L0
-              core.s:148    .text:0000009e .L0
-              core.s:145    .text:00000098 .L0
-              core.s:149    .text:000000a0 .L0
-              core.s:148    .text:0000009e .L0
-              core.s:150    .text:000000a2 .L0
-              core.s:149    .text:000000a0 .L0
-              core.s:153    .text:000000a8 .L0
-              core.s:150    .text:000000a2 .L0
-              core.s:154    .text:000000aa .L0
-              core.s:153    .text:000000a8 .L0
-              core.s:155    .text:000000ac .L0
-              core.s:154    .text:000000aa .L0
-              core.s:161    .text:000000b2 .L0
-              core.s:155    .text:000000ac .L0
-              core.s:162    .text:000000b4 .L0
-              core.s:161    .text:000000b2 .L0
-              core.s:165    .text:000000ba .L0
-              core.s:162    .text:000000b4 .L0
-              core.s:166    .text:000000bc .L0
-              core.s:165    .text:000000ba .L0
-              core.s:167    .text:000000be .L0
-              core.s:166    .text:000000bc .L0
-              core.s:168    .text:000000c0 .L0
-              core.s:167    .text:000000be .L0
-              core.s:172    .text:000000c6 .L0
-              core.s:168    .text:000000c0 .L0
-              core.s:173    .text:000000c8 .L0
-              core.s:172    .text:000000c6 .L0
-              core.s:176    .text:000000ce .L0
-              core.s:173    .text:000000c8 .L0
-              core.s:177    .text:000000d0 .L0
-              core.s:176    .text:000000ce .L0
-              core.s:178    .text:000000d2 .L0
-              core.s:177    .text:000000d0 .L0
-              core.s:179    .text:000000d4 .L0
-              core.s:178    .text:000000d2 .L0
-              core.s:182    .text:000000da .L0
-              core.s:179    .text:000000d4 .L0
-              core.s:183    .text:000000dc .L0
-              core.s:182    .text:000000da .L0
-              core.s:184    .text:000000de .L0
-              core.s:183    .text:000000dc .L0
-              core.s:185    .text:000000e0 .L0
-              core.s:184    .text:000000de .L0
-              core.s:186    .text:000000e2 .L0
-              core.s:185    .text:000000e0 .L0
-              core.s:187    .text:000000e4 .L0
-              core.s:186    .text:000000e2 .L0
-              core.s:190    .text:000000ea .L0
-              core.s:187    .text:000000e4 .L0
-              core.s:191    .text:000000ec .L0
-              core.s:190    .text:000000ea .L0
-              core.s:192    .text:000000ee .L0
-              core.s:191    .text:000000ec .L0
-              core.s:195    .text:000000f4 .L0
-              core.s:192    .text:000000ee .L0
-              core.s:196    .text:000000f6 .L0
-              core.s:195    .text:000000f4 .L0
-              core.s:199    .text:000000fc .L0
-              core.s:196    .text:000000f6 .L0
-              core.s:200    .text:000000fe .L0
-              core.s:199    .text:000000fc .L0
-              core.s:201    .text:00000100 .L0
-              core.s:200    .text:000000fe .L0
-              core.s:204    .text:00000106 .L0
-              core.s:201    .text:00000100 .L0
-              core.s:205    .text:00000108 .L0
-              core.s:204    .text:00000106 .L0
-              core.s:206    .text:0000010a .L0
-              core.s:205    .text:00000108 .L0
-              core.s:209    .text:00000110 .L0
-              core.s:206    .text:0000010a .L0
-              core.s:210    .text:00000112 .L0
-              core.s:209    .text:00000110 .L0
-              core.s:211    .text:00000114 .L0
-              core.s:210    .text:00000112 .L0
-              core.s:214    .text:0000011a .L0
-              core.s:211    .text:00000114 .L0
-              core.s:215    .text:0000011c .L0
-              core.s:214    .text:0000011a .L0
-              core.s:216    .text:0000011e .L0
-              core.s:215    .text:0000011c .L0
-              core.s:219    .text:00000124 .L0
-              core.s:216    .text:0000011e .L0
-              core.s:220    .text:00000126 .L0
-              core.s:219    .text:00000124 .L0
-              core.s:221    .text:00000128 .L0
-              core.s:220    .text:00000126 .L0
-              core.s:224    .text:0000012e .L0
-              core.s:221    .text:00000128 .L0
-              core.s:225    .text:00000130 .L0
-              core.s:224    .text:0000012e .L0
-              core.s:226    .text:00000132 .L0
-              core.s:225    .text:00000130 .L0
-              core.s:229    .text:00000138 .L0
-              core.s:226    .text:00000132 .L0
-              core.s:230    .text:0000013a .L0
-              core.s:229    .text:00000138 .L0
-              core.s:231    .text:0000013c .L0
-              core.s:230    .text:0000013a .L0
-              core.s:234    .text:00000142 .L0
-              core.s:231    .text:0000013c .L0
-              core.s:235    .text:00000144 .L0
-              core.s:234    .text:00000142 .L0
-              core.s:236    .text:00000146 .L0
-              core.s:235    .text:00000144 .L0
-              core.s:237    .text:00000148 .L0
-              core.s:236    .text:00000146 .L0
-              core.s:238    .text:0000014a .L0
-              core.s:237    .text:00000148 .L0
-              core.s:239    .text:0000014c .L0
-              core.s:238    .text:0000014a .L0
-              core.s:246    .text:00000152 .L0
-              core.s:239    .text:0000014c .L0
-              core.s:247    .text:00000154 .L0
-              core.s:246    .text:00000152 .L0
-              core.s:248    .text:00000156 .L0
-              core.s:247    .text:00000154 .L0
-              core.s:249    .text:00000158 .L0
-              core.s:248    .text:00000156 .L0
-              core.s:252    .text:0000015e .L0
-              core.s:249    .text:00000158 .L0
-              core.s:253    .text:00000160 .L0
-              core.s:252    .text:0000015e .L0
-              core.s:254    .text:00000162 .L0
-              core.s:253    .text:00000160 .L0
-              core.s:255    .text:00000164 .L0
-              core.s:254    .text:00000162 .L0
-              core.s:258    .text:0000016a .L0
-              core.s:255    .text:00000164 .L0
-              core.s:259    .text:0000016c .L0
-              core.s:258    .text:0000016a .L0
-              core.s:262    .text:00000172 .L0
-              core.s:259    .text:0000016c .L0
-              core.s:263    .text:00000174 .L0
-              core.s:262    .text:00000172 .L0
-              core.s:266    .text:0000017a .L0
-              core.s:263    .text:00000174 .L0
-              core.s:267    .text:0000017c .L0
-              core.s:266    .text:0000017a .L0
-              core.s:270    .text:00000182 .L0
-              core.s:267    .text:0000017c .L0
-              core.s:271    .text:00000184 .L0
-              core.s:270    .text:00000182 .L0
-              core.s:274    .text:0000018a .L0
-              core.s:271    .text:00000184 .L0
-              core.s:275    .text:0000018c .L0
-              core.s:274    .text:0000018a .L0
-              core.s:278    .text:00000192 .L0
-              core.s:275    .text:0000018c .L0
-              core.s:279    .text:00000194 .L0
-              core.s:278    .text:00000192 .L0
-              core.s:284    .text:0000019a .L0
-              core.s:279    .text:00000194 .L0
-              core.s:285    .text:0000019c .L0
-              core.s:284    .text:0000019a .L0
-              core.s:286    .text:0000019e .L0
-              core.s:285    .text:0000019c .L0
-              core.s:287    .text:000001a0 .L0
-              core.s:286    .text:0000019e .L0
-              core.s:290    .text:000001a6 .L0
-              core.s:287    .text:000001a0 .L0
-              core.s:291    .text:000001a8 .L0
-              core.s:290    .text:000001a6 .L0
-              core.s:292    .text:000001aa .L0
-              core.s:291    .text:000001a8 .L0
-              core.s:293    .text:000001ac .L0
-              core.s:292    .text:000001aa .L0
-              core.s:294    .text:000001ae .L0
-              core.s:293    .text:000001ac .L0
-              core.s:298    .text:000001b4 .L0
-              core.s:294    .text:000001ae .L0
-              core.s:299    .text:000001b6 .L0
-              core.s:298    .text:000001b4 .L0
-              core.s:300    .text:000001b8 .L0
-              core.s:299    .text:000001b6 .L0
-              core.s:303    .text:000001be .L0
-              core.s:300    .text:000001b8 .L0
-              core.s:304    .text:000001c0 .L0
-              core.s:303    .text:000001be .L0
-              core.s:305    .text:000001c2 .L0
-              core.s:304    .text:000001c0 .L0
-              core.s:308    .text:000001c8 .L0
-              core.s:305    .text:000001c2 .L0
-              core.s:309    .text:000001ca .L0
-              core.s:308    .text:000001c8 .L0
-              core.s:310    .text:000001cc .L0
-              core.s:309    .text:000001ca .L0
-              core.s:314    .text:000001d2 .L0
-              core.s:310    .text:000001cc .L0
-              core.s:315    .text:000001d4 .L0
-              core.s:314    .text:000001d2 .L0
-              core.s:318    .text:000001da .L0
-              core.s:315    .text:000001d4 .L0
-              core.s:319    .text:000001dc .L0
-              core.s:318    .text:000001da .L0
-              core.s:324    .text:000001e2 .L0
-              core.s:319    .text:000001dc .L0
-              core.s:325    .text:000001e4 .L0
-              core.s:324    .text:000001e2 .L0
-              core.s:326    .text:000001e6 .L0
-              core.s:325    .text:000001e4 .L0
-              core.s:329    .text:000001ec .L0
-              core.s:326    .text:000001e6 .L0
-              core.s:330    .text:000001ee .L0
-              core.s:329    .text:000001ec .L0
-              core.s:331    .text:000001f0 .L0
-              core.s:330    .text:000001ee .L0
-              core.s:332    .text:000001f2 .L0
-              core.s:331    .text:000001f0 .L0
-              core.s:333    .text:000001f4 .L0
-              core.s:332    .text:000001f2 .L0
-              core.s:336    .text:000001fa .L0
-              core.s:333    .text:000001f4 .L0
-              core.s:337    .text:000001fc .L0
-              core.s:336    .text:000001fa .L0
-              core.s:338    .text:000001fe .L0
-              core.s:337    .text:000001fc .L0
-              core.s:339    .text:00000200 .L0
-              core.s:338    .text:000001fe .L0
-              core.s:341    .text:00000202 .L0
-              core.s:339    .text:00000200 .L0
-              core.s:342    .text:00000204 .L0
-              core.s:341    .text:00000202 .L0
-              core.s:345    .text:0000020a .L0
-              core.s:342    .text:00000204 .L0
-              core.s:346    .text:0000020c .L0
-              core.s:345    .text:0000020a .L0
-              core.s:347    .text:0000020e .L0
-              core.s:346    .text:0000020c .L0
-              core.s:348    .text:00000210 .L0
-              core.s:347    .text:0000020e .L0
-              core.s:350    .text:00000212 .L0
-              core.s:348    .text:00000210 .L0
-              core.s:351    .text:00000214 .L0
-              core.s:350    .text:00000212 .L0
-              core.s:354    .text:0000021a .L0
-              core.s:351    .text:00000214 .L0
-              core.s:355    .text:0000021c .L0
-              core.s:354    .text:0000021a .L0
-              core.s:356    .text:0000021e .L0
-              core.s:355    .text:0000021c .L0
-              core.s:357    .text:00000220 .L0
-              core.s:356    .text:0000021e .L0
-              core.s:359    .text:00000222 .L0
-              core.s:357    .text:00000220 .L0
-              core.s:360    .text:00000224 .L0
-              core.s:359    .text:00000222 .L0
-              core.s:363    .text:0000022a .L0
-              core.s:360    .text:00000224 .L0
-              core.s:364    .text:0000022c .L0
-              core.s:363    .text:0000022a .L0
-              core.s:365    .text:0000022e .L0
-              core.s:364    .text:0000022c .L0
-              core.s:366    .text:00000230 .L0
-              core.s:365    .text:0000022e .L0
-              core.s:368    .text:00000232 .L0
-              core.s:366    .text:00000230 .L0
-              core.s:369    .text:00000234 .L0
-              core.s:368    .text:00000232 .L0
-              core.s:372    .text:0000023a .L0
-              core.s:369    .text:00000234 .L0
-              core.s:373    .text:0000023c .L0
-              core.s:372    .text:0000023a .L0
-              core.s:374    .text:0000023e .L0
-              core.s:373    .text:0000023c .L0
-              core.s:375    .text:00000240 .L0
-              core.s:374    .text:0000023e .L0
-              core.s:377    .text:00000242 .L0
-              core.s:375    .text:00000240 .L0
-              core.s:378    .text:00000244 .L0
-              core.s:377    .text:00000242 .L0
-              core.s:381    .text:0000024a .L0
-              core.s:378    .text:00000244 .L0
-              core.s:382    .text:0000024c .L0
-              core.s:381    .text:0000024a .L0
-              core.s:383    .text:0000024e .L0
-              core.s:382    .text:0000024c .L0
-              core.s:384    .text:00000250 .L0
-              core.s:383    .text:0000024e .L0
-              core.s:386    .text:00000252 .L0
-              core.s:384    .text:00000250 .L0
-              core.s:387    .text:00000254 .L0
-              core.s:386    .text:00000252 .L0
-              core.s:435    .text:0000025a .L0
-              core.s:387    .text:00000254 .L0
-              core.s:436    .text:0000025c .L0
-              core.s:435    .text:0000025a .L0
-              core.s:437    .text:0000025e .L0
-              core.s:436    .text:0000025c .L0
-              core.s:438    .text:00000260 .L0
-              core.s:437    .text:0000025e .L0
-              core.s:439    .text:00000262 .L0
-              core.s:438    .text:00000260 .L0
-              core.s:440    .text:00000264 .L0
-              core.s:439    .text:00000262 .L0
-              core.s:441    .text:00000266 .L0
-              core.s:440    .text:00000264 .L0
-              core.s:442    .text:00000268 .L0
-              core.s:441    .text:00000266 .L0
-              core.s:443    .text:0000026a .L0
-              core.s:442    .text:00000268 .L0
-              core.s:444    .text:0000026c .L0
-              core.s:443    .text:0000026a .L0
-              core.s:446    .text:0000026e .L0
-              core.s:444    .text:0000026c .L0
-              core.s:447    .text:00000270 .L0
-              core.s:446    .text:0000026e .L0
-              core.s:448    .text:00000272 .L0
-              core.s:447    .text:00000270 .L0
-              core.s:449    .text:00000274 .L0
-              core.s:448    .text:00000272 .L0
-              core.s:450    .text:00000276 .L0
-              core.s:449    .text:00000274 .L0
-              core.s:451    .text:00000278 .L0
-              core.s:450    .text:00000276 .L0
-              core.s:452    .text:0000027a .L0
-              core.s:451    .text:00000278 .L0
-              core.s:454    .text:0000027c .L0
-              core.s:452    .text:0000027a .L0
-              core.s:455    .text:0000027e .L0
-              core.s:454    .text:0000027c .L0
-              core.s:456    .text:00000280 .L0
-              core.s:455    .text:0000027e .L0
-              core.s:457    .text:00000282 .L0
-              core.s:456    .text:00000280 .L0
-              core.s:458    .text:00000284 .L0
-              core.s:457    .text:00000282 .L0
-              core.s:459    .text:00000286 .L0
-              core.s:458    .text:00000284 .L0
-              core.s:460    .text:00000288 .L0
-              core.s:459    .text:00000286 .L0
-              core.s:461    .text:0000028a .L0
-              core.s:460    .text:00000288 .L0
-              core.s:463    .text:0000028c .L0
-              core.s:461    .text:0000028a .L0
-              core.s:464    .text:0000028e .L0
-              core.s:463    .text:0000028c .L0
-              core.s:465    .text:00000290 .L0
-              core.s:464    .text:0000028e .L0
-              core.s:466    .text:00000292 .L0
-              core.s:465    .text:00000290 .L0
-              core.s:467    .text:00000294 .L0
-              core.s:466    .text:00000292 .L0
-              core.s:468    .text:00000296 .L0
-              core.s:467    .text:00000294 .L0
-              core.s:469    .text:00000298 .L0
-              core.s:468    .text:00000296 .L0
-              core.s:471    .text:0000029a .L0
-              core.s:469    .text:00000298 .L0
-              core.s:472    .text:0000029c .L0
-              core.s:471    .text:0000029a .L0
-              core.s:484    .text:000002a2 .L0
-              core.s:472    .text:0000029c .L0
-              core.s:486    .text:000002a4 .L0
-              core.s:484    .text:000002a2 .L0
+              core.s:459    .debug_line:000000f8 .L0
+              core.s:58     .text:00000000 .L0
+              core.s:59     .text:00000002 .L0
+              core.s:58     .text:00000000 .L0
+              core.s:60     .text:00000004 .L0
+              core.s:59     .text:00000002 .L0
+              core.s:63     .text:0000000a .L0
+              core.s:60     .text:00000004 .L0
+              core.s:68     .text:0000000c .L0
+              core.s:63     .text:0000000a .L0
+              core.s:69     .text:0000000e .L0
+              core.s:68     .text:0000000c .L0
+              core.s:71     .text:00000010 .L0
+              core.s:69     .text:0000000e .L0
+              core.s:72     .text:00000012 .L0
+              core.s:71     .text:00000010 .L0
+              core.s:75     .text:00000018 .L0
+              core.s:72     .text:00000012 .L0
+              core.s:76     .text:0000001a .L0
+              core.s:75     .text:00000018 .L0
+              core.s:77     .text:0000001c .L0
+              core.s:76     .text:0000001a .L0
+              core.s:80     .text:0000001e .L0
+              core.s:77     .text:0000001c .L0
+              core.s:81     .text:00000020 .L0
+              core.s:80     .text:0000001e .L0
+              core.s:84     .text:00000026 .L0
+              core.s:81     .text:00000020 .L0
+              core.s:85     .text:00000028 .L0
+              core.s:84     .text:00000026 .L0
+              core.s:86     .text:0000002a .L0
+              core.s:85     .text:00000028 .L0
+              core.s:89     .text:00000030 .L0
+              core.s:86     .text:0000002a .L0
+              core.s:90     .text:00000032 .L0
+              core.s:89     .text:00000030 .L0
+              core.s:91     .text:00000034 .L0
+              core.s:90     .text:00000032 .L0
+              core.s:92     .text:00000036 .L0
+              core.s:91     .text:00000034 .L0
+              core.s:95     .text:0000003c .L0
+              core.s:92     .text:00000036 .L0
+              core.s:96     .text:0000003e .L0
+              core.s:95     .text:0000003c .L0
+              core.s:97     .text:00000040 .L0
+              core.s:96     .text:0000003e .L0
+              core.s:100    .text:00000046 .L0
+              core.s:97     .text:00000040 .L0
+              core.s:101    .text:00000048 .L0
+              core.s:100    .text:00000046 .L0
+              core.s:102    .text:0000004a .L0
+              core.s:101    .text:00000048 .L0
+              core.s:103    .text:0000004c .L0
+              core.s:102    .text:0000004a .L0
+              core.s:104    .text:0000004e .L0
+              core.s:103    .text:0000004c .L0
+              core.s:109    .text:00000054 .L0
+              core.s:104    .text:0000004e .L0
+              core.s:110    .text:00000056 .L0
+              core.s:109    .text:00000054 .L0
+              core.s:114    .text:0000005c .L0
+              core.s:110    .text:00000056 .L0
+              core.s:115    .text:0000005e .L0
+              core.s:114    .text:0000005c .L0
+              core.s:116    .text:00000060 .L0
+              core.s:115    .text:0000005e .L0
+              core.s:117    .text:00000062 .L0
+              core.s:116    .text:00000060 .L0
+              core.s:118    .text:00000064 .L0
+              core.s:117    .text:00000062 .L0
+              core.s:122    .text:0000006a .L0
+              core.s:118    .text:00000064 .L0
+              core.s:123    .text:0000006c .L0
+              core.s:122    .text:0000006a .L0
+              core.s:124    .text:0000006e .L0
+              core.s:123    .text:0000006c .L0
+              core.s:127    .text:00000070 .L0
+              core.s:124    .text:0000006e .L0
+              core.s:128    .text:00000072 .L0
+              core.s:127    .text:00000070 .L0
+              core.s:132    .text:00000078 .L0
+              core.s:128    .text:00000072 .L0
+              core.s:133    .text:0000007a .L0
+              core.s:132    .text:00000078 .L0
+              core.s:134    .text:0000007c .L0
+              core.s:133    .text:0000007a .L0
+              core.s:135    .text:0000007e .L0
+              core.s:134    .text:0000007c .L0
+              core.s:136    .text:00000080 .L0
+              core.s:135    .text:0000007e .L0
+              core.s:137    .text:00000082 .L0
+              core.s:136    .text:00000080 .L0
+              core.s:139    .text:00000088 .L0
+              core.s:137    .text:00000082 .L0
+              core.s:140    .text:0000008a .L0
+              core.s:139    .text:00000088 .L0
+              core.s:141    .text:0000008c .L0
+              core.s:140    .text:0000008a .L0
+              core.s:142    .text:0000008e .L0
+              core.s:141    .text:0000008c .L0
+              core.s:146    .text:00000094 .L0
+              core.s:142    .text:0000008e .L0
+              core.s:147    .text:00000096 .L0
+              core.s:146    .text:00000094 .L0
+              core.s:148    .text:00000098 .L0
+              core.s:147    .text:00000096 .L0
+              core.s:151    .text:0000009e .L0
+              core.s:148    .text:00000098 .L0
+              core.s:152    .text:000000a0 .L0
+              core.s:151    .text:0000009e .L0
+              core.s:153    .text:000000a2 .L0
+              core.s:152    .text:000000a0 .L0
+              core.s:156    .text:000000a8 .L0
+              core.s:153    .text:000000a2 .L0
+              core.s:157    .text:000000aa .L0
+              core.s:156    .text:000000a8 .L0
+              core.s:158    .text:000000ac .L0
+              core.s:157    .text:000000aa .L0
+              core.s:164    .text:000000b2 .L0
+              core.s:158    .text:000000ac .L0
+              core.s:165    .text:000000b4 .L0
+              core.s:164    .text:000000b2 .L0
+              core.s:168    .text:000000ba .L0
+              core.s:165    .text:000000b4 .L0
+              core.s:169    .text:000000bc .L0
+              core.s:168    .text:000000ba .L0
+              core.s:170    .text:000000be .L0
+              core.s:169    .text:000000bc .L0
+              core.s:171    .text:000000c0 .L0
+              core.s:170    .text:000000be .L0
+              core.s:175    .text:000000c6 .L0
+              core.s:171    .text:000000c0 .L0
+              core.s:176    .text:000000c8 .L0
+              core.s:175    .text:000000c6 .L0
+              core.s:179    .text:000000ce .L0
+              core.s:176    .text:000000c8 .L0
+              core.s:180    .text:000000d0 .L0
+              core.s:179    .text:000000ce .L0
+              core.s:181    .text:000000d2 .L0
+              core.s:180    .text:000000d0 .L0
+              core.s:182    .text:000000d4 .L0
+              core.s:181    .text:000000d2 .L0
+              core.s:185    .text:000000da .L0
+              core.s:182    .text:000000d4 .L0
+              core.s:186    .text:000000dc .L0
+              core.s:185    .text:000000da .L0
+              core.s:187    .text:000000de .L0
+              core.s:186    .text:000000dc .L0
+              core.s:188    .text:000000e0 .L0
+              core.s:187    .text:000000de .L0
+              core.s:189    .text:000000e2 .L0
+              core.s:188    .text:000000e0 .L0
+              core.s:190    .text:000000e4 .L0
+              core.s:189    .text:000000e2 .L0
+              core.s:193    .text:000000ea .L0
+              core.s:190    .text:000000e4 .L0
+              core.s:194    .text:000000ec .L0
+              core.s:193    .text:000000ea .L0
+              core.s:195    .text:000000ee .L0
+              core.s:194    .text:000000ec .L0
+              core.s:198    .text:000000f4 .L0
+              core.s:195    .text:000000ee .L0
+              core.s:199    .text:000000f6 .L0
+              core.s:198    .text:000000f4 .L0
+              core.s:202    .text:000000fc .L0
+              core.s:199    .text:000000f6 .L0
+              core.s:203    .text:000000fe .L0
+              core.s:202    .text:000000fc .L0
+              core.s:204    .text:00000100 .L0
+              core.s:203    .text:000000fe .L0
+              core.s:207    .text:00000106 .L0
+              core.s:204    .text:00000100 .L0
+              core.s:208    .text:00000108 .L0
+              core.s:207    .text:00000106 .L0
+              core.s:209    .text:0000010a .L0
+              core.s:208    .text:00000108 .L0
+              core.s:212    .text:00000110 .L0
+              core.s:209    .text:0000010a .L0
+              core.s:213    .text:00000112 .L0
+              core.s:212    .text:00000110 .L0
+              core.s:214    .text:00000114 .L0
+              core.s:213    .text:00000112 .L0
+              core.s:217    .text:0000011a .L0
+              core.s:214    .text:00000114 .L0
+              core.s:218    .text:0000011c .L0
+              core.s:217    .text:0000011a .L0
+              core.s:219    .text:0000011e .L0
+              core.s:218    .text:0000011c .L0
+              core.s:222    .text:00000124 .L0
+              core.s:219    .text:0000011e .L0
+              core.s:223    .text:00000126 .L0
+              core.s:222    .text:00000124 .L0
+              core.s:224    .text:00000128 .L0
+              core.s:223    .text:00000126 .L0
+              core.s:227    .text:0000012e .L0
+              core.s:224    .text:00000128 .L0
+              core.s:228    .text:00000130 .L0
+              core.s:227    .text:0000012e .L0
+              core.s:229    .text:00000132 .L0
+              core.s:228    .text:00000130 .L0
+              core.s:232    .text:00000138 .L0
+              core.s:229    .text:00000132 .L0
+              core.s:233    .text:0000013a .L0
+              core.s:232    .text:00000138 .L0
+              core.s:234    .text:0000013c .L0
+              core.s:233    .text:0000013a .L0
+              core.s:237    .text:00000142 .L0
+              core.s:234    .text:0000013c .L0
+              core.s:238    .text:00000144 .L0
+              core.s:237    .text:00000142 .L0
+              core.s:239    .text:00000146 .L0
+              core.s:238    .text:00000144 .L0
+              core.s:240    .text:00000148 .L0
+              core.s:239    .text:00000146 .L0
+              core.s:241    .text:0000014a .L0
+              core.s:240    .text:00000148 .L0
+              core.s:242    .text:0000014c .L0
+              core.s:241    .text:0000014a .L0
+              core.s:249    .text:00000152 .L0
+              core.s:242    .text:0000014c .L0
+              core.s:250    .text:00000154 .L0
+              core.s:249    .text:00000152 .L0
+              core.s:251    .text:00000156 .L0
+              core.s:250    .text:00000154 .L0
+              core.s:252    .text:00000158 .L0
+              core.s:251    .text:00000156 .L0
+              core.s:255    .text:0000015e .L0
+              core.s:252    .text:00000158 .L0
+              core.s:256    .text:00000160 .L0
+              core.s:255    .text:0000015e .L0
+              core.s:257    .text:00000162 .L0
+              core.s:256    .text:00000160 .L0
+              core.s:258    .text:00000164 .L0
+              core.s:257    .text:00000162 .L0
+              core.s:261    .text:0000016a .L0
+              core.s:258    .text:00000164 .L0
+              core.s:262    .text:0000016c .L0
+              core.s:261    .text:0000016a .L0
+              core.s:265    .text:00000172 .L0
+              core.s:262    .text:0000016c .L0
+              core.s:266    .text:00000174 .L0
+              core.s:265    .text:00000172 .L0
+              core.s:269    .text:0000017a .L0
+              core.s:266    .text:00000174 .L0
+              core.s:270    .text:0000017c .L0
+              core.s:269    .text:0000017a .L0
+              core.s:273    .text:00000182 .L0
+              core.s:270    .text:0000017c .L0
+              core.s:274    .text:00000184 .L0
+              core.s:273    .text:00000182 .L0
+              core.s:277    .text:0000018a .L0
+              core.s:274    .text:00000184 .L0
+              core.s:278    .text:0000018c .L0
+              core.s:277    .text:0000018a .L0
+              core.s:281    .text:00000192 .L0
+              core.s:278    .text:0000018c .L0
+              core.s:282    .text:00000194 .L0
+              core.s:281    .text:00000192 .L0
+              core.s:287    .text:0000019a .L0
+              core.s:282    .text:00000194 .L0
+              core.s:288    .text:0000019c .L0
+              core.s:287    .text:0000019a .L0
+              core.s:289    .text:0000019e .L0
+              core.s:288    .text:0000019c .L0
+              core.s:290    .text:000001a0 .L0
+              core.s:289    .text:0000019e .L0
+              core.s:293    .text:000001a6 .L0
+              core.s:290    .text:000001a0 .L0
+              core.s:294    .text:000001a8 .L0
+              core.s:293    .text:000001a6 .L0
+              core.s:295    .text:000001aa .L0
+              core.s:294    .text:000001a8 .L0
+              core.s:296    .text:000001ac .L0
+              core.s:295    .text:000001aa .L0
+              core.s:297    .text:000001ae .L0
+              core.s:296    .text:000001ac .L0
+              core.s:301    .text:000001b4 .L0
+              core.s:297    .text:000001ae .L0
+              core.s:302    .text:000001b6 .L0
+              core.s:301    .text:000001b4 .L0
+              core.s:303    .text:000001b8 .L0
+              core.s:302    .text:000001b6 .L0
+              core.s:306    .text:000001be .L0
+              core.s:303    .text:000001b8 .L0
+              core.s:307    .text:000001c0 .L0
+              core.s:306    .text:000001be .L0
+              core.s:308    .text:000001c2 .L0
+              core.s:307    .text:000001c0 .L0
+              core.s:311    .text:000001c8 .L0
+              core.s:308    .text:000001c2 .L0
+              core.s:312    .text:000001ca .L0
+              core.s:311    .text:000001c8 .L0
+              core.s:313    .text:000001cc .L0
+              core.s:312    .text:000001ca .L0
+              core.s:317    .text:000001d2 .L0
+              core.s:313    .text:000001cc .L0
+              core.s:318    .text:000001d4 .L0
+              core.s:317    .text:000001d2 .L0
+              core.s:321    .text:000001da .L0
+              core.s:318    .text:000001d4 .L0
+              core.s:322    .text:000001dc .L0
+              core.s:321    .text:000001da .L0
+              core.s:327    .text:000001e2 .L0
+              core.s:322    .text:000001dc .L0
+              core.s:328    .text:000001e4 .L0
+              core.s:327    .text:000001e2 .L0
+              core.s:329    .text:000001e6 .L0
+              core.s:328    .text:000001e4 .L0
+              core.s:332    .text:000001ec .L0
+              core.s:329    .text:000001e6 .L0
+              core.s:333    .text:000001ee .L0
+              core.s:332    .text:000001ec .L0
+              core.s:334    .text:000001f0 .L0
+              core.s:333    .text:000001ee .L0
+              core.s:335    .text:000001f2 .L0
+              core.s:334    .text:000001f0 .L0
+              core.s:336    .text:000001f4 .L0
+              core.s:335    .text:000001f2 .L0
+              core.s:339    .text:000001fa .L0
+              core.s:336    .text:000001f4 .L0
+              core.s:340    .text:000001fc .L0
+              core.s:339    .text:000001fa .L0
+              core.s:341    .text:000001fe .L0
+              core.s:340    .text:000001fc .L0
+              core.s:342    .text:00000200 .L0
+              core.s:341    .text:000001fe .L0
+              core.s:344    .text:00000202 .L0
+              core.s:342    .text:00000200 .L0
+              core.s:345    .text:00000204 .L0
+              core.s:344    .text:00000202 .L0
+              core.s:348    .text:0000020a .L0
+              core.s:345    .text:00000204 .L0
+              core.s:349    .text:0000020c .L0
+              core.s:348    .text:0000020a .L0
+              core.s:350    .text:0000020e .L0
+              core.s:349    .text:0000020c .L0
+              core.s:351    .text:00000210 .L0
+              core.s:350    .text:0000020e .L0
+              core.s:353    .text:00000212 .L0
+              core.s:351    .text:00000210 .L0
+              core.s:354    .text:00000214 .L0
+              core.s:353    .text:00000212 .L0
+              core.s:357    .text:0000021a .L0
+              core.s:354    .text:00000214 .L0
+              core.s:358    .text:0000021c .L0
+              core.s:357    .text:0000021a .L0
+              core.s:359    .text:0000021e .L0
+              core.s:358    .text:0000021c .L0
+              core.s:360    .text:00000220 .L0
+              core.s:359    .text:0000021e .L0
+              core.s:362    .text:00000222 .L0
+              core.s:360    .text:00000220 .L0
+              core.s:363    .text:00000224 .L0
+              core.s:362    .text:00000222 .L0
+              core.s:366    .text:0000022a .L0
+              core.s:363    .text:00000224 .L0
+              core.s:367    .text:0000022c .L0
+              core.s:366    .text:0000022a .L0
+              core.s:368    .text:0000022e .L0
+              core.s:367    .text:0000022c .L0
+              core.s:369    .text:00000230 .L0
+              core.s:368    .text:0000022e .L0
+              core.s:371    .text:00000232 .L0
+              core.s:369    .text:00000230 .L0
+              core.s:372    .text:00000234 .L0
+              core.s:371    .text:00000232 .L0
+              core.s:375    .text:0000023a .L0
+              core.s:372    .text:00000234 .L0
+              core.s:376    .text:0000023c .L0
+              core.s:375    .text:0000023a .L0
+              core.s:377    .text:0000023e .L0
+              core.s:376    .text:0000023c .L0
+              core.s:378    .text:00000240 .L0
+              core.s:377    .text:0000023e .L0
+              core.s:380    .text:00000242 .L0
+              core.s:378    .text:00000240 .L0
+              core.s:381    .text:00000244 .L0
+              core.s:380    .text:00000242 .L0
+              core.s:384    .text:0000024a .L0
+              core.s:381    .text:00000244 .L0
+              core.s:385    .text:0000024c .L0
+              core.s:384    .text:0000024a .L0
+              core.s:386    .text:0000024e .L0
+              core.s:385    .text:0000024c .L0
+              core.s:387    .text:00000250 .L0
+              core.s:386    .text:0000024e .L0
+              core.s:389    .text:00000252 .L0
+              core.s:387    .text:00000250 .L0
+              core.s:390    .text:00000254 .L0
+              core.s:389    .text:00000252 .L0
+              core.s:448    .text:0000025a .L0
+              core.s:390    .text:00000254 .L0
+              core.s:450    .text:0000025c .L0
+              core.s:448    .text:0000025a .L0
                             .text:00000000 .L0
-              core.s:486    .text:000002a4 .L0
+              core.s:450    .text:0000025c .L0
                       .debug_info:00000000 .L0
                       .debug_info:00000083 .L0
 
@@ -6319,7 +6207,7 @@ SEMIT
 KEY
 EMIT
 CURPOS
-BL
+SPACE
 _video_buffer
 RSTORE
 RLOAD

@@ -22,7 +22,8 @@
 ;REF: http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt
 ;   http://www.bradrodriguez.com/papers/
 ;   msp430 camelForth source code: http://www.camelforth.com/download.php?view.25
-
+;   ANS FORTH 94: http://www.greenarraychips.com/home/documents/dpans94.pdf
+    
     
 .include "hardware.inc"
 .include "core.inc"
@@ -58,26 +59,28 @@ DOCOLON: ; entre dans un mot de haut niveau (mot défini par ':')
     mov WP,IP
     NEXT
 
-DEFCODE "COLD",4,,COLD ; ( -- )
+DEFCODE "COLD",4,,COLD ; ( -- )  démarrage à froid
     reset
     
 
-DEFCODE "WARM",4,,WARM   ; ( -- )
+DEFCODE "WARM",4,,WARM   ; ( -- )  démarrage à chaud
+__MathError:
     mov #pstack, DSP
     mov #rstack, RSP
+    ; à faire: doit-remettre à zéro input buffer
     mov #psvoffset(ENTRY), IP
     NEXT
     
-DEFCODE "EXECUTE",7,,DOCODE
+DEFCODE "EXECUTE",7,,DOCODE ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
     mov T, WP
     DPOP
     goto WP
     
-DEFCODE "EXIT",4,,EXIT
+DEFCODE "EXIT",4,,EXIT  ; ( -- ) (R: nest-sys -- ) 6.1.1380  sortie mot haut-niveau.
     RPOP IP
     NEXT
 
-DEFCODE "LIT",5,,LIT  ; ( -- n )
+DEFCODE "LIT",5,,LIT  ; ( -- x ) empile une valeur  
     DPUSH
     mov [IP++], T
     NEXT
@@ -146,7 +149,7 @@ DEFCODE "I",1,,DOI  ; ( -- n )
 
 DEFCODE "J",1,,DOJ  ; ( -- n )
     DPUSH
-    mov [RSP-2],T
+    mov [RSP-4],T
     NEXT
     
 DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) jette les arguments d'une boucle
@@ -196,18 +199,18 @@ DEFCODE "NIP",3,,NIP   ; ( n1 n2 -- n2 )
     NEXT
     
 DEFCODE ">R",2,,TOR   ;  ( n -- )  R:( -- n)
-    push T
+    RPUSH T
     DPOP
     NEXT
     
 DEFCODE "R>",2,,RFROM  ; ( -- n ) R( n -- )
     DPUSH
-    pop T
+    RPOP T
     NEXT
 
 DEFCODE "R@",2,,RFETCH ; ( -- n ) R ( -- )
     DPUSH
-    mov [RSP], T
+    mov [RSP-2], T
     NEXT
     
 DEFCODE "SP@",3,,SPFETCH ; ( -- n )
@@ -404,7 +407,7 @@ DEFWORD "HOME",5,,HOME
 .word LIT,0,LIT,0,CURPOS,EXIT
     
 DEFWORD "OKOFF",6,,OKOFF
-.word BL,BL,EXIT 
+.word SPACE,SPACE,EXIT 
     
 DEFWORD "OK",2,,OK
 .word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
@@ -429,47 +432,8 @@ DEFWORD "EEPROMTEST",10,,EEPROMTEST
 .word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,BRANCH,-16
 
 DEFWORD "LOOPTEST",8,,LOOPTEST
-.word CLS,LIT,'Z',LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
+.word CLS,DELAY,LIT,'Z',LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
 
-DEFCODE "DOTR",4,,DOTR
-    mov #_video_buffer,W2
-    mov #'9',W3
-    mov [RSP],W0
-    swap W0
-    swap.b W0
-    and W0,#15,W1
-    add #'0',W1
-    cp W3,W1
-    bra geu, 1f
-    add #8,W1
-1:    
-    mov.b W1,[W2++]
-    swap.b W0
-    and #15,W1
-    add #'0',W1
-    cp W3,W1
-    bra geu, 1f
-    add #8,W1
-1:    
-    mov.b W1,[W2++]
-    swap W0
-    swap.b W0
-    and #15,W1
-    add #'0',W1
-    cp W3,W1
-    bra geu, 1f
-    add W1,#8,W1
-1:
-    mov.b W1,[W2++]
-    swap.b W0
-    and W0,#15,W1
-    add #'0',W1
-    cp W3,W1
-    bra geu, 1f
-    add W1,#8,W1
-1:    
-    mov.b W1,[W2++]
-    NEXT
     
 DEFWORD "CRTEST",6,,CRTEST
 .word CLS,LIT,'A',DUP,EMIT,CR,ONEPLUS,DUP,LIT,'X',EQUAL,QBRANCH,-18,INFLOOP    

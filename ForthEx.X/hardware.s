@@ -33,7 +33,12 @@ systicks: ; compteur de millisecondes
 .space 2
 seed: ; PRNG 32 bits    
 .space 4
- 
+.global inpb
+inpb: .space 80
+.global pad
+pad: .space 84
+    
+    
 INT    
 .global __DefaultInterrupt
 __DefaultInterrupt:

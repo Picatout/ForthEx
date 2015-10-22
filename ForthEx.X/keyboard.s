@@ -36,11 +36,11 @@
 kbd_queue:
 .space KBD_QUEUE_SIZE    
 kbd_head:
-.word 0
+.space 2
 kbd_tail:
-.word 0
+.space 2
 key_state:    
-.byte 0
+.space 2
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; interruption TIMER1
@@ -74,7 +74,7 @@ __T1Interrupt:
     mov #ps2_queue, W1
     add W0, W1, W1
     btss [W1], #10
-    bra nc, 9f ; rejet: stop bit doit-être 1
+    bra 9f ; rejet: stop bit doit-être 1
     mov [W1], W0
     lsr W0,W0
     bra c, 9f ; rejet: start bit doit-être zéro
@@ -87,9 +87,42 @@ __T1Interrupt:
 2:    
     dec W2,W2
     bra nn, 1b
-    ; paritée impaire: W3 doit-être impaire.
+    ; paritée impaire: W1 doit-être impaire.
     btss W1,#0
     bra 9f ; rejet: mauvaise parité
+    and #255,W0
+    ; vérifie code relâchement
+    mov #SC_KREL, W1
+    cp  W0,W1
+    bra neq, 3f
+    bset key_state, #F_KREL
+    bra 9f
+3:  ; vérifie code étendu
+    mov #SC_XKEY, W1
+    cp W0,W1
+    bra neq, 4f
+    bset key_state, #F_XKEY
+    bra 9f
+4:  
+    ; vérification CTRL
+    mov #L_CTRL,W1
+    cp W1, W0
+    bra neq, 5f
+    bclr key_state, #F_CTRL
+    btss key_state, #F_KREL
+    bset key_state, #F_CTRL
+    bclr key_state, #F_KREL
+    bclr key_state, #F_XKEY
+5:
+    mov #SC_C, W1
+    cp W1,W0
+    bra neq, 8f
+    btss key_state, #F_CTRL
+    bra 8f
+    clr W2
+    repeat #17
+    div.s W0,W2 ; génère une exception __MathError
+8:    
     ; tranfert code dans file
     ; kbd_queue
     mov #kbd_queue, W1
@@ -111,7 +144,14 @@ isr_exit:
     retfie
     
 .text
-
+;ctrl_c_reset:
+;    clr kbd_head
+;    clr kbd_tail
+;    clr ps2_head
+;    clr ps2_tail
+;    clr key_state
+;    goto code_WARM
+    
 ;;;;;;;;;;;;;;;;;;;;;;;
 ; retourne le code clavier
 ; dans W0 sinon retourne 0
@@ -179,24 +219,6 @@ kbd_get:
     call get_code
     cp0 W0
     bra eq, kbd_no_key   
-    ;code clavier touche étendue?
-    mov #SC_XKEY, W1
-    cp W1,W0
-    bra neq, 1f
-    bset key_state, #F_XKEY
-    call get_code
-    cp0 W0
-    bra eq, kbd_no_key
-1:
-    ;code clavier relâchement touche?
-    mov #SC_KREL, W1
-    cp W0,W1
-    bra neq, 2f
-    bset key_state, #F_KREL
-    call get_code
-    cp0 W0
-    bra eq, kbd_no_key
-2:
     mov W0,W1
     btss key_state, #F_KREL
     bra 3f
