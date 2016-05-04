@@ -100,25 +100,25 @@ store_init:
     ior STR_LAT
     com W0,W0
     and STR_TRIS
-    ;sélection des PPS
-    ; signal MISO
-    mov #~(0x1f<<STR_SDI_PPSbit), W0
-    and STR_RPINR
-    mov #(STR_MISO<<STR_SDI_PPSbit), W0
-    ior STR_RPINR
-    ; signal STR_CLK
-    mov #~(0x1f<<STR_CLK_RPORbit), W0
-    and STR_CLK_RPOR
-    mov #(STR_CLK_FN<<STR_CLK_RPORbit),W0
-    ior STR_CLK_RPOR
-    ; signal STR_MOSI
-    mov #~(0x1f<<STR_SDO_RPORbit), W0
-    and STR_SDO_RPOR
-    mov #(STR_SDO_FN<<STR_SDO_RPORbit),W0
-    ior STR_SDO_RPOR
-    bclr STR_SPISTAT, #SPIEN
+;    ;sélection des PPS
+;    ; signal MISO
+;    mov #~(0x1f<<STR_SDI_PPSbit), W0
+;    and STR_RPINR
+;    mov #(STR_MISO<<STR_SDI_PPSbit), W0
+;    ior STR_RPINR
+;    ; signal STR_CLK
+;    mov #~(0x1f<<STR_CLK_RPORbit), W0
+;    and STR_CLK_RPOR
+;    mov #(STR_CLK_FN<<STR_CLK_RPORbit),W0
+;    ior STR_CLK_RPOR
+;    ; signal STR_MOSI
+;    mov #~(0x1f<<STR_SDO_RPORbit), W0
+;    and STR_SDO_RPOR
+;    mov #(STR_SDO_FN<<STR_SDO_RPORbit),W0
+;    ior STR_SDO_RPOR
+;    bclr STR_SPISTAT, #SPIEN
     ; configuration SPI
-    mov #(1<<MSTEN)|(6<<SPRE0)|(3<<PPRE0)|(1<<CKE), W0 ; clock 8Mhz
+    mov #(1<<MSTEN)|(1<<SPRE0)|(3<<PPRE0)|(1<<CKE), W0 ; SCLK=FCY/7
     mov W0, STR_SPICON1
 ;    bset STR_SPICON2, #SPIBEN ; enhanced mode
     bset STR_SPISTAT, #SPIEN

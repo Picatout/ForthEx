@@ -36,11 +36,11 @@
 user: ; variables utilisateur
 .space 20
     
-.section _pstack, bss, address(PSV_BASE-RSTK_SIZE-DSTK_SIZE)    
+.section _pstack, bss, address(EDS_BASE-RSTK_SIZE-DSTK_SIZE)    
 pstack:
 .space DSTK_SIZE
 
-.section _rstack,stack, address(PSV_BASE-RSTK_SIZE)
+.section _rstack,stack, address(EDS_BASE-RSTK_SIZE)
 rstack:
 .space RSTK_SIZE
     
@@ -423,16 +423,19 @@ DEFWORD "ZTYPE",5,,ZTYPE
 .word DUP,CFETCH,DUP,QBRANCH,10,EMIT,ONEPLUS,BRANCH,-16
 .word DROP,DROP, EXIT     
 
+DEFWORD "QUICKTEST",9,,QUICKTEST
+.word CLS,LIT,quick,ZTYPE,BRANCH,-2
+    
 DEFWORD "STRTEST",7,,STRTEST
 .word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
 .word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,BRANCH, -26
 
 DEFWORD "EEPROMTEST",10,,EEPROMTEST
-.word CLS,LIT, quick, ZTYPE, LIT,2000,MSEC, LIT, _video_buffer,LIT,100,ESTORE
-.word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,BRANCH,-16
+.word CLS,LIT, quick, ZTYPE, LIT,500,MSEC, LIT, _video_buffer,LIT,43,ESTORE
+.word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,BRANCH,-32
 
 DEFWORD "LOOPTEST",8,,LOOPTEST
-.word CLS,DELAY,LIT,'Z',LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
+.word CLS,DELAY,LIT,'Z'+1,LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
 
     
 DEFWORD "CRTEST",6,,CRTEST
@@ -450,7 +453,7 @@ DEFCODE "INFLOOP",7,,INFLOOP
 SYSDICT
 .global ENTRY
 ENTRY: 
-.word LOOPTEST
+.word EEPROMTEST
 .global sys_latest
 sys_latest:
 .word link

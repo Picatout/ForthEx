@@ -23,14 +23,14 @@
 .equ NTSC_CONST, 1
     
 .equ HFREQ, 15748 ; fréquence horizontale pour information seulement
-.equ HLINE, 1015 ; PR2= période ligne horizontale
-.equ HSYNC, 74  ; OC1R=47e-6*FCY-1 sync pulse horizontal
-.equ HALFLINE, 507 ; période demi-ligne horizontale (VSYNC)
+.equ HLINE, (FCY/HFREQ-1) ; PR2= période ligne horizontale
+.equ HSYNC, (47*FCY_MHZ/10-1)  ; OC1R=47e-6*FCY-1 sync pulse horizontal
+.equ HALFLINE, (HLINE/2) ; période demi-ligne horizontale (VSYNC)
 .equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
-.equ TOPLINE, 44  ; première ligne visible
+.equ TOPLINE, 50  ; première ligne visible
 .equ ELPFRM,  271  ; nombre de lignes par frame pair
 .equ OLPFRM,  272  ; nombre de lignes par frame impair
-.equ VIDEO_DLY, 50 ; délais déclenche interruption video=HSYNC+VIDEO_DLY
+.equ VIDEO_DLY, (2*HSYNC+250) ; délais déclenche interruption video=HSYNC+VIDEO_DLY
 
 .endif
 

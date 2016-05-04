@@ -42,8 +42,9 @@ sound_init:
     mov #(AUDIO_FN<<AUDIO_PPSbit),W0
     ior AUDIO_RPOR
     ; configuration output compare
-    mov #((1<<OCTSEL)|(5<<OCM0)), W0
-    mov W0, AUDIO_OCCON
+    clr AUDIO_OCCON2
+    mov #((1<<OCTSEL0)|(5<<OCM0)), W0
+    mov W0, AUDIO_OCCON1
     mov #(1<<TCKPS0),W0  ; Fct=Fcy/8
     mov W0, AUDIO_TMRCON
     return

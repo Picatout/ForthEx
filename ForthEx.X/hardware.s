@@ -19,12 +19,14 @@
 ; hardware setup
     
 .include "hardware.inc"
-.if VIDEO_STD==NTSC
+    
+.if (VIDEO_STD==NTSC)
 .include "ntsc_const.inc"    
 .else
 .include "pal_const.inc"
 .endif
-
+    
+.include "video.inc"
 .include "core.inc"
     
 .data 
@@ -49,6 +51,8 @@ __DefaultInterrupt:
 .global __reset    
 __reset: 
     ; mise à zéro de la RAM
+    movpag #1, DSWPAG
+    movpag #1, DSRPAG
     mov #RAM_BASE, W0
     mov #(RAM_SIZE/2-1), W1
     repeat W1
@@ -60,33 +64,26 @@ __reset:
     ; conserve adresse de la pile
     mov RSP, [UP+RBASE]
     call hardware_init
-    mov #(PSV_BASE), W0
+    mov #(EDS_BASE), W0
     mov W0, SPLIM
     mov #pstack, DSP
     mov DSP, [UP+PBASE]
     mov #10, W0
     mov W0, [UP+BASE]
-    mov #psvoffset(sys_latest), W0
+    movpag #edspage(sys_latest), DSRPAG
+    mov #edsoffset(ENTRY), IP
     mov W0, [UP+LATEST]
-    mov #psvoffset(ENTRY), IP
     NEXT
     
 .text
 .global hardware_init
 hardware_init:
-    bclr CORCON, #PSV
-    clr W0
-    mov W0, PSVPAG
-    bset CORCON, #PSV ; espace programme visible en RAM
     clr CLKDIV
-    bset OSCCON, #NOSC0
+    mov #PLLDIV, W0
+    mov W0, PLLFBD
     bset OSCCON, #CLKLOCK ; verrouillage clock
     bclr INTCON1, #NSTDIS ; interruption multi-niveaux
-    setm TRISA      ; port A tout en entrée
-    setm TRISB      ; port B tout en entrée
-    setm CNPU1       ;activation pullup
-    setm CNPU2
-    setm AD1PCFG    ; désactivation entrées analogiques
+    clr ANSELA    ; désactivation entrées analogiques
     call tvout_init
     call ps2_init
     call serial_init
@@ -175,30 +172,16 @@ DEFCODE "RAND",4,,RAND   ; ( -- n)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 ;initialisation variable seed
-; utilisation de l'ADC
-; on ne garde que le bit 
-; le plus faible de chaque
-; lecture.
+; seed=systicks/3
+; seed+2=systicks%3    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 DEFCODE "SRAND",5,,SRAND  ; ( -- )
-    ; initialisation du convertisseur
-    bset AD1CON3, #SAMC0
-    mov #15, W0
-    mov W0, AD1CHS
-    mov W0, W1
-    clr W2
-0:
-    bset AD1CON1, #SAMP
-    btsc AD1CON1, #DONE
-    bra .-2
-    mov ADC1BUF0, W0
-    rrc W0,W0
-    rlc W2,W2
-    dec W1,W1
-    bra nz, 0b
-    mov W2, seed
-    
+    mov systicks,W0
+    mov #3,W2
+    div.u W0,W2
+    mov W0, seed
+    mov W1, seed+2
     NEXT
-.end
+
 
 

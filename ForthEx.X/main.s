@@ -34,10 +34,10 @@
 .global _main
     
 _main:
-    call hardware_init
+  
 ; test vidéo
-    call cls
-    set_psv quick, W1
+;    call cls
+    set_eds_table quick, W1
     mov #_video_buffer,W2
     clr W0
 1:

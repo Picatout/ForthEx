@@ -41,6 +41,9 @@ ps2_tail:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .global ps2_init
 ps2_init:
+    ; sortie en mode open drain
+    mov #(1<<15|1<<14),W0
+    ior KBD_ODC
     ; PPS sélection broche pour kbd_clk
     ; interruption externe
     mov #~(0x1f<<KBD_PPSbit), W0
@@ -58,7 +61,9 @@ ps2_init:
     ; initialisation TIMER1
     ; mise à jour systicks
     ; et traitement file clavier
-    mov #15999, W0
+    mov #(1<<TCKPS0),W0
+    mov WREG,T1CON
+    mov #(FCY_MHZ*1000/8-1), W0
     mov W0, PR1
     mov #~(7<<T1IP0), W0
     and IPC0

@@ -20,16 +20,17 @@
 ; constante pour génération signal vidéo standard PAL
 ; REF: http://martin.hinner.info/vga/pal.html
 .ifndef PAL_CONST
+
 .equ PAL_CONST, 1
     
 .equ HFREQ, 15625 ; fréquence horizontale pour information seulement
-.equ HLINE, 1023 ; PR2= période ligne horizontale
-.equ HSYNC, 74  ; OC1R=47e-6*FCY-1 sync pulse horizontal
-.equ HALFLINE, 511 ; période demi-ligne horizontale (VSYNC)
+.equ HLINE, (FCY/HFREQ-1) ; PR2= période ligne horizontale
+.equ HSYNC, (47*FCY_MHZ/10-1)  ; OC1R=47e-6*FCY-1 sync pulse horizontal
+.equ HALFLINE, (HLINE/2) ; période demi-ligne horizontale (VSYNC)
 .equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
-.equ TOPLINE, 64  ; première ligne visible
+.equ TOPLINE, 70  ; première ligne visible
 .equ ELPFRM,  321  ; nombre de lignes par frame pair
 .equ OLPFRM,  322   ; nombre de lignes par frame impair
-.equ VIDEO_DLY, 66 ; délais déclenche interruption video=HSYNC+VIDEO_DLY
-
-.endif    
+.equ VIDEO_DLY, (2*HSYNC+300) ; délais déclenche interruption video=HSYNC+VIDEO_DLY
+    
+.endif

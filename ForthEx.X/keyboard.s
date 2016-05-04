@@ -215,7 +215,7 @@ search_table:
 ; Les rela?hements de touches sont ignorés sauf pour <CTRL>,<ALT>,<SHIFT>     
 .global kbd_get
 kbd_get:
-    push PSVPAG
+    push DSRPAG
     call get_code
     cp0 W0
     bra eq, kbd_no_key   
@@ -229,14 +229,14 @@ kbd_get:
     btss key_state, #F_XKEY
     bra try_shifted
     ; recherche table 'extended'
-    set_psv extended, W2
+    set_eds_table extended, W2
     call search_table
     cp0 W0
     bra eq, try_xmod_key
     ; scancode trouvé dans la table 'extended'
     bra kbd_goodkey
 try_xmod_key:
-    set_psv xmod, W2
+    set_eds_table xmod, W2
     call search_table
     cp0 W0
     bra eq, kbd_ignore_it
@@ -244,12 +244,12 @@ try_xmod_key:
 try_shifted:  ; recherche table 'shifted'
     btss key_state, #F_SHIFT
     bra try_ascii
-    set_psv shifted, W2
+    set_eds_table shifted, W2
     call search_table
     cp0 W0
     bra nz, kbd_goodkey
 try_ascii:  ; recherche table 'ascii'
-    set_psv ascii, W2
+    set_eds_table ascii, W2
     call search_table
     cp0 W0
     bra eq, try_mod_key
@@ -267,7 +267,7 @@ try_ascii:  ; recherche table 'ascii'
     btg W0, #5
     bra kbd_goodkey
 try_mod_key:
-    set_psv mod, W2
+    set_eds_table mod, W2
     call search_table
     cp0 W0
     bra eq, kbd_ignore_it
@@ -307,7 +307,7 @@ kbd_goodkey:  ; sortie touche acceptée
     bclr key_state, #F_KREL
     bclr key_state, #F_XKEY
 kbd_no_key: ; sortie file vide
-    pop PSVPAG
+    pop DSRPAG
     return
 
 ;;;;;;;;;;;;;;;;;;;;;;

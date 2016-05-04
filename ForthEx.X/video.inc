@@ -25,7 +25,7 @@
 .equ CHAR_HEIGHT, (8)
 .equ FONT_SIZE, (128)
 ; caractères pa ligne    
-.equ CPL, (50)
+.equ CPL, (64)
 ; ligne par écran    
 .equ LPS, (24)  
 ;résolution d'image

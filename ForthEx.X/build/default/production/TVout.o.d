@@ -6,7 +6,6 @@ build/default/production/TVout.o:  \
  ./ntsc_const.inc  \
 ./gen_macros.inc  \
 ./video.inc  \
- /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24FJ64GA002.inc  \
- /opt/microchip/xc16/v1.23/bin/bin/../../support/PIC24F/inc/p24Fxxxx.inc  \
+ /opt/microchip/xc16/v1.26/bin/bin/../../support/PIC24E/inc/p24EP512GP202.inc  \
  ./hardware.inc  \
 TVout.S  \

@@ -23,10 +23,12 @@
 .ifndef GEN_MACCRO
 .equ GEN_MACRO, 1
 
-.macro set_psv table, reg
-    mov #psvpage(\table), \reg
-    mov \reg, PSVPAG
-    mov #psvoffset(\table), \reg
+; initialisation table en flash
+; pour lecture
+.macro set_eds_table table, reg
+    mov #edspage(\table), \reg
+    mov \reg, DSRPAG
+    mov #edsoffset(\table), \reg
 .endm
 
 .endif

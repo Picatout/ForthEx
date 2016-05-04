@@ -1,4 +1,5 @@
 EESchema Schematic File Version 2
+LIBS:forthEx-rescue
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -10,7 +11,6 @@ LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
-LIBS:special
 LIBS:microcontrollers
 LIBS:dsp
 LIBS:microchip
@@ -45,7 +45,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L R R11
+L R-RESCUE-forthEx R11
 U 1 1 55772335
 P 5250 5000
 F 0 "R11" V 5330 5000 40  0000 C CNN
@@ -56,7 +56,7 @@ F 3 "~" H 5250 5000 30  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L R R9
+L R-RESCUE-forthEx R9
 U 1 1 557723B5
 P 4700 6600
 F 0 "R9" V 4780 6600 40  0000 C CNN
@@ -67,7 +67,7 @@ F 3 "~" H 4700 6600 30  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L R R10
+L R-RESCUE-forthEx R10
 U 1 1 557723D1
 P 5100 6250
 F 0 "R10" V 5180 6250 40  0000 C CNN
@@ -119,7 +119,7 @@ F 3 "" H 4550 1800 60  0000 C CNN
 	0    1    -1   0   
 $EndComp
 $Comp
-L R R7
+L R-RESCUE-forthEx R7
 U 1 1 557729D3
 P 4150 3000
 F 0 "R7" V 4230 3000 40  0000 C CNN
@@ -130,7 +130,7 @@ F 3 "~" H 4150 3000 30  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L R R6
+L R-RESCUE-forthEx R6
 U 1 1 557729E0
 P 3600 2750
 F 0 "R6" V 3680 2750 40  0000 C CNN
@@ -141,7 +141,7 @@ F 3 "~" H 3600 2750 30  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L C C6
+L C-RESCUE-forthEx C6
 U 1 1 557729E8
 P 3600 3300
 F 0 "C6" H 3600 3400 40  0000 L CNN
@@ -200,7 +200,7 @@ Text GLabel 3600 2200 1    60   Input ~ 0
 Text GLabel 4050 4200 0    39   Input ~ 0
 +3V
 $Comp
-L C C7
+L C-RESCUE-forthEx C7
 U 1 1 55772EC6
 P 4200 4400
 F 0 "C7" H 4200 4500 40  0000 L CNN
@@ -211,7 +211,7 @@ F 3 "~" H 4200 4400 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C10
+L C-RESCUE-forthEx C10
 U 1 1 55772ECC
 P 6900 2650
 F 0 "C10" H 6900 2750 40  0000 L CNN
@@ -285,7 +285,7 @@ F 3 "~" H 3100 3900 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C5
+L C-RESCUE-forthEx C5
 U 1 1 557736BE
 P 3400 4250
 F 0 "C5" H 3400 4350 40  0000 L CNN
@@ -296,7 +296,7 @@ F 3 "~" H 3400 4250 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C4
+L C-RESCUE-forthEx C4
 U 1 1 557736CB
 P 2800 4250
 F 0 "C4" H 2800 4350 40  0000 L CNN
@@ -340,7 +340,7 @@ F 3 "" H 9050 4000 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C12
+L C-RESCUE-forthEx C12
 U 1 1 55773ACD
 P 10400 3500
 F 0 "C12" H 10400 3600 40  0000 L CNN
@@ -362,7 +362,7 @@ F 3 "" H 10600 3650 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R15
+L R-RESCUE-forthEx R15
 U 1 1 55773BD0
 P 8700 3200
 F 0 "R15" V 8780 3200 40  0000 C CNN
@@ -372,13 +372,13 @@ F 3 "~" H 8700 3200 30  0000 C CNN
 	1    8700 3200
 	1    0    0    -1  
 $EndComp
-Text GLabel 6550 4000 2    39   Input ~ 0
-~SS1
-Text GLabel 6550 4100 2    39   Input ~ 0
-SCLK
-Text GLabel 6550 4200 2    39   Input ~ 0
-MISO
 Text GLabel 6550 4300 2    39   Input ~ 0
+~SS1
+Text GLabel 6550 4200 2    39   Input ~ 0
+SCLK
+Text GLabel 6550 4000 2    39   Input ~ 0
+MISO
+Text GLabel 6550 4100 2    39   Input ~ 0
 MOSI
 Text GLabel 8550 3500 0    39   Input ~ 0
 ~SS1
@@ -433,7 +433,7 @@ F 3 "" H 1400 3100 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R17
+L R-RESCUE-forthEx R17
 U 1 1 55778C04
 P 8950 3200
 F 0 "R17" V 9030 3200 40  0000 C CNN
@@ -479,7 +479,7 @@ F 3 "" H 9600 2100 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R13
+L R-RESCUE-forthEx R13
 U 1 1 557C98D1
 P 7250 2800
 F 0 "R13" V 7330 2800 40  0000 C CNN
@@ -490,7 +490,7 @@ F 3 "~" H 7250 2800 30  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L R R14
+L R-RESCUE-forthEx R14
 U 1 1 557C98D7
 P 7450 2800
 F 0 "R14" V 7530 2800 40  0000 C CNN
@@ -501,7 +501,7 @@ F 3 "~" H 7450 2800 30  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L R R5
+L R-RESCUE-forthEx R5
 U 1 1 557C9D70
 P 2800 2650
 F 0 "R5" V 2880 2650 40  0000 C CNN
@@ -512,7 +512,7 @@ F 3 "~" H 2800 2650 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED D2
+L LED-RESCUE-forthEx D2
 U 1 1 557C9D7F
 P 2800 3200
 F 0 "D2" H 2800 3300 50  0000 C CNN
@@ -578,7 +578,7 @@ F 3 "~" H 1400 2550 300 0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C3
+L C-RESCUE-forthEx C3
 U 1 1 557CC8BB
 P 2400 1050
 F 0 "C3" H 2400 1150 40  0000 L CNN
@@ -639,7 +639,7 @@ F 3 "" H 6900 5600 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R12
+L R-RESCUE-forthEx R12
 U 1 1 557F975C
 P 6000 5250
 F 0 "R12" V 6080 5250 40  0000 C CNN
@@ -665,7 +665,7 @@ F 3 "" H 9050 5750 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C13
+L C-RESCUE-forthEx C13
 U 1 1 55FA145F
 P 10400 5250
 F 0 "C13" H 10400 5350 40  0000 L CNN
@@ -706,7 +706,7 @@ F 3 "" H 9550 5450 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R16
+L R-RESCUE-forthEx R16
 U 1 1 55FA147B
 P 8700 4950
 F 0 "R16" V 8780 4950 40  0000 C CNN
@@ -768,7 +768,7 @@ F 3 "" H 2400 1300 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R8
+L R-RESCUE-forthEx R8
 U 1 1 5601461A
 P 4750 4550
 F 0 "R8" V 4830 4550 40  0000 C CNN
@@ -779,7 +779,7 @@ F 3 "~" H 4750 4550 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C8
+L C-RESCUE-forthEx C8
 U 1 1 5601470A
 P 4750 5200
 F 0 "C8" H 4750 5300 40  0000 L CNN
@@ -790,7 +790,7 @@ F 3 "~" H 4750 5200 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C9
+L C-RESCUE-forthEx C9
 U 1 1 56014795
 P 5650 5200
 F 0 "C9" H 5650 5300 40  0000 L CNN
@@ -856,7 +856,7 @@ F 3 "" H 2600 6400 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R2
+L R-RESCUE-forthEx R2
 U 1 1 5613C08F
 P 2000 6400
 F 0 "R2" V 2080 6400 50  0000 C CNN
@@ -911,7 +911,7 @@ F 3 "" H 2700 6750 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R4
+L R-RESCUE-forthEx R4
 U 1 1 5613F420
 P 2700 5900
 F 0 "R4" V 2780 5900 50  0000 C CNN
@@ -933,7 +933,7 @@ F 3 "" H 1500 7100 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R1
+L R-RESCUE-forthEx R1
 U 1 1 5613F63B
 P 1500 5950
 F 0 "R1" V 1580 5950 50  0000 C CNN
@@ -944,7 +944,7 @@ F 3 "" H 1500 5950 30  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L R R3
+L R-RESCUE-forthEx R3
 U 1 1 5613F821
 P 2150 5400
 F 0 "R3" V 2230 5400 50  0000 C CNN
@@ -1037,7 +1037,7 @@ Wire Wire Line
 Wire Wire Line
 	4950 6600 5950 6600
 Wire Wire Line
-	6550 4000 6400 4000
+	6550 4300 6400 4300
 Wire Wire Line
 	8550 3500 9050 3500
 Wire Wire Line
@@ -1060,11 +1060,11 @@ Wire Wire Line
 Wire Wire Line
 	6900 3900 6400 3900
 Wire Wire Line
-	6400 4300 6550 4300
-Wire Wire Line
 	6400 4100 6550 4100
 Wire Wire Line
-	6550 4200 6400 4200
+	6400 4200 6550 4200
+Wire Wire Line
+	6550 4000 6400 4000
 Wire Wire Line
 	8950 3450 8950 3500
 Connection ~ 8950 3500
@@ -1294,15 +1294,15 @@ Wire Wire Line
 Connection ~ 1500 5650
 Wire Wire Line
 	1100 6550 1050 6550
-Text GLabel 6550 3400 2    39   Input ~ 0
+Text GLabel 6550 3600 2    39   Input ~ 0
 TX
 Text GLabel 6550 3500 2    39   Input ~ 0
 RX
 Wire Wire Line
 	6550 3500 6400 3500
 Wire Wire Line
-	6550 3400 6400 3400
-Text Notes 6750 3500 0    39   ~ 0
+	6550 3600 6400 3600
+Text Notes 6750 3600 0    39   ~ 0
 UART
 Text Notes 1950 7050 0    39   ~ 0
 RS232\nconverter
