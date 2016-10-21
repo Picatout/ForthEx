@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015, 2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -39,12 +39,11 @@ kbd_head:
 .space 2
 kbd_tail:
 .space 2
-key_state:    
-.space 2
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; interruption TIMER1
-; incrémente 'systicks'
+; incrémente 'systicks',
+; termine tonalité si durée expirée    
 ; et traitement primaire
 ; file ps2_queue vers kbd_queue
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -95,16 +94,16 @@ __T1Interrupt:
     mov #SC_KREL, W1
     cp  W0,W1
     bra neq, 3f
-    bset key_state, #F_KREL
+    bset key_state, #F_KREL ; touche relâchée
     bra 9f
 3:  ; vérifie code étendu
     mov #SC_XKEY, W1
     cp W0,W1
     bra neq, 4f
-    bset key_state, #F_XKEY
+    bset key_state, #F_XKEY ; c'est une touche étendue
     bra 9f
 4:  
-    ; vérification CTRL
+    ; vérification touche CTRL de gauche
     mov #L_CTRL,W1
     cp W1, W0
     bra neq, 5f
@@ -113,15 +112,22 @@ __T1Interrupt:
     bset key_state, #F_CTRL
     bclr key_state, #F_KREL
     bclr key_state, #F_XKEY
-5:
+5:  
+    mov #SC_BATOK,W1
+    cp W1,W0
+    bra neq, 6f
+    bset key_state,#F_KBDOK
+    bra 9f
+6:    
     mov #SC_C, W1
     cp W1,W0
     bra neq, 8f
     btss key_state, #F_CTRL
     bra 8f
-    clr W2
-    repeat #17
-    div.s W0,W2 ; génère une exception __MathError
+    reset
+;    clr W2
+;    repeat #17
+;    div.s W0,W2 ; génère une exception __MathError
 8:    
     ; tranfert code dans file
     ; kbd_queue
@@ -212,7 +218,7 @@ search_table:
 ; lorsqu'elle est relâchée le clavier envoie 0xE0,0xF0,0x6C
 ; référence scancode: http://www.computer-engineering.org/ps2keyboard/scancodes2.html    
 ; Le décodage est partiel sinon la routine serait encore plus complexe. 
-; Les rela?hements de touches sont ignorés sauf pour <CTRL>,<ALT>,<SHIFT>     
+; Les relachements de touches sont ignorés sauf pour <CTRL>,<ALT>,<SHIFT>     
 .global kbd_get
 kbd_get:
     push DSRPAG
@@ -338,6 +344,15 @@ DEFCODE "KEY",3,,KEY ; ( -- c)
     mov W0, T
     NEXT
     
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; envoie d'un octet au clavier
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "KBD_CMD",7,,KBD_CMD ; ( c -- )
+    mov T, W0
+    call ps2_send
+    inc2 T,T
+    NEXT
     
 .end
     

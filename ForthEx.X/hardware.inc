@@ -59,6 +59,7 @@
 .NOLIST
 .equ FCY, 70000000   ;70Mhz
 .equ FCY_MHZ, 70
+.equ TCY_USEC, 35  ; nombre de TCY dans 1µSec
     
 ; PLL settings
 .equ PLLPRE, 0  ; 8Mhz/2
@@ -122,9 +123,10 @@
 .equ SYNC_IPbit, T2IP0
 
 ; clavier
-.equ RPI47, 0x2F   ; INT1 
+.equ RPI47, 0x2F    
 .equ KBD_CLK, RB15   ; pin 26, RPI47
 .equ KBD_DAT, RB14   ; pin 25, RPI46
+.equ KBD_RPI, RPI47   
 .equ KBD_PORT, PORTB
 .equ KBD_LAT, LATB
 .equ KBD_TRIS, TRISB
@@ -140,7 +142,8 @@
 .equ KBD_INTEP, INT1EP
 .equ KBD_INTCON, INTCON2
 
-; interface SPI1 RAM et EEPROM
+; interface SPI1 SDCARD, RAM et EEPROM
+.equ SDC_SEL, RB2     ; pin 6, RPI34
 .equ SRAM_SEL, RB10   ; pin 21, RP42 
 .equ EEPROM_SEL, RB6  ; pin 18, RP41
 .equ STR_CLK,   RB7   ; pin 17, RP40

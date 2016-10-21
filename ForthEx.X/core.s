@@ -453,7 +453,7 @@ DEFCODE "INFLOOP",7,,INFLOOP
 SYSDICT
 .global ENTRY
 ENTRY: 
-.word EEPROMTEST
+.word KBDTEST
 .global sys_latest
 sys_latest:
 .word link

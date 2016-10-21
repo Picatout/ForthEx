@@ -19,6 +19,7 @@
 ; hardware setup
     
 .include "hardware.inc"
+.include "ps2.inc"
     
 .if (VIDEO_STD==NTSC)
 .include "ntsc_const.inc"    
@@ -91,8 +92,44 @@ hardware_init:
     call sound_init
     ; verouillage configuration I/O
     bset OSCCON, #IOLOCK
+    ; réinitialise le clavier
+    mov #KCMD_RESET,W0
+    call ps2_send
+    ; délais auto-test clavier 750 µsec.
+    mov #TCY_USEC,W0
+    mov #750,W1
+    mul.uu W0,W1,W0
+    repeat W0
+    nop
+;1:  btss key_state, #F_KBDOK
+;    call kbd_error
     return
 
+;kbd_error:
+;    mov #440, W2  ; fréquence
+;    mov #200, W1  ; durée
+;    mov W2, AUDIO_PER
+;    mov W2, AUDIO_OCRS
+;    lsr W2,W0
+;    mov W0, AUDIO_OCR
+;    bset AUDIO_TMRCON, #TON
+;    mov W1, tone_len
+; 1: cp0 tone_len
+;    bra nz, 1b
+;    mov systicks, W0
+;    add W0,W1,W0
+; 2: cp systicks
+;    bra neq, 2b
+;    mov W2, AUDIO_PER
+;    mov W2, AUDIO_OCRS
+;    lsr W2,W0
+;    mov W0, AUDIO_OCR
+;    bset AUDIO_TMRCON, #TON
+;    mov W1, tone_len
+; 1: cp0 tone_len
+;    bra nz, 1b
+;    return
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; mots forth
 ;;;;;;;;;;;;;;;;;;;;;;;;;;

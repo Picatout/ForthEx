@@ -112,6 +112,7 @@ tvout_init:
 
 ;********************
 ; interruption TIMER2
+; synchronisation    
 ;********************
 .global __T2Interrupt
 INT    
@@ -188,6 +189,7 @@ __T2Interrupt:
     
 ;*********************
 ; interruption OC2
+; serialisation des pixels    
 ;*********************
 .extern _font
 .equ CH_ROW, W5    

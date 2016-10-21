@@ -26,7 +26,11 @@
 .ifndef PS2_INC
 .equ PS2_INC, 1
 
-
+;commandes clavier
+.equ KCMD_RESET, 0xFF ; reset keybaord
+.equ KCMD_RESEND, 0xFE ; resend last code
+.equ KCMD_LED, 0xED    ; set keyboard leds
+    
 .equ SC_BATOK, 0xAA ; basic assurance test OK
 .equ SC_ERROR, 0xFC ; erreur clavier
 .equ SC_KREL,  0xF0 ; touche relâchée
@@ -96,6 +100,9 @@
 .equ F_NUM,  4  ; clavier numérique actif
 .equ F_XKEY, 5 ; touche étendue
 .equ F_KREL, 6 ; relâchement touche
+.equ F_KBDOK, 7 ; clavier présent
+.equ F_SEND, 15; indicateur d'envoie
+ 
 ; grandeur file interface PS/2 
 .equ PS2_QUEUE_SIZE, 32
 .endif
