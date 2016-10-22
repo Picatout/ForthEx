@@ -43,7 +43,7 @@ ypos: .byte 0
  
 .global _video_buffer
 _video_buffer: .space TV_BUFFER
-
+line_pixels: .space CPL
 
 .text
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -53,7 +53,6 @@ _video_buffer: .space TV_BUFFER
 tvout_init:
     bclr VIDEO_TRIS, #VIDEO_OUT ; sortie vidéo
     bclr SYNC_TRIS, #SYNC_OUT  ; sortie sync vidéo
-;    bclr VIDEO_TRIS, #VIDEO_PORCH ; seuil video
     ; configuration PPS
     mov VIDEO_RPOR, W0
     mov #~(0x1f<<VIDEO_RPORbit),W1 ;mask
@@ -68,15 +67,9 @@ tvout_init:
     ior W0,W1,W0
     mov W0, SYNC_RPOR
     ; configuration VIDEO_SPI
-    mov #(3<<PPRE0),W0
+    mov #(3<<PPRE0)|(2<<SPRE0)|(1<<MSTEN),W0
     mov W0,VIDEO_SPICON1
-    mov #(2<<SPRE0),W0
-    ior VIDEO_SPICON1
-    mov #(1<<MSTEN), W0
-    ior VIDEO_SPICON1
     bset VIDEO_SPICON2,#0
-    bset VIDEO_SPISTAT, #SPIEN
-    clr VIDEO_SPIBUF
     ; configuration output compare
     mov #HLINE, W0
     ; période timer
@@ -88,7 +81,7 @@ tvout_init:
     mov  #VIDEO_DLY, W0
     mov W0, VIDEO_OCRS
     ; configuraton output compare mode 5
-    mov #5, W0
+    mov #5|(7<<OCTSEL0), W0
     mov W0, SYNC_OCCON1
     mov W0, VIDEO_OCCON1
     ; configuration priorité d'interruptions
@@ -117,6 +110,8 @@ tvout_init:
 .global __T2Interrupt
 INT    
 __T2Interrupt:
+    bclr SYNC_IFS, #SYNC_IF
+    bclr VIDEO_SPISTAT, #SPIEN
     push W0
     inc line_count
     bra z, 1f
@@ -142,7 +137,6 @@ __T2Interrupt:
     cp line_count
     bra z, 8f
 0:
-    bclr SYNC_IFS, #SYNC_IF
     pop W0
     retfie
 1: ; line_count==0 start VSYNC 6 half line narrow neg. pulses
@@ -198,22 +192,11 @@ __T2Interrupt:
 .equ CH_COUNT, W2    
 .global __OC2Interrupt    
 __OC2Interrupt:
+    bclr VIDEO_IFS, #VIDEO_IF
     push.D W0
     push.D CH_COUNT
     push.D pVIDBUF
     push DSRPAG
-    mov SYNC_TMR, W0
-    and W0, #3, W0
-    sl W0,W0
-    bra W0
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
     movpag #edspage(_font),DSRPAG
     mov line_count, W1
     sub #TOPLINE, W1
@@ -224,6 +207,13 @@ __OC2Interrupt:
     mov #_video_buffer, pVIDBUF
     add W0, pVIDBUF, pVIDBUF
     mov #edsoffset(_font), pFONT
+    mov VIDEO_TMR, W0
+    and W0, #3, W0
+    bra W0
+    nop
+    nop
+    nop
+    bset VIDEO_SPISTAT, #SPIEN
  1:
     mov.b [pVIDBUF++], W0
     and  #127,W0
@@ -246,7 +236,6 @@ __OC2Interrupt:
     pop.D pVIDBUF
     pop.D CH_COUNT
     pop.D W0
-    bclr VIDEO_IFS, #VIDEO_IF
     retfie
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;

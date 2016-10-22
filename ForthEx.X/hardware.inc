@@ -85,7 +85,8 @@
 .equ VIDEO_OCR, OC2R
 .equ VIDEO_OCRS, OC2RS
 .equ VIDEO_OCCON1, OC2CON1
-.equ VIDEO_OCCON2, OC2CON2    
+.equ VIDEO_OCCON2, OC2CON2
+.equ VIDEO_TMR, OC2TMR    
 .equ VIDEO_RPOR, RPOR0  ; registre PPS pour sortie pin 7
 .equ VIDEO_RPORbit, RP35R0  ; RP35
 .equ VIDEO_FN,  8    ; fonction SDO2
@@ -105,7 +106,7 @@
 .equ SYNC_TRIS, TRISB
 .equ SYNC_LAT,  LATB    
 .equ SYNC_OUT,   RB4  ;sortie SYNC
-.equ SYNC_TMR, TMR2
+.equ SYNC_TMR, OC1TMR
 .equ SYNC_TMRCON, T2CON
 .equ SYNC_PER, PR2
 .equ SYNC_OCRS,  OC1RS
