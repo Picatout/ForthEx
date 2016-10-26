@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015,2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -28,7 +28,8 @@
 
 .equ QUEUE_SIZE, 16
     
-.data
+.section .serial.bss bss
+    
 rx_queue: .space QUEUE_SIZE
 tx_queue: .space QUEUE_SIZE
 tx_wait:  .space 2 ; nombre de caractères dans tx_queue 
@@ -131,7 +132,7 @@ DEFCODE "SGET",4,,SGET
     
     
     
-INT
+INTR
 .global __U1RXInterrupt
 __U1RXInterrupt:
     bclr  SER_RX_IFS, #SER_RX_IF

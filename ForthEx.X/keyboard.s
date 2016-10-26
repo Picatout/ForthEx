@@ -32,7 +32,8 @@
  
 .equ KBD_QUEUE_SIZE, 32    
  
-.data
+.section .keyboard.bss bss
+    
 kbd_queue:
 .space KBD_QUEUE_SIZE    
 kbd_head:
@@ -51,7 +52,7 @@ kbd_tail:
 .extern ps2_head
 .extern ps2_tail    
 .extern ps2_queue  
-INT    
+INTR    
 .global __T1Interrupt   
 __T1Interrupt:
     bclr IFS0, #T1IF

@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015,2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -22,12 +22,12 @@
   DESCRIPTION: contient toutes les constantes et alias de SFR. Tout ce qui concerne
                l'affectation des périphériques est défini dans ce fichier.
      
-  MCU: PIC24FJ64GA002
-  FLASH: 64Ko (22Kloc)
+  MCU: PIC24EP512GP202
+  FLASH: 512Ko (22Kloc)
   RAM: 8Ko,  
-    MAP: 0x0-0x7FF SFR
-         0x800-0x27FF RAM
-         0x2800-67FF  PSV
+    MAP: 0x0-0xFFF SFR
+         0x1000-0x7FFF RAM
+         0x8000-0xCFFF EDS
      
   Utilisation des périphériques:
      
@@ -50,9 +50,8 @@
   - SPI1,  interface avec les mémoires externes RAM 23LC104 et EEPROM 25LC1024
      
 */
-    
-.ifndef HARD_INC
-.equ HARD_INC, 1
+.ifndef HARWARE_INC
+.equ HARWARE_INC,1
     
 .include "p24EP512GP202.inc"
 
@@ -69,6 +68,8 @@
 .equ RAM_SIZE, 0xC000 ; 48KO
 .equ RAM_BASE, 0x1000 ; 4096
 .equ EDS_BASE, 0x8000 ; 32768
+.equ RAM_END,  0xCFFF ; 53247    
+.equ EDS_RAM_SIZE, (RAM_END-EDS_BASE+1)
     
 ; sortie vidéo
 .equ NTSC, 1
@@ -100,13 +101,20 @@
 .equ VIDEO_SPICON2, SPI2CON2
 .equ VIDEO_SPISTAT, SPI2STAT
 .equ VIDEO_SPIBUF, SPI2BUF
+.equ VIDEO_SPI_IFS, IFS2
+.equ VIDEO_SPI_IEC, IEC2
+.equ VIDEO_SPI_IE, SPI2IE
+.equ VIDEO_SPI_IF, SPI2IF
+.equ VIDEO_SPI_IPC, IPC8
+.equ VIDEO_SPI_IPbit, SPI2IP0    
+    
 ; synchronistation vidéo
 ; vidéo SYNC RB4 (pin 11) périphérique OC1
 .equ SYNC_PORT, PORTB
 .equ SYNC_TRIS, TRISB
 .equ SYNC_LAT,  LATB    
 .equ SYNC_OUT,   RB4  ;sortie SYNC
-.equ SYNC_TMR, OC1TMR
+.equ SYNC_TMR, TMR2
 .equ SYNC_TMRCON, T2CON
 .equ SYNC_PER, PR2
 .equ SYNC_OCRS,  OC1RS
@@ -209,18 +217,12 @@
 .LIST
  
 ; section pour regrouper les routine ISR    
-.macro INT  
-.section .int code
+.macro INTR  
+.section .intr code
 .align 2
 .endm
 
-; aide au débogage
-; affiche un caractère à l'écran 
-.macro progress c
-   mov #\c, W0
-   mov.b WREG, _video_buffer
-.endm
+.endif
  
 
-.endif
 

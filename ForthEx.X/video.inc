@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015,2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@
 .equ XRES, (CHAR_WIDTH*CPL)
 .equ YRES, (CHAR_HEIGHT*LPS)
  ; grandeur du tampon vidéo    
-.equ TV_BUFFER, (CPL*LPS)
+.equ TV_BUFFER_SIZE, (CPL*LPS)
 
 .endif
  

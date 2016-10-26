@@ -16,20 +16,19 @@
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; bits de configuration du MCU
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;Fichier: gen_macro.inc
-;Description:  définition de macros d'usage général
-;Date: 2015-10-02
-.ifndef GEN_MACCRO
-.equ GEN_MACRO, 1
+.include "p24EP512GP202.inc"
 
-; initialisation table en flash
-; pour lecture
-.macro set_eds_table table, reg
-    mov #edspage(\table), \reg
-    mov \reg, DSRPAG
-    mov #edsoffset(\table), \reg
-.endm
+    config __FICD, JTAGEN_OFF
+    config __FPOR, 0xFFFF
+    config __FWDT, FWDTEN_OFF & WINDIS_OFF & PLLKEN_OFF
+    config __FOSC, FCKSM_CSDCMD & POSCMD_HS & OSCIOFNC_ON  & IOL1WAY_OFF
+    config __FOSCSEL, FNOSC_PRIPLL & IESO_ON
+    config __FGS, 0xFFFF
+    
+   
 
-.endif
 

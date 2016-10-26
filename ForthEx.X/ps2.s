@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015, 2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -24,23 +24,25 @@
     
 .equ SENTRY, 0x0400
     
+.section .ps2.bss bss
+
 .global ps2_queue, ps2_head, ps2_tail
-.data
+    
 ps2_shiftin:  ; utilisé par ISR INT1 réception bits clavier
-.word  0
+.space 2  
 ps2_shiftout:  ; utilisé par ISR INT1 envoie bits au clavier    
-.word 0
+.space 2
 send_count:  ; nombre de bits à envoyer
-.word 0
+.space 2 
 ps2_queue:
 .space PS2_QUEUE_SIZE     
 ps2_head:
-.word 0
+.space 2 
 ps2_tail:
-.word 0
+.space 2
 .global key_state    
 key_state:    
-.word 0
+.space 2 
     
 .text
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -134,7 +136,7 @@ ps2_send:
  ; interruption signal clock
  ; du clavier sur INT1
 .global __INT1Interrupt
- INT
+ INTR
 __INT1Interrupt:
 ;    push W0
 ;    push W1

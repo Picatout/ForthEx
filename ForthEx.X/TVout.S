@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015,2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -34,17 +34,19 @@
 .include "core.inc"
 .include "keyboard.inc"
     
-.data
-line_count: .word 0xffff
-even: .byte 0xff
+.section .tvout.bss bss
+    
+line_count: .space 2
+even: .space 1
+video_on: .space 1
 .align 2 
-xpos: .byte 0
-ypos: .byte 0
+xpos: .space 1
+ypos: .space 1
+
  
 .global _video_buffer
-_video_buffer: .space TV_BUFFER
-line_pixels: .space CPL
-
+_video_buffer: .space TV_BUFFER_SIZE
+ 
 .text
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; initialisation générateur vidéo
@@ -69,7 +71,7 @@ tvout_init:
     ; configuration VIDEO_SPI
     mov #(3<<PPRE0)|(2<<SPRE0)|(1<<MSTEN),W0
     mov W0,VIDEO_SPICON1
-    bset VIDEO_SPICON2,#0
+    bset VIDEO_SPICON2, #SPIBEN
     ; configuration output compare
     mov #HLINE, W0
     ; période timer
@@ -80,12 +82,12 @@ tvout_init:
     mov W0, SYNC_OCR
     mov  #VIDEO_DLY, W0
     mov W0, VIDEO_OCRS
-    ; configuraton output compare mode 5
+    ; configuraton output compare mode 5, clock=Fp
     mov #5|(7<<OCTSEL0), W0
     mov W0, SYNC_OCCON1
     mov W0, VIDEO_OCCON1
-    ; configuration priorité d'interruptions
-    ; priorité 5 pour les 2
+    ;configuration priorité d'interruptions
+    ;priorité 5 pour les 2
     mov #~(7<<SYNC_IPbit), W0
     and SYNC_IPC
     mov #(5<<SYNC_IPbit), W0 
@@ -96,6 +98,7 @@ tvout_init:
     ior VIDEO_IPC
     setm line_count
     setm.b even
+    setm.b video_on
     ; activation interruption  SYNC_TIMER
     bclr SYNC_IFS, #SYNC_IF
     bset SYNC_IEC, #SYNC_IE
@@ -108,7 +111,7 @@ tvout_init:
 ; synchronisation    
 ;********************
 .global __T2Interrupt
-INT    
+INTR    
 __T2Interrupt:
     bclr SYNC_IFS, #SYNC_IF
     bclr VIDEO_SPISTAT, #SPIEN
@@ -162,6 +165,8 @@ __T2Interrupt:
     mov W0, SYNC_PER
     bra 0b
 5: ; line_count==TOPLINE  activation interruption video
+    cp0.b video_on
+    bra z, 0b
     bclr VIDEO_IFS, #VIDEO_IF
     bset VIDEO_IEC, #VIDEO_IE
     bra 0b
@@ -169,8 +174,7 @@ __T2Interrupt:
     bclr VIDEO_IEC, #VIDEO_IE
     bra 0b
 7: ; line_count==ELPFRM
-    clr W0
-    cp.b even
+    cp0.b even
     bra z, 0b
     setm line_count
     clr.b even
@@ -214,21 +218,21 @@ __OC2Interrupt:
     nop
     nop
     bset VIDEO_SPISTAT, #SPIEN
- 1:
+1:  cp0 CH_COUNT
+    bra z, 3f
     mov.b [pVIDBUF++], W0
     and  #127,W0
     sl W0, #3, W0
     add pFONT,W0,W1
     add W1,CH_ROW, W1
-    mov.b [W1],W1
-    ze W1, W1
-2:
+    mov.b [W1],W0
+ 2:
     btst VIDEO_SPISTAT, #SPITBF
     bra nz, 2b
-    mov W1, VIDEO_SPIBUF
-    dec CH_COUNT, CH_COUNT
-    bra nz, 1b 
-3:
+    mov.b WREG,VIDEO_SPIBUF
+    dec CH_COUNT,CH_COUNT
+    bra 1b
+3:   
     btst VIDEO_SPISTAT, #SPITBF
     bra nz, 3b
     clr VIDEO_SPIBUF
@@ -241,6 +245,15 @@ __OC2Interrupt:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; mots Forth
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; active désactive sortie vidéo
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "VIDON",5,,VIDON ; ( f -- )    
+    mov T, W0
+    mov.b WREG,video_on
+    DPOP
+    NEXT
     
 ;;;;;;;;;;;;;;;;;;
 ; nettoie écran
@@ -248,7 +261,7 @@ __OC2Interrupt:
 DEFCODE "CLS",3,,CLS   ; ( -- )
     mov #0x2020, W0
     mov #_video_buffer, W1
-    repeat #(TV_BUFFER/2-1)
+    repeat #(TV_BUFFER_SIZE/2-1)
     mov W0,[W1++]
     clr xpos  ; xpos=0, ypos=0
     NEXT
@@ -339,7 +352,7 @@ DEFCODE "SCROLLUP",8,,SCROLLUP  ; ( -- )
     mov #_video_buffer, W1
     mov #CPL, W0
     add W0,W1,W2
-    mov #TV_BUFFER, W3
+    mov #TV_BUFFER_SIZE, W3
     sub W3,W0,W3
     lsr W3,W3
     dec W3,W3

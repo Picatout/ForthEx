@@ -16,20 +16,34 @@
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
+; police de caractère 8x8
+;table ASCII REF: http://www.asciitable.com/ 
+    
+/* 
+ * File:   font.h
+ * Author: jacques
+ *
+ * Created on 25 septembre 2015, 20:17
+ */
 
-;Fichier: gen_macro.inc
-;Description:  définition de macros d'usage général
-;Date: 2015-10-02
-.ifndef GEN_MACCRO
-.equ GEN_MACRO, 1
+#ifndef FONT_H
+#define	FONT_H
 
-; initialisation table en flash
-; pour lecture
-.macro set_eds_table table, reg
-    mov #edspage(\table), \reg
-    mov \reg, DSRPAG
-    mov #edsoffset(\table), \reg
-.endm
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
-.endif
+#define CHAR_WIDTH  (8)
+#define CHAR_HEIGHT (8)
+#define FONT_SIZE (101)
+#define CPL (40)  // caractères pa ligne
+#define LPS (25)  // ligne par écran
+
+
+
+#ifdef	__cplusplus
+}
+#endif
+
+#endif	/* FONT_H */
 

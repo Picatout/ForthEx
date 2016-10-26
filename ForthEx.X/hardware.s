@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015, 2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -30,24 +30,25 @@
 .include "video.inc"
 .include "core.inc"
     
-.data 
+.section .hardware.bss  bss
+    
 .global systicks    
 systicks: ; compteur de millisecondes
 .space 2
 seed: ; PRNG 32 bits    
 .space 4
-.global inpb
+.global inpb ; tampon clavier
 inpb: .space 80
-.global pad
+.global pad  ; scratch pad
 pad: .space 84
     
     
-INT    
+INTR    
 .global __DefaultInterrupt
 __DefaultInterrupt:
     reset
 
-.section .start code
+.section .start.text code address(0x200)
 .align 2    
 .global __reset    
 __reset: 

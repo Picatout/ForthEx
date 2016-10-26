@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015,2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -32,25 +32,26 @@
     
 .global pstack, rstack, user
     
-.data
+.section .core.bss bss
+    
 user: ; variables utilisateur
 .space 20
     
-.section _pstack, bss, address(EDS_BASE-RSTK_SIZE-DSTK_SIZE)    
+.section .param.stack.bss, bss , address(RAM_BASE+RSTK_SIZE)    
 pstack:
 .space DSTK_SIZE
 
-.section _rstack,stack, address(EDS_BASE-RSTK_SIZE)
+.section .return.stack.bss stack , address(RAM_BASE)
 rstack:
 .space RSTK_SIZE
     
     
     
 
-.section .const psv       
+.section .ver_str.const psv       
 ;test string
 version:
-.asciz "ForthEx V0.1\r\n"    
+.asciz "ForthEx V0.1\n"    
     
 .text
 .global DOCOLON    
@@ -68,7 +69,7 @@ __MathError:
     mov #pstack, DSP
     mov #rstack, RSP
     ; à faire: doit-remettre à zéro input buffer
-    mov #psvoffset(ENTRY), IP
+    mov #edsoffset(ENTRY), IP
     NEXT
     
 DEFCODE "EXECUTE",7,,DOCODE ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
@@ -80,15 +81,16 @@ DEFCODE "EXIT",4,,EXIT  ; ( -- ) (R: nest-sys -- ) 6.1.1380  sortie mot haut-niv
     RPOP IP
     NEXT
 
-DEFCODE "LIT",5,,LIT  ; ( -- x ) empile une valeur  
+DEFCODE "LIT",3,,LIT  ; ( -- x ) empile une valeur  
     DPUSH
     mov [IP++], T
     NEXT
 
 DEFCODE "CLIT",4,,CLIT  ; ( -- c )
     DPUSH
-    mov.b [IP++], T
+    mov.b [IP], T
     ze T,T
+    inc2 IP,IP ;IP doit toujours être aligné sur un mot de 16 bits
     NEXT
 
 DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
@@ -246,15 +248,11 @@ DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 n3 -- n3 n1 n2 )
 ; MATH
 ;;;;;;;
 DEFCODE "+",1,,PLUS   ;( n1 n2 -- n1+n2 )
-    add T, [DSP], W0
-    DPOP
-    mov W0, T
+    add T, [DSP++], T
     NEXT
     
 DEFCODE "-",1,,MINUS   ; ( n1 n2 -- n1-n2 )
-    mov T, W0
-    DPOP
-    sub T, W0, T
+    sub T, [DSP--], T
     NEXT
     
 DEFCODE "1+",2,,ONEPLUS ; ( n -- n ) n+1
@@ -285,7 +283,9 @@ DEFCODE "RSHIFT",6,,RSHIFT ; ( x1 -- x2 ) x2=x1>>1
     
 DEFCODE "+!",2,,PLUSSTORE  ; ( n addr  -- ) [addr]=[addr]+n     
     mov [DSP--], W0
-    add W0, [T],[T]
+    mov [W0],W1
+    add W1, [DSP--],W1
+    mov W1,[W0]
     DPOP
     NEXT
     
@@ -298,18 +298,15 @@ DEFCODE "M+",2,,DADD  ; ( d n --  d ) simple + double
  
 ; opérations logiques bit à bit    
 DEFCODE "AND",3,,_AND  ; ( n1 n2 -- n)  ET bit à bit
-    and T,[DSP],[DSP]
-    DPOP
+    and T,[DSP--],T
     NEXT
     
 DEFCODE "OR",2,,_OR   ; ( n1 n2 -- n ) OU bit à bit
-    ior T,[DSP],[DSP]
-    DPOP
+    ior T,[DSP--],T
     NEXT
     
 DEFCODE "XOR",3,,_XOR ; ( n1 n2 -- n ) OU exclusif bit à bit
-    xor T,[DSP],[DSP]
-    DPOP
+    xor T,[DSP--],T
     NEXT
     
     
@@ -395,13 +392,13 @@ DEFCODE "U>",2,,UGREATER ; ( u1 u2 -- f) f=u1>u2
 ;   TESTS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "TEST",4,,TEST   
-.word  CLS,MSG,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,BRANCH, -22
+.word  CLS,VERSION,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,BRANCH, -22
 
 DEFWORD "SERTEST",7,,SERTEST
-.word CLS,MSG,SGET,SEMIT,BRANCH,-6    
+.word CLS,VERSION,SGET,SEMIT,BRANCH,-6    
 
 DEFWORD "KBDTEST",7,,KBDTEST
-.word CLS,KEY,EMIT,BRANCH,-6    
+.word KEY,EMIT,BRANCH,-6 
     
 DEFWORD "HOME",5,,HOME
 .word LIT,0,LIT,0,CURPOS,EXIT
@@ -412,12 +409,12 @@ DEFWORD "OKOFF",6,,OKOFF
 DEFWORD "OK",2,,OK
 .word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
-.section .const psv
+.section .quick_str.const psv
 quick:
 .asciz "The quick brown fox jump over the lazy dog.\r"
 
-DEFWORD "MSG",3,,MSG
-.word LIT,1000,MSEC,LIT,version,ZTYPE, EXIT    
+DEFWORD "VERSION",7,,VERSION
+.word CLS,LIT,version,ZTYPE,CR,EXIT    
 
 DEFWORD "ZTYPE",5,,ZTYPE
 .word DUP,CFETCH,DUP,QBRANCH,10,EMIT,ONEPLUS,BRANCH,-16
@@ -449,11 +446,18 @@ DEFWORD "DELAY",5,,DELAY
 
 DEFCODE "INFLOOP",7,,INFLOOP
     bra .
+
+DEFWORD "FNTTEST",7,,FNTTEST
+.WORD LIT,128,LIT,0,DODO, DOI, EMIT, DOLOOP,-6,CR,EXIT
+    
+DEFWORD "BOX",3,,BOX
+.WORD CLIT,1,EMIT,CLIT,11,EMIT,CLIT,3,EMIT,CR,CLIT,14,EMIT,CLIT,7,EMIT,CLIT,15,EMIT
+.WORD CR,CLIT,2,EMIT,CLIT,12,EMIT,CLIT,4,EMIT,CR,EXIT
     
 SYSDICT
 .global ENTRY
 ENTRY: 
-.word KBDTEST
+.word VERSION, BOX, FNTTEST, KBDTEST
 .global sys_latest
 sys_latest:
 .word link

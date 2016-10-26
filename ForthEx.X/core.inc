@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015,2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -107,14 +107,14 @@
 ;macro utilisée pour créer les entête des mots de haut niveaux.
 .macro DEFWORD name, namelen, flags=0, label
     .section .sysdict psv
-    .align 2
+    .align 1
     .global name_\label
 name_\label :
     .word link		; lien vers élément précédent du dictionnaire
     .equ link, name_\label
     .byte \flags+\namelen	; flags + length byte
     .ascii "\name"		; the name
-    .align 2		; padding to next 2 byte boundary
+    .align 1		; padding to next 2 byte boundary
     .global \label
 \label :
     .word handle(DOCOLON)
@@ -124,18 +124,18 @@ name_\label :
 ; macro utilisée pour créer les entêtes des mots en code machine	
 .macro DEFCODE name, namelen, flags=0, label
 	.section .sysdict psv
-	.align 2
+	.align 1
 	.global name_\label
 name_\label :
 	.word link		; link
 	.set link,name_\label
 	.byte \flags+\namelen	; flags + length byte
 	.ascii "\name"		; the name
-	.align 2		; padding to next 4 byte boundary
+	.align 1		; padding to next 4 byte boundary
 	.global \label
 \label :
 	.word handle(code_\label)	; codeword
-	.text
+	.section .forth_code.text code
 	.global code_\label
 code_\label :			;pfa,  assembler code follows
 	
@@ -148,7 +148,7 @@ code_\label :			;pfa,  assembler code follows
 	mov var_\name, T
 	NEXT
 	.data
-	.align 2
+	.align 1
 var_\name :
 	.word \initial
 .endm

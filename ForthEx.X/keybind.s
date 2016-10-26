@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015,2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
     
 .global ascii, shifted, extended, mod , xmod
     
-.section .const psv 
+.section .keybind.const psv 
     
 ascii:
 .byte 0x1c,'a'
