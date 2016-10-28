@@ -54,8 +54,8 @@ version:
 .asciz "ForthEx V0.1\n"    
     
 .text
-.global DOCOLON    
-DOCOLON: ; entre dans un mot de haut niveau (mot défini par ':')
+.global ENTER    
+ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
     RPUSH IP   
     mov WP,IP
     NEXT

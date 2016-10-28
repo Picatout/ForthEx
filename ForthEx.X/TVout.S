@@ -325,7 +325,7 @@ crlf:
     clr.b xpos
     mov #(LPS-1), W0
     cp.b ypos
-    bra eq, code_SCROLLUP
+    bra eq, xt_SCROLLUP
     inc.b ypos
 2:    
     NEXT
@@ -342,7 +342,7 @@ DEFCODE "CR",2,,CR  ; ( -- )
 DEFCODE "SPACE",5,,SPACE   ; ( -- )
     DPUSH
     mov #32, T
-    bra code_EMIT
+    bra xt_EMIT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; défile écran vers le haut
@@ -360,7 +360,7 @@ DEFCODE "SCROLLUP",8,,SCROLLUP  ; ( -- )
     mov [W2++],[W1++]
     DPUSH
     mov #(LPS-1), T
-    bra code_CLRLN
+    bra xt_CLRLN
     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -107,37 +107,38 @@
 ;macro utilisée pour créer les entête des mots de haut niveaux.
 .macro DEFWORD name, namelen, flags=0, label
     .section .sysdict psv
-    .align 1
+    .align 2
     .global name_\label
 name_\label :
     .word link		; lien vers élément précédent du dictionnaire
     .equ link, name_\label
     .byte \flags+\namelen	; flags + length byte
     .ascii "\name"		; the name
-    .align 1		; padding to next 2 byte boundary
+  ;  .align 1		; padding to word boundary
     .global \label
 \label :
-    .word handle(DOCOLON)
+    .word handle(ENTER)
+   ; .align 1
 	;pfa:  list of word pointers follow
 .endm
 
 ; macro utilisée pour créer les entêtes des mots en code machine	
 .macro DEFCODE name, namelen, flags=0, label
 	.section .sysdict psv
-	.align 1
+	.align 2
 	.global name_\label
 name_\label :
 	.word link		; link
 	.set link,name_\label
 	.byte \flags+\namelen	; flags + length byte
 	.ascii "\name"		; the name
-	.align 1		; padding to next 4 byte boundary
+	.align 2		; padding to next 4 byte boundary
 	.global \label
 \label :
-	.word handle(code_\label)	; codeword
+	.word handle(xt_\label)	; codeword
 	.section .forth_code.text code
 	.global code_\label
-code_\label :			;pfa,  assembler code follows
+xt_\label :			;pfa,  assembler code follows
 	
 .endm
  
