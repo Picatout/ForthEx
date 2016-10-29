@@ -93,6 +93,10 @@
     .align 2
 .endm
     
+.macro FORTH_CODE
+    .section .forth_code.text code
+.endm
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 ; macros empruntée et modifiée, à partir de Jones Forth    
 ;REF: http:;www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt    
@@ -118,7 +122,6 @@ name_\label :
     .global \label
 \label :
     .word handle(ENTER)
-   ; .align 1
 	;pfa:  list of word pointers follow
 .endm
 
@@ -136,22 +139,22 @@ name_\label :
 	.global \label
 \label :
 	.word handle(xt_\label)	; codeword
-	.section .forth_code.text code
+	FORTH_CODE
 	.global code_\label
 xt_\label :			;pfa,  assembler code follows
 	
 .endm
  
 ; macro utilisée pour créer des variables
-.macro DEFVAR name, namelen, flags=0, label, initial=0
+.macro DEFVAR name, namelen, flags=0, label
 	DEFCODE \name,\namelen,\flags,\label
 	DPUSH
 	mov var_\name, T
 	NEXT
-	.data
+	.bss
 	.align 1
 var_\name :
-	.word \initial
+	.space 2 
 .endm
 
 	

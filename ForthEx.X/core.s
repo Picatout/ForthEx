@@ -53,13 +53,17 @@ rstack:
 version:
 .asciz "ForthEx V0.1\n"    
     
-.text
+FORTH_CODE
 .global ENTER    
 ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
     RPUSH IP   
     mov WP,IP
     NEXT
 
+DEFCODE "EXIT",4,,EXIT  ; ( -- ) (R: nest-sys -- ) 6.1.1380  sortie mot haut-niveau.
+    RPOP IP
+    NEXT
+    
 DEFCODE "COLD",4,,COLD ; ( -- )  démarrage à froid
     reset
     
@@ -77,10 +81,6 @@ DEFCODE "EXECUTE",7,,DOCODE ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adr
     DPOP
     goto WP
     
-DEFCODE "EXIT",4,,EXIT  ; ( -- ) (R: nest-sys -- ) 6.1.1380  sortie mot haut-niveau.
-    RPOP IP
-    NEXT
-
 DEFCODE "LIT",3,,LIT  ; ( -- x ) empile une valeur  
     DPUSH
     mov [IP++], T
@@ -93,14 +93,24 @@ DEFCODE "CLIT",4,,CLIT  ; ( -- c )
     inc2 IP,IP ;IP doit toujours être aligné sur un mot de 16 bits
     NEXT
 
+DEFCODE "@",1,,FETCH ; ( addr -- n )
+    mov [T],T
+    NEXT
+    
 DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
     mov.b [T], T
     ze T, T
     NEXT
     
-DEFCODE "C!",2,,CSTORE  ; ( c-addr c -- )
-    ze T, W0
+DEFCODE "!",1,,STORE  ; ( n  addr -- )
+    mov [DSP--],W0
+    mov W0,[T]
     DPOP
+    NEXT
+    
+DEFCODE "C!",2,,CSTORE  ; ( c addr  -- )
+    mov [DSP--],W0
+    ze W0, W0
     mov.b W0,[T]
     DPOP
     NEXT
@@ -166,6 +176,11 @@ DEFCODE "DUP",3,,DUP ; ( n -- n n )
     DPUSH
     NEXT
 
+DEFCODE "2DUP",4,,DDUP ; ( n1 n2 -- n1 n2 n1 n2 )
+    mov [DSP],W0
+    mov W0, [++DSP]
+    NEXT
+    
 DEFCODE "?DUP",4,,QDUP ; ( n - n | n n )
     cp0 T
     bra z, 0f
@@ -177,18 +192,41 @@ DEFCODE "DROP",4,,DROP ; ( n -- )
     DPOP
     NEXT
 
+DEFCODE "2DROP",5,,DDROP ; ( n1 n2 -- )
+    mov [DSP-2],T
+    sub #4,DSP
+    NEXT
+    
 DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
     mov T, W0
     mov [DSP], T
     mov W0, [DSP+0]
     NEXT
 
+DEFCODE "2SWAP",6,,DSWAP ; ( n1 n2 n3 n4 -- n3 n4 n1 n2 )
+    mov [DSP-2],W0
+    mov T,[DSP-2]
+    mov W0, T
+    mov [DSP-4],W0
+    mov [DSP],W1
+    mov W1, [DSP-4]
+    mov W0, [DSP]
+    NEXT
+    
 DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
     mov T, W0
     mov [DSP], T
     mov [DSP-2], W1
     mov W1, [DSP]
     mov W0, [DSP-2]
+    NEXT
+
+DEFCODE "-ROT",4,,NROT ; ( n1 n2 n3 -- n3 n1 n2 )
+    mov T, W0
+    mov [DSP],T
+    mov [DSP-2],W1
+    mov W1,[DSP]
+    mov W0,[DSP-2]
     NEXT
     
 DEFCODE "OVER",4,,OVER  ; ( n1 n2 -- n1 n2 n1 )
@@ -255,12 +293,20 @@ DEFCODE "-",1,,MINUS   ; ( n1 n2 -- n1-n2 )
     sub T, [DSP--], T
     NEXT
     
-DEFCODE "1+",2,,ONEPLUS ; ( n -- n ) n+1
+DEFCODE "1+",2,,ONEPLUS ; ( n -- n+1 )
     add #1, T
     NEXT
 
-DEFCODE "1-",2,,ONEMINUS  ; ( n -- n ) n-1
+DEFCODE "2+",2,,TWOPLUS ; ( N -- N+2 )
+    add #2, T
+    NEXT
+    
+DEFCODE "1-",2,,ONEMINUS  ; ( n -- n-1 )
     sub #1, T
+    NEXT
+    
+DEFCODE "2-",2,,TWOMINUS ; ( n -- n-2 )
+    sub #2, T
     NEXT
     
 DEFCODE "2*",2,,TWOSTAR  ; ( n -- n ) 2*n
@@ -279,23 +325,43 @@ DEFCODE "RSHIFT",6,,RSHIFT ; ( x1 -- x2 ) x2=x1>>1
     lsr T,T
     NEXT
     
-    
-    
 DEFCODE "+!",2,,PLUSSTORE  ; ( n addr  -- ) [addr]=[addr]+n     
-    mov [DSP--], W0
-    mov [W0],W1
-    add W1, [DSP--],W1
-    mov W1,[W0]
+    mov [T], W0
+    add W0, [DSP--],W0
+    mov W0, [T]
     DPOP
     NEXT
     
 DEFCODE "M+",2,,DADD  ; ( d n --  d ) simple + double
-    mov T, W0
-    DPOP
-    add W0, [DSP], [DSP]
+    mov [DSP-2], W0 ; d faible
+    mov T, W1 ; n
+    DPOP    ; T= d fort
+    add W0,W1, [DSP]
     addc #0, T
     NEXT
  
+DEFCODE "*",1,,MULTIPLY ; ( n1 n2 -- n1*n2) 
+    mov T, W0
+    DPOP
+    mul.ss W0,T,W0
+    mov W0,T
+    NEXT
+    
+DEFCODE "/",1,,DIVIDE ; ( n1 n2 -- n1/n2 )
+    mov [DSP--],W2
+    repeat #17
+    div.s W2,T
+    mov W0, T
+    NEXT
+    
+DEFCODE "/MOD",4,,DIVMOD ; ( n1 n2 -- r q )
+    mov [DSP],W2
+    repeat #17
+    div.s W2,T
+    mov W0,T     ; quotient
+    mov W1,[DSP] ; reste
+    NEXT
+    
 ; opérations logiques bit à bit    
 DEFCODE "AND",3,,_AND  ; ( n1 n2 -- n)  ET bit à bit
     and T,[DSP--],T
@@ -386,6 +452,20 @@ DEFCODE "U>",2,,UGREATER ; ( u1 u2 -- f) f=u1>u2
     mov W0,T
     NEXT
     
+    
+DEFCODE "CELL",4,,CELL ; ( -- CELL_SIZE )
+    DPUSH
+    mov #CELL_SIZE, T
+    NEXT
+    
+DEFCODE "CELL+",5,,CELLPLUS ; ( addr -- addr+CELL_SIZE )
+    add #CELL_SIZE, T
+    NEXT
+    
+DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
+    mul.uu T,#CELL_SIZE,W0
+    mov W0,T
+    NEXT
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
