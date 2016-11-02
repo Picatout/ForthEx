@@ -26,18 +26,19 @@
 ; utilisation des registres    
 .equ RSP, W15 ; pile retours
 .equ DSP, W14 ; pile arguments
-;.equ R, W13 ; sommet pile retour
-.equ T, W12 ; sommet pile arguments
-.equ WP, W11 ; pointeur paramètres
-.equ X, W10 ; pointeur d'adresse
-.equ UP, W9  ; pointeur variables utilisateur
-.equ IP, W8 ; pointeur d'instruction 
-.equ I, W7  ; compteur de boucle    
+.equ T, W13   ; sommet pile arguments
+.equ WP, W12  ; pointeur paramètres
+.equ X, W11   ; pointeur d'adresse
+.equ UP, W10  ; pointeur variables utilisateur
+.equ IP, W9   ; pointeur d'instruction 
+.equ I, W8    ; compteur de boucle    
+.equ LIMIT,W7 ; limite des boucles
     
 .equ CELL_SIZE, 2
 .equ DSTK_SIZE, 32*CELL_SIZE
 .equ RSTK_SIZE, 64*CELL_SIZE
-
+.equ TIB_SIZE, 80
+.equ PAD_SIZE, 80    
 ;offset variables utilisateurs
 .equ RBASE, 0  ; adresse début pile retours
 .equ PBASE, 2  ; adresse début pile paramètres
@@ -87,7 +88,11 @@
     dec2 RSP,RSP
     ; pop R
 .endm
-    
+
+.macro DEST label
+    .word \label - $
+ .endm
+ 
 .macro SYSDICT
     .section .sysdict psv
     .align 2
@@ -107,7 +112,11 @@
 .equ F_LENMASK,0x1f	; length mask
 
 ; Store the chain of links.
-.equ link,0
+.ifndef link
+;.global link    
+;.set link,0
+.endif
+    
 ;macro utilisée pour créer les entête des mots de haut niveaux.
 .macro DEFWORD name, namelen, flags=0, label
     .section .sysdict psv
@@ -115,10 +124,10 @@
     .global name_\label
 name_\label :
     .word link		; lien vers élément précédent du dictionnaire
-    .equ link, name_\label
+    .set link, name_\label
     .byte \flags+\namelen	; flags + length byte
     .ascii "\name"		; the name
-  ;  .align 1		; padding to word boundary
+    .align 2		; padding to word boundary
     .global \label
 \label :
     .word handle(ENTER)
@@ -132,7 +141,7 @@ name_\label :
 	.global name_\label
 name_\label :
 	.word link		; link
-	.set link,name_\label
+	.set link, name_\label
 	.byte \flags+\namelen	; flags + length byte
 	.ascii "\name"		; the name
 	.align 2		; padding to next 4 byte boundary
@@ -152,7 +161,7 @@ xt_\label :			;pfa,  assembler code follows
 	mov var_\name, T
 	NEXT
 	.bss
-	.align 1
+	.align 2
 var_\name :
 	.space 2 
 .endm

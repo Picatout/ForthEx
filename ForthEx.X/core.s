@@ -122,7 +122,7 @@ XBRAN:
     NEXT
     
 ; branchement si T==0    
-DEFCODE "?BRANCH",6,,QBRANCH ; ( n -- )
+DEFCODE "?BRANCH",6,,ZBRANCH ; ( n -- )
     cp0 T
     DPOP
     bra z, XBRAN
@@ -466,7 +466,37 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
     mul.uu T,#CELL_SIZE,W0
     mov W0,T
     NEXT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  variables système
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;DEFVAR "STATE",5,,STATE
+;DEFVAR "HERE",4,,HERE
+;DEFVAR "BASE",4,,BASE
+;DEFVAR "LATEST",6,,LATEST
+;DEFVAR "RBASE",5,,RBASE
+;DEFVAR "PBASE",5,,PBASE    
+;DEFVAR "PAD",3,,PAD    
+;DEFVAR "SOURCE-ID",9,,SOURCE_ID
+;    
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; constantes système
+;;;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCONST "VERSION",7,,VERSION,version
+DEFCONST "RAMEND",6,,RAMEND,RAM_END
+DEFCONST "F_IMMED",7,,_F_IMMED,F_IMMED
+DEFCONST "F_HIIDEN",8,,_F_HIDDEN,F_HIDDEN
+DEFCONST "F_LENMASK",9,,_F_LENMASK,F_LENMASK    
+DEFCONST "BL",2,,BL,32
+DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE
     
+DEFWORD "QUIT",4,,QUIT
+    .word VERSION,ZTYPE,CR
+quit0:
+    .word ACCEPT
+    .word OK
+    .word BRANCH
+    DEST quit0
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   TESTS
@@ -477,8 +507,14 @@ DEFWORD "TEST",4,,TEST
 DEFWORD "SERTEST",7,,SERTEST
 .word CLS,VERSION,SGET,SEMIT,BRANCH,-6    
 
-DEFWORD "KBDTEST",7,,KBDTEST
-.word KEY,EMIT,BRANCH,-6 
+DEFWORD "ACCEPT",6,,ACCEPT
+kbdtest0:
+    .word KEY,DUP,LIT,13,NEQUAL,ZBRANCH
+    DEST kbdtest1
+    .word EMIT,BRANCH
+    DEST kbdtest0 
+kbdtest1:
+    .word EXIT
     
 DEFWORD "HOME",5,,HOME
 .word LIT,0,LIT,0,CURPOS,EXIT
@@ -487,17 +523,17 @@ DEFWORD "OKOFF",6,,OKOFF
 .word SPACE,SPACE,EXIT 
     
 DEFWORD "OK",2,,OK
-.word LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
+.word BL,EMIT,LIT, 'O', EMIT, LIT,'K',EMIT, CR, EXIT    
 
 .section .quick_str.const psv
 quick:
 .asciz "The quick brown fox jump over the lazy dog.\r"
 
-DEFWORD "VERSION",7,,VERSION
-.word CLS,LIT,version,ZTYPE,CR,EXIT    
+;DEFWORD "VERSION",7,,VERSION
+;.word CLS,LIT,version,ZTYPE,CR,EXIT    
 
 DEFWORD "ZTYPE",5,,ZTYPE
-.word DUP,CFETCH,DUP,QBRANCH,10,EMIT,ONEPLUS,BRANCH,-16
+.word DUP,CFETCH,DUP,ZBRANCH,10,EMIT,ONEPLUS,BRANCH,-16
 .word DROP,DROP, EXIT     
 
 DEFWORD "QUICKTEST",9,,QUICKTEST
@@ -516,7 +552,7 @@ DEFWORD "LOOPTEST",8,,LOOPTEST
 
     
 DEFWORD "CRTEST",6,,CRTEST
-.word CLS,LIT,'A',DUP,EMIT,CR,ONEPLUS,DUP,LIT,'X',EQUAL,QBRANCH,-18,INFLOOP    
+.word CLS,LIT,'A',DUP,EMIT,CR,ONEPLUS,DUP,LIT,'X',EQUAL,ZBRANCH,-18,INFLOOP    
     
 DEFWORD "DELAY",5,,DELAY
 .word  LIT, 500, MSEC, EXIT
@@ -537,7 +573,7 @@ DEFWORD "BOX",3,,BOX
 SYSDICT
 .global ENTRY
 ENTRY: 
-.word VERSION, BOX, FNTTEST, KBDTEST
+.word VERSION, BOX, FNTTEST,INFLOOP
 .global sys_latest
 sys_latest:
 .word link

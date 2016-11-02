@@ -73,9 +73,10 @@ __reset:
     mov #10, W0
     mov W0, [UP+BASE]
     movpag #edspage(sys_latest), DSRPAG
-    mov #edsoffset(ENTRY), IP
-    mov W0, [UP+LATEST]
-    NEXT
+    mov #edsoffset(COLD),IP
+    mov #edsoffset(QUIT), WP
+    mov [WP++], W0
+    goto W0
     
 .text
 .global hardware_init
@@ -222,4 +223,6 @@ DEFCODE "SRAND",5,,SRAND  ; ( -- )
     NEXT
 
 
+.end
+    
 
