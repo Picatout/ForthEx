@@ -37,10 +37,6 @@ systicks: ; compteur de millisecondes
 .space 2
 seed: ; PRNG 32 bits    
 .space 4
-.global inpb ; tampon clavier
-inpb: .space 80
-.global pad  ; scratch pad
-pad: .space 84
     
     
 INTR    
@@ -59,24 +55,27 @@ __reset:
     mov #(RAM_SIZE/2-1), W1
     repeat W1
     clr [W0++]
-    ; modification du pointeur 
-    ; de pile des retours
-    mov #rstack, RSP
-    mov #user, UP
-    ; conserve adresse de la pile
-    mov RSP, [UP+RBASE]
     call hardware_init
-    mov #(EDS_BASE), W0
-    mov W0, SPLIM
+    ; initialisation registres système forth
+    mov #rstack, RSP
     mov #pstack, DSP
-    mov DSP, [UP+PBASE]
+    mov DSP, SPLIM
+    ; initialisation variables système
+    mov RSP, var_RBASE
+    mov DSP, var_PBASE
     mov #10, W0
-    mov W0, [UP+BASE]
-    movpag #edspage(sys_latest), DSRPAG
-    mov #edsoffset(COLD),IP
-    mov #edsoffset(QUIT), WP
-    mov [WP++], W0
-    goto W0
+    mov W0, var_BASE
+    mov #pad, W0
+    mov W0, var_PAD
+    mov #tib, W0
+    mov W0, var_TIB
+    mov #USER_BASE, W0
+    mov W0,var_HERE
+    movpag #edspage(sys_latest),DSRPAG
+    mov #edsoffset(sys_latest),W0
+    mov [W0], W0
+    mov W0, var_LATEST
+    goto code_WARM
     
 .text
 .global hardware_init

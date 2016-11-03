@@ -29,23 +29,16 @@
 .equ T, W13   ; sommet pile arguments
 .equ WP, W12  ; pointeur paramètres
 .equ X, W11   ; pointeur d'adresse
-.equ UP, W10  ; pointeur variables utilisateur
-.equ IP, W9   ; pointeur d'instruction 
-.equ I, W8    ; compteur de boucle    
-.equ LIMIT,W7 ; limite des boucles
+.equ IP, W10   ; pointeur d'instruction 
+.equ I, W9    ; compteur de boucle    
+.equ LIMIT,W8 ; limite des boucles
     
 .equ CELL_SIZE, 2
 .equ DSTK_SIZE, 32*CELL_SIZE
 .equ RSTK_SIZE, 64*CELL_SIZE
 .equ TIB_SIZE, 80
 .equ PAD_SIZE, 80    
-;offset variables utilisateurs
-.equ RBASE, 0  ; adresse début pile retours
-.equ PBASE, 2  ; adresse début pile paramètres
-.equ BASE, 4   ; base numérique
-.equ HERE, 6   ; valeur du pointeur HERE
-.equ LATEST, 8 ; pointeur dernière définition    
-.equ PAD, 10   ; pointeur vers PAD
+.equ USER_BASE, 0x1800 ; début espace utilisateur
     
 ;;;;;;;;;;;;    
 ; macros
@@ -111,11 +104,7 @@
 .equ F_HIDDEN,0x20
 .equ F_LENMASK,0x1f	; length mask
 
-; Store the chain of links.
-.ifndef link
-;.global link    
-;.set link,0
-.endif
+.set link,0
     
 ;macro utilisée pour créer les entête des mots de haut niveaux.
 .macro DEFWORD name, namelen, flags=0, label
@@ -130,7 +119,7 @@ name_\label :
     .align 2		; padding to word boundary
     .global \label
 \label :
-    .word handle(ENTER)
+    .word ENTER
 	;pfa:  list of word pointers follow
 .endm
 
@@ -147,10 +136,10 @@ name_\label :
 	.align 2		; padding to next 4 byte boundary
 	.global \label
 \label :
-	.word handle(xt_\label)	; codeword
+	.word code_\label	; codeword
 	FORTH_CODE
 	.global code_\label
-xt_\label :			;pfa,  assembler code follows
+code_\label :			;pfa,  assembler code follows
 	
 .endm
  
@@ -158,11 +147,12 @@ xt_\label :			;pfa,  assembler code follows
 .macro DEFVAR name, namelen, flags=0, label
 	DEFCODE \name,\namelen,\flags,\label
 	DPUSH
-	mov var_\name, T
+	mov var_\label, T
 	NEXT
 	.bss
 	.align 2
-var_\name :
+	.global var_\label
+var_\label :
 	.space 2 
 .endm
 

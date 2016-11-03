@@ -33,9 +33,7 @@
 .global pstack, rstack, user
     
 .section .core.bss bss
-    
-user: ; variables utilisateur
-.space 20
+.global user    
     
 .section .param.stack.bss, bss , address(RAM_BASE+RSTK_SIZE)    
 pstack:
@@ -44,8 +42,17 @@ pstack:
 .section .return.stack.bss stack , address(RAM_BASE)
 rstack:
 .space RSTK_SIZE
+
+.section .tib.bss bss
+.global tib    
+tib: .space TIB_SIZE
+.section .pad.bss bss
+.global pad 
+pad: .space PAD_SIZE    
     
-    
+.section .user_dict bss  address(USER_BASE)
+.global user 
+user: .space RAM_SIZE-USER_BASE
     
 
 .section .ver_str.const psv       
@@ -73,13 +80,17 @@ __MathError:
     mov #pstack, DSP
     mov #rstack, RSP
     ; à faire: doit-remettre à zéro input buffer
-    mov #edsoffset(ENTRY), IP
-    NEXT
+    mov #edsoffset(COLD),IP
+    mov #edsoffset(QUIT), WP
+    mov [WP++], W0
+    goto W0
+
     
-DEFCODE "EXECUTE",7,,DOCODE ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
+DEFCODE "EXECUTE",7,,EXECUTE ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
     mov T, WP
     DPOP
-    goto WP
+    mov [WP++],W0
+    goto W0
     
 DEFCODE "LIT",3,,LIT  ; ( -- x ) empile une valeur  
     DPUSH
@@ -470,15 +481,17 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  variables système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;DEFVAR "STATE",5,,STATE
-;DEFVAR "HERE",4,,HERE
-;DEFVAR "BASE",4,,BASE
-;DEFVAR "LATEST",6,,LATEST
-;DEFVAR "RBASE",5,,RBASE
-;DEFVAR "PBASE",5,,PBASE    
-;DEFVAR "PAD",3,,PAD    
-;DEFVAR "SOURCE-ID",9,,SOURCE_ID
-;    
+DEFVAR "STATE",5,,STATE
+DEFVAR "HERE",4,,HERE
+DEFVAR "BASE",4,,BASE
+DEFVAR "LATEST",6,,LATEST
+DEFVAR "RBASE",5,,RBASE
+DEFVAR "PBASE",5,,PBASE    
+DEFVAR "PAD",3,,PAD
+DEFVAR "TIB",3,,TIB    
+DEFVAR "SOURCE-ID",9,,SOURCE_ID
+DEFVAR ">IN",3,,INPTR
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;    
@@ -489,9 +502,12 @@ DEFCONST "F_HIIDEN",8,,_F_HIDDEN,F_HIDDEN
 DEFCONST "F_LENMASK",9,,_F_LENMASK,F_LENMASK    
 DEFCONST "BL",2,,BL,32
 DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE
+DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE 
+DEFCONST "ULIMIT",6,,ULIMIT,RAM_END-1
     
 DEFWORD "QUIT",4,,QUIT
     .word VERSION,ZTYPE,CR
+    .word TIB,FETCH,INPTR,STORE
 quit0:
     .word ACCEPT
     .word OK
@@ -571,9 +587,6 @@ DEFWORD "BOX",3,,BOX
 .WORD CR,CLIT,2,EMIT,CLIT,12,EMIT,CLIT,4,EMIT,CR,EXIT
     
 SYSDICT
-.global ENTRY
-ENTRY: 
-.word VERSION, BOX, FNTTEST,INFLOOP
 .global sys_latest
 sys_latest:
 .word link
