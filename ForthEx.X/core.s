@@ -478,6 +478,16 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
     mov W0,T
     NEXT
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  mot forth I/O
+;;;;;;;;;;;;;;;;;;;;;;;;;;    
+.include "hardware_f.inc"
+.include "TVout_f.inc"
+.include "keyboard_f.inc"
+.include "serial_f.inc"
+.include "sound_f.inc"
+.include "store_f.inc"
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  variables système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -585,12 +595,14 @@ DEFWORD "FNTTEST",7,,FNTTEST
 DEFWORD "BOX",3,,BOX
 .WORD CLIT,1,EMIT,CLIT,11,EMIT,CLIT,3,EMIT,CR,CLIT,14,EMIT,CLIT,7,EMIT,CLIT,15,EMIT
 .WORD CR,CLIT,2,EMIT,CLIT,12,EMIT,CLIT,4,EMIT,CR,EXIT
-    
-SYSDICT
+
+
+.section .link psv  address(0x7FFE)    
 .global sys_latest
 sys_latest:
 .word link
     
+.text    
     
 .end
 

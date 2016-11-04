@@ -26,10 +26,10 @@
 .include "serial.inc"
 .include "core.inc"    
 
-.equ QUEUE_SIZE, 16
+
     
 .section .serial.bss bss
-    
+.global tx_wait, tx_tail,tx_queue,rx_head,rx_queue,rx_in    
 rx_queue: .space QUEUE_SIZE
 tx_queue: .space QUEUE_SIZE
 tx_wait:  .space 2 ; nombre de caractères dans tx_queue 
@@ -81,54 +81,6 @@ serial_init:
     bset SER_STA, #UTXEN
     return
  
-    
-DEFCODE "SEMIT",5,,SEMIT
-    cp0 tx_wait
-    bra neq, 0f
-    btsc SER_STA, #UTXBF
-    bra 0f
-    mov T, SER_TXREG
-    DPOP
-    bra 3f
-0:    
-    mov #QUEUE_SIZE, W0
-1:
-    cp tx_wait
-    bra eq, 1b
-2:    
-    mov.b tx_tail, WREG
-    ze W0,W0
-    mov #tx_queue, W1
-    add W0,W1,W1
-    mov.b T, [W1]
-    DPOP
-    inc tx_wait
-    inc.b tx_tail
-    mov #(QUEUE_SIZE-1), W0
-    and.b tx_tail
-3:    
-    NEXT
-    
-DEFCODE "SGET",4,,SGET
-    DPUSH
-0:    
-    cp0 rx_in
-    bra nz, 1f
-;    mov #XON, W0
-;    btss SER_STA, #UTXBF
-;    mov.b WREG, SER_TXREG
-    bra 0b
-1:
-    mov.b rx_head, WREG
-    ze W0,W0
-    mov #rx_queue, W1
-    add W0,W1,W1
-    mov.b [W1], T
-    dec rx_in
-    inc.b rx_head
-    mov #(QUEUE_SIZE-1), W0
-    and.b rx_head
-    NEXT
     
     
     

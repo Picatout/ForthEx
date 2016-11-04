@@ -33,7 +33,8 @@
 .equ KBD_QUEUE_SIZE, 32    
  
 .section .keyboard.bss bss
-    
+ 
+.global kbd_queue, kbd_head    
 kbd_queue:
 .space KBD_QUEUE_SIZE    
 kbd_head:
@@ -317,43 +318,6 @@ kbd_no_key: ; sortie file vide
     pop DSRPAG
     return
 
-;;;;;;;;;;;;;;;;;;;;;;
-; définitions Forth
-;;;;;;;;;;;;;;;;;;;;;;    
-    
-DEFCODE "?KEY",4,,QKEY  ; ( -- 0 | T c )
-    call kbd_get
-    DPUSH
-    mov W0, T
-    cp0 W0
-    bra eq, 1f
-    DPUSH
-    setm T
-1:    
-    NEXT
-    
-;;;;;;;;;;;;;;;;;;;;;;;;
-; attend une touche
-; du clavier
-;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "KEY",3,,KEY ; ( -- c)
-0:
-    call kbd_get
-    cp0 W0
-    bra z, 0b
-    DPUSH
-    mov W0, T
-    NEXT
-    
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; envoie d'un octet au clavier
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "KBD_CMD",7,,KBD_CMD ; ( c -- )
-    mov T, W0
-    call ps2_send
-    inc2 T,T
-    NEXT
     
 .end
     

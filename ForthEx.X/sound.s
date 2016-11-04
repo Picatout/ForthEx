@@ -50,19 +50,5 @@ sound_init:
     mov W0, AUDIO_TMRCON
     return
     
- ;;;;;;;;;;;;;;;;;;
- ; mots Forth
- ;;;;;;;;;;;;;;;;;;
- 
- DEFCODE "TONE",4,,TONE  ; ( duration Nfr -- )
-    mov T, AUDIO_PER
-    mov T, AUDIO_OCRS
-    lsr T, T
-    mov T, AUDIO_OCR
-    DPOP
-    bset AUDIO_TMRCON, #TON
-    mov T, tone_len
-    DPOP
-    NEXT
- 
+  
  .end   

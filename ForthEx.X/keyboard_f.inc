@@ -16,13 +16,48 @@
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
+; mots forth lié au clavier
 
-;NOM: serial.inc
-;Description:  communication port sériel RS232 via USART
-;Date: 2015-10-07
+.include "keyboard.inc"
 
-.equ  XON,  17
-.equ  XOFF, 19
-
-.equ QUEUE_SIZE, 16
     
+;;;;;;;;;;;;;;;;;;;;;;
+; définitions Forth
+;;;;;;;;;;;;;;;;;;;;;;    
+    
+DEFCODE "?KEY",4,,QKEY  ; ( -- 0 | T c )
+    call kbd_get
+    DPUSH
+    mov W0, T
+    cp0 W0
+    bra eq, 1f
+    DPUSH
+    setm T
+1:    
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;
+; attend une touche
+; du clavier
+;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCODE "KEY",3,,KEY ; ( -- c)
+0:
+    call kbd_get
+    cp0 W0
+    bra z, 0b
+    DPUSH
+    mov W0, T
+    NEXT
+    
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; envoie d'un octet au clavier
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "KBD_CMD",7,,KBD_CMD ; ( c -- )
+    mov T, W0
+    call ps2_send
+    inc2 T,T
+    NEXT
+    
+
+

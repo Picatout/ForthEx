@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015,2016 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -17,12 +17,22 @@
 ;
 ;****************************************************************************
 
-;NOM: serial.inc
-;Description:  communication port sériel RS232 via USART
-;Date: 2015-10-07
+.include "sound.inc"
 
-.equ  XON,  17
-.equ  XOFF, 19
-
-.equ QUEUE_SIZE, 16
+;;;;;;;;;;;;;;;;;;
+ ; mots Forth
+ ;;;;;;;;;;;;;;;;;;
+ 
+ DEFCODE "TONE",4,,TONE  ; ( duration Nfr -- )
+    mov T, AUDIO_PER
+    mov T, AUDIO_OCRS
+    lsr T, T
+    mov T, AUDIO_OCR
+    DPOP
+    bset AUDIO_TMRCON, #TON
+    mov T, tone_len
+    DPOP
+    NEXT
     
+
+

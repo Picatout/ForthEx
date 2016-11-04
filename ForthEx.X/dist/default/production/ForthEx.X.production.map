@@ -81,18 +81,14 @@ section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .start.text                  0x200                0x36            0x51  (81)
 .intr                        0x236               0x1ea           0x2df  (735)
-.sysdict                     0x420               0x696           0x9e1  (2529)
-.font.const                  0xab6               0x400           0x600  (1536)
-.keybind.const               0xeb6                0xc2           0x123  (291)
-.quick_str.const             0xf78                0x2e            0x45  (69)
-.ver_str.const               0xfa6                 0xe            0x15  (21)
-.forth_code.text             0xfb4               0x3b8           0x594  (1428)
-.text                       0x136c                0xea           0x15f  (351)
-.forth_code.text            0x1456               0x206           0x309  (777)
-.text                       0x165c               0x114           0x19e  (414)
-.forth_code.text            0x1770                0x84            0xc6  (198)
-.text                       0x17f4                0x82            0xc3  (195)
-.forth_code.text            0x1876                0x16            0x21  (33)
+.sysdict                     0x420               0x694           0x9de  (2526)
+.font.const                  0xab4               0x400           0x600  (1536)
+.keybind.const               0xeb4                0xc2           0x123  (291)
+.quick_str.const             0xf76                0x2e            0x45  (69)
+.ver_str.const               0xfa4                 0xe            0x15  (21)
+.forth_code.text             0xfb2               0x658           0x984  (2436)
+.text                       0x160a               0x280           0x3c0  (960)
+.link                       0x7ffe                 0x2             0x3  (3)
 
                  Total program memory used (bytes):         0x21d2  (8658) 1%
 
@@ -143,6 +139,9 @@ External Symbols in Data Memory (by address):
 
                     0x1000                  rstack
                     0x1080                  pstack
+                    0x10c3                  video_on
+                    0x10c4                  xpos
+                    0x10c5                  ypos
                     0x10c6                  _video_buffer
                     0x16c6                  tib
                     0x1716                  pad
@@ -150,6 +149,14 @@ External Symbols in Data Memory (by address):
                     0x178c                  ps2_head
                     0x178e                  ps2_tail
                     0x1790                  key_state
+                    0x1792                  rx_queue
+                    0x17a2                  tx_queue
+                    0x17b2                  tx_wait
+                    0x17b5                  tx_tail
+                    0x17b6                  rx_in
+                    0x17b8                  rx_head
+                    0x17ba                  kbd_queue
+                    0x17da                  kbd_head
                     0x17de                  var_STATE
                     0x17e0                  var_HERE
                     0x17e2                  var_BASE
@@ -161,12 +168,15 @@ External Symbols in Data Memory (by address):
                     0x17ee                  var_SOURCE_ID
                     0x17f0                  var_INPTR
                     0x17f2                  systicks
+                    0x17f4                  seed
                     0x17f8                  tone_len
                     0x1800                  user
 
 External Symbols in Data Memory (by name):
 
                     0x10c6                  _video_buffer
+                    0x17da                  kbd_head
+                    0x17ba                  kbd_queue
                     0x1790                  key_state
                     0x1716                  pad
                     0x178c                  ps2_head
@@ -174,9 +184,16 @@ External Symbols in Data Memory (by name):
                     0x178e                  ps2_tail
                     0x1080                  pstack
                     0x1000                  rstack
+                    0x17b8                  rx_head
+                    0x17b6                  rx_in
+                    0x1792                  rx_queue
+                    0x17f4                  seed
                     0x17f2                  systicks
                     0x16c6                  tib
                     0x17f8                  tone_len
+                    0x17a2                  tx_queue
+                    0x17b5                  tx_tail
+                    0x17b2                  tx_wait
                     0x1800                  user
                     0x17e2                  var_BASE
                     0x17e0                  var_HERE
@@ -188,6 +205,9 @@ External Symbols in Data Memory (by name):
                     0x17ee                  var_SOURCE_ID
                     0x17de                  var_STATE
                     0x17ec                  var_TIB
+                    0x10c3                  video_on
+                    0x10c4                  xpos
+                    0x10c5                  ypos
 
 External Symbols in Program Memory (by address):
 
@@ -199,529 +219,531 @@ External Symbols in Program Memory (by address):
                   0x000398                  __INT1Interrupt
                   0x0003d8                  __U1RXInterrupt
                   0x0003fc                  __U1TXInterrupt
-                  0x000420                  name_VIDON
-                  0x000428                  VIDON
-                  0x00042a                  name_CLS
-                  0x000430                  CLS
-                  0x000432                  name_XPOS
-                  0x00043a                  XPOS
-                  0x00043c                  name_YPOS
-                  0x000444                  YPOS
-                  0x000446                  name_CURPOS
-                  0x000450                  CURPOS
-                  0x000458                  name_EMIT
-                  0x000460                  EMIT
-                  0x000462                  name_CR
-                  0x000468                  CR
-                  0x00046a                  name_SPACE
-                  0x000472                  SPACE
-                  0x000474                  name_SCROLLUP
-                  0x000480                  SCROLLUP
-                  0x000482                  name_CLRLN
-                  0x00048a                  CLRLN
-                  0x00048c                  name_TYPE
-                  0x000494                  TYPE
-                  0x0004a8                  name_DOT
-                  0x0004ac                  DOT
-                  0x0004b0                  name_EXIT
-                  0x0004b8                  EXIT
-                  0x0004ba                  name_COLD
-                  0x0004c2                  COLD
-                  0x0004c4                  name_WARM
-                  0x0004cc                  WARM
-                  0x0004ce                  name_EXECUTE
-                  0x0004d8                  EXECUTE
-                  0x0004da                  name_LIT
-                  0x0004e0                  LIT
-                  0x0004e2                  name_CLIT
-                  0x0004ea                  CLIT
-                  0x0004ec                  name_FETCH
-                  0x0004f0                  FETCH
-                  0x0004f2                  name_CFETCH
-                  0x0004f8                  CFETCH
-                  0x0004fa                  name_STORE
-                  0x0004fe                  STORE
-                  0x000500                  name_CSTORE
-                  0x000506                  CSTORE
-                  0x000508                  name_BRANCH
-                  0x000512                  BRANCH
-                  0x000514                  name_ZBRANCH
-                  0x00051e                  ZBRANCH
-                  0x000520                  name_DODO
-                  0x000528                  DODO
-                  0x00052a                  name_DOLOOP
-                  0x000534                  DOLOOP
-                  0x000536                  name_DOI
-                  0x00053a                  DOI
-                  0x00053c                  name_DOJ
-                  0x000540                  DOJ
-                  0x000542                  name_UNLOOP
-                  0x00054c                  UNLOOP
-                  0x00054e                  name_DUP
-                  0x000554                  DUP
-                  0x000556                  name_DDUP
-                  0x00055e                  DDUP
-                  0x000560                  name_QDUP
-                  0x000568                  QDUP
-                  0x00056a                  name_DROP
-                  0x000572                  DROP
-                  0x000574                  name_DDROP
-                  0x00057c                  DDROP
-                  0x00057e                  name_SWAP
-                  0x000586                  SWAP
-                  0x000588                  name_DSWAP
-                  0x000590                  DSWAP
-                  0x000592                  name_ROT
-                  0x000598                  ROT
-                  0x00059a                  name_NROT
-                  0x0005a2                  NROT
-                  0x0005a4                  name_OVER
-                  0x0005ac                  OVER
-                  0x0005ae                  name_NIP
-                  0x0005b4                  NIP
-                  0x0005b6                  name_TOR
-                  0x0005bc                  TOR
-                  0x0005be                  name_RFROM
-                  0x0005c4                  RFROM
-                  0x0005c6                  name_RFETCH
-                  0x0005cc                  RFETCH
-                  0x0005ce                  name_SPFETCH
-                  0x0005d4                  SPFETCH
-                  0x0005d6                  name_SPSTORE
-                  0x0005dc                  SPSTORE
-                  0x0005de                  name_RPFETCH
-                  0x0005e4                  RPFETCH
-                  0x0005e6                  name_RPSTORE
-                  0x0005ec                  RPSTORE
-                  0x0005ee                  name_TUCK
-                  0x0005f6                  TUCK
-                  0x0005f8                  name_PLUS
-                  0x0005fc                  PLUS
-                  0x0005fe                  name_MINUS
-                  0x000602                  MINUS
-                  0x000604                  name_ONEPLUS
-                  0x00060a                  ONEPLUS
-                  0x00060c                  name_TWOPLUS
-                  0x000612                  TWOPLUS
-                  0x000614                  name_ONEMINUS
-                  0x00061a                  ONEMINUS
-                  0x00061c                  name_TWOMINUS
-                  0x000622                  TWOMINUS
-                  0x000624                  name_TWOSTAR
-                  0x00062a                  TWOSTAR
-                  0x00062c                  name_TWOSLASH
-                  0x000632                  TWOSLASH
-                  0x000634                  name_LSHIFT
-                  0x00063e                  LSHIFT
-                  0x000640                  name_RSHIFT
-                  0x00064a                  RSHIFT
-                  0x00064c                  name_PLUSSTORE
-                  0x000652                  PLUSSTORE
-                  0x000654                  name_DADD
-                  0x00065a                  DADD
-                  0x00065c                  name_MULTIPLY
-                  0x000660                  MULTIPLY
-                  0x000662                  name_DIVIDE
-                  0x000666                  DIVIDE
-                  0x000668                  name_DIVMOD
-                  0x000670                  DIVMOD
-                  0x000672                  name__AND
-                  0x000678                  _AND
-                  0x00067a                  name__OR
-                  0x000680                  _OR
-                  0x000682                  name__XOR
-                  0x000688                  _XOR
-                  0x00068a                  name_INVERT
-                  0x000694                  INVERT
-                  0x000696                  name_NEGATE
-                  0x0006a0                  NEGATE
-                  0x0006a2                  name_ZEROEQ
-                  0x0006a8                  ZEROEQ
-                  0x0006aa                  name_ZEROLT
-                  0x0006b0                  ZEROLT
-                  0x0006b2                  name_EQUAL
-                  0x0006b6                  EQUAL
-                  0x0006b8                  name_NEQUAL
-                  0x0006be                  NEQUAL
-                  0x0006c0                  name_LESS
-                  0x0006c4                  LESS
-                  0x0006c6                  name_GREATER
-                  0x0006ca                  GREATER
-                  0x0006cc                  name_ULESS
-                  0x0006d2                  ULESS
-                  0x0006d4                  name_UGREATER
-                  0x0006da                  UGREATER
-                  0x0006dc                  name_CELL
-                  0x0006e4                  CELL
-                  0x0006e6                  name_CELLPLUS
-                  0x0006ee                  CELLPLUS
-                  0x0006f0                  name_CELLS
-                  0x0006f8                  CELLS
-                  0x0006fa                  name_STATE
-                  0x000702                  STATE
-                  0x000704                  name_HERE
-                  0x00070c                  HERE
-                  0x00070e                  name_BASE
-                  0x000716                  BASE
-                  0x000718                  name_LATEST
-                  0x000722                  LATEST
-                  0x000724                  name_RBASE
-                  0x00072c                  RBASE
-                  0x00072e                  name_PBASE
-                  0x000736                  PBASE
-                  0x000738                  name_PAD
-                  0x00073e                  PAD
-                  0x000740                  name_TIB
-                  0x000746                  TIB
-                  0x000748                  name_SOURCE_ID
-                  0x000754                  SOURCE_ID
-                  0x000756                  name_INPTR
-                  0x00075c                  INPTR
-                  0x00075e                  name_VERSION
-                  0x000768                  VERSION
-                  0x00076a                  name_RAMEND
-                  0x000774                  RAMEND
-                  0x000776                  name__F_IMMED
-                  0x000780                  _F_IMMED
-                  0x000782                  name__F_HIDDEN
-                  0x00078e                  _F_HIDDEN
-                  0x000790                  name__F_LENMASK
-                  0x00079c                  _F_LENMASK
-                  0x00079e                  name_BL
-                  0x0007a4                  BL
-                  0x0007a6                  name_TIBSIZE
-                  0x0007b0                  TIBSIZE
-                  0x0007b2                  name_PADSIZE
-                  0x0007bc                  PADSIZE
-                  0x0007be                  name_ULIMIT
-                  0x0007c8                  ULIMIT
-                  0x0007ca                  name_QUIT
-                  0x0007d2                  QUIT
-                  0x0007ea                  name_TEST
-                  0x0007f2                  TEST
-                  0x000810                  name_SERTEST
-                  0x00081a                  SERTEST
-                  0x000828                  name_ACCEPT
-                  0x000832                  ACCEPT
-                  0x00084a                  name_HOME
-                  0x000852                  HOME
-                  0x000860                  name_OKOFF
-                  0x000868                  OKOFF
-                  0x000870                  name_OK
-                  0x000876                  OK
-                  0x00088c                  name_ZTYPE
-                  0x000894                  ZTYPE
-                  0x0008ae                  name_QUICKTEST
-                  0x0008ba                  QUICKTEST
-                  0x0008c8                  name_STRTEST
-                  0x0008d2                  STRTEST
-                  0x00090c                  name_EEPROMTEST
-                  0x00091a                  EEPROMTEST
-                  0x000946                  name_LOOPTEST
-                  0x000952                  LOOPTEST
-                  0x00096c                  name_CRTEST
-                  0x000976                  CRTEST
-                  0x000994                  name_DELAY
-                  0x00099c                  DELAY
-                  0x0009a6                  name_INFLOOP
-                  0x0009b0                  INFLOOP
-                  0x0009b2                  name_FNTTEST
-                  0x0009bc                  FNTTEST
-                  0x0009d4                  name_BOX
-                  0x0009da                  BOX
-                  0x000a1a                  sys_latest
-                  0x000a1c                  name_TICKS
-                  0x000a24                  TICKS
-                  0x000a26                  name_MSEC
-                  0x000a2e                  MSEC
-                  0x000a30                  name_LFSR
-                  0x000a38                  LFSR
-                  0x000a3a                  name_RAND
-                  0x000a42                  RAND
-                  0x000a44                  name_SRAND
-                  0x000a4c                  SRAND
-                  0x000a4e                  name_QKEY
-                  0x000a56                  QKEY
-                  0x000a58                  name_KEY
-                  0x000a5e                  KEY
-                  0x000a60                  name_KBD_CMD
-                  0x000a6a                  KBD_CMD
-                  0x000a6c                  name_SEMIT
-                  0x000a74                  SEMIT
-                  0x000a76                  name_SGET
-                  0x000a7e                  SGET
-                  0x000a80                  name_TONE
-                  0x000a88                  TONE
-                  0x000a8a                  name_RSTORE
-                  0x000a94                  RSTORE
-                  0x000a96                  name_RLOAD
-                  0x000a9e                  RLOAD
-                  0x000aa0                  name_ESTORE
-                  0x000aaa                  ESTORE
-                  0x000aac                  name_ELOAD
-                  0x000ab4                  ELOAD
-                  0x000ab6                  _font
-                  0x000eb6                  ascii
-                  0x000f22                  shifted
-                  0x000f4e                  mod
-                  0x000f5a                  xmod
-                  0x000f60                  extended
-                  0x000fb4                  ENTER
-                  0x000fbe                  code_EXIT
-                  0x000fc6                  code_COLD
-                  0x000fc8                  code_WARM
-                  0x000fd4                  code_EXECUTE
-                  0x000fdc                  code_LIT
-                  0x000fe6                  code_CLIT
-                  0x000ff4                  code_FETCH
-                  0x000ffc                  code_CFETCH
-                  0x001006                  code_STORE
-                  0x001012                  code_CSTORE
-                  0x001020                  code_BRANCH
-                  0x001028                  code_ZBRANCH
-                  0x001036                  code_DODO
-                  0x001044                  code_DOLOOP
-                  0x001060                  code_DOI
-                  0x00106a                  code_DOJ
-                  0x001074                  code_UNLOOP
-                  0x00107e                  code_DUP
-                  0x001086                  code_DDUP
-                  0x001090                  code_QDUP
-                  0x00109c                  code_DROP
-                  0x0010a4                  code_DDROP
-                  0x0010ae                  code_SWAP
-                  0x0010ba                  code_DSWAP
-                  0x0010ce                  code_ROT
-                  0x0010de                  code_NROT
-                  0x0010ee                  code_OVER
-                  0x0010f8                  code_NIP
-                  0x001100                  code_TOR
-                  0x00110a                  code_RFROM
-                  0x001114                  code_RFETCH
-                  0x00111e                  code_SPFETCH
-                  0x001128                  code_SPSTORE
-                  0x001132                  code_RPFETCH
-                  0x00113c                  code_RPSTORE
-                  0x001146                  code_TUCK
-                  0x001156                  code_PLUS
-                  0x00115e                  code_MINUS
-                  0x001166                  code_ONEPLUS
-                  0x00116e                  code_TWOPLUS
-                  0x001176                  code_ONEMINUS
-                  0x00117e                  code_TWOMINUS
-                  0x001186                  code_TWOSTAR
-                  0x00118e                  code_TWOSLASH
-                  0x001196                  code_LSHIFT
-                  0x00119e                  code_RSHIFT
-                  0x0011a6                  code_PLUSSTORE
-                  0x0011b4                  code_DADD
-                  0x0011c4                  code_MULTIPLY
-                  0x0011d2                  code_DIVIDE
-                  0x0011e0                  code_DIVMOD
-                  0x0011f0                  code__AND
-                  0x0011f8                  code__OR
-                  0x001200                  code__XOR
-                  0x001208                  code_INVERT
-                  0x001210                  code_NEGATE
-                  0x001218                  code_ZEROEQ
-                  0x001222                  code_ZEROLT
-                  0x001230                  code_EQUAL
-                  0x001240                  code_NEQUAL
-                  0x001250                  code_LESS
-                  0x001260                  code_GREATER
-                  0x001270                  code_ULESS
-                  0x001280                  code_UGREATER
-                  0x001290                  code_CELL
-                  0x00129a                  code_CELLPLUS
-                  0x0012a2                  code_CELLS
-                  0x0012ac                  code_STATE
-                  0x0012b6                  code_HERE
-                  0x0012c0                  code_BASE
-                  0x0012ca                  code_LATEST
-                  0x0012d4                  code_RBASE
-                  0x0012de                  code_PBASE
-                  0x0012e8                  code_PAD
-                  0x0012f2                  code_TIB
-                  0x0012fc                  code_SOURCE_ID
-                  0x001306                  code_INPTR
-                  0x001310                  code_VERSION
-                  0x00131a                  code_RAMEND
-                  0x001324                  code__F_IMMED
-                  0x00132e                  code__F_HIDDEN
-                  0x001338                  code__F_LENMASK
-                  0x001342                  code_BL
-                  0x00134c                  code_TIBSIZE
-                  0x001356                  code_PADSIZE
-                  0x001360                  code_ULIMIT
-                  0x00136a                  code_INFLOOP
-                  0x00136c                  get_code
-                  0x00139a                  kbd_get
-                  0x001456                  code_RSTORE
-                  0x001488                  code_RLOAD
-                  0x0014ba                  code_ESTORE
-                  0x001502                  code_ELOAD
-                  0x00153a                  code_VIDON
-                  0x001546                  code_CLS
-                  0x001556                  code_XPOS
-                  0x001568                  code_YPOS
-                  0x00157a                  code_EMIT
-                  0x0015ac                  code_CR
-                  0x0015ae                  code_SPACE
-                  0x0015b4                  code_SCROLLUP
-                  0x0015cc                  code_CLRLN
-                  0x0015e8                  code_TICKS
-                  0x0015f2                  code_MSEC
-                  0x001602                  code_LFSR
-                  0x00161a                  code_RAND
-                  0x00164c                  code_SRAND
-                  0x00165c                  ps2_init
-                  0x0016aa                  ps2_send
-                  0x0016ca                  tvout_init
-                  0x001720                  store_init
-                  0x001770                  code_SEMIT
-                  0x00179e                  code_SGET
-                  0x0017be                  code_QKEY
-                  0x0017d4                  code_KEY
-                  0x0017e6                  code_KBD_CMD
-                  0x0017f4                  serial_init
-                  0x00182a                  hardware_init
-                  0x00185e                  sound_init
-                  0x001876                  code_TONE
+                  0x000420                  name_EXIT
+                  0x000428                  EXIT
+                  0x00042a                  name_COLD
+                  0x000432                  COLD
+                  0x000434                  name_WARM
+                  0x00043c                  WARM
+                  0x00043e                  name_EXECUTE
+                  0x000448                  EXECUTE
+                  0x00044a                  name_LIT
+                  0x000450                  LIT
+                  0x000452                  name_CLIT
+                  0x00045a                  CLIT
+                  0x00045c                  name_FETCH
+                  0x000460                  FETCH
+                  0x000462                  name_CFETCH
+                  0x000468                  CFETCH
+                  0x00046a                  name_STORE
+                  0x00046e                  STORE
+                  0x000470                  name_CSTORE
+                  0x000476                  CSTORE
+                  0x000478                  name_BRANCH
+                  0x000482                  BRANCH
+                  0x000484                  name_ZBRANCH
+                  0x00048e                  ZBRANCH
+                  0x000490                  name_DODO
+                  0x000498                  DODO
+                  0x00049a                  name_DOLOOP
+                  0x0004a4                  DOLOOP
+                  0x0004a6                  name_DOI
+                  0x0004aa                  DOI
+                  0x0004ac                  name_DOJ
+                  0x0004b0                  DOJ
+                  0x0004b2                  name_UNLOOP
+                  0x0004bc                  UNLOOP
+                  0x0004be                  name_DUP
+                  0x0004c4                  DUP
+                  0x0004c6                  name_DDUP
+                  0x0004ce                  DDUP
+                  0x0004d0                  name_QDUP
+                  0x0004d8                  QDUP
+                  0x0004da                  name_DROP
+                  0x0004e2                  DROP
+                  0x0004e4                  name_DDROP
+                  0x0004ec                  DDROP
+                  0x0004ee                  name_SWAP
+                  0x0004f6                  SWAP
+                  0x0004f8                  name_DSWAP
+                  0x000500                  DSWAP
+                  0x000502                  name_ROT
+                  0x000508                  ROT
+                  0x00050a                  name_NROT
+                  0x000512                  NROT
+                  0x000514                  name_OVER
+                  0x00051c                  OVER
+                  0x00051e                  name_NIP
+                  0x000524                  NIP
+                  0x000526                  name_TOR
+                  0x00052c                  TOR
+                  0x00052e                  name_RFROM
+                  0x000534                  RFROM
+                  0x000536                  name_RFETCH
+                  0x00053c                  RFETCH
+                  0x00053e                  name_SPFETCH
+                  0x000544                  SPFETCH
+                  0x000546                  name_SPSTORE
+                  0x00054c                  SPSTORE
+                  0x00054e                  name_RPFETCH
+                  0x000554                  RPFETCH
+                  0x000556                  name_RPSTORE
+                  0x00055c                  RPSTORE
+                  0x00055e                  name_TUCK
+                  0x000566                  TUCK
+                  0x000568                  name_PLUS
+                  0x00056c                  PLUS
+                  0x00056e                  name_MINUS
+                  0x000572                  MINUS
+                  0x000574                  name_ONEPLUS
+                  0x00057a                  ONEPLUS
+                  0x00057c                  name_TWOPLUS
+                  0x000582                  TWOPLUS
+                  0x000584                  name_ONEMINUS
+                  0x00058a                  ONEMINUS
+                  0x00058c                  name_TWOMINUS
+                  0x000592                  TWOMINUS
+                  0x000594                  name_TWOSTAR
+                  0x00059a                  TWOSTAR
+                  0x00059c                  name_TWOSLASH
+                  0x0005a2                  TWOSLASH
+                  0x0005a4                  name_LSHIFT
+                  0x0005ae                  LSHIFT
+                  0x0005b0                  name_RSHIFT
+                  0x0005ba                  RSHIFT
+                  0x0005bc                  name_PLUSSTORE
+                  0x0005c2                  PLUSSTORE
+                  0x0005c4                  name_DADD
+                  0x0005ca                  DADD
+                  0x0005cc                  name_MULTIPLY
+                  0x0005d0                  MULTIPLY
+                  0x0005d2                  name_DIVIDE
+                  0x0005d6                  DIVIDE
+                  0x0005d8                  name_DIVMOD
+                  0x0005e0                  DIVMOD
+                  0x0005e2                  name__AND
+                  0x0005e8                  _AND
+                  0x0005ea                  name__OR
+                  0x0005f0                  _OR
+                  0x0005f2                  name__XOR
+                  0x0005f8                  _XOR
+                  0x0005fa                  name_INVERT
+                  0x000604                  INVERT
+                  0x000606                  name_NEGATE
+                  0x000610                  NEGATE
+                  0x000612                  name_ZEROEQ
+                  0x000618                  ZEROEQ
+                  0x00061a                  name_ZEROLT
+                  0x000620                  ZEROLT
+                  0x000622                  name_EQUAL
+                  0x000626                  EQUAL
+                  0x000628                  name_NEQUAL
+                  0x00062e                  NEQUAL
+                  0x000630                  name_LESS
+                  0x000634                  LESS
+                  0x000636                  name_GREATER
+                  0x00063a                  GREATER
+                  0x00063c                  name_ULESS
+                  0x000642                  ULESS
+                  0x000644                  name_UGREATER
+                  0x00064a                  UGREATER
+                  0x00064c                  name_CELL
+                  0x000654                  CELL
+                  0x000656                  name_CELLPLUS
+                  0x00065e                  CELLPLUS
+                  0x000660                  name_CELLS
+                  0x000668                  CELLS
+                  0x00066a                  name_TICKS
+                  0x000672                  TICKS
+                  0x000674                  name_MSEC
+                  0x00067c                  MSEC
+                  0x00067e                  name_LFSR
+                  0x000686                  LFSR
+                  0x000688                  name_RAND
+                  0x000690                  RAND
+                  0x000692                  name_SRAND
+                  0x00069a                  SRAND
+                  0x00069c                  name_VIDON
+                  0x0006a4                  VIDON
+                  0x0006a6                  name_CLS
+                  0x0006ac                  CLS
+                  0x0006ae                  name_XPOS
+                  0x0006b6                  XPOS
+                  0x0006b8                  name_YPOS
+                  0x0006c0                  YPOS
+                  0x0006c2                  name_CURPOS
+                  0x0006cc                  CURPOS
+                  0x0006d4                  name_EMIT
+                  0x0006dc                  EMIT
+                  0x0006de                  name_CR
+                  0x0006e4                  CR
+                  0x0006e6                  name_SPACE
+                  0x0006ee                  SPACE
+                  0x0006f0                  name_SCROLLUP
+                  0x0006fc                  SCROLLUP
+                  0x0006fe                  name_CLRLN
+                  0x000706                  CLRLN
+                  0x000708                  name_TYPE
+                  0x000710                  TYPE
+                  0x000724                  name_DOT
+                  0x000728                  DOT
+                  0x00072c                  name_QKEY
+                  0x000734                  QKEY
+                  0x000736                  name_KEY
+                  0x00073c                  KEY
+                  0x00073e                  name_KBD_CMD
+                  0x000748                  KBD_CMD
+                  0x00074a                  name_SEMIT
+                  0x000752                  SEMIT
+                  0x000754                  name_SGET
+                  0x00075c                  SGET
+                  0x00075e                  name_TONE
+                  0x000766                  TONE
+                  0x000768                  name_RSTORE
+                  0x000772                  RSTORE
+                  0x000774                  name_RLOAD
+                  0x00077c                  RLOAD
+                  0x00077e                  name_ESTORE
+                  0x000788                  ESTORE
+                  0x00078a                  name_ELOAD
+                  0x000792                  ELOAD
+                  0x000794                  name_STATE
+                  0x00079c                  STATE
+                  0x00079e                  name_HERE
+                  0x0007a6                  HERE
+                  0x0007a8                  name_BASE
+                  0x0007b0                  BASE
+                  0x0007b2                  name_LATEST
+                  0x0007bc                  LATEST
+                  0x0007be                  name_RBASE
+                  0x0007c6                  RBASE
+                  0x0007c8                  name_PBASE
+                  0x0007d0                  PBASE
+                  0x0007d2                  name_PAD
+                  0x0007d8                  PAD
+                  0x0007da                  name_TIB
+                  0x0007e0                  TIB
+                  0x0007e2                  name_SOURCE_ID
+                  0x0007ee                  SOURCE_ID
+                  0x0007f0                  name_INPTR
+                  0x0007f6                  INPTR
+                  0x0007f8                  name_VERSION
+                  0x000802                  VERSION
+                  0x000804                  name_RAMEND
+                  0x00080e                  RAMEND
+                  0x000810                  name__F_IMMED
+                  0x00081a                  _F_IMMED
+                  0x00081c                  name__F_HIDDEN
+                  0x000828                  _F_HIDDEN
+                  0x00082a                  name__F_LENMASK
+                  0x000836                  _F_LENMASK
+                  0x000838                  name_BL
+                  0x00083e                  BL
+                  0x000840                  name_TIBSIZE
+                  0x00084a                  TIBSIZE
+                  0x00084c                  name_PADSIZE
+                  0x000856                  PADSIZE
+                  0x000858                  name_ULIMIT
+                  0x000862                  ULIMIT
+                  0x000864                  name_QUIT
+                  0x00086c                  QUIT
+                  0x000884                  name_TEST
+                  0x00088c                  TEST
+                  0x0008aa                  name_SERTEST
+                  0x0008b4                  SERTEST
+                  0x0008c2                  name_ACCEPT
+                  0x0008cc                  ACCEPT
+                  0x0008e4                  name_HOME
+                  0x0008ec                  HOME
+                  0x0008fa                  name_OKOFF
+                  0x000902                  OKOFF
+                  0x00090a                  name_OK
+                  0x000910                  OK
+                  0x000926                  name_ZTYPE
+                  0x00092e                  ZTYPE
+                  0x000948                  name_QUICKTEST
+                  0x000954                  QUICKTEST
+                  0x000962                  name_STRTEST
+                  0x00096c                  STRTEST
+                  0x0009a6                  name_EEPROMTEST
+                  0x0009b4                  EEPROMTEST
+                  0x0009e0                  name_LOOPTEST
+                  0x0009ec                  LOOPTEST
+                  0x000a06                  name_CRTEST
+                  0x000a10                  CRTEST
+                  0x000a2e                  name_DELAY
+                  0x000a36                  DELAY
+                  0x000a40                  name_INFLOOP
+                  0x000a4a                  INFLOOP
+                  0x000a4c                  name_FNTTEST
+                  0x000a56                  FNTTEST
+                  0x000a6e                  name_BOX
+                  0x000a74                  BOX
+                  0x000ab4                  _font
+                  0x000eb4                  ascii
+                  0x000f20                  shifted
+                  0x000f4c                  mod
+                  0x000f58                  xmod
+                  0x000f5e                  extended
+                  0x000fb2                  ENTER
+                  0x000fbc                  code_EXIT
+                  0x000fc4                  code_COLD
+                  0x000fc6                  code_WARM
+                  0x000fd2                  code_EXECUTE
+                  0x000fda                  code_LIT
+                  0x000fe4                  code_CLIT
+                  0x000ff2                  code_FETCH
+                  0x000ffa                  code_CFETCH
+                  0x001004                  code_STORE
+                  0x001010                  code_CSTORE
+                  0x00101e                  code_BRANCH
+                  0x001026                  code_ZBRANCH
+                  0x001034                  code_DODO
+                  0x001042                  code_DOLOOP
+                  0x00105e                  code_DOI
+                  0x001068                  code_DOJ
+                  0x001072                  code_UNLOOP
+                  0x00107c                  code_DUP
+                  0x001084                  code_DDUP
+                  0x00108e                  code_QDUP
+                  0x00109a                  code_DROP
+                  0x0010a2                  code_DDROP
+                  0x0010ac                  code_SWAP
+                  0x0010b8                  code_DSWAP
+                  0x0010cc                  code_ROT
+                  0x0010dc                  code_NROT
+                  0x0010ec                  code_OVER
+                  0x0010f6                  code_NIP
+                  0x0010fe                  code_TOR
+                  0x001108                  code_RFROM
+                  0x001112                  code_RFETCH
+                  0x00111c                  code_SPFETCH
+                  0x001126                  code_SPSTORE
+                  0x001130                  code_RPFETCH
+                  0x00113a                  code_RPSTORE
+                  0x001144                  code_TUCK
+                  0x001154                  code_PLUS
+                  0x00115c                  code_MINUS
+                  0x001164                  code_ONEPLUS
+                  0x00116c                  code_TWOPLUS
+                  0x001174                  code_ONEMINUS
+                  0x00117c                  code_TWOMINUS
+                  0x001184                  code_TWOSTAR
+                  0x00118c                  code_TWOSLASH
+                  0x001194                  code_LSHIFT
+                  0x00119c                  code_RSHIFT
+                  0x0011a4                  code_PLUSSTORE
+                  0x0011b2                  code_DADD
+                  0x0011c2                  code_MULTIPLY
+                  0x0011d0                  code_DIVIDE
+                  0x0011de                  code_DIVMOD
+                  0x0011ee                  code__AND
+                  0x0011f6                  code__OR
+                  0x0011fe                  code__XOR
+                  0x001206                  code_INVERT
+                  0x00120e                  code_NEGATE
+                  0x001216                  code_ZEROEQ
+                  0x001220                  code_ZEROLT
+                  0x00122e                  code_EQUAL
+                  0x00123e                  code_NEQUAL
+                  0x00124e                  code_LESS
+                  0x00125e                  code_GREATER
+                  0x00126e                  code_ULESS
+                  0x00127e                  code_UGREATER
+                  0x00128e                  code_CELL
+                  0x001298                  code_CELLPLUS
+                  0x0012a0                  code_CELLS
+                  0x0012aa                  code_TICKS
+                  0x0012b4                  code_MSEC
+                  0x0012c4                  code_LFSR
+                  0x0012dc                  code_RAND
+                  0x00130e                  code_SRAND
+                  0x00131e                  code_VIDON
+                  0x00132a                  code_CLS
+                  0x00133a                  code_XPOS
+                  0x00134c                  code_YPOS
+                  0x00135e                  code_EMIT
+                  0x001390                  code_CR
+                  0x001392                  code_SPACE
+                  0x001398                  code_SCROLLUP
+                  0x0013b0                  code_CLRLN
+                  0x0013cc                  code_QKEY
+                  0x0013e2                  code_KEY
+                  0x0013f4                  code_KBD_CMD
+                  0x001402                  code_SEMIT
+                  0x001430                  code_SGET
+                  0x001450                  code_TONE
+                  0x001466                  code_RSTORE
+                  0x001498                  code_RLOAD
+                  0x0014ca                  code_ESTORE
+                  0x001512                  code_ELOAD
+                  0x00154a                  code_STATE
+                  0x001554                  code_HERE
+                  0x00155e                  code_BASE
+                  0x001568                  code_LATEST
+                  0x001572                  code_RBASE
+                  0x00157c                  code_PBASE
+                  0x001586                  code_PAD
+                  0x001590                  code_TIB
+                  0x00159a                  code_SOURCE_ID
+                  0x0015a4                  code_INPTR
+                  0x0015ae                  code_VERSION
+                  0x0015b8                  code_RAMEND
+                  0x0015c2                  code__F_IMMED
+                  0x0015cc                  code__F_HIDDEN
+                  0x0015d6                  code__F_LENMASK
+                  0x0015e0                  code_BL
+                  0x0015ea                  code_TIBSIZE
+                  0x0015f4                  code_PADSIZE
+                  0x0015fe                  code_ULIMIT
+                  0x001608                  code_INFLOOP
+                  0x00160a                  get_code
+                  0x001638                  kbd_get
+                  0x0016f4                  ps2_init
+                  0x001742                  ps2_send
+                  0x001762                  tvout_init
+                  0x0017b8                  store_init
+                  0x0017c8                  spi_send_address
+                  0x0017ee                  wait_wip0
+                  0x001808                  serial_init
+                  0x00183e                  hardware_init
+                  0x001872                  sound_init
+                  0x007ffe                  sys_latest
                   0x0557fa                  __FGS.sec
 
 External Symbols in Program Memory (by name):
 
-                  0x000832                  ACCEPT
-                  0x000716                  BASE
-                  0x0007a4                  BL
-                  0x0009da                  BOX
-                  0x000512                  BRANCH
-                  0x0006e4                  CELL
-                  0x0006ee                  CELLPLUS
-                  0x0006f8                  CELLS
-                  0x0004f8                  CFETCH
-                  0x0004ea                  CLIT
-                  0x00048a                  CLRLN
-                  0x000430                  CLS
-                  0x0004c2                  COLD
-                  0x000468                  CR
-                  0x000976                  CRTEST
-                  0x000506                  CSTORE
-                  0x000450                  CURPOS
-                  0x00065a                  DADD
-                  0x00057c                  DDROP
-                  0x00055e                  DDUP
-                  0x00099c                  DELAY
-                  0x000666                  DIVIDE
-                  0x000670                  DIVMOD
-                  0x000528                  DODO
-                  0x00053a                  DOI
-                  0x000540                  DOJ
-                  0x000534                  DOLOOP
-                  0x0004ac                  DOT
-                  0x000572                  DROP
-                  0x000590                  DSWAP
-                  0x000554                  DUP
-                  0x00091a                  EEPROMTEST
-                  0x000ab4                  ELOAD
-                  0x000460                  EMIT
-                  0x000fb4                  ENTER
-                  0x0006b6                  EQUAL
-                  0x000aaa                  ESTORE
-                  0x0004d8                  EXECUTE
-                  0x0004b8                  EXIT
-                  0x0004f0                  FETCH
-                  0x0009bc                  FNTTEST
-                  0x0006ca                  GREATER
-                  0x00070c                  HERE
-                  0x000852                  HOME
-                  0x0009b0                  INFLOOP
-                  0x00075c                  INPTR
-                  0x000694                  INVERT
-                  0x000a6a                  KBD_CMD
-                  0x000a5e                  KEY
-                  0x000722                  LATEST
-                  0x0006c4                  LESS
-                  0x000a38                  LFSR
-                  0x0004e0                  LIT
-                  0x000952                  LOOPTEST
-                  0x00063e                  LSHIFT
-                  0x000602                  MINUS
-                  0x000a2e                  MSEC
-                  0x000660                  MULTIPLY
-                  0x0006a0                  NEGATE
-                  0x0006be                  NEQUAL
-                  0x0005b4                  NIP
-                  0x0005a2                  NROT
-                  0x000876                  OK
-                  0x000868                  OKOFF
-                  0x00061a                  ONEMINUS
-                  0x00060a                  ONEPLUS
-                  0x0005ac                  OVER
-                  0x00073e                  PAD
-                  0x0007bc                  PADSIZE
-                  0x000736                  PBASE
-                  0x0005fc                  PLUS
-                  0x000652                  PLUSSTORE
-                  0x000568                  QDUP
-                  0x000a56                  QKEY
-                  0x0008ba                  QUICKTEST
-                  0x0007d2                  QUIT
-                  0x000774                  RAMEND
-                  0x000a42                  RAND
-                  0x00072c                  RBASE
-                  0x0005cc                  RFETCH
-                  0x0005c4                  RFROM
-                  0x000a9e                  RLOAD
-                  0x000598                  ROT
-                  0x0005e4                  RPFETCH
-                  0x0005ec                  RPSTORE
-                  0x00064a                  RSHIFT
-                  0x000a94                  RSTORE
-                  0x000480                  SCROLLUP
-                  0x000a74                  SEMIT
-                  0x00081a                  SERTEST
-                  0x000a7e                  SGET
-                  0x000754                  SOURCE_ID
-                  0x000472                  SPACE
-                  0x0005d4                  SPFETCH
-                  0x0005dc                  SPSTORE
-                  0x000a4c                  SRAND
-                  0x000702                  STATE
-                  0x0004fe                  STORE
-                  0x0008d2                  STRTEST
-                  0x000586                  SWAP
-                  0x0007f2                  TEST
-                  0x000746                  TIB
-                  0x0007b0                  TIBSIZE
-                  0x000a24                  TICKS
-                  0x000a88                  TONE
-                  0x0005bc                  TOR
-                  0x0005f6                  TUCK
-                  0x000622                  TWOMINUS
-                  0x000612                  TWOPLUS
-                  0x000632                  TWOSLASH
-                  0x00062a                  TWOSTAR
-                  0x000494                  TYPE
-                  0x0006da                  UGREATER
-                  0x0006d2                  ULESS
-                  0x0007c8                  ULIMIT
-                  0x00054c                  UNLOOP
-                  0x000768                  VERSION
-                  0x000428                  VIDON
-                  0x0004cc                  WARM
-                  0x00043a                  XPOS
-                  0x000444                  YPOS
-                  0x00051e                  ZBRANCH
-                  0x0006a8                  ZEROEQ
-                  0x0006b0                  ZEROLT
-                  0x000894                  ZTYPE
-                  0x000678                  _AND
-                  0x00078e                  _F_HIDDEN
-                  0x000780                  _F_IMMED
-                  0x00079c                  _F_LENMASK
-                  0x000680                  _OR
-                  0x000688                  _XOR
+                  0x0008cc                  ACCEPT
+                  0x0007b0                  BASE
+                  0x00083e                  BL
+                  0x000a74                  BOX
+                  0x000482                  BRANCH
+                  0x000654                  CELL
+                  0x00065e                  CELLPLUS
+                  0x000668                  CELLS
+                  0x000468                  CFETCH
+                  0x00045a                  CLIT
+                  0x000706                  CLRLN
+                  0x0006ac                  CLS
+                  0x000432                  COLD
+                  0x0006e4                  CR
+                  0x000a10                  CRTEST
+                  0x000476                  CSTORE
+                  0x0006cc                  CURPOS
+                  0x0005ca                  DADD
+                  0x0004ec                  DDROP
+                  0x0004ce                  DDUP
+                  0x000a36                  DELAY
+                  0x0005d6                  DIVIDE
+                  0x0005e0                  DIVMOD
+                  0x000498                  DODO
+                  0x0004aa                  DOI
+                  0x0004b0                  DOJ
+                  0x0004a4                  DOLOOP
+                  0x000728                  DOT
+                  0x0004e2                  DROP
+                  0x000500                  DSWAP
+                  0x0004c4                  DUP
+                  0x0009b4                  EEPROMTEST
+                  0x000792                  ELOAD
+                  0x0006dc                  EMIT
+                  0x000fb2                  ENTER
+                  0x000626                  EQUAL
+                  0x000788                  ESTORE
+                  0x000448                  EXECUTE
+                  0x000428                  EXIT
+                  0x000460                  FETCH
+                  0x000a56                  FNTTEST
+                  0x00063a                  GREATER
+                  0x0007a6                  HERE
+                  0x0008ec                  HOME
+                  0x000a4a                  INFLOOP
+                  0x0007f6                  INPTR
+                  0x000604                  INVERT
+                  0x000748                  KBD_CMD
+                  0x00073c                  KEY
+                  0x0007bc                  LATEST
+                  0x000634                  LESS
+                  0x000686                  LFSR
+                  0x000450                  LIT
+                  0x0009ec                  LOOPTEST
+                  0x0005ae                  LSHIFT
+                  0x000572                  MINUS
+                  0x00067c                  MSEC
+                  0x0005d0                  MULTIPLY
+                  0x000610                  NEGATE
+                  0x00062e                  NEQUAL
+                  0x000524                  NIP
+                  0x000512                  NROT
+                  0x000910                  OK
+                  0x000902                  OKOFF
+                  0x00058a                  ONEMINUS
+                  0x00057a                  ONEPLUS
+                  0x00051c                  OVER
+                  0x0007d8                  PAD
+                  0x000856                  PADSIZE
+                  0x0007d0                  PBASE
+                  0x00056c                  PLUS
+                  0x0005c2                  PLUSSTORE
+                  0x0004d8                  QDUP
+                  0x000734                  QKEY
+                  0x000954                  QUICKTEST
+                  0x00086c                  QUIT
+                  0x00080e                  RAMEND
+                  0x000690                  RAND
+                  0x0007c6                  RBASE
+                  0x00053c                  RFETCH
+                  0x000534                  RFROM
+                  0x00077c                  RLOAD
+                  0x000508                  ROT
+                  0x000554                  RPFETCH
+                  0x00055c                  RPSTORE
+                  0x0005ba                  RSHIFT
+                  0x000772                  RSTORE
+                  0x0006fc                  SCROLLUP
+                  0x000752                  SEMIT
+                  0x0008b4                  SERTEST
+                  0x00075c                  SGET
+                  0x0007ee                  SOURCE_ID
+                  0x0006ee                  SPACE
+                  0x000544                  SPFETCH
+                  0x00054c                  SPSTORE
+                  0x00069a                  SRAND
+                  0x00079c                  STATE
+                  0x00046e                  STORE
+                  0x00096c                  STRTEST
+                  0x0004f6                  SWAP
+                  0x00088c                  TEST
+                  0x0007e0                  TIB
+                  0x00084a                  TIBSIZE
+                  0x000672                  TICKS
+                  0x000766                  TONE
+                  0x00052c                  TOR
+                  0x000566                  TUCK
+                  0x000592                  TWOMINUS
+                  0x000582                  TWOPLUS
+                  0x0005a2                  TWOSLASH
+                  0x00059a                  TWOSTAR
+                  0x000710                  TYPE
+                  0x00064a                  UGREATER
+                  0x000642                  ULESS
+                  0x000862                  ULIMIT
+                  0x0004bc                  UNLOOP
+                  0x000802                  VERSION
+                  0x0006a4                  VIDON
+                  0x00043c                  WARM
+                  0x0006b6                  XPOS
+                  0x0006c0                  YPOS
+                  0x00048e                  ZBRANCH
+                  0x000618                  ZEROEQ
+                  0x000620                  ZEROLT
+                  0x00092e                  ZTYPE
+                  0x0005e8                  _AND
+                  0x000828                  _F_HIDDEN
+                  0x00081a                  _F_IMMED
+                  0x000836                  _F_LENMASK
+                  0x0005f0                  _OR
+                  0x0005f8                  _XOR
                   0x000306                  __DefaultInterrupt
                   0x0557fa                  __FGS.sec
                   0x000398                  __INT1Interrupt
@@ -731,263 +753,265 @@ External Symbols in Program Memory (by name):
                   0x0003d8                  __U1RXInterrupt
                   0x0003fc                  __U1TXInterrupt
                   0x000200                  __reset
-                  0x000ab6                  _font
-                  0x000eb6                  ascii
-                  0x0012c0                  code_BASE
-                  0x001342                  code_BL
-                  0x001020                  code_BRANCH
-                  0x001290                  code_CELL
-                  0x00129a                  code_CELLPLUS
-                  0x0012a2                  code_CELLS
-                  0x000ffc                  code_CFETCH
-                  0x000fe6                  code_CLIT
-                  0x0015cc                  code_CLRLN
-                  0x001546                  code_CLS
-                  0x000fc6                  code_COLD
-                  0x0015ac                  code_CR
-                  0x001012                  code_CSTORE
-                  0x0011b4                  code_DADD
-                  0x0010a4                  code_DDROP
-                  0x001086                  code_DDUP
-                  0x0011d2                  code_DIVIDE
-                  0x0011e0                  code_DIVMOD
-                  0x001036                  code_DODO
-                  0x001060                  code_DOI
-                  0x00106a                  code_DOJ
-                  0x001044                  code_DOLOOP
-                  0x00109c                  code_DROP
-                  0x0010ba                  code_DSWAP
-                  0x00107e                  code_DUP
-                  0x001502                  code_ELOAD
-                  0x00157a                  code_EMIT
-                  0x001230                  code_EQUAL
-                  0x0014ba                  code_ESTORE
-                  0x000fd4                  code_EXECUTE
-                  0x000fbe                  code_EXIT
-                  0x000ff4                  code_FETCH
-                  0x001260                  code_GREATER
-                  0x0012b6                  code_HERE
-                  0x00136a                  code_INFLOOP
-                  0x001306                  code_INPTR
-                  0x001208                  code_INVERT
-                  0x0017e6                  code_KBD_CMD
-                  0x0017d4                  code_KEY
-                  0x0012ca                  code_LATEST
-                  0x001250                  code_LESS
-                  0x001602                  code_LFSR
-                  0x000fdc                  code_LIT
-                  0x001196                  code_LSHIFT
-                  0x00115e                  code_MINUS
-                  0x0015f2                  code_MSEC
-                  0x0011c4                  code_MULTIPLY
-                  0x001210                  code_NEGATE
-                  0x001240                  code_NEQUAL
-                  0x0010f8                  code_NIP
-                  0x0010de                  code_NROT
-                  0x001176                  code_ONEMINUS
-                  0x001166                  code_ONEPLUS
-                  0x0010ee                  code_OVER
-                  0x0012e8                  code_PAD
-                  0x001356                  code_PADSIZE
-                  0x0012de                  code_PBASE
-                  0x001156                  code_PLUS
-                  0x0011a6                  code_PLUSSTORE
-                  0x001090                  code_QDUP
-                  0x0017be                  code_QKEY
-                  0x00131a                  code_RAMEND
-                  0x00161a                  code_RAND
-                  0x0012d4                  code_RBASE
-                  0x001114                  code_RFETCH
-                  0x00110a                  code_RFROM
-                  0x001488                  code_RLOAD
-                  0x0010ce                  code_ROT
-                  0x001132                  code_RPFETCH
-                  0x00113c                  code_RPSTORE
-                  0x00119e                  code_RSHIFT
-                  0x001456                  code_RSTORE
-                  0x0015b4                  code_SCROLLUP
-                  0x001770                  code_SEMIT
-                  0x00179e                  code_SGET
-                  0x0012fc                  code_SOURCE_ID
-                  0x0015ae                  code_SPACE
-                  0x00111e                  code_SPFETCH
-                  0x001128                  code_SPSTORE
-                  0x00164c                  code_SRAND
-                  0x0012ac                  code_STATE
-                  0x001006                  code_STORE
-                  0x0010ae                  code_SWAP
-                  0x0012f2                  code_TIB
-                  0x00134c                  code_TIBSIZE
-                  0x0015e8                  code_TICKS
-                  0x001876                  code_TONE
-                  0x001100                  code_TOR
-                  0x001146                  code_TUCK
-                  0x00117e                  code_TWOMINUS
-                  0x00116e                  code_TWOPLUS
-                  0x00118e                  code_TWOSLASH
-                  0x001186                  code_TWOSTAR
-                  0x001280                  code_UGREATER
-                  0x001270                  code_ULESS
-                  0x001360                  code_ULIMIT
-                  0x001074                  code_UNLOOP
-                  0x001310                  code_VERSION
-                  0x00153a                  code_VIDON
-                  0x000fc8                  code_WARM
-                  0x001556                  code_XPOS
-                  0x001568                  code_YPOS
-                  0x001028                  code_ZBRANCH
-                  0x001218                  code_ZEROEQ
-                  0x001222                  code_ZEROLT
-                  0x0011f0                  code__AND
-                  0x00132e                  code__F_HIDDEN
-                  0x001324                  code__F_IMMED
-                  0x001338                  code__F_LENMASK
-                  0x0011f8                  code__OR
-                  0x001200                  code__XOR
-                  0x000f60                  extended
-                  0x00136c                  get_code
-                  0x00182a                  hardware_init
-                  0x00139a                  kbd_get
-                  0x000f4e                  mod
-                  0x000828                  name_ACCEPT
-                  0x00070e                  name_BASE
-                  0x00079e                  name_BL
-                  0x0009d4                  name_BOX
-                  0x000508                  name_BRANCH
-                  0x0006dc                  name_CELL
-                  0x0006e6                  name_CELLPLUS
-                  0x0006f0                  name_CELLS
-                  0x0004f2                  name_CFETCH
-                  0x0004e2                  name_CLIT
-                  0x000482                  name_CLRLN
-                  0x00042a                  name_CLS
-                  0x0004ba                  name_COLD
-                  0x000462                  name_CR
-                  0x00096c                  name_CRTEST
-                  0x000500                  name_CSTORE
-                  0x000446                  name_CURPOS
-                  0x000654                  name_DADD
-                  0x000574                  name_DDROP
-                  0x000556                  name_DDUP
-                  0x000994                  name_DELAY
-                  0x000662                  name_DIVIDE
-                  0x000668                  name_DIVMOD
-                  0x000520                  name_DODO
-                  0x000536                  name_DOI
-                  0x00053c                  name_DOJ
-                  0x00052a                  name_DOLOOP
-                  0x0004a8                  name_DOT
-                  0x00056a                  name_DROP
-                  0x000588                  name_DSWAP
-                  0x00054e                  name_DUP
-                  0x00090c                  name_EEPROMTEST
-                  0x000aac                  name_ELOAD
-                  0x000458                  name_EMIT
-                  0x0006b2                  name_EQUAL
-                  0x000aa0                  name_ESTORE
-                  0x0004ce                  name_EXECUTE
-                  0x0004b0                  name_EXIT
-                  0x0004ec                  name_FETCH
-                  0x0009b2                  name_FNTTEST
-                  0x0006c6                  name_GREATER
-                  0x000704                  name_HERE
-                  0x00084a                  name_HOME
-                  0x0009a6                  name_INFLOOP
-                  0x000756                  name_INPTR
-                  0x00068a                  name_INVERT
-                  0x000a60                  name_KBD_CMD
-                  0x000a58                  name_KEY
-                  0x000718                  name_LATEST
-                  0x0006c0                  name_LESS
-                  0x000a30                  name_LFSR
-                  0x0004da                  name_LIT
-                  0x000946                  name_LOOPTEST
-                  0x000634                  name_LSHIFT
-                  0x0005fe                  name_MINUS
-                  0x000a26                  name_MSEC
-                  0x00065c                  name_MULTIPLY
-                  0x000696                  name_NEGATE
-                  0x0006b8                  name_NEQUAL
-                  0x0005ae                  name_NIP
-                  0x00059a                  name_NROT
-                  0x000870                  name_OK
-                  0x000860                  name_OKOFF
-                  0x000614                  name_ONEMINUS
-                  0x000604                  name_ONEPLUS
-                  0x0005a4                  name_OVER
-                  0x000738                  name_PAD
-                  0x0007b2                  name_PADSIZE
-                  0x00072e                  name_PBASE
-                  0x0005f8                  name_PLUS
-                  0x00064c                  name_PLUSSTORE
-                  0x000560                  name_QDUP
-                  0x000a4e                  name_QKEY
-                  0x0008ae                  name_QUICKTEST
-                  0x0007ca                  name_QUIT
-                  0x00076a                  name_RAMEND
-                  0x000a3a                  name_RAND
-                  0x000724                  name_RBASE
-                  0x0005c6                  name_RFETCH
-                  0x0005be                  name_RFROM
-                  0x000a96                  name_RLOAD
-                  0x000592                  name_ROT
-                  0x0005de                  name_RPFETCH
-                  0x0005e6                  name_RPSTORE
-                  0x000640                  name_RSHIFT
-                  0x000a8a                  name_RSTORE
-                  0x000474                  name_SCROLLUP
-                  0x000a6c                  name_SEMIT
-                  0x000810                  name_SERTEST
-                  0x000a76                  name_SGET
-                  0x000748                  name_SOURCE_ID
-                  0x00046a                  name_SPACE
-                  0x0005ce                  name_SPFETCH
-                  0x0005d6                  name_SPSTORE
-                  0x000a44                  name_SRAND
-                  0x0006fa                  name_STATE
-                  0x0004fa                  name_STORE
-                  0x0008c8                  name_STRTEST
-                  0x00057e                  name_SWAP
-                  0x0007ea                  name_TEST
-                  0x000740                  name_TIB
-                  0x0007a6                  name_TIBSIZE
-                  0x000a1c                  name_TICKS
-                  0x000a80                  name_TONE
-                  0x0005b6                  name_TOR
-                  0x0005ee                  name_TUCK
-                  0x00061c                  name_TWOMINUS
-                  0x00060c                  name_TWOPLUS
-                  0x00062c                  name_TWOSLASH
-                  0x000624                  name_TWOSTAR
-                  0x00048c                  name_TYPE
-                  0x0006d4                  name_UGREATER
-                  0x0006cc                  name_ULESS
-                  0x0007be                  name_ULIMIT
-                  0x000542                  name_UNLOOP
-                  0x00075e                  name_VERSION
-                  0x000420                  name_VIDON
-                  0x0004c4                  name_WARM
-                  0x000432                  name_XPOS
-                  0x00043c                  name_YPOS
-                  0x000514                  name_ZBRANCH
-                  0x0006a2                  name_ZEROEQ
-                  0x0006aa                  name_ZEROLT
-                  0x00088c                  name_ZTYPE
-                  0x000672                  name__AND
-                  0x000782                  name__F_HIDDEN
-                  0x000776                  name__F_IMMED
-                  0x000790                  name__F_LENMASK
-                  0x00067a                  name__OR
-                  0x000682                  name__XOR
-                  0x00165c                  ps2_init
-                  0x0016aa                  ps2_send
-                  0x0017f4                  serial_init
-                  0x000f22                  shifted
-                  0x00185e                  sound_init
-                  0x001720                  store_init
-                  0x000a1a                  sys_latest
-                  0x0016ca                  tvout_init
-                  0x000f5a                  xmod
+                  0x000ab4                  _font
+                  0x000eb4                  ascii
+                  0x00155e                  code_BASE
+                  0x0015e0                  code_BL
+                  0x00101e                  code_BRANCH
+                  0x00128e                  code_CELL
+                  0x001298                  code_CELLPLUS
+                  0x0012a0                  code_CELLS
+                  0x000ffa                  code_CFETCH
+                  0x000fe4                  code_CLIT
+                  0x0013b0                  code_CLRLN
+                  0x00132a                  code_CLS
+                  0x000fc4                  code_COLD
+                  0x001390                  code_CR
+                  0x001010                  code_CSTORE
+                  0x0011b2                  code_DADD
+                  0x0010a2                  code_DDROP
+                  0x001084                  code_DDUP
+                  0x0011d0                  code_DIVIDE
+                  0x0011de                  code_DIVMOD
+                  0x001034                  code_DODO
+                  0x00105e                  code_DOI
+                  0x001068                  code_DOJ
+                  0x001042                  code_DOLOOP
+                  0x00109a                  code_DROP
+                  0x0010b8                  code_DSWAP
+                  0x00107c                  code_DUP
+                  0x001512                  code_ELOAD
+                  0x00135e                  code_EMIT
+                  0x00122e                  code_EQUAL
+                  0x0014ca                  code_ESTORE
+                  0x000fd2                  code_EXECUTE
+                  0x000fbc                  code_EXIT
+                  0x000ff2                  code_FETCH
+                  0x00125e                  code_GREATER
+                  0x001554                  code_HERE
+                  0x001608                  code_INFLOOP
+                  0x0015a4                  code_INPTR
+                  0x001206                  code_INVERT
+                  0x0013f4                  code_KBD_CMD
+                  0x0013e2                  code_KEY
+                  0x001568                  code_LATEST
+                  0x00124e                  code_LESS
+                  0x0012c4                  code_LFSR
+                  0x000fda                  code_LIT
+                  0x001194                  code_LSHIFT
+                  0x00115c                  code_MINUS
+                  0x0012b4                  code_MSEC
+                  0x0011c2                  code_MULTIPLY
+                  0x00120e                  code_NEGATE
+                  0x00123e                  code_NEQUAL
+                  0x0010f6                  code_NIP
+                  0x0010dc                  code_NROT
+                  0x001174                  code_ONEMINUS
+                  0x001164                  code_ONEPLUS
+                  0x0010ec                  code_OVER
+                  0x001586                  code_PAD
+                  0x0015f4                  code_PADSIZE
+                  0x00157c                  code_PBASE
+                  0x001154                  code_PLUS
+                  0x0011a4                  code_PLUSSTORE
+                  0x00108e                  code_QDUP
+                  0x0013cc                  code_QKEY
+                  0x0015b8                  code_RAMEND
+                  0x0012dc                  code_RAND
+                  0x001572                  code_RBASE
+                  0x001112                  code_RFETCH
+                  0x001108                  code_RFROM
+                  0x001498                  code_RLOAD
+                  0x0010cc                  code_ROT
+                  0x001130                  code_RPFETCH
+                  0x00113a                  code_RPSTORE
+                  0x00119c                  code_RSHIFT
+                  0x001466                  code_RSTORE
+                  0x001398                  code_SCROLLUP
+                  0x001402                  code_SEMIT
+                  0x001430                  code_SGET
+                  0x00159a                  code_SOURCE_ID
+                  0x001392                  code_SPACE
+                  0x00111c                  code_SPFETCH
+                  0x001126                  code_SPSTORE
+                  0x00130e                  code_SRAND
+                  0x00154a                  code_STATE
+                  0x001004                  code_STORE
+                  0x0010ac                  code_SWAP
+                  0x001590                  code_TIB
+                  0x0015ea                  code_TIBSIZE
+                  0x0012aa                  code_TICKS
+                  0x001450                  code_TONE
+                  0x0010fe                  code_TOR
+                  0x001144                  code_TUCK
+                  0x00117c                  code_TWOMINUS
+                  0x00116c                  code_TWOPLUS
+                  0x00118c                  code_TWOSLASH
+                  0x001184                  code_TWOSTAR
+                  0x00127e                  code_UGREATER
+                  0x00126e                  code_ULESS
+                  0x0015fe                  code_ULIMIT
+                  0x001072                  code_UNLOOP
+                  0x0015ae                  code_VERSION
+                  0x00131e                  code_VIDON
+                  0x000fc6                  code_WARM
+                  0x00133a                  code_XPOS
+                  0x00134c                  code_YPOS
+                  0x001026                  code_ZBRANCH
+                  0x001216                  code_ZEROEQ
+                  0x001220                  code_ZEROLT
+                  0x0011ee                  code__AND
+                  0x0015cc                  code__F_HIDDEN
+                  0x0015c2                  code__F_IMMED
+                  0x0015d6                  code__F_LENMASK
+                  0x0011f6                  code__OR
+                  0x0011fe                  code__XOR
+                  0x000f5e                  extended
+                  0x00160a                  get_code
+                  0x00183e                  hardware_init
+                  0x001638                  kbd_get
+                  0x000f4c                  mod
+                  0x0008c2                  name_ACCEPT
+                  0x0007a8                  name_BASE
+                  0x000838                  name_BL
+                  0x000a6e                  name_BOX
+                  0x000478                  name_BRANCH
+                  0x00064c                  name_CELL
+                  0x000656                  name_CELLPLUS
+                  0x000660                  name_CELLS
+                  0x000462                  name_CFETCH
+                  0x000452                  name_CLIT
+                  0x0006fe                  name_CLRLN
+                  0x0006a6                  name_CLS
+                  0x00042a                  name_COLD
+                  0x0006de                  name_CR
+                  0x000a06                  name_CRTEST
+                  0x000470                  name_CSTORE
+                  0x0006c2                  name_CURPOS
+                  0x0005c4                  name_DADD
+                  0x0004e4                  name_DDROP
+                  0x0004c6                  name_DDUP
+                  0x000a2e                  name_DELAY
+                  0x0005d2                  name_DIVIDE
+                  0x0005d8                  name_DIVMOD
+                  0x000490                  name_DODO
+                  0x0004a6                  name_DOI
+                  0x0004ac                  name_DOJ
+                  0x00049a                  name_DOLOOP
+                  0x000724                  name_DOT
+                  0x0004da                  name_DROP
+                  0x0004f8                  name_DSWAP
+                  0x0004be                  name_DUP
+                  0x0009a6                  name_EEPROMTEST
+                  0x00078a                  name_ELOAD
+                  0x0006d4                  name_EMIT
+                  0x000622                  name_EQUAL
+                  0x00077e                  name_ESTORE
+                  0x00043e                  name_EXECUTE
+                  0x000420                  name_EXIT
+                  0x00045c                  name_FETCH
+                  0x000a4c                  name_FNTTEST
+                  0x000636                  name_GREATER
+                  0x00079e                  name_HERE
+                  0x0008e4                  name_HOME
+                  0x000a40                  name_INFLOOP
+                  0x0007f0                  name_INPTR
+                  0x0005fa                  name_INVERT
+                  0x00073e                  name_KBD_CMD
+                  0x000736                  name_KEY
+                  0x0007b2                  name_LATEST
+                  0x000630                  name_LESS
+                  0x00067e                  name_LFSR
+                  0x00044a                  name_LIT
+                  0x0009e0                  name_LOOPTEST
+                  0x0005a4                  name_LSHIFT
+                  0x00056e                  name_MINUS
+                  0x000674                  name_MSEC
+                  0x0005cc                  name_MULTIPLY
+                  0x000606                  name_NEGATE
+                  0x000628                  name_NEQUAL
+                  0x00051e                  name_NIP
+                  0x00050a                  name_NROT
+                  0x00090a                  name_OK
+                  0x0008fa                  name_OKOFF
+                  0x000584                  name_ONEMINUS
+                  0x000574                  name_ONEPLUS
+                  0x000514                  name_OVER
+                  0x0007d2                  name_PAD
+                  0x00084c                  name_PADSIZE
+                  0x0007c8                  name_PBASE
+                  0x000568                  name_PLUS
+                  0x0005bc                  name_PLUSSTORE
+                  0x0004d0                  name_QDUP
+                  0x00072c                  name_QKEY
+                  0x000948                  name_QUICKTEST
+                  0x000864                  name_QUIT
+                  0x000804                  name_RAMEND
+                  0x000688                  name_RAND
+                  0x0007be                  name_RBASE
+                  0x000536                  name_RFETCH
+                  0x00052e                  name_RFROM
+                  0x000774                  name_RLOAD
+                  0x000502                  name_ROT
+                  0x00054e                  name_RPFETCH
+                  0x000556                  name_RPSTORE
+                  0x0005b0                  name_RSHIFT
+                  0x000768                  name_RSTORE
+                  0x0006f0                  name_SCROLLUP
+                  0x00074a                  name_SEMIT
+                  0x0008aa                  name_SERTEST
+                  0x000754                  name_SGET
+                  0x0007e2                  name_SOURCE_ID
+                  0x0006e6                  name_SPACE
+                  0x00053e                  name_SPFETCH
+                  0x000546                  name_SPSTORE
+                  0x000692                  name_SRAND
+                  0x000794                  name_STATE
+                  0x00046a                  name_STORE
+                  0x000962                  name_STRTEST
+                  0x0004ee                  name_SWAP
+                  0x000884                  name_TEST
+                  0x0007da                  name_TIB
+                  0x000840                  name_TIBSIZE
+                  0x00066a                  name_TICKS
+                  0x00075e                  name_TONE
+                  0x000526                  name_TOR
+                  0x00055e                  name_TUCK
+                  0x00058c                  name_TWOMINUS
+                  0x00057c                  name_TWOPLUS
+                  0x00059c                  name_TWOSLASH
+                  0x000594                  name_TWOSTAR
+                  0x000708                  name_TYPE
+                  0x000644                  name_UGREATER
+                  0x00063c                  name_ULESS
+                  0x000858                  name_ULIMIT
+                  0x0004b2                  name_UNLOOP
+                  0x0007f8                  name_VERSION
+                  0x00069c                  name_VIDON
+                  0x000434                  name_WARM
+                  0x0006ae                  name_XPOS
+                  0x0006b8                  name_YPOS
+                  0x000484                  name_ZBRANCH
+                  0x000612                  name_ZEROEQ
+                  0x00061a                  name_ZEROLT
+                  0x000926                  name_ZTYPE
+                  0x0005e2                  name__AND
+                  0x00081c                  name__F_HIDDEN
+                  0x000810                  name__F_IMMED
+                  0x00082a                  name__F_LENMASK
+                  0x0005ea                  name__OR
+                  0x0005f2                  name__XOR
+                  0x0016f4                  ps2_init
+                  0x001742                  ps2_send
+                  0x001808                  serial_init
+                  0x000f20                  shifted
+                  0x001872                  sound_init
+                  0x0017c8                  spi_send_address
+                  0x0017b8                  store_init
+                  0x007ffe                  sys_latest
+                  0x001762                  tvout_init
+                  0x0017ee                  wait_wip0
+                  0x000f58                  xmod
 
 Configuration mémoire
 
@@ -1078,276 +1102,269 @@ usercode
 .start.text
  *(.start.txt)
 
-.sysdict            0x8420        0x696
+.sysdict            0x8420        0x694
  *(.sysdict)
- .sysdict           0x8420         0x90 build/default/production/TVout.o
-                    0x8420                  name_VIDON
-                    0x8428                  VIDON
-                    0x842a                  name_CLS
-                    0x8430                  CLS
-                    0x8432                  name_XPOS
-                    0x843a                  XPOS
-                    0x843c                  name_YPOS
-                    0x8444                  YPOS
-                    0x8446                  name_CURPOS
-                    0x8450                  CURPOS
-                    0x8458                  name_EMIT
-                    0x8460                  EMIT
-                    0x8462                  name_CR
-                    0x8468                  CR
-                    0x846a                  name_SPACE
-                    0x8472                  SPACE
-                    0x8474                  name_SCROLLUP
-                    0x8480                  SCROLLUP
-                    0x8482                  name_CLRLN
-                    0x848a                  CLRLN
-                    0x848c                  name_TYPE
-                    0x8494                  TYPE
-                    0x84a8                  name_DOT
-                    0x84ac                  DOT
- .sysdict           0x84b0        0x56c build/default/production/core.o
-                    0x84b0                  name_EXIT
-                    0x84b8                  EXIT
-                    0x84ba                  name_COLD
-                    0x84c2                  COLD
-                    0x84c4                  name_WARM
-                    0x84cc                  WARM
-                    0x84ce                  name_EXECUTE
-                    0x84d8                  EXECUTE
-                    0x84da                  name_LIT
-                    0x84e0                  LIT
-                    0x84e2                  name_CLIT
-                    0x84ea                  CLIT
-                    0x84ec                  name_FETCH
-                    0x84f0                  FETCH
-                    0x84f2                  name_CFETCH
-                    0x84f8                  CFETCH
-                    0x84fa                  name_STORE
-                    0x84fe                  STORE
-                    0x8500                  name_CSTORE
-                    0x8506                  CSTORE
-                    0x8508                  name_BRANCH
-                    0x8512                  BRANCH
-                    0x8514                  name_ZBRANCH
-                    0x851e                  ZBRANCH
-                    0x8520                  name_DODO
-                    0x8528                  DODO
-                    0x852a                  name_DOLOOP
-                    0x8534                  DOLOOP
-                    0x8536                  name_DOI
-                    0x853a                  DOI
-                    0x853c                  name_DOJ
-                    0x8540                  DOJ
-                    0x8542                  name_UNLOOP
-                    0x854c                  UNLOOP
-                    0x854e                  name_DUP
-                    0x8554                  DUP
-                    0x8556                  name_DDUP
-                    0x855e                  DDUP
-                    0x8560                  name_QDUP
-                    0x8568                  QDUP
-                    0x856a                  name_DROP
-                    0x8572                  DROP
-                    0x8574                  name_DDROP
-                    0x857c                  DDROP
-                    0x857e                  name_SWAP
-                    0x8586                  SWAP
-                    0x8588                  name_DSWAP
-                    0x8590                  DSWAP
-                    0x8592                  name_ROT
-                    0x8598                  ROT
-                    0x859a                  name_NROT
-                    0x85a2                  NROT
-                    0x85a4                  name_OVER
-                    0x85ac                  OVER
-                    0x85ae                  name_NIP
-                    0x85b4                  NIP
-                    0x85b6                  name_TOR
-                    0x85bc                  TOR
-                    0x85be                  name_RFROM
-                    0x85c4                  RFROM
-                    0x85c6                  name_RFETCH
-                    0x85cc                  RFETCH
-                    0x85ce                  name_SPFETCH
-                    0x85d4                  SPFETCH
-                    0x85d6                  name_SPSTORE
-                    0x85dc                  SPSTORE
-                    0x85de                  name_RPFETCH
-                    0x85e4                  RPFETCH
-                    0x85e6                  name_RPSTORE
-                    0x85ec                  RPSTORE
-                    0x85ee                  name_TUCK
-                    0x85f6                  TUCK
-                    0x85f8                  name_PLUS
-                    0x85fc                  PLUS
-                    0x85fe                  name_MINUS
-                    0x8602                  MINUS
-                    0x8604                  name_ONEPLUS
-                    0x860a                  ONEPLUS
-                    0x860c                  name_TWOPLUS
-                    0x8612                  TWOPLUS
-                    0x8614                  name_ONEMINUS
-                    0x861a                  ONEMINUS
-                    0x861c                  name_TWOMINUS
-                    0x8622                  TWOMINUS
-                    0x8624                  name_TWOSTAR
-                    0x862a                  TWOSTAR
-                    0x862c                  name_TWOSLASH
-                    0x8632                  TWOSLASH
-                    0x8634                  name_LSHIFT
-                    0x863e                  LSHIFT
-                    0x8640                  name_RSHIFT
-                    0x864a                  RSHIFT
-                    0x864c                  name_PLUSSTORE
-                    0x8652                  PLUSSTORE
-                    0x8654                  name_DADD
-                    0x865a                  DADD
-                    0x865c                  name_MULTIPLY
-                    0x8660                  MULTIPLY
-                    0x8662                  name_DIVIDE
-                    0x8666                  DIVIDE
-                    0x8668                  name_DIVMOD
-                    0x8670                  DIVMOD
-                    0x8672                  name__AND
-                    0x8678                  _AND
-                    0x867a                  name__OR
-                    0x8680                  _OR
-                    0x8682                  name__XOR
-                    0x8688                  _XOR
-                    0x868a                  name_INVERT
-                    0x8694                  INVERT
-                    0x8696                  name_NEGATE
-                    0x86a0                  NEGATE
-                    0x86a2                  name_ZEROEQ
-                    0x86a8                  ZEROEQ
-                    0x86aa                  name_ZEROLT
-                    0x86b0                  ZEROLT
-                    0x86b2                  name_EQUAL
-                    0x86b6                  EQUAL
-                    0x86b8                  name_NEQUAL
-                    0x86be                  NEQUAL
-                    0x86c0                  name_LESS
-                    0x86c4                  LESS
-                    0x86c6                  name_GREATER
-                    0x86ca                  GREATER
-                    0x86cc                  name_ULESS
-                    0x86d2                  ULESS
-                    0x86d4                  name_UGREATER
-                    0x86da                  UGREATER
-                    0x86dc                  name_CELL
-                    0x86e4                  CELL
-                    0x86e6                  name_CELLPLUS
-                    0x86ee                  CELLPLUS
-                    0x86f0                  name_CELLS
-                    0x86f8                  CELLS
-                    0x86fa                  name_STATE
-                    0x8702                  STATE
-                    0x8704                  name_HERE
-                    0x870c                  HERE
-                    0x870e                  name_BASE
-                    0x8716                  BASE
-                    0x8718                  name_LATEST
-                    0x8722                  LATEST
-                    0x8724                  name_RBASE
-                    0x872c                  RBASE
-                    0x872e                  name_PBASE
-                    0x8736                  PBASE
-                    0x8738                  name_PAD
-                    0x873e                  PAD
-                    0x8740                  name_TIB
-                    0x8746                  TIB
-                    0x8748                  name_SOURCE_ID
-                    0x8754                  SOURCE_ID
-                    0x8756                  name_INPTR
-                    0x875c                  INPTR
-                    0x875e                  name_VERSION
-                    0x8768                  VERSION
-                    0x876a                  name_RAMEND
-                    0x8774                  RAMEND
-                    0x8776                  name__F_IMMED
-                    0x8780                  _F_IMMED
-                    0x8782                  name__F_HIDDEN
-                    0x878e                  _F_HIDDEN
-                    0x8790                  name__F_LENMASK
-                    0x879c                  _F_LENMASK
-                    0x879e                  name_BL
-                    0x87a4                  BL
-                    0x87a6                  name_TIBSIZE
-                    0x87b0                  TIBSIZE
-                    0x87b2                  name_PADSIZE
-                    0x87bc                  PADSIZE
-                    0x87be                  name_ULIMIT
-                    0x87c8                  ULIMIT
-                    0x87ca                  name_QUIT
-                    0x87d2                  QUIT
-                    0x87ea                  name_TEST
-                    0x87f2                  TEST
-                    0x8810                  name_SERTEST
-                    0x881a                  SERTEST
-                    0x8828                  name_ACCEPT
-                    0x8832                  ACCEPT
-                    0x884a                  name_HOME
-                    0x8852                  HOME
-                    0x8860                  name_OKOFF
-                    0x8868                  OKOFF
-                    0x8870                  name_OK
-                    0x8876                  OK
-                    0x888c                  name_ZTYPE
-                    0x8894                  ZTYPE
-                    0x88ae                  name_QUICKTEST
-                    0x88ba                  QUICKTEST
-                    0x88c8                  name_STRTEST
-                    0x88d2                  STRTEST
-                    0x890c                  name_EEPROMTEST
-                    0x891a                  EEPROMTEST
-                    0x8946                  name_LOOPTEST
-                    0x8952                  LOOPTEST
-                    0x896c                  name_CRTEST
-                    0x8976                  CRTEST
-                    0x8994                  name_DELAY
-                    0x899c                  DELAY
-                    0x89a6                  name_INFLOOP
-                    0x89b0                  INFLOOP
-                    0x89b2                  name_FNTTEST
-                    0x89bc                  FNTTEST
-                    0x89d4                  name_BOX
-                    0x89da                  BOX
-                    0x8a1a                  sys_latest
- .sysdict           0x8a1c         0x32 build/default/production/hardware.o
-                    0x8a1c                  name_TICKS
-                    0x8a24                  TICKS
-                    0x8a26                  name_MSEC
-                    0x8a2e                  MSEC
-                    0x8a30                  name_LFSR
-                    0x8a38                  LFSR
-                    0x8a3a                  name_RAND
-                    0x8a42                  RAND
-                    0x8a44                  name_SRAND
-                    0x8a4c                  SRAND
- .sysdict           0x8a4e         0x1e build/default/production/keyboard.o
-                    0x8a4e                  name_QKEY
-                    0x8a56                  QKEY
-                    0x8a58                  name_KEY
-                    0x8a5e                  KEY
-                    0x8a60                  name_KBD_CMD
-                    0x8a6a                  KBD_CMD
- .sysdict           0x8a6c         0x14 build/default/production/serial.o
-                    0x8a6c                  name_SEMIT
-                    0x8a74                  SEMIT
-                    0x8a76                  name_SGET
-                    0x8a7e                  SGET
- .sysdict           0x8a80          0xa build/default/production/sound.o
-                    0x8a80                  name_TONE
-                    0x8a88                  TONE
- .sysdict           0x8a8a         0x2c build/default/production/store.o
-                    0x8a8a                  name_RSTORE
-                    0x8a94                  RSTORE
-                    0x8a96                  name_RLOAD
-                    0x8a9e                  RLOAD
-                    0x8aa0                  name_ESTORE
-                    0x8aaa                  ESTORE
-                    0x8aac                  name_ELOAD
-                    0x8ab4                  ELOAD
+ .sysdict           0x8420        0x694 build/default/production/core.o
+                    0x8420                  name_EXIT
+                    0x8428                  EXIT
+                    0x842a                  name_COLD
+                    0x8432                  COLD
+                    0x8434                  name_WARM
+                    0x843c                  WARM
+                    0x843e                  name_EXECUTE
+                    0x8448                  EXECUTE
+                    0x844a                  name_LIT
+                    0x8450                  LIT
+                    0x8452                  name_CLIT
+                    0x845a                  CLIT
+                    0x845c                  name_FETCH
+                    0x8460                  FETCH
+                    0x8462                  name_CFETCH
+                    0x8468                  CFETCH
+                    0x846a                  name_STORE
+                    0x846e                  STORE
+                    0x8470                  name_CSTORE
+                    0x8476                  CSTORE
+                    0x8478                  name_BRANCH
+                    0x8482                  BRANCH
+                    0x8484                  name_ZBRANCH
+                    0x848e                  ZBRANCH
+                    0x8490                  name_DODO
+                    0x8498                  DODO
+                    0x849a                  name_DOLOOP
+                    0x84a4                  DOLOOP
+                    0x84a6                  name_DOI
+                    0x84aa                  DOI
+                    0x84ac                  name_DOJ
+                    0x84b0                  DOJ
+                    0x84b2                  name_UNLOOP
+                    0x84bc                  UNLOOP
+                    0x84be                  name_DUP
+                    0x84c4                  DUP
+                    0x84c6                  name_DDUP
+                    0x84ce                  DDUP
+                    0x84d0                  name_QDUP
+                    0x84d8                  QDUP
+                    0x84da                  name_DROP
+                    0x84e2                  DROP
+                    0x84e4                  name_DDROP
+                    0x84ec                  DDROP
+                    0x84ee                  name_SWAP
+                    0x84f6                  SWAP
+                    0x84f8                  name_DSWAP
+                    0x8500                  DSWAP
+                    0x8502                  name_ROT
+                    0x8508                  ROT
+                    0x850a                  name_NROT
+                    0x8512                  NROT
+                    0x8514                  name_OVER
+                    0x851c                  OVER
+                    0x851e                  name_NIP
+                    0x8524                  NIP
+                    0x8526                  name_TOR
+                    0x852c                  TOR
+                    0x852e                  name_RFROM
+                    0x8534                  RFROM
+                    0x8536                  name_RFETCH
+                    0x853c                  RFETCH
+                    0x853e                  name_SPFETCH
+                    0x8544                  SPFETCH
+                    0x8546                  name_SPSTORE
+                    0x854c                  SPSTORE
+                    0x854e                  name_RPFETCH
+                    0x8554                  RPFETCH
+                    0x8556                  name_RPSTORE
+                    0x855c                  RPSTORE
+                    0x855e                  name_TUCK
+                    0x8566                  TUCK
+                    0x8568                  name_PLUS
+                    0x856c                  PLUS
+                    0x856e                  name_MINUS
+                    0x8572                  MINUS
+                    0x8574                  name_ONEPLUS
+                    0x857a                  ONEPLUS
+                    0x857c                  name_TWOPLUS
+                    0x8582                  TWOPLUS
+                    0x8584                  name_ONEMINUS
+                    0x858a                  ONEMINUS
+                    0x858c                  name_TWOMINUS
+                    0x8592                  TWOMINUS
+                    0x8594                  name_TWOSTAR
+                    0x859a                  TWOSTAR
+                    0x859c                  name_TWOSLASH
+                    0x85a2                  TWOSLASH
+                    0x85a4                  name_LSHIFT
+                    0x85ae                  LSHIFT
+                    0x85b0                  name_RSHIFT
+                    0x85ba                  RSHIFT
+                    0x85bc                  name_PLUSSTORE
+                    0x85c2                  PLUSSTORE
+                    0x85c4                  name_DADD
+                    0x85ca                  DADD
+                    0x85cc                  name_MULTIPLY
+                    0x85d0                  MULTIPLY
+                    0x85d2                  name_DIVIDE
+                    0x85d6                  DIVIDE
+                    0x85d8                  name_DIVMOD
+                    0x85e0                  DIVMOD
+                    0x85e2                  name__AND
+                    0x85e8                  _AND
+                    0x85ea                  name__OR
+                    0x85f0                  _OR
+                    0x85f2                  name__XOR
+                    0x85f8                  _XOR
+                    0x85fa                  name_INVERT
+                    0x8604                  INVERT
+                    0x8606                  name_NEGATE
+                    0x8610                  NEGATE
+                    0x8612                  name_ZEROEQ
+                    0x8618                  ZEROEQ
+                    0x861a                  name_ZEROLT
+                    0x8620                  ZEROLT
+                    0x8622                  name_EQUAL
+                    0x8626                  EQUAL
+                    0x8628                  name_NEQUAL
+                    0x862e                  NEQUAL
+                    0x8630                  name_LESS
+                    0x8634                  LESS
+                    0x8636                  name_GREATER
+                    0x863a                  GREATER
+                    0x863c                  name_ULESS
+                    0x8642                  ULESS
+                    0x8644                  name_UGREATER
+                    0x864a                  UGREATER
+                    0x864c                  name_CELL
+                    0x8654                  CELL
+                    0x8656                  name_CELLPLUS
+                    0x865e                  CELLPLUS
+                    0x8660                  name_CELLS
+                    0x8668                  CELLS
+                    0x866a                  name_TICKS
+                    0x8672                  TICKS
+                    0x8674                  name_MSEC
+                    0x867c                  MSEC
+                    0x867e                  name_LFSR
+                    0x8686                  LFSR
+                    0x8688                  name_RAND
+                    0x8690                  RAND
+                    0x8692                  name_SRAND
+                    0x869a                  SRAND
+                    0x869c                  name_VIDON
+                    0x86a4                  VIDON
+                    0x86a6                  name_CLS
+                    0x86ac                  CLS
+                    0x86ae                  name_XPOS
+                    0x86b6                  XPOS
+                    0x86b8                  name_YPOS
+                    0x86c0                  YPOS
+                    0x86c2                  name_CURPOS
+                    0x86cc                  CURPOS
+                    0x86d4                  name_EMIT
+                    0x86dc                  EMIT
+                    0x86de                  name_CR
+                    0x86e4                  CR
+                    0x86e6                  name_SPACE
+                    0x86ee                  SPACE
+                    0x86f0                  name_SCROLLUP
+                    0x86fc                  SCROLLUP
+                    0x86fe                  name_CLRLN
+                    0x8706                  CLRLN
+                    0x8708                  name_TYPE
+                    0x8710                  TYPE
+                    0x8724                  name_DOT
+                    0x8728                  DOT
+                    0x872c                  name_QKEY
+                    0x8734                  QKEY
+                    0x8736                  name_KEY
+                    0x873c                  KEY
+                    0x873e                  name_KBD_CMD
+                    0x8748                  KBD_CMD
+                    0x874a                  name_SEMIT
+                    0x8752                  SEMIT
+                    0x8754                  name_SGET
+                    0x875c                  SGET
+                    0x875e                  name_TONE
+                    0x8766                  TONE
+                    0x8768                  name_RSTORE
+                    0x8772                  RSTORE
+                    0x8774                  name_RLOAD
+                    0x877c                  RLOAD
+                    0x877e                  name_ESTORE
+                    0x8788                  ESTORE
+                    0x878a                  name_ELOAD
+                    0x8792                  ELOAD
+                    0x8794                  name_STATE
+                    0x879c                  STATE
+                    0x879e                  name_HERE
+                    0x87a6                  HERE
+                    0x87a8                  name_BASE
+                    0x87b0                  BASE
+                    0x87b2                  name_LATEST
+                    0x87bc                  LATEST
+                    0x87be                  name_RBASE
+                    0x87c6                  RBASE
+                    0x87c8                  name_PBASE
+                    0x87d0                  PBASE
+                    0x87d2                  name_PAD
+                    0x87d8                  PAD
+                    0x87da                  name_TIB
+                    0x87e0                  TIB
+                    0x87e2                  name_SOURCE_ID
+                    0x87ee                  SOURCE_ID
+                    0x87f0                  name_INPTR
+                    0x87f6                  INPTR
+                    0x87f8                  name_VERSION
+                    0x8802                  VERSION
+                    0x8804                  name_RAMEND
+                    0x880e                  RAMEND
+                    0x8810                  name__F_IMMED
+                    0x881a                  _F_IMMED
+                    0x881c                  name__F_HIDDEN
+                    0x8828                  _F_HIDDEN
+                    0x882a                  name__F_LENMASK
+                    0x8836                  _F_LENMASK
+                    0x8838                  name_BL
+                    0x883e                  BL
+                    0x8840                  name_TIBSIZE
+                    0x884a                  TIBSIZE
+                    0x884c                  name_PADSIZE
+                    0x8856                  PADSIZE
+                    0x8858                  name_ULIMIT
+                    0x8862                  ULIMIT
+                    0x8864                  name_QUIT
+                    0x886c                  QUIT
+                    0x8884                  name_TEST
+                    0x888c                  TEST
+                    0x88aa                  name_SERTEST
+                    0x88b4                  SERTEST
+                    0x88c2                  name_ACCEPT
+                    0x88cc                  ACCEPT
+                    0x88e4                  name_HOME
+                    0x88ec                  HOME
+                    0x88fa                  name_OKOFF
+                    0x8902                  OKOFF
+                    0x890a                  name_OK
+                    0x8910                  OK
+                    0x8926                  name_ZTYPE
+                    0x892e                  ZTYPE
+                    0x8948                  name_QUICKTEST
+                    0x8954                  QUICKTEST
+                    0x8962                  name_STRTEST
+                    0x896c                  STRTEST
+                    0x89a6                  name_EEPROMTEST
+                    0x89b4                  EEPROMTEST
+                    0x89e0                  name_LOOPTEST
+                    0x89ec                  LOOPTEST
+                    0x8a06                  name_CRTEST
+                    0x8a10                  CRTEST
+                    0x8a2e                  name_DELAY
+                    0x8a36                  DELAY
+                    0x8a40                  name_INFLOOP
+                    0x8a4a                  INFLOOP
+                    0x8a4c                  name_FNTTEST
+                    0x8a56                  FNTTEST
+                    0x8a6e                  name_BOX
+                    0x8a74                  BOX
 
 __FICD            0x0557f0          0x2
  *(__FICD.sec*)
@@ -1389,7 +1406,7 @@ __FUID3
 .comment
  *(.comment)
 
-.debug_info       0x000000        0x3ac
+.debug_info       0x000000        0x3bc
  *(.debug_info)
  .debug_info      0x000000         0x74 build/default/production/TVout.o
  .debug_info      0x000074         0x7b build/default/production/core.o
@@ -1397,11 +1414,11 @@ __FUID3
  .debug_info      0x000166         0x77 build/default/production/keyboard.o
  .debug_info      0x0001dd         0x72 build/default/production/ps2.o
  .debug_info      0x00024f         0x75 build/default/production/serial.o
- .debug_info      0x0002c4         0x74 build/default/production/sound.o
- .debug_info      0x000338         0x74 build/default/production/store.o
+ .debug_info      0x0002c4         0x7c build/default/production/sound.o
+ .debug_info      0x000340         0x7c build/default/production/store.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev     0x000000         0x84
+.debug_abbrev     0x000000         0x8c
  *(.debug_abbrev)
  .debug_abbrev    0x000000         0x10 build/default/production/TVout.o
  .debug_abbrev    0x000010         0x14 build/default/production/core.o
@@ -1409,22 +1426,22 @@ __FUID3
  .debug_abbrev    0x000034         0x10 build/default/production/keyboard.o
  .debug_abbrev    0x000044         0x10 build/default/production/ps2.o
  .debug_abbrev    0x000054         0x10 build/default/production/serial.o
- .debug_abbrev    0x000064         0x10 build/default/production/sound.o
- .debug_abbrev    0x000074         0x10 build/default/production/store.o
+ .debug_abbrev    0x000064         0x14 build/default/production/sound.o
+ .debug_abbrev    0x000078         0x14 build/default/production/store.o
 
-.debug_line       0x000000        0x6f0
+.debug_line       0x000000        0x719
  *(.debug_line)
- .debug_line      0x000000        0x133 build/default/production/TVout.o
- .debug_line      0x000133        0x142 build/default/production/core.o
- .debug_line      0x000275         0x1a build/default/production/font.o
- .debug_line      0x00028f         0xc4 build/default/production/hardware.o
- .debug_line      0x000353         0x1a build/default/production/keybind.o
- .debug_line      0x00036d        0x117 build/default/production/keyboard.o
- .debug_line      0x000484         0x96 build/default/production/ps2.o
- .debug_line      0x00051a         0xb6 build/default/production/serial.o
- .debug_line      0x0005d0         0x56 build/default/production/sound.o
- .debug_line      0x000626         0xb0 build/default/production/store.o
- .debug_line      0x0006d6         0x1a build/default/production/mcu_config_bits.o
+ .debug_line      0x000000         0xd7 build/default/production/TVout.o
+ .debug_line      0x0000d7        0x2d1 build/default/production/core.o
+ .debug_line      0x0003a8         0x1a build/default/production/font.o
+ .debug_line      0x0003c2         0x81 build/default/production/hardware.o
+ .debug_line      0x000443         0x1a build/default/production/keybind.o
+ .debug_line      0x00045d         0xf6 build/default/production/keyboard.o
+ .debug_line      0x000553         0x96 build/default/production/ps2.o
+ .debug_line      0x0005e9         0x84 build/default/production/serial.o
+ .debug_line      0x00066d         0x3f build/default/production/sound.o
+ .debug_line      0x0006ac         0x53 build/default/production/store.o
+ .debug_line      0x0006ff         0x1a build/default/production/mcu_config_bits.o
 
 .debug_frame
  *(.debug_frame)
@@ -1444,24 +1461,24 @@ __FUID3
 .debug_ranges
  *(.debug_ranges)
 
-.debug_aranges    0x000000        0x120
+.debug_aranges    0x000000         0xf0
  *(.debug_aranges)
  .debug_aranges
-                  0x000000         0x28 build/default/production/TVout.o
+                  0x000000         0x20 build/default/production/TVout.o
  .debug_aranges
-                  0x000028         0x18 build/default/production/core.o
+                  0x000020         0x18 build/default/production/core.o
  .debug_aranges
-                  0x000040         0x30 build/default/production/hardware.o
+                  0x000038         0x28 build/default/production/hardware.o
  .debug_aranges
-                  0x000070         0x28 build/default/production/keyboard.o
+                  0x000060         0x20 build/default/production/keyboard.o
  .debug_aranges
-                  0x000098         0x20 build/default/production/ps2.o
+                  0x000080         0x20 build/default/production/ps2.o
  .debug_aranges
-                  0x0000b8         0x28 build/default/production/serial.o
+                  0x0000a0         0x20 build/default/production/serial.o
  .debug_aranges
-                  0x0000e0         0x20 build/default/production/sound.o
+                  0x0000c0         0x18 build/default/production/sound.o
  .debug_aranges
-                  0x000100         0x20 build/default/production/store.o
+                  0x0000d8         0x18 build/default/production/store.o
                     0x0000                  WREG0 = 0x0
                     0x0000                  _WREG0 = 0x0
                     0x0002                  WREG1 = 0x2
@@ -2336,6 +2353,9 @@ LOAD FGS
 
 .tvout.bss          0x10c0        0x606
  .tvout.bss         0x10c0        0x606 build/default/production/TVout.o
+                    0x10c3                  video_on
+                    0x10c4                  xpos
+                    0x10c5                  ypos
                     0x10c6                  _video_buffer
 
 .tib.bss            0x16c6         0x50
@@ -2355,9 +2375,17 @@ LOAD FGS
 
 .serial.bss         0x1792         0x28
  .serial.bss        0x1792         0x28 build/default/production/serial.o
+                    0x1792                  rx_queue
+                    0x17a2                  tx_queue
+                    0x17b2                  tx_wait
+                    0x17b5                  tx_tail
+                    0x17b6                  rx_in
+                    0x17b8                  rx_head
 
 .keyboard.bss       0x17ba         0x24
  .keyboard.bss      0x17ba         0x24 build/default/production/keyboard.o
+                    0x17ba                  kbd_queue
+                    0x17da                  kbd_head
 
 .bss                0x17de         0x14
  .bss               0x17de         0x14 build/default/production/core.o
@@ -2375,6 +2403,7 @@ LOAD FGS
 .hardware.bss       0x17f2          0x6
  .hardware.bss      0x17f2          0x6 build/default/production/hardware.o
                     0x17f2                  systicks
+                    0x17f4                  seed
 
 .sound.bss          0x17f8          0x2
  .sound.bss         0x17f8          0x2 build/default/production/sound.o
@@ -2393,6 +2422,10 @@ LOAD FGS
                   0x000020          0x2
  .ivt._OC2Interrupt
                   0x000020          0x2 build/default/production/TVout.o
+
+.link               0xfffe          0x2 address de chargement 0x007ffe  
+ .link              0xfffe          0x2 build/default/production/core.o
+                    0xfffe                  sys_latest
 
 .ivt._T1Interrupt
                   0x00001a          0x2
@@ -2414,184 +2447,161 @@ LOAD FGS
  .ivt._U1TXInterrupt
                   0x00002c          0x2 build/default/production/serial.o
 
-.font.const         0x8ab6        0x400 address de chargement 0x000ab6  
- .font.const        0x8ab6        0x400 build/default/production/font.o
-                    0x8ab6                  _font
+.font.const         0x8ab4        0x400 address de chargement 0x000ab4  
+ .font.const        0x8ab4        0x400 build/default/production/font.o
+                    0x8ab4                  _font
 
-.keybind.const      0x8eb6         0xc2 address de chargement 0x000eb6  
+.keybind.const      0x8eb4         0xc2 address de chargement 0x000eb4  
  .keybind.const
-                    0x8eb6         0xc2 build/default/production/keybind.o
-                    0x8eb6                  ascii
-                    0x8f22                  shifted
-                    0x8f4e                  mod
-                    0x8f5a                  xmod
-                    0x8f60                  extended
+                    0x8eb4         0xc2 build/default/production/keybind.o
+                    0x8eb4                  ascii
+                    0x8f20                  shifted
+                    0x8f4c                  mod
+                    0x8f58                  xmod
+                    0x8f5e                  extended
 
 .quick_str.const
-                    0x8f78         0x2e address de chargement 0x000f78  
+                    0x8f76         0x2e address de chargement 0x000f76  
  .quick_str.const
-                    0x8f78         0x2e build/default/production/core.o
+                    0x8f76         0x2e build/default/production/core.o
 
-.ver_str.const      0x8fa6          0xe address de chargement 0x000fa6  
+.ver_str.const      0x8fa4          0xe address de chargement 0x000fa4  
  .ver_str.const
-                    0x8fa6          0xe build/default/production/core.o
+                    0x8fa4          0xe build/default/production/core.o
 
 .forth_code.text
-                  0x000fb4        0x3b8
+                  0x000fb2        0x658
  .forth_code.text
-                  0x000fb4        0x3b8 build/default/production/core.o
-                  0x000fb4                  ENTER
-                  0x000fbe                  code_EXIT
-                  0x000fc6                  code_COLD
-                  0x000fc8                  code_WARM
-                  0x000fd4                  code_EXECUTE
-                  0x000fdc                  code_LIT
-                  0x000fe6                  code_CLIT
-                  0x000ff4                  code_FETCH
-                  0x000ffc                  code_CFETCH
-                  0x001006                  code_STORE
-                  0x001012                  code_CSTORE
-                  0x001020                  code_BRANCH
-                  0x001028                  code_ZBRANCH
-                  0x001036                  code_DODO
-                  0x001044                  code_DOLOOP
-                  0x001060                  code_DOI
-                  0x00106a                  code_DOJ
-                  0x001074                  code_UNLOOP
-                  0x00107e                  code_DUP
-                  0x001086                  code_DDUP
-                  0x001090                  code_QDUP
-                  0x00109c                  code_DROP
-                  0x0010a4                  code_DDROP
-                  0x0010ae                  code_SWAP
-                  0x0010ba                  code_DSWAP
-                  0x0010ce                  code_ROT
-                  0x0010de                  code_NROT
-                  0x0010ee                  code_OVER
-                  0x0010f8                  code_NIP
-                  0x001100                  code_TOR
-                  0x00110a                  code_RFROM
-                  0x001114                  code_RFETCH
-                  0x00111e                  code_SPFETCH
-                  0x001128                  code_SPSTORE
-                  0x001132                  code_RPFETCH
-                  0x00113c                  code_RPSTORE
-                  0x001146                  code_TUCK
-                  0x001156                  code_PLUS
-                  0x00115e                  code_MINUS
-                  0x001166                  code_ONEPLUS
-                  0x00116e                  code_TWOPLUS
-                  0x001176                  code_ONEMINUS
-                  0x00117e                  code_TWOMINUS
-                  0x001186                  code_TWOSTAR
-                  0x00118e                  code_TWOSLASH
-                  0x001196                  code_LSHIFT
-                  0x00119e                  code_RSHIFT
-                  0x0011a6                  code_PLUSSTORE
-                  0x0011b4                  code_DADD
-                  0x0011c4                  code_MULTIPLY
-                  0x0011d2                  code_DIVIDE
-                  0x0011e0                  code_DIVMOD
-                  0x0011f0                  code__AND
-                  0x0011f8                  code__OR
-                  0x001200                  code__XOR
-                  0x001208                  code_INVERT
-                  0x001210                  code_NEGATE
-                  0x001218                  code_ZEROEQ
-                  0x001222                  code_ZEROLT
-                  0x001230                  code_EQUAL
-                  0x001240                  code_NEQUAL
-                  0x001250                  code_LESS
-                  0x001260                  code_GREATER
-                  0x001270                  code_ULESS
-                  0x001280                  code_UGREATER
-                  0x001290                  code_CELL
-                  0x00129a                  code_CELLPLUS
-                  0x0012a2                  code_CELLS
-                  0x0012ac                  code_STATE
-                  0x0012b6                  code_HERE
-                  0x0012c0                  code_BASE
-                  0x0012ca                  code_LATEST
-                  0x0012d4                  code_RBASE
-                  0x0012de                  code_PBASE
-                  0x0012e8                  code_PAD
-                  0x0012f2                  code_TIB
-                  0x0012fc                  code_SOURCE_ID
-                  0x001306                  code_INPTR
-                  0x001310                  code_VERSION
-                  0x00131a                  code_RAMEND
-                  0x001324                  code__F_IMMED
-                  0x00132e                  code__F_HIDDEN
-                  0x001338                  code__F_LENMASK
-                  0x001342                  code_BL
-                  0x00134c                  code_TIBSIZE
-                  0x001356                  code_PADSIZE
-                  0x001360                  code_ULIMIT
-                  0x00136a                  code_INFLOOP
+                  0x000fb2        0x658 build/default/production/core.o
+                  0x000fb2                  ENTER
+                  0x000fbc                  code_EXIT
+                  0x000fc4                  code_COLD
+                  0x000fc6                  code_WARM
+                  0x000fd2                  code_EXECUTE
+                  0x000fda                  code_LIT
+                  0x000fe4                  code_CLIT
+                  0x000ff2                  code_FETCH
+                  0x000ffa                  code_CFETCH
+                  0x001004                  code_STORE
+                  0x001010                  code_CSTORE
+                  0x00101e                  code_BRANCH
+                  0x001026                  code_ZBRANCH
+                  0x001034                  code_DODO
+                  0x001042                  code_DOLOOP
+                  0x00105e                  code_DOI
+                  0x001068                  code_DOJ
+                  0x001072                  code_UNLOOP
+                  0x00107c                  code_DUP
+                  0x001084                  code_DDUP
+                  0x00108e                  code_QDUP
+                  0x00109a                  code_DROP
+                  0x0010a2                  code_DDROP
+                  0x0010ac                  code_SWAP
+                  0x0010b8                  code_DSWAP
+                  0x0010cc                  code_ROT
+                  0x0010dc                  code_NROT
+                  0x0010ec                  code_OVER
+                  0x0010f6                  code_NIP
+                  0x0010fe                  code_TOR
+                  0x001108                  code_RFROM
+                  0x001112                  code_RFETCH
+                  0x00111c                  code_SPFETCH
+                  0x001126                  code_SPSTORE
+                  0x001130                  code_RPFETCH
+                  0x00113a                  code_RPSTORE
+                  0x001144                  code_TUCK
+                  0x001154                  code_PLUS
+                  0x00115c                  code_MINUS
+                  0x001164                  code_ONEPLUS
+                  0x00116c                  code_TWOPLUS
+                  0x001174                  code_ONEMINUS
+                  0x00117c                  code_TWOMINUS
+                  0x001184                  code_TWOSTAR
+                  0x00118c                  code_TWOSLASH
+                  0x001194                  code_LSHIFT
+                  0x00119c                  code_RSHIFT
+                  0x0011a4                  code_PLUSSTORE
+                  0x0011b2                  code_DADD
+                  0x0011c2                  code_MULTIPLY
+                  0x0011d0                  code_DIVIDE
+                  0x0011de                  code_DIVMOD
+                  0x0011ee                  code__AND
+                  0x0011f6                  code__OR
+                  0x0011fe                  code__XOR
+                  0x001206                  code_INVERT
+                  0x00120e                  code_NEGATE
+                  0x001216                  code_ZEROEQ
+                  0x001220                  code_ZEROLT
+                  0x00122e                  code_EQUAL
+                  0x00123e                  code_NEQUAL
+                  0x00124e                  code_LESS
+                  0x00125e                  code_GREATER
+                  0x00126e                  code_ULESS
+                  0x00127e                  code_UGREATER
+                  0x00128e                  code_CELL
+                  0x001298                  code_CELLPLUS
+                  0x0012a0                  code_CELLS
+                  0x0012aa                  code_TICKS
+                  0x0012b4                  code_MSEC
+                  0x0012c4                  code_LFSR
+                  0x0012dc                  code_RAND
+                  0x00130e                  code_SRAND
+                  0x00131e                  code_VIDON
+                  0x00132a                  code_CLS
+                  0x00133a                  code_XPOS
+                  0x00134c                  code_YPOS
+                  0x00135e                  code_EMIT
+                  0x001390                  code_CR
+                  0x001392                  code_SPACE
+                  0x001398                  code_SCROLLUP
+                  0x0013b0                  code_CLRLN
+                  0x0013cc                  code_QKEY
+                  0x0013e2                  code_KEY
+                  0x0013f4                  code_KBD_CMD
+                  0x001402                  code_SEMIT
+                  0x001430                  code_SGET
+                  0x001450                  code_TONE
+                  0x001466                  code_RSTORE
+                  0x001498                  code_RLOAD
+                  0x0014ca                  code_ESTORE
+                  0x001512                  code_ELOAD
+                  0x00154a                  code_STATE
+                  0x001554                  code_HERE
+                  0x00155e                  code_BASE
+                  0x001568                  code_LATEST
+                  0x001572                  code_RBASE
+                  0x00157c                  code_PBASE
+                  0x001586                  code_PAD
+                  0x001590                  code_TIB
+                  0x00159a                  code_SOURCE_ID
+                  0x0015a4                  code_INPTR
+                  0x0015ae                  code_VERSION
+                  0x0015b8                  code_RAMEND
+                  0x0015c2                  code__F_IMMED
+                  0x0015cc                  code__F_HIDDEN
+                  0x0015d6                  code__F_LENMASK
+                  0x0015e0                  code_BL
+                  0x0015ea                  code_TIBSIZE
+                  0x0015f4                  code_PADSIZE
+                  0x0015fe                  code_ULIMIT
+                  0x001608                  code_INFLOOP
 
-.text             0x00136c         0xea
- .text            0x00136c         0xea build/default/production/keyboard.o
-                  0x00136c                  get_code
-                  0x00139a                  kbd_get
-
-.forth_code.text
-                  0x001456        0x206
- .forth_code.text
-                  0x001456         0xe4 build/default/production/store.o
-                  0x001456                  code_RSTORE
-                  0x001488                  code_RLOAD
-                  0x0014ba                  code_ESTORE
-                  0x001502                  code_ELOAD
- .forth_code.text
-                  0x00153a         0xae build/default/production/TVout.o
-                  0x00153a                  code_VIDON
-                  0x001546                  code_CLS
-                  0x001556                  code_XPOS
-                  0x001568                  code_YPOS
-                  0x00157a                  code_EMIT
-                  0x0015ac                  code_CR
-                  0x0015ae                  code_SPACE
-                  0x0015b4                  code_SCROLLUP
-                  0x0015cc                  code_CLRLN
- .forth_code.text
-                  0x0015e8         0x74 build/default/production/hardware.o
-                  0x0015e8                  code_TICKS
-                  0x0015f2                  code_MSEC
-                  0x001602                  code_LFSR
-                  0x00161a                  code_RAND
-                  0x00164c                  code_SRAND
-
-.text             0x00165c        0x114
- .text            0x00165c         0x6e build/default/production/ps2.o
-                  0x00165c                  ps2_init
-                  0x0016aa                  ps2_send
- .text            0x0016ca         0x56 build/default/production/TVout.o
-                  0x0016ca                  tvout_init
- .text            0x001720         0x50 build/default/production/store.o
-                  0x001720                  store_init
-
-.forth_code.text
-                  0x001770         0x84
- .forth_code.text
-                  0x001770         0x4e build/default/production/serial.o
-                  0x001770                  code_SEMIT
-                  0x00179e                  code_SGET
- .forth_code.text
-                  0x0017be         0x36 build/default/production/keyboard.o
-                  0x0017be                  code_QKEY
-                  0x0017d4                  code_KEY
-                  0x0017e6                  code_KBD_CMD
-
-.text             0x0017f4         0x82
- .text            0x0017f4         0x36 build/default/production/serial.o
-                  0x0017f4                  serial_init
- .text            0x00182a         0x34 build/default/production/hardware.o
-                  0x00182a                  hardware_init
- .text            0x00185e         0x18 build/default/production/sound.o
-                  0x00185e                  sound_init
-
-.forth_code.text
-                  0x001876         0x16
- .forth_code.text
-                  0x001876         0x16 build/default/production/sound.o
-                  0x001876                  code_TONE
+.text             0x00160a        0x280
+ .text            0x00160a         0xea build/default/production/keyboard.o
+                  0x00160a                  get_code
+                  0x001638                  kbd_get
+ .text            0x0016f4         0x6e build/default/production/ps2.o
+                  0x0016f4                  ps2_init
+                  0x001742                  ps2_send
+ .text            0x001762         0x56 build/default/production/TVout.o
+                  0x001762                  tvout_init
+ .text            0x0017b8         0x50 build/default/production/store.o
+                  0x0017b8                  store_init
+                  0x0017c8                  spi_send_address
+                  0x0017ee                  wait_wip0
+ .text            0x001808         0x36 build/default/production/serial.o
+                  0x001808                  serial_init
+ .text            0x00183e         0x34 build/default/production/hardware.o
+                  0x00183e                  hardware_init
+ .text            0x001872         0x18 build/default/production/sound.o
+                  0x001872                  sound_init

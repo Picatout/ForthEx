@@ -23,70 +23,10 @@
     
 .include "hardware.inc"
 .include "core.inc"
+.include "store.inc"
     
- ; commandes SPIRAM   
-.equ WRMR, 1
-.equ RDMR, 5
-.equ RREAD, 3
-.equ RWRITE, 2
- ; modes SPIRAM
-.equ RMBYTE, 0
-.equ RMPAGE, (2<<6) 
-.equ RMSEQ, (1<<6)    
- 
-; commandes EEPROM
-.equ EWRITE, 2 
-.equ EREAD,  3
-.equ EWREN,  6
-.equ EWRDI,  4
-.equ ERDSR,  5
-.equ EWRSR,  1
-.equ EPE,    0x42
-.equ ESE,    0xD8
-.equ ECE,    0xC7
-.equ RDID,   0xAB
-.equ EDPD,   0xB9 
-
-;eeprom status bits
-.equ WIP, 0
-.equ WEN, 1
-.equ BP0, 2
-.equ BP1, 3
-.equ WPEN, 7
- 
-.equ EPAGE_SIZE, 256
- 
  .text
  
- .macro spi_write
-    mov.b WREG, STR_SPIBUF
-    btss STR_SPISTAT, #SPIRBF
-    bra .-2
-    mov STR_SPIBUF, W0
-.endm
-
-.macro spi_read
-    setm.b STR_SPIBUF    
-    btss STR_SPISTAT, #SPIRBF
-    bra .-2
-.endm
-
-.macro _enable_sram
-    bclr STR_LAT, #SRAM_SEL
-.endm
-    
-.macro _disable_sram
-    bset STR_LAT, #SRAM_SEL
-.endm
-    
-.macro _enable_eeprom
-   bclr STR_LAT, #EEPROM_SEL
-.endm
-   
-.macro _disable_eeprom
-   bset STR_LAT, #EEPROM_SEL
-.endm
-   
    
  ;;;;;;;;;;;;;;;;;;;;;;;
 ; initialisation SPI
@@ -137,7 +77,8 @@ store_init:
 ; envoie d'une adresse via STR_SPI
 ; adresse sur dstack
 ; adresse de 24 bits
-;;;;;;;;;;;;;;;;;;;;    
+;;;;;;;;;;;;;;;;;;;;   
+.global spi_send_address    
 spi_send_address:
     mov T, W0
     DPOP
@@ -155,6 +96,7 @@ spi_send_address:
 ; est actif et attend
 ; qu'il revienne à zéro.
 ;;;;;;;;;;;;;;;;;;;;;;;;;
+.global wait_wip0    
 wait_wip0:
     _enable_eeprom  
     mov #ERDSR, W0
@@ -166,125 +108,6 @@ wait_wip0:
     return
 
     
-;;;;;;;;;;;;;;;
-;  Forth words
-;;;;;;;;;;;;;;;
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; transfert un bloc d'octets de la RAM du MCU vers la RAM SPI
-; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
-; sortie aucune
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RSTORE",6,,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
-    _enable_sram
-    mov #RWRITE,W0
-    spi_write
-    mov T, W1 ; nombre d'octets
-    DPOP
-    call spi_send_address
-    mov T, W2 ; adresse bloc RAM
-    DPOP
-0:
-    cp0 W1
-    bra z, 1f
-    mov.b [W2++], W0
-    spi_write
-    dec W1,W1
-    bra 0b
-1:    
-    _disable_sram
-    NEXT
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; transfert un bloc d'octets de la RAM SPI vers la RAM du MCU
-; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
-; sortie: aucune
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RLOAD",6,,RLOAD ; ( addr-bloc addr-sramL addr-sramH n -- )
-    _enable_sram
-    mov #RREAD, W0
-    spi_write
-    mov T, W1 ; nombre d'octets à transférer
-    DPOP
-    call spi_send_address
-    mov T, W2 ; adresse bloc RAM
-    DPOP
-    mov #STR_SPIBUF, W3
-0:    
-    cp0 W1
-    bra z, 3f
-    spi_read
-    mov.b [W3], [W2++]
-    dec W1,W1
-    bra 0b
-3:
-    _disable_sram
-    NEXT
-  
-    
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; enregistrement bloc RAM dans EEPROM
-; entrée: bloc-adress, page
-; l'eeprom est organisée en 512 pages de
-; 256 octets.
-; Bien qu'il soit possible de programmer
-; un seule octet à la fois
-; cette routine est conçue pour programmer
-; une page complète.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "ESTORE",6,,ESTORE  ;( addr-bloc page -- )
-    call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
-    _enable_eeprom
-    mov #EWREN, W0
-    spi_write
-    _disable_eeprom
-    nop
-    _enable_eeprom
-    mov #EWRITE, W0
-    spi_write
-    sl  T, #8, T
-    DPUSH
-    clr T
-    rlc T,T
-    call spi_send_address
-    mov T, W2 ; addr-bloc
-    DPOP
-    mov #256, W3
-1:
-    mov.b [W2++], W0
-    spi_write
-    dec W3,W3
-    bra nz, 1b
-    _disable_eeprom
-    NEXT
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; charque une page EEPROM
-; en mémoire RAM
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "ELOAD",5,,ELOAD   ; ( addr-bloc page -- )
-    call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
-    _enable_eeprom
-    mov #EREAD, W0
-    spi_write
-    sl  T, #8, T
-    DPUSH
-    clr T
-    rlc T,T
-    call spi_send_address
-    mov T, W2 ; addr-bloc
-    DPOP
-    mov #256, W3
-1:
-    spi_read
-    mov STR_SPIBUF, W0
-    mov.b W0, [W2++]
-    dec W3,W3
-    bra nz, 1b
-    _disable_eeprom
-    NEXT
     
     
  .end

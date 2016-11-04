@@ -32,7 +32,7 @@
     
 .section .hardware.bss  bss
     
-.global systicks    
+.global systicks , seed   
 systicks: ; compteur de millisecondes
 .space 2
 seed: ; PRNG 32 bits    
@@ -131,95 +131,6 @@ hardware_init:
 ;    bra nz, 1b
 ;    return
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-; mots forth
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    
-    
-DEFCODE "TICKS",5,,TICKS  ; ( -- n )
-    DPUSH
-    mov systicks, T
-    NEXT
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;  délais en millisecondes
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "MSEC",4,,MSEC  ; ( n -- )
-    mov systicks, W0
-    add W0,T,W0
-0:    
-    cp systicks
-    bra neq, 0b
-    DPOP
-    NEXT
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; générnateur pseudo-hasard
-; basé sur une LFSR
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-.equ TAPSH, 0x8020
-.equ TAPSL, 0x0002    
-DEFCODE "LFSR",4,,LFSR  ; ( -- )
-    lsr seed+2 
-    rrc seed
-    bra nc, 0f
-    mov #TAPSH, W0
-    xor seed+2
-    mov #TAPSL, W0
-    xor seed
-0:    
-    DPUSH
-    mov seed, T
-    NEXT
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; générateur pseudo hazard
-; génère un nombre de 16 bits
-;  si seed impaire incrémente
-;  ensuite Sn=(Sn-1)*3/2
-;  on ne garde que le bit
-;  le moins significatif
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "RAND",4,,RAND   ; ( -- n)
-    clr W2
-    mov #15,W3
-0:
-    btss seed,#0
-    bra 1f
-    inc seed
-    bra nc, 1f
-    inc seed+2
- 1:
-    sl seed,WREG
-    mov W0,W1
-    rlc seed+2, WREG
-    exch W0,W1
-    add seed
-    mov W1,W0
-    addc seed+2
-    lsr seed+2,
-    rrc seed
-    lsr seed, WREG
-    rrc W3,W3
-    dec W4,W4
-    bra c, 1b
-    DPUSH
-    mov W3,T
-    NEXT
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-;initialisation variable seed
-; seed=systicks/3
-; seed+2=systicks%3    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "SRAND",5,,SRAND  ; ( -- )
-    mov systicks,W0
-    mov #3,W2
-    div.u W0,W2
-    mov W0, seed
-    mov W1, seed+2
-    NEXT
 
 
 .end
