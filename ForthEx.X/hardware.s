@@ -70,7 +70,7 @@ __reset:
     mov #tib, W0
     mov W0, var_TIB
     mov #USER_BASE, W0
-    mov W0,var_HERE
+    mov W0,var_DP
     movpag #edspage(sys_latest),DSRPAG
     mov #edsoffset(sys_latest),W0
     mov [W0], W0

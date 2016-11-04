@@ -132,14 +132,23 @@ XBRAN:
     add IP, [IP], IP
     NEXT
     
-; branchement si T==0    
-DEFCODE "?BRANCH",6,,ZBRANCH ; ( n -- )
+; branchement si T<>0    
+DEFCODE "?BRANCH",7,,QBRANCH ; ( n -- )
     cp0 T
     DPOP
-    bra z, XBRAN
+    bra nz, XBRAN
     inc2 IP,IP
     NEXT
 
+; branchement si T==0
+DEFCODE "ZBRANCH",7,,ZBRANCH ; ( n -- )
+    cp0 T
+    DPOP
+    bra z, XBRAN
+    inc2, IP,IP
+    NEXT
+    
+    
 ; exécution de DO    
 DEFCODE "(DO)",4,,DODO ; ( n  n -- ) R( -- n n )
     RPUSH I
@@ -478,6 +487,9 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
     mov W0,T
     NEXT
 
+DEFWORD "HERE",4,,HERE
+    .word DP,FETCH,EXIT
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  mot forth I/O
 ;;;;;;;;;;;;;;;;;;;;;;;;;;    
@@ -491,36 +503,77 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  variables système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFVAR "STATE",5,,STATE
-DEFVAR "HERE",4,,HERE
-DEFVAR "BASE",4,,BASE
-DEFVAR "LATEST",6,,LATEST
-DEFVAR "RBASE",5,,RBASE
-DEFVAR "PBASE",5,,PBASE    
-DEFVAR "PAD",3,,PAD
-DEFVAR "TIB",3,,TIB    
-DEFVAR "SOURCE-ID",9,,SOURCE_ID
-DEFVAR ">IN",3,,INPTR
+DEFVAR "STATE",5,,STATE   ; état compile=1/interprète=0
+DEFVAR "DP",4,,DP         ; pointeur fin dictionnaire
+DEFVAR "BASE",4,,BASE     ; base numérique
+DEFVAR "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
+DEFVAR "RBASE",5,,RBASE   ; base pile retour
+DEFVAR "PBASE",5,,PBASE   ; base pile arguments   
+DEFVAR "PAD",3,,PAD       ; tampon de travail
+DEFVAR "TIB",3,,TIB       ; tampon de saisei
+DEFVAR "SOURCE-ID",9,,SOURCE_ID ; source de la chaîne traité par l'interpréteur
+DEFVAR ">IN",3,,INPTR     ; pointeur position début dernier mot retourné par WORD
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCONST "VERSION",7,,VERSION,version
-DEFCONST "RAMEND",6,,RAMEND,RAM_END
-DEFCONST "F_IMMED",7,,_F_IMMED,F_IMMED
-DEFCONST "F_HIIDEN",8,,_F_HIDDEN,F_HIDDEN
-DEFCONST "F_LENMASK",9,,_F_LENMASK,F_LENMASK    
-DEFCONST "BL",2,,BL,32
-DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE
-DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE 
-DEFCONST "ULIMIT",6,,ULIMIT,RAM_END-1
+DEFCONST "VERSION",7,,VERSION,version        ; adresse chaêine version
+DEFCONST "RAMEND",6,,RAMEND,RAM_END          ;  fin mémoire RAM
+DEFCONST "F_IMMED",7,,_F_IMMED,F_IMMED       ; drapeau mot immédiat
+DEFCONST "F_HIIDEN",8,,_F_HIDDEN,F_HIDDEN    ; drapeau mot caché
+DEFCONST "F_LENMASK",9,,_F_LENMASK,F_LENMASK ; masque longueur nom   
+DEFCONST "BL",2,,BL,32                       ; caractère espace
+DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
+DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
+DEFCONST "ULIMIT",6,,ULIMIT,RAM_END-1        ; limite espace dictionnaire
+
+; imprime une chaîne zéro terminée  ( c-addr -- )    
+DEFWORD "ZTYPE",5,,ZTYPE
+ztype0:    
+.word DUP,CFETCH,DUP,ZBRANCH
+DEST ztype1 
+.word EMIT,ONEPLUS,BRANCH
+DEST  ztype0
+ztype1:    
+.word DROP,DROP, EXIT     
+
     
+DEFWORD "ACCEPT",6,,ACCEPT
+accept0:
+    .word KEY,DUP,LIT,13,NEQUAL,ZBRANCH
+    DEST accept1
+    .word EMIT,BRANCH
+    DEST accept0 
+accept1:
+    .word EXIT
+    
+   
+; interprète une chaine    
+DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr +n -- )
+    
+    .word EXIT
+    
+; imprime le prompt et passe à la ligne suivante    
+DEFWORD "OK",2,,OK  ; ( -- )
+.word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
+    
+; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT
+    .word RBASE,FETCH,RPSTORE
+;quit00:
+;    .word BRANCH
+;    DEST quit00
+    .word LIT,0,STATE,STORE
     .word VERSION,ZTYPE,CR
     .word TIB,FETCH,INPTR,STORE
 quit0:
-    .word ACCEPT
+    .word TIB, DUP, TIBSIZE, ACCEPT
+    .word SPACE, INTERPRET
+    .word STATE, FETCH, ZEROEQ,ZBRANCH
+    DEST quit1
     .word OK
+quit1:
+    .word CR
     .word BRANCH
     DEST quit0
     
@@ -533,23 +586,12 @@ DEFWORD "TEST",4,,TEST
 DEFWORD "SERTEST",7,,SERTEST
 .word CLS,VERSION,SGET,SEMIT,BRANCH,-6    
 
-DEFWORD "ACCEPT",6,,ACCEPT
-kbdtest0:
-    .word KEY,DUP,LIT,13,NEQUAL,ZBRANCH
-    DEST kbdtest1
-    .word EMIT,BRANCH
-    DEST kbdtest0 
-kbdtest1:
-    .word EXIT
-    
 DEFWORD "HOME",5,,HOME
 .word LIT,0,LIT,0,CURPOS,EXIT
     
 DEFWORD "OKOFF",6,,OKOFF
 .word SPACE,SPACE,EXIT 
     
-DEFWORD "OK",2,,OK
-.word BL,EMIT,LIT, 'O', EMIT, LIT,'K',EMIT, CR, EXIT    
 
 .section .quick_str.const psv
 quick:
@@ -557,10 +599,6 @@ quick:
 
 ;DEFWORD "VERSION",7,,VERSION
 ;.word CLS,LIT,version,ZTYPE,CR,EXIT    
-
-DEFWORD "ZTYPE",5,,ZTYPE
-.word DUP,CFETCH,DUP,ZBRANCH,10,EMIT,ONEPLUS,BRANCH,-16
-.word DROP,DROP, EXIT     
 
 DEFWORD "QUICKTEST",9,,QUICKTEST
 .word CLS,LIT,quick,ZTYPE,BRANCH,-2

@@ -147,7 +147,7 @@ code_\label :			;pfa,  assembler code follows
 .macro DEFVAR name, namelen, flags=0, label
 	DEFCODE \name,\namelen,\flags,\label
 	DPUSH
-	mov var_\label, T
+	mov #var_\label, T
 	NEXT
 	.bss
 	.align 2
