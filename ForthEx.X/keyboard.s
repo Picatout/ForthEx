@@ -42,12 +42,14 @@ kbd_head:
 kbd_tail:
 .space 2
  
-;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;    
 ; interruption TIMER1
-; incrémente 'systicks',
-; termine tonalité si durée expirée    
-; et traitement primaire
-; file ps2_queue vers kbd_queue
+; interruption multi-tâches    
+; * incrémente 'systicks',
+; * minuterie durée son    
+; * traitement primaire
+;   file ps2_queue vers kbd_queue
+; * clignotement du curseur texte    
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 .extern systicks
 .extern ps2_head
@@ -57,21 +59,36 @@ INTR
 .global __T1Interrupt   
 __T1Interrupt:
     bclr IFS0, #T1IF
-    push W0
-    push W1
-    push W2
+    push.d W0
+    push.d W2
+    ; mise à jour compteur systicks
     inc systicks
+    ; minuterie son
     cp0 tone_len
     bra z, 0f
     dec tone_len
     bra nz, 0f
     bclr AUDIO_TMRCON, #TON
-0:    
-    ;traitement file ps2_queue
-    ;vers file kbd_queue
+0:   
+;traitement file ps2_queue
+    call scancode_convert
+;clignotement curseur texte
+    cp0.b cursor_sema
+    bra nz, isr_exit
+    btsc.b fcursor, #CURSOR_ACTIVE
+    call cursor_blink
+isr_exit:
+    pop.d W2
+    pop.d W0
+    retfie
+    
+.text
+scancode_convert:
     mov ps2_head, W0
     cp ps2_tail
-    bra z, isr_exit ; file ps2_queue vide
+    bra nz, 0f ; file ps2_queue vide
+    return
+0:    
     mov #ps2_queue, W1
     add W0, W1, W1
     btss [W1], #10
@@ -127,9 +144,6 @@ __T1Interrupt:
     btss key_state, #F_CTRL
     bra 8f
     reset
-;    clr W2
-;    repeat #17
-;    div.s W0,W2 ; génère une exception __MathError
 8:    
     ; tranfert code dans file
     ; kbd_queue
@@ -145,13 +159,8 @@ __T1Interrupt:
     inc2 ps2_head
     mov #(PS2_QUEUE_SIZE-1), W0
     and ps2_head
-isr_exit:
-    pop W2
-    pop W1
-    pop W0
-    retfie
+    return
     
-.text
 ;ctrl_c_reset:
 ;    clr kbd_head
 ;    clr kbd_tail

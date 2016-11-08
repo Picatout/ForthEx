@@ -58,7 +58,7 @@ user: .space RAM_SIZE-USER_BASE
 .section .ver_str.const psv       
 ;test string
 version:
-.asciz "ForthEx V0.1\n"    
+.asciz "ForthEx V0.1"    
     
 FORTH_CODE
 .global ENTER    
@@ -119,9 +119,8 @@ DEFCODE "!",1,,STORE  ; ( n  addr -- )
     DPOP
     NEXT
     
-DEFCODE "C!",2,,CSTORE  ; ( c addr  -- )
+DEFCODE "C!",2,,CSTORE  ; ( char c-addr  -- )
     mov [DSP--],W0
-    ze W0, W0
     mov.b W0,[T]
     DPOP
     NEXT
@@ -133,7 +132,7 @@ XBRAN:
     NEXT
     
 ; branchement si T<>0    
-DEFCODE "?BRANCH",7,,QBRANCH ; ( n -- )
+DEFCODE "?BRANCH",7,,TBRANCH ; ( n -- )
     cp0 T
     DPOP
     bra nz, XBRAN
@@ -196,7 +195,7 @@ DEFCODE "DUP",3,,DUP ; ( n -- n n )
     DPUSH
     NEXT
 
-DEFCODE "2DUP",4,,DDUP ; ( n1 n2 -- n1 n2 n1 n2 )
+DEFCODE "2DUP",4,,TWODUP ; ( n1 n2 -- n1 n2 n1 n2 )
     mov [DSP],W0
     mov W0, [++DSP]
     NEXT
@@ -212,18 +211,18 @@ DEFCODE "DROP",4,,DROP ; ( n -- )
     DPOP
     NEXT
 
-DEFCODE "2DROP",5,,DDROP ; ( n1 n2 -- )
-    mov [DSP-2],T
-    sub #4,DSP
+DEFCODE "2DROP",5,,TWODROP ; ( n1 n2 -- )
+    DPOP
+    DPOP
     NEXT
     
-DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
+DEFCODE "SWAP",4,,DOSWAP ; ( n1 n2 -- n2 n1)
     mov T, W0
     mov [DSP], T
     mov W0, [DSP+0]
     NEXT
 
-DEFCODE "2SWAP",6,,DSWAP ; ( n1 n2 n3 n4 -- n3 n4 n1 n2 )
+DEFCODE "2SWAP",6,,TWOSWAP ; ( n1 n2 n3 n4 -- n3 n4 n1 n2 )
     mov [DSP-2],W0
     mov T,[DSP-2]
     mov W0, T
@@ -381,6 +380,21 @@ DEFCODE "/MOD",4,,DIVMOD ; ( n1 n2 -- r q )
     mov W0,T     ; quotient
     mov W1,[DSP] ; reste
     NEXT
+
+DEFCODE "UMAX",4,,UMAX ; ( u1 u2 -- max(u1,u2)
+    mov [DSP--],W0
+    cp T,W0
+    bra geu, 1f
+    exch T,W0
+1:  NEXT    
+    
+DEFCODE "UMIN",4,,UMIN ; ( u1 u2 -- min(u1,u2)
+    mov [DSP--],w0
+    cp W0,T
+    bra geu, 1f
+    exch T,W0
+1:  NEXT
+    
     
 ; opérations logiques bit à bit    
 DEFCODE "AND",3,,_AND  ; ( n1 n2 -- n)  ET bit à bit
@@ -510,7 +524,7 @@ DEFVAR "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
 DEFVAR "RBASE",5,,RBASE   ; base pile retour
 DEFVAR "PBASE",5,,PBASE   ; base pile arguments   
 DEFVAR "PAD",3,,PAD       ; tampon de travail
-DEFVAR "TIB",3,,TIB       ; tampon de saisei
+DEFVAR "TIB",3,,TIB       ; tampon de saisie clavier
 DEFVAR "SOURCE-ID",9,,SOURCE_ID ; source de la chaîne traité par l'interpréteur
 DEFVAR ">IN",3,,INPTR     ; pointeur position début dernier mot retourné par WORD
     
@@ -537,20 +551,27 @@ DEST  ztype0
 ztype1:    
 .word DROP,DROP, EXIT     
 
-    
-DEFWORD "ACCEPT",6,,ACCEPT
-accept0:
-    .word KEY,DUP,LIT,13,NEQUAL,ZBRANCH
-    DEST accept1
-    .word EMIT,BRANCH
-    DEST accept0 
-accept1:
-    .word EXIT
+; lecture d'une ligne de texte au clavier
+; adapté de CamelForth pour msp430    
+DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
+        .word OVER,PLUS,ONEMINUS,OVER
+ACC1:   .word KEY,DUP,LIT,13,EQUAL,TBRANCH
+        DEST ACC5
+        .word DUP,EMIT,DUP,LIT,8,EQUAL,ZBRANCH
+        DEST ACC3
+        .word DROP,ONEMINUS,TOR,OVER,RFROM,UMAX
+        .word BRANCH
+        DEST ACC4
+ACC3:   .word OVER,CSTORE,ONEPLUS,OVER,UMIN
+ACC4:   .word BRANCH
+        DEST ACC1
+ACC5:   .word DROP,NIP,DOSWAP,MINUS,EXIT
+        
     
    
 ; interprète une chaine    
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr +n -- )
-    
+    .word TWODROP
     .word EXIT
     
 ; imprime le prompt et passe à la ligne suivante    
@@ -560,14 +581,11 @@ DEFWORD "OK",2,,OK  ; ( -- )
 ; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT
     .word RBASE,FETCH,RPSTORE
-;quit00:
-;    .word BRANCH
-;    DEST quit00
     .word LIT,0,STATE,STORE
     .word VERSION,ZTYPE,CR
     .word TIB,FETCH,INPTR,STORE
 quit0:
-    .word TIB, DUP, TIBSIZE, ACCEPT
+    .word TIB, FETCH, DUP,LIT,CPL,ONEMINUS,ACCEPT
     .word SPACE, INTERPRET
     .word STATE, FETCH, ZEROEQ,ZBRANCH
     DEST quit1

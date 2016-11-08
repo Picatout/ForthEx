@@ -33,6 +33,7 @@
 .endif
 .include "core.inc"
 .include "keyboard.inc"
+ 
     
 .section .tvout.bss bss
 
@@ -44,7 +45,13 @@ video_on: .space 1
 xpos: .space 1
 ypos: .space 1
 
+
+.global fcursor, cursor_dly , cursor_sema
+cursor_dly: .space 2 ; contrôle vitesse clignotement
+cursor_sema: .space 1 ; sémaphore 
+fcursor: .space 1 ; indicateur booléens curseur texte
  
+.align 2 
 .global _video_buffer
 _video_buffer: .space TV_BUFFER_SIZE
  
@@ -105,8 +112,15 @@ tvout_init:
     bset SYNC_IEC, #SYNC_IE
     ; activation timer
     bset SYNC_TMRCON, #TON
+    ; activation du curseur texte
+    mov #CURSOR_DELAY,W0
+    mov W0, cursor_dly
+    clr.b cursor_sema
+    bset fcursor, #CURSOR_ACTIVE
+    bclr fcursor, #CURSOR_INV
     return
 
+    
 ;********************
 ; interruption TIMER2
 ; synchronisation    
@@ -191,6 +205,7 @@ __T2Interrupt:
 ; serialisation des pixels    
 ;*********************
 .extern _font
+.equ fINVERT, W6    
 .equ CH_ROW, W5    
 .equ pVIDBUF, W4
 .equ pFONT, W3
@@ -201,6 +216,7 @@ __OC2Interrupt:
     push.D W0
     push.D CH_COUNT
     push.D pVIDBUF
+    push fINVERT
     push DSRPAG
     movpag #edspage(_font),DSRPAG
     mov line_count, W1
@@ -222,11 +238,16 @@ __OC2Interrupt:
 1:  cp0 CH_COUNT
     bra z, 3f
     mov.b [pVIDBUF++], W0
+    clr fINVERT
+    btsc W0,#7
+    setm fINVERT
     and  #127,W0
     sl W0, #3, W0
     add pFONT,W0,W1
     add W1,CH_ROW, W1
     mov.b [W1],W0
+    btsc fINVERT,#7
+    com W0,W0
  2:
     btst VIDEO_SPISTAT, #SPITBF
     bra nz, 2b
@@ -238,13 +259,89 @@ __OC2Interrupt:
     bra nz, 3b
     clr VIDEO_SPIBUF
     pop DSRPAG
+    pop fINVERT
     pop.D pVIDBUF
     pop.D CH_COUNT
     pop.D W0
     retfie
 
     
+.text
+.global cursor_blink, toggle_char, cursor_enable, cursor_disable
+cursor_blink:
+    dec cursor_dly
+    bra z, 1f
+    return
+1:    
+    mov #CURSOR_DELAY,W0
+    mov W0,cursor_dly
+    btg.b fcursor,#CURSOR_INV
+toggle_char:
+    cursor_incr_sema
+    mov.b #CPL, W0
+    mul.b ypos
+    mov.b xpos, WREG
+    ze W0,W0
+    add W0,W2,W0
+    mov #_video_buffer, W1
+    add W0,W1,W1
+    btg.b [W1],#7
+    cursor_decr_sema
+    return
 
+cursor_enable:
+    btsc.b fcursor,#CURSOR_ACTIVE
+    return
+    mov	#CURSOR_DELAY, W0
+    mov W0, cursor_dly
+    clr.b cursor_sema
+    mov #1<<CURSOR_ACTIVE,W0
+    mov.b WREG, fcursor
+    return
+    
+cursor_disable:
+    cursor_incr_sema
+    btsc.b fcursor,#CURSOR_INV
+    call toggle_char
+    clr.b fcursor
+    cursor_decr_sema
+    return
+
+.global scroll_up
+scroll_up:
+    cursor_incr_sema
+    cursor_sync
+    mov #_video_buffer, W1 ;destination
+    mov #CPL, W0
+    add W0,W1,W2  ; source
+    mov #TV_BUFFER_SIZE, W3
+    sub W3,W0,W3
+    lsr W3,W3
+    dec W3,W3
+    repeat W3
+    mov [W2++],[W1++]
+    mov #0x2020,W0
+    repeat #CPL/2-1
+    mov W0, [W1++]
+    cursor_decr_sema
+    return
+    
+.global scroll_down    
+scroll_down:
+    cursor_incr_sema
+    cursor_sync
+    mov #_video_buffer, W1
+    mov #TV_BUFFER_SIZE, W0
+    add W1,W0,W1  ; W1 source
+    mov #CPL,W0
+    sub W1,W0,W2  ; W2 destination
+    repeat #(TV_BUFFER_SIZE-CPL)/2-1
+    mov [--W1],[--W2]
+    mov 0x2020,W0
+    repeat #CPL/2-1
+    mov W0,[--W2]
+    cursor_decr_sema
+    return
     
 .end
 
