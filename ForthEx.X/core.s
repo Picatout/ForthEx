@@ -150,26 +150,25 @@ DEFCODE "ZBRANCH",7,,ZBRANCH ; ( n -- )
     
 ; exécution de DO    
 DEFCODE "(DO)",4,,DODO ; ( n  n -- ) R( -- n n )
+    RPUSH LIMIT
     RPUSH I
     mov T, I
-    mov [DSP--],[RSP++]
-;    DPOP
-;    RPUSH T
+    DPOP
+    mov T, LIMIT
     DPOP
     NEXT
 
 ; exécution de LOOP   
 DEFCODE "(LOOP)",6,,DOLOOP  ; ( -- )  R( n n -- )
     inc I, I
-    mov [RSP-2],W0
-    cp I, W0
+    cp I, LIMIT
     bra z, 1f
     add IP, [IP], IP
     NEXT
 1:
     inc2 IP,IP
-    RDROP    
-    RPOP I
+    RPOP I    
+    RPOP LIMIT
     NEXT
 
 ; empile compteur de boucle    
@@ -180,12 +179,12 @@ DEFCODE "I",1,,DOI  ; ( -- n )
 
 DEFCODE "J",1,,DOJ  ; ( -- n )
     DPUSH
-    mov [RSP-4],T
+    mov [RSP],T
     NEXT
     
-DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) jette les arguments d'une boucle
-    RDROP
+DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) n1=LIMIT_J, n2=J
     RPOP I
+    RPOP LIMIT
     NEXT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
@@ -219,7 +218,7 @@ DEFCODE "2DROP",5,,TWODROP ; ( n1 n2 -- )
 DEFCODE "SWAP",4,,DOSWAP ; ( n1 n2 -- n2 n1)
     mov T, W0
     mov [DSP], T
-    mov W0, [DSP+0]
+    mov W0, [DSP]
     NEXT
 
 DEFCODE "2SWAP",6,,TWOSWAP ; ( n1 n2 n3 n4 -- n3 n4 n1 n2 )
@@ -254,7 +253,7 @@ DEFCODE "OVER",4,,OVER  ; ( n1 n2 -- n1 n2 n1 )
     NEXT
     
 DEFCODE "NIP",3,,NIP   ; ( n1 n2 -- n2 )
-    sub #2, DSP
+    dec2 DSP,DSP
     NEXT
     
 DEFCODE ">R",2,,TOR   ;  ( n -- )  R:( -- n)
@@ -305,11 +304,12 @@ DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 n3 -- n3 n1 n2 )
 ; MATH
 ;;;;;;;
 DEFCODE "+",1,,PLUS   ;( n1 n2 -- n1+n2 )
-    add T, [DSP++], T
+    add T, [DSP--], T
     NEXT
     
 DEFCODE "-",1,,MINUS   ; ( n1 n2 -- n1-n2 )
-    sub T, [DSP--], T
+    mov [DSP--],W0
+    sub W0,T,T
     NEXT
     
 DEFCODE "1+",2,,ONEPLUS ; ( n -- n+1 )
@@ -552,26 +552,25 @@ ztype1:
 .word DROP,DROP, EXIT     
 
 ; lecture d'une ligne de texte au clavier
-; adapté de CamelForth pour msp430    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
-        .word OVER,PLUS,ONEMINUS,OVER
-ACC1:   .word KEY,DUP,LIT,13,EQUAL,TBRANCH
-        DEST ACC5
-        .word DUP,EMIT,DUP,LIT,8,EQUAL,ZBRANCH
-        DEST ACC3
-        .word DROP,ONEMINUS,TOR,OVER,RFROM,UMAX
+        .word OVER,PLUS,OVER  ;( tib last ptr )
+acc1:   .word KEY,DUP,LIT,13,EQUAL,TBRANCH
+        DEST acc5
+        .word DUP,LIT,8,NEQUAL,TBRANCH
+        DEST acc3
+        .word DROP,BACKCHAR,ONEMINUS,TOR,OVER,RFROM,UMAX
         .word BRANCH
-        DEST ACC4
-ACC3:   .word OVER,CSTORE,ONEPLUS,OVER,UMIN
-ACC4:   .word BRANCH
-        DEST ACC1
-ACC5:   .word DROP,NIP,DOSWAP,MINUS,EXIT
+        DEST acc1
+acc3:   .word DUP,EMIT,OVER,CSTORE,ONEPLUS,OVER,UMIN
+acc4:   .word BRANCH
+        DEST acc1
+acc5:   .word DROP,NIP,DOSWAP,MINUS,EXIT
         
     
    
 ; interprète une chaine    
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr +n -- )
-    .word TWODROP
+    .word CR,TYPE
     .word EXIT
     
 ; imprime le prompt et passe à la ligne suivante    
@@ -585,6 +584,8 @@ DEFWORD "QUIT",4,,QUIT
     .word VERSION,ZTYPE,CR
     .word TIB,FETCH,INPTR,STORE
 quit0:
+    .word TYPETEST,CR,BRANCH
+    DEST quit0
     .word TIB, FETCH, DUP,LIT,CPL,ONEMINUS,ACCEPT
     .word SPACE, INTERPRET
     .word STATE, FETCH, ZEROEQ,ZBRANCH
@@ -613,13 +614,13 @@ DEFWORD "OKOFF",6,,OKOFF
 
 .section .quick_str.const psv
 quick:
-.asciz "The quick brown fox jump over the lazy dog.\r"
+.asciz "The quick brown fox jump over the lazy dog."
 
 ;DEFWORD "VERSION",7,,VERSION
 ;.word CLS,LIT,version,ZTYPE,CR,EXIT    
 
 DEFWORD "QUICKTEST",9,,QUICKTEST
-.word CLS,LIT,quick,ZTYPE,BRANCH,-2
+.word LIT,quick,ZTYPE,EXIT
     
 DEFWORD "STRTEST",7,,STRTEST
 .word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
@@ -630,8 +631,10 @@ DEFWORD "EEPROMTEST",10,,EEPROMTEST
 .word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,BRANCH,-32
 
 DEFWORD "LOOPTEST",8,,LOOPTEST
-.word CLS,DELAY,LIT,'Z'+1,LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
+.word LIT,'Z'+1,LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
 
+DEFWORD "TYPETEST",8,,TYPETEST
+.word TIB,FETCH,DUP,LIT,63,ACCEPT,CR,TYPE,EXIT 
     
 DEFWORD "CRTEST",6,,CRTEST
 .word CLS,LIT,'A',DUP,EMIT,CR,ONEPLUS,DUP,LIT,'X',EQUAL,ZBRANCH,-18,INFLOOP    

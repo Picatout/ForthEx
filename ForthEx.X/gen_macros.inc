@@ -26,8 +26,7 @@
 ; initialisation table en flash
 ; pour lecture
 .macro set_eds_table table, reg
-    mov #edspage(\table), \reg
-    mov \reg, DSRPAG
+    movpag #edspage(\table), DSRPAG
     mov #edsoffset(\table), \reg
 .endm
 

@@ -259,12 +259,16 @@ DEFCODE "CLRLN",5,,CLRLN    ; ( n -- )
 ; caractère à l'écran
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
+.word DUP,TBRANCH
+DEST type1
+.word TWODROP, EXIT
+type1:    
 .word LIT, 0, DODO
 type0:
 .word  DUP, CFETCH, EMIT,ONEPLUS
 .word DOLOOP
 DEST type0
-.word EXIT     
+.word DROP, EXIT     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; efface le caractère
@@ -277,7 +281,7 @@ DEFWORD "DELETE",7,,DELETE  ; ( -- )
 ;efface le carctère à gauche
 ; du curseur
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "DELLT",5,,DELLT     ; ( -- )
+DEFWORD "BACKCHAR",8,,BACKCHAR   ; ( -- )
     .word LEFT,DELETE,LEFT,EXIT
     
     
