@@ -196,7 +196,8 @@ DEFCODE "DUP",3,,DUP ; ( n -- n n )
 
 DEFCODE "2DUP",4,,TWODUP ; ( n1 n2 -- n1 n2 n1 n2 )
     mov [DSP],W0
-    mov W0, [++DSP]
+    DPUSH
+    mov W0,[++DSP]
     NEXT
     
 DEFCODE "?DUP",4,,QDUP ; ( n - n | n n )
@@ -266,7 +267,7 @@ DEFCODE "R>",2,,RFROM  ; ( -- n ) R( n -- )
     RPOP T
     NEXT
 
-DEFCODE "R@",2,,RFETCH ; ( -- n ) R ( -- )
+DEFCODE "R@",2,,RFETCH ; ( -- n ) (R: n -- n )
     DPUSH
     mov [RSP-2], T
     NEXT
@@ -436,7 +437,7 @@ DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
     clr W0
     cp T, [DSP--]
     bra nz, 1f
-    com W0,W0
+    setm W0
  1: 
     mov W0,T
     NEXT
@@ -553,16 +554,21 @@ ztype1:
 
 ; lecture d'une ligne de texte au clavier
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
-        .word OVER,PLUS,OVER  ;( tib last ptr )
-acc1:   .word KEY,DUP,LIT,13,EQUAL,TBRANCH
+        .word OVER,PLUS,OVER  ;( c-addr bound cursor )
+acc1:   .word KEY,DUP,LIT,13,EQUAL,TBRANCH 
         DEST acc5
         .word DUP,LIT,8,NEQUAL,TBRANCH
         DEST acc3
-        .word DROP,BACKCHAR,ONEMINUS,TOR,OVER,RFROM,UMAX
-        .word BRANCH
+        .word DROP,TOR,OVER,RFETCH,EQUAL,RFROM,DOSWAP,TBRANCH
+	DEST acc1
+	.word BACKCHAR,ONEMINUS,BRANCH
         DEST acc1
-acc3:   .word DUP,EMIT,OVER,CSTORE,ONEPLUS,OVER,UMIN
-acc4:   .word BRANCH
+acc3:   .word TOR,TWODUP,EQUAL,RFROM,DOSWAP,ZBRANCH
+        DEST acc4
+	.word DROP,BRANCH
+	DEST acc1
+acc4:	.word DUP,EMIT,OVER,CSTORE,ONEPLUS
+        .word BRANCH
         DEST acc1
 acc5:   .word DROP,NIP,DOSWAP,MINUS,EXIT
         
@@ -584,8 +590,6 @@ DEFWORD "QUIT",4,,QUIT
     .word VERSION,ZTYPE,CR
     .word TIB,FETCH,INPTR,STORE
 quit0:
-    .word TYPETEST,CR,BRANCH
-    DEST quit0
     .word TIB, FETCH, DUP,LIT,CPL,ONEMINUS,ACCEPT
     .word SPACE, INTERPRET
     .word STATE, FETCH, ZEROEQ,ZBRANCH
@@ -641,6 +645,12 @@ DEFWORD "CRTEST",6,,CRTEST
     
 DEFWORD "DELAY",5,,DELAY
 .word  LIT, 500, MSEC, EXIT
+ 
+DEFWORD "2DUPTEST",8,,TWODUPTEST
+.word LIT,'B',LIT,'A',TWODUP,EMIT,EMIT,EMIT,EMIT,INFLOOP
+
+DEFWORD "TEST4",5,,TEST4
+    .word CLIT,'C',TOR,RFETCH,EMIT,RFROM,EMIT,INFLOOP
     
 ;DEFWORD "INFLOOP",7,,INFLOOP
 ;.word  BRANCH, -2
