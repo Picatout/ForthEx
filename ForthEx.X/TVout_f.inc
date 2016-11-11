@@ -231,7 +231,20 @@ DEFCODE "SPACE",5,,SPACE   ; ( -- )
     mov #32, T
     bra code_EMIT
 
-    
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; imprime n espaces
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFWORD "SPACES",6,,SPACES  ; ( n -- )
+    .word DUP,LIT,0,GREATER,TBRANCH
+    DEST spaces1
+    .word DROP,EXIT
+spaces1:    
+    .word LIT,0,DODO
+spaces0:
+    .word SPACE,DOLOOP
+    DEST spaces0
+    .word EXIT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; efface la ligne indiquée

@@ -49,10 +49,11 @@ tib: .space TIB_SIZE
 .section .pad.bss bss
 .global pad 
 pad: .space PAD_SIZE    
-    
+ 
+; dictionnaire utilisateur dans la RAM 
 .section .user_dict bss  address(USER_BASE)
-.global user 
-user: .space RAM_SIZE-USER_BASE
+.global user_dict 
+user_dict: .space RAM_SIZE-USER_BASE
     
 
 .section .ver_str.const psv       
@@ -61,7 +62,7 @@ version:
 .asciz "ForthEx V0.1"    
     
 FORTH_CODE
-.global ENTER    
+.global ENTER  ; s'appelle DOCOL dans Jonesforth  
 ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
     RPUSH IP   
     mov WP,IP
@@ -71,7 +72,7 @@ DEFCODE "EXIT",4,,EXIT  ; ( -- ) (R: nest-sys -- ) 6.1.1380  sortie mot haut-niv
     RPOP IP
     NEXT
     
-DEFCODE "COLD",4,,COLD ; ( -- )  démarrage à froid
+DEFCODE "REBOOT",6,,REBOOT ; ( -- )  démarrage à froid
     reset
     
 
@@ -80,11 +81,8 @@ __MathError:
     mov #pstack, DSP
     mov #rstack, RSP
     ; à faire: doit-remettre à zéro input buffer
-    mov #edsoffset(COLD),IP
-    mov #edsoffset(QUIT), WP
-    mov [WP++], W0
-    goto W0
-
+    mov #edsoffset(cold_start),IP
+    NEXT
     
 DEFCODE "EXECUTE",7,,EXECUTE ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
     mov T, WP
@@ -177,9 +175,10 @@ DEFCODE "I",1,,DOI  ; ( -- n )
     mov I, T
     NEXT
 
+; empile compteur boucle externe    
 DEFCODE "J",1,,DOJ  ; ( -- n )
     DPUSH
-    mov [RSP],T
+    mov [RSP-2],T
     NEXT
     
 DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) n1=LIMIT_J, n2=J
@@ -216,7 +215,7 @@ DEFCODE "2DROP",5,,TWODROP ; ( n1 n2 -- )
     DPOP
     NEXT
     
-DEFCODE "SWAP",4,,DOSWAP ; ( n1 n2 -- n2 n1)
+DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
     mov T, W0
     mov [DSP], T
     mov W0, [DSP]
@@ -292,12 +291,10 @@ DEFCODE "RP!",3,,RPSTORE  ; ( n -- )
     DPOP
     NEXT
     
-DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 n3 -- n3 n1 n2 )
-    mov T, W0
-    mov [DSP], T
-    mov [DSP-2], W1
-    mov W0, [DSP-2]
-    mov W1, [DSP]
+DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 -- n2 n1 n2 )
+    mov [DSP], W0
+    mov T, [DSP]
+    mov W0,[++DSP]
     NEXT
 
     
@@ -418,21 +415,25 @@ DEFCODE "INVERT",6,,INVERT ; ( n -- n ) inversion des bits
 DEFCODE "NEGATE",6,,NEGATE ; ( n - n ) complément à 2
     neg T, T
     NEXT
-
+;;;;;;;;;;;;;;;
 ; comparaisons
-
+;;;;;;;;;;;;;;;
 DEFCODE "0=",2,,ZEROEQ  ; ( n -- f )  f=  n==0
     sub #1,T
     subb T,T,T
     NEXT
     
 DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
-    setm W0
     add T,T,T
     subb T,T,T
-    xor W0,T,T
+    com T,T
     NEXT
 
+DEFCODE "0>",2,,ZEROGT ; ( n -- f ) f= n>0
+    add T,T,T
+    subb T,T,T
+    NEXT
+    
 DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
     clr W0
     cp T, [DSP--]
@@ -452,18 +453,18 @@ DEFCODE "<>",2,,NEQUAL ; ( n1 n2 -- f ) f = n1<>n2
     NEXT
     
  DEFCODE "<",1,,LESS  ; ( n1 n2 -- f) f= n1<n2
-    clr W0
+    setm W0
     cp T,[DSP--]
-    bra le, 1f
+    bra gt, 1f
     com W0,W0
 1:
     mov W0, T
     NEXT
     
 DEFCODE ">",1,,GREATER  ; ( n1 n2 -- f ) f= n1>n2
-    clr W0
+    setm W0
     cp T,[DSP--]
-    bra ge, 1f
+    bra lt, 1f
     com W0,W0
 1:
     mov W0, T
@@ -504,6 +505,38 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
 
 DEFWORD "HERE",4,,HERE
     .word DP,FETCH,EXIT
+
+; copie un bloc mémoire    
+DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
+    mov T, W0 ; compte
+    DPOP
+    mov T, W2 ; destination
+    DPOP
+    mov T, W1 ; source
+    DPOP
+    cp0 W0
+    bra z, 1f
+    dec W0,W0
+    repeat W0
+    mov [W1++],[W2++]
+1:  NEXT
+
+; copie un bloc d'octets    
+DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
+    mov T, W0 ; compte
+    DPOP
+    mov T, W2 ; destination
+    DPOP
+    mov T, W1 ; source
+    DPOP
+    cp0 W0
+    bra z, 1f
+    dec W0,W0
+    repeat W0
+    mov.b [W1++],[W2++]
+1:  NEXT
+
+    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  mot forth I/O
@@ -535,13 +568,15 @@ DEFVAR ">IN",3,,INPTR     ; pointeur position début dernier mot retourné par WOR
 DEFCONST "VERSION",7,,VERSION,version        ; adresse chaêine version
 DEFCONST "RAMEND",6,,RAMEND,RAM_END          ;  fin mémoire RAM
 DEFCONST "F_IMMED",7,,_F_IMMED,F_IMMED       ; drapeau mot immédiat
-DEFCONST "F_HIIDEN",8,,_F_HIDDEN,F_HIDDEN    ; drapeau mot caché
+DEFCONST "F_HIDDEN",8,,_F_HIDDEN,F_HIDDEN    ; drapeau mot caché
 DEFCONST "F_LENMASK",9,,_F_LENMASK,F_LENMASK ; masque longueur nom   
 DEFCONST "BL",2,,BL,32                       ; caractère espace
 DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
 DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
 DEFCONST "ULIMIT",6,,ULIMIT,RAM_END-1        ; limite espace dictionnaire
-
+DEFCONST "DOCOL",5,,DOCOL,#edsoffset(ENTER)  ; pointeur vers ENTER
+    
+    
 ; imprime une chaîne zéro terminée  ( c-addr -- )    
 DEFWORD "ZTYPE",5,,ZTYPE
 ztype0:    
@@ -559,18 +594,18 @@ acc1:   .word KEY,DUP,LIT,13,EQUAL,TBRANCH
         DEST acc5
         .word DUP,LIT,8,NEQUAL,TBRANCH
         DEST acc3
-        .word DROP,TOR,OVER,RFETCH,EQUAL,RFROM,DOSWAP,TBRANCH
+        .word DROP,TOR,OVER,RFETCH,EQUAL,RFROM,SWAP,TBRANCH
 	DEST acc1
 	.word BACKCHAR,ONEMINUS,BRANCH
         DEST acc1
-acc3:   .word TOR,TWODUP,EQUAL,RFROM,DOSWAP,ZBRANCH
+acc3:   .word TOR,TWODUP,EQUAL,RFROM,SWAP,ZBRANCH
         DEST acc4
 	.word DROP,BRANCH
 	DEST acc1
 acc4:	.word DUP,EMIT,OVER,CSTORE,ONEPLUS
         .word BRANCH
         DEST acc1
-acc5:   .word DROP,NIP,DOSWAP,MINUS,EXIT
+acc5:   .word DROP,NIP,SWAP,MINUS,EXIT
         
     
    
@@ -590,6 +625,8 @@ DEFWORD "QUIT",4,,QUIT
     .word VERSION,ZTYPE,CR
     .word TIB,FETCH,INPTR,STORE
 quit0:
+;    .word TEST4,CR,BRANCH
+;    DEST quit0
     .word TIB, FETCH, DUP,LIT,CPL,ONEMINUS,ACCEPT
     .word SPACE, INTERPRET
     .word STATE, FETCH, ZEROEQ,ZBRANCH
@@ -650,7 +687,7 @@ DEFWORD "2DUPTEST",8,,TWODUPTEST
 .word LIT,'B',LIT,'A',TWODUP,EMIT,EMIT,EMIT,EMIT,INFLOOP
 
 DEFWORD "TEST4",5,,TEST4
-    .word CLIT,'C',TOR,RFETCH,EMIT,RFROM,EMIT,INFLOOP
+    .word KEY,DUP,LIT,'0',MINUS,SPACES,EMIT,EXIT
     
 ;DEFWORD "INFLOOP",7,,INFLOOP
 ;.word  BRANCH, -2
@@ -671,7 +708,11 @@ DEFWORD "BOX",3,,BOX
 sys_latest:
 .word link
     
-.text    
+    .text  
+    .global cold_start
+cold_start:
+    .word QUIT
+    .word REBOOT ; ne devrait jamais se rendre ici
     
 .end
 

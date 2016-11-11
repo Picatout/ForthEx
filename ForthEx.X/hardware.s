@@ -75,7 +75,8 @@ __reset:
     mov #edsoffset(sys_latest),W0
     mov [W0], W0
     mov W0, var_LATEST
-    goto code_WARM
+    mov #edsoffset(cold_start),IP
+    NEXT
     
 .text
 .global hardware_init

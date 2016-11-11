@@ -43,54 +43,71 @@
 ;;;;;;;;;;;;    
 ; macros
 ;;;;;;;;;;;;
+; interpréeteur interne
+; exécute l'instruction suivante    
 .macro NEXT
     mov [IP++], WP  ; WP=CFA, IP pointe vers item suivant
     mov [WP++], W0  ; W0= adresse code, WP=PFA
     goto W0         ; saut vers code routine
 .endm    
  
+; aligment sur adresse paire
+; valeur registre    
 .macro SET_EVEN reg
     btsc \reg, #0
     inc \reg, \reg
 .endm
-    
+
+;empile le registre T
+; sur la pile des arguments
 .macro DPUSH  
     mov T, [++DSP]
 ;    cp DSP, #RBASE
 ;    bra nz, .+4
 ;    reset
 .endm
-    
+
+; dépile la pile des arguments
+; dans T    
 .macro DPOP
     mov [DSP--], T
 .endm
-    
+
+; empile un registre
+; sur la pile des retours    
 .macro RPUSH reg
 ;    push R
 ;    mov \reg, R    
     push \reg
 .endm
-    
+
+; dépile la pile des retourne
+; vers le registre    
 .macro RPOP reg
     pop \reg
 ;    mov R, \reg
 ;    pop R
 .endm
-    
+
+; jette le sommet de la
+; pile des retours
 .macro RDROP
     dec2 RSP,RSP
     ; pop R
 .endm
 
+; calcul l'adresse d'un saut    
 .macro DEST label
     .word \label - $
  .endm
  
+; section dictionnaire système 
 .macro SYSDICT
     .section .sysdict psv
     .align 2
 .endm
-    
+
+; section de code FORTH    
 .macro FORTH_CODE
     .section .forth_code.text code
 .endm
