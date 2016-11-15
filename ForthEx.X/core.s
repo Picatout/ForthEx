@@ -272,8 +272,9 @@ DEFCODE "R@",2,,RFETCH ; ( -- n ) (R: n -- n )
     NEXT
     
 DEFCODE "SP@",3,,SPFETCH ; ( -- n )
+    mov DSP,W0
     DPUSH
-    mov DSP, T
+    mov W0, T
     NEXT
     
 DEFCODE "SP!",3,,SPSTORE  ; ( n -- )
@@ -297,6 +298,46 @@ DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 -- n2 n1 n2 )
     mov W0,[++DSP]
     NEXT
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; adressage indirect 
+; utilisant registre X
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; initialise X    
+DEFCODE "X!",2,,XSTORE ; ( u -- )
+    mov T,X
+    DPOP
+    NEXT
+
+; empile la valeur dans X    
+DEFCODE "X@",2,,XFETCH ; ( -- u )
+    DPUSH
+    mov X,T
+    NEXT
+
+; store indirect via X
+DEFCODE "!IX",3,,STRIX   ; ( n -- ) 
+    mov T,[X]
+    DPOP
+    NEXT
+    
+; load indirect via X
+DEFCODE "@IX",3,,LDIX  ; ( -- n )
+    DPUSH
+    mov [X],T
+    NEXT
+    
+; incrémente X
+DEFCODE "X++",3,,INCX  ; X=X+1
+    inc X,X
+    NEXT
+    
+; décrément X
+DEFCODE "X--",3,,DECX  ; X=X-1
+    dec X,X
+    NEXT
+    
+    
     
 ;;;;;;;
 ; MATH
@@ -587,59 +628,120 @@ DEST  ztype0
 ztype1:    
 .word DROP,DROP, EXIT     
 
+; convertie la chaîne comptée en majuscules
+DEFCODE "UPPER",5,,UPPER  ; ( c-addr -- )
+    mov T, W1 ; 1
+    DPOP ; 0
+    mov.b [W1++],W2
+    cp0.b W2
+    bra z, 3f
+1:  mov.b [W1],W0
+    mov.b #'a',W1
+    cp.b W0,W1
+    bra ltu, 2f
+    mov.b #'z',W1
+    cp.b W0,W1
+    bra gtu, 2f
+    sub.b #32,W0
+2:  mov.b W0,[W1++]
+    dec.b W2,W2
+    bra nz, 1b
+3:  NEXT
+    
+; localise le prochain mot dans TIB
+; la variable INPTR indique la position courante
+; le mot trouvé est copié dans le PAD 
+; met à jour INPTR    
+DEFCODE "WORD",4,,WORD  ; ( c -- c-addr) c est le délimiteur
+    mov #pad,W2 ; current dest pointer
+    mov W2,W3  ; PAD[0]
+    mov #tib,W0 ; TIB address
+    add #TIB_SIZE,W0 ; TIB end
+    mov W0,W4 ; limit
+    mov var_INPTR,W1 
+1:  cp W1,W4  
+    bra geu, 4f 
+    mov.b [W1],W0
+    cp0.b W0
+    bra z,4f
+    inc W1,W1
+    cp.b w0,T
+    bra z, 1b
+2:  mov.b W0,[++W2]
+    cp W1,W4
+    bra geu, 4f
+    mov.b [W1],W0
+    cp0.b W0
+    bra z, 4f
+    inc W1,W1
+    cp.b W0,T
+    bra neq, 2b
+4:  mov W1, var_INPTR
+    mov W3,T
+    sub W2,T,W2
+    mov.b W2,[T]
+    NEXT
+    
 ; lecture d'une ligne de texte au clavier
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
-        .word OVER,PLUS,OVER  ;( c-addr bound cursor )
-acc1:   .word KEY,DUP,LIT,13,EQUAL,TBRANCH 
+        .word OVER,DUP,INPTR,STORE,PLUS,OVER  ; 2,3,4,5,3,2,3 ( c-addr bound cursor )
+acc1:   .word TWODUP,EQUAL,TBRANCH ; 3,5,4,3
+        DEST acc6
+        .word KEY,DUP,LIT,13,EQUAL,TBRANCH ; 3,4,5,6,5,4 ( c-addr bound cursor c )
         DEST acc5
-        .word DUP,LIT,8,NEQUAL,TBRANCH
+        .word DUP,LIT,8,EQUAL,ZBRANCH ; 4,5,6,5,4 ( c-addr bound cursor c )
         DEST acc3
-        .word DROP,TOR,OVER,RFETCH,EQUAL,RFROM,SWAP,TBRANCH
-	DEST acc1
-	.word BACKCHAR,ONEMINUS,BRANCH
+	.word DROP,BACKCHAR,ONEMINUS,BRANCH ; 4,3,3,3
         DEST acc1
-acc3:   .word TOR,TWODUP,EQUAL,RFROM,SWAP,ZBRANCH
-        DEST acc4
-	.word DROP,BRANCH
-	DEST acc1
-acc4:	.word DUP,EMIT,OVER,CSTORE,ONEPLUS
+acc3:	.word DUP,EMIT,OVER,CSTORE,ONEPLUS ;4,5,4,5,3,3
         .word BRANCH
         DEST acc1
-acc5:   .word DROP,NIP,SWAP,MINUS,EXIT
+acc5:   .word DROP; 4,3
+acc6:   .word LIT,0,OVER,CSTORE,NIP,SWAP,MINUS,EXIT ; 3,2,2,1
+   
         
     
    
-; interprète une chaine    
-DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr +n -- )
-    .word CR,TYPE
-    .word EXIT
+; interprète une chaine  la chaîne dans TIB  
+DEFWORD "INTERPRET",9,,INTERPRET ; ( -- )
+    .word CR
+interp1:    
+    .word BL,WORD,DUP,CFETCH,DUP,ZEROEQ,TBRANCH ; 0,1,1,2,2,3,3,2
+    DEST interp2
+    .word OVER,UPPER,TOR,ONEPLUS,RFROM,TYPE,CR,BRANCH ; 2,3,2,1,1,2,0
+    DEST interp1
+interp2:    
+    .word TWODROP,EXIT
     
 ; imprime le prompt et passe à la ligne suivante    
 DEFWORD "OK",2,,OK  ; ( -- )
 .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
     
 ; boucle de l'interpréteur    
-DEFWORD "QUIT",4,,QUIT
-    .word RBASE,FETCH,RPSTORE
-    .word LIT,0,STATE,STORE
-    .word VERSION,ZTYPE,CR
-    .word TIB,FETCH,INPTR,STORE
+DEFWORD "QUIT",4,,QUIT ; ( -- )
+    .word RBASE,FETCH,RPSTORE ;0,1,1,0
+    .word LIT,0,STATE,STORE ;0,1,2,0
+    .word VERSION,ZTYPE,CR  ;1,0,0
+    .word TIB,FETCH,INPTR,STORE ;1,1,2,0
 quit0:
 ;    .word TEST4,CR,BRANCH
 ;    DEST quit0
-    .word TIB, FETCH, DUP,LIT,CPL,ONEMINUS,ACCEPT
-    .word SPACE, INTERPRET
-    .word STATE, FETCH, ZEROEQ,ZBRANCH
+    .word TIB, FETCH, LIT,CPL,ONEMINUS,ACCEPT,DROP ;0,1,1,2,2,1,0
+    .word SPACE,INTERPRET ; 0, 0
+    .word STATE, FETCH, ZEROEQ,ZBRANCH ;0,1,1,1,0
     DEST quit1
     .word OK
 quit1:
-    .word CR
+    .word CR 
     .word BRANCH
     DEST quit0
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   TESTS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFWORD "COUNT",5,,COUNT
+    .word SPFETCH,PBASE,FETCH,MINUS,TWOSLASH,LIT,'0',PLUS,EMIT,EXIT
+    
 DEFWORD "TEST",4,,TEST   
 .word  CLS,VERSION,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,BRANCH, -22
 
