@@ -121,16 +121,17 @@
 .equ F_HIDDEN,0x20
 .equ F_LENMASK,0x1f	; length mask
 
+   
 .set link,0
-    
+ 
 ;macro utilisée pour créer les entête des mots de haut niveaux.
-.macro DEFWORD name, namelen, flags=0, label
+.macro DEFWORD name, namelen, flags=0, label, last=0
     .section .sysdict psv
     .align 2
     .global name_\label
 name_\label :
-    .word link		; lien vers élément précédent du dictionnaire
-    .set link, name_\label
+    .word name_\last		; lien vers élément précédent du dictionnaire
+    ;.set link, name_\label
     .byte \flags+\namelen	; flags + length byte
     .ascii "\name"		; the name
     .align 2		; padding to word boundary
@@ -141,13 +142,13 @@ name_\label :
 .endm
 
 ; macro utilisée pour créer les entêtes des mots en code machine	
-.macro DEFCODE name, namelen, flags=0, label
+.macro DEFCODE name, namelen, flags=0, label, last=0
 	.section .sysdict psv
 	.align 2
 	.global name_\label
 name_\label :
-	.word link		; link
-	.set link, name_\label
+	.word  name_\last
+	;.set link, name_\label
 	.byte \flags+\namelen	; flags + length byte
 	.ascii "\name"		; the name
 	.align 2		; padding to next 4 byte boundary

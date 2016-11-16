@@ -63,20 +63,24 @@ version:
     
 FORTH_CODE
 .global ENTER  ; s'appelle DOCOL dans Jonesforth  
+    
 ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
     RPUSH IP   
     mov WP,IP
     NEXT
-
+    
+name_0:
+    .word 0
+    
 DEFCODE "EXIT",4,,EXIT  ; ( -- ) (R: nest-sys -- ) 6.1.1380  sortie mot haut-niveau.
     RPOP IP
     NEXT
     
-DEFCODE "REBOOT",6,,REBOOT ; ( -- )  démarrage à froid
+DEFCODE "REBOOT",6,,REBOOT,EXIT ; ( -- )  démarrage à froid
     reset
     
 
-DEFCODE "WARM",4,,WARM   ; ( -- )  démarrage à chaud
+DEFCODE "WARM",4,,WARM,REBOOT   ; ( -- )  démarrage à chaud
 __MathError:
     mov #pstack, DSP
     mov #rstack, RSP
@@ -84,53 +88,53 @@ __MathError:
     mov #edsoffset(cold_start),IP
     NEXT
     
-DEFCODE "EXECUTE",7,,EXECUTE ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
+DEFCODE "EXECUTE",7,,EXECUTE,WARM ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
     mov T, WP
     DPOP
     mov [WP++],W0
     goto W0
     
-DEFCODE "LIT",3,,LIT  ; ( -- x ) empile une valeur  
+DEFCODE "LIT",3,,LIT,EXECUTE  ; ( -- x ) empile une valeur  
     DPUSH
     mov [IP++], T
     NEXT
 
-DEFCODE "CLIT",4,,CLIT  ; ( -- c )
+DEFCODE "CLIT",4,,CLIT,LIT  ; ( -- c )
     DPUSH
     mov.b [IP], T
     ze T,T
     inc2 IP,IP ;IP doit toujours être aligné sur un mot de 16 bits
     NEXT
 
-DEFCODE "@",1,,FETCH ; ( addr -- n )
+DEFCODE "@",1,,FETCH,CLIT ; ( addr -- n )
     mov [T],T
     NEXT
     
-DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
+DEFCODE "C@",2,,CFETCH,FETCH  ; ( c-addr -- c )
     mov.b [T], T
     ze T, T
     NEXT
     
-DEFCODE "!",1,,STORE  ; ( n  addr -- )
+DEFCODE "!",1,,STORE,CFETCH  ; ( n  addr -- )
     mov [DSP--],W0
     mov W0,[T]
     DPOP
     NEXT
     
-DEFCODE "C!",2,,CSTORE  ; ( char c-addr  -- )
+DEFCODE "C!",2,,CSTORE,STORE  ; ( char c-addr  -- )
     mov [DSP--],W0
     mov.b W0,[T]
     DPOP
     NEXT
     
 ; branchement inconditionnel    
-DEFCODE "BRANCH",5,,BRANCH  ; ( -- )
+DEFCODE "BRANCH",5,,BRANCH,CSTORE  ; ( -- )
 XBRAN:
     add IP, [IP], IP
     NEXT
     
 ; branchement si T<>0    
-DEFCODE "?BRANCH",7,,TBRANCH ; ( n -- )
+DEFCODE "?BRANCH",7,,TBRANCH,BRANCH ; ( n -- )
     cp0 T
     DPOP
     bra nz, XBRAN
@@ -138,7 +142,7 @@ DEFCODE "?BRANCH",7,,TBRANCH ; ( n -- )
     NEXT
 
 ; branchement si T==0
-DEFCODE "ZBRANCH",7,,ZBRANCH ; ( n -- )
+DEFCODE "ZBRANCH",7,,ZBRANCH,TBRANCH ; ( n -- )
     cp0 T
     DPOP
     bra z, XBRAN
@@ -147,7 +151,7 @@ DEFCODE "ZBRANCH",7,,ZBRANCH ; ( n -- )
     
     
 ; exécution de DO    
-DEFCODE "(DO)",4,,DODO ; ( n  n -- ) R( -- n n )
+DEFCODE "(DO)",4,,DODO,ZBRANCH ; ( n  n -- ) R( -- n n )
     RPUSH LIMIT
     RPUSH I
     mov T, I
@@ -157,7 +161,7 @@ DEFCODE "(DO)",4,,DODO ; ( n  n -- ) R( -- n n )
     NEXT
 
 ; exécution de LOOP   
-DEFCODE "(LOOP)",6,,DOLOOP  ; ( -- )  R( n n -- )
+DEFCODE "(LOOP)",6,,DOLOOP,DODO  ; ( -- )  R( n n -- )
     inc I, I
     cp I, LIMIT
     bra z, 1f
@@ -630,22 +634,20 @@ ztype1:
 
 ; convertie la chaîne comptée en majuscules
 DEFCODE "UPPER",5,,UPPER  ; ( c-addr -- )
-    mov T, W1 ; 1
-    DPOP ; 0
+    mov T, W1
+    DPOP 
     mov.b [W1++],W2
-    cp0.b W2
+1:  cp0.b W2
     bra z, 3f
-1:  mov.b [W1],W0
-    mov.b #'a',W1
-    cp.b W0,W1
-    bra ltu, 2f
-    mov.b #'z',W1
-    cp.b W0,W1
-    bra gtu, 2f
-    sub.b #32,W0
-2:  mov.b W0,[W1++]
+    mov.b [W1++],W0
     dec.b W2,W2
-    bra nz, 1b
+    cp.b W0, #'a'
+    bra ltu, 1b
+    cp.b W0,#'z'
+    bra gtu, 1b
+    sub.b #32,W0
+    mov.b W0,[W1-1]
+    bra 1b
 3:  NEXT
     
 ; localise le prochain mot dans TIB
@@ -681,6 +683,61 @@ DEFCODE "WORD",4,,WORD  ; ( c -- c-addr) c est le délimiteur
     sub W2,T,W2
     mov.b W2,[T]
     NEXT
+
+; recherche un mot dans le dictionnaire
+; retourne: c-addr 0 si adresse non trouvée
+;           xt 1 trouvé mot immédiat
+;	    xt -1 trouvé mot non-immédiat
+.equ  LINK, W1
+.equ  NFA, W2
+.equ  TARGET,W3
+.equ  LEN, W4
+.equ CNTR, W5
+.equ NAME, W6
+.equ FLAGS,W7    
+DEFCODE "FIND",4,,FIND ; ( c-addr -- c-addr 0 | xt 1 | xt -1 )
+    mov var_LATEST, LINK
+    mov LINK,W0
+    mov T, TARGET
+    DPUSH
+    mov.b [TARGET++],LEN ; longueur
+try_next:
+;    call prt_hex ; debug
+    mov [LINK],W0
+;    call prt_hex
+    cp0 W0
+    bra z, not_found
+    mov W0,LINK
+    inc2 W0,NFA  ; W3=NFA
+    mov.b [NFA++],W0 ;
+    mov.b W0,FLAGS
+    and.b #F_LENMASK,W0
+    cp.b W0,LEN
+    bra nz, try_next
+    ; compare les 2 chaîne
+    mov TARGET,NAME
+    mov.b LEN,CNTR
+1:  cp0.b CNTR
+    bra z, match
+    mov.b [NAME++],W0
+    cp.b W0,[NFA++]
+    bra neq, try_next
+    dec.b CNTR,CNTR
+    bra 1b
+    ;trouvé 
+match:
+    btsc NAME,#0 ; alignement sur adresse paire
+    inc NAME,NAME ; CFA
+    mov NAME,[DSP] ; XT
+    setm T
+    and.b #F_IMMED,FLAGS
+    bra z, 2f
+    neg T,T
+    bra 2f
+    ; pas trouvé
+not_found:    
+    mov #0,T
+2:  NEXT
     
 ; lecture d'une ligne de texte au clavier
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
@@ -706,12 +763,12 @@ acc6:   .word LIT,0,OVER,CSTORE,NIP,SWAP,MINUS,EXIT ; 3,2,2,1
 DEFWORD "INTERPRET",9,,INTERPRET ; ( -- )
     .word CR
 interp1:    
-    .word BL,WORD,DUP,CFETCH,DUP,ZEROEQ,TBRANCH ; 0,1,1,2,2,3,3,2
+    .word BL,WORD,DUP,CFETCH,ZEROEQ,TBRANCH ; 0,1,1,2,2,2,1
     DEST interp2
-    .word OVER,UPPER,TOR,ONEPLUS,RFROM,TYPE,CR,BRANCH ; 2,3,2,1,1,2,0
+    .word FIND,COUNT,TWODROP,CR,BRANCH ; 2,3,2,1,1,2,0
     DEST interp1
 interp2:    
-    .word TWODROP,EXIT
+    .word DROP,EXIT
     
 ; imprime le prompt et passe à la ligne suivante    
 DEFWORD "OK",2,,OK  ; ( -- )
@@ -739,6 +796,29 @@ quit1:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   TESTS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.text 
+prt_hex:; W0 entier à imprimer
+    push.d W0
+    push.d W2
+    mov #_video_buffer,W3
+    add #32,W3
+1:  mov #16,W2
+    repeat #17
+    div.u W0,W2
+    exch W1,W0
+    add.b #'0',W0
+    cp.b W0,#'9'
+    bra leu, 2f
+    add.b #7,W0
+2:  mov.b W0,[W3--]
+    cp0 W1
+    exch W1,W0
+    bra nz,1b
+    pop.d W2
+    pop.d W0
+    return
+    
+    
 DEFWORD "COUNT",5,,COUNT
     .word SPFETCH,PBASE,FETCH,MINUS,TWOSLASH,LIT,'0',PLUS,EMIT,EXIT
     
