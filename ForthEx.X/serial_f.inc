@@ -19,7 +19,7 @@
 
 .include "serial.inc"    
     
-DEFCODE "SEMIT",5,,SEMIT
+DEFCODE "SEMIT",5,,SEMIT,KBD_CMD
     cp0 tx_wait
     bra neq, 0f
     btsc SER_STA, #UTXBF
@@ -46,7 +46,7 @@ DEFCODE "SEMIT",5,,SEMIT
 3:    
     NEXT
     
-DEFCODE "SGET",4,,SGET
+DEFCODE "SGET",4,,SGET,SEMIT
     DPUSH
 0:    
     cp0 rx_in

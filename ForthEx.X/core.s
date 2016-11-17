@@ -57,8 +57,9 @@ user_dict: .space RAM_SIZE-USER_BASE
     
 
 .section .ver_str.const psv       
-;test string
-version:
+.global _version
+ 
+_version:
 .asciz "ForthEx V0.1"    
     
 FORTH_CODE
@@ -69,10 +70,20 @@ ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
     mov WP,IP
     NEXT
     
-name_0:
+    .section .sysdict psv
+    .align 2
+    .global name_EXIT
+name_EXIT :
     .word 0
-    
-DEFCODE "EXIT",4,,EXIT  ; ( -- ) (R: nest-sys -- ) 6.1.1380  sortie mot haut-niveau.
+    .byte 4
+    .ascii "EXIT"
+    .align 2
+    .global EXIT
+EXIT:
+    .word code_EXIT	; codeword
+    FORTH_CODE
+    .global code_EXIT
+code_EXIT :			;pfa,  assembler code follows
     RPOP IP
     NEXT
     
@@ -93,6 +104,7 @@ DEFCODE "EXECUTE",7,,EXECUTE,WARM ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à
     DPOP
     mov [WP++],W0
     goto W0
+    
     
 DEFCODE "LIT",3,,LIT,EXECUTE  ; ( -- x ) empile une valeur  
     DPUSH
@@ -128,7 +140,7 @@ DEFCODE "C!",2,,CSTORE,STORE  ; ( char c-addr  -- )
     NEXT
     
 ; branchement inconditionnel    
-DEFCODE "BRANCH",5,,BRANCH,CSTORE  ; ( -- )
+DEFCODE "BRANCH",6,,BRANCH,CSTORE  ; ( -- )
 XBRAN:
     add IP, [IP], IP
     NEXT
@@ -174,18 +186,18 @@ DEFCODE "(LOOP)",6,,DOLOOP,DODO  ; ( -- )  R( n n -- )
     NEXT
 
 ; empile compteur de boucle    
-DEFCODE "I",1,,DOI  ; ( -- n )
+DEFCODE "I",1,,DOI,DOLOOP  ; ( -- n )
     DPUSH
     mov I, T
     NEXT
 
 ; empile compteur boucle externe    
-DEFCODE "J",1,,DOJ  ; ( -- n )
+DEFCODE "J",1,,DOJ,DOI  ; ( -- n )
     DPUSH
     mov [RSP-2],T
     NEXT
     
-DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) n1=LIMIT_J, n2=J
+DEFCODE "UNLOOP",6,,UNLOOP,DOJ   ; R:( n1 n2 -- ) n1=LIMIT_J, n2=J
     RPOP I
     RPOP LIMIT
     NEXT
@@ -193,39 +205,39 @@ DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) n1=LIMIT_J, n2=J
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 ; mots manipulant les arguments sur la pile
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "DUP",3,,DUP ; ( n -- n n )
+DEFCODE "DUP",3,,DUP,UNLOOP ; ( n -- n n )
     DPUSH
     NEXT
 
-DEFCODE "2DUP",4,,TWODUP ; ( n1 n2 -- n1 n2 n1 n2 )
+DEFCODE "2DUP",4,,TWODUP,DUP ; ( n1 n2 -- n1 n2 n1 n2 )
     mov [DSP],W0
     DPUSH
     mov W0,[++DSP]
     NEXT
     
-DEFCODE "?DUP",4,,QDUP ; ( n - n | n n )
+DEFCODE "?DUP",4,,QDUP,TWODUP ; ( n - n | n n )
     cp0 T
     bra z, 0f
     DPUSH
 0:  NEXT
     
     
-DEFCODE "DROP",4,,DROP ; ( n -- )
+DEFCODE "DROP",4,,DROP,QDUP ; ( n -- )
     DPOP
     NEXT
 
-DEFCODE "2DROP",5,,TWODROP ; ( n1 n2 -- )
+DEFCODE "2DROP",5,,TWODROP,DROP ; ( n1 n2 -- )
     DPOP
     DPOP
     NEXT
     
-DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
+DEFCODE "SWAP",4,,SWAP,TWODROP ; ( n1 n2 -- n2 n1)
     mov T, W0
     mov [DSP], T
     mov W0, [DSP]
     NEXT
 
-DEFCODE "2SWAP",6,,TWOSWAP ; ( n1 n2 n3 n4 -- n3 n4 n1 n2 )
+DEFCODE "2SWAP",5,,TWOSWAP,SWAP ; ( n1 n2 n3 n4 -- n3 n4 n1 n2 )
     mov [DSP-2],W0
     mov T,[DSP-2]
     mov W0, T
@@ -235,7 +247,7 @@ DEFCODE "2SWAP",6,,TWOSWAP ; ( n1 n2 n3 n4 -- n3 n4 n1 n2 )
     mov W0, [DSP]
     NEXT
     
-DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
+DEFCODE "ROT",3,,ROT,TWOSWAP  ; ( n1 n2 n3 -- n2 n3 n1 )
     mov T, W0
     mov [DSP], T
     mov [DSP-2], W1
@@ -243,7 +255,7 @@ DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
     mov W0, [DSP-2]
     NEXT
 
-DEFCODE "-ROT",4,,NROT ; ( n1 n2 n3 -- n3 n1 n2 )
+DEFCODE "-ROT",4,,NROT,ROT ; ( n1 n2 n3 -- n3 n1 n2 )
     mov T, W0
     mov [DSP],T
     mov [DSP-2],W1
@@ -251,150 +263,150 @@ DEFCODE "-ROT",4,,NROT ; ( n1 n2 n3 -- n3 n1 n2 )
     mov W0,[DSP-2]
     NEXT
     
-DEFCODE "OVER",4,,OVER  ; ( n1 n2 -- n1 n2 n1 )
+DEFCODE "OVER",4,,OVER,NROT  ; ( n1 n2 -- n1 n2 n1 )
     DPUSH
     mov [DSP-2],T
     NEXT
     
-DEFCODE "NIP",3,,NIP   ; ( n1 n2 -- n2 )
+DEFCODE "NIP",3,,NIP,OVER   ; ( n1 n2 -- n2 )
     dec2 DSP,DSP
     NEXT
     
-DEFCODE ">R",2,,TOR   ;  ( n -- )  R:( -- n)
+DEFCODE ">R",2,,TOR,NIP   ;  ( n -- )  R:( -- n)
     RPUSH T
     DPOP
     NEXT
     
-DEFCODE "R>",2,,RFROM  ; ( -- n ) R( n -- )
+DEFCODE "R>",2,,RFROM,TOR  ; ( -- n ) R( n -- )
     DPUSH
     RPOP T
     NEXT
 
-DEFCODE "R@",2,,RFETCH ; ( -- n ) (R: n -- n )
+DEFCODE "R@",2,,RFETCH,RFROM ; ( -- n ) (R: n -- n )
     DPUSH
     mov [RSP-2], T
     NEXT
     
-DEFCODE "SP@",3,,SPFETCH ; ( -- n )
+DEFCODE "SP@",3,,SPFETCH,RFETCH ; ( -- n )
     mov DSP,W0
     DPUSH
     mov W0, T
     NEXT
     
-DEFCODE "SP!",3,,SPSTORE  ; ( n -- )
+DEFCODE "SP!",3,,SPSTORE,SPFETCH  ; ( n -- )
     mov T, DSP
     DPOP
     NEXT
     
-DEFCODE "RP@",3,,RPFETCH  ; ( -- n )
+DEFCODE "RP@",3,,RPFETCH,SPSTORE  ; ( -- n )
     DPUSH
     mov RSP, T
     NEXT
     
-DEFCODE "RP!",3,,RPSTORE  ; ( n -- )
+DEFCODE "RP!",3,,RPSTORE,RPFETCH  ; ( n -- )
     mov T, RSP
     DPOP
     NEXT
     
-DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 -- n2 n1 n2 )
+DEFCODE "TUCK",4,,TUCK,RPSTORE  ; ( n1 n2 -- n2 n1 n2 )
     mov [DSP], W0
     mov T, [DSP]
     mov W0,[++DSP]
     NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; adressage indirect 
-; utilisant registre X
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; initialise X    
-DEFCODE "X!",2,,XSTORE ; ( u -- )
-    mov T,X
-    DPOP
-    NEXT
-
-; empile la valeur dans X    
-DEFCODE "X@",2,,XFETCH ; ( -- u )
-    DPUSH
-    mov X,T
-    NEXT
-
-; store indirect via X
-DEFCODE "!IX",3,,STRIX   ; ( n -- ) 
-    mov T,[X]
-    DPOP
-    NEXT
-    
-; load indirect via X
-DEFCODE "@IX",3,,LDIX  ; ( -- n )
-    DPUSH
-    mov [X],T
-    NEXT
-    
-; incrémente X
-DEFCODE "X++",3,,INCX  ; X=X+1
-    inc X,X
-    NEXT
-    
-; décrément X
-DEFCODE "X--",3,,DECX  ; X=X-1
-    dec X,X
-    NEXT
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; adressage indirect 
+;; utilisant registre X
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;; initialise X    
+;DEFCODE "X!",2,,XSTORE ; ( u -- )
+;    mov T,X
+;    DPOP
+;    NEXT
+;
+;; empile la valeur dans X    
+;DEFCODE "X@",2,,XFETCH ; ( -- u )
+;    DPUSH
+;    mov X,T
+;    NEXT
+;
+;; store indirect via X
+;DEFCODE "!IX",3,,STRIX   ; ( n -- ) 
+;    mov T,[X]
+;    DPOP
+;    NEXT
+;    
+;; load indirect via X
+;DEFCODE "@IX",3,,LDIX  ; ( -- n )
+;    DPUSH
+;    mov [X],T
+;    NEXT
+;    
+;; incrémente X
+;DEFCODE "X++",3,,INCX  ; X=X+1
+;    inc X,X
+;    NEXT
+;    
+;; décrément X
+;DEFCODE "X--",3,,DECX  ; X=X-1
+;    dec X,X
+;    NEXT
     
     
     
 ;;;;;;;
 ; MATH
 ;;;;;;;
-DEFCODE "+",1,,PLUS   ;( n1 n2 -- n1+n2 )
+DEFCODE "+",1,,PLUS,TUCK   ;( n1 n2 -- n1+n2 )
     add T, [DSP--], T
     NEXT
     
-DEFCODE "-",1,,MINUS   ; ( n1 n2 -- n1-n2 )
+DEFCODE "-",1,,MINUS,PLUS   ; ( n1 n2 -- n1-n2 )
     mov [DSP--],W0
     sub W0,T,T
     NEXT
     
-DEFCODE "1+",2,,ONEPLUS ; ( n -- n+1 )
+DEFCODE "1+",2,,ONEPLUS,MINUS ; ( n -- n+1 )
     add #1, T
     NEXT
 
-DEFCODE "2+",2,,TWOPLUS ; ( N -- N+2 )
+DEFCODE "2+",2,,TWOPLUS,ONEPLUS ; ( N -- N+2 )
     add #2, T
     NEXT
     
-DEFCODE "1-",2,,ONEMINUS  ; ( n -- n-1 )
+DEFCODE "1-",2,,ONEMINUS,TWOPLUS  ; ( n -- n-1 )
     sub #1, T
     NEXT
     
-DEFCODE "2-",2,,TWOMINUS ; ( n -- n-2 )
+DEFCODE "2-",2,,TWOMINUS,ONEMINUS ; ( n -- n-2 )
     sub #2, T
     NEXT
     
-DEFCODE "2*",2,,TWOSTAR  ; ( n -- n ) 2*n
+DEFCODE "2*",2,,TWOSTAR,TWOMINUS  ; ( n -- n ) 2*n
     add T,T, T
     NEXT
     
-DEFCODE "2/",2,,TWOSLASH ; ( n -- n ) n/2
+DEFCODE "2/",2,,TWOSLASH,TWOSTAR ; ( n -- n ) n/2
     lsr T,T
     NEXT
     
-DEFCODE "LSHIFT",6,,LSHIFT ; ( x1 -- x2 ) x2=x1<<1    
+DEFCODE "LSHIFT",6,,LSHIFT,TWOSLASH ; ( x1 -- x2 ) x2=x1<<1    
     sl T,T
     NEXT
     
-DEFCODE "RSHIFT",6,,RSHIFT ; ( x1 -- x2 ) x2=x1>>1
+DEFCODE "RSHIFT",6,,RSHIFT,LSHIFT ; ( x1 -- x2 ) x2=x1>>1
     lsr T,T
     NEXT
     
-DEFCODE "+!",2,,PLUSSTORE  ; ( n addr  -- ) [addr]=[addr]+n     
+DEFCODE "+!",2,,PLUSSTORE,RSHIFT  ; ( n addr  -- ) [addr]=[addr]+n     
     mov [T], W0
     add W0, [DSP--],W0
     mov W0, [T]
     DPOP
     NEXT
     
-DEFCODE "M+",2,,DADD  ; ( d n --  d ) simple + double
+DEFCODE "M+",2,,ADDPLUS,PLUSSTORE  ; ( d n --  d ) simple + double
     mov [DSP-2], W0 ; d faible
     mov T, W1 ; n
     DPOP    ; T= d fort
@@ -402,21 +414,21 @@ DEFCODE "M+",2,,DADD  ; ( d n --  d ) simple + double
     addc #0, T
     NEXT
  
-DEFCODE "*",1,,MULTIPLY ; ( n1 n2 -- n1*n2) 
+DEFCODE "*",1,,MULTIPLY,ADDPLUS ; ( n1 n2 -- n1*n2) 
     mov T, W0
     DPOP
     mul.ss W0,T,W0
     mov W0,T
     NEXT
     
-DEFCODE "/",1,,DIVIDE ; ( n1 n2 -- n1/n2 )
+DEFCODE "/",1,,DIVIDE,MULTIPLY ; ( n1 n2 -- n1/n2 )
     mov [DSP--],W2
     repeat #17
     div.s W2,T
     mov W0, T
     NEXT
     
-DEFCODE "/MOD",4,,DIVMOD ; ( n1 n2 -- r q )
+DEFCODE "/MOD",4,,DIVMOD,DIVIDE ; ( n1 n2 -- r q )
     mov [DSP],W2
     repeat #17
     div.s W2,T
@@ -424,14 +436,14 @@ DEFCODE "/MOD",4,,DIVMOD ; ( n1 n2 -- r q )
     mov W1,[DSP] ; reste
     NEXT
 
-DEFCODE "UMAX",4,,UMAX ; ( u1 u2 -- max(u1,u2)
+DEFCODE "UMAX",4,,UMAX,DIVMOD ; ( u1 u2 -- max(u1,u2)
     mov [DSP--],W0
     cp T,W0
     bra geu, 1f
     exch T,W0
 1:  NEXT    
     
-DEFCODE "UMIN",4,,UMIN ; ( u1 u2 -- min(u1,u2)
+DEFCODE "UMIN",4,,UMIN,UMAX ; ( u1 u2 -- min(u1,u2)
     mov [DSP--],w0
     cp W0,T
     bra geu, 1f
@@ -440,46 +452,46 @@ DEFCODE "UMIN",4,,UMIN ; ( u1 u2 -- min(u1,u2)
     
     
 ; opérations logiques bit à bit    
-DEFCODE "AND",3,,_AND  ; ( n1 n2 -- n)  ET bit à bit
+DEFCODE "AND",3,,AND,UMIN  ; ( n1 n2 -- n)  ET bit à bit
     and T,[DSP--],T
     NEXT
     
-DEFCODE "OR",2,,_OR   ; ( n1 n2 -- n ) OU bit à bit
+DEFCODE "OR",2,,OR,AND   ; ( n1 n2 -- n ) OU bit à bit
     ior T,[DSP--],T
     NEXT
     
-DEFCODE "XOR",3,,_XOR ; ( n1 n2 -- n ) OU exclusif bit à bit
+DEFCODE "XOR",3,,XOR,OR ; ( n1 n2 -- n ) OU exclusif bit à bit
     xor T,[DSP--],T
     NEXT
     
     
-DEFCODE "INVERT",6,,INVERT ; ( n -- n ) inversion des bits
+DEFCODE "INVERT",6,,INVERT,XOR ; ( n -- n ) inversion des bits
     com T, T
     NEXT
     
-DEFCODE "NEGATE",6,,NEGATE ; ( n - n ) complément à 2
+DEFCODE "NEGATE",6,,NEGATE,INVERT ; ( n - n ) complément à 2
     neg T, T
     NEXT
 ;;;;;;;;;;;;;;;
 ; comparaisons
 ;;;;;;;;;;;;;;;
-DEFCODE "0=",2,,ZEROEQ  ; ( n -- f )  f=  n==0
+DEFCODE "0=",2,,ZEROEQ,NEGATE  ; ( n -- f )  f=  n==0
     sub #1,T
     subb T,T,T
     NEXT
     
-DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
+DEFCODE "0<",2,,ZEROLT,ZEROEQ ; ( n -- f ) f= n<0
     add T,T,T
     subb T,T,T
     com T,T
     NEXT
 
-DEFCODE "0>",2,,ZEROGT ; ( n -- f ) f= n>0
+DEFCODE "0>",2,,ZEROGT,ZEROLT ; ( n -- f ) f= n>0
     add T,T,T
     subb T,T,T
     NEXT
     
-DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
+DEFCODE "=",1,,EQUAL,ZEROGT  ; ( n1 n2 -- f ) f= n1==n2
     clr W0
     cp T, [DSP--]
     bra nz, 1f
@@ -488,7 +500,7 @@ DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
     mov W0,T
     NEXT
     
-DEFCODE "<>",2,,NEQUAL ; ( n1 n2 -- f ) f = n1<>n2
+DEFCODE "<>",2,,NOTEQ,EQUAL ; ( n1 n2 -- f ) f = n1<>n2
     clr W0
     cp T, [DSP--]
     bra z, 1f
@@ -497,7 +509,7 @@ DEFCODE "<>",2,,NEQUAL ; ( n1 n2 -- f ) f = n1<>n2
     mov W0, T
     NEXT
     
- DEFCODE "<",1,,LESS  ; ( n1 n2 -- f) f= n1<n2
+ DEFCODE "<",1,,LESS,NOTEQ  ; ( n1 n2 -- f) f= n1<n2
     setm W0
     cp T,[DSP--]
     bra gt, 1f
@@ -506,7 +518,7 @@ DEFCODE "<>",2,,NEQUAL ; ( n1 n2 -- f ) f = n1<>n2
     mov W0, T
     NEXT
     
-DEFCODE ">",1,,GREATER  ; ( n1 n2 -- f ) f= n1>n2
+DEFCODE ">",1,,GREATER,LESS  ; ( n1 n2 -- f ) f= n1>n2
     setm W0
     cp T,[DSP--]
     bra lt, 1f
@@ -515,7 +527,7 @@ DEFCODE ">",1,,GREATER  ; ( n1 n2 -- f ) f= n1>n2
     mov W0, T
     NEXT
     
-DEFCODE "U<",2,,ULESS  ; (u1 u2 -- f) f= u1<u2
+DEFCODE "U<",2,,ULESS,GREATER  ; (u1 u2 -- f) f= u1<u2
     clr W0
     cp T,[DSP--]
     bra leu, 1f
@@ -524,7 +536,7 @@ DEFCODE "U<",2,,ULESS  ; (u1 u2 -- f) f= u1<u2
     mov W0, T
     NEXT
     
-DEFCODE "U>",2,,UGREATER ; ( u1 u2 -- f) f=u1>u2
+DEFCODE "U>",2,,UGREATER,ULESS ; ( u1 u2 -- f) f=u1>u2
     clr W0
     cp T,[DSP--]
     bra geu, 1f
@@ -534,25 +546,33 @@ DEFCODE "U>",2,,UGREATER ; ( u1 u2 -- f) f=u1>u2
     NEXT
     
     
-DEFCODE "CELL",4,,CELL ; ( -- CELL_SIZE )
+DEFCODE "CELL",4,,CELL,UGREATER ; ( -- CELL_SIZE )
     DPUSH
     mov #CELL_SIZE, T
     NEXT
     
-DEFCODE "CELL+",5,,CELLPLUS ; ( addr -- addr+CELL_SIZE )
+DEFCODE "CELL+",5,,CELLPLUS,CELL ; ( addr -- addr+CELL_SIZE )
     add #CELL_SIZE, T
     NEXT
     
-DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
+DEFCODE "CELLS",5,,CELLS,CELLPLUS ; ( n -- n*CELL_SIZE )
     mul.uu T,#CELL_SIZE,W0
     mov W0,T
     NEXT
 
-DEFWORD "HERE",4,,HERE
+DEFWORD "HERE",4,,HERE,CELLS
     .word DP,FETCH,EXIT
 
+DEFWORD "IMMEDIATE",9,,IMMEDIATE,HERE
+    .word LATEST,FETCH,DUP,SYSLATEST,FETCH,EQUAL,TBRANCH
+    DEST 1f
+    .word TWOPLUS,DUP,CFETCH,IMMED,OR,CSTORE,BRANCH
+    DEST 2f
+1:  .word DROP  
+2:  .word EXIT
+    
 ; copie un bloc mémoire    
-DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
+DEFCODE "MOVE",4,,MOVE,IMMEDIATE  ; ( addr1 addr2 u -- )
     mov T, W0 ; compte
     DPOP
     mov T, W2 ; destination
@@ -567,7 +587,7 @@ DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
 1:  NEXT
 
 ; copie un bloc d'octets    
-DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
+DEFCODE "CMOVE",5,,CMOVE,MOVE  ;( c-addr1 c-addr2 u -- )
     mov T, W0 ; compte
     DPOP
     mov T, W2 ; destination
@@ -596,44 +616,58 @@ DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  variables système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFVAR "STATE",5,,STATE   ; état compile=1/interprète=0
-DEFVAR "DP",4,,DP         ; pointeur fin dictionnaire
-DEFVAR "BASE",4,,BASE     ; base numérique
-DEFVAR "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
-DEFVAR "RBASE",5,,RBASE   ; base pile retour
-DEFVAR "PBASE",5,,PBASE   ; base pile arguments   
-DEFVAR "PAD",3,,PAD       ; tampon de travail
-DEFVAR "TIB",3,,TIB       ; tampon de saisie clavier
-DEFVAR "SOURCE-ID",9,,SOURCE_ID ; source de la chaîne traité par l'interpréteur
-DEFVAR ">IN",3,,INPTR     ; pointeur position début dernier mot retourné par WORD
+DEFVAR "STATE",5,,STATE,ELOAD   ; état compile=1/interprète=0
+DEFVAR "DP",2,,DP,STATE         ; pointeur fin dictionnaire
+DEFVAR "BASE",4,,BASE,DP     ; base numérique
+DEFVAR "SYSLATEST",9,,SYSLATEST,BASE ; tête du dictionnaire en FLASH    
+DEFVAR "LATEST",6,,LATEST,SYSLATEST ; pointer dernier mot dictionnaire
+DEFVAR "RBASE",5,,RBASE,LATEST   ; base pile retour
+DEFVAR "PBASE",5,,PBASE,RBASE   ; base pile arguments   
+DEFVAR "PAD",3,,PAD,PBASE       ; tampon de travail
+DEFVAR "TIB",3,,TIB,PAD       ; tampon de saisie clavier
+DEFVAR "SOURCE-ID",9,,SOURCE_ID,TIB ; source de la chaîne traité par l'interpréteur
+DEFVAR ">IN",3,,INPTR,SOURCE_ID     ; pointeur position début dernier mot retourné par WORD
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCONST "VERSION",7,,VERSION,version        ; adresse chaêine version
-DEFCONST "RAMEND",6,,RAMEND,RAM_END          ;  fin mémoire RAM
-DEFCONST "F_IMMED",7,,_F_IMMED,F_IMMED       ; drapeau mot immédiat
-DEFCONST "F_HIDDEN",8,,_F_HIDDEN,F_HIDDEN    ; drapeau mot caché
-DEFCONST "F_LENMASK",9,,_F_LENMASK,F_LENMASK ; masque longueur nom   
-DEFCONST "BL",2,,BL,32                       ; caractère espace
-DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
-DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
-DEFCONST "ULIMIT",6,,ULIMIT,RAM_END-1        ; limite espace dictionnaire
-DEFCONST "DOCOL",5,,DOCOL,#edsoffset(ENTER)  ; pointeur vers ENTER
+DEFCONST "VERSION",7,,VERSION,psvoffset(_version),INPTR        ; adresse chaêine version
+DEFCONST "RAMEND",6,,RAMEND,RAM_END,VERSION          ;  fin mémoire RAM
+DEFCONST "IMMED",5,,IMMED,F_IMMED,RAMEND       ; drapeau mot immédiat
+DEFCONST "HIDDEN",6,,HIDDEN,F_HIDDEN,IMMED    ; drapeau mot caché
+DEFCONST "LENMASK",7,,LENMASK,F_LENMASK,HIDDEN ; masque longueur nom   
+DEFCONST "BL",2,,BL,32,LENMASK                       ; caractère espace
+DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE,BL       ; grandeur tampon TIB
+DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE,TIBSIZE       ; grandeur tampon PAD
+DEFCONST "ULIMIT",6,,ULIMIT,RAM_END-1,PADSIZE        ; limite espace dictionnaire
+DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER),ULIMIT  ; pointeur vers ENTER
     
+;imprime la liste des mots du dictionnaire
+DEFWORD "WORDS",5,,WORDS,DOCOL ; ( -- )
+    .word LATEST
+1:  .word FETCH,DUP,ZEROEQ,TBRANCH
+    DEST words_exit
+    .word GETX,LIT,54,ULESS,TBRANCH
+    DEST 2f
+    .word CR
+2:  .word DUP,TWOPLUS,DUP,CFETCH,LENMASK,AND,TOR,ONEPLUS,RFROM,TYPE,SPACE
+    .word BRANCH
+    DEST 1b
+words_exit:
+    .word DROP,CR,EXIT
     
 ; imprime une chaîne zéro terminée  ( c-addr -- )    
-DEFWORD "ZTYPE",5,,ZTYPE
-ztype0:    
+DEFWORD "ZTYPE",5,,ZTYPE,WORDS
+ztype0:  
 .word DUP,CFETCH,DUP,ZBRANCH
 DEST ztype1 
 .word EMIT,ONEPLUS,BRANCH
 DEST  ztype0
 ztype1:    
-.word DROP,DROP, EXIT     
+.word TWODROP, EXIT     
 
 ; convertie la chaîne comptée en majuscules
-DEFCODE "UPPER",5,,UPPER  ; ( c-addr -- )
+DEFCODE "UPPER",5,,UPPER,ZTYPE  ; ( c-addr -- )
     mov T, W1
     DPOP 
     mov.b [W1++],W2
@@ -654,7 +688,7 @@ DEFCODE "UPPER",5,,UPPER  ; ( c-addr -- )
 ; la variable INPTR indique la position courante
 ; le mot trouvé est copié dans le PAD 
 ; met à jour INPTR    
-DEFCODE "WORD",4,,WORD  ; ( c -- c-addr) c est le délimiteur
+DEFCODE "WORD",4,,WORD,UPPER  ; ( c -- c-addr) c est le délimiteur
     mov #pad,W2 ; current dest pointer
     mov W2,W3  ; PAD[0]
     mov #tib,W0 ; TIB address
@@ -690,12 +724,12 @@ DEFCODE "WORD",4,,WORD  ; ( c -- c-addr) c est le délimiteur
 ;	    xt -1 trouvé mot non-immédiat
 .equ  LINK, W1
 .equ  NFA, W2
-.equ  TARGET,W3
-.equ  LEN, W4
+.equ  TARGET,W3 ;pointer chaîne recherchée
+.equ  LEN, W4  ; longueur de la chaîne recherchée
 .equ CNTR, W5
-.equ NAME, W6
+.equ NAME, W6 ; nom dans dictionnaire 
 .equ FLAGS,W7    
-DEFCODE "FIND",4,,FIND ; ( c-addr -- c-addr 0 | xt 1 | xt -1 )
+DEFCODE "FIND",4,,FIND,WORD ; ( c-addr -- c-addr 0 | xt 1 | xt -1 )
     mov var_LATEST, LINK
     mov LINK,W0
     mov T, TARGET
@@ -709,12 +743,12 @@ try_next:
     bra z, not_found
     mov W0,LINK
     inc2 W0,NFA  ; W3=NFA
-    mov.b [NFA++],W0 ;
+    mov.b [NFA++],W0 ; flags+name_lengh
     mov.b W0,FLAGS
     and.b #F_LENMASK,W0
     cp.b W0,LEN
     bra nz, try_next
-    ; compare les 2 chaîne
+    ; compare les 2 chaînes
     mov TARGET,NAME
     mov.b LEN,CNTR
 1:  cp0.b CNTR
@@ -726,9 +760,9 @@ try_next:
     bra 1b
     ;trouvé 
 match:
-    btsc NAME,#0 ; alignement sur adresse paire
-    inc NAME,NAME ; CFA
-    mov NAME,[DSP] ; XT
+    btsc NFA,#0 ; alignement sur adresse paire
+    inc NFA,NFA ; CFA
+    mov NFA,[DSP] ; XT
     setm T
     and.b #F_IMMED,FLAGS
     bra z, 2f
@@ -740,7 +774,10 @@ not_found:
 2:  NEXT
     
 ; lecture d'une ligne de texte au clavier
-DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
+; c-addre addresse du buffer
+; +n1 longueur du buffer
+; +n2 longueur de la chaîne lue    
+DEFWORD "ACCEPT",6,,ACCEPT,FIND  ; ( c-addr +n1 -- +n2 )
         .word OVER,DUP,INPTR,STORE,PLUS,OVER  ; 2,3,4,5,3,2,3 ( c-addr bound cursor )
 acc1:   .word TWODUP,EQUAL,TBRANCH ; 3,5,4,3
         DEST acc6
@@ -755,34 +792,47 @@ acc3:	.word DUP,EMIT,OVER,CSTORE,ONEPLUS ;4,5,4,5,3,3
         DEST acc1
 acc5:   .word DROP; 4,3
 acc6:   .word LIT,0,OVER,CSTORE,NIP,SWAP,MINUS,EXIT ; 3,2,2,1
+
+; retourne la spécification
+; de la chaîne comptée dont
+; l'adresse est dans T   
+DEFWORD "COUNT",5,,COUNT,ACCEPT ; ( c-addr1 -- c-addr2 u )
+   .word DUP,CFETCH,TOR,ONEPLUS,RFROM,EXIT
    
-        
-    
+; imprime 'mot ?'        
+DEFWORD "ERROR",5,,ERROR,COUNT ;  ( c-addr -- )  
+   .word SPACE,COUNT,TYPE
+   .word SPACE,CLIT,'?',EMIT
+   .word LIT,0,STATE,STORE
+   .word PBASE,FETCH,SPSTORE
+   .word EXIT
    
 ; interprète une chaine  la chaîne dans TIB  
-DEFWORD "INTERPRET",9,,INTERPRET ; ( -- )
-    .word CR
+DEFWORD "INTERPRET",9,,INTERPRET,ERROR ; ( c-addr u -- )
 interp1:    
     .word BL,WORD,DUP,CFETCH,ZEROEQ,TBRANCH ; 0,1,1,2,2,2,1
     DEST interp2
-    .word FIND,COUNT,TWODROP,CR,BRANCH ; 2,3,2,1,1,2,0
+    .word FIND,DUP,ZBRANCH
+    DEST interp15
+    .word DROP,EXECUTE
+    .word CR,BRANCH ; 2,3,2,1,1,2,0
     DEST interp1
+interp15:; le mot n'est pas dans le dictionnaire    
+    .word SWAP,ERROR
 interp2:    
     .word DROP,EXIT
     
 ; imprime le prompt et passe à la ligne suivante    
-DEFWORD "OK",2,,OK  ; ( -- )
+DEFWORD "OK",2,,OK,INTERPRET  ; ( -- )
 .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
     
 ; boucle de l'interpréteur    
-DEFWORD "QUIT",4,,QUIT ; ( -- )
+DEFWORD "QUIT",4,,QUIT,OK ; ( -- )
     .word RBASE,FETCH,RPSTORE ;0,1,1,0
     .word LIT,0,STATE,STORE ;0,1,2,0
     .word VERSION,ZTYPE,CR  ;1,0,0
     .word TIB,FETCH,INPTR,STORE ;1,1,2,0
 quit0:
-;    .word TEST4,CR,BRANCH
-;    DEST quit0
     .word TIB, FETCH, LIT,CPL,ONEMINUS,ACCEPT,DROP ;0,1,1,2,2,1,0
     .word SPACE,INTERPRET ; 0, 0
     .word STATE, FETCH, ZEROEQ,ZBRANCH ;0,1,1,1,0
@@ -819,70 +869,74 @@ prt_hex:; W0 entier à imprimer
     return
     
     
-DEFWORD "COUNT",5,,COUNT
-    .word SPFETCH,PBASE,FETCH,MINUS,TWOSLASH,LIT,'0',PLUS,EMIT,EXIT
+;DEFWORD "COUNT",5,,COUNT,QUIT
+;    .word SPFETCH,PBASE,FETCH,MINUS,TWOSLASH,LIT,'0',PLUS
+;    .WORD DUP,LIT,'9',GREATER,ZBRANCH
+;    DEST 1f
+;    .word LIT,7,PLUS
+;1:  .word EMIT,EXIT
     
-DEFWORD "TEST",4,,TEST   
-.word  CLS,VERSION,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,BRANCH, -22
+;DEFWORD "TEST",4,,TEST ,COUNT  
+;.word  CLS,VERSION,HOME,OK,LIT,333, MSEC,HOME,OKOFF, LIT,333,MSEC,BRANCH, -22
+;
+;DEFWORD "SERTEST",7,,SERTEST,TEST
+;.word CLS,VERSION,SGET,SEMIT,BRANCH,-6    
+;
+;DEFWORD "HOME",5,,HOME,SERTEST
+;.word LIT,0,LIT,0,CURPOS,EXIT
+;    
+;DEFWORD "OKOFF",6,,OKOFF,HOME
+;.word SPACE,SPACE,EXIT 
+;    
+;
+;.section .quick_str.const psv
+;quick:
+;.asciz "The quick brown fox jump over the lazy dog."
 
-DEFWORD "SERTEST",7,,SERTEST
-.word CLS,VERSION,SGET,SEMIT,BRANCH,-6    
-
-DEFWORD "HOME",5,,HOME
-.word LIT,0,LIT,0,CURPOS,EXIT
-    
-DEFWORD "OKOFF",6,,OKOFF
-.word SPACE,SPACE,EXIT 
-    
-
-.section .quick_str.const psv
-quick:
-.asciz "The quick brown fox jump over the lazy dog."
-
-;DEFWORD "VERSION",7,,VERSION
+;DEFWORD "VERSION",7,,VERSION,COUNT
 ;.word CLS,LIT,version,ZTYPE,CR,EXIT    
 
-DEFWORD "QUICKTEST",9,,QUICKTEST
-.word LIT,quick,ZTYPE,EXIT
-    
-DEFWORD "STRTEST",7,,STRTEST
-.word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
-.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,BRANCH, -26
-
-DEFWORD "EEPROMTEST",10,,EEPROMTEST
-.word CLS,LIT, quick, ZTYPE, LIT,500,MSEC, LIT, _video_buffer,LIT,43,ESTORE
-.word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,BRANCH,-32
-
-DEFWORD "LOOPTEST",8,,LOOPTEST
-.word LIT,'Z'+1,LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
-
-DEFWORD "TYPETEST",8,,TYPETEST
-.word TIB,FETCH,DUP,LIT,63,ACCEPT,CR,TYPE,EXIT 
-    
-DEFWORD "CRTEST",6,,CRTEST
-.word CLS,LIT,'A',DUP,EMIT,CR,ONEPLUS,DUP,LIT,'X',EQUAL,ZBRANCH,-18,INFLOOP    
-    
-DEFWORD "DELAY",5,,DELAY
-.word  LIT, 500, MSEC, EXIT
- 
-DEFWORD "2DUPTEST",8,,TWODUPTEST
-.word LIT,'B',LIT,'A',TWODUP,EMIT,EMIT,EMIT,EMIT,INFLOOP
-
-DEFWORD "TEST4",5,,TEST4
-    .word KEY,DUP,LIT,'0',MINUS,SPACES,EMIT,EXIT
+;DEFWORD "QUICKTEST",9,,QUICKTEST,OKOFF
+;.word LIT,quick,ZTYPE,EXIT
+;    
+;DEFWORD "STRTEST",7,,STRTEST
+;.word CLS,LIT, quick, ZTYPE,LIT,_video_buffer,LIT,0,LIT,0,LIT,43,RSTORE,DELAY
+;.word CLS,DELAY,LIT, _video_buffer,LIT,0,LIT,0,LIT,43,RLOAD,DELAY,BRANCH, -26
+;
+;DEFWORD "EEPROMTEST",10,,EEPROMTEST
+;.word CLS,LIT, quick, ZTYPE, LIT,500,MSEC, LIT, _video_buffer,LIT,43,ESTORE
+;.word CLS, DELAY, LIT, _video_buffer,LIT,100,ELOAD,BRANCH,-32
+;
+;DEFWORD "LOOPTEST",8,,LOOPTEST
+;.word LIT,'Z'+1,LIT,'A',DODO,DOI,EMIT,DOLOOP,-6,INFLOOP    
+;
+;DEFWORD "TYPETEST",8,,TYPETEST
+;.word TIB,FETCH,DUP,LIT,63,ACCEPT,CR,TYPE,EXIT 
+;    
+;DEFWORD "CRTEST",6,,CRTEST
+;.word CLS,LIT,'A',DUP,EMIT,CR,ONEPLUS,DUP,LIT,'X',EQUAL,ZBRANCH,-18,INFLOOP    
+;    
+;DEFWORD "DELAY",5,,DELAY
+;.word  LIT, 500, MSEC, EXIT
+; 
+;DEFWORD "2DUPTEST",8,,TWODUPTEST
+;.word LIT,'B',LIT,'A',TWODUP,EMIT,EMIT,EMIT,EMIT,INFLOOP
+;
+;DEFWORD "TEST4",5,,TEST4
+;    .word KEY,DUP,LIT,'0',MINUS,SPACES,EMIT,EXIT
     
 ;DEFWORD "INFLOOP",7,,INFLOOP
 ;.word  BRANCH, -2
 
-DEFCODE "INFLOOP",7,,INFLOOP
+DEFCODE "INFLOOP",7,,INFLOOP,QUIT
     bra .
 
-DEFWORD "FNTTEST",7,,FNTTEST
-.WORD LIT,128,LIT,0,DODO, DOI, EMIT, DOLOOP,-6,CR,EXIT
-    
-DEFWORD "BOX",3,,BOX
-.WORD CLIT,1,EMIT,CLIT,11,EMIT,CLIT,3,EMIT,CR,CLIT,14,EMIT,CLIT,7,EMIT,CLIT,15,EMIT
-.WORD CR,CLIT,2,EMIT,CLIT,12,EMIT,CLIT,4,EMIT,CR,EXIT
+;DEFWORD "FNTTEST",7,,FNTTEST
+;.WORD LIT,128,LIT,0,DODO, DOI, EMIT, DOLOOP,-6,CR,EXIT
+;    
+;DEFWORD "BOX",3,,BOX
+;.WORD CLIT,1,EMIT,CLIT,11,EMIT,CLIT,3,EMIT,CR,CLIT,14,EMIT,CLIT,7,EMIT,CLIT,15,EMIT
+;.WORD CR,CLIT,2,EMIT,CLIT,12,EMIT,CLIT,4,EMIT,CR,EXIT
 
 
 .section .link psv  address(0x7FFE)    

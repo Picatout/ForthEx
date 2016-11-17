@@ -73,7 +73,8 @@ __reset:
     mov W0,var_DP
     movpag #edspage(sys_latest),DSRPAG
     mov #edsoffset(sys_latest),W0
-    mov [W0], W0
+    mov [W0], W0 ; LFA du dernier mot système
+    mov W0, var_SYSLATEST
     mov W0, var_LATEST
     mov #edsoffset(cold_start),IP
     NEXT

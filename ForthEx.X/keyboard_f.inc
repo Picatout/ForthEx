@@ -25,7 +25,7 @@
 ; définitions Forth
 ;;;;;;;;;;;;;;;;;;;;;;    
     
-DEFCODE "?KEY",4,,QKEY  ; ( -- 0 | T c )
+DEFCODE "?KEY",4,,QKEY,DOT  ; ( -- 0 | T c )
     call kbd_get
     DPUSH
     mov W0, T
@@ -40,7 +40,7 @@ DEFCODE "?KEY",4,,QKEY  ; ( -- 0 | T c )
 ; attend une touche
 ; du clavier
 ;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "KEY",3,,KEY ; ( -- c)
+DEFCODE "KEY",3,,KEY,QKEY ; ( -- c)
 0:
     call kbd_get
     cp0 W0
@@ -53,7 +53,7 @@ DEFCODE "KEY",3,,KEY ; ( -- c)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; envoie d'un octet au clavier
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "KBD_CMD",7,,KBD_CMD ; ( c -- )
+DEFCODE "KBD_CMD",7,,KBD_CMD,KEY ; ( c -- )
     mov T, W0
     call ps2_send
     inc2 T,T

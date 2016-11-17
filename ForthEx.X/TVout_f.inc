@@ -24,7 +24,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; active/désactive sortie vidéo
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "VIDON",5,,VIDON ; ( f -- )  T=on F=off  
+DEFCODE "VIDON",5,,VIDON,SRAND ; ( f -- )  T=on F=off  
     mov T, W0
     mov.b WREG,video_on
     DPOP
@@ -33,7 +33,7 @@ DEFCODE "VIDON",5,,VIDON ; ( f -- )  T=on F=off
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; active ou désactive le curseur texte
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "CURENBL",7,,CURENBL  ; ( f -- )  T=active, F=désactive
+DEFCODE "CURENBL",7,,CURENBL,VIDON  ; ( f -- )  T=active, F=désactive
     mov T, W0
     DPOP
     cp0 W0
@@ -47,7 +47,7 @@ DEFCODE "CURENBL",7,,CURENBL  ; ( f -- )  T=active, F=désactive
 ;;;;;;;;;;;;;;;;;;
 ; nettoie écran
 ;;;;;;;;;;;;;;;;;;
-DEFCODE "CLS",3,,CLS   ; ( -- )
+DEFCODE "CLS",3,,CLS,CURENBL   ; ( -- )
     cursor_incr_sema
     mov #0x2020, W0
     mov #_video_buffer, W1
@@ -63,7 +63,7 @@ DEFCODE "CLS",3,,CLS   ; ( -- )
 ; haut d'une ligne texte
 ; dernière ligne effacée
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "SCRLUP",6,,SCRLUP  ; ( -- )
+DEFCODE "SCRLUP",6,,SCRLUP,CLS  ; ( -- )
     call scroll_up
     NEXT
 
@@ -72,7 +72,7 @@ DEFCODE "SCRLUP",6,,SCRLUP  ; ( -- )
 ; bas d'une ligne texte
 ; première ligne effacée
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "SCRLDN",6,,SCRLDN  ; ( -- )
+DEFCODE "SCRLDN",6,,SCRLDN,SCRLUP  ; ( -- )
     call scroll_down
     NEXT
     
@@ -80,7 +80,7 @@ DEFCODE "SCRLDN",6,,SCRLDN  ; ( -- )
 ; obtient la valeur
 ; de xpos
 ;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "GETX",4,,GETX ; ( -- n )
+DEFCODE "GETX",4,,GETX,SCRLDN ; ( -- n )
     DPUSH
     mov.b xpos, WREG
     mov W0,T
@@ -91,7 +91,7 @@ DEFCODE "GETX",4,,GETX ; ( -- n )
 ; obtient la valeur
 ; de ypos
 ;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "GETY",4,,GETY ; ( -- n )
+DEFCODE "GETY",4,,GETY,GETX ; ( -- n )
     DPUSH
     mov.b ypos, WREG
     mov W0,T
@@ -102,7 +102,7 @@ DEFCODE "GETY",4,,GETY ; ( -- n )
 ; définie position X
 ; du curseur texte
 ;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "SETX",4,, SETX  ; ( n -- )
+DEFCODE "SETX",4,, SETX,GETY  ; ( n -- )
     cursor_incr_sema
     cursor_sync
     mov #CPL-1,W0
@@ -119,7 +119,7 @@ DEFCODE "SETX",4,, SETX  ; ( n -- )
 ; définie position Y
 ; du curseur texte
 ;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "SETY",4,,SETY  ; ( n -- )
+DEFCODE "SETY",4,,SETY,SETX  ; ( n -- )
     cursor_incr_sema
     cursor_sync
     cp T, #LPS
@@ -132,14 +132,14 @@ DEFCODE "SETY",4,,SETY  ; ( n -- )
     DPOP
     NEXT
     
-DEFWORD "CURPOS",6,,CURPOS  ; ( ny nx -- )
+DEFWORD "CURPOS",6,,CURPOS,SETY  ; ( ny nx -- )
 .word SETX, SETY, EXIT
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; déplace le curseur 1 caractère
 ; vers la gauche
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "LEFT",4,,LEFT ; ( -- )
+DEFCODE "LEFT",4,,LEFT,CURPOS ; ( -- )
     cursor_incr_sema
     cursor_sync
     dec.b xpos
@@ -161,7 +161,7 @@ DEFCODE "LEFT",4,,LEFT ; ( -- )
 ; déplace le curseur 1 caractère
 ; vers la droite
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "RIGHT",5,,RIGHT  ; ( -- )
+DEFCODE "RIGHT",5,,RIGHT,LEFT  ; ( -- )
     cursor_incr_sema
     cursor_sync
     inc.b xpos
@@ -184,7 +184,7 @@ DEFCODE "RIGHT",5,,RIGHT  ; ( -- )
 ; inverse le bit #7 du caractère 
 ; à la position du curseur
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "TGLCHAR",7,,TGLCHAR  ; ( -- )
+DEFCODE "TGLCHAR",7,,TGLCHAR,RIGHT  ; ( -- )
     cursor_incr_sema
     cursor_sync
     call toggle_char
@@ -197,7 +197,7 @@ DEFCODE "TGLCHAR",7,,TGLCHAR  ; ( -- )
 ; au sommet de la pile
 ; dans le buffer video    
 ;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "EMIT",4,,EMIT  ; ( c -- )
+DEFCODE "EMIT",4,,EMIT,TGLCHAR  ; ( c -- )
     cursor_incr_sema
     cursor_sync
     mov.b #CPL, W0
@@ -215,7 +215,7 @@ DEFCODE "EMIT",4,,EMIT  ; ( c -- )
 ;;;;;;;;;;;;;;;;;;;
 ; retour à la ligne
 ;;;;;;;;;;;;;;;;;;;;
-DEFCODE "CR",2,,CR  ; ( -- )
+DEFCODE "CR",2,,CR,EMIT ; ( -- )
     cursor_incr_sema
     cursor_sync
     mov #CPL-1,W0
@@ -226,7 +226,7 @@ DEFCODE "CR",2,,CR  ; ( -- )
 ;;;;;;;;;;;;;;;;;;;;;;
 ; imprime un espace
 ;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "SPACE",5,,SPACE   ; ( -- )
+DEFCODE "SPACE",5,,SPACE ,CR  ; ( -- )
     DPUSH
     mov #32, T
     bra code_EMIT
@@ -235,7 +235,7 @@ DEFCODE "SPACE",5,,SPACE   ; ( -- )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; imprime n espaces
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "SPACES",6,,SPACES  ; ( n -- )
+DEFWORD "SPACES",6,,SPACES,SPACE  ; ( n -- )
     .word DUP,LIT,0,GREATER,TBRANCH
     DEST spaces1
     .word DROP,EXIT
@@ -249,7 +249,7 @@ spaces0:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; efface la ligne indiquée
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "CLRLN",5,,CLRLN    ; ( n -- )
+DEFCODE "CLRLN",5,,CLRLN,SPACES    ; ( n -- )
     cursor_incr_sema
     cursor_sync
     mov #_video_buffer, W2
@@ -271,7 +271,7 @@ DEFCODE "CLRLN",5,,CLRLN    ; ( n -- )
 ; imprime une chaîne de
 ; caractère à l'écran
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
+DEFWORD "TYPE",4,,TYPE,CLRLN  ; (c-addr n+ .. )
 .word DUP,TBRANCH
 DEST type1
 .word TWODROP, EXIT
@@ -287,21 +287,21 @@ DEST type0
 ; efface le caractère
 ; sous le curseur
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "DELETE",7,,DELETE  ; ( -- )
+DEFWORD "DELETE",6,,DELETE,TYPE  ; ( -- )
     .word BL,EMIT,EXIT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;efface le carctère à gauche
 ; du curseur
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "BACKCHAR",8,,BACKCHAR   ; ( -- )
+DEFWORD "BACKCHAR",8,,BACKCHAR,DELETE   ; ( -- )
     .word LEFT,DELETE,LEFT,EXIT
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; imprime l'entier au sommet de la pile
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD ".",1,,DOT
+DEFWORD ".",1,,DOT,BACKCHAR
 
 .word    EXIT
     

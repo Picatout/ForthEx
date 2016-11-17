@@ -23,7 +23,7 @@
  ; mots Forth
  ;;;;;;;;;;;;;;;;;;
  
- DEFCODE "TONE",4,,TONE  ; ( duration Nfr -- )
+ DEFCODE "TONE",4,,TONE,SGET  ; ( duration Nfr -- )
     mov T, AUDIO_PER
     mov T, AUDIO_OCRS
     lsr T, T

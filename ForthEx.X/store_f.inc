@@ -29,7 +29,7 @@
 ; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
 ; sortie aucune
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RSTORE",6,,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
+DEFCODE "RSTORE",6,,RSTORE,TONE ; ( addr-bloc addr-sramL addr-sramH n -- )
     _enable_sram
     mov #RWRITE,W0
     spi_write
@@ -55,7 +55,7 @@ DEFCODE "RSTORE",6,,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
 ; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
 ; sortie: aucune
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RLOAD",6,,RLOAD ; ( addr-bloc addr-sramL addr-sramH n -- )
+DEFCODE "RLOAD",5,,RLOAD,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
     _enable_sram
     mov #RREAD, W0
     spi_write
@@ -88,7 +88,7 @@ DEFCODE "RLOAD",6,,RLOAD ; ( addr-bloc addr-sramL addr-sramH n -- )
 ; cette routine est conçue pour programmer
 ; une page complète.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "ESTORE",6,,ESTORE  ;( addr-bloc page -- )
+DEFCODE "ESTORE",6,,ESTORE,RLOAD  ;( addr-bloc page -- )
     call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
     _enable_eeprom
     mov #EWREN, W0
@@ -118,7 +118,7 @@ DEFCODE "ESTORE",6,,ESTORE  ;( addr-bloc page -- )
 ; charque une page EEPROM
 ; en mémoire RAM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "ELOAD",5,,ELOAD   ; ( addr-bloc page -- )
+DEFCODE "ELOAD",5,,ELOAD,ESTORE   ; ( addr-bloc page -- )
     call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
     _enable_eeprom
     mov #EREAD, W0

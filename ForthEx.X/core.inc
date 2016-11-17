@@ -119,20 +119,22 @@
 ; Flags
 .equ F_IMMED,0x80
 .equ F_HIDDEN,0x20
-.equ F_LENMASK,0x1f	; length mask
+.equ F_LENMASK,0x3f	; length mask
 
    
-.set link,0
- 
+.set link0,0
+.set count,0
+    
 ;macro utilisée pour créer les entête des mots de haut niveaux.
 .macro DEFWORD name, namelen, flags=0, label, last=0
     .section .sysdict psv
     .align 2
     .global name_\label
-name_\label :
+name_\label :  ; LFA
+    ;.word link ;; ça ne fonctionne toutes les entrées prennent la dernière valeur de link
     .word name_\last		; lien vers élément précédent du dictionnaire
-    ;.set link, name_\label
-    .byte \flags+\namelen	; flags + length byte
+    .set link, name_\label
+    .byte \flags+\namelen	; NFA flags + length byte
     .ascii "\name"		; the name
     .align 2		; padding to word boundary
     .global \label
@@ -146,10 +148,11 @@ name_\label :
 	.section .sysdict psv
 	.align 2
 	.global name_\label
-name_\label :
+name_\label :  ; LFA
+	;.word link   ;; ça ne fonctionne toutes les entrées prennent la dernière valeur de link
 	.word  name_\last
-	;.set link, name_\label
-	.byte \flags+\namelen	; flags + length byte
+	.set link, name_\label
+	.byte \flags+\namelen	; NFA flags + length byte
 	.ascii "\name"		; the name
 	.align 2		; padding to next 4 byte boundary
 	.global \label
@@ -162,12 +165,12 @@ code_\label :			;pfa,  assembler code follows
 .endm
  
 ; macro utilisée pour créer des variables
-.macro DEFVAR name, namelen, flags=0, label
-	DEFCODE \name,\namelen,\flags,\label
+.macro DEFVAR name, namelen, flags=0, label, last=0
+	DEFCODE \name,\namelen,\flags,\label,\last
 	DPUSH
 	mov #var_\label, T
 	NEXT
-	.bss
+	.section .sysvar.bss bss
 	.align 2
 	.global var_\label
 var_\label :
@@ -176,8 +179,8 @@ var_\label :
 
 	
 ; macro utilisée pour créer des constantes
-.macro DEFCONST name, namelen, flags=0, label, value
-	DEFCODE \name,\namelen,\flags,\label
+.macro DEFCONST name, namelen, flags=0, label, value, last=0
+	DEFCODE \name,\namelen,\flags,\label,\last
 	DPUSH
 	mov #\value, T
 	NEXT
