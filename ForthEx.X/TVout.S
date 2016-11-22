@@ -55,78 +55,13 @@ fcursor: .space 1 ; indicateur booléens curseur texte
 .global _video_buffer
 _video_buffer: .space TV_BUFFER_SIZE
  
-.text
- ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; initialisation générateur vidéo
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-.global tvout_init
-tvout_init:
-    bclr VIDEO_TRIS, #VIDEO_OUT ; sortie vidéo
-    bclr SYNC_TRIS, #SYNC_OUT  ; sortie sync vidéo
-    ; configuration PPS
-    mov VIDEO_RPOR, W0
-    mov #~(0x1f<<VIDEO_RPORbit),W1 ;mask
-    and W0,W1,W0
-    mov #(VIDEO_FN<<VIDEO_RPORbit), W1
-    ior W0,W1,W0
-    mov W0, VIDEO_RPOR
-    mov SYNC_RPOR, W0
-    mov #~(0x1f<<SYNC_RPORbit),W1 ;mask
-    and W0,W1,W0
-    mov #(SYNC_FN<<SYNC_RPORbit), W1
-    ior W0,W1,W0
-    mov W0, SYNC_RPOR
-    ; configuration VIDEO_SPI
-    mov #(3<<PPRE0)|(2<<SPRE0)|(1<<MSTEN),W0
-    mov W0,VIDEO_SPICON1
-    bset VIDEO_SPICON2, #SPIBEN
-    ; configuration output compare
-    mov #HLINE, W0
-    ; période timer
-    mov W0, SYNC_PER
-    mov W0, SYNC_OCRS
-    mov W0, VIDEO_OCR
-    mov #HSYNC, W0
-    mov W0, SYNC_OCR
-    mov  #VIDEO_DLY, W0
-    mov W0, VIDEO_OCRS
-    ; configuraton output compare mode 5, clock=Fp
-    mov #5|(7<<OCTSEL0), W0
-    mov W0, SYNC_OCCON1
-    mov W0, VIDEO_OCCON1
-    ;configuration priorité d'interruptions
-    ;priorité 5 pour les 2
-    mov #~(7<<SYNC_IPbit), W0
-    and SYNC_IPC
-    mov #(5<<SYNC_IPbit), W0 
-    ior SYNC_IPC
-    mov #~(7<<VIDEO_IPbit), W0
-    and VIDEO_IPC
-    mov #(5<<VIDEO_IPbit), W0
-    ior VIDEO_IPC
-    setm line_count
-    setm.b even
-    setm.b video_on
-    ; activation interruption  SYNC_TIMER
-    bclr SYNC_IFS, #SYNC_IF
-    bset SYNC_IEC, #SYNC_IE
-    ; activation timer
-    bset SYNC_TMRCON, #TON
-    ; activation du curseur texte
-    mov #CURSOR_DELAY,W0
-    mov W0, cursor_dly
-    clr.b cursor_sema
-    bset fcursor, #CURSOR_ACTIVE
-    bclr fcursor, #CURSOR_INV
-    return
 
-    
 ;********************
 ; interruption TIMER2
-; synchronisation    
+; synchronisation  vidéo  
 ;********************
-.global __T2Interrupt
 INTR    
+.global __T2Interrupt
 __T2Interrupt:
     bclr SYNC_IFS, #SYNC_IF
     bclr VIDEO_SPISTAT, #SPIEN
@@ -188,13 +123,13 @@ __T2Interrupt:
 6: ; line_count==TOPLINE+VIDEDO désactivaion int. video
     bclr VIDEO_IEC, #VIDEO_IE
     bra 0b
-7: ; line_count==ELPFRM
+7: ; line_count==ELPFRM  champ paire
     cp0.b even
     bra z, 0b
     setm line_count
     clr.b even
     bra 0b
-8: ;line_count==OLPFRM
+8: ;line_count==OLPFRM  champ impaire
     setm line_count
     setm.b even
     bra 0b
@@ -342,6 +277,381 @@ scroll_down:
     mov W0,[--W2]
     cursor_decr_sema
     return
+ 
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  mots du système FORTH
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; initialisation générateur vidéo
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;.global tvout_init
+HEADLESS TVOUT_INIT, CODE ;tvout_init:
+    bclr VIDEO_TRIS, #VIDEO_OUT ; sortie vidéo
+    bclr SYNC_TRIS, #SYNC_OUT  ; sortie sync vidéo
+    ; configuration PPS
+    mov VIDEO_RPOR, W0
+    mov #~(0x1f<<VIDEO_RPORbit),W1 ;mask
+    and W0,W1,W0
+    mov #(VIDEO_FN<<VIDEO_RPORbit), W1
+    ior W0,W1,W0
+    mov W0, VIDEO_RPOR
+    mov SYNC_RPOR, W0
+    mov #~(0x1f<<SYNC_RPORbit),W1 ;mask
+    and W0,W1,W0
+    mov #(SYNC_FN<<SYNC_RPORbit), W1
+    ior W0,W1,W0
+    mov W0, SYNC_RPOR
+    ; configuration VIDEO_SPI
+    mov #(3<<PPRE0)|(2<<SPRE0)|(1<<MSTEN),W0
+    mov W0,VIDEO_SPICON1
+    bset VIDEO_SPICON2, #SPIBEN
+    ; configuration output compare
+    mov #HLINE, W0
+    ; période timer
+    mov W0, SYNC_PER
+    mov W0, SYNC_OCRS
+    mov W0, VIDEO_OCR
+    mov #HSYNC, W0
+    mov W0, SYNC_OCR
+    mov  #VIDEO_DLY, W0
+    mov W0, VIDEO_OCRS
+    ; configuraton output compare mode 5, clock=Fp
+    mov #5|(7<<OCTSEL0), W0
+    mov W0, SYNC_OCCON1
+    mov W0, VIDEO_OCCON1
+    ;configuration priorité d'interruptions
+    ;priorité 5 pour les 2
+    mov #~(7<<SYNC_IPbit), W0
+    and SYNC_IPC
+    mov #(5<<SYNC_IPbit), W0 
+    ior SYNC_IPC
+    mov #~(7<<VIDEO_IPbit), W0
+    and VIDEO_IPC
+    mov #(5<<VIDEO_IPbit), W0
+    ior VIDEO_IPC
+    setm line_count
+    setm.b even
+    setm.b video_on
+    ; activation interruption  SYNC_TIMER
+    bclr SYNC_IFS, #SYNC_IF
+    bset SYNC_IEC, #SYNC_IE
+    ; activation timer
+    bset SYNC_TMRCON, #TON
+    ; activation du curseur texte
+    mov #CURSOR_DELAY,W0
+    mov W0, cursor_dly
+    clr.b cursor_sema
+    bset fcursor, #CURSOR_ACTIVE
+    bclr fcursor, #CURSOR_INV
+    ;return
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; active/désactive sortie vidéo
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "VIDON",5,,VIDON,SRAND ; ( f -- )  T=on F=off  
+    mov T, W0
+    mov.b WREG,video_on
+    DPOP
+    NEXT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; active ou désactive le curseur texte
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "CURENBL",7,,CURENBL,VIDON  ; ( f -- )  T=active, F=désactive
+    mov T, W0
+    DPOP
+    cp0 W0
+    bra z, 1f
+    call cursor_enable
+    NEXT
+1: ; désactive le clignotement 
+    call cursor_disable
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;
+; nettoie écran
+;;;;;;;;;;;;;;;;;;
+DEFCODE "CLS",3,,CLS,CURENBL   ; ( -- )
+    cursor_incr_sema
+    mov #0x2020, W0
+    mov #_video_buffer, W1
+    repeat #(TV_BUFFER_SIZE/2-1)
+    mov W0,[W1++]
+    clr xpos  ; xpos=0, ypos=0
+    bclr.b fcursor,#CURSOR_INV
+    cursor_decr_sema
+    NEXT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; glisse affichage vers le
+; haut d'une ligne texte
+; dernière ligne effacée
+;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCODE "SCRLUP",6,,SCRLUP,CLS  ; ( -- )
+    call scroll_up
+    NEXT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; glisse affichage vers le
+; bas d'une ligne texte
+; première ligne effacée
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCODE "SCRLDN",6,,SCRLDN,SCRLUP  ; ( -- )
+    call scroll_down
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;
+; obtient la valeur
+; de xpos
+;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "GETX",4,,GETX,SCRLDN ; ( -- n )
+    DPUSH
+    mov.b xpos, WREG
+    mov W0,T
+    ze T,T
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;
+; obtient la valeur
+; de ypos
+;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "GETY",4,,GETY,GETX ; ( -- n )
+    DPUSH
+    mov.b ypos, WREG
+    mov W0,T
+    ze T,T
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;
+; définie position X
+; du curseur texte
+;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "SETX",4,, SETX,GETY  ; ( n -- )
+    cursor_incr_sema
+    cursor_sync
+    mov #CPL-1,W0
+    cp T, W0
+    bra gtu, 1f
+    mov T, W0
+ 1:
+    mov.b WREG,xpos
+    cursor_decr_sema
+    DPOP
+    NEXT
+
+;;;;;;;;;;;;;;;;;;;;;;
+; définie position Y
+; du curseur texte
+;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "SETY",4,,SETY,SETX  ; ( n -- )
+    cursor_incr_sema
+    cursor_sync
+    cp T, #LPS
+    bra ltu, 1f
+    mov #(LPS-1), T
+1:
+    mov T, W0
+    mov.b WREG,ypos
+    cursor_decr_sema
+    DPOP
+    NEXT
+    
+DEFWORD "CURPOS",6,,CURPOS,SETY  ; ( ny nx -- )
+.word SETX, SETY, EXIT
+ 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; déplace le curseur 1 caractère
+; vers la gauche
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "LEFT",4,,LEFT,CURPOS ; ( -- )
+    cursor_incr_sema
+    cursor_sync
+    dec.b xpos
+    bra nn, 2f
+    dec.b ypos
+    bra nn, 1f
+    call scroll_down
+    clr.b ypos
+1:
+    mov #CPL,W0
+    dec W0,W0
+    mov.b WREG,xpos
+2:
+    cursor_decr_sema
+    NEXT
+    
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; déplace le curseur 1 caractère
+; vers la droite
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "RIGHT",5,,RIGHT,LEFT  ; ( -- )
+    cursor_incr_sema
+    cursor_sync
+    inc.b xpos
+    mov #CPL, W0
+    cp.b xpos
+    bra ltu, 2f
+    clr.b xpos
+    inc.b ypos
+    mov #LPS, W0
+    cp.b ypos
+    bra ltu, 2f
+    call scroll_up
+    dec.b ypos
+2:    
+    cursor_decr_sema
+    NEXT
+
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; inverse le bit #7 du caractère 
+; à la position du curseur
+; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "TGLCHAR",7,,TGLCHAR,RIGHT  ; ( -- )
+    cursor_incr_sema
+    cursor_sync
+    call toggle_char
+    cursor_decr_sema
+    NEXT
+    
+    
+;;;;;;;;;;;;;;;;;;;;;;
+; place caractère 
+; au sommet de la pile
+; dans le buffer video    
+;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "EMIT",4,,EMIT,TGLCHAR  ; ( c -- )
+    cursor_incr_sema
+    cursor_sync
+    mov.b #CPL, W0
+    mul.b ypos
+    mov.b xpos, WREG
+    ze W0,W0
+    add W0,W2,W0
+    mov #_video_buffer, W1
+    add W0,W1,W1
+    mov.b T, [W1]
+    DPOP
+    cursor_decr_sema
+    bra code_RIGHT
+
+;;;;;;;;;;;;;;;;;;;
+; retour à la ligne
+;;;;;;;;;;;;;;;;;;;;
+DEFCODE "CR",2,,CR,EMIT ; ( -- )
+    cursor_incr_sema
+    cursor_sync
+    mov #CPL-1,W0
+    mov.b WREG,xpos
+    cursor_decr_sema
+    bra code_RIGHT
+
+;;;;;;;;;;;;;;;;;;;;;;
+; imprime un espace
+;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "SPACE",5,,SPACE ,CR  ; ( -- )
+    DPUSH
+    mov #32, T
+    bra code_EMIT
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; imprime n espaces
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFWORD "SPACES",6,,SPACES,SPACE  ; ( n -- )
+    .word DUP,LIT,0,GREATER,TBRANCH
+    DEST spaces1
+    .word DROP,EXIT
+spaces1:    
+    .word LIT,0,DODO
+spaces0:
+    .word SPACE,DOLOOP
+    DEST spaces0
+    .word EXIT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; efface la ligne indiquée
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "CLRLN",5,,CLRLN,SPACES    ; ( n -- )
+    cursor_incr_sema
+    cursor_sync
+    mov #_video_buffer, W2
+    mov #LPS, W0
+    cp T, W0
+    bra geu, 1f
+    mov #CPL, W0
+    mul.uu T, W0,W0
+    add W0, W2,W2
+    mov #0x2020, W0
+    repeat #(CPL/2-1)
+    mov W0, [W2++]
+1:    
+    cursor_decr_sema
+    DPOP
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; imprime une chaîne de
+; caractère à l'écran
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFWORD "TYPE",4,,TYPE,CLRLN  ; (c-addr n+ .. )
+.word DUP,TBRANCH
+DEST type1
+.word TWODROP, EXIT
+type1:    
+.word LIT, 0, DODO
+type0:
+.word  DUP, CFETCH, EMIT,ONEPLUS
+.word DOLOOP
+DEST type0
+.word DROP, EXIT     
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; efface le caractère
+; sous le curseur
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFWORD "DELETE",6,,DELETE,TYPE  ; ( -- )
+    .word BL,EMIT,EXIT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;efface le carctère à gauche
+; du curseur
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFWORD "BACKCHAR",8,,BACKCHAR,DELETE   ; ( -- )
+    .word LEFT,DELETE,LEFT,EXIT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; routines pour la conversion
+; d'un entier en chaîne
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;débute la conversion
+;en initialisant la variable HP    
+DEFWORD "<#",2,,LTSHARP,BACKCHAR ; ( -- )
+    .word PAD,FETCH,PADSIZE,PLUS,HP,STORE
+    .word EXIT
+    
+;met le caractère dand T au
+; début de la chaîne de conversion
+DEFWORD "HOLD",4,,HOLD,LTSHARP ; ( c -- )
+    .word LIT,-1,HP,PLUSSTORE
+    .word HP,FETCH,CSTORE
+    .word EXIT
+
+;    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; imprime l'entier au sommet de la pile
+; la présentation dépend de la valeur de
+; la variable BASE    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFWORD ".",1,,DOT,BACKCHAR ; ( n -- )
+    .word 
+    .word SPACE,EXIT
+    
     
 .end
 

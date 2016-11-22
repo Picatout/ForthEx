@@ -28,7 +28,7 @@
 .equ DSP, W14 ; pile arguments
 .equ T, W13   ; sommet pile arguments
 .equ WP, W12  ; pointeur paramètres
-.equ X, W11   ; pointeur d'adresse
+.equ UP, W11   ; pointeur _USER_VARS
 .equ IP, W10   ; pointeur d'instruction 
 .equ I, W9    ; compteur de boucle    
 .equ LIMIT,W8 ; limite des boucles
@@ -36,9 +36,10 @@
 .equ CELL_SIZE, 2
 .equ DSTK_SIZE, 32*CELL_SIZE
 .equ RSTK_SIZE, 64*CELL_SIZE
+.equ RSTK_GUARD, 24 ; réserve 16 octets pour les interrupts et exceptions    
 .equ TIB_SIZE, 80
 .equ PAD_SIZE, 80    
-.equ USER_BASE, 0x1800 ; début espace utilisateur
+.equ USER_BASE, 0x1900 ; début espace utilisateur
     
 ;;;;;;;;;;;;    
 ; macros
@@ -76,8 +77,6 @@
 ; empile un registre
 ; sur la pile des retours    
 .macro RPUSH reg
-;    push R
-;    mov \reg, R    
     push \reg
 .endm
 
@@ -85,8 +84,6 @@
 ; vers le registre    
 .macro RPOP reg
     pop \reg
-;    mov R, \reg
-;    pop R
 .endm
 
 ; jette le sommet de la
@@ -107,7 +104,7 @@
     .align 2
 .endm
 
-; section de code FORTH    
+; section de code FORTH 
 .macro FORTH_CODE
     .section .forth_code.text code
 .endm
@@ -119,34 +116,31 @@
 ; Flags
 .equ F_IMMED,0x80
 .equ F_HIDDEN,0x20
-.equ F_LENMASK,0x3f	; length mask
+.equ F_LENMASK,0x1f	; length mask
 
-   
-.set link0,0
-.set count,0
-    
+.equiv CODE,1
+.equiv HWORD,2
+
 ;macro utilisée pour créer les entête des mots de haut niveaux.
 .macro DEFWORD name, namelen, flags=0, label, last=0
-    .section .sysdict psv
-    .align 2
-    .global name_\label
+	SYSDICT
+	.global name_\label
 name_\label :  ; LFA
-    ;.word link ;; ça ne fonctionne toutes les entrées prennent la dernière valeur de link
-    .word name_\last		; lien vers élément précédent du dictionnaire
-    .set link, name_\label
-    .byte \flags+\namelen	; NFA flags + length byte
-    .ascii "\name"		; the name
-    .align 2		; padding to word boundary
-    .global \label
+	;.word link ;; ça ne fonctionne toutes les entrées prennent la dernière valeur de link
+	.word name_\last		; lien vers élément précédent du dictionnaire
+	.set link, name_\label
+	.byte \flags+\namelen	; NFA flags + length byte
+	.ascii "\name"		; the name
+	.align 2		; padding to word boundary
+	.global \label
 \label :
-    .word ENTER
-	;pfa:  list of word pointers follow
+	.word ENTER
+	;pfa:  liste des paramètres
 .endm
 
 ; macro utilisée pour créer les entêtes des mots en code machine	
 .macro DEFCODE name, namelen, flags=0, label, last=0
-	.section .sysdict psv
-	.align 2
+	SYSDICT
 	.global name_\label
 name_\label :  ; LFA
 	;.word link   ;; ça ne fonctionne toutes les entrées prennent la dernière valeur de link
@@ -164,17 +158,41 @@ code_\label :			;pfa,  assembler code follows
 	
 .endm
  
+; macro utilisé pour créer les mots sans entête de dictionnaire
+.macro HEADLESS label, type=CODE
+	SYSDICT
+	.global \label
+\label :
+	.if ( \type == CODE )
+	.print "code: \label"
+	.word code_\label
+	FORTH_CODE
+	.global code_\label
+code_\label :
+        .else
+	.print "hword: \label"
+	.word ENTER
+	.endif
+	
+.endm
+    
+	
 ; macro utilisée pour créer des variables
 .macro DEFVAR name, namelen, flags=0, label, last=0
-	DEFCODE \name,\namelen,\flags,\label,\last
-	DPUSH
-	mov #var_\label, T
-	NEXT
-	.section .sysvar.bss bss
-	.align 2
-	.global var_\label
-var_\label :
-	.space 2 
+	SYSDICT
+	.global name_\label
+name_\label :  ; LFA
+	;.word link ;; ça ne fonctionne toutes les entrées prennent la dernière valeur de link
+	.word name_\last		; lien vers élément précédent du dictionnaire
+	.set link, name_\label
+	.byte \flags+\namelen	; NFA flags + length byte
+	.ascii "\name"		; the name
+	.align 2		; padding to word boundary
+	.global \label
+\label :
+        .word DOUSER
+;pfa:  paramètres
+	.word _\label-_USER_VARS 
 .endm
 
 	

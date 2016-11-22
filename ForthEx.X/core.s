@@ -23,14 +23,14 @@
 ;   http://www.bradrodriguez.com/papers/
 ;   msp430 camelForth source code: http://www.camelforth.com/download.php?view.25
 ;   ANS FORTH 94: http://www.greenarraychips.com/home/documents/dpans94.pdf
-    
+;   http://sinclairql.speccy.org/archivo/docs/books/Threaded_interpretive_languages.pdf    
     
 .include "hardware.inc"
 .include "core.inc"
 .include "gen_macros.inc"
 .include "sound.inc"
     
-.global pstack, rstack, user
+.global pstack, rstack, user,tib,pad
     
 .section .core.bss bss
 .global user    
@@ -43,32 +43,166 @@ pstack:
 rstack:
 .space RSTK_SIZE
 
-.section .tib.bss bss
-.global tib    
+.section .buffers.bss bss
 tib: .space TIB_SIZE
-.section .pad.bss bss
-.global pad 
-pad: .space PAD_SIZE    
+pad: .space PAD_SIZE
+ 
+.section .user_vars.bss bss
+.global _USER_VARS
+_USER_VARS:    
+.global _TIB    
+_TIB: .space 2
+.global _PAD 
+_PAD: .space 2    
+ .global _SOURCE
+; adresse et longueur du buffer d'évaluation
+_SOURCE: .space 4
+; identifiant de la source: 0->interactif, -1, fichier
+ .global _SOURCE_ID
+_SOURCE_ID: .space 2
+; pointeur data 
+ .global _DP
+_DP: .space 2 
+; état interpréteur : 0 interactif, 1 compilation
+ .global _STATE
+_STATE: .space 2
+; base numérique utilisée pour l'affichage des entiers
+ .global _BASE
+_BASE: .space 2
+; pointeur position parser
+ .global _TOIN
+_TOIN: .space 2 
+; adresse début pile arguments
+ .global _S0
+_S0: .space 2
+; adresse début pile des retours
+ .global _R0
+_R0: .space 2
+; pointeur HOLD conversion numérique
+ .global _HP
+_HP: .space 2
+; LFA dernière entrée dans le dictionnaire utilisateur
+ .global _LATEST
+_LATEST: .space 2 
+ .global _SYSLATEST
+_SYSLATEST: .space 2
+ 
  
 ; dictionnaire utilisateur dans la RAM 
 .section .user_dict bss  address(USER_BASE)
-.global user_dict 
-user_dict: .space RAM_SIZE-USER_BASE
+.global _user_dict 
+_user_dict: .space RAM_SIZE-USER_BASE
     
-
+; constantes dans la mémoire flash
 .section .ver_str.const psv       
 .global _version
- 
 _version:
 .asciz "ForthEx V0.1"    
+.global _compile_only
+_compile_only:
+    .ascii "compile only word"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; mot système qui ne sont pas
+; dans le dictionnaire
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
 FORTH_CODE
-.global ENTER  ; s'appelle DOCOL dans Jonesforth  
+
+
+ .global __MathError,_warm
+_warm:	   ; ( -- )  démarrage à chaud
+__MathError:
+    mov #pstack, DSP
+    mov #rstack, RSP
+    mov #edsoffset(ABORT),IP
+    NEXT
     
+    .global ENTER
 ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
     RPUSH IP   
     mov WP,IP
     NEXT
+
+    .global DOUSER
+DOUSER: ; empile pointeur sur variable utilisateur
+    DPUSH
+    mov [WP++],W0
+    add W0,UP,T
+    NEXT
+
+HEADLESS LIT ; ( -- x ) empile une valeur  
+    DPUSH
+    mov [IP++], T
+    NEXT
+
+HEADLESS CLIT  ; ( -- c )
+    DPUSH
+    mov [IP++], T
+    ze T,T
+    NEXT
+
+; branchement inconditionnel
+HEADLESS BRANCH ; ( -- )
+    add IP, [IP], IP
+    NEXT
+    
+; branchement si T<>0
+HEADLESS TBRANCH ; ( f -- )
+    cp0 T
+    DPOP
+    bra nz, code_BRANCH
+    inc2 IP,IP
+    NEXT
+
+; branchement si T==0
+HEADLESS ZBRANCH ; ( f -- )
+    cp0 T
+    DPOP
+    bra z, code_BRANCH
+    inc2, IP,IP
+    NEXT
+    
+    
+; exécution de DO
+HEADLESS DODO ; ( n  n -- ) R( -- n n )
+    RPUSH LIMIT
+    RPUSH I
+    mov T, I
+    DPOP
+    mov T, LIMIT
+    DPOP
+    NEXT
+
+; exécution de LOOP
+HEADLESS DOLOOP ; ( -- )  R( n n -- )
+    inc I, I
+    cp I, LIMIT
+    bra z, 1f
+    add IP, [IP], IP
+    NEXT
+1:
+    inc2 IP,IP
+    RPOP I    
+    RPOP LIMIT
+    NEXT
+
+; empile IP
+HEADLESS IPFETCH  ; ( -- n )
+    DPUSH
+    mov IP,T
+    NEXT
+    
+; T->IP
+HEADLESS IPSTORE ; ( n -- )
+    mov T,IP
+    DPOP
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; mots qui sont dans le dictionnaire
+; système
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
     .section .sysdict psv
     .align 2
@@ -90,35 +224,14 @@ code_EXIT :			;pfa,  assembler code follows
 DEFCODE "REBOOT",6,,REBOOT,EXIT ; ( -- )  démarrage à froid
     reset
     
-
-DEFCODE "WARM",4,,WARM,REBOOT   ; ( -- )  démarrage à chaud
-__MathError:
-    mov #pstack, DSP
-    mov #rstack, RSP
-    ; à faire: doit-remettre à zéro input buffer
-    mov #edsoffset(cold_start),IP
-    NEXT
     
-DEFCODE "EXECUTE",7,,EXECUTE,WARM ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
+DEFCODE "EXECUTE",7,,EXECUTE,REBOOT; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
     mov T, WP
     DPOP
     mov [WP++],W0
     goto W0
     
-    
-DEFCODE "LIT",3,,LIT,EXECUTE  ; ( -- x ) empile une valeur  
-    DPUSH
-    mov [IP++], T
-    NEXT
-
-DEFCODE "CLIT",4,,CLIT,LIT  ; ( -- c )
-    DPUSH
-    mov.b [IP], T
-    ze T,T
-    inc2 IP,IP ;IP doit toujours être aligné sur un mot de 16 bits
-    NEXT
-
-DEFCODE "@",1,,FETCH,CLIT ; ( addr -- n )
+DEFCODE "@",1,,FETCH,EXECUTE ; ( addr -- n )
     mov [T],T
     NEXT
     
@@ -139,54 +252,9 @@ DEFCODE "C!",2,,CSTORE,STORE  ; ( char c-addr  -- )
     DPOP
     NEXT
     
-; branchement inconditionnel    
-DEFCODE "BRANCH",6,,BRANCH,CSTORE  ; ( -- )
-XBRAN:
-    add IP, [IP], IP
-    NEXT
-    
-; branchement si T<>0    
-DEFCODE "?BRANCH",7,,TBRANCH,BRANCH ; ( n -- )
-    cp0 T
-    DPOP
-    bra nz, XBRAN
-    inc2 IP,IP
-    NEXT
-
-; branchement si T==0
-DEFCODE "ZBRANCH",7,,ZBRANCH,TBRANCH ; ( n -- )
-    cp0 T
-    DPOP
-    bra z, XBRAN
-    inc2, IP,IP
-    NEXT
-    
-    
-; exécution de DO    
-DEFCODE "(DO)",4,,DODO,ZBRANCH ; ( n  n -- ) R( -- n n )
-    RPUSH LIMIT
-    RPUSH I
-    mov T, I
-    DPOP
-    mov T, LIMIT
-    DPOP
-    NEXT
-
-; exécution de LOOP   
-DEFCODE "(LOOP)",6,,DOLOOP,DODO  ; ( -- )  R( n n -- )
-    inc I, I
-    cp I, LIMIT
-    bra z, 1f
-    add IP, [IP], IP
-    NEXT
-1:
-    inc2 IP,IP
-    RPOP I    
-    RPOP LIMIT
-    NEXT
 
 ; empile compteur de boucle    
-DEFCODE "I",1,,DOI,DOLOOP  ; ( -- n )
+DEFCODE "I",1,,DOI,CSTORE  ; ( -- n )
     DPUSH
     mov I, T
     NEXT
@@ -314,51 +382,17 @@ DEFCODE "TUCK",4,,TUCK,RPSTORE  ; ( n1 n2 -- n2 n1 n2 )
     mov W0,[++DSP]
     NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; adressage indirect 
-;; utilisant registre X
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;; initialise X    
-;DEFCODE "X!",2,,XSTORE ; ( u -- )
-;    mov T,X
-;    DPOP
-;    NEXT
-;
-;; empile la valeur dans X    
-;DEFCODE "X@",2,,XFETCH ; ( -- u )
-;    DPUSH
-;    mov X,T
-;    NEXT
-;
-;; store indirect via X
-;DEFCODE "!IX",3,,STRIX   ; ( n -- ) 
-;    mov T,[X]
-;    DPOP
-;    NEXT
-;    
-;; load indirect via X
-;DEFCODE "@IX",3,,LDIX  ; ( -- n )
-;    DPUSH
-;    mov [X],T
-;    NEXT
-;    
-;; incrémente X
-;DEFCODE "X++",3,,INCX  ; X=X+1
-;    inc X,X
-;    NEXT
-;    
-;; décrément X
-;DEFCODE "X--",3,,DECX  ; X=X-1
-;    dec X,X
-;    NEXT
+;;;;;;;;;;;;;;;;
+;     MATH
+;;;;;;;;;;;;;;;;
     
+DEFWORD "HEX",3,,HEX,TUCK ; ( -- )
+    .word LIT,16,BASE,STORE,EXIT
     
+DEFWORD "DECIMAL",7,,DECIMAL,HEX ; ( -- )
+    .word LIT,10,BASE,STORE,EXIT
     
-;;;;;;;
-; MATH
-;;;;;;;
-DEFCODE "+",1,,PLUS,TUCK   ;( n1 n2 -- n1+n2 )
+DEFCODE "+",1,,PLUS,DECIMAL   ;( n1 n2 -- n1+n2 )
     add T, [DSP--], T
     NEXT
     
@@ -450,9 +484,24 @@ DEFCODE "UMIN",4,,UMIN,UMAX ; ( u1 u2 -- min(u1,u2)
     exch T,W0
 1:  NEXT
     
+DEFCODE "EVEN",4,,EVEN,UMIN ; ( n -- f ) vrai si n pair
+    setm W0
+    btsc T,#0
+    clr W0
+    mov W0,T
+    NEXT
     
-; opérations logiques bit à bit    
-DEFCODE "AND",3,,AND,UMIN  ; ( n1 n2 -- n)  ET bit à bit
+DEFCODE "ODD",3,,ODD,EVEN ; ( n -- f ) vrai si n est impair
+    setm W0
+    btss T,#0
+    clr W0
+    mov W0,T
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+; opérations logiques bit à bit
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCODE "AND",3,,AND,ODD  ; ( n1 n2 -- n)  ET bit à bit
     and T,[DSP--],T
     NEXT
     
@@ -472,6 +521,7 @@ DEFCODE "INVERT",6,,INVERT,XOR ; ( n -- n ) inversion des bits
 DEFCODE "NEGATE",6,,NEGATE,INVERT ; ( n - n ) complément à 2
     neg T, T
     NEXT
+    
 ;;;;;;;;;;;;;;;
 ; comparaisons
 ;;;;;;;;;;;;;;;
@@ -606,12 +656,12 @@ DEFCODE "CMOVE",5,,CMOVE,MOVE  ;( c-addr1 c-addr2 u -- )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  mot forth I/O
 ;;;;;;;;;;;;;;;;;;;;;;;;;;    
-.include "hardware_f.inc"
-.include "TVout_f.inc"
-.include "keyboard_f.inc"
-.include "serial_f.inc"
-.include "sound_f.inc"
-.include "store_f.inc"
+.include "hardware.inc"
+.include "video.inc"
+.include "keyboard.inc"
+.include "serial.inc"
+.include "sound.inc"
+.include "store.inc"
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  variables système
@@ -621,17 +671,18 @@ DEFVAR "DP",2,,DP,STATE         ; pointeur fin dictionnaire
 DEFVAR "BASE",4,,BASE,DP     ; base numérique
 DEFVAR "SYSLATEST",9,,SYSLATEST,BASE ; tête du dictionnaire en FLASH    
 DEFVAR "LATEST",6,,LATEST,SYSLATEST ; pointer dernier mot dictionnaire
-DEFVAR "RBASE",5,,RBASE,LATEST   ; base pile retour
-DEFVAR "PBASE",5,,PBASE,RBASE   ; base pile arguments   
-DEFVAR "PAD",3,,PAD,PBASE       ; tampon de travail
+DEFVAR "R0",2,,R0,LATEST   ; base pile retour
+DEFVAR "S0",2,,S0,R0   ; base pile arguments   
+DEFVAR "PAD",3,,PAD,S0       ; tampon de travail
 DEFVAR "TIB",3,,TIB,PAD       ; tampon de saisie clavier
-DEFVAR "SOURCE-ID",9,,SOURCE_ID,TIB ; source de la chaîne traité par l'interpréteur
-DEFVAR ">IN",3,,INPTR,SOURCE_ID     ; pointeur position début dernier mot retourné par WORD
+DEFVAR ">IN",3,,TOIN,TIB     ; pointeur position début dernier mot retourné par WORD
+DEFVAR "HP",2,,HP,TOIN       ; HOLD pointer
+DEFVAR "SOURCE-ID",9,,SOURCE_ID,HP ; tampon source pour l'évaluation
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCONST "VERSION",7,,VERSION,psvoffset(_version),INPTR        ; adresse chaêine version
+DEFCONST "VERSION",7,,VERSION,psvoffset(_version),HP        ; adresse chaîne version
 DEFCONST "RAMEND",6,,RAMEND,RAM_END,VERSION          ;  fin mémoire RAM
 DEFCONST "IMMED",5,,IMMED,F_IMMED,RAMEND       ; drapeau mot immédiat
 DEFCONST "HIDDEN",6,,HIDDEN,F_HIDDEN,IMMED    ; drapeau mot caché
@@ -641,18 +692,101 @@ DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE,BL       ; grandeur tampon TIB
 DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE,TIBSIZE       ; grandeur tampon PAD
 DEFCONST "ULIMIT",6,,ULIMIT,RAM_END-1,PADSIZE        ; limite espace dictionnaire
 DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER),ULIMIT  ; pointeur vers ENTER
+
+; addresse buffer pour l'évaluateur    
+DEFCODE "SOURCE",6,,SOURCE,DOCOL ; ( -- c-addr u ) 
+    DPUSH
+    mov _SOURCE,T
+    DPUSH
+    mov _SOURCE+2,T
+    NEXT
+
+; sauvegarde les valeur de source    
+DEFCODE "SOURCE!",7,,SRCSTORE,SOURCE ; ( c-addr u -- )
+    mov T,_SOURCE+2
+    DPOP
+    mov T,_SOURCE
+    DPOP
+    NEXT
+    
+    
+;vérifie si le caractère est un digit
+;valide dans la base B
+; si valide retourne la valeur du digit et -1
+; si invalide retourne 0
+DEFWORD "?DIGIT",6,,QDIGIT,SRCSTORE ; ( c B -- 0| n -1 )
+    .word SWAP,CLIT,'0',MINUS,DUP,ZEROLT,TBRANCH
+    DEST not_digit
+    .word DUP,LIT,10,ULESS,TBRANCH
+    DEST base_test
+    .word LIT,7,MINUS
+base_test:
+    .word DUP,ROT,ULESS,ZBRANCH
+    DEST 1f
+    .word LIT,-1,BRANCH
+    DEST 2f
+not_digit:
+    .word DROP
+1:  .word DROP,LIT,0
+2:  .word EXIT
+    
+;converti la chaîne en nombre
+;en utilisant la valeur de BASE
+;la conversion s'arrête au premier
+;caractère non numérique
+; <c-addr1 u1> spécifie le début et le nombre
+; de caractères de la chaîne    
+DEFWORD ">NUMBER",7,,TONUMBER,QDIGIT ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
+    .word BASE,FETCH,TOR
+1:  .word DUP,ZEROEQ,TBRANCH
+    DEST 4f
+    
+4:    
+    .word EXIT
+    
+;vérifie s'il y a un signe '-'|'+'
+; à la première postion de la chaîne spécifiée par <c-addr u>
+; retourne -1 si '-', retourne 1 si '+' autrement retourne 0    
+; s'il y a un signe incrémente c-addr et décrémente u    
+DEFWORD "?SIGN",5,,QSIGN,TONUMBER ; ( c-addr u -- c-addr u 0|-1|1 )
+    .word OVER,FETCH,DUP,CLIT,'-',EQUAL,ZBRANCH
+    DEST 1f
+    .word DROP,LIT,-1,TOR, BRANCH
+    DEST 2f
+1: .word CLIT,'+',EQUAL,ZBRANCH
+    DEST 3f
+   .word LIT,1,TOR
+2: .word  TOR, ONEPLUS,RFROM, ONEMINUS,RFROM,BRANCH
+    DEST 4f
+3: .word LIT,0
+4:  .word EXIT
+    
+;conversion d'une chaîne en nombre
+; c-address indique le début de la chaîne
+; utilise la base active
+DEFWORD "?NUMBER",7,,QNUMBER,QSIGN ; ( c-addr -- c-addr 0| n -1 )
+    .word DUP,LIT,0,DUP,ROT,COUNT ; c-addr 0 0 c-addr u
+    .word QSIGN,TOR,TONUMBER   
+    
+    .word EXIT
     
 ;imprime la liste des mots du dictionnaire
-DEFWORD "WORDS",5,,WORDS,DOCOL ; ( -- )
-    .word LATEST
+DEFWORD "WORDS",5,,WORDS,QNUMBER ; ( -- )
+    .word CR,LATEST
 1:  .word FETCH,DUP,ZEROEQ,TBRANCH
     DEST words_exit
-    .word GETX,LIT,54,ULESS,TBRANCH
+    .word DUP,TWOPLUS,DUP,CFETCH,LENMASK,AND
+    .word DUP,GETX,PLUS,LIT,64,ULESS,TBRANCH
     DEST 2f
     .word CR
-2:  .word DUP,TWOPLUS,DUP,CFETCH,LENMASK,AND,TOR,ONEPLUS,RFROM,TYPE,SPACE
-    .word BRANCH
+2:  .word TOR,ONEPLUS,RFROM,TYPE,SPACE,BRANCH
     DEST 1b
+;    .word GETX,LIT,54,ULESS,TBRANCH
+;    DEST 2f
+;    .word CR
+;2:  .word DUP,TWOPLUS,DUP,CFETCH,LENMASK,AND,TOR,ONEPLUS,RFROM,TYPE,SPACE
+;    .word BRANCH
+;    DEST 1b
 words_exit:
     .word DROP,CR,EXIT
     
@@ -684,17 +818,17 @@ DEFCODE "UPPER",5,,UPPER,ZTYPE  ; ( c-addr -- )
     bra 1b
 3:  NEXT
     
-; localise le prochain mot dans TIB
-; la variable INPTR indique la position courante
-; le mot trouvé est copié dans le PAD 
-; met à jour INPTR    
-DEFCODE "WORD",4,,WORD,UPPER  ; ( c -- c-addr) c est le délimiteur
-    mov #pad,W2 ; current dest pointer
+; localise le prochain mot délimité par 'c'
+; la variable TOIN indique la position courante
+; le mot trouvé est copié dans lPAD 
+; met à jour TOIN    
+DEFCODE "WORD",4,,WORD,UPPER  ; ( c -- c-addr)
+    mov #_PAD,W2 ; current dest pointer
     mov W2,W3  ; PAD[0]
-    mov #tib,W0 ; TIB address
+    mov #_TIB,W0 ; TIB address
     add #TIB_SIZE,W0 ; TIB end
     mov W0,W4 ; limit
-    mov var_INPTR,W1 
+    mov _TOIN,W1 
 1:  cp W1,W4  
     bra geu, 4f 
     mov.b [W1],W0
@@ -712,7 +846,7 @@ DEFCODE "WORD",4,,WORD,UPPER  ; ( c -- c-addr) c est le délimiteur
     inc W1,W1
     cp.b W0,T
     bra neq, 2b
-4:  mov W1, var_INPTR
+4:  mov W1, _TOIN
     mov W3,T
     sub W2,T,W2
     mov.b W2,[T]
@@ -730,15 +864,13 @@ DEFCODE "WORD",4,,WORD,UPPER  ; ( c -- c-addr) c est le délimiteur
 .equ NAME, W6 ; nom dans dictionnaire 
 .equ FLAGS,W7    
 DEFCODE "FIND",4,,FIND,WORD ; ( c-addr -- c-addr 0 | xt 1 | xt -1 )
-    mov var_LATEST, LINK
+    mov #_LATEST, LINK
     mov LINK,W0
     mov T, TARGET
     DPUSH
     mov.b [TARGET++],LEN ; longueur
 try_next:
-;    call prt_hex ; debug
     mov [LINK],W0
-;    call prt_hex
     cp0 W0
     bra z, not_found
     mov W0,LINK
@@ -778,7 +910,7 @@ not_found:
 ; +n1 longueur du buffer
 ; +n2 longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT,FIND  ; ( c-addr +n1 -- +n2 )
-        .word OVER,DUP,INPTR,STORE,PLUS,OVER  ; 2,3,4,5,3,2,3 ( c-addr bound cursor )
+        .word OVER,DUP,TOIN,STORE,PLUS,OVER  ; 2,3,4,5,3,2,3 ( c-addr bound cursor )
 acc1:   .word TWODUP,EQUAL,TBRANCH ; 3,5,4,3
         DEST acc6
         .word KEY,DUP,LIT,13,EQUAL,TBRANCH ; 3,4,5,6,5,4 ( c-addr bound cursor c )
@@ -804,10 +936,11 @@ DEFWORD "ERROR",5,,ERROR,COUNT ;  ( c-addr -- )
    .word SPACE,COUNT,TYPE
    .word SPACE,CLIT,'?',EMIT
    .word LIT,0,STATE,STORE
-   .word PBASE,FETCH,SPSTORE
+   .word S0,FETCH,SPSTORE
    .word EXIT
    
-; interprète une chaine  la chaîne dans TIB  
+; interprète une chaine  la chaîne indiquée par
+; c-addr u   
 DEFWORD "INTERPRET",9,,INTERPRET,ERROR ; ( c-addr u -- )
 interp1:    
     .word BL,WORD,DUP,CFETCH,ZEROEQ,TBRANCH ; 0,1,1,2,2,2,1
@@ -825,13 +958,28 @@ interp2:
 ; imprime le prompt et passe à la ligne suivante    
 DEFWORD "OK",2,,OK,INTERPRET  ; ( -- )
 .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
+
+    
+DEFWORD "ABORT",5,,ABORT,OK
+    .word S0,FETCH,SPSTORE,QUIT
+    
+; si x1<>0 affiche message et appel ABORT
+DEFWORD "ABORT\"",6,,ABORTQ,ABORT ; ( i*x x1 -- i*x )
+    .word ZBRANCH
+    DEST 2f
+    .word IPFETCH,DUP,CFETCH,TWODUP,TOR,TOR
+    .word SWAP,ONEPLUS,SWAP,TYPE
+    .word RFROM,RFROM,PLUS,ONEPLUS,DUP,EVEN,TBRANCH
+    DEST 1f
+    .word ONEPLUS
+1:  .word IPSTORE,ABORT  
+2:  .word EXIT
     
 ; boucle de l'interpréteur    
-DEFWORD "QUIT",4,,QUIT,OK ; ( -- )
-    .word RBASE,FETCH,RPSTORE ;0,1,1,0
-    .word LIT,0,STATE,STORE ;0,1,2,0
-    .word VERSION,ZTYPE,CR  ;1,0,0
-    .word TIB,FETCH,INPTR,STORE ;1,1,2,0
+DEFWORD "QUIT",4,,QUIT,ABORTQ ; ( -- )
+    .word R0,FETCH,RPSTORE ;0,1,1,0
+    .word LIT,0,DUP,STATE,STORE,SOURCE_ID,STORE ;0,1,2,0
+    .word TIB,FETCH,TOIN,STORE ;1,1,2,0
 quit0:
     .word TIB, FETCH, LIT,CPL,ONEMINUS,ACCEPT,DROP ;0,1,1,2,2,1,0
     .word SPACE,INTERPRET ; 0, 0
@@ -940,15 +1088,10 @@ DEFCODE "INFLOOP",7,,INFLOOP,QUIT
 
 
 .section .link psv  address(0x7FFE)    
-.global sys_latest
-sys_latest:
+.global _sys_latest
+_sys_latest:
 .word link
     
-    .text  
-    .global cold_start
-cold_start:
-    .word QUIT
-    .word REBOOT ; ne devrait jamais se rendre ici
-    
+   
 .end
 

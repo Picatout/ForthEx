@@ -1,0 +1,2939 @@
+Microchip Technology Inc, v1.26 (A)
+
+Tool Name:
+  /opt/microchip/xc16/v1.26/bin/bin/../bin/elf-ld
+
+Command:
+  -p24EP512GP202 \
+  -o \
+  dist/default/debug/ForthEx.X.debug.elf \
+  -L/opt/microchip/xc16/v1.26/bin/bin/.. \
+  -L/opt/microchip/xc16/v1.26/bin/bin/../../lib \
+  -L/opt/microchip/xc16/v1.26/bin/bin/../../support/PIC24E/gld \
+  -L/opt/microchip/xc16/v1.26/bin/bin/../../support/PIC24F/gld \
+  -L/opt/microchip/xc16/v1.26/bin/bin/../../support/PIC24H/gld \
+  -L/opt/microchip/xc16/v1.26/bin/bin/../../support/dsPIC30F/gld \
+  -L/opt/microchip/xc16/v1.26/bin/bin/../../support/dsPIC33E/gld \
+  -L/opt/microchip/xc16/v1.26/bin/bin/../../support/dsPIC33F/gld \
+  build/default/debug/TVout.o \
+  build/default/debug/core.o \
+  build/default/debug/font.o \
+  build/default/debug/hardware.o \
+  build/default/debug/keybind.o \
+  build/default/debug/keyboard.o \
+  build/default/debug/ps2.o \
+  build/default/debug/serial.o \
+  build/default/debug/sound.o \
+  build/default/debug/store.o \
+  build/default/debug/mcu_config_bits.o \
+  --no-local-stack \
+  --defsym=__MPLAB_BUILD=1 \
+  --defsym=__MPLAB_DEBUG=1 \
+  --defsym=__DEBUG=1 \
+  --defsym=__MPLAB_DEBUGGER_SIMULATOR=1 \
+  -Tp24EP512GP202.gld.00 \
+  --stack=16 \
+  --check-sections \
+  --no-data-init \
+  --pack-data \
+  --handles \
+  --isr \
+  --no-gc-sections \
+  --fill-upper=0 \
+  --stackguard=0 \
+  --no-force-link \
+  --smart-io \
+  -Map=dist/default/debug/ForthEx.X.debug.map \
+  --report-mem \
+  --memorysummary \
+  dist/default/debug/memoryfile.xml \
+  -start-group \
+  --library=lega-pic30-elf \
+  --library=m-elf \
+  --library=lega-c-elf \
+  -end-group \
+
+
+Optional library libp24EP512GP202.a not found
+Archive member included because of file (symbol)
+
+/opt/microchip/xc16/v1.26/bin/bin/../../lib/liblega-pic30-elf.a(crt1_extendedep.o)
+                              (__resetALT)
+
+
+Selected CodeGuard Options:
+  FGS:GWRP:OFF
+  FGS:GCP:OFF
+
+CodeGuard FLASH Memory:
+  boot    (none)
+  secure  (none)
+  general 0x200 to 0x557ea
+
+CodeGuard RAM Memory:
+  general 0x1000 to 0xcfff
+  secure  (none)
+  boot    (none)
+
+
+xc16-ld 1.26 (A)
+
+Program Memory  [Origin = 0x200, Length = 0x555ec]
+
+section                    address   length (PC units)   length (bytes) (dec)
+-------                    -------   -----------------   --------------------
+.start.text                  0x200                0x16            0x21  (33)
+.intr                        0x216               0x18e           0x255  (597)
+.sysdict                     0x3a4               0x8ea           0xd5f  (3423)
+.font.const                  0xc8e               0x400           0x600  (1536)
+.keybind.const              0x108e                0xc2           0x123  (291)
+.ver_str.const              0x1150                0x1e            0x2d  (45)
+.forth_code.text            0x116e               0x69a           0x9e7  (2535)
+.text                       0x1808               0x158           0x204  (516)
+.forth_code.text            0x1960               0x20c           0x312  (786)
+.text                       0x1b6c                0x88            0xcc  (204)
+.forth_code.text            0x1bf4               0x178           0x234  (564)
+.text                       0x1d6c                0x32            0x4b  (75)
+.link                       0x7ffe                 0x2             0x3  (3)
+
+                 Total program memory used (bytes):         0x2970  (10608) 2%
+
+
+Ivt Memory  [Origin = 0x4, Length = 0x1fc]
+
+section                    address   length (PC units)   length (bytes) (dec)
+-------                    -------   -----------------   --------------------
+.ivt._MathError                0xc                 0x2             0x3  (3)
+.ivt._T1Interrupt             0x1a                 0x2             0x3  (3)
+.ivt._OC2Interrupt            0x20                 0x2             0x3  (3)
+.ivt._T2Interrupt             0x22                 0x2             0x3  (3)
+.ivt._U1RXInterrupt           0x2a                 0x2             0x3  (3)
+.ivt._U1TXInterrupt           0x2c                 0x2             0x3  (3)
+.ivt._INT1Interrupt           0x3c                 0x2             0x3  (3)
+
+
+Data Memory  [Origin = 0x1000, Length = 0xc000]
+
+section                    address      alignment gaps    total length  (dec)
+-------                    -------      --------------    -------------------
+.return.stack.bss           0x1000                   0            0x80  (128)
+.param.stack.bss            0x1080                   0            0x40  (64)
+.tvout.bss                  0x10c0                   0           0x60a  (1546)
+.buffers.bss                0x16ca                   0            0xa0  (160)
+.ps2.bss                    0x176a                   0            0x2c  (44)
+.serial.bss                 0x1796                   0            0x28  (40)
+.keyboard.bss               0x17be                   0            0x24  (36)
+.user_vars.bss              0x17e2                   0            0x1c  (28)
+.hardware.bss               0x17fe                   0             0x6  (6)
+.sound.bss                  0x1804                   0             0x2  (2)
+.user_dict                  0x1900                   0          0xa700  (42752)
+
+                 Total data memory used (bytes):         0xaf06  (44806) 91%
+
+
+Dynamic Memory Usage
+
+region                     address                      maximum length  (dec)
+------                     -------                      ---------------------
+heap                             0                                   0  (0)
+stack                       0x1000                                0x80  (128)
+
+                 Maximum dynamic memory (bytes):           0x80  (128)
+
+
+External Symbols in Data Memory (by address):
+
+                    0x1000                  rstack
+                    0x1080                  pstack
+                    0x10c3                  video_on
+                    0x10c4                  xpos
+                    0x10c5                  ypos
+                    0x10c6                  cursor_dly
+                    0x10c8                  cursor_sema
+                    0x10c9                  fcursor
+                    0x10ca                  _video_buffer
+                    0x16ca                  tib
+                    0x171a                  pad
+                    0x1770                  ps2_queue
+                    0x1790                  ps2_head
+                    0x1792                  ps2_tail
+                    0x1794                  key_state
+                    0x1796                  rx_queue
+                    0x17a6                  tx_queue
+                    0x17b6                  tx_wait
+                    0x17b9                  tx_tail
+                    0x17ba                  rx_in
+                    0x17bc                  rx_head
+                    0x17be                  kbd_queue
+                    0x17de                  kbd_head
+                    0x17e2                  _TIB
+                    0x17e2                  _USER_VARS
+                    0x17e4                  _PAD
+                    0x17e6                  _SOURCE
+                    0x17ea                  _SOURCE_ID
+                    0x17ec                  _DP
+                    0x17ee                  _STATE
+                    0x17f0                  _BASE
+                    0x17f2                  _TOIN
+                    0x17f4                  _S0
+                    0x17f6                  _R0
+                    0x17f8                  _HP
+                    0x17fa                  _LATEST
+                    0x17fc                  _SYSLATEST
+                    0x17fe                  systicks
+                    0x1800                  seed
+                    0x1804                  tone_len
+                    0x1900                  _user_dict
+
+External Symbols in Data Memory (by name):
+
+                    0x17f0                  _BASE
+                    0x17ec                  _DP
+                    0x17f8                  _HP
+                    0x17fa                  _LATEST
+                    0x17e4                  _PAD
+                    0x17f6                  _R0
+                    0x17f4                  _S0
+                    0x17e6                  _SOURCE
+                    0x17ea                  _SOURCE_ID
+                    0x17ee                  _STATE
+                    0x17fc                  _SYSLATEST
+                    0x17e2                  _TIB
+                    0x17f2                  _TOIN
+                    0x17e2                  _USER_VARS
+                    0x1900                  _user_dict
+                    0x10ca                  _video_buffer
+                    0x10c6                  cursor_dly
+                    0x10c8                  cursor_sema
+                    0x10c9                  fcursor
+                    0x17de                  kbd_head
+                    0x17be                  kbd_queue
+                    0x1794                  key_state
+                    0x171a                  pad
+                    0x1790                  ps2_head
+                    0x1770                  ps2_queue
+                    0x1792                  ps2_tail
+                    0x1080                  pstack
+                    0x1000                  rstack
+                    0x17bc                  rx_head
+                    0x17ba                  rx_in
+                    0x1796                  rx_queue
+                    0x1800                  seed
+                    0x17fe                  systicks
+                    0x16ca                  tib
+                    0x1804                  tone_len
+                    0x17a6                  tx_queue
+                    0x17b9                  tx_tail
+                    0x17b6                  tx_wait
+                    0x10c3                  video_on
+                    0x10c4                  xpos
+                    0x10c5                  ypos
+
+External Symbols in Program Memory (by address):
+
+                  0x000200                  __reset
+                  0x000216                  __T2Interrupt
+                  0x000290                  __OC2Interrupt
+                  0x0002f4                  __DefaultInterrupt
+                  0x0002f6                  __T1Interrupt
+                  0x00031c                  __INT1Interrupt
+                  0x00035c                  __U1RXInterrupt
+                  0x000380                  __U1TXInterrupt
+                  0x0003a4                  TVOUT_INIT
+                  0x0003a6                  name_VIDON
+                  0x0003ae                  VIDON
+                  0x0003b0                  name_CURENBL
+                  0x0003ba                  CURENBL
+                  0x0003bc                  name_CLS
+                  0x0003c2                  CLS
+                  0x0003c4                  name_SCRLUP
+                  0x0003ce                  SCRLUP
+                  0x0003d0                  name_SCRLDN
+                  0x0003da                  SCRLDN
+                  0x0003dc                  name_GETX
+                  0x0003e4                  GETX
+                  0x0003e6                  name_GETY
+                  0x0003ee                  GETY
+                  0x0003f0                  name_SETX
+                  0x0003f8                  SETX
+                  0x0003fa                  name_SETY
+                  0x000402                  SETY
+                  0x000404                  name_CURPOS
+                  0x00040e                  CURPOS
+                  0x000416                  name_LEFT
+                  0x00041e                  LEFT
+                  0x000420                  name_RIGHT
+                  0x000428                  RIGHT
+                  0x00042a                  name_TGLCHAR
+                  0x000434                  TGLCHAR
+                  0x000436                  name_EMIT
+                  0x00043e                  EMIT
+                  0x000440                  name_CR
+                  0x000446                  CR
+                  0x000448                  name_SPACE
+                  0x000450                  SPACE
+                  0x000452                  name_SPACES
+                  0x00045c                  SPACES
+                  0x00047c                  name_CLRLN
+                  0x000484                  CLRLN
+                  0x000486                  name_TYPE
+                  0x00048e                  TYPE
+                  0x0004b0                  name_DELETE
+                  0x0004ba                  DELETE
+                  0x0004c2                  name_BACKCHAR
+                  0x0004ce                  BACKCHAR
+                  0x0004d8                  name_LTSHARP
+                  0x0004de                  LTSHARP
+                  0x0004ee                  name_HOLD
+                  0x0004f6                  HOLD
+                  0x000508                  name_DOT
+                  0x00050c                  DOT
+                  0x000512                  LIT
+                  0x000514                  CLIT
+                  0x000516                  BRANCH
+                  0x000518                  TBRANCH
+                  0x00051a                  ZBRANCH
+                  0x00051c                  DODO
+                  0x00051e                  DOLOOP
+                  0x000520                  IPFETCH
+                  0x000522                  IPSTORE
+                  0x000524                  name_EXIT
+                  0x00052c                  EXIT
+                  0x00052e                  name_REBOOT
+                  0x000538                  REBOOT
+                  0x00053a                  name_EXECUTE
+                  0x000544                  EXECUTE
+                  0x000546                  name_FETCH
+                  0x00054a                  FETCH
+                  0x00054c                  name_CFETCH
+                  0x000552                  CFETCH
+                  0x000554                  name_STORE
+                  0x000558                  STORE
+                  0x00055a                  name_CSTORE
+                  0x000560                  CSTORE
+                  0x000562                  name_DOI
+                  0x000566                  DOI
+                  0x000568                  name_DOJ
+                  0x00056c                  DOJ
+                  0x00056e                  name_UNLOOP
+                  0x000578                  UNLOOP
+                  0x00057a                  name_DUP
+                  0x000580                  DUP
+                  0x000582                  name_TWODUP
+                  0x00058a                  TWODUP
+                  0x00058c                  name_QDUP
+                  0x000594                  QDUP
+                  0x000596                  name_DROP
+                  0x00059e                  DROP
+                  0x0005a0                  name_TWODROP
+                  0x0005a8                  TWODROP
+                  0x0005aa                  name_SWAP
+                  0x0005b2                  SWAP
+                  0x0005b4                  name_TWOSWAP
+                  0x0005bc                  TWOSWAP
+                  0x0005be                  name_ROT
+                  0x0005c4                  ROT
+                  0x0005c6                  name_NROT
+                  0x0005ce                  NROT
+                  0x0005d0                  name_OVER
+                  0x0005d8                  OVER
+                  0x0005da                  name_NIP
+                  0x0005e0                  NIP
+                  0x0005e2                  name_TOR
+                  0x0005e8                  TOR
+                  0x0005ea                  name_RFROM
+                  0x0005f0                  RFROM
+                  0x0005f2                  name_RFETCH
+                  0x0005f8                  RFETCH
+                  0x0005fa                  name_SPFETCH
+                  0x000600                  SPFETCH
+                  0x000602                  name_SPSTORE
+                  0x000608                  SPSTORE
+                  0x00060a                  name_RPFETCH
+                  0x000610                  RPFETCH
+                  0x000612                  name_RPSTORE
+                  0x000618                  RPSTORE
+                  0x00061a                  name_TUCK
+                  0x000622                  TUCK
+                  0x000624                  name_HEX
+                  0x00062a                  HEX
+                  0x000636                  name_DECIMAL
+                  0x000640                  DECIMAL
+                  0x00064c                  name_PLUS
+                  0x000650                  PLUS
+                  0x000652                  name_MINUS
+                  0x000656                  MINUS
+                  0x000658                  name_ONEPLUS
+                  0x00065e                  ONEPLUS
+                  0x000660                  name_TWOPLUS
+                  0x000666                  TWOPLUS
+                  0x000668                  name_ONEMINUS
+                  0x00066e                  ONEMINUS
+                  0x000670                  name_TWOMINUS
+                  0x000676                  TWOMINUS
+                  0x000678                  name_TWOSTAR
+                  0x00067e                  TWOSTAR
+                  0x000680                  name_TWOSLASH
+                  0x000686                  TWOSLASH
+                  0x000688                  name_LSHIFT
+                  0x000692                  LSHIFT
+                  0x000694                  name_RSHIFT
+                  0x00069e                  RSHIFT
+                  0x0006a0                  name_PLUSSTORE
+                  0x0006a6                  PLUSSTORE
+                  0x0006a8                  name_ADDPLUS
+                  0x0006ae                  ADDPLUS
+                  0x0006b0                  name_MULTIPLY
+                  0x0006b4                  MULTIPLY
+                  0x0006b6                  name_DIVIDE
+                  0x0006ba                  DIVIDE
+                  0x0006bc                  name_DIVMOD
+                  0x0006c4                  DIVMOD
+                  0x0006c6                  name_UMAX
+                  0x0006ce                  UMAX
+                  0x0006d0                  name_UMIN
+                  0x0006d8                  UMIN
+                  0x0006da                  name_EVEN
+                  0x0006e2                  EVEN
+                  0x0006e4                  name_ODD
+                  0x0006ea                  ODD
+                  0x0006ec                  name_AND
+                  0x0006f2                  AND
+                  0x0006f4                  name_OR
+                  0x0006fa                  OR
+                  0x0006fc                  name_XOR
+                  0x000702                  XOR
+                  0x000704                  name_INVERT
+                  0x00070e                  INVERT
+                  0x000710                  name_NEGATE
+                  0x00071a                  NEGATE
+                  0x00071c                  name_ZEROEQ
+                  0x000722                  ZEROEQ
+                  0x000724                  name_ZEROLT
+                  0x00072a                  ZEROLT
+                  0x00072c                  name_ZEROGT
+                  0x000732                  ZEROGT
+                  0x000734                  name_EQUAL
+                  0x000738                  EQUAL
+                  0x00073a                  name_NOTEQ
+                  0x000740                  NOTEQ
+                  0x000742                  name_LESS
+                  0x000746                  LESS
+                  0x000748                  name_GREATER
+                  0x00074c                  GREATER
+                  0x00074e                  name_ULESS
+                  0x000754                  ULESS
+                  0x000756                  name_UGREATER
+                  0x00075c                  UGREATER
+                  0x00075e                  name_CELL
+                  0x000766                  CELL
+                  0x000768                  name_CELLPLUS
+                  0x000770                  CELLPLUS
+                  0x000772                  name_CELLS
+                  0x00077a                  CELLS
+                  0x00077c                  name_HERE
+                  0x000784                  HERE
+                  0x00078c                  name_IMMEDIATE
+                  0x000798                  IMMEDIATE
+                  0x0007be                  name_MOVE
+                  0x0007c6                  MOVE
+                  0x0007c8                  name_CMOVE
+                  0x0007d0                  CMOVE
+                  0x0007d2                  name_STATE
+                  0x0007da                  STATE
+                  0x0007de                  name_DP
+                  0x0007e4                  DP
+                  0x0007e8                  name_BASE
+                  0x0007f0                  BASE
+                  0x0007f4                  name_SYSLATEST
+                  0x000800                  SYSLATEST
+                  0x000804                  name_LATEST
+                  0x00080e                  LATEST
+                  0x000812                  name_R0
+                  0x000818                  R0
+                  0x00081c                  name_S0
+                  0x000822                  S0
+                  0x000826                  name_PAD
+                  0x00082c                  PAD
+                  0x000830                  name_TIB
+                  0x000836                  TIB
+                  0x00083a                  name_TOIN
+                  0x000840                  TOIN
+                  0x000844                  name_HP
+                  0x00084a                  HP
+                  0x00084e                  name_SOURCE_ID
+                  0x00085a                  SOURCE_ID
+                  0x00085e                  name_VERSION
+                  0x000868                  VERSION
+                  0x00086a                  name_RAMEND
+                  0x000874                  RAMEND
+                  0x000876                  name_IMMED
+                  0x00087e                  IMMED
+                  0x000880                  name_HIDDEN
+                  0x00088a                  HIDDEN
+                  0x00088c                  name_LENMASK
+                  0x000896                  LENMASK
+                  0x000898                  name_BL
+                  0x00089e                  BL
+                  0x0008a0                  name_TIBSIZE
+                  0x0008aa                  TIBSIZE
+                  0x0008ac                  name_PADSIZE
+                  0x0008b6                  PADSIZE
+                  0x0008b8                  name_ULIMIT
+                  0x0008c2                  ULIMIT
+                  0x0008c4                  name_DOCOL
+                  0x0008cc                  DOCOL
+                  0x0008ce                  name_SOURCE
+                  0x0008d8                  SOURCE
+                  0x0008da                  name_SRCSTORE
+                  0x0008e4                  SRCSTORE
+                  0x0008e6                  name_QDIGIT
+                  0x0008f0                  QDIGIT
+                  0x000930                  name_TONUMBER
+                  0x00093a                  TONUMBER
+                  0x00094c                  name_QSIGN
+                  0x000954                  QSIGN
+                  0x000996                  name_QNUMBER
+                  0x0009a0                  QNUMBER
+                  0x0009b6                  name_WORDS
+                  0x0009be                  WORDS
+                  0x0009fa                  name_ZTYPE
+                  0x000a02                  ZTYPE
+                  0x000a1a                  name_UPPER
+                  0x000a22                  UPPER
+                  0x000a24                  name_WORD
+                  0x000a2c                  WORD
+                  0x000a2e                  name_FIND
+                  0x000a36                  FIND
+                  0x000a38                  name_ACCEPT
+                  0x000a42                  ACCEPT
+                  0x000a9c                  name_COUNT
+                  0x000aa4                  COUNT
+                  0x000ab2                  name_ERROR
+                  0x000aba                  ERROR
+                  0x000ada                  name_INTERPRET
+                  0x000ae6                  INTERPRET
+                  0x000b10                  name_OK
+                  0x000b16                  OK
+                  0x000b28                  name_ABORT
+                  0x000b30                  ABORT
+                  0x000b3a                  name_ABORTQ
+                  0x000b44                  ABORTQ
+                  0x000b76                  name_QUIT
+                  0x000b7e                  QUIT
+                  0x000bc0                  name_INFLOOP
+                  0x000bca                  INFLOOP
+                  0x000bcc                  HARDWARE_INIT
+                  0x000be2                  SET_CLOCK
+                  0x000be4                  CLR_RAM
+                  0x000be6                  IO_LOCK
+                  0x000be8                  VARS_INIT
+                  0x000bea                  name_TICKS
+                  0x000bf2                  TICKS
+                  0x000bf4                  name_MSEC
+                  0x000bfc                  MSEC
+                  0x000bfe                  name_LFSR
+                  0x000c06                  LFSR
+                  0x000c08                  name_RAND
+                  0x000c10                  RAND
+                  0x000c12                  name_SRAND
+                  0x000c1a                  SRAND
+                  0x000c1c                  KBD_RESET
+                  0x000c1e                  name_QKEY
+                  0x000c26                  QKEY
+                  0x000c28                  name_KEY
+                  0x000c2e                  KEY
+                  0x000c30                  name_KBD_CMD
+                  0x000c3a                  KBD_CMD
+                  0x000c3c                  PS2_INIT
+                  0x000c3e                  SERIAL_INIT
+                  0x000c40                  name_SEMIT
+                  0x000c48                  SEMIT
+                  0x000c4a                  name_SGET
+                  0x000c52                  SGET
+                  0x000c54                  SOUND_INIT
+                  0x000c56                  name_TONE
+                  0x000c5e                  TONE
+                  0x000c60                  STORE_INIT
+                  0x000c62                  name_RSTORE
+                  0x000c6c                  RSTORE
+                  0x000c6e                  name_RLOAD
+                  0x000c76                  RLOAD
+                  0x000c78                  name_ESTORE
+                  0x000c82                  ESTORE
+                  0x000c84                  name_ELOAD
+                  0x000c8c                  ELOAD
+                  0x000c8e                  _font
+                  0x00108e                  ascii
+                  0x0010fa                  shifted
+                  0x001126                  mod
+                  0x001132                  xmod
+                  0x001138                  extended
+                  0x001150                  _version
+                  0x00115d                  _compile_only
+                  0x00116e                  __MathError
+                  0x00116e                  _warm
+                  0x00117a                  ENTER
+                  0x001184                  DOUSER
+                  0x001190                  code_LIT
+                  0x00119a                  code_CLIT
+                  0x0011a6                  code_BRANCH
+                  0x0011ae                  code_TBRANCH
+                  0x0011bc                  code_ZBRANCH
+                  0x0011ca                  code_DODO
+                  0x0011dc                  code_DOLOOP
+                  0x0011f6                  code_IPFETCH
+                  0x001200                  code_IPSTORE
+                  0x00120a                  code_EXIT
+                  0x001212                  code_REBOOT
+                  0x001214                  code_EXECUTE
+                  0x00121c                  code_FETCH
+                  0x001224                  code_CFETCH
+                  0x00122e                  code_STORE
+                  0x00123a                  code_CSTORE
+                  0x001246                  code_DOI
+                  0x001250                  code_DOJ
+                  0x00125a                  code_UNLOOP
+                  0x001264                  code_DUP
+                  0x00126c                  code_TWODUP
+                  0x001278                  code_QDUP
+                  0x001284                  code_DROP
+                  0x00128c                  code_TWODROP
+                  0x001296                  code_SWAP
+                  0x0012a2                  code_TWOSWAP
+                  0x0012b6                  code_ROT
+                  0x0012c6                  code_NROT
+                  0x0012d6                  code_OVER
+                  0x0012e0                  code_NIP
+                  0x0012e8                  code_TOR
+                  0x0012f2                  code_RFROM
+                  0x0012fc                  code_RFETCH
+                  0x001306                  code_SPFETCH
+                  0x001312                  code_SPSTORE
+                  0x00131c                  code_RPFETCH
+                  0x001326                  code_RPSTORE
+                  0x001330                  code_TUCK
+                  0x00133c                  code_PLUS
+                  0x001344                  code_MINUS
+                  0x00134e                  code_ONEPLUS
+                  0x001356                  code_TWOPLUS
+                  0x00135e                  code_ONEMINUS
+                  0x001366                  code_TWOMINUS
+                  0x00136e                  code_TWOSTAR
+                  0x001376                  code_TWOSLASH
+                  0x00137e                  code_LSHIFT
+                  0x001386                  code_RSHIFT
+                  0x00138e                  code_PLUSSTORE
+                  0x00139c                  code_ADDPLUS
+                  0x0013ac                  code_MULTIPLY
+                  0x0013ba                  code_DIVIDE
+                  0x0013c8                  code_DIVMOD
+                  0x0013d8                  code_UMAX
+                  0x0013e6                  code_UMIN
+                  0x0013f4                  code_EVEN
+                  0x001402                  code_ODD
+                  0x001410                  code_AND
+                  0x001418                  code_OR
+                  0x001420                  code_XOR
+                  0x001428                  code_INVERT
+                  0x001430                  code_NEGATE
+                  0x001438                  code_ZEROEQ
+                  0x001442                  code_ZEROLT
+                  0x00144e                  code_ZEROGT
+                  0x001458                  code_EQUAL
+                  0x001468                  code_NOTEQ
+                  0x001478                  code_LESS
+                  0x001488                  code_GREATER
+                  0x001498                  code_ULESS
+                  0x0014a8                  code_UGREATER
+                  0x0014b8                  code_CELL
+                  0x0014c2                  code_CELLPLUS
+                  0x0014ca                  code_CELLS
+                  0x0014d4                  code_MOVE
+                  0x0014f0                  code_CMOVE
+                  0x00150c                  code_VERSION
+                  0x001516                  code_RAMEND
+                  0x001520                  code_IMMED
+                  0x00152a                  code_HIDDEN
+                  0x001534                  code_LENMASK
+                  0x00153e                  code_BL
+                  0x001548                  code_TIBSIZE
+                  0x001552                  code_PADSIZE
+                  0x00155c                  code_ULIMIT
+                  0x001566                  code_DOCOL
+                  0x001570                  code_SOURCE
+                  0x00157e                  code_SRCSTORE
+                  0x00158c                  code_UPPER
+                  0x0015ae                  code_WORD
+                  0x0015ea                  code_FIND
+                  0x001632                  code_INFLOOP
+                  0x001634                  code_TVOUT_INIT
+                  0x001698                  code_VIDON
+                  0x0016a4                  code_CURENBL
+                  0x0016c0                  code_CLS
+                  0x0016d6                  code_SCRLUP
+                  0x0016e0                  code_SCRLDN
+                  0x0016ea                  code_GETX
+                  0x0016f8                  code_GETY
+                  0x001706                  code_SETX
+                  0x001724                  code_SETY
+                  0x001742                  code_LEFT
+                  0x001768                  code_RIGHT
+                  0x001792                  code_TGLCHAR
+                  0x0017a8                  code_EMIT
+                  0x0017c8                  code_CR
+                  0x0017da                  code_SPACE
+                  0x0017e0                  code_CLRLN
+                  0x001880                  get_code
+                  0x0018ae                  kbd_get
+                  0x001960                  code_STORE_INIT
+                  0x001974                  spi_send_address
+                  0x00199a                  wait_wip0
+                  0x0019b4                  code_RSTORE
+                  0x0019e6                  code_RLOAD
+                  0x001a18                  code_ESTORE
+                  0x001a60                  code_ELOAD
+                  0x001a98                  code_SET_CLOCK
+                  0x001aa8                  code_CLR_RAM
+                  0x001ac0                  code_IO_LOCK
+                  0x001ac8                  code_VARS_INIT
+                  0x001af8                  code_TICKS
+                  0x001b02                  code_MSEC
+                  0x001b12                  code_LFSR
+                  0x001b2a                  code_RAND
+                  0x001b5c                  code_SRAND
+                  0x001b6c                  cursor_blink
+                  0x001b78                  toggle_char
+                  0x001b8e                  cursor_enable
+                  0x001b9e                  cursor_disable
+                  0x001bac                  scroll_up
+                  0x001bd2                  scroll_down
+                  0x001bf4                  code_SERIAL_INIT
+                  0x001c2e                  code_SEMIT
+                  0x001c5c                  code_SGET
+                  0x001c7c                  code_PS2_INIT
+                  0x001cce                  ps2_send
+                  0x001cee                  code_KBD_RESET
+                  0x001d04                  code_QKEY
+                  0x001d1a                  code_KEY
+                  0x001d2c                  code_KBD_CMD
+                  0x001d3a                  code_SOUND_INIT
+                  0x001d56                  code_TONE
+                  0x001d92                  _cold
+                  0x007ffe                  _sys_latest
+                  0x0557fa                  __FGS.sec
+
+External Symbols in Program Memory (by name):
+
+                  0x000b30                  ABORT
+                  0x000b44                  ABORTQ
+                  0x000a42                  ACCEPT
+                  0x0006ae                  ADDPLUS
+                  0x0006f2                  AND
+                  0x0004ce                  BACKCHAR
+                  0x0007f0                  BASE
+                  0x00089e                  BL
+                  0x000516                  BRANCH
+                  0x000766                  CELL
+                  0x000770                  CELLPLUS
+                  0x00077a                  CELLS
+                  0x000552                  CFETCH
+                  0x000514                  CLIT
+                  0x000484                  CLRLN
+                  0x000be4                  CLR_RAM
+                  0x0003c2                  CLS
+                  0x0007d0                  CMOVE
+                  0x000aa4                  COUNT
+                  0x000446                  CR
+                  0x000560                  CSTORE
+                  0x0003ba                  CURENBL
+                  0x00040e                  CURPOS
+                  0x000640                  DECIMAL
+                  0x0004ba                  DELETE
+                  0x0006ba                  DIVIDE
+                  0x0006c4                  DIVMOD
+                  0x0008cc                  DOCOL
+                  0x00051c                  DODO
+                  0x000566                  DOI
+                  0x00056c                  DOJ
+                  0x00051e                  DOLOOP
+                  0x00050c                  DOT
+                  0x001184                  DOUSER
+                  0x0007e4                  DP
+                  0x00059e                  DROP
+                  0x000580                  DUP
+                  0x000c8c                  ELOAD
+                  0x00043e                  EMIT
+                  0x00117a                  ENTER
+                  0x000738                  EQUAL
+                  0x000aba                  ERROR
+                  0x000c82                  ESTORE
+                  0x0006e2                  EVEN
+                  0x000544                  EXECUTE
+                  0x00052c                  EXIT
+                  0x00054a                  FETCH
+                  0x000a36                  FIND
+                  0x0003e4                  GETX
+                  0x0003ee                  GETY
+                  0x00074c                  GREATER
+                  0x000bcc                  HARDWARE_INIT
+                  0x000784                  HERE
+                  0x00062a                  HEX
+                  0x00088a                  HIDDEN
+                  0x0004f6                  HOLD
+                  0x00084a                  HP
+                  0x00087e                  IMMED
+                  0x000798                  IMMEDIATE
+                  0x000bca                  INFLOOP
+                  0x000ae6                  INTERPRET
+                  0x00070e                  INVERT
+                  0x000be6                  IO_LOCK
+                  0x000520                  IPFETCH
+                  0x000522                  IPSTORE
+                  0x000c3a                  KBD_CMD
+                  0x000c1c                  KBD_RESET
+                  0x000c2e                  KEY
+                  0x00080e                  LATEST
+                  0x00041e                  LEFT
+                  0x000896                  LENMASK
+                  0x000746                  LESS
+                  0x000c06                  LFSR
+                  0x000512                  LIT
+                  0x000692                  LSHIFT
+                  0x0004de                  LTSHARP
+                  0x000656                  MINUS
+                  0x0007c6                  MOVE
+                  0x000bfc                  MSEC
+                  0x0006b4                  MULTIPLY
+                  0x00071a                  NEGATE
+                  0x0005e0                  NIP
+                  0x000740                  NOTEQ
+                  0x0005ce                  NROT
+                  0x0006ea                  ODD
+                  0x000b16                  OK
+                  0x00066e                  ONEMINUS
+                  0x00065e                  ONEPLUS
+                  0x0006fa                  OR
+                  0x0005d8                  OVER
+                  0x00082c                  PAD
+                  0x0008b6                  PADSIZE
+                  0x000650                  PLUS
+                  0x0006a6                  PLUSSTORE
+                  0x000c3c                  PS2_INIT
+                  0x0008f0                  QDIGIT
+                  0x000594                  QDUP
+                  0x000c26                  QKEY
+                  0x0009a0                  QNUMBER
+                  0x000954                  QSIGN
+                  0x000b7e                  QUIT
+                  0x000818                  R0
+                  0x000874                  RAMEND
+                  0x000c10                  RAND
+                  0x000538                  REBOOT
+                  0x0005f8                  RFETCH
+                  0x0005f0                  RFROM
+                  0x000428                  RIGHT
+                  0x000c76                  RLOAD
+                  0x0005c4                  ROT
+                  0x000610                  RPFETCH
+                  0x000618                  RPSTORE
+                  0x00069e                  RSHIFT
+                  0x000c6c                  RSTORE
+                  0x000822                  S0
+                  0x0003da                  SCRLDN
+                  0x0003ce                  SCRLUP
+                  0x000c48                  SEMIT
+                  0x000c3e                  SERIAL_INIT
+                  0x0003f8                  SETX
+                  0x000402                  SETY
+                  0x000be2                  SET_CLOCK
+                  0x000c52                  SGET
+                  0x000c54                  SOUND_INIT
+                  0x0008d8                  SOURCE
+                  0x00085a                  SOURCE_ID
+                  0x000450                  SPACE
+                  0x00045c                  SPACES
+                  0x000600                  SPFETCH
+                  0x000608                  SPSTORE
+                  0x000c1a                  SRAND
+                  0x0008e4                  SRCSTORE
+                  0x0007da                  STATE
+                  0x000558                  STORE
+                  0x000c60                  STORE_INIT
+                  0x0005b2                  SWAP
+                  0x000800                  SYSLATEST
+                  0x000518                  TBRANCH
+                  0x000434                  TGLCHAR
+                  0x000836                  TIB
+                  0x0008aa                  TIBSIZE
+                  0x000bf2                  TICKS
+                  0x000840                  TOIN
+                  0x000c5e                  TONE
+                  0x00093a                  TONUMBER
+                  0x0005e8                  TOR
+                  0x000622                  TUCK
+                  0x0003a4                  TVOUT_INIT
+                  0x0005a8                  TWODROP
+                  0x00058a                  TWODUP
+                  0x000676                  TWOMINUS
+                  0x000666                  TWOPLUS
+                  0x000686                  TWOSLASH
+                  0x00067e                  TWOSTAR
+                  0x0005bc                  TWOSWAP
+                  0x00048e                  TYPE
+                  0x00075c                  UGREATER
+                  0x000754                  ULESS
+                  0x0008c2                  ULIMIT
+                  0x0006ce                  UMAX
+                  0x0006d8                  UMIN
+                  0x000578                  UNLOOP
+                  0x000a22                  UPPER
+                  0x000be8                  VARS_INIT
+                  0x000868                  VERSION
+                  0x0003ae                  VIDON
+                  0x000a2c                  WORD
+                  0x0009be                  WORDS
+                  0x000702                  XOR
+                  0x00051a                  ZBRANCH
+                  0x000722                  ZEROEQ
+                  0x000732                  ZEROGT
+                  0x00072a                  ZEROLT
+                  0x000a02                  ZTYPE
+                  0x0002f4                  __DefaultInterrupt
+                  0x0557fa                  __FGS.sec
+                  0x00031c                  __INT1Interrupt
+                  0x00116e                  __MathError
+                  0x000290                  __OC2Interrupt
+                  0x0002f6                  __T1Interrupt
+                  0x000216                  __T2Interrupt
+                  0x00035c                  __U1RXInterrupt
+                  0x000380                  __U1TXInterrupt
+                  0x000200                  __reset
+                  0x001d92                  _cold
+                  0x00115d                  _compile_only
+                  0x000c8e                  _font
+                  0x007ffe                  _sys_latest
+                  0x001150                  _version
+                  0x00116e                  _warm
+                  0x00108e                  ascii
+                  0x00139c                  code_ADDPLUS
+                  0x001410                  code_AND
+                  0x00153e                  code_BL
+                  0x0011a6                  code_BRANCH
+                  0x0014b8                  code_CELL
+                  0x0014c2                  code_CELLPLUS
+                  0x0014ca                  code_CELLS
+                  0x001224                  code_CFETCH
+                  0x00119a                  code_CLIT
+                  0x0017e0                  code_CLRLN
+                  0x001aa8                  code_CLR_RAM
+                  0x0016c0                  code_CLS
+                  0x0014f0                  code_CMOVE
+                  0x0017c8                  code_CR
+                  0x00123a                  code_CSTORE
+                  0x0016a4                  code_CURENBL
+                  0x0013ba                  code_DIVIDE
+                  0x0013c8                  code_DIVMOD
+                  0x001566                  code_DOCOL
+                  0x0011ca                  code_DODO
+                  0x001246                  code_DOI
+                  0x001250                  code_DOJ
+                  0x0011dc                  code_DOLOOP
+                  0x001284                  code_DROP
+                  0x001264                  code_DUP
+                  0x001a60                  code_ELOAD
+                  0x0017a8                  code_EMIT
+                  0x001458                  code_EQUAL
+                  0x001a18                  code_ESTORE
+                  0x0013f4                  code_EVEN
+                  0x001214                  code_EXECUTE
+                  0x00120a                  code_EXIT
+                  0x00121c                  code_FETCH
+                  0x0015ea                  code_FIND
+                  0x0016ea                  code_GETX
+                  0x0016f8                  code_GETY
+                  0x001488                  code_GREATER
+                  0x00152a                  code_HIDDEN
+                  0x001520                  code_IMMED
+                  0x001632                  code_INFLOOP
+                  0x001428                  code_INVERT
+                  0x001ac0                  code_IO_LOCK
+                  0x0011f6                  code_IPFETCH
+                  0x001200                  code_IPSTORE
+                  0x001d2c                  code_KBD_CMD
+                  0x001cee                  code_KBD_RESET
+                  0x001d1a                  code_KEY
+                  0x001742                  code_LEFT
+                  0x001534                  code_LENMASK
+                  0x001478                  code_LESS
+                  0x001b12                  code_LFSR
+                  0x001190                  code_LIT
+                  0x00137e                  code_LSHIFT
+                  0x001344                  code_MINUS
+                  0x0014d4                  code_MOVE
+                  0x001b02                  code_MSEC
+                  0x0013ac                  code_MULTIPLY
+                  0x001430                  code_NEGATE
+                  0x0012e0                  code_NIP
+                  0x001468                  code_NOTEQ
+                  0x0012c6                  code_NROT
+                  0x001402                  code_ODD
+                  0x00135e                  code_ONEMINUS
+                  0x00134e                  code_ONEPLUS
+                  0x001418                  code_OR
+                  0x0012d6                  code_OVER
+                  0x001552                  code_PADSIZE
+                  0x00133c                  code_PLUS
+                  0x00138e                  code_PLUSSTORE
+                  0x001c7c                  code_PS2_INIT
+                  0x001278                  code_QDUP
+                  0x001d04                  code_QKEY
+                  0x001516                  code_RAMEND
+                  0x001b2a                  code_RAND
+                  0x001212                  code_REBOOT
+                  0x0012fc                  code_RFETCH
+                  0x0012f2                  code_RFROM
+                  0x001768                  code_RIGHT
+                  0x0019e6                  code_RLOAD
+                  0x0012b6                  code_ROT
+                  0x00131c                  code_RPFETCH
+                  0x001326                  code_RPSTORE
+                  0x001386                  code_RSHIFT
+                  0x0019b4                  code_RSTORE
+                  0x0016e0                  code_SCRLDN
+                  0x0016d6                  code_SCRLUP
+                  0x001c2e                  code_SEMIT
+                  0x001bf4                  code_SERIAL_INIT
+                  0x001706                  code_SETX
+                  0x001724                  code_SETY
+                  0x001a98                  code_SET_CLOCK
+                  0x001c5c                  code_SGET
+                  0x001d3a                  code_SOUND_INIT
+                  0x001570                  code_SOURCE
+                  0x0017da                  code_SPACE
+                  0x001306                  code_SPFETCH
+                  0x001312                  code_SPSTORE
+                  0x001b5c                  code_SRAND
+                  0x00157e                  code_SRCSTORE
+                  0x00122e                  code_STORE
+                  0x001960                  code_STORE_INIT
+                  0x001296                  code_SWAP
+                  0x0011ae                  code_TBRANCH
+                  0x001792                  code_TGLCHAR
+                  0x001548                  code_TIBSIZE
+                  0x001af8                  code_TICKS
+                  0x001d56                  code_TONE
+                  0x0012e8                  code_TOR
+                  0x001330                  code_TUCK
+                  0x001634                  code_TVOUT_INIT
+                  0x00128c                  code_TWODROP
+                  0x00126c                  code_TWODUP
+                  0x001366                  code_TWOMINUS
+                  0x001356                  code_TWOPLUS
+                  0x001376                  code_TWOSLASH
+                  0x00136e                  code_TWOSTAR
+                  0x0012a2                  code_TWOSWAP
+                  0x0014a8                  code_UGREATER
+                  0x001498                  code_ULESS
+                  0x00155c                  code_ULIMIT
+                  0x0013d8                  code_UMAX
+                  0x0013e6                  code_UMIN
+                  0x00125a                  code_UNLOOP
+                  0x00158c                  code_UPPER
+                  0x001ac8                  code_VARS_INIT
+                  0x00150c                  code_VERSION
+                  0x001698                  code_VIDON
+                  0x0015ae                  code_WORD
+                  0x001420                  code_XOR
+                  0x0011bc                  code_ZBRANCH
+                  0x001438                  code_ZEROEQ
+                  0x00144e                  code_ZEROGT
+                  0x001442                  code_ZEROLT
+                  0x001b6c                  cursor_blink
+                  0x001b9e                  cursor_disable
+                  0x001b8e                  cursor_enable
+                  0x001138                  extended
+                  0x001880                  get_code
+                  0x0018ae                  kbd_get
+                  0x001126                  mod
+                  0x000b28                  name_ABORT
+                  0x000b3a                  name_ABORTQ
+                  0x000a38                  name_ACCEPT
+                  0x0006a8                  name_ADDPLUS
+                  0x0006ec                  name_AND
+                  0x0004c2                  name_BACKCHAR
+                  0x0007e8                  name_BASE
+                  0x000898                  name_BL
+                  0x00075e                  name_CELL
+                  0x000768                  name_CELLPLUS
+                  0x000772                  name_CELLS
+                  0x00054c                  name_CFETCH
+                  0x00047c                  name_CLRLN
+                  0x0003bc                  name_CLS
+                  0x0007c8                  name_CMOVE
+                  0x000a9c                  name_COUNT
+                  0x000440                  name_CR
+                  0x00055a                  name_CSTORE
+                  0x0003b0                  name_CURENBL
+                  0x000404                  name_CURPOS
+                  0x000636                  name_DECIMAL
+                  0x0004b0                  name_DELETE
+                  0x0006b6                  name_DIVIDE
+                  0x0006bc                  name_DIVMOD
+                  0x0008c4                  name_DOCOL
+                  0x000562                  name_DOI
+                  0x000568                  name_DOJ
+                  0x000508                  name_DOT
+                  0x0007de                  name_DP
+                  0x000596                  name_DROP
+                  0x00057a                  name_DUP
+                  0x000c84                  name_ELOAD
+                  0x000436                  name_EMIT
+                  0x000734                  name_EQUAL
+                  0x000ab2                  name_ERROR
+                  0x000c78                  name_ESTORE
+                  0x0006da                  name_EVEN
+                  0x00053a                  name_EXECUTE
+                  0x000524                  name_EXIT
+                  0x000546                  name_FETCH
+                  0x000a2e                  name_FIND
+                  0x0003dc                  name_GETX
+                  0x0003e6                  name_GETY
+                  0x000748                  name_GREATER
+                  0x00077c                  name_HERE
+                  0x000624                  name_HEX
+                  0x000880                  name_HIDDEN
+                  0x0004ee                  name_HOLD
+                  0x000844                  name_HP
+                  0x000876                  name_IMMED
+                  0x00078c                  name_IMMEDIATE
+                  0x000bc0                  name_INFLOOP
+                  0x000ada                  name_INTERPRET
+                  0x000704                  name_INVERT
+                  0x000c30                  name_KBD_CMD
+                  0x000c28                  name_KEY
+                  0x000804                  name_LATEST
+                  0x000416                  name_LEFT
+                  0x00088c                  name_LENMASK
+                  0x000742                  name_LESS
+                  0x000bfe                  name_LFSR
+                  0x000688                  name_LSHIFT
+                  0x0004d8                  name_LTSHARP
+                  0x000652                  name_MINUS
+                  0x0007be                  name_MOVE
+                  0x000bf4                  name_MSEC
+                  0x0006b0                  name_MULTIPLY
+                  0x000710                  name_NEGATE
+                  0x0005da                  name_NIP
+                  0x00073a                  name_NOTEQ
+                  0x0005c6                  name_NROT
+                  0x0006e4                  name_ODD
+                  0x000b10                  name_OK
+                  0x000668                  name_ONEMINUS
+                  0x000658                  name_ONEPLUS
+                  0x0006f4                  name_OR
+                  0x0005d0                  name_OVER
+                  0x000826                  name_PAD
+                  0x0008ac                  name_PADSIZE
+                  0x00064c                  name_PLUS
+                  0x0006a0                  name_PLUSSTORE
+                  0x0008e6                  name_QDIGIT
+                  0x00058c                  name_QDUP
+                  0x000c1e                  name_QKEY
+                  0x000996                  name_QNUMBER
+                  0x00094c                  name_QSIGN
+                  0x000b76                  name_QUIT
+                  0x000812                  name_R0
+                  0x00086a                  name_RAMEND
+                  0x000c08                  name_RAND
+                  0x00052e                  name_REBOOT
+                  0x0005f2                  name_RFETCH
+                  0x0005ea                  name_RFROM
+                  0x000420                  name_RIGHT
+                  0x000c6e                  name_RLOAD
+                  0x0005be                  name_ROT
+                  0x00060a                  name_RPFETCH
+                  0x000612                  name_RPSTORE
+                  0x000694                  name_RSHIFT
+                  0x000c62                  name_RSTORE
+                  0x00081c                  name_S0
+                  0x0003d0                  name_SCRLDN
+                  0x0003c4                  name_SCRLUP
+                  0x000c40                  name_SEMIT
+                  0x0003f0                  name_SETX
+                  0x0003fa                  name_SETY
+                  0x000c4a                  name_SGET
+                  0x0008ce                  name_SOURCE
+                  0x00084e                  name_SOURCE_ID
+                  0x000448                  name_SPACE
+                  0x000452                  name_SPACES
+                  0x0005fa                  name_SPFETCH
+                  0x000602                  name_SPSTORE
+                  0x000c12                  name_SRAND
+                  0x0008da                  name_SRCSTORE
+                  0x0007d2                  name_STATE
+                  0x000554                  name_STORE
+                  0x0005aa                  name_SWAP
+                  0x0007f4                  name_SYSLATEST
+                  0x00042a                  name_TGLCHAR
+                  0x000830                  name_TIB
+                  0x0008a0                  name_TIBSIZE
+                  0x000bea                  name_TICKS
+                  0x00083a                  name_TOIN
+                  0x000c56                  name_TONE
+                  0x000930                  name_TONUMBER
+                  0x0005e2                  name_TOR
+                  0x00061a                  name_TUCK
+                  0x0005a0                  name_TWODROP
+                  0x000582                  name_TWODUP
+                  0x000670                  name_TWOMINUS
+                  0x000660                  name_TWOPLUS
+                  0x000680                  name_TWOSLASH
+                  0x000678                  name_TWOSTAR
+                  0x0005b4                  name_TWOSWAP
+                  0x000486                  name_TYPE
+                  0x000756                  name_UGREATER
+                  0x00074e                  name_ULESS
+                  0x0008b8                  name_ULIMIT
+                  0x0006c6                  name_UMAX
+                  0x0006d0                  name_UMIN
+                  0x00056e                  name_UNLOOP
+                  0x000a1a                  name_UPPER
+                  0x00085e                  name_VERSION
+                  0x0003a6                  name_VIDON
+                  0x000a24                  name_WORD
+                  0x0009b6                  name_WORDS
+                  0x0006fc                  name_XOR
+                  0x00071c                  name_ZEROEQ
+                  0x00072c                  name_ZEROGT
+                  0x000724                  name_ZEROLT
+                  0x0009fa                  name_ZTYPE
+                  0x001cce                  ps2_send
+                  0x001bd2                  scroll_down
+                  0x001bac                  scroll_up
+                  0x0010fa                  shifted
+                  0x001974                  spi_send_address
+                  0x001b78                  toggle_char
+                  0x00199a                  wait_wip0
+                  0x001132                  xmod
+
+Configuration mémoire
+
+Nom              Origine            Longueur           Attributs
+data             0x001000           0x00c000           a !xr
+reset            0x000000           0x000004  
+ivt              0x000004           0x0001fc  
+program          0x000200           0x0555ec           xr
+FICD             0x0557f0           0x000002  
+FPOR             0x0557f2           0x000002  
+FWDT             0x0557f4           0x000002  
+FOSC             0x0557f6           0x000002  
+FOSCSEL          0x0557f8           0x000002  
+FGS              0x0557fa           0x000002  
+FUID0            0x800ff8           0x000002  
+FUID1            0x800ffa           0x000002  
+FUID2            0x800ffc           0x000002  
+FUID3            0x800ffe           0x000002  
+*default*        0x000000           0xffffffff  
+aivt             0x000000           0xffffffff  
+
+Script de l'éditeurs de liens and table de projection mémoire
+
+LOAD build/default/debug/TVout.o
+LOAD build/default/debug/core.o
+LOAD build/default/debug/font.o
+LOAD build/default/debug/hardware.o
+LOAD build/default/debug/keybind.o
+LOAD build/default/debug/keyboard.o
+LOAD build/default/debug/ps2.o
+LOAD build/default/debug/serial.o
+LOAD build/default/debug/sound.o
+LOAD build/default/debug/store.o
+LOAD build/default/debug/mcu_config_bits.o
+                    0x0001                  __MPLAB_BUILD = 0x1
+                    0x0001                  __MPLAB_DEBUG = 0x1
+                    0x0001                  __DEBUG = 0x1
+                    0x0001                  __MPLAB_DEBUGGER_SIMULATOR = 0x1
+LOAD p24EP512GP202
+LOAD /opt/microchip/xc16/v1.26/bin/bin/../../lib/libfx-elf.a
+                    0x557f0                  __FICD = 0x557f0
+                    0x557f2                  __FPOR = 0x557f2
+                    0x557f4                  __FWDT = 0x557f4
+                    0x557f6                  __FOSC = 0x557f6
+                    0x557f8                  __FOSCSEL = 0x557f8
+                    0x557fa                  __FGS = 0x557fa
+                    0x800ff8                  __FUID0 = 0x800ff8
+                    0x800ffa                  __FUID1 = 0x800ffa
+                    0x800ffc                  __FUID2 = 0x800ffc
+                    0x800ffe                  __FUID3 = 0x800ffe
+                    0x0200                  __CODE_BASE = 0x200
+                    0x555ec                  __CODE_LENGTH = 0x555ec
+                    0x0004                  __IVT_BASE = 0x4
+                    0x1000                  __DATA_BASE = 0x1000
+                    0xc000                  __DATA_LENGTH = 0xc000
+
+.reset            0x000000          0x4
+                  0x000000          0x2 SHORT 0x200 ABSOLUTE (__reset)
+                  0x000001          0x2 SHORT 0x4
+                  0x000002          0x2 SHORT 0x0 ((ABSOLUTE (__reset) >> 0x10) & 0x7f)
+                  0x000003          0x2 SHORT 0x0
+
+.text
+ *(.init)
+ *(.user_init)
+ *(.handle)
+ *(.isr*)
+ *(.libc)
+ *(.libm)
+ *(.libdsp)
+ *(.lib*)
+
+usercode
+ *(usercode)
+
+.intr             0x000216        0x18e
+ *(.intr)
+ .intr            0x000216         0xde build/default/debug/TVout.o
+                  0x000216                  __T2Interrupt
+                  0x000290                  __OC2Interrupt
+ .intr            0x0002f4          0x2 build/default/debug/hardware.o
+                  0x0002f4                  __DefaultInterrupt
+ .intr            0x0002f6         0x26 build/default/debug/keyboard.o
+                  0x0002f6                  __T1Interrupt
+ .intr            0x00031c         0x40 build/default/debug/ps2.o
+                  0x00031c                  __INT1Interrupt
+ .intr            0x00035c         0x48 build/default/debug/serial.o
+                  0x00035c                  __U1RXInterrupt
+                  0x000380                  __U1TXInterrupt
+
+.start.text
+ *(.start.txt)
+
+.sysdict            0x83a4        0x8ea
+ *(.sysdict)
+ .sysdict           0x83a4        0x16e build/default/debug/TVout.o
+                    0x83a4                  TVOUT_INIT
+                    0x83a6                  name_VIDON
+                    0x83ae                  VIDON
+                    0x83b0                  name_CURENBL
+                    0x83ba                  CURENBL
+                    0x83bc                  name_CLS
+                    0x83c2                  CLS
+                    0x83c4                  name_SCRLUP
+                    0x83ce                  SCRLUP
+                    0x83d0                  name_SCRLDN
+                    0x83da                  SCRLDN
+                    0x83dc                  name_GETX
+                    0x83e4                  GETX
+                    0x83e6                  name_GETY
+                    0x83ee                  GETY
+                    0x83f0                  name_SETX
+                    0x83f8                  SETX
+                    0x83fa                  name_SETY
+                    0x8402                  SETY
+                    0x8404                  name_CURPOS
+                    0x840e                  CURPOS
+                    0x8416                  name_LEFT
+                    0x841e                  LEFT
+                    0x8420                  name_RIGHT
+                    0x8428                  RIGHT
+                    0x842a                  name_TGLCHAR
+                    0x8434                  TGLCHAR
+                    0x8436                  name_EMIT
+                    0x843e                  EMIT
+                    0x8440                  name_CR
+                    0x8446                  CR
+                    0x8448                  name_SPACE
+                    0x8450                  SPACE
+                    0x8452                  name_SPACES
+                    0x845c                  SPACES
+                    0x847c                  name_CLRLN
+                    0x8484                  CLRLN
+                    0x8486                  name_TYPE
+                    0x848e                  TYPE
+                    0x84b0                  name_DELETE
+                    0x84ba                  DELETE
+                    0x84c2                  name_BACKCHAR
+                    0x84ce                  BACKCHAR
+                    0x84d8                  name_LTSHARP
+                    0x84de                  LTSHARP
+                    0x84ee                  name_HOLD
+                    0x84f6                  HOLD
+                    0x8508                  name_DOT
+                    0x850c                  DOT
+ .sysdict           0x8512        0x6ba build/default/debug/core.o
+                    0x8512                  LIT
+                    0x8514                  CLIT
+                    0x8516                  BRANCH
+                    0x8518                  TBRANCH
+                    0x851a                  ZBRANCH
+                    0x851c                  DODO
+                    0x851e                  DOLOOP
+                    0x8520                  IPFETCH
+                    0x8522                  IPSTORE
+                    0x8524                  name_EXIT
+                    0x852c                  EXIT
+                    0x852e                  name_REBOOT
+                    0x8538                  REBOOT
+                    0x853a                  name_EXECUTE
+                    0x8544                  EXECUTE
+                    0x8546                  name_FETCH
+                    0x854a                  FETCH
+                    0x854c                  name_CFETCH
+                    0x8552                  CFETCH
+                    0x8554                  name_STORE
+                    0x8558                  STORE
+                    0x855a                  name_CSTORE
+                    0x8560                  CSTORE
+                    0x8562                  name_DOI
+                    0x8566                  DOI
+                    0x8568                  name_DOJ
+                    0x856c                  DOJ
+                    0x856e                  name_UNLOOP
+                    0x8578                  UNLOOP
+                    0x857a                  name_DUP
+                    0x8580                  DUP
+                    0x8582                  name_TWODUP
+                    0x858a                  TWODUP
+                    0x858c                  name_QDUP
+                    0x8594                  QDUP
+                    0x8596                  name_DROP
+                    0x859e                  DROP
+                    0x85a0                  name_TWODROP
+                    0x85a8                  TWODROP
+                    0x85aa                  name_SWAP
+                    0x85b2                  SWAP
+                    0x85b4                  name_TWOSWAP
+                    0x85bc                  TWOSWAP
+                    0x85be                  name_ROT
+                    0x85c4                  ROT
+                    0x85c6                  name_NROT
+                    0x85ce                  NROT
+                    0x85d0                  name_OVER
+                    0x85d8                  OVER
+                    0x85da                  name_NIP
+                    0x85e0                  NIP
+                    0x85e2                  name_TOR
+                    0x85e8                  TOR
+                    0x85ea                  name_RFROM
+                    0x85f0                  RFROM
+                    0x85f2                  name_RFETCH
+                    0x85f8                  RFETCH
+                    0x85fa                  name_SPFETCH
+                    0x8600                  SPFETCH
+                    0x8602                  name_SPSTORE
+                    0x8608                  SPSTORE
+                    0x860a                  name_RPFETCH
+                    0x8610                  RPFETCH
+                    0x8612                  name_RPSTORE
+                    0x8618                  RPSTORE
+                    0x861a                  name_TUCK
+                    0x8622                  TUCK
+                    0x8624                  name_HEX
+                    0x862a                  HEX
+                    0x8636                  name_DECIMAL
+                    0x8640                  DECIMAL
+                    0x864c                  name_PLUS
+                    0x8650                  PLUS
+                    0x8652                  name_MINUS
+                    0x8656                  MINUS
+                    0x8658                  name_ONEPLUS
+                    0x865e                  ONEPLUS
+                    0x8660                  name_TWOPLUS
+                    0x8666                  TWOPLUS
+                    0x8668                  name_ONEMINUS
+                    0x866e                  ONEMINUS
+                    0x8670                  name_TWOMINUS
+                    0x8676                  TWOMINUS
+                    0x8678                  name_TWOSTAR
+                    0x867e                  TWOSTAR
+                    0x8680                  name_TWOSLASH
+                    0x8686                  TWOSLASH
+                    0x8688                  name_LSHIFT
+                    0x8692                  LSHIFT
+                    0x8694                  name_RSHIFT
+                    0x869e                  RSHIFT
+                    0x86a0                  name_PLUSSTORE
+                    0x86a6                  PLUSSTORE
+                    0x86a8                  name_ADDPLUS
+                    0x86ae                  ADDPLUS
+                    0x86b0                  name_MULTIPLY
+                    0x86b4                  MULTIPLY
+                    0x86b6                  name_DIVIDE
+                    0x86ba                  DIVIDE
+                    0x86bc                  name_DIVMOD
+                    0x86c4                  DIVMOD
+                    0x86c6                  name_UMAX
+                    0x86ce                  UMAX
+                    0x86d0                  name_UMIN
+                    0x86d8                  UMIN
+                    0x86da                  name_EVEN
+                    0x86e2                  EVEN
+                    0x86e4                  name_ODD
+                    0x86ea                  ODD
+                    0x86ec                  name_AND
+                    0x86f2                  AND
+                    0x86f4                  name_OR
+                    0x86fa                  OR
+                    0x86fc                  name_XOR
+                    0x8702                  XOR
+                    0x8704                  name_INVERT
+                    0x870e                  INVERT
+                    0x8710                  name_NEGATE
+                    0x871a                  NEGATE
+                    0x871c                  name_ZEROEQ
+                    0x8722                  ZEROEQ
+                    0x8724                  name_ZEROLT
+                    0x872a                  ZEROLT
+                    0x872c                  name_ZEROGT
+                    0x8732                  ZEROGT
+                    0x8734                  name_EQUAL
+                    0x8738                  EQUAL
+                    0x873a                  name_NOTEQ
+                    0x8740                  NOTEQ
+                    0x8742                  name_LESS
+                    0x8746                  LESS
+                    0x8748                  name_GREATER
+                    0x874c                  GREATER
+                    0x874e                  name_ULESS
+                    0x8754                  ULESS
+                    0x8756                  name_UGREATER
+                    0x875c                  UGREATER
+                    0x875e                  name_CELL
+                    0x8766                  CELL
+                    0x8768                  name_CELLPLUS
+                    0x8770                  CELLPLUS
+                    0x8772                  name_CELLS
+                    0x877a                  CELLS
+                    0x877c                  name_HERE
+                    0x8784                  HERE
+                    0x878c                  name_IMMEDIATE
+                    0x8798                  IMMEDIATE
+                    0x87be                  name_MOVE
+                    0x87c6                  MOVE
+                    0x87c8                  name_CMOVE
+                    0x87d0                  CMOVE
+                    0x87d2                  name_STATE
+                    0x87da                  STATE
+                    0x87de                  name_DP
+                    0x87e4                  DP
+                    0x87e8                  name_BASE
+                    0x87f0                  BASE
+                    0x87f4                  name_SYSLATEST
+                    0x8800                  SYSLATEST
+                    0x8804                  name_LATEST
+                    0x880e                  LATEST
+                    0x8812                  name_R0
+                    0x8818                  R0
+                    0x881c                  name_S0
+                    0x8822                  S0
+                    0x8826                  name_PAD
+                    0x882c                  PAD
+                    0x8830                  name_TIB
+                    0x8836                  TIB
+                    0x883a                  name_TOIN
+                    0x8840                  TOIN
+                    0x8844                  name_HP
+                    0x884a                  HP
+                    0x884e                  name_SOURCE_ID
+                    0x885a                  SOURCE_ID
+                    0x885e                  name_VERSION
+                    0x8868                  VERSION
+                    0x886a                  name_RAMEND
+                    0x8874                  RAMEND
+                    0x8876                  name_IMMED
+                    0x887e                  IMMED
+                    0x8880                  name_HIDDEN
+                    0x888a                  HIDDEN
+                    0x888c                  name_LENMASK
+                    0x8896                  LENMASK
+                    0x8898                  name_BL
+                    0x889e                  BL
+                    0x88a0                  name_TIBSIZE
+                    0x88aa                  TIBSIZE
+                    0x88ac                  name_PADSIZE
+                    0x88b6                  PADSIZE
+                    0x88b8                  name_ULIMIT
+                    0x88c2                  ULIMIT
+                    0x88c4                  name_DOCOL
+                    0x88cc                  DOCOL
+                    0x88ce                  name_SOURCE
+                    0x88d8                  SOURCE
+                    0x88da                  name_SRCSTORE
+                    0x88e4                  SRCSTORE
+                    0x88e6                  name_QDIGIT
+                    0x88f0                  QDIGIT
+                    0x8930                  name_TONUMBER
+                    0x893a                  TONUMBER
+                    0x894c                  name_QSIGN
+                    0x8954                  QSIGN
+                    0x8996                  name_QNUMBER
+                    0x89a0                  QNUMBER
+                    0x89b6                  name_WORDS
+                    0x89be                  WORDS
+                    0x89fa                  name_ZTYPE
+                    0x8a02                  ZTYPE
+                    0x8a1a                  name_UPPER
+                    0x8a22                  UPPER
+                    0x8a24                  name_WORD
+                    0x8a2c                  WORD
+                    0x8a2e                  name_FIND
+                    0x8a36                  FIND
+                    0x8a38                  name_ACCEPT
+                    0x8a42                  ACCEPT
+                    0x8a9c                  name_COUNT
+                    0x8aa4                  COUNT
+                    0x8ab2                  name_ERROR
+                    0x8aba                  ERROR
+                    0x8ada                  name_INTERPRET
+                    0x8ae6                  INTERPRET
+                    0x8b10                  name_OK
+                    0x8b16                  OK
+                    0x8b28                  name_ABORT
+                    0x8b30                  ABORT
+                    0x8b3a                  name_ABORTQ
+                    0x8b44                  ABORTQ
+                    0x8b76                  name_QUIT
+                    0x8b7e                  QUIT
+                    0x8bc0                  name_INFLOOP
+                    0x8bca                  INFLOOP
+ .sysdict           0x8bcc         0x50 build/default/debug/hardware.o
+                    0x8bcc                  HARDWARE_INIT
+                    0x8be2                  SET_CLOCK
+                    0x8be4                  CLR_RAM
+                    0x8be6                  IO_LOCK
+                    0x8be8                  VARS_INIT
+                    0x8bea                  name_TICKS
+                    0x8bf2                  TICKS
+                    0x8bf4                  name_MSEC
+                    0x8bfc                  MSEC
+                    0x8bfe                  name_LFSR
+                    0x8c06                  LFSR
+                    0x8c08                  name_RAND
+                    0x8c10                  RAND
+                    0x8c12                  name_SRAND
+                    0x8c1a                  SRAND
+ .sysdict           0x8c1c         0x20 build/default/debug/keyboard.o
+                    0x8c1c                  KBD_RESET
+                    0x8c1e                  name_QKEY
+                    0x8c26                  QKEY
+                    0x8c28                  name_KEY
+                    0x8c2e                  KEY
+                    0x8c30                  name_KBD_CMD
+                    0x8c3a                  KBD_CMD
+ .sysdict           0x8c3c          0x2 build/default/debug/ps2.o
+                    0x8c3c                  PS2_INIT
+ .sysdict           0x8c3e         0x16 build/default/debug/serial.o
+                    0x8c3e                  SERIAL_INIT
+                    0x8c40                  name_SEMIT
+                    0x8c48                  SEMIT
+                    0x8c4a                  name_SGET
+                    0x8c52                  SGET
+ .sysdict           0x8c54          0xc build/default/debug/sound.o
+                    0x8c54                  SOUND_INIT
+                    0x8c56                  name_TONE
+                    0x8c5e                  TONE
+ .sysdict           0x8c60         0x2e build/default/debug/store.o
+                    0x8c60                  STORE_INIT
+                    0x8c62                  name_RSTORE
+                    0x8c6c                  RSTORE
+                    0x8c6e                  name_RLOAD
+                    0x8c76                  RLOAD
+                    0x8c78                  name_ESTORE
+                    0x8c82                  ESTORE
+                    0x8c84                  name_ELOAD
+                    0x8c8c                  ELOAD
+
+__FICD            0x0557f0          0x2
+ *(__FICD.sec*)
+ __FICD.sec       0x0557f0          0x2 build/default/debug/mcu_config_bits.o
+
+__FPOR            0x0557f2          0x2
+ *(__FPOR.sec*)
+ __FPOR.sec       0x0557f2          0x2 build/default/debug/mcu_config_bits.o
+
+__FWDT            0x0557f4          0x2
+ *(__FWDT.sec*)
+ __FWDT.sec       0x0557f4          0x2 build/default/debug/mcu_config_bits.o
+
+__FOSC            0x0557f6          0x2
+ *(__FOSC.sec*)
+ __FOSC.sec       0x0557f6          0x2 build/default/debug/mcu_config_bits.o
+
+__FOSCSEL         0x0557f8          0x2
+ *(__FOSCSEL.sec*)
+ __FOSCSEL.sec    0x0557f8          0x2 build/default/debug/mcu_config_bits.o
+
+__FGS             0x0557fa          0x2
+ *(__FGS.sec*)
+ __FGS.sec        0x0557fa          0x2 FGS
+                  0x0557fa                  __FGS.sec
+
+__FUID0
+ *(__FUID0.sec*)
+
+__FUID1
+ *(__FUID1.sec*)
+
+__FUID2
+ *(__FUID2.sec*)
+
+__FUID3
+ *(__FUID3.sec*)
+
+.comment
+ *(.comment)
+
+.debug_info       0x000000        0x3b4
+ *(.debug_info)
+ .debug_info      0x000000         0x74 build/default/debug/TVout.o
+ .debug_info      0x000074         0x73 build/default/debug/core.o
+ .debug_info      0x0000e7         0x77 build/default/debug/hardware.o
+ .debug_info      0x00015e         0x77 build/default/debug/keyboard.o
+ .debug_info      0x0001d5         0x72 build/default/debug/ps2.o
+ .debug_info      0x000247         0x75 build/default/debug/serial.o
+ .debug_info      0x0002bc         0x7c build/default/debug/sound.o
+ .debug_info      0x000338         0x7c build/default/debug/store.o
+ *(.gnu.linkonce.wi.*)
+
+.debug_abbrev     0x000000         0x88
+ *(.debug_abbrev)
+ .debug_abbrev    0x000000         0x10 build/default/debug/TVout.o
+ .debug_abbrev    0x000010         0x10 build/default/debug/core.o
+ .debug_abbrev    0x000020         0x10 build/default/debug/hardware.o
+ .debug_abbrev    0x000030         0x10 build/default/debug/keyboard.o
+ .debug_abbrev    0x000040         0x10 build/default/debug/ps2.o
+ .debug_abbrev    0x000050         0x10 build/default/debug/serial.o
+ .debug_abbrev    0x000060         0x14 build/default/debug/sound.o
+ .debug_abbrev    0x000074         0x14 build/default/debug/store.o
+
+.debug_line       0x000000        0x808
+ *(.debug_line)
+ .debug_line      0x000000        0x1b3 build/default/debug/TVout.o
+ .debug_line      0x0001b3        0x1fa build/default/debug/core.o
+ .debug_line      0x0003ad         0x1a build/default/debug/font.o
+ .debug_line      0x0003c7         0xb9 build/default/debug/hardware.o
+ .debug_line      0x000480         0x1a build/default/debug/keybind.o
+ .debug_line      0x00049a        0x126 build/default/debug/keyboard.o
+ .debug_line      0x0005c0         0x96 build/default/debug/ps2.o
+ .debug_line      0x000656         0xaa build/default/debug/serial.o
+ .debug_line      0x000700         0x48 build/default/debug/sound.o
+ .debug_line      0x000748         0xa6 build/default/debug/store.o
+ .debug_line      0x0007ee         0x1a build/default/debug/mcu_config_bits.o
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str
+ *(.debug_str)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_ranges
+ *(.debug_ranges)
+
+.debug_aranges    0x000000        0x108
+ *(.debug_aranges)
+ .debug_aranges
+                  0x000000         0x28 build/default/debug/TVout.o
+ .debug_aranges
+                  0x000028         0x20 build/default/debug/core.o
+ .debug_aranges
+                  0x000048         0x28 build/default/debug/hardware.o
+ .debug_aranges
+                  0x000070         0x28 build/default/debug/keyboard.o
+ .debug_aranges
+                  0x000098         0x20 build/default/debug/ps2.o
+ .debug_aranges
+                  0x0000b8         0x20 build/default/debug/serial.o
+ .debug_aranges
+                  0x0000d8         0x18 build/default/debug/sound.o
+ .debug_aranges
+                  0x0000f0         0x18 build/default/debug/store.o
+                    0x0000                  WREG0 = 0x0
+                    0x0000                  _WREG0 = 0x0
+                    0x0002                  WREG1 = 0x2
+                    0x0002                  _WREG1 = 0x2
+                    0x0004                  WREG2 = 0x4
+                    0x0004                  _WREG2 = 0x4
+                    0x0006                  WREG3 = 0x6
+                    0x0006                  _WREG3 = 0x6
+                    0x0008                  WREG4 = 0x8
+                    0x0008                  _WREG4 = 0x8
+                    0x000a                  WREG5 = 0xa
+                    0x000a                  _WREG5 = 0xa
+                    0x000c                  WREG6 = 0xc
+                    0x000c                  _WREG6 = 0xc
+                    0x000e                  WREG7 = 0xe
+                    0x000e                  _WREG7 = 0xe
+                    0x0010                  WREG8 = 0x10
+                    0x0010                  _WREG8 = 0x10
+                    0x0012                  WREG9 = 0x12
+                    0x0012                  _WREG9 = 0x12
+                    0x0014                  WREG10 = 0x14
+                    0x0014                  _WREG10 = 0x14
+                    0x0016                  WREG11 = 0x16
+                    0x0016                  _WREG11 = 0x16
+                    0x0018                  WREG12 = 0x18
+                    0x0018                  _WREG12 = 0x18
+                    0x001a                  WREG13 = 0x1a
+                    0x001a                  _WREG13 = 0x1a
+                    0x001c                  WREG14 = 0x1c
+                    0x001c                  _WREG14 = 0x1c
+                    0x001e                  WREG15 = 0x1e
+                    0x001e                  _WREG15 = 0x1e
+                    0x0020                  SPLIM = 0x20
+                    0x0020                  _SPLIM = 0x20
+                    0x002e                  PCL = 0x2e
+                    0x002e                  _PCL = 0x2e
+                    0x0030                  PCH = 0x30
+                    0x0030                  _PCH = 0x30
+                    0x0032                  DSRPAG = 0x32
+                    0x0032                  _DSRPAG = 0x32
+                    0x0032                  _DSRPAGbits = 0x32
+                    0x0034                  DSWPAG = 0x34
+                    0x0034                  _DSWPAG = 0x34
+                    0x0034                  _DSWPAGbits = 0x34
+                    0x0036                  RCOUNT = 0x36
+                    0x0036                  _RCOUNT = 0x36
+                    0x0042                  SR = 0x42
+                    0x0042                  _SR = 0x42
+                    0x0042                  _SRbits = 0x42
+                    0x0044                  CORCON = 0x44
+                    0x0044                  _CORCON = 0x44
+                    0x0044                  _CORCONbits = 0x44
+                    0x0052                  DISICNT = 0x52
+                    0x0052                  _DISICNT = 0x52
+                    0x0054                  TBLPAG = 0x54
+                    0x0054                  _TBLPAG = 0x54
+                    0x0054                  _TBLPAGbits = 0x54
+                    0x0058                  MSTRPR = 0x58
+                    0x0058                  _MSTRPR = 0x58
+                    0x0100                  TMR1 = 0x100
+                    0x0100                  _TMR1 = 0x100
+                    0x0102                  PR1 = 0x102
+                    0x0102                  _PR1 = 0x102
+                    0x0104                  T1CON = 0x104
+                    0x0104                  _T1CON = 0x104
+                    0x0104                  _T1CONbits = 0x104
+                    0x0106                  TMR2 = 0x106
+                    0x0106                  _TMR2 = 0x106
+                    0x0108                  TMR3HLD = 0x108
+                    0x0108                  _TMR3HLD = 0x108
+                    0x010a                  TMR3 = 0x10a
+                    0x010a                  _TMR3 = 0x10a
+                    0x010c                  PR2 = 0x10c
+                    0x010c                  _PR2 = 0x10c
+                    0x010e                  PR3 = 0x10e
+                    0x010e                  _PR3 = 0x10e
+                    0x0110                  T2CON = 0x110
+                    0x0110                  _T2CON = 0x110
+                    0x0110                  _T2CONbits = 0x110
+                    0x0112                  T3CON = 0x112
+                    0x0112                  _T3CON = 0x112
+                    0x0112                  _T3CONbits = 0x112
+                    0x0114                  TMR4 = 0x114
+                    0x0114                  _TMR4 = 0x114
+                    0x0116                  TMR5HLD = 0x116
+                    0x0116                  _TMR5HLD = 0x116
+                    0x0118                  TMR5 = 0x118
+                    0x0118                  _TMR5 = 0x118
+                    0x011a                  PR4 = 0x11a
+                    0x011a                  _PR4 = 0x11a
+                    0x011c                  PR5 = 0x11c
+                    0x011c                  _PR5 = 0x11c
+                    0x011e                  T4CON = 0x11e
+                    0x011e                  _T4CON = 0x11e
+                    0x011e                  _T4CONbits = 0x11e
+                    0x0120                  T5CON = 0x120
+                    0x0120                  _T5CON = 0x120
+                    0x0120                  _T5CONbits = 0x120
+                    0x0140                  IC1CON1 = 0x140
+                    0x0140                  _IC1CON1 = 0x140
+                    0x0140                  _IC1CON1bits = 0x140
+                    0x0142                  IC1CON2 = 0x142
+                    0x0142                  _IC1CON2 = 0x142
+                    0x0142                  _IC1CON2bits = 0x142
+                    0x0144                  IC1BUF = 0x144
+                    0x0144                  _IC1BUF = 0x144
+                    0x0146                  IC1TMR = 0x146
+                    0x0146                  _IC1TMR = 0x146
+                    0x0148                  IC2CON1 = 0x148
+                    0x0148                  _IC2CON1 = 0x148
+                    0x0148                  _IC2CON1bits = 0x148
+                    0x014a                  IC2CON2 = 0x14a
+                    0x014a                  _IC2CON2 = 0x14a
+                    0x014a                  _IC2CON2bits = 0x14a
+                    0x014c                  IC2BUF = 0x14c
+                    0x014c                  _IC2BUF = 0x14c
+                    0x014e                  IC2TMR = 0x14e
+                    0x014e                  _IC2TMR = 0x14e
+                    0x0150                  IC3CON1 = 0x150
+                    0x0150                  _IC3CON1 = 0x150
+                    0x0150                  _IC3CON1bits = 0x150
+                    0x0152                  IC3CON2 = 0x152
+                    0x0152                  _IC3CON2 = 0x152
+                    0x0152                  _IC3CON2bits = 0x152
+                    0x0154                  IC3BUF = 0x154
+                    0x0154                  _IC3BUF = 0x154
+                    0x0156                  IC3TMR = 0x156
+                    0x0156                  _IC3TMR = 0x156
+                    0x0158                  IC4CON1 = 0x158
+                    0x0158                  _IC4CON1 = 0x158
+                    0x0158                  _IC4CON1bits = 0x158
+                    0x015a                  IC4CON2 = 0x15a
+                    0x015a                  _IC4CON2 = 0x15a
+                    0x015a                  _IC4CON2bits = 0x15a
+                    0x015c                  IC4BUF = 0x15c
+                    0x015c                  _IC4BUF = 0x15c
+                    0x015e                  IC4TMR = 0x15e
+                    0x015e                  _IC4TMR = 0x15e
+                    0x0200                  I2C1RCV = 0x200
+                    0x0200                  _I2C1RCV = 0x200
+                    0x0202                  I2C1TRN = 0x202
+                    0x0202                  _I2C1TRN = 0x202
+                    0x0204                  I2C1BRG = 0x204
+                    0x0204                  _I2C1BRG = 0x204
+                    0x0206                  I2C1CON = 0x206
+                    0x0206                  _I2C1CON = 0x206
+                    0x0206                  _I2C1CONbits = 0x206
+                    0x0208                  I2C1STAT = 0x208
+                    0x0208                  _I2C1STAT = 0x208
+                    0x0208                  _I2C1STATbits = 0x208
+                    0x020a                  I2C1ADD = 0x20a
+                    0x020a                  _I2C1ADD = 0x20a
+                    0x020c                  I2C1MSK = 0x20c
+                    0x020c                  _I2C1MSK = 0x20c
+                    0x0210                  I2C2RCV = 0x210
+                    0x0210                  _I2C2RCV = 0x210
+                    0x0212                  I2C2TRN = 0x212
+                    0x0212                  _I2C2TRN = 0x212
+                    0x0214                  I2C2BRG = 0x214
+                    0x0214                  _I2C2BRG = 0x214
+                    0x0216                  I2C2CON = 0x216
+                    0x0216                  _I2C2CON = 0x216
+                    0x0216                  _I2C2CONbits = 0x216
+                    0x0218                  I2C2STAT = 0x218
+                    0x0218                  _I2C2STAT = 0x218
+                    0x0218                  _I2C2STATbits = 0x218
+                    0x021a                  I2C2ADD = 0x21a
+                    0x021a                  _I2C2ADD = 0x21a
+                    0x021c                  I2C2MSK = 0x21c
+                    0x021c                  _I2C2MSK = 0x21c
+                    0x0220                  U1MODE = 0x220
+                    0x0220                  _U1MODE = 0x220
+                    0x0220                  _U1MODEbits = 0x220
+                    0x0222                  U1STA = 0x222
+                    0x0222                  _U1STA = 0x222
+                    0x0222                  _U1STAbits = 0x222
+                    0x0224                  U1TXREG = 0x224
+                    0x0224                  _U1TXREG = 0x224
+                    0x0226                  U1RXREG = 0x226
+                    0x0226                  _U1RXREG = 0x226
+                    0x0228                  U1BRG = 0x228
+                    0x0228                  _U1BRG = 0x228
+                    0x0230                  U2MODE = 0x230
+                    0x0230                  _U2MODE = 0x230
+                    0x0230                  _U2MODEbits = 0x230
+                    0x0232                  U2STA = 0x232
+                    0x0232                  _U2STA = 0x232
+                    0x0232                  _U2STAbits = 0x232
+                    0x0234                  U2TXREG = 0x234
+                    0x0234                  _U2TXREG = 0x234
+                    0x0236                  U2RXREG = 0x236
+                    0x0236                  _U2RXREG = 0x236
+                    0x0238                  U2BRG = 0x238
+                    0x0238                  _U2BRG = 0x238
+                    0x0240                  SPI1STAT = 0x240
+                    0x0240                  _SPI1STAT = 0x240
+                    0x0240                  _SPI1STATbits = 0x240
+                    0x0242                  SPI1CON1 = 0x242
+                    0x0242                  _SPI1CON1 = 0x242
+                    0x0242                  _SPI1CON1bits = 0x242
+                    0x0244                  SPI1CON2 = 0x244
+                    0x0244                  _SPI1CON2 = 0x244
+                    0x0244                  _SPI1CON2bits = 0x244
+                    0x0248                  SPI1BUF = 0x248
+                    0x0248                  _SPI1BUF = 0x248
+                    0x0260                  SPI2STAT = 0x260
+                    0x0260                  _SPI2STAT = 0x260
+                    0x0260                  _SPI2STATbits = 0x260
+                    0x0262                  SPI2CON1 = 0x262
+                    0x0262                  _SPI2CON1 = 0x262
+                    0x0262                  _SPI2CON1bits = 0x262
+                    0x0264                  SPI2CON2 = 0x264
+                    0x0264                  _SPI2CON2 = 0x264
+                    0x0264                  _SPI2CON2bits = 0x264
+                    0x0268                  SPI2BUF = 0x268
+                    0x0268                  _SPI2BUF = 0x268
+                    0x0300                  ADC1BUF0 = 0x300
+                    0x0300                  _ADC1BUF0 = 0x300
+                    0x0302                  ADC1BUF1 = 0x302
+                    0x0302                  _ADC1BUF1 = 0x302
+                    0x0304                  ADC1BUF2 = 0x304
+                    0x0304                  _ADC1BUF2 = 0x304
+                    0x0306                  ADC1BUF3 = 0x306
+                    0x0306                  _ADC1BUF3 = 0x306
+                    0x0308                  ADC1BUF4 = 0x308
+                    0x0308                  _ADC1BUF4 = 0x308
+                    0x030a                  ADC1BUF5 = 0x30a
+                    0x030a                  _ADC1BUF5 = 0x30a
+                    0x030c                  ADC1BUF6 = 0x30c
+                    0x030c                  _ADC1BUF6 = 0x30c
+                    0x030e                  ADC1BUF7 = 0x30e
+                    0x030e                  _ADC1BUF7 = 0x30e
+                    0x0310                  ADC1BUF8 = 0x310
+                    0x0310                  _ADC1BUF8 = 0x310
+                    0x0312                  ADC1BUF9 = 0x312
+                    0x0312                  _ADC1BUF9 = 0x312
+                    0x0314                  ADC1BUFA = 0x314
+                    0x0314                  _ADC1BUFA = 0x314
+                    0x0316                  ADC1BUFB = 0x316
+                    0x0316                  _ADC1BUFB = 0x316
+                    0x0318                  ADC1BUFC = 0x318
+                    0x0318                  _ADC1BUFC = 0x318
+                    0x031a                  ADC1BUFD = 0x31a
+                    0x031a                  _ADC1BUFD = 0x31a
+                    0x031c                  ADC1BUFE = 0x31c
+                    0x031c                  _ADC1BUFE = 0x31c
+                    0x031e                  ADC1BUFF = 0x31e
+                    0x031e                  _ADC1BUFF = 0x31e
+                    0x0320                  AD1CON1 = 0x320
+                    0x0320                  _AD1CON1 = 0x320
+                    0x0320                  _AD1CON1bits = 0x320
+                    0x0322                  AD1CON2 = 0x322
+                    0x0322                  _AD1CON2 = 0x322
+                    0x0322                  _AD1CON2bits = 0x322
+                    0x0324                  AD1CON3 = 0x324
+                    0x0324                  _AD1CON3 = 0x324
+                    0x0324                  _AD1CON3bits = 0x324
+                    0x0326                  AD1CHS123 = 0x326
+                    0x0326                  _AD1CHS123 = 0x326
+                    0x0326                  _AD1CHS123bits = 0x326
+                    0x0328                  AD1CHS0 = 0x328
+                    0x0328                  _AD1CHS0 = 0x328
+                    0x0328                  _AD1CHS0bits = 0x328
+                    0x032e                  AD1CSSH = 0x32e
+                    0x032e                  _AD1CSSH = 0x32e
+                    0x032e                  _AD1CSSHbits = 0x32e
+                    0x0330                  AD1CSSL = 0x330
+                    0x0330                  _AD1CSSL = 0x330
+                    0x0330                  _AD1CSSLbits = 0x330
+                    0x0332                  AD1CON4 = 0x332
+                    0x0332                  _AD1CON4 = 0x332
+                    0x0332                  _AD1CON4bits = 0x332
+                    0x033a                  CTMUCON1 = 0x33a
+                    0x033a                  _CTMUCON1 = 0x33a
+                    0x033a                  _CTMUCON1bits = 0x33a
+                    0x033c                  CTMUCON2 = 0x33c
+                    0x033c                  _CTMUCON2 = 0x33c
+                    0x033c                  _CTMUCON2bits = 0x33c
+                    0x033e                  CTMUICON = 0x33e
+                    0x033e                  _CTMUICON = 0x33e
+                    0x033e                  _CTMUICONbits = 0x33e
+                    0x0640                  CRCCON1 = 0x640
+                    0x0640                  _CRCCON1 = 0x640
+                    0x0640                  _CRCCON1bits = 0x640
+                    0x0642                  CRCCON2 = 0x642
+                    0x0642                  _CRCCON2 = 0x642
+                    0x0642                  _CRCCON2bits = 0x642
+                    0x0644                  CRCXORL = 0x644
+                    0x0644                  _CRCXORL = 0x644
+                    0x0644                  _CRCXORLbits = 0x644
+                    0x0646                  CRCXORH = 0x646
+                    0x0646                  _CRCXORH = 0x646
+                    0x0646                  _CRCXORHbits = 0x646
+                    0x0648                  CRCDAT = 0x648
+                    0x0648                  _CRCDAT = 0x648
+                    0x0648                  CRCDATL = 0x648
+                    0x0648                  _CRCDATL = 0x648
+                    0x064a                  CRCDATH = 0x64a
+                    0x064a                  _CRCDATH = 0x64a
+                    0x064c                  CRCWDAT = 0x64c
+                    0x064c                  _CRCWDAT = 0x64c
+                    0x064c                  CRCWDATL = 0x64c
+                    0x064c                  _CRCWDATL = 0x64c
+                    0x064e                  CRCWDATH = 0x64e
+                    0x064e                  _CRCWDATH = 0x64e
+                    0x0680                  RPOR0 = 0x680
+                    0x0680                  _RPOR0 = 0x680
+                    0x0680                  _RPOR0bits = 0x680
+                    0x0682                  RPOR1 = 0x682
+                    0x0682                  _RPOR1 = 0x682
+                    0x0682                  _RPOR1bits = 0x682
+                    0x0684                  RPOR2 = 0x684
+                    0x0684                  _RPOR2 = 0x684
+                    0x0684                  _RPOR2bits = 0x684
+                    0x0686                  RPOR3 = 0x686
+                    0x0686                  _RPOR3 = 0x686
+                    0x0686                  _RPOR3bits = 0x686
+                    0x0688                  RPOR4 = 0x688
+                    0x0688                  _RPOR4 = 0x688
+                    0x0688                  _RPOR4bits = 0x688
+                    0x06a0                  RPINR0 = 0x6a0
+                    0x06a0                  _RPINR0 = 0x6a0
+                    0x06a0                  _RPINR0bits = 0x6a0
+                    0x06a2                  RPINR1 = 0x6a2
+                    0x06a2                  _RPINR1 = 0x6a2
+                    0x06a2                  _RPINR1bits = 0x6a2
+                    0x06a6                  RPINR3 = 0x6a6
+                    0x06a6                  _RPINR3 = 0x6a6
+                    0x06a6                  _RPINR3bits = 0x6a6
+                    0x06ae                  RPINR7 = 0x6ae
+                    0x06ae                  _RPINR7 = 0x6ae
+                    0x06ae                  _RPINR7bits = 0x6ae
+                    0x06b0                  RPINR8 = 0x6b0
+                    0x06b0                  _RPINR8 = 0x6b0
+                    0x06b0                  _RPINR8bits = 0x6b0
+                    0x06b6                  RPINR11 = 0x6b6
+                    0x06b6                  _RPINR11 = 0x6b6
+                    0x06b6                  _RPINR11bits = 0x6b6
+                    0x06c4                  RPINR18 = 0x6c4
+                    0x06c4                  _RPINR18 = 0x6c4
+                    0x06c4                  _RPINR18bits = 0x6c4
+                    0x06c6                  RPINR19 = 0x6c6
+                    0x06c6                  _RPINR19 = 0x6c6
+                    0x06c6                  _RPINR19bits = 0x6c6
+                    0x06cc                  RPINR22 = 0x6cc
+                    0x06cc                  _RPINR22 = 0x6cc
+                    0x06cc                  _RPINR22bits = 0x6cc
+                    0x06ce                  RPINR23 = 0x6ce
+                    0x06ce                  _RPINR23 = 0x6ce
+                    0x06ce                  _RPINR23bits = 0x6ce
+                    0x0728                  NVMCON = 0x728
+                    0x0728                  _NVMCON = 0x728
+                    0x0728                  _NVMCONbits = 0x728
+                    0x072a                  NVMADR = 0x72a
+                    0x072a                  _NVMADR = 0x72a
+                    0x072c                  NVMADRU = 0x72c
+                    0x072c                  _NVMADRU = 0x72c
+                    0x072c                  _NVMADRUbits = 0x72c
+                    0x072e                  NVMKEY = 0x72e
+                    0x072e                  _NVMKEY = 0x72e
+                    0x0740                  RCON = 0x740
+                    0x0740                  _RCON = 0x740
+                    0x0740                  _RCONbits = 0x740
+                    0x0742                  OSCCON = 0x742
+                    0x0742                  _OSCCON = 0x742
+                    0x0742                  _OSCCONbits = 0x742
+                    0x0742                  OSCCONL = 0x742
+                    0x0742                  _OSCCONL = 0x742
+                    0x0743                  OSCCONH = 0x743
+                    0x0743                  _OSCCONH = 0x743
+                    0x0744                  CLKDIV = 0x744
+                    0x0744                  _CLKDIV = 0x744
+                    0x0744                  _CLKDIVbits = 0x744
+                    0x0746                  PLLFBD = 0x746
+                    0x0746                  _PLLFBD = 0x746
+                    0x0746                  _PLLFBDbits = 0x746
+                    0x0748                  OSCTUN = 0x748
+                    0x0748                  _OSCTUN = 0x748
+                    0x0748                  _OSCTUNbits = 0x748
+                    0x074e                  REFOCON = 0x74e
+                    0x074e                  _REFOCON = 0x74e
+                    0x074e                  _REFOCONbits = 0x74e
+                    0x0760                  PMD1 = 0x760
+                    0x0760                  _PMD1 = 0x760
+                    0x0760                  _PMD1bits = 0x760
+                    0x0762                  PMD2 = 0x762
+                    0x0762                  _PMD2 = 0x762
+                    0x0762                  _PMD2bits = 0x762
+                    0x0764                  PMD3 = 0x764
+                    0x0764                  _PMD3 = 0x764
+                    0x0764                  _PMD3bits = 0x764
+                    0x0766                  PMD4 = 0x766
+                    0x0766                  _PMD4 = 0x766
+                    0x0766                  _PMD4bits = 0x766
+                    0x076a                  PMD6 = 0x76a
+                    0x076a                  _PMD6 = 0x76a
+                    0x076c                  PMD7 = 0x76c
+                    0x076c                  _PMD7 = 0x76c
+                    0x076c                  _PMD7bits = 0x76c
+                    0x0800                  IFS0 = 0x800
+                    0x0800                  _IFS0 = 0x800
+                    0x0800                  _IFS0bits = 0x800
+                    0x0802                  IFS1 = 0x802
+                    0x0802                  _IFS1 = 0x802
+                    0x0802                  _IFS1bits = 0x802
+                    0x0804                  IFS2 = 0x804
+                    0x0804                  _IFS2 = 0x804
+                    0x0804                  _IFS2bits = 0x804
+                    0x0806                  IFS3 = 0x806
+                    0x0806                  _IFS3 = 0x806
+                    0x0806                  _IFS3bits = 0x806
+                    0x0808                  IFS4 = 0x808
+                    0x0808                  _IFS4 = 0x808
+                    0x0808                  _IFS4bits = 0x808
+                    0x0810                  IFS8 = 0x810
+                    0x0810                  _IFS8 = 0x810
+                    0x0810                  _IFS8bits = 0x810
+                    0x0812                  IFS9 = 0x812
+                    0x0812                  _IFS9 = 0x812
+                    0x0812                  _IFS9bits = 0x812
+                    0x0820                  IEC0 = 0x820
+                    0x0820                  _IEC0 = 0x820
+                    0x0820                  _IEC0bits = 0x820
+                    0x0822                  IEC1 = 0x822
+                    0x0822                  _IEC1 = 0x822
+                    0x0822                  _IEC1bits = 0x822
+                    0x0824                  IEC2 = 0x824
+                    0x0824                  _IEC2 = 0x824
+                    0x0824                  _IEC2bits = 0x824
+                    0x0826                  IEC3 = 0x826
+                    0x0826                  _IEC3 = 0x826
+                    0x0826                  _IEC3bits = 0x826
+                    0x0828                  IEC4 = 0x828
+                    0x0828                  _IEC4 = 0x828
+                    0x0828                  _IEC4bits = 0x828
+                    0x0830                  IEC8 = 0x830
+                    0x0830                  _IEC8 = 0x830
+                    0x0830                  _IEC8bits = 0x830
+                    0x0832                  IEC9 = 0x832
+                    0x0832                  _IEC9 = 0x832
+                    0x0832                  _IEC9bits = 0x832
+                    0x0840                  IPC0 = 0x840
+                    0x0840                  _IPC0 = 0x840
+                    0x0840                  _IPC0bits = 0x840
+                    0x0842                  IPC1 = 0x842
+                    0x0842                  _IPC1 = 0x842
+                    0x0842                  _IPC1bits = 0x842
+                    0x0844                  IPC2 = 0x844
+                    0x0844                  _IPC2 = 0x844
+                    0x0844                  _IPC2bits = 0x844
+                    0x0846                  IPC3 = 0x846
+                    0x0846                  _IPC3 = 0x846
+                    0x0846                  _IPC3bits = 0x846
+                    0x0848                  IPC4 = 0x848
+                    0x0848                  _IPC4 = 0x848
+                    0x0848                  _IPC4bits = 0x848
+                    0x084a                  IPC5 = 0x84a
+                    0x084a                  _IPC5 = 0x84a
+                    0x084a                  _IPC5bits = 0x84a
+                    0x084c                  IPC6 = 0x84c
+                    0x084c                  _IPC6 = 0x84c
+                    0x084c                  _IPC6bits = 0x84c
+                    0x084e                  IPC7 = 0x84e
+                    0x084e                  _IPC7 = 0x84e
+                    0x084e                  _IPC7bits = 0x84e
+                    0x0850                  IPC8 = 0x850
+                    0x0850                  _IPC8 = 0x850
+                    0x0850                  _IPC8bits = 0x850
+                    0x0852                  IPC9 = 0x852
+                    0x0852                  _IPC9 = 0x852
+                    0x0852                  _IPC9bits = 0x852
+                    0x0858                  IPC12 = 0x858
+                    0x0858                  _IPC12 = 0x858
+                    0x0858                  _IPC12bits = 0x858
+                    0x0860                  IPC16 = 0x860
+                    0x0860                  _IPC16 = 0x860
+                    0x0860                  _IPC16bits = 0x860
+                    0x0866                  IPC19 = 0x866
+                    0x0866                  _IPC19 = 0x866
+                    0x0866                  _IPC19bits = 0x866
+                    0x0886                  IPC35 = 0x886
+                    0x0886                  _IPC35 = 0x886
+                    0x0886                  _IPC35bits = 0x886
+                    0x0888                  IPC36 = 0x888
+                    0x0888                  _IPC36 = 0x888
+                    0x0888                  _IPC36bits = 0x888
+                    0x088a                  IPC37 = 0x88a
+                    0x088a                  _IPC37 = 0x88a
+                    0x088a                  _IPC37bits = 0x88a
+                    0x08c0                  INTCON1 = 0x8c0
+                    0x08c0                  _INTCON1 = 0x8c0
+                    0x08c0                  _INTCON1bits = 0x8c0
+                    0x08c2                  INTCON2 = 0x8c2
+                    0x08c2                  _INTCON2 = 0x8c2
+                    0x08c2                  _INTCON2bits = 0x8c2
+                    0x08c4                  INTCON3 = 0x8c4
+                    0x08c4                  _INTCON3 = 0x8c4
+                    0x08c4                  _INTCON3bits = 0x8c4
+                    0x08c6                  INTCON4 = 0x8c6
+                    0x08c6                  _INTCON4 = 0x8c6
+                    0x08c6                  _INTCON4bits = 0x8c6
+                    0x08c8                  INTTREG = 0x8c8
+                    0x08c8                  _INTTREG = 0x8c8
+                    0x08c8                  _INTTREGbits = 0x8c8
+                    0x0900                  OC1CON1 = 0x900
+                    0x0900                  _OC1CON1 = 0x900
+                    0x0900                  _OC1CON1bits = 0x900
+                    0x0902                  OC1CON2 = 0x902
+                    0x0902                  _OC1CON2 = 0x902
+                    0x0902                  _OC1CON2bits = 0x902
+                    0x0904                  OC1RS = 0x904
+                    0x0904                  _OC1RS = 0x904
+                    0x0906                  OC1R = 0x906
+                    0x0906                  _OC1R = 0x906
+                    0x0908                  OC1TMR = 0x908
+                    0x0908                  _OC1TMR = 0x908
+                    0x090a                  OC2CON1 = 0x90a
+                    0x090a                  _OC2CON1 = 0x90a
+                    0x090a                  _OC2CON1bits = 0x90a
+                    0x090c                  OC2CON2 = 0x90c
+                    0x090c                  _OC2CON2 = 0x90c
+                    0x090c                  _OC2CON2bits = 0x90c
+                    0x090e                  OC2RS = 0x90e
+                    0x090e                  _OC2RS = 0x90e
+                    0x0910                  OC2R = 0x910
+                    0x0910                  _OC2R = 0x910
+                    0x0912                  OC2TMR = 0x912
+                    0x0912                  _OC2TMR = 0x912
+                    0x0914                  OC3CON1 = 0x914
+                    0x0914                  _OC3CON1 = 0x914
+                    0x0914                  _OC3CON1bits = 0x914
+                    0x0916                  OC3CON2 = 0x916
+                    0x0916                  _OC3CON2 = 0x916
+                    0x0916                  _OC3CON2bits = 0x916
+                    0x0918                  OC3RS = 0x918
+                    0x0918                  _OC3RS = 0x918
+                    0x091a                  OC3R = 0x91a
+                    0x091a                  _OC3R = 0x91a
+                    0x091c                  OC3TMR = 0x91c
+                    0x091c                  _OC3TMR = 0x91c
+                    0x091e                  OC4CON1 = 0x91e
+                    0x091e                  _OC4CON1 = 0x91e
+                    0x091e                  _OC4CON1bits = 0x91e
+                    0x0920                  OC4CON2 = 0x920
+                    0x0920                  _OC4CON2 = 0x920
+                    0x0920                  _OC4CON2bits = 0x920
+                    0x0922                  OC4RS = 0x922
+                    0x0922                  _OC4RS = 0x922
+                    0x0924                  OC4R = 0x924
+                    0x0924                  _OC4R = 0x924
+                    0x0926                  OC4TMR = 0x926
+                    0x0926                  _OC4TMR = 0x926
+                    0x0a80                  CMSTAT = 0xa80
+                    0x0a80                  _CMSTAT = 0xa80
+                    0x0a80                  _CMSTATbits = 0xa80
+                    0x0a82                  CVRCON = 0xa82
+                    0x0a82                  _CVRCON = 0xa82
+                    0x0a82                  _CVRCONbits = 0xa82
+                    0x0a84                  CM1CON = 0xa84
+                    0x0a84                  _CM1CON = 0xa84
+                    0x0a84                  _CM1CONbits = 0xa84
+                    0x0a86                  CM1MSKSRC = 0xa86
+                    0x0a86                  _CM1MSKSRC = 0xa86
+                    0x0a86                  _CM1MSKSRCbits = 0xa86
+                    0x0a88                  CM1MSKCON = 0xa88
+                    0x0a88                  _CM1MSKCON = 0xa88
+                    0x0a88                  _CM1MSKCONbits = 0xa88
+                    0x0a8a                  CM1FLTR = 0xa8a
+                    0x0a8a                  _CM1FLTR = 0xa8a
+                    0x0a8a                  _CM1FLTRbits = 0xa8a
+                    0x0a8c                  CM2CON = 0xa8c
+                    0x0a8c                  _CM2CON = 0xa8c
+                    0x0a8c                  _CM2CONbits = 0xa8c
+                    0x0a8e                  CM2MSKSRC = 0xa8e
+                    0x0a8e                  _CM2MSKSRC = 0xa8e
+                    0x0a8e                  _CM2MSKSRCbits = 0xa8e
+                    0x0a90                  CM2MSKCON = 0xa90
+                    0x0a90                  _CM2MSKCON = 0xa90
+                    0x0a90                  _CM2MSKCONbits = 0xa90
+                    0x0a92                  CM2FLTR = 0xa92
+                    0x0a92                  _CM2FLTR = 0xa92
+                    0x0a92                  _CM2FLTRbits = 0xa92
+                    0x0a94                  CM3CON = 0xa94
+                    0x0a94                  _CM3CON = 0xa94
+                    0x0a94                  _CM3CONbits = 0xa94
+                    0x0a96                  CM3MSKSRC = 0xa96
+                    0x0a96                  _CM3MSKSRC = 0xa96
+                    0x0a96                  _CM3MSKSRCbits = 0xa96
+                    0x0a98                  CM3MSKCON = 0xa98
+                    0x0a98                  _CM3MSKCON = 0xa98
+                    0x0a98                  _CM3MSKCONbits = 0xa98
+                    0x0a9a                  CM3FLTR = 0xa9a
+                    0x0a9a                  _CM3FLTR = 0xa9a
+                    0x0a9a                  _CM3FLTRbits = 0xa9a
+                    0x0a9c                  CM4CON = 0xa9c
+                    0x0a9c                  _CM4CON = 0xa9c
+                    0x0a9c                  _CM4CONbits = 0xa9c
+                    0x0a9e                  CM4MSKSRC = 0xa9e
+                    0x0a9e                  _CM4MSKSRC = 0xa9e
+                    0x0a9e                  _CM4MSKSRCbits = 0xa9e
+                    0x0aa0                  CM4MSKCON = 0xaa0
+                    0x0aa0                  _CM4MSKCON = 0xaa0
+                    0x0aa0                  _CM4MSKCONbits = 0xaa0
+                    0x0aa2                  CM4FLTR = 0xaa2
+                    0x0aa2                  _CM4FLTR = 0xaa2
+                    0x0aa2                  _CM4FLTRbits = 0xaa2
+                    0x0ac0                  PTGCST = 0xac0
+                    0x0ac0                  _PTGCST = 0xac0
+                    0x0ac0                  _PTGCSTbits = 0xac0
+                    0x0ac2                  PTGCON = 0xac2
+                    0x0ac2                  _PTGCON = 0xac2
+                    0x0ac2                  _PTGCONbits = 0xac2
+                    0x0ac4                  PTGBTE = 0xac4
+                    0x0ac4                  _PTGBTE = 0xac4
+                    0x0ac4                  _PTGBTEbits = 0xac4
+                    0x0ac6                  PTGHOLD = 0xac6
+                    0x0ac6                  _PTGHOLD = 0xac6
+                    0x0ac8                  PTGT0LIM = 0xac8
+                    0x0ac8                  _PTGT0LIM = 0xac8
+                    0x0aca                  PTGT1LIM = 0xaca
+                    0x0aca                  _PTGT1LIM = 0xaca
+                    0x0acc                  PTGSDLIM = 0xacc
+                    0x0acc                  _PTGSDLIM = 0xacc
+                    0x0ace                  PTGC0LIM = 0xace
+                    0x0ace                  _PTGC0LIM = 0xace
+                    0x0ad0                  PTGC1LIM = 0xad0
+                    0x0ad0                  _PTGC1LIM = 0xad0
+                    0x0ad2                  PTGADJ = 0xad2
+                    0x0ad2                  _PTGADJ = 0xad2
+                    0x0ad4                  PTGL0 = 0xad4
+                    0x0ad4                  _PTGL0 = 0xad4
+                    0x0ad6                  PTGQPTR = 0xad6
+                    0x0ad6                  _PTGQPTR = 0xad6
+                    0x0ad6                  _PTGQPTRbits = 0xad6
+                    0x0ad8                  PTGQUE0 = 0xad8
+                    0x0ad8                  _PTGQUE0 = 0xad8
+                    0x0ad8                  _PTGQUE0bits = 0xad8
+                    0x0ada                  PTGQUE1 = 0xada
+                    0x0ada                  _PTGQUE1 = 0xada
+                    0x0ada                  _PTGQUE1bits = 0xada
+                    0x0adc                  PTGQUE2 = 0xadc
+                    0x0adc                  _PTGQUE2 = 0xadc
+                    0x0adc                  _PTGQUE2bits = 0xadc
+                    0x0ade                  PTGQUE3 = 0xade
+                    0x0ade                  _PTGQUE3 = 0xade
+                    0x0ade                  _PTGQUE3bits = 0xade
+                    0x0ae0                  PTGQUE4 = 0xae0
+                    0x0ae0                  _PTGQUE4 = 0xae0
+                    0x0ae0                  _PTGQUE4bits = 0xae0
+                    0x0ae2                  PTGQUE5 = 0xae2
+                    0x0ae2                  _PTGQUE5 = 0xae2
+                    0x0ae2                  _PTGQUE5bits = 0xae2
+                    0x0ae4                  PTGQUE6 = 0xae4
+                    0x0ae4                  _PTGQUE6 = 0xae4
+                    0x0ae4                  _PTGQUE6bits = 0xae4
+                    0x0ae6                  PTGQUE7 = 0xae6
+                    0x0ae6                  _PTGQUE7 = 0xae6
+                    0x0ae6                  _PTGQUE7bits = 0xae6
+                    0x0b00                  DMA0CON = 0xb00
+                    0x0b00                  _DMA0CON = 0xb00
+                    0x0b00                  _DMA0CONbits = 0xb00
+                    0x0b02                  DMA0REQ = 0xb02
+                    0x0b02                  _DMA0REQ = 0xb02
+                    0x0b02                  _DMA0REQbits = 0xb02
+                    0x0b04                  DMA0STAL = 0xb04
+                    0x0b04                  _DMA0STAL = 0xb04
+                    0x0b06                  DMA0STAH = 0xb06
+                    0x0b06                  _DMA0STAH = 0xb06
+                    0x0b06                  _DMA0STAHbits = 0xb06
+                    0x0b08                  DMA0STBL = 0xb08
+                    0x0b08                  _DMA0STBL = 0xb08
+                    0x0b0a                  DMA0STBH = 0xb0a
+                    0x0b0a                  _DMA0STBH = 0xb0a
+                    0x0b0a                  _DMA0STBHbits = 0xb0a
+                    0x0b0c                  DMA0PAD = 0xb0c
+                    0x0b0c                  _DMA0PAD = 0xb0c
+                    0x0b0e                  DMA0CNT = 0xb0e
+                    0x0b0e                  _DMA0CNT = 0xb0e
+                    0x0b0e                  _DMA0CNTbits = 0xb0e
+                    0x0b10                  DMA1CON = 0xb10
+                    0x0b10                  _DMA1CON = 0xb10
+                    0x0b10                  _DMA1CONbits = 0xb10
+                    0x0b12                  DMA1REQ = 0xb12
+                    0x0b12                  _DMA1REQ = 0xb12
+                    0x0b12                  _DMA1REQbits = 0xb12
+                    0x0b14                  DMA1STAL = 0xb14
+                    0x0b14                  _DMA1STAL = 0xb14
+                    0x0b16                  DMA1STAH = 0xb16
+                    0x0b16                  _DMA1STAH = 0xb16
+                    0x0b16                  _DMA1STAHbits = 0xb16
+                    0x0b18                  DMA1STBL = 0xb18
+                    0x0b18                  _DMA1STBL = 0xb18
+                    0x0b1a                  DMA1STBH = 0xb1a
+                    0x0b1a                  _DMA1STBH = 0xb1a
+                    0x0b1a                  _DMA1STBHbits = 0xb1a
+                    0x0b1c                  DMA1PAD = 0xb1c
+                    0x0b1c                  _DMA1PAD = 0xb1c
+                    0x0b1e                  DMA1CNT = 0xb1e
+                    0x0b1e                  _DMA1CNT = 0xb1e
+                    0x0b1e                  _DMA1CNTbits = 0xb1e
+                    0x0b20                  DMA2CON = 0xb20
+                    0x0b20                  _DMA2CON = 0xb20
+                    0x0b20                  _DMA2CONbits = 0xb20
+                    0x0b22                  DMA2REQ = 0xb22
+                    0x0b22                  _DMA2REQ = 0xb22
+                    0x0b22                  _DMA2REQbits = 0xb22
+                    0x0b24                  DMA2STAL = 0xb24
+                    0x0b24                  _DMA2STAL = 0xb24
+                    0x0b26                  DMA2STAH = 0xb26
+                    0x0b26                  _DMA2STAH = 0xb26
+                    0x0b26                  _DMA2STAHbits = 0xb26
+                    0x0b28                  DMA2STBL = 0xb28
+                    0x0b28                  _DMA2STBL = 0xb28
+                    0x0b2a                  DMA2STBH = 0xb2a
+                    0x0b2a                  _DMA2STBH = 0xb2a
+                    0x0b2a                  _DMA2STBHbits = 0xb2a
+                    0x0b2c                  DMA2PAD = 0xb2c
+                    0x0b2c                  _DMA2PAD = 0xb2c
+                    0x0b2e                  DMA2CNT = 0xb2e
+                    0x0b2e                  _DMA2CNT = 0xb2e
+                    0x0b2e                  _DMA2CNTbits = 0xb2e
+                    0x0b30                  DMA3CON = 0xb30
+                    0x0b30                  _DMA3CON = 0xb30
+                    0x0b30                  _DMA3CONbits = 0xb30
+                    0x0b32                  DMA3REQ = 0xb32
+                    0x0b32                  _DMA3REQ = 0xb32
+                    0x0b32                  _DMA3REQbits = 0xb32
+                    0x0b34                  DMA3STAL = 0xb34
+                    0x0b34                  _DMA3STAL = 0xb34
+                    0x0b36                  DMA3STAH = 0xb36
+                    0x0b36                  _DMA3STAH = 0xb36
+                    0x0b36                  _DMA3STAHbits = 0xb36
+                    0x0b38                  DMA3STBL = 0xb38
+                    0x0b38                  _DMA3STBL = 0xb38
+                    0x0b3a                  DMA3STBH = 0xb3a
+                    0x0b3a                  _DMA3STBH = 0xb3a
+                    0x0b3a                  _DMA3STBHbits = 0xb3a
+                    0x0b3c                  DMA3PAD = 0xb3c
+                    0x0b3c                  _DMA3PAD = 0xb3c
+                    0x0b3e                  DMA3CNT = 0xb3e
+                    0x0b3e                  _DMA3CNT = 0xb3e
+                    0x0b3e                  _DMA3CNTbits = 0xb3e
+                    0x0bf0                  DMAPWC = 0xbf0
+                    0x0bf0                  _DMAPWC = 0xbf0
+                    0x0bf0                  _DMAPWCbits = 0xbf0
+                    0x0bf2                  DMARQC = 0xbf2
+                    0x0bf2                  _DMARQC = 0xbf2
+                    0x0bf2                  _DMARQCbits = 0xbf2
+                    0x0bf4                  DMAPPS = 0xbf4
+                    0x0bf4                  _DMAPPS = 0xbf4
+                    0x0bf4                  _DMAPPSbits = 0xbf4
+                    0x0bf6                  DMALCA = 0xbf6
+                    0x0bf6                  _DMALCA = 0xbf6
+                    0x0bf6                  _DMALCAbits = 0xbf6
+                    0x0bf8                  DSADRL = 0xbf8
+                    0x0bf8                  _DSADRL = 0xbf8
+                    0x0bfa                  DSADRH = 0xbfa
+                    0x0bfa                  _DSADRH = 0xbfa
+                    0x0bfa                  _DSADRHbits = 0xbfa
+                    0x0e00                  TRISA = 0xe00
+                    0x0e00                  _TRISA = 0xe00
+                    0x0e00                  _TRISAbits = 0xe00
+                    0x0e02                  PORTA = 0xe02
+                    0x0e02                  _PORTA = 0xe02
+                    0x0e02                  _PORTAbits = 0xe02
+                    0x0e04                  LATA = 0xe04
+                    0x0e04                  _LATA = 0xe04
+                    0x0e04                  _LATAbits = 0xe04
+                    0x0e06                  ODCA = 0xe06
+                    0x0e06                  _ODCA = 0xe06
+                    0x0e06                  _ODCAbits = 0xe06
+                    0x0e08                  CNENA = 0xe08
+                    0x0e08                  _CNENA = 0xe08
+                    0x0e08                  _CNENAbits = 0xe08
+                    0x0e0a                  CNPUA = 0xe0a
+                    0x0e0a                  _CNPUA = 0xe0a
+                    0x0e0a                  _CNPUAbits = 0xe0a
+                    0x0e0c                  CNPDA = 0xe0c
+                    0x0e0c                  _CNPDA = 0xe0c
+                    0x0e0c                  _CNPDAbits = 0xe0c
+                    0x0e0e                  ANSELA = 0xe0e
+                    0x0e0e                  _ANSELA = 0xe0e
+                    0x0e0e                  _ANSELAbits = 0xe0e
+                    0x0e10                  TRISB = 0xe10
+                    0x0e10                  _TRISB = 0xe10
+                    0x0e10                  _TRISBbits = 0xe10
+                    0x0e12                  PORTB = 0xe12
+                    0x0e12                  _PORTB = 0xe12
+                    0x0e12                  _PORTBbits = 0xe12
+                    0x0e14                  LATB = 0xe14
+                    0x0e14                  _LATB = 0xe14
+                    0x0e14                  _LATBbits = 0xe14
+                    0x0e16                  ODCB = 0xe16
+                    0x0e16                  _ODCB = 0xe16
+                    0x0e16                  _ODCBbits = 0xe16
+                    0x0e18                  CNENB = 0xe18
+                    0x0e18                  _CNENB = 0xe18
+                    0x0e18                  _CNENBbits = 0xe18
+                    0x0e1a                  CNPUB = 0xe1a
+                    0x0e1a                  _CNPUB = 0xe1a
+                    0x0e1a                  _CNPUBbits = 0xe1a
+                    0x0e1c                  CNPDB = 0xe1c
+                    0x0e1c                  _CNPDB = 0xe1c
+                    0x0e1c                  _CNPDBbits = 0xe1c
+                    0x0e1e                  ANSELB = 0xe1e
+                    0x0e1e                  _ANSELB = 0xe1e
+                    0x0e1e                  _ANSELBbits = 0xe1e
+                    0x0fa0                  _APPO = 0xfa0
+                    0x0fa0                  __APPO = 0xfa0
+                    0x0fa2                  _APPIN = 0xfa2
+                    0x0fa2                  __APPIN = 0xfa2
+                    0x0fa4                  APPS = 0xfa4
+                    0x0fa4                  _APPS = 0xfa4
+                    0x0fa4                  _APPSbits = 0xfa4
+                    0x0fa6                  STROUTL = 0xfa6
+                    0x0fa6                  _STROUTL = 0xfa6
+                    0x0fa8                  STROUTH = 0xfa8
+                    0x0fa8                  _STROUTH = 0xfa8
+                    0x0faa                  STROVCNT = 0xfaa
+                    0x0faa                  _STROVCNT = 0xfaa
+                    0x0ff0                  JDATAH = 0xff0
+                    0x0ff0                  _JDATAH = 0xff0
+                    0x0ff2                  JDATAL = 0xff2
+                    0x0ff2                  _JDATAL = 0xff2
+                    0x0144                  IC1 = 0x144
+                    0x0144                  _IC1 = 0x144
+                    0x014c                  IC2 = 0x14c
+                    0x014c                  _IC2 = 0x14c
+                    0x0154                  IC3 = 0x154
+                    0x0154                  _IC3 = 0x154
+                    0x015c                  IC4 = 0x15c
+                    0x015c                  _IC4 = 0x15c
+                    0x0904                  OC1 = 0x904
+                    0x0904                  _OC1 = 0x904
+                    0x090e                  OC2 = 0x90e
+                    0x090e                  _OC2 = 0x90e
+                    0x0918                  OC3 = 0x918
+                    0x0918                  _OC3 = 0x918
+                    0x0922                  OC4 = 0x922
+                    0x0922                  _OC4 = 0x922
+                    0x0240                  SPI1 = 0x240
+                    0x0240                  _SPI1 = 0x240
+                    0x0260                  SPI2 = 0x260
+                    0x0260                  _SPI2 = 0x260
+                    0x0220                  UART1 = 0x220
+                    0x0220                  _UART1 = 0x220
+                    0x0230                  UART2 = 0x230
+                    0x0230                  _UART2 = 0x230
+START GROUP
+LOAD /opt/microchip/xc16/v1.26/bin/bin/../../lib/liblega-pic30-elf.a
+LOAD /opt/microchip/xc16/v1.26/bin/bin/../../lib/libm-elf.a
+LOAD /opt/microchip/xc16/v1.26/bin/bin/../../lib/liblega-c-elf.a
+END GROUP
+OUTPUT(dist/default/debug/ForthEx.X.debug.elf elf32-pic30)
+LOAD FGS
+
+.user_dict          0x1900       0xa700
+ .user_dict         0x1900       0xa700 build/default/debug/core.o
+                    0x1900                  _user_dict
+
+.return.stack.bss
+                    0x1000         0x80
+ .return.stack.bss
+                    0x1000         0x80 build/default/debug/core.o
+                    0x1000                  rstack
+
+.param.stack.bss
+                    0x1080         0x40
+ .param.stack.bss
+                    0x1080         0x40 build/default/debug/core.o
+                    0x1080                  pstack
+
+.tvout.bss          0x10c0        0x60a
+ .tvout.bss         0x10c0        0x60a build/default/debug/TVout.o
+                    0x10c3                  video_on
+                    0x10c4                  xpos
+                    0x10c5                  ypos
+                    0x10c6                  cursor_dly
+                    0x10c8                  cursor_sema
+                    0x10c9                  fcursor
+                    0x10ca                  _video_buffer
+
+.buffers.bss        0x16ca         0xa0
+ .buffers.bss       0x16ca         0xa0 build/default/debug/core.o
+                    0x16ca                  tib
+                    0x171a                  pad
+
+.ps2.bss            0x176a         0x2c
+ .ps2.bss           0x176a         0x2c build/default/debug/ps2.o
+                    0x1770                  ps2_queue
+                    0x1790                  ps2_head
+                    0x1792                  ps2_tail
+                    0x1794                  key_state
+
+.serial.bss         0x1796         0x28
+ .serial.bss        0x1796         0x28 build/default/debug/serial.o
+                    0x1796                  rx_queue
+                    0x17a6                  tx_queue
+                    0x17b6                  tx_wait
+                    0x17b9                  tx_tail
+                    0x17ba                  rx_in
+                    0x17bc                  rx_head
+
+.keyboard.bss       0x17be         0x24
+ .keyboard.bss      0x17be         0x24 build/default/debug/keyboard.o
+                    0x17be                  kbd_queue
+                    0x17de                  kbd_head
+
+.user_vars.bss      0x17e2         0x1c
+ .user_vars.bss
+                    0x17e2         0x1c build/default/debug/core.o
+                    0x17e2                  _TIB
+                    0x17e2                  _USER_VARS
+                    0x17e4                  _PAD
+                    0x17e6                  _SOURCE
+                    0x17ea                  _SOURCE_ID
+                    0x17ec                  _DP
+                    0x17ee                  _STATE
+                    0x17f0                  _BASE
+                    0x17f2                  _TOIN
+                    0x17f4                  _S0
+                    0x17f6                  _R0
+                    0x17f8                  _HP
+                    0x17fa                  _LATEST
+                    0x17fc                  _SYSLATEST
+
+.hardware.bss       0x17fe          0x6
+ .hardware.bss      0x17fe          0x6 build/default/debug/hardware.o
+                    0x17fe                  systicks
+                    0x1800                  seed
+
+.sound.bss          0x1804          0x2
+ .sound.bss         0x1804          0x2 build/default/debug/sound.o
+                    0x1804                  tone_len
+
+.start.text       0x000200         0x16
+ .start.text      0x000200         0x16 build/default/debug/hardware.o
+                  0x000200                  __reset
+
+.ivt._T2Interrupt
+                  0x000022          0x2
+ .ivt._T2Interrupt
+                  0x000022          0x2 build/default/debug/TVout.o
+
+.ivt._OC2Interrupt
+                  0x000020          0x2
+ .ivt._OC2Interrupt
+                  0x000020          0x2 build/default/debug/TVout.o
+
+.link               0xfffe          0x2 address de chargement 0x007ffe  
+ .link              0xfffe          0x2 build/default/debug/core.o
+                    0xfffe                  _sys_latest
+
+.ivt._MathError
+                  0x00000c          0x2
+ .ivt._MathError
+                  0x00000c          0x2 build/default/debug/core.o
+
+.ivt._T1Interrupt
+                  0x00001a          0x2
+ .ivt._T1Interrupt
+                  0x00001a          0x2 build/default/debug/keyboard.o
+
+.ivt._INT1Interrupt
+                  0x00003c          0x2
+ .ivt._INT1Interrupt
+                  0x00003c          0x2 build/default/debug/ps2.o
+
+.ivt._U1RXInterrupt
+                  0x00002a          0x2
+ .ivt._U1RXInterrupt
+                  0x00002a          0x2 build/default/debug/serial.o
+
+.ivt._U1TXInterrupt
+                  0x00002c          0x2
+ .ivt._U1TXInterrupt
+                  0x00002c          0x2 build/default/debug/serial.o
+
+.font.const         0x8c8e        0x400 address de chargement 0x000c8e  
+ .font.const        0x8c8e        0x400 build/default/debug/font.o
+                    0x8c8e                  _font
+
+.keybind.const      0x908e         0xc2 address de chargement 0x00108e  
+ .keybind.const
+                    0x908e         0xc2 build/default/debug/keybind.o
+                    0x908e                  ascii
+                    0x90fa                  shifted
+                    0x9126                  mod
+                    0x9132                  xmod
+                    0x9138                  extended
+
+.ver_str.const      0x9150         0x1e address de chargement 0x001150  
+ .ver_str.const
+                    0x9150         0x1e build/default/debug/core.o
+                    0x9150                  _version
+                    0x915d                  _compile_only
+
+.forth_code.text
+                  0x00116e        0x69a
+ .forth_code.text
+                  0x00116e        0x4c6 build/default/debug/core.o
+                  0x00116e                  __MathError
+                  0x00116e                  _warm
+                  0x00117a                  ENTER
+                  0x001184                  DOUSER
+                  0x001190                  code_LIT
+                  0x00119a                  code_CLIT
+                  0x0011a6                  code_BRANCH
+                  0x0011ae                  code_TBRANCH
+                  0x0011bc                  code_ZBRANCH
+                  0x0011ca                  code_DODO
+                  0x0011dc                  code_DOLOOP
+                  0x0011f6                  code_IPFETCH
+                  0x001200                  code_IPSTORE
+                  0x00120a                  code_EXIT
+                  0x001212                  code_REBOOT
+                  0x001214                  code_EXECUTE
+                  0x00121c                  code_FETCH
+                  0x001224                  code_CFETCH
+                  0x00122e                  code_STORE
+                  0x00123a                  code_CSTORE
+                  0x001246                  code_DOI
+                  0x001250                  code_DOJ
+                  0x00125a                  code_UNLOOP
+                  0x001264                  code_DUP
+                  0x00126c                  code_TWODUP
+                  0x001278                  code_QDUP
+                  0x001284                  code_DROP
+                  0x00128c                  code_TWODROP
+                  0x001296                  code_SWAP
+                  0x0012a2                  code_TWOSWAP
+                  0x0012b6                  code_ROT
+                  0x0012c6                  code_NROT
+                  0x0012d6                  code_OVER
+                  0x0012e0                  code_NIP
+                  0x0012e8                  code_TOR
+                  0x0012f2                  code_RFROM
+                  0x0012fc                  code_RFETCH
+                  0x001306                  code_SPFETCH
+                  0x001312                  code_SPSTORE
+                  0x00131c                  code_RPFETCH
+                  0x001326                  code_RPSTORE
+                  0x001330                  code_TUCK
+                  0x00133c                  code_PLUS
+                  0x001344                  code_MINUS
+                  0x00134e                  code_ONEPLUS
+                  0x001356                  code_TWOPLUS
+                  0x00135e                  code_ONEMINUS
+                  0x001366                  code_TWOMINUS
+                  0x00136e                  code_TWOSTAR
+                  0x001376                  code_TWOSLASH
+                  0x00137e                  code_LSHIFT
+                  0x001386                  code_RSHIFT
+                  0x00138e                  code_PLUSSTORE
+                  0x00139c                  code_ADDPLUS
+                  0x0013ac                  code_MULTIPLY
+                  0x0013ba                  code_DIVIDE
+                  0x0013c8                  code_DIVMOD
+                  0x0013d8                  code_UMAX
+                  0x0013e6                  code_UMIN
+                  0x0013f4                  code_EVEN
+                  0x001402                  code_ODD
+                  0x001410                  code_AND
+                  0x001418                  code_OR
+                  0x001420                  code_XOR
+                  0x001428                  code_INVERT
+                  0x001430                  code_NEGATE
+                  0x001438                  code_ZEROEQ
+                  0x001442                  code_ZEROLT
+                  0x00144e                  code_ZEROGT
+                  0x001458                  code_EQUAL
+                  0x001468                  code_NOTEQ
+                  0x001478                  code_LESS
+                  0x001488                  code_GREATER
+                  0x001498                  code_ULESS
+                  0x0014a8                  code_UGREATER
+                  0x0014b8                  code_CELL
+                  0x0014c2                  code_CELLPLUS
+                  0x0014ca                  code_CELLS
+                  0x0014d4                  code_MOVE
+                  0x0014f0                  code_CMOVE
+                  0x00150c                  code_VERSION
+                  0x001516                  code_RAMEND
+                  0x001520                  code_IMMED
+                  0x00152a                  code_HIDDEN
+                  0x001534                  code_LENMASK
+                  0x00153e                  code_BL
+                  0x001548                  code_TIBSIZE
+                  0x001552                  code_PADSIZE
+                  0x00155c                  code_ULIMIT
+                  0x001566                  code_DOCOL
+                  0x001570                  code_SOURCE
+                  0x00157e                  code_SRCSTORE
+                  0x00158c                  code_UPPER
+                  0x0015ae                  code_WORD
+                  0x0015ea                  code_FIND
+                  0x001632                  code_INFLOOP
+ .forth_code.text
+                  0x001634        0x1d4 build/default/debug/TVout.o
+                  0x001634                  code_TVOUT_INIT
+                  0x001698                  code_VIDON
+                  0x0016a4                  code_CURENBL
+                  0x0016c0                  code_CLS
+                  0x0016d6                  code_SCRLUP
+                  0x0016e0                  code_SCRLDN
+                  0x0016ea                  code_GETX
+                  0x0016f8                  code_GETY
+                  0x001706                  code_SETX
+                  0x001724                  code_SETY
+                  0x001742                  code_LEFT
+                  0x001768                  code_RIGHT
+                  0x001792                  code_TGLCHAR
+                  0x0017a8                  code_EMIT
+                  0x0017c8                  code_CR
+                  0x0017da                  code_SPACE
+                  0x0017e0                  code_CLRLN
+
+.text             0x001808        0x158
+ .text            0x001808        0x158 build/default/debug/keyboard.o
+                  0x001880                  get_code
+                  0x0018ae                  kbd_get
+
+.forth_code.text
+                  0x001960        0x20c
+ .forth_code.text
+                  0x001960        0x138 build/default/debug/store.o
+                  0x001960                  code_STORE_INIT
+                  0x001974                  spi_send_address
+                  0x00199a                  wait_wip0
+                  0x0019b4                  code_RSTORE
+                  0x0019e6                  code_RLOAD
+                  0x001a18                  code_ESTORE
+                  0x001a60                  code_ELOAD
+ .forth_code.text
+                  0x001a98         0xd4 build/default/debug/hardware.o
+                  0x001a98                  code_SET_CLOCK
+                  0x001aa8                  code_CLR_RAM
+                  0x001ac0                  code_IO_LOCK
+                  0x001ac8                  code_VARS_INIT
+                  0x001af8                  code_TICKS
+                  0x001b02                  code_MSEC
+                  0x001b12                  code_LFSR
+                  0x001b2a                  code_RAND
+                  0x001b5c                  code_SRAND
+
+.text             0x001b6c         0x88
+ .text            0x001b6c         0x88 build/default/debug/TVout.o
+                  0x001b6c                  cursor_blink
+                  0x001b78                  toggle_char
+                  0x001b8e                  cursor_enable
+                  0x001b9e                  cursor_disable
+                  0x001bac                  scroll_up
+                  0x001bd2                  scroll_down
+
+.forth_code.text
+                  0x001bf4        0x178
+ .forth_code.text
+                  0x001bf4         0x88 build/default/debug/serial.o
+                  0x001bf4                  code_SERIAL_INIT
+                  0x001c2e                  code_SEMIT
+                  0x001c5c                  code_SGET
+ .forth_code.text
+                  0x001c7c         0x72 build/default/debug/ps2.o
+                  0x001c7c                  code_PS2_INIT
+                  0x001cce                  ps2_send
+ .forth_code.text
+                  0x001cee         0x4c build/default/debug/keyboard.o
+                  0x001cee                  code_KBD_RESET
+                  0x001d04                  code_QKEY
+                  0x001d1a                  code_KEY
+                  0x001d2c                  code_KBD_CMD
+ .forth_code.text
+                  0x001d3a         0x32 build/default/debug/sound.o
+                  0x001d3a                  code_SOUND_INIT
+                  0x001d56                  code_TONE
+
+.text             0x001d6c         0x32
+ .text            0x001d6c         0x26 build/default/debug/core.o
+ .text            0x001d92          0xc build/default/debug/hardware.o
+                  0x001d92                  _cold

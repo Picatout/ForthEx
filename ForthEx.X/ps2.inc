@@ -41,7 +41,7 @@
 .equ R_SHIFT,  0x59
 .equ L_CTRL,   0x14
 .equ L_ALT,    0x11
-.equ ENTER,    0x5A
+.equ RETRN,    0x5A
 .equ CAPS,     0x58
 .equ SCROLL,   0x7E
 .equ NUM,      0x77
@@ -78,7 +78,7 @@
 .equ L_GUI,    0x1f
 .equ R_GUI,    0x27
 .equ R_ALT,    0x11
-.equ APPS,     0x2f 
+.equ APPLI,    0x2f 
 .equ INSERT,   0x70
 .equ HOME,     0x6C
 .equ PGUP,     0x7D

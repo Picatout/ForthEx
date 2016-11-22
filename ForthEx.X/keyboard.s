@@ -83,6 +83,10 @@ isr_exit:
     retfie
     
 .text
+; convertie les codes clavier
+; en code ASCII
+; la combinaison CTRL-ALT-SUPPR
+; réinitialise l'ordinateur    
 scancode_convert:
     mov ps2_head, W0
     cp ps2_tail
@@ -122,13 +126,22 @@ scancode_convert:
     bset key_state, #F_XKEY ; c'est une touche étendue
     bra 9f
 4:  
-    ; vérification touche CTRL de gauche
+    ; vérification touche CTRL
     mov #L_CTRL,W1
     cp W1, W0
-    bra neq, 5f
+    bra neq, alt_test
     bclr key_state, #F_CTRL
     btss key_state, #F_KREL
     bset key_state, #F_CTRL
+    bclr key_state, #F_KREL
+    bclr key_state, #F_XKEY
+alt_test:
+    mov #L_ALT,W1
+    cp W1,W0
+    bra neq, 5f
+    bclr key_state, #F_ALT
+    btss key_state, #F_KREL
+    bset key_state, #F_ALT
     bclr key_state, #F_KREL
     bclr key_state, #F_XKEY
 5:  
@@ -143,7 +156,7 @@ scancode_convert:
     bra neq, 8f
     btss key_state, #F_CTRL
     bra 8f
-    reset
+    goto _warm
 8:    
     ; tranfert code dans file
     ; kbd_queue
@@ -173,7 +186,7 @@ scancode_convert:
 ; retourne le code clavier
 ; dans W0 sinon retourne 0
 ;;;;;;;;;;;;;;;;;;;;;;;
-.global get_code    
+;.global get_code    
 get_code:
     clr W0
     mov kbd_head, W1
@@ -230,7 +243,7 @@ search_table:
 ; référence scancode: http://www.computer-engineering.org/ps2keyboard/scancodes2.html    
 ; Le décodage est partiel sinon la routine serait encore plus complexe. 
 ; Les relachements de touches sont ignorés sauf pour <CTRL>,<ALT>,<SHIFT>     
-.global kbd_get
+;.global kbd_get
 kbd_get:
     push DSRPAG
     call get_code
@@ -326,6 +339,41 @@ kbd_goodkey:  ; sortie touche acceptée
 kbd_no_key: ; sortie file vide
     pop DSRPAG
     return
+
+
+;;;;;;;;;;;;;;;;;;;;;;
+; définitions Forth
+;;;;;;;;;;;;;;;;;;;;;;    
+
+HEADLESS KBD_RESET, HWORD  ; ( -- )
+    .word LIT,KCMD_RESET,TOKBD
+    .word LIT,750,USEC
+    .word EXIT
+    
+DEFCODE "?KEY",4,,QKEY,DOT  ; ( -- 0 | c T )
+    call kbd_get
+    DPUSH
+    mov W0, T
+    cp0 W0
+    bra eq, 1f
+    DPUSH
+    setm T
+1:    
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;
+; attend une touche
+; du clavier
+;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCODE "KEY",3,,KEY,QKEY ; ( -- c)
+0:
+    call kbd_get
+    cp0 W0
+    bra z, 0b
+    DPUSH
+    mov W0, T
+    NEXT
+    
 
     
 .end
