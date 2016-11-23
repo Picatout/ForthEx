@@ -239,22 +239,34 @@ DEFCODE "C@",2,,CFETCH,FETCH  ; ( c-addr -- c )
     mov.b [T], T
     ze T, T
     NEXT
+
+DEFCODE "2@",2,,TWOFETCH,CFETCH ; ( addr -- n1 n2 )
+    mov [T],W0
+    add #CELL_SIZE,T
+    mov [T],[++DSP]
+    mov W0,T
+    NEXT
     
-DEFCODE "!",1,,STORE,CFETCH  ; ( n  addr -- )
-    mov [DSP--],W0
-    mov W0,[T]
+DEFCODE "!",1,,STORE,TWOFETCH  ; ( n  addr -- )
+    mov [DSP--],[T]
     DPOP
     NEXT
     
 DEFCODE "C!",2,,CSTORE,STORE  ; ( char c-addr  -- )
-    mov [DSP--],W0
+    mov [DSP--],w0
     mov.b W0,[T]
     DPOP
     NEXT
     
-
+DEFCODE "2!",2,,TWOSTORE,CSTORE ; ( n1 n2 addr -- ) n2->addr, n1->addr+CELL_SÌZE
+    mov [DSP--],[T]
+    add #CELL_SIZE,T
+    mov [DSP--],[T]
+    DPOP
+    NEXT
+    
 ; empile compteur de boucle    
-DEFCODE "I",1,,DOI,CSTORE  ; ( -- n )
+DEFCODE "I",1,,DOI,TWOSTORE  ; ( -- n )
     DPUSH
     mov I, T
     NEXT
@@ -335,8 +347,15 @@ DEFCODE "OVER",4,,OVER,NROT  ; ( n1 n2 -- n1 n2 n1 )
     DPUSH
     mov [DSP-2],T
     NEXT
+
+DEFCODE "2OVER",5,,TWOOVER,OVER ; ( x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2 )
+    DPUSH
+    mov [DSP-4],T
+    mov [DSP-6],W0
+    mov W0,[++DSP]
+    NEXT
     
-DEFCODE "NIP",3,,NIP,OVER   ; ( n1 n2 -- n2 )
+DEFCODE "NIP",3,,NIP,TWOOVER   ; ( n1 n2 -- n2 )
     dec2 DSP,DSP
     NEXT
     
@@ -382,11 +401,18 @@ DEFCODE "TUCK",4,,TUCK,RPSTORE  ; ( n1 n2 -- n2 n1 n2 )
     mov W0,[++DSP]
     NEXT
 
+DEFCODE "DEPTH",5,,DEPTH,TUCK ; ( -- +n1 ) nombre d'élément sur la pile data avant que +n1 soit inséré
+    mov _S0,W0
+    sub DSP,W0,W0
+    DPUSH
+    lsr W0,T
+    NEXT
+    
 ;;;;;;;;;;;;;;;;
 ;     MATH
 ;;;;;;;;;;;;;;;;
     
-DEFWORD "HEX",3,,HEX,TUCK ; ( -- )
+DEFWORD "HEX",3,,HEX,DEPTH ; ( -- )
     .word LIT,16,BASE,STORE,EXIT
     
 DEFWORD "DECIMAL",7,,DECIMAL,HEX ; ( -- )
@@ -425,11 +451,19 @@ DEFCODE "2/",2,,TWOSLASH,TWOSTAR ; ( n -- n ) n/2
     lsr T,T
     NEXT
     
-DEFCODE "LSHIFT",6,,LSHIFT,TWOSLASH ; ( x1 -- x2 ) x2=x1<<1    
+DEFCODE "LSHIFT",6,,LSHIFT,TWOSLASH ; ( x1 u -- x2 ) x2=x1<<u    
+    mov T, W0
+    DPOP
+    dec W0,W0
+    repeat W0
     sl T,T
     NEXT
     
-DEFCODE "RSHIFT",6,,RSHIFT,LSHIFT ; ( x1 -- x2 ) x2=x1>>1
+DEFCODE "RSHIFT",6,,RSHIFT,LSHIFT ; ( x1 u -- x2 ) x2=x1>>u
+    mov T,W0
+    DPOP
+    dec W0,W0
+    repeat W0
     lsr T,T
     NEXT
     
@@ -461,11 +495,30 @@ DEFCODE "/",1,,DIVIDE,MULTIPLY ; ( n1 n2 -- n1/n2 )
     div.s W2,T
     mov W0, T
     NEXT
+
+DEFCODE "*/",2,,STARSLASH,DIVIDE   ; ( n1 n2 n3 -- n4 ) n1*n2/n3, n4 quotient
+    mov [DSP--],W0
+    mov [DSP--],W1
+    mul.ss W0,W1,W0
+    repeat #17
+    div.s W0,T
+    mov W0,T
+    NEXT
+
+DEFCODE "*/MOD",5,,STARSLASHMOD,STARSLASH ; ( n1 n2 n3 -- n4 n5 ) n1*n2/n3, n4 reste, n5 quotient
+    mov [DSP--],W0
+    mov [DSP--],W1
+    mul.ss W0,W1,W0
+    repeat #17
+    div.s W0,T 
+    mov W1,[++DSP]
+    mov W0,T
+    NEXT
     
-DEFCODE "/MOD",4,,DIVMOD,DIVIDE ; ( n1 n2 -- r q )
+DEFCODE "/MOD",4,,DIVMOD,STARSLASHMOD ; ( n1 n2 -- r q )
     mov [DSP],W2
     repeat #17
-    div.s W2,T
+    div.sd W2,T
     mov W0,T     ; quotient
     mov W1,[DSP] ; reste
     NEXT

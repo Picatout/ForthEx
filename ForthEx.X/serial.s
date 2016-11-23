@@ -141,17 +141,20 @@ HEADLESS SERIAL_INIT,CODE ; ( -- )
     bset SER_STA, #UTXEN
     NEXT
     
-DEFCODE "BAUD",4,,BAUD,KEY   
+DEFCODE "BAUD",4,,BAUD,KEY   ; ( u -- ) u<=57600
     bclr SER_MODE, #UARTEN
-    mov #16,W0
-    mul.uu T,W0,W2
-    DPOP
     mov #FCY&0xffff,W0
     mov #FCY>>16,W1
-    div.ud W0,W2
+    mov #4,W2 ; FCY/16
+1:  lsr W1,W1
+    rrc W0,W0
+    dec W2,W2
+    repeat #17  ; W1:W0/T
+    div.ud W0,T
     dec W0,W0
     mov W0, SER_BRG
     bset SER_MODE, #UARTEN
+    DPOP
     NEXT
     
 DEFCODE "SEMIT",5,,SEMIT,BAUD
