@@ -29,8 +29,7 @@
 .equ SERATION, (HSYNC/2) ;durée pulse dans VSYNC
 .equ TOPLINE, 50  ; première ligne visible
 ; à cause des demi-lignes de synchronisation vertical on ajoute 9 lignes    
-.equ ELPFRM,  271  ; nombre de lignes par frame pair 
-.equ OLPFRM,  272  ; nombre de lignes par frame impair
+.equ FIELD_LINES,  271  ; nombre de lignes par frame pair 
 .equ VIDEO_DLY, (2*HSYNC+250) ; délais déclenche interruption video=HSYNC+VIDEO_DLY
 
 .endif

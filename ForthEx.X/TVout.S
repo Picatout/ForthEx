@@ -83,12 +83,15 @@ __T2Interrupt:
     mov #TOPLINE+YRES, W0
     cp line_count
     bra z, 6f
-    mov #ELPFRM, W0
+    mov	 #FIELD_LINES, W0
+    cp0.b even
+    bra z, odd_field
+    inc W0,W0
+odd_field:    
     cp line_count
-    bra z, 7f
-    mov #OLPFRM, W0
-    cp line_count
-    bra z, 8f
+    bra neq, 0f
+    com.b even
+    setm line_count
 0:
     pop W0
     retfie
@@ -122,16 +125,6 @@ __T2Interrupt:
     bra 0b
 6: ; line_count==TOPLINE+VIDEDO désactivaion int. video
     bclr VIDEO_IEC, #VIDEO_IE
-    bra 0b
-7: ; line_count==ELPFRM  champ paire
-    cp0.b even
-    bra z, 0b
-    setm line_count
-    clr.b even
-    bra 0b
-8: ;line_count==OLPFRM  champ impaire
-    setm line_count
-    setm.b even
     bra 0b
 
     
