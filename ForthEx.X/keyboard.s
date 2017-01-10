@@ -25,7 +25,6 @@
 
 .include "hardware.inc"    
 .include "video.inc"
-.include "ps2.inc"
 .include "keyboard.inc"    
 .include "gen_macros.inc"
 .include "core.inc"    
@@ -52,9 +51,9 @@ kbd_tail:
 ; * clignotement du curseur texte    
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 .extern systicks
-.extern ps2_head
-.extern ps2_tail    
-.extern ps2_queue  
+;.extern ps2_head
+;.extern ps2_tail    
+;.extern ps2_queue  
 INTR    
 .global __T1Interrupt   
 __T1Interrupt:
@@ -71,7 +70,7 @@ __T1Interrupt:
     bclr AUDIO_TMRCON, #TON
 0:   
 ;traitement file ps2_queue
-    call scancode_convert
+;    call scancode_convert
 ;clignotement curseur texte
     cp0.b cursor_sema
     bra nz, isr_exit
@@ -81,85 +80,21 @@ isr_exit:
     pop.d W2
     pop.d W0
     retfie
+
+INTR
+.global __INT1Interrupt
+__INT1Interrupt:
+    reset
     
-.text
-; convertie les codes clavier
-; en code ASCII
-; la combinaison CTRL-ALT-SUPPR
-; réinitialise l'ordinateur    
-scancode_convert:
-    mov ps2_head, W0
-    cp ps2_tail
-    bra nz, 0f ; file ps2_queue vide
-    return
-0:    
-    mov #ps2_queue, W1
-    add W0, W1, W1
-    btss [W1], #10
-    bra 9f ; rejet: stop bit doit-être 1
-    mov [W1], W0
-    lsr W0,W0
-    bra c, 9f ; rejet: start bit doit-être zéro
-    ;vérification paritée
-    clr W1 ; compte les bits à 1
-    mov #8, W2 ; test bits <8:0>
-1:
-    btst.c W0,W2
-    addc #0, W1 
-2:    
-    dec W2,W2
-    bra nn, 1b
-    ; paritée impaire: W1 doit-être impaire.
-    btss W1,#0
-    bra 9f ; rejet: mauvaise parité
-    and #255,W0
-    ; vérifie code relâchement
-    mov #SC_KREL, W1
-    cp  W0,W1
-    bra neq, 3f
-    bset key_state, #F_KREL ; touche relâchée
-    bra 9f
-3:  ; vérifie code étendu
-    mov #SC_XKEY, W1
-    cp W0,W1
-    bra neq, 4f
-    bset key_state, #F_XKEY ; c'est une touche étendue
-    bra 9f
-4:  
-    ; vérification touche CTRL
-    mov #L_CTRL,W1
-    cp W1, W0
-    bra neq, alt_test
-    bclr key_state, #F_CTRL
-    btss key_state, #F_KREL
-    bset key_state, #F_CTRL
-    bclr key_state, #F_KREL
-    bclr key_state, #F_XKEY
-alt_test:
-    mov #L_ALT,W1
-    cp W1,W0
-    bra neq, 5f
-    bclr key_state, #F_ALT
-    btss key_state, #F_KREL
-    bset key_state, #F_ALT
-    bclr key_state, #F_KREL
-    bclr key_state, #F_XKEY
-5:  
-    mov #SC_BATOK,W1
-    cp W1,W0
-    bra neq, 6f
-    bset key_state,#F_KBDOK
-    bra 9f
-6:    
-    mov #SC_C, W1
-    cp W1,W0
-    bra neq, 8f
-    btss key_state, #F_CTRL
-    bra 8f
-    goto _warm
-8:    
-    ; tranfert code dans file
-    ; kbd_queue
+INTR
+.global __U2RXInterrupt    
+__U2RXInterrupt:
+    bclr KBD_RX_IFS,#KBD_RX_IF
+    push.d W0
+    push.d W2
+    mov KBD_RXREG,W0
+; tranfert code dans file
+; kbd_queue
     mov #kbd_queue, W1
     mov kbd_tail, W2
     add W2,W1,W1
@@ -167,26 +102,18 @@ alt_test:
     add #1,W2
     and #(KBD_QUEUE_SIZE-1),W2 ; arg1 <#lit10>
     mov W2, kbd_tail
-9:    
-    ;incrémente ps2_head
-    inc2 ps2_head
-    mov #(PS2_QUEUE_SIZE-1), W0
-    and ps2_head
-    return
+    pop.d W2
+    pop.d W0
+    retfie
     
-;ctrl_c_reset:
-;    clr kbd_head
-;    clr kbd_tail
-;    clr ps2_head
-;    clr ps2_tail
-;    clr key_state
-;    goto code_WARM
+    
+.text
     
 ;;;;;;;;;;;;;;;;;;;;;;;
 ; retourne le code clavier
 ; dans W0 sinon retourne 0
 ;;;;;;;;;;;;;;;;;;;;;;;
-;.global get_code    
+.global get_code    
 get_code:
     clr W0
     mov kbd_head, W1
@@ -203,155 +130,65 @@ get_code:
 1:
     return
 
-;;;;;;;;;;;;;;;;;;;;;;;;
-; recherche code clavier
-; dans la table
-; entrée: W2=index table    
-;         W1=scancode recherché
-; sortie: W0 contient caractère
-;         W0=0 si scancode pas dans la table
-; modifie: W0,W2,W3    
-;;;;;;;;;;;;;;;;;;;;;;;;;
-search_table:
-1:
-    mov [W2++], W0
-    cp0 W0
-    bra eq, 2f
-    mov W0, W3
-    ze W3,W3
-    cp W3,W1
-    bra neq, 1b
-    swap W0
-    ze W0,W0
-2: ; pas trouvé
-    return
-
-    
-;;;;;;;;;;;;;;;;;;;;;;;
-; retourne un caractère
-; si disponible sinon 0
-; sortie: W0
-;;;;;;;;;;;;;;;;;;;;;;; 
-; Cette routine est complexe car une touche peut-être composée
-; de plusieurs codes. 
-; Lorsqu'une touche est relâchée son scancode est précédé du code 0xF0
-; Certaines touches ont un scancode étendu, i.e. le premier code est 0xE0
-; Lorsqu'une touche à code étendu est relaché il y a 3 codes envoyés
-; par le clavier  0xE0, 0xF0 suivit du code de la touche.
-; exemple touche <HOME>  lorsqu'elle est enfoncée le clavier envoie 0xE0,0x6C
-; lorsqu'elle est relâchée le clavier envoie 0xE0,0xF0,0x6C
-; référence scancode: http://www.computer-engineering.org/ps2keyboard/scancodes2.html    
-; Le décodage est partiel sinon la routine serait encore plus complexe. 
-; Les relachements de touches sont ignorés sauf pour <CTRL>,<ALT>,<SHIFT>     
-;.global kbd_get
-kbd_get:
-    push DSRPAG
-    call get_code
-    cp0 W0
-    bra eq, kbd_no_key   
-    mov W0,W1
-    btss key_state, #F_KREL
-    bra 3f
-    btsc key_state, #F_XKEY
-    bra try_xmod_key
-    bra try_mod_key
-3:    
-    btss key_state, #F_XKEY
-    bra try_shifted
-    ; recherche table 'extended'
-    set_eds_table extended, W2
-    call search_table
-    cp0 W0
-    bra eq, try_xmod_key
-    ; scancode trouvé dans la table 'extended'
-    bra kbd_goodkey
-try_xmod_key:
-    set_eds_table xmod, W2
-    call search_table
-    cp0 W0
-    bra eq, kbd_ignore_it
-    bra mod_switch
-try_shifted:  ; recherche table 'shifted'
-    btss key_state, #F_SHIFT
-    bra try_ascii
-    set_eds_table shifted, W2
-    call search_table
-    cp0 W0
-    bra nz, kbd_goodkey
-try_ascii:  ; recherche table 'ascii'
-    set_eds_table ascii, W2
-    call search_table
-    cp0 W0
-    bra eq, try_mod_key
-    ; scancode trouvé dans la table 'ascii'
-    mov #'a', W1
-    cp W0,W1
-    bra ltu, kbd_goodkey
-    mov #'z', W1
-    cp W0, W1
-    bra gtu, kbd_goodkey
-    ;lettre
-    btss key_state, #F_CAPS
-    btg  W0, #5 
-    btsc key_state, #F_SHIFT
-    btg W0, #5
-    bra kbd_goodkey
-try_mod_key:
-    set_eds_table mod, W2
-    call search_table
-    cp0 W0
-    bra eq, kbd_ignore_it
-mod_switch:
-    mov #VK_SHIFT, W1
-    cp W0,W1
-    bra neq, 6f
-    bclr key_state, #F_SHIFT
-    btss key_state, #F_KREL
-    bset key_state, #F_SHIFT
-    bra kbd_ignore_it
-6:
-    mov #VK_CAPS, W1
-    cp W0,W1
-    bra neq, 7f
-    btss key_state, #F_KREL
-    btg key_state, #F_CAPS
-    bra kbd_ignore_it
-7:  
-    mov #VK_CTRL, W1
-    cp W0, W1
-    bra neq, 8f
-    bclr key_state, #F_CTRL
-    btss key_state, #F_KREL
-    bset key_state, #F_CTRL
-    bra kbd_ignore_it
-8:
-    mov #VK_ALT, W1
-    cp W0,W1
-    bra neq, kbd_ignore_it
-    bclr key_state, #F_ALT
-    btss key_state, #F_KREL
-    bset key_state, #F_CTRL
-kbd_ignore_it:    
-    clr W0
-kbd_goodkey:  ; sortie touche acceptée
-    bclr key_state, #F_KREL
-    bclr key_state, #F_XKEY
-kbd_no_key: ; sortie file vide
-    pop DSRPAG
-    return
 
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ; définitions Forth
 ;;;;;;;;;;;;;;;;;;;;;;    
 
-HEADLESS KBD_RESET, HWORD  ; ( -- )
-    .word LIT,KCMD_RESET,TOKBD
-    .word LIT,750,USEC
-    .word EXIT
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; initialistaion interface clavier 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+HEADLESS KBD_INIT,CODE ; ( -- )
+; configuration en sortie de la broche ~HRST
+    bset KBD_RST_ODC, #KBD_RST_OUT ; KBD_RST_OUT doit-être open drain
+    bclr KBD_RST_TRIS,#KBD_RST_OUT ; broche en sortie
+    bclr KBD_RST_LAT, #KBD_RST_OUT ; maintient l'interface clavier en RESET
+; configuration de l'entrée du signal ~REBOOT
+; utilise une interruption externe
+    ; PPS sélection broche associé à l'interruption
+    mov #(KBD_RBT_RPI<<KBD_RBT_PPSbit),W0
+    mov W0,KBD_RBT_RPINR
+    bset KBD_RBT_INTCON,#KBD_RBT_INTEP ; interruption sur transition négative
+    mov #(7<<KBD_RBT_IPCbit),W0 ; priorité d'interruption 7 (la plus haute)
+    ior KBD_RBT_IPC
+; configuration de l'entrée réception des codes du clavier    
+    ; PPS sélection broche pour kbd_rx
+    mov #(KBD_RX_RPI<<KBD_RX_PPSbit), W0
+    mov W0,KBD_RX_RPINR
+    ; baud rate 9600
+    mov #(FCY/(16*9600)-1), W0
+    mov W0, KBD_RX_BRG
+    ; activation  8 bits, 1 stop, pas de paritée
+    bset KBD_RX_MODE, #UARTEN
+    ; configuration priorité interruption
+    mov #~(7<<KBD_RX_IPCbit),W0
+    and KBD_RX_IPC
+    mov #(5<<KBD_RX_IPCbit),W0
+    ior KBD_RX_IPC
+    ; activation interruption rx clavier
+    bclr KBD_RX_IFS, #KBD_RX_IF
+    bset KBD_RX_IEC, #KBD_RX_IE
+   ;activation interruption signal ~REBOOT
+     bclr KBD_RBT_IFS, #KBD_RBT_IF
+     bset KBD_RBT_IEC, #KBD_RBT_IE
+    NEXT
+
+; réiniatilise l'interface clavier    
+HEADLESS KBD_RESET  ; ( -- )
+    bclr KBD_RST_LAT,#KBD_RST_OUT
+    mov systicks,W0
+    add W0,#2,W0
+0:    
+    cp systicks
+    bra neq, 0b
+    bset KBD_RST_LAT,#KBD_RST_OUT
+    NEXT
+
+    
     
 DEFCODE "?KEY",4,,QKEY,DOT  ; ( -- 0 | c T )
-    call kbd_get
+    call get_code
     DPUSH
     mov W0, T
     cp0 W0
@@ -367,7 +204,7 @@ DEFCODE "?KEY",4,,QKEY,DOT  ; ( -- 0 | c T )
 ;;;;;;;;;;;;;;;;;;;;;;;;    
 DEFCODE "KEY",3,,KEY,QKEY ; ( -- c)
 0:
-    call kbd_get
+    call get_code
     cp0 W0
     bra z, 0b
     DPUSH

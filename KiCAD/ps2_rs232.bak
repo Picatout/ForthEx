@@ -1,0 +1,295 @@
+EESchema Schematic File Version 2
+LIBS:forthEx-rescue
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:forthEx-cache
+LIBS:Personal_KiCAD
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 2 2
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L USB_A P2
+U 1 1 5872D906
+P 6900 3950
+F 0 "P2" V 6600 3950 50  0000 C CNN
+F 1 "keyboard" V 6850 4300 50  0000 C CNN
+F 2 "" V 6850 3850 50  0000 C CNN
+F 3 "" V 6850 3850 50  0000 C CNN
+	1    6900 3950
+	0    1    1    0   
+$EndComp
+$Comp
+L GND #PWR36
+U 1 1 5872D9BC
+P 7000 4250
+F 0 "#PWR36" H 7000 4000 50  0001 C CNN
+F 1 "GND" H 7000 4100 50  0000 C CNN
+F 2 "" H 7000 4250 50  0000 C CNN
+F 3 "" H 7000 4250 50  0000 C CNN
+	1    7000 4250
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR35
+U 1 1 5872D9D4
+P 6600 4050
+F 0 "#PWR35" H 6600 3800 50  0001 C CNN
+F 1 "GND" H 6600 3900 50  0000 C CNN
+F 2 "" H 6600 4050 50  0000 C CNN
+F 3 "" H 6600 4050 50  0000 C CNN
+	1    6600 4050
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR34
+U 1 1 5872D9E5
+P 5900 3650
+F 0 "#PWR34" H 5900 3400 50  0001 C CNN
+F 1 "GND" H 5900 3500 50  0000 C CNN
+F 2 "" H 5900 3650 50  0000 C CNN
+F 3 "" H 5900 3650 50  0000 C CNN
+	1    5900 3650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5600 3650 5900 3650
+$Comp
+L C C15
+U 1 1 5872DA01
+P 4200 3800
+F 0 "C15" H 4225 3900 50  0000 L CNN
+F 1 "100nF" H 3900 3700 50  0000 L CNN
+F 2 "" H 4238 3650 50  0000 C CNN
+F 3 "" H 4200 3800 50  0000 C CNN
+	1    4200 3800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4050 3650 4700 3650
+Connection ~ 4200 3650
+$Comp
+L GND #PWR31
+U 1 1 5872DA37
+P 4200 4000
+F 0 "#PWR31" H 4200 3750 50  0001 C CNN
+F 1 "GND" H 4200 3850 50  0000 C CNN
+F 2 "" H 4200 4000 50  0000 C CNN
+F 3 "" H 4200 4000 50  0000 C CNN
+	1    4200 4000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4200 3950 4200 4000
+Text HLabel 6600 3750 0    59   Input ~ 0
++5V
+Text HLabel 4050 3650 0    59   Input ~ 0
++5V
+Text HLabel 4600 3850 0    59   Input ~ 0
+send
+Wire Wire Line
+	5600 3850 6600 3850
+Wire Wire Line
+	5600 3950 6600 3950
+$Comp
+L C C16
+U 1 1 5872DB70
+P 4400 4200
+F 0 "C16" H 4425 4300 50  0000 L CNN
+F 1 "100nF" H 4425 4100 50  0000 L CNN
+F 2 "" H 4438 4050 50  0000 C CNN
+F 3 "" H 4400 4200 50  0000 C CNN
+	1    4400 4200
+	1    0    0    -1  
+$EndComp
+Text Notes 7500 7500 0    59   ~ 0
+PS2 keyboard interface
+Text Notes 7150 6850 0    59   ~ 0
+Copyright, Jacques Deschenes 2016,2017\nlicence: CC-BY-SA-V3.0
+Wire Wire Line
+	4400 3950 4400 4050
+$Comp
+L GND #PWR32
+U 1 1 5873E590
+P 4400 4350
+F 0 "#PWR32" H 4400 4100 50  0001 C CNN
+F 1 "GND" H 4400 4200 50  0000 C CNN
+F 2 "" H 4400 4350 50  0000 C CNN
+F 3 "" H 4400 4350 50  0000 C CNN
+	1    4400 4350
+	1    0    0    -1  
+$EndComp
+$Comp
+L PIC12F1572 U6
+U 1 1 5872D897
+P 5150 3800
+F 0 "U6" H 5100 3550 60  0000 C CNN
+F 1 "PIC12F1572" H 5150 4050 39  0000 C CNN
+F 2 "" H 5150 3600 60  0001 C CNN
+F 3 "" H 5150 3600 60  0001 C CNN
+	1    5150 3800
+	1    0    0    -1  
+$EndComp
+$Comp
+L LED D5
+U 1 1 58740431
+P 4600 3400
+F 0 "D5" H 4600 3500 50  0000 C CNN
+F 1 "LED" H 4600 3300 50  0000 C CNN
+F 2 "" H 4600 3400 50  0000 C CNN
+F 3 "" H 4600 3400 50  0000 C CNN
+	1    4600 3400
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	4600 3550 4600 3850
+$Comp
+L R R20
+U 1 1 58740482
+P 4600 3000
+F 0 "R20" V 4680 3000 50  0000 C CNN
+F 1 "470" V 4600 3000 50  0000 C CNN
+F 2 "" V 4530 3000 50  0000 C CNN
+F 3 "" H 4600 3000 50  0000 C CNN
+	1    4600 3000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4600 3150 4600 3250
+Text HLabel 4450 2850 0    59   Input ~ 0
++5V
+Wire Wire Line
+	4450 2850 4600 2850
+$Comp
+L CONN_01X05 P3
+U 1 1 587404F1
+P 5550 3050
+F 0 "P3" H 5550 3350 50  0000 C CNN
+F 1 "ICSP" V 5650 3050 50  0000 C CNN
+F 2 "" H 5550 3050 50  0000 C CNN
+F 3 "" H 5550 3050 50  0000 C CNN
+	1    5550 3050
+	1    0    0    -1  
+$EndComp
+Text Label 5350 2850 2    39   ~ 0
+Vpp
+Text Label 5350 2950 2    39   ~ 0
+Vdd
+$Comp
+L GND #PWR33
+U 1 1 5874053C
+P 5050 3100
+F 0 "#PWR33" H 5050 2850 50  0001 C CNN
+F 1 "GND" H 5050 2950 50  0000 C CNN
+F 2 "" H 5050 3100 50  0000 C CNN
+F 3 "" H 5050 3100 50  0000 C CNN
+	1    5050 3100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5050 3100 5050 3050
+Wire Wire Line
+	5050 3050 5350 3050
+Text Label 5350 3150 2    39   ~ 0
+PDAT
+Text Label 5350 3250 2    39   ~ 0
+PCLK
+Text Label 5600 3750 0    39   ~ 0
+PDAT
+Text Label 5600 3850 0    39   ~ 0
+PCLK
+Text Label 4700 3950 3    39   ~ 0
+Vpp
+$Comp
+L R R19
+U 1 1 58740633
+P 4550 3950
+F 0 "R19" V 4630 3950 50  0000 C CNN
+F 1 "470" V 4550 3950 50  0000 C CNN
+F 2 "" V 4480 3950 50  0000 C CNN
+F 3 "" H 4550 3950 50  0000 C CNN
+	1    4550 3950
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	4600 3850 4700 3850
+Text HLabel 4700 3750 0    39   Input ~ 0
+~REBOOT
+$Comp
+L R R21
+U 1 1 58740755
+P 6100 3500
+F 0 "R21" V 6180 3500 50  0000 C CNN
+F 1 "10k" V 6100 3500 50  0000 C CNN
+F 2 "" V 6030 3500 50  0000 C CNN
+F 3 "" H 6100 3500 50  0000 C CNN
+	1    6100 3500
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R22
+U 1 1 587407AC
+P 6300 3500
+F 0 "R22" V 6380 3500 50  0000 C CNN
+F 1 "10k" V 6300 3500 50  0000 C CNN
+F 2 "" V 6230 3500 50  0000 C CNN
+F 3 "" H 6300 3500 50  0000 C CNN
+	1    6300 3500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6100 3650 6100 3850
+Connection ~ 6100 3850
+Wire Wire Line
+	6300 3650 6300 3950
+Connection ~ 6300 3950
+Wire Wire Line
+	6300 3350 6100 3350
+Text HLabel 6100 3350 0    59   Input ~ 0
++5V
+Text Label 4700 3650 2    39   ~ 0
+Vdd
+Text Label 6600 3950 2    39   ~ 0
+CLK
+Text Label 6600 3850 2    39   ~ 0
+DAT
+Text HLabel 4400 3950 0    39   Input ~ 0
+~HRST
+$EndSCHEMATC

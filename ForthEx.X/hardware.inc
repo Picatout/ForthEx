@@ -131,26 +131,50 @@
 .equ SYNC_IPC, IPC1 ; priorité int. T2
 .equ SYNC_IPbit, T2IP0
 
-; clavier
-.equ RPI47, 0x2F    
-.equ KBD_CLK, RB15   ; pin 26, RPI47
-.equ KBD_DAT, RB14   ; pin 25, RPI46
-.equ KBD_RPI, RPI47   
-.equ KBD_PORT, PORTB
-.equ KBD_LAT, LATB
-.equ KBD_TRIS, TRISB
-.equ KBD_ODC, ODCB    
-.equ KBD_RPINR, RPINR0  ; INT1R0
-.equ KBD_PPSbit, INT1R0
-.equ KBD_IFS, IFS1
-.equ KBD_IF, INT1IF
-.equ KBD_IEC, IEC1
-.equ KBD_IE, INT1IE
-.equ KBD_IPC, IPC5
-.equ KBD_IPCbit, INT1IP0
-.equ KBD_INTEP, INT1EP
-.equ KBD_INTCON, INTCON2
-
+;;;;;;;;;;;;;;;;;;;;;;    
+; interface clavier
+;;;;;;;;;;;;;;;;;;;;;;    
+; sortie pour envoyer le signal ~HRST
+; à l'interface clavier    
+.equ KBD_RST_OUT, RA0   ; pin 2, sortie du signal ~HRST
+.equ KBD_RST_LAT, LATA
+.equ KBD_RST_TRIS, TRISA
+.equ KBD_RST_ODC, ODCA 
+; entrée relié au signal ~REBOOT envoyé par le clavier    
+.equ RPI46, 46    ; code PPS de la broche 25, fonction
+.equ KBD_RBT_RPI, RPI46   
+.equ KBD_RBT_INP, RB14 ; pin 25, RPI46 entrée du signal ~REBOOT
+.equ KBD_RBT_RPINR, RPINR0  ; registre PPS associé à INT0   
+.equ KBD_RBT_PPSbit, INT1R0  ; bit 0 du champ PPS 
+.equ KBD_RBT_INTCON, INTCON2  ; registre de contrôle de la polarité d'interruption
+.equ KBD_RBT_INTEP, INT1EP    ; bit de contrôle de la polarité
+.equ KBD_RBT_IFS, IFS1 ; registre contenant l'indicateur d'interruption
+.equ KBD_RBT_IF, INT1IF ; bit indicateur d'interruption    
+.equ KBD_RBT_IEC, IEC1 ; registre contenant le bit d'activation d'interruption    
+.equ KBD_RBT_IE, INT1IE ; bit activation de l'interruption
+.equ KBD_RBT_IPC, IPC5  ; registe de contrôle de la priorité d'interruption
+.equ KBD_RBT_IPCbit, INT1IP0 ; bit 0 du champ priorité INT0
+; entrée reception des touches claviers
+; utilise un UART    
+.equ RPI47, 47 ; code de la broche 26
+.equ KBD_RX_INP, RB15 ; pin 26, RPI47
+.equ KBD_RX_RPI, RPI47   
+.equ KBD_RX_RPINR, RPINR19  ; U2RX
+.equ KBD_RX_PPSbit, U2RXR0
+.equ KBD_RX_LAT, LATB
+.equ KBD_RX_TRIS, TRISB
+.equ KBD_RX_IFS, IFS1
+.equ KBD_RX_IF, U2RXIF
+.equ KBD_RX_IEC, IEC1
+.equ KBD_RX_IE, U2RXIE
+.equ KBD_RX_IPC, IPC7
+.equ KBD_RX_IPCbit, U2RXIP0
+.equ KBD_RXREG, U2RXREG
+.equ KBD_RX_MODE, U2MODE
+.equ KBD_RX_BRG, U2BRG
+.equ KBD_RX_STA, U2STA
+    
+    
 ; interface SPI1 SDCARD, RAM et EEPROM
 .equ SDC_SEL, RB2     ; pin 6, RPI34
 .equ SRAM_SEL, RB10   ; pin 21, RP42 
@@ -169,7 +193,7 @@
 .equ STR_SPIIF,   SPI1IF    
 
 ; communication port série
-.equ  RPI44, 44    
+.equ  RPI44, 44  ; code PPS de la broche 23  
 .equ  SER_PORT, PORTB
 .equ  SER_LAT,  LATB
 .equ  SER_TRIS, TRISB

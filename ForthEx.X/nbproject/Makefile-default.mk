@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=TVout.S core.s font.S hardware.s keybind.s keyboard.s ps2.s serial.s sound.s store.s mcu_config_bits.s
+SOURCEFILES_QUOTED_IF_SPACED=TVout.S core.s font.S hardware.s keyboard.s serial.s sound.s store.s mcu_config_bits.s
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/TVout.o ${OBJECTDIR}/core.o ${OBJECTDIR}/font.o ${OBJECTDIR}/hardware.o ${OBJECTDIR}/keybind.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/ps2.o ${OBJECTDIR}/serial.o ${OBJECTDIR}/sound.o ${OBJECTDIR}/store.o ${OBJECTDIR}/mcu_config_bits.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/TVout.o.d ${OBJECTDIR}/core.o.d ${OBJECTDIR}/font.o.d ${OBJECTDIR}/hardware.o.d ${OBJECTDIR}/keybind.o.d ${OBJECTDIR}/keyboard.o.d ${OBJECTDIR}/ps2.o.d ${OBJECTDIR}/serial.o.d ${OBJECTDIR}/sound.o.d ${OBJECTDIR}/store.o.d ${OBJECTDIR}/mcu_config_bits.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/TVout.o ${OBJECTDIR}/core.o ${OBJECTDIR}/font.o ${OBJECTDIR}/hardware.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/serial.o ${OBJECTDIR}/sound.o ${OBJECTDIR}/store.o ${OBJECTDIR}/mcu_config_bits.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/TVout.o.d ${OBJECTDIR}/core.o.d ${OBJECTDIR}/font.o.d ${OBJECTDIR}/hardware.o.d ${OBJECTDIR}/keyboard.o.d ${OBJECTDIR}/serial.o.d ${OBJECTDIR}/sound.o.d ${OBJECTDIR}/store.o.d ${OBJECTDIR}/mcu_config_bits.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/TVout.o ${OBJECTDIR}/core.o ${OBJECTDIR}/font.o ${OBJECTDIR}/hardware.o ${OBJECTDIR}/keybind.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/ps2.o ${OBJECTDIR}/serial.o ${OBJECTDIR}/sound.o ${OBJECTDIR}/store.o ${OBJECTDIR}/mcu_config_bits.o
+OBJECTFILES=${OBJECTDIR}/TVout.o ${OBJECTDIR}/core.o ${OBJECTDIR}/font.o ${OBJECTDIR}/hardware.o ${OBJECTDIR}/keyboard.o ${OBJECTDIR}/serial.o ${OBJECTDIR}/sound.o ${OBJECTDIR}/store.o ${OBJECTDIR}/mcu_config_bits.o
 
 # Source Files
-SOURCEFILES=TVout.S core.s font.S hardware.s keybind.s keyboard.s ps2.s serial.s sound.s store.s mcu_config_bits.s
+SOURCEFILES=TVout.S core.s font.S hardware.s keyboard.s serial.s sound.s store.s mcu_config_bits.s
 
 
 CFLAGS=
@@ -108,26 +108,12 @@ ${OBJECTDIR}/hardware.o: hardware.s  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_AS_PRE)  hardware.s  -o ${OBJECTDIR}/hardware.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  -Wa,-MD,"${OBJECTDIR}/hardware.o.d",--defsym=__MPLAB_BUILD=1,--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PK3=1,-g,--no-relax$(MP_EXTRA_AS_POST)
 	@${FIXDEPS} "${OBJECTDIR}/hardware.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
-${OBJECTDIR}/keybind.o: keybind.s  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/keybind.o.d 
-	@${RM} ${OBJECTDIR}/keybind.o 
-	${MP_CC} $(MP_EXTRA_AS_PRE)  keybind.s  -o ${OBJECTDIR}/keybind.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  -Wa,-MD,"${OBJECTDIR}/keybind.o.d",--defsym=__MPLAB_BUILD=1,--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PK3=1,-g,--no-relax$(MP_EXTRA_AS_POST)
-	@${FIXDEPS} "${OBJECTDIR}/keybind.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
-	
 ${OBJECTDIR}/keyboard.o: keyboard.s  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/keyboard.o.d 
 	@${RM} ${OBJECTDIR}/keyboard.o 
 	${MP_CC} $(MP_EXTRA_AS_PRE)  keyboard.s  -o ${OBJECTDIR}/keyboard.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  -Wa,-MD,"${OBJECTDIR}/keyboard.o.d",--defsym=__MPLAB_BUILD=1,--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PK3=1,-g,--no-relax$(MP_EXTRA_AS_POST)
 	@${FIXDEPS} "${OBJECTDIR}/keyboard.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
-	
-${OBJECTDIR}/ps2.o: ps2.s  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/ps2.o.d 
-	@${RM} ${OBJECTDIR}/ps2.o 
-	${MP_CC} $(MP_EXTRA_AS_PRE)  ps2.s  -o ${OBJECTDIR}/ps2.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  -Wa,-MD,"${OBJECTDIR}/ps2.o.d",--defsym=__MPLAB_BUILD=1,--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PK3=1,-g,--no-relax$(MP_EXTRA_AS_POST)
-	@${FIXDEPS} "${OBJECTDIR}/ps2.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
 ${OBJECTDIR}/serial.o: serial.s  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -172,26 +158,12 @@ ${OBJECTDIR}/hardware.o: hardware.s  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_AS_PRE)  hardware.s  -o ${OBJECTDIR}/hardware.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  -Wa,-MD,"${OBJECTDIR}/hardware.o.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax$(MP_EXTRA_AS_POST)
 	@${FIXDEPS} "${OBJECTDIR}/hardware.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
-${OBJECTDIR}/keybind.o: keybind.s  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/keybind.o.d 
-	@${RM} ${OBJECTDIR}/keybind.o 
-	${MP_CC} $(MP_EXTRA_AS_PRE)  keybind.s  -o ${OBJECTDIR}/keybind.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  -Wa,-MD,"${OBJECTDIR}/keybind.o.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax$(MP_EXTRA_AS_POST)
-	@${FIXDEPS} "${OBJECTDIR}/keybind.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
-	
 ${OBJECTDIR}/keyboard.o: keyboard.s  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/keyboard.o.d 
 	@${RM} ${OBJECTDIR}/keyboard.o 
 	${MP_CC} $(MP_EXTRA_AS_PRE)  keyboard.s  -o ${OBJECTDIR}/keyboard.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  -Wa,-MD,"${OBJECTDIR}/keyboard.o.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax$(MP_EXTRA_AS_POST)
 	@${FIXDEPS} "${OBJECTDIR}/keyboard.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
-	
-${OBJECTDIR}/ps2.o: ps2.s  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/ps2.o.d 
-	@${RM} ${OBJECTDIR}/ps2.o 
-	${MP_CC} $(MP_EXTRA_AS_PRE)  ps2.s  -o ${OBJECTDIR}/ps2.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  -Wa,-MD,"${OBJECTDIR}/ps2.o.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax$(MP_EXTRA_AS_POST)
-	@${FIXDEPS} "${OBJECTDIR}/ps2.o.d"  $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
 ${OBJECTDIR}/serial.o: serial.s  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -262,12 +234,12 @@ endif
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 dist/${CND_CONF}/${IMAGE_TYPE}/ForthEx.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    p24EP512GP202.gld
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_CC} $(MP_EXTRA_LD_PRE)  -o dist/${CND_CONF}/${IMAGE_TYPE}/ForthEx.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}      -mcpu=$(MP_PROCESSOR_OPTION)        -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)   -mreserve=data@0x1000:0x101B -mreserve=data@0x101C:0x101D -mreserve=data@0x101E:0x101F -mreserve=data@0x1020:0x1021 -mreserve=data@0x1022:0x1023 -mreserve=data@0x1024:0x1027 -mreserve=data@0x1028:0x104F   -Wl,--no-local-stack,--defsym=__MPLAB_BUILD=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PK3=1,$(MP_LINKER_FILE_OPTION),--stack=16,--check-sections,--no-data-init,--pack-data,--handles,--isr,--no-gc-sections,--fill-upper=0,--stackguard=0,--no-force-link,--smart-io,-Map="${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map",--report-mem,--memorysummary,dist/${CND_CONF}/${IMAGE_TYPE}/memoryfile.xml$(MP_EXTRA_LD_POST) 
+	${MP_CC} $(MP_EXTRA_LD_PRE)  -o dist/${CND_CONF}/${IMAGE_TYPE}/ForthEx.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}      -mcpu=$(MP_PROCESSOR_OPTION)        -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)   -mreserve=data@0x1000:0x101B -mreserve=data@0x101C:0x101D -mreserve=data@0x101E:0x101F -mreserve=data@0x1020:0x1021 -mreserve=data@0x1022:0x1023 -mreserve=data@0x1024:0x1027 -mreserve=data@0x1028:0x104F   -Wl,--no-local-stack,,--defsym=__MPLAB_BUILD=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_PK3=1,$(MP_LINKER_FILE_OPTION),--stack=16,--check-sections,--no-data-init,--pack-data,--handles,--isr,--no-gc-sections,--fill-upper=0,--stackguard=0,--no-force-link,--smart-io,-Map="${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map",--report-mem,--memorysummary,dist/${CND_CONF}/${IMAGE_TYPE}/memoryfile.xml$(MP_EXTRA_LD_POST) 
 	
 else
 dist/${CND_CONF}/${IMAGE_TYPE}/ForthEx.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   p24EP512GP202.gld
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_CC} $(MP_EXTRA_LD_PRE)  -o dist/${CND_CONF}/${IMAGE_TYPE}/ForthEx.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}      -mcpu=$(MP_PROCESSOR_OPTION)        -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -Wl,--no-local-stack,--defsym=__MPLAB_BUILD=1,$(MP_LINKER_FILE_OPTION),--stack=16,--check-sections,--no-data-init,--pack-data,--handles,--isr,--no-gc-sections,--fill-upper=0,--stackguard=0,--no-force-link,--smart-io,-Map="${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map",--report-mem,--memorysummary,dist/${CND_CONF}/${IMAGE_TYPE}/memoryfile.xml$(MP_EXTRA_LD_POST) 
+	${MP_CC} $(MP_EXTRA_LD_PRE)  -o dist/${CND_CONF}/${IMAGE_TYPE}/ForthEx.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}      -mcpu=$(MP_PROCESSOR_OPTION)        -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -Wl,--no-local-stack,,--defsym=__MPLAB_BUILD=1,$(MP_LINKER_FILE_OPTION),--stack=16,--check-sections,--no-data-init,--pack-data,--handles,--isr,--no-gc-sections,--fill-upper=0,--stackguard=0,--no-force-link,--smart-io,-Map="${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map",--report-mem,--memorysummary,dist/${CND_CONF}/${IMAGE_TYPE}/memoryfile.xml$(MP_EXTRA_LD_POST) 
 	${MP_CC_DIR}/xc16-bin2hex dist/${CND_CONF}/${IMAGE_TYPE}/ForthEx.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX} -a  -omf=elf  
 	
 endif

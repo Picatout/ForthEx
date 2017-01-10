@@ -66,25 +66,42 @@ _cold:
     .word HARDWARE_INIT,VARS_INIT
     .word VERSION,ZTYPE,CR  
     .word QUIT ; cette fonction ne quitte jamais
-    
+
+; initialisation matérielle    
 HEADLESS HARDWARE_INIT, HWORD
-    .word CLR_RAM
     .word SET_CLOCK
+    .word CLR_RAM    
+    .word TICKS_INIT
     .word TVOUT_INIT
-    .word PS2_INIT
+    .word KBD_INIT
     .word SERIAL_INIT
     .word STORE_INIT
     .word SOUND_INIT
     .word IO_LOCK
     .word KBD_RESET
     .word EXIT
-    
-;    call tvout_init
-;    call ps2_init
-;    call serial_init
-;    call store_init
-;    call sound_init
 
+; initialisation TIMER1
+; utilisé pour compteur systicks    
+HEADLESS TICKS_INIT
+    ; diviseur prescale 1:8
+    mov #(1<<TCKPS0),W0
+    mov WREG,T1CON
+    ; periode 1 msec
+    mov #(FCY_MHZ*1000/8-1), W0
+    mov W0, PR1
+    ; priorité d'interruption 3
+    mov #~(7<<T1IP0), W0
+    and IPC0
+    mov #(3<<T1IP0), W0
+    ior IPC0
+    ; activation de l'interruption
+    bclr IFS0, #T1IF
+    bset IEC0, #T1IE
+    bset T1CON, #TON
+    NEXT
+
+; ajustement de la fréquence oscillateur.    
 HEADLESS SET_CLOCK
     clr CLKDIV
     mov #PLLDIV, W0
@@ -99,15 +116,15 @@ HEADLESS CLR_RAM
     repeat #((RAM_SIZE-DSTK_SIZE-RSTK_SIZE)/2-1)
     clr [W0++]
     NEXT
-    
+
+; verouillage configuration I/O
 HEADLESS IO_LOCK    
-    ; verouillage configuration I/O
     bset OSCCON, #IOLOCK
     NEXT
 
+; initialisation registres système forth
+; initialisation variables utilisateur
 HEADLESS VARS_INIT    
-    ; initialisation registres système forth
-    ; initialisation variables utilisateur
     mov #rstack, W0
     mov W0,_R0
     mov #pstack, W0
@@ -131,7 +148,7 @@ HEADLESS VARS_INIT
     mov W0, _LATEST
     NEXT
 
-    
+; empile le compteur systicks    
 DEFCODE "TICKS",5,,TICKS,CMOVE  ; ( -- n )
     DPUSH
     mov systicks, T

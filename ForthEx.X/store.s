@@ -118,7 +118,7 @@ wait_wip0:
 ; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
 ; sortie aucune
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RSTORE",6,,RSTORE,TOKBD ; ( addr-bloc addr-sramL addr-sramH n -- )
+DEFCODE "RSTORE",6,,RSTORE,TONE ; ( addr-bloc addr-sramL addr-sramH n -- )
     _enable_sram
     mov #RWRITE,W0
     spi_write

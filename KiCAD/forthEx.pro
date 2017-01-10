@@ -1,4 +1,4 @@
-update=mar 03 mai 2016 09:49:21 EDT
+update=lun 09 jan 2017 16:12:55 EST
 version=1
 last_client=kicad
 [cvpcb]
@@ -45,19 +45,6 @@ LibName15=pga_sockets
 LibName16=valves
 [general]
 version=1
-[schematic_editor]
-version=1
-PageLayoutDescrFile=
-PlotDirectoryName=
-SubpartIdSeparator=0
-SubpartFirstId=65
-NetFmtName=
-SpiceForceRefPrefix=0
-SpiceUseNetNumbers=0
-RptD_X=0
-RptD_Y=100
-RptLab=1
-LabSize=39
 [eeschema]
 version=1
 LibDir=
@@ -94,4 +81,15 @@ LibName29=atmel
 LibName30=contrib
 LibName31=valves
 LibName32=forthEx-cache
+LibName33=/home/jacques/Personal_KiCAD
+[schematic_editor]
+version=1
+PageLayoutDescrFile=
+PlotDirectoryName=
+SubpartIdSeparator=0
+SubpartFirstId=65
+NetFmtName=
+SpiceForceRefPrefix=0
+SpiceUseNetNumbers=0
+LabSize=39
 
