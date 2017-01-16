@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015,2016 Jacques Deschênes
+; Copyright 2015,2016,2017 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -1143,7 +1143,7 @@ DEFCODE "INFLOOP",7,,INFLOOP,QUIT
 .section .link psv  address(0x7FFE)    
 .global _sys_latest
 _sys_latest:
-.word link
+.word name_INFLOOP
     
    
 .end

@@ -24,6 +24,21 @@
 .include "hardware.inc"
 .include "core.inc"
 .include "store.inc"
+.include "gen_macros.inc"
+    
+.section .hardware.bss  bss
+sdc_status: .space 2 ; indicateur booléens carte SD
+ 
+INTR
+;détection carte SD    
+.global __CNInterrupt
+__CNInterrupt:
+    bset sdc_status,#F_SDC_CHG
+    bclr sdc_status,#F_SDC_IN
+    btss SDC_PORT,#SDC_DETECT
+    bset sdc_status,#F_SDC_IN
+    bclr SDC_IFS,#SDC_IF
+    retfie
     
  .text
  
@@ -37,10 +52,23 @@
 ;store_init:
 HEADLESS STORE_INIT,CODE 
     ; changement de direction des broches en sorties
-    mov #((1<<SRAM_SEL)+(1<<EEPROM_SEL)+(1<<STR_CLK)+(1<<STR_MOSI)), W0
+    ; SDC_SEL  sélection carte SD interface SPI
+    ; SRAM_SEL sélection RAM SPI
+    ; EEPROM_SEL sélection EEPROM SPI
+    ; STR_CLK  signal clock SPI
+    ; STR_MOSI signal MOSI SPI
+    mov #((1<<SDC_SEL)+(1<<SRAM_SEL)+(1<<EEPROM_SEL)+(1<<STR_CLK)+(1<<STR_MOSI)), W0
     ior STR_LAT
     com W0,W0
     and STR_TRIS
+    ; initialisation détection carte SD
+    bset SDC_CNEN,#SDC_DETECT
+    mov #~(7<<SDC_CNIP),W0
+    and SDC_IPC
+    mov #(3<<SDC_CNIP),W0
+    ior SDC_IPC
+    bset SDC_IEC,#SDC_IE
+    bclr SDC_IFS,#SDC_IF
 ;    ;sélection des PPS
 ;    ; signal MISO
 ;    mov #~(0x1f<<STR_SDI_PPSbit), W0
@@ -59,10 +87,10 @@ HEADLESS STORE_INIT,CODE
 ;    ior STR_SDO_RPOR
 ;    bclr STR_SPISTAT, #SPIEN
     ; configuration SPI
-    mov #(1<<MSTEN)|(1<<SPRE0)|(3<<PPRE0)|(1<<CKE), W0 ; SCLK=FCY/7
+    mov #(1<<MSTEN)|(1<<CKE)|SPI_CLK_17MHZ, W0 ; SCLK=FCY/4
     mov W0, STR_SPICON1
 ;    bset STR_SPICON2, #SPIBEN ; enhanced mode
-    bset STR_SPISTAT, #SPIEN
+    _enable_spi
     ; met la SPIRAM en mode séquenctiel.
 ;    bclr STR_LAT, #SRAM_SEL
 ;    mov #WRMR, W0
@@ -73,6 +101,82 @@ HEADLESS STORE_INIT,CODE
 ;    return
     NEXT
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; configure la fréquence clock SPI
+; entrée: W1 contient la nouvelle valeur
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+set_spi_clock:
+    _disable_spi
+    mov #0x1f,W0
+    and STR_SPICON1
+    mov W1,W0
+    ior STR_SPICON1
+    _enable_spi
+    return
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+; envoie 80 cycles clock SPI
+; la carte est désélectionnée
+; pendant cette procédure
+;  SDC_SEL=MOSI=1    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+dummy_clock:
+    _disable_sdc
+    _enable_spi
+    mov.b #0xff,WREG
+    mov #10,W1
+1:  spi_write
+    decsz W1
+    bra 1b
+    return
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+; désélection de la carte SD
+; 1 octet doit-être envoyée
+; après que CS est ramené à 1
+; pour libéré la ligne MISO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+sdc_deselect:
+    _sdc_disable
+    mov.b #0xff,WREG
+    _spi_write
+    return
+  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; envoie d'une commande carte SD
+; entrée: 
+;    W0  index commande
+;    W1  argHigh
+;    W2  argLow
+;    W3  pointeur buffer
+;    W4  grandeur buffer en octets    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+sdc_cmd:
+    case GO_IDLE_STATE,cmd0
+    
+cmd0:
+    
+    return
+    
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;    
+;initialisation carte SD 
+;ref: http://elm-chan.org/docs/mmc/pic/sdinit.png    
+;;;;;;;;;;;;;;;;;;;;;;;;;    
+HEADLESS SDC_INIT,CODE
+    clr sdc_status
+    btsc SDC_PORT,#SDC_DETECT
+    return
+    bset sdc_status,#F_SDC_IN
+    mov #SPI_CLK_137KHZ,W1
+    call set_spi_clock
+    call dummy_clock
+    _sdc_enable
+    ;envoie CMD0
+    mov #GO_IDLE_STATE,W0
+    call sdc_cmd
+    
+    NEXT
     
 ;;;;;;;;;;;;;;;;;;;;
 ; envoie d'une adresse via STR_SPI

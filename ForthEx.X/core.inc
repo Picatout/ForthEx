@@ -44,7 +44,7 @@
 ;;;;;;;;;;;;    
 ; macros
 ;;;;;;;;;;;;
-; interpréeteur interne
+; interpréteur interne
 ; exécute l'instruction suivante    
 .macro NEXT
     mov [IP++], WP  ; WP=CFA, IP pointe vers item suivant
@@ -120,15 +120,14 @@
 
 .equiv CODE,1
 .equiv HWORD,2
-
+    
+    
 ;macro utilisée pour créer les entête des mots de haut niveaux.
 .macro DEFWORD name, namelen, flags=0, label, last=0
 	SYSDICT
 	.global name_\label
 name_\label :  ; LFA
-	;.word link ;; ça ne fonctionne toutes les entrées prennent la dernière valeur de link
-	.word name_\last		; lien vers élément précédent du dictionnaire
-	.set link, name_\label
+	.word name_\last ; lien vers élément précédent du dictionnaire	
 	.byte \flags+\namelen	; NFA flags + length byte
 	.ascii "\name"		; the name
 	.align 2		; padding to word boundary
@@ -143,9 +142,7 @@ name_\label :  ; LFA
 	SYSDICT
 	.global name_\label
 name_\label :  ; LFA
-	;.word link   ;; ça ne fonctionne toutes les entrées prennent la dernière valeur de link
-	.word  name_\last
-	.set link, name_\label
+	.word name_\last
 	.byte \flags+\namelen	; NFA flags + length byte
 	.ascii "\name"		; the name
 	.align 2		; padding to next 4 byte boundary
@@ -182,9 +179,7 @@ code_\label :
 	SYSDICT
 	.global name_\label
 name_\label :  ; LFA
-	;.word link ;; ça ne fonctionne toutes les entrées prennent la dernière valeur de link
-	.word name_\last		; lien vers élément précédent du dictionnaire
-	.set link, name_\label
+	.word name_\last; lien vers élément précédent du dictionnaire
 	.byte \flags+\namelen	; NFA flags + length byte
 	.ascii "\name"		; the name
 	.align 2		; padding to word boundary

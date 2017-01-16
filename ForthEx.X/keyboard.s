@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, 2016 Jacques Deschênes
+; Copyright 2015, 2016,2017 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -176,12 +176,17 @@ HEADLESS KBD_INIT,CODE ; ( -- )
 
 ; réiniatilise l'interface clavier    
 HEADLESS KBD_RESET  ; ( -- )
-    bclr KBD_RST_LAT,#KBD_RST_OUT
-    mov systicks,W0
-    add W0,#2,W0
-0:    
+    mov #250,W0
+    add systicks,WREG
+0:
     cp systicks
     bra neq, 0b
+    bclr KBD_RST_LAT,#KBD_RST_OUT
+    mov systicks,W0
+    add W0,#3,W0
+1:    
+    cp systicks
+    bra neq, 1b
     bset KBD_RST_LAT,#KBD_RST_OUT
     NEXT
 

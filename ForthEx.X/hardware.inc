@@ -142,7 +142,8 @@
 .equ KBD_RST_ODC, ODCA 
 ; entrée relié au signal ~REBOOT envoyé par le clavier    
 .equ RPI46, 46    ; code PPS de la broche 25, fonction
-.equ KBD_RBT_RPI, RPI46   
+.equ KBD_RBT_RPI, RPI46  
+.equ KBD_RBT_PORT, PORTB    
 .equ KBD_RBT_INP, RB14 ; pin 25, RPI46 entrée du signal ~REBOOT
 .equ KBD_RBT_RPINR, RPINR0  ; registre PPS associé à INT0   
 .equ KBD_RBT_PPSbit, INT1R0  ; bit 0 du champ PPS 
@@ -176,8 +177,20 @@
     
     
 ; interface SPI1 SDCARD, RAM et EEPROM
+; carte SD    
+.equ SDC_DETECT, RB13 ; pin 24, RPI45
 .equ SDC_SEL, RB2     ; pin 6, RPI34
-.equ SRAM_SEL, RB10   ; pin 21, RP42 
+.equ SDC_PORT, PORTB  ;
+.equ SDC_CNEN, CNENB  ; registre i/o change enable
+.equ SDC_IFS, IFS1    ; registre contenant le bit indicateur d'interruption CNIF
+.equ SDC_IEC, IEC1    ; registre contenant le bit d'activation CNIE
+.equ SDC_IF, CNIF   ; bit indicateur d'interruption
+.equ SDC_IE, CNIE   ; bit d'activation interruption
+.equ SDC_IPC, IPC4   ; registre IPC pour cette interruption
+.equ SDC_CNIP, CNIP0 ; champ IPC pour cette interruption
+; broche de sélection de la RAM SPI    
+.equ SRAM_SEL, RB10   ; pin 21, RP42
+; broche de sélection de la EEPROM SPI    
 .equ EEPROM_SEL, RB6  ; pin 18, RP41
 .equ STR_CLK,   RB7   ; pin 17, RP40
 .equ STR_MOSI,  RB8   ; pin 15, RP38

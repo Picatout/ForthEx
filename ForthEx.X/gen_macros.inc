@@ -30,5 +30,11 @@
     mov #edsoffset(\table), \reg
 .endm
 
+; case select macro W0 contient la valeur de contrôle
+.macro case value, target
+    xor W0, #\value
+    bra nz, 1f
+    bra \target
+1:  xor W0, #\value
 .endif
 
