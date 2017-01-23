@@ -28,13 +28,16 @@
     
 .section .hardware.bss  bss
 sdc_status: .space 2 ; indicateur booléens carte SD
+sdc_size: .space 4 ; nombre de secteurs de 512 octets
+sdc_R: .space 5; réponse de la carte 
  
 INTR
-;détection carte SD    
+;la broche SDC_DETECT
+; a changée d'état
+; carte insérée ou retirée. 
 .global __CNInterrupt
 __CNInterrupt:
-    bset sdc_status,#F_SDC_CHG
-    bclr sdc_status,#F_SDC_IN
+    clr sdc_status
     btss SDC_PORT,#SDC_DETECT
     bset sdc_status,#F_SDC_IN
     bclr SDC_IFS,#SDC_IF
@@ -69,36 +72,11 @@ HEADLESS STORE_INIT,CODE
     ior SDC_IPC
     bset SDC_IEC,#SDC_IE
     bclr SDC_IFS,#SDC_IF
-;    ;sélection des PPS
-;    ; signal MISO
-;    mov #~(0x1f<<STR_SDI_PPSbit), W0
-;    and STR_RPINR
-;    mov #(STR_MISO<<STR_SDI_PPSbit), W0
-;    ior STR_RPINR
-;    ; signal STR_CLK
-;    mov #~(0x1f<<STR_CLK_RPORbit), W0
-;    and STR_CLK_RPOR
-;    mov #(STR_CLK_FN<<STR_CLK_RPORbit),W0
-;    ior STR_CLK_RPOR
-;    ; signal STR_MOSI
-;    mov #~(0x1f<<STR_SDO_RPORbit), W0
-;    and STR_SDO_RPOR
-;    mov #(STR_SDO_FN<<STR_SDO_RPORbit),W0
-;    ior STR_SDO_RPOR
-;    bclr STR_SPISTAT, #SPIEN
     ; configuration SPI
     mov #(1<<MSTEN)|(1<<CKE)|SPI_CLK_17MHZ, W0 ; SCLK=FCY/4
     mov W0, STR_SPICON1
 ;    bset STR_SPICON2, #SPIBEN ; enhanced mode
     _enable_spi
-    ; met la SPIRAM en mode séquenctiel.
-;    bclr STR_LAT, #SRAM_SEL
-;    mov #WRMR, W0
-;    spi_write
-;    mov #RMSEQ, W0
-;    spi_write
-;    bset STR_LAT, #SRAM_SEL
-;    return
     NEXT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -123,11 +101,11 @@ set_spi_clock:
 dummy_clock:
     _disable_sdc
     _enable_spi
-    mov.b #0xff,WREG
+    mov.b #0xff,W0
     mov #10,W1
 1:  spi_write
-    decsz W1
-    bra 1b
+    dec W1,W1
+    bra nz, 1b
     return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
@@ -137,46 +115,79 @@ dummy_clock:
 ; pour libéré la ligne MISO
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 sdc_deselect:
-    _sdc_disable
-    mov.b #0xff,WREG
-    _spi_write
+    _disable_sdc
+    mov.b #0xff,W0
+    spi_write
     return
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; envoie d'une commande carte SD
 ; entrée: 
 ;    W0  index commande
-;    W1  argHigh
-;    W2  argLow
-;    W3  pointeur buffer
-;    W4  grandeur buffer en octets    
+;    W1  argb1b2  b15:8->byte1,b7:0->byte2
+;    W2  argb3b4  b15:7->byte3,b7:0->byte4
+;    W3  nombre d'octets supplémentaire dans la réponse
+;    W4  pointeur buffer réponse    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 sdc_cmd:
-    case GO_IDLE_STATE,cmd0
-    
-cmd0:
-    
+    mov W0,W5
+    ;initialisation générateur CRC
+    ;mode CRC7=x?+x³+1
+    mov #0x89,W0
+    mov W0,CRCXORL
+    clr CRCXORH
+    bset CRCCON1,#CRCEN
+    mov #(7<<DWIDTH0)+(7<<PLEN0),W0
+    mov W0, CRCCON2
+    clr CRCWDATL
+    clr CRCWDATH
+    mov.b W5,W0
+    bset W0,#6
+    bclr W0,#7
+    mov.b WREG,CRCDATL
+    spi_write
+    mov W1,W0
+    swap W0
+    mov.b WREG,CRCDATL
+    spi_write
+    mov W1,W0
+    mov.b WREG,CRCDATL
+    spi_write
+    mov W2,W0
+    swap W0
+    mov.b WREG,CRCDATL
+    spi_write
+    mov W2,W0
+    mov.b WREG,CRCDATL
+    bset CRCCON1,#CRCGO
+    spi_write
+    btsc CRCCON1,#CRCGO
+    bra .-2
+    mov.b CRCWDATL,WREG
+    spi_write
+wait_response:
+    mov #8,W1
+1:
+    mov.b #0xff,W0
+    spi_write
+    xor.b #0xFF,W0
+    bra nz, 2f
+    dec W1,W1
+    bra nz, 1b
+    bset sdc_status, #F_SDC_TO
     return
-    
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;    
-;initialisation carte SD 
-;ref: http://elm-chan.org/docs/mmc/pic/sdinit.png    
-;;;;;;;;;;;;;;;;;;;;;;;;;    
-HEADLESS SDC_INIT,CODE
-    clr sdc_status
-    btsc SDC_PORT,#SDC_DETECT
+2:
+    mov.b W0, [W4++]
+3:  cp0 W3
+    bra nz, 4f
     return
-    bset sdc_status,#F_SDC_IN
-    mov #SPI_CLK_137KHZ,W1
-    call set_spi_clock
-    call dummy_clock
-    _sdc_enable
-    ;envoie CMD0
-    mov #GO_IDLE_STATE,W0
-    call sdc_cmd
+4:  spi_read
+    mov.b STR_SPIBUF,WREG
+    mov.b W0,[W4++]
+    dec W3,W3
+    bra 3b
     
-    NEXT
+    
     
 ;;;;;;;;;;;;;;;;;;;;
 ; envoie d'une adresse via STR_SPI
@@ -216,13 +227,36 @@ wait_wip0:
  ;;;;;;;;;;;;;;;
 ;  Forth words
 ;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;    
+;initialisation carte SD 
+;ref: http://elm-chan.org/docs/mmc/pic/sdinit.png    
+;;;;;;;;;;;;;;;;;;;;;;;;;    
+DEFCODE "SDCINIT",7,,SDCINIT,TONE
+    clr sdc_status
+    btsc SDC_PORT,#SDC_DETECT
+    return
+    bset sdc_status,#F_SDC_IN
+    mov #SPI_CLK_137KHZ,W1
+    call set_spi_clock
+    call dummy_clock
+    _enable_sdc
+    ;envoie CMD0
+    mov #GO_IDLE_STATE,W0
+    clr W1
+    clr W2
+    clr W3
+    mov #sdc_R,W4
+    call sdc_cmd
     
+    NEXT
+ 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; transfert un bloc d'octets de la RAM du MCU vers la RAM SPI
 ; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
 ; sortie aucune
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RSTORE",6,,RSTORE,TONE ; ( addr-bloc addr-sramL addr-sramH n -- )
+DEFCODE "RSTORE",6,,RSTORE,SDCINIT ; ( addr-bloc addr-sramL addr-sramH n -- )
     _enable_sram
     mov #RWRITE,W0
     spi_write

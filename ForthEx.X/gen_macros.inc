@@ -36,5 +36,7 @@
     bra nz, 1f
     bra \target
 1:  xor W0, #\value
+.endm    
+    
 .endif
 

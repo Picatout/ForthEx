@@ -17,9 +17,6 @@
 ;
 ;****************************************************************************
 
-; indicateurs booléens carte SD
-.equ F_SDC_IN, 0 ; carte dans la fente
-.equ F_SDC_CHG,1 ; une carte a été insérée ou enlevée
     
  ; commandes SPIRAM   
 .equ WRMR, 1
@@ -55,6 +52,18 @@
 
 ;ref: http://www.microchip.com/forums/m530149.aspx
 ;ref: http://elm-chan.org/docs/mmc/mmc_e.html 
+
+; indicateurs booléens carte SD
+.equ F_SDC_IN, 0 ; carte dans la fente
+.equ F_SDC_OK,1 ; carte insérée et initialisée
+.equ F_SDC_V1,2 ; carte version 1
+.equ F_SDC_HC,3 ; carte haute capacité
+.equ F_SDC_TO,4 ; commande time out
+.equ F_SDC_WE,5 ; erreur écriture
+.equ F_SDC_RE,6 ; erreur lecture
+.equ F_SDC_IE,7 ; erreur initialisation  
+.equ F_BAD_CARD,8 ; la carte ne répond pas
+ 
 ;commandes carte SD
 .equ GO_IDLE_STATE,         0    ; CMD0 - réinitialise carte
 .equ SEND_OP_COND,        1      ; CMD1 - requête condition d'opération
@@ -68,19 +77,14 @@
 .equ SD_STATUS,            13    ; ACMD13 - requête status
 .equ SD_SEND_OP_COND,        41  ; ACMD41 - requête condition d'opération
 ; certaines commandes requière une valeur pour CRC
-.equ CMD0_CRC, 0x4A 
-.equ CMD8_CRC, 0x43
-.equ CMD1_CRC, 0xF9
-.equ CMD58_CRC, 0x25
-.equ CMD9_CRC, 0xAF
-.equ CMD59_CRC, 0x25
-.equ CMD16_CRC, 0xFF
-.equ CMDX_CRC, 0x7F  ; autre commandes
+.equ CMD0_CRC, 0x95 
+.equ CMD8_CRC, 0x87
+.equ CMDX_CRC, 0xFF  ; autre commandes
  
  
 ; fréquence SPI clock
-.equ SPI_137KHZ, 0    ; SPRE->8:1, PPRE->64:1
-.equ SPI_17MHZ, 0x1E  ; SPRE->1:1, PPRE->4:1 
+.equ SPI_CLK_137KHZ, 0    ; SPRE->8:1, PPRE->64:1
+.equ SPI_CLK_17MHZ, 0x1E  ; SPRE->1:1, PPRE->4:1 
  
 .macro _disable_spi
     bclr STR_SPISTAT, #SPIEN
@@ -124,7 +128,7 @@
 .endm
    
 .macro _disable_sdc
-   bset SD_LAT,#SDC_SEL
+   bset SDC_LAT,#SDC_SEL
 .endm
    
    

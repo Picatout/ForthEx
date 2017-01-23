@@ -24,6 +24,8 @@
 ;   msp430 camelForth source code: http://www.camelforth.com/download.php?view.25
 ;   ANS FORTH 94: http://www.greenarraychips.com/home/documents/dpans94.pdf
 ;   http://sinclairql.speccy.org/archivo/docs/books/Threaded_interpretive_languages.pdf    
+;   http://www.exemark.com/FORTH/eForthOverviewv5.pdf
+;   http://forthfiles.net/ting/sysguidefig.pdf    
     
 .include "hardware.inc"
 .include "core.inc"

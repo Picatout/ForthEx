@@ -181,6 +181,7 @@
 .equ SDC_DETECT, RB13 ; pin 24, RPI45
 .equ SDC_SEL, RB2     ; pin 6, RPI34
 .equ SDC_PORT, PORTB  ;
+.equ SDC_LAT, LATB    
 .equ SDC_CNEN, CNENB  ; registre i/o change enable
 .equ SDC_IFS, IFS1    ; registre contenant le bit indicateur d'interruption CNIF
 .equ SDC_IEC, IEC1    ; registre contenant le bit d'activation CNIE
