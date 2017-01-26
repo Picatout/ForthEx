@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015,2016 Jacques Deschênes
+; Copyright 2015,2016,2017 Jacques Deschenes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -16,27 +16,26 @@
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
+;
+;NOM: forthex
+;DESCRIPTION: fichier principal du projet. Tous les autres fichiers qui ont
+;  des noms dans le dictionnaire sont assemblés par inclusion dans celui-ci.
+;  Ceci est requis pour que le lien entre les mots se fasse. L'étiquette '0:'
+;  doit-être réservée pour la création de ce lien, voir macro 'HEADER'
+;    
+;****************************************************************************
 
-;Fichier: gen_macro.inc
-;Description:  définition de macros d'usage général
-;Date: 2015-10-02
-.ifndef GEN_MACCRO
-.equ GEN_MACRO, 1
+.include "macros.inc" ; toutes les macros sont dans ce fichier
+.include "hardware.s" ; initialisaton matérielle. 
 
-; initialisation table en flash
-; pour lecture
-.macro set_eds_table table, reg
-    movpag #edspage(\table), DSRPAG
-    mov #edsoffset(\table), \reg
-.endm
-
-; case select macro W0 contient la valeur de contrôle
-.macro case value, target
-    xor W0, #\value
-    bra nz, 1f
-    bra \target
-1:  xor W0, #\value
-.endm    
+.section .link psv  address(0x7FFE)    
+.global _sys_latest
+_sys_latest:
+.word 0b
     
-.endif
+    
+    
+.end
+
+    
 

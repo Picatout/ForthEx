@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015,2016 Jacques Deschênes
+; Copyright 2015,2016,2017 Jacques Deschenes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -16,10 +16,11 @@
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
-; police de caractère 8x8
+;
+; police de caractère 6x8
 ;table ASCII REF: http://www.asciitable.com/ 
     
-#include "video.inc"
+;#include "video.inc"
     
 .section .font.const psv
 .global _font

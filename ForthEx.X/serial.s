@@ -21,8 +21,6 @@
 ;Description:  communication port sériel RS232 via USART
 ;Date: 2015-10-07
     
-.include "hardware.inc"
-.include "core.inc"
 .include "serial.inc"
    
 
@@ -141,7 +139,7 @@ HEADLESS SERIAL_INIT,CODE ; ( -- )
     bset SER_STA, #UTXEN
     NEXT
     
-DEFCODE "BAUD",4,,BAUD,KEY   ; ( u -- ) u<=57600
+DEFCODE "BAUD",4,,BAUD   ; ( u -- ) u<=57600
     bclr SER_MODE, #UARTEN
     mov #FCY&0xffff,W0
     mov #FCY>>16,W1
@@ -157,20 +155,20 @@ DEFCODE "BAUD",4,,BAUD,KEY   ; ( u -- ) u<=57600
     DPOP
     NEXT
     
-DEFCODE "SEMIT",5,,SEMIT,BAUD
+DEFCODE "SEMIT",5,,SEMIT
     cp0 tx_wait
-    bra neq, 0f
+    bra neq, 1f
     btsc SER_STA, #UTXBF
-    bra 0f
+    bra 1f
     mov T, SER_TXREG
     DPOP
-    bra 3f
-0:    
+    bra 4f
+1:    
     mov #QUEUE_SIZE, W0
-1:
+2:
     cp tx_wait
-    bra eq, 1b
-2:    
+    bra eq, 2b
+3:    
     mov.b tx_tail, WREG
     ze W0,W0
     mov #tx_queue, W1
@@ -181,16 +179,16 @@ DEFCODE "SEMIT",5,,SEMIT,BAUD
     inc.b tx_tail
     mov #(QUEUE_SIZE-1), W0
     and.b tx_tail
-3:    
+4:    
     NEXT
     
-DEFCODE "SGET",4,,SGET,SEMIT
+DEFCODE "SGET",4,,SGET
     DPUSH
-0:    
+1:    
     cp0 rx_in
-    bra nz, 1f
-    bra 0b
-1:
+    bra nz, 2f
+    bra 1b
+2:
     mov.b rx_head, WREG
     ze W0,W0
     mov #rx_queue, W1
@@ -206,4 +204,4 @@ DEFCODE "SGET",4,,SGET,SEMIT
 
 
     
-.end
+;.end

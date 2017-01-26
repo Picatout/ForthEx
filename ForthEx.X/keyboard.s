@@ -23,11 +23,7 @@
 ; Date: 2015-09-28
 ; REF: http://www.computer-engineering.org/ps2keyboard/scancodes2.html
 
-.include "hardware.inc"    
-.include "video.inc"
 .include "keyboard.inc"    
-.include "gen_macros.inc"
-.include "core.inc"    
  
 .equ KBD_QUEUE_SIZE, 32    
  
@@ -40,53 +36,13 @@ kbd_head:
 .space 2
 kbd_tail:
 .space 2
- 
-;;;;;;;;;;;;;;;;;;;;;;;;;;    
-; interruption TIMER1
-; interruption multi-tâches    
-; * incrémente 'systicks',
-; * minuterie durée son    
-; * traitement primaire
-;   file ps2_queue vers kbd_queue
-; * clignotement du curseur texte    
-;;;;;;;;;;;;;;;;;;;;;;;;;
-.extern systicks
-;.extern ps2_head
-;.extern ps2_tail    
-;.extern ps2_queue  
-INTR    
-.global __T1Interrupt   
-__T1Interrupt:
-    bclr IFS0, #T1IF
-    push.d W0
-    push.d W2
-    ; mise à jour compteur systicks
-    inc systicks
-    ; minuterie son
-    cp0 tone_len
-    bra z, 0f
-    dec tone_len
-    bra nz, 0f
-    bclr AUDIO_TMRCON, #TON
-0:   
-;traitement file ps2_queue
-;    call scancode_convert
-;clignotement curseur texte
-    cp0.b cursor_sema
-    bra nz, isr_exit
-    btsc.b fcursor, #CURSOR_ACTIVE
-    call cursor_blink
-isr_exit:
-    pop.d W2
-    pop.d W0
-    retfie
 
-INTR
-.global __INT1Interrupt
-__INT1Interrupt:
-    reset
+INTR ; section routines d'interruptions   
     
-INTR
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; réception d'un caractère
+; envoyé par le clavier
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 .global __U2RXInterrupt    
 __U2RXInterrupt:
     bclr KBD_RX_IFS,#KBD_RX_IF
@@ -100,35 +56,14 @@ __U2RXInterrupt:
     add W2,W1,W1
     mov.b W0,[W1]
     add #1,W2
-    and #(KBD_QUEUE_SIZE-1),W2 ; arg1 <#lit10>
+    and #(KBD_QUEUE_SIZE-1),W2
     mov W2, kbd_tail
     pop.d W2
     pop.d W0
     retfie
     
     
-.text
     
-;;;;;;;;;;;;;;;;;;;;;;;
-; retourne le code clavier
-; dans W0 sinon retourne 0
-;;;;;;;;;;;;;;;;;;;;;;;
-.global get_code    
-get_code:
-    clr W0
-    mov kbd_head, W1
-    mov kbd_tail, W2
-    cp  W1,W2
-    bra eq, 1f
-    mov #kbd_queue,W2
-    add W1,W2,W2
-    inc kbd_head
-    mov #(KBD_QUEUE_SIZE-1), W0
-    and kbd_head
-    mov.b [W2], W0
-    ze W0,W0
-1:
-    return
 
 
 
@@ -178,45 +113,83 @@ HEADLESS KBD_INIT,CODE ; ( -- )
 HEADLESS KBD_RESET  ; ( -- )
     mov #250,W0
     add systicks,WREG
-0:
+1:
     cp systicks
-    bra neq, 0b
+    bra neq, 1b
     bclr KBD_RST_LAT,#KBD_RST_OUT
     mov systicks,W0
     add W0,#3,W0
-1:    
+2:    
     cp systicks
-    bra neq, 1b
+    bra neq, 2b
     bset KBD_RST_LAT,#KBD_RST_OUT
     NEXT
 
-    
-    
-DEFCODE "?KEY",4,,QKEY,DOT  ; ( -- 0 | c T )
-    call get_code
-    DPUSH
-    mov W0, T
-    cp0 W0
-    bra eq, 1f
-    DPUSH
-    setm T
-1:    
+; filtre le caractère dans T    
+; accepte seulement
+; VK_ENTER,VK_BKSP,{32-126}
+; code 255 déclenche un RESET    
+HEADLESS KEYFILTER,CODE  ; ( c|0 -- c|0 )
+1:  cp T, #32
+    bra ge, 7f
+    cp T, #VK_RETURN
+    bra eq, 9f
+    cp T, #VK_BACK
+    bra eq, 9f
+    bra 8f
+7:
+    cp T, #127
+    bra lt,9f
+8:    
+    clr T  
+9:    
     NEXT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  mots dans le dictionnaire
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; retourne le caractère
+; en tête de file kbd_queue    
+; retourne 0 si file vide.    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFCODE "GETKEY",6,,GETKEY   ; (  -- c|0 )  
+    clr W0
+    mov kbd_head, W1
+    mov kbd_tail, W2
+    cp  W1,W2
+    bra eq, 1f
+    mov #kbd_queue,W2
+    add W1,W2,W2
+    inc kbd_head
+    mov #(KBD_QUEUE_SIZE-1), W0
+    and kbd_head
+    mov.b [W2], W0
+    ze W0,W0
+1:
+    DPUSH
+    mov W0,T
+    NEXT
+
+    
+; lecture clavier sans attente.    
+DEFWORD "?KEY",4,,QKEY  ; ( -- 0 | c T )
+    .word GETKEY,KEYFILTER,DUP
+    .word ZBRANCH,1f-$
+    .word LIT,0xffff
+1:    
+    .word EXIT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ; attend une touche
 ; du clavier
 ;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "KEY",3,,KEY,QKEY ; ( -- c)
-0:
-    call get_code
-    cp0 W0
-    bra z, 0b
-    DPUSH
-    mov W0, T
-    NEXT
+DEFWORD "KEY",3,,KEY ; ( -- c)    
+1:  .word QKEY,QDUP
+    .word ZBRANCH,1b-$
+    .word DROP,EXIT 
     
-
     
-.end
+;.end
     

@@ -21,8 +21,7 @@
 ;Description: routines sortie tonalités audio.
 ;Date: 2015-10-16
     
-.include "hardware.inc"
-.include "core.inc"    
+.include "sound.inc"
 
 .equ FCT, (FCY/8)
     
@@ -56,7 +55,7 @@ HEADLESS SOUND_INIT,CODE
  ; mots Forth
  ;;;;;;;;;;;;;;;;;;
  
- DEFCODE "TONE",4,,TONE,SGET  ; ( duration Nfr -- )
+ DEFCODE "TONE",4,,TONE  ; ( duration Nfr -- )
     mov T, AUDIO_PER
     mov T, AUDIO_OCRS
     lsr T, T
@@ -70,4 +69,4 @@ HEADLESS SOUND_INIT,CODE
 
 
   
- .end   
+; .end   

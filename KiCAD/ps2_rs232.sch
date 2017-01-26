@@ -250,8 +250,6 @@ F 3 "" H 4550 3950 50  0000 C CNN
 $EndComp
 Wire Wire Line
 	4600 3850 4700 3850
-Text HLabel 4700 3750 0    39   Input ~ 0
-~REBOOT
 $Comp
 L R R21
 U 1 1 58740755
@@ -334,4 +332,6 @@ Wire Wire Line
 Wire Wire Line
 	3900 4000 3900 3950
 Connection ~ 4400 4000
+Text HLabel 4700 3750 0    39   Input ~ 0
+~REBOOT
 $EndSCHEMATC

@@ -1,6 +1,4 @@
 build/default/production/font.o:  \
-font.S  \
-video.inc 
+font.S 
 build/default/production/font.o:  \
-video.inc  \
- font.S  \
+font.S  \

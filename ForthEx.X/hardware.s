@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, 2016, 2017 Jacques Deschênes
+; Copyright 2015, 2016, 2017 Jacques Deschenes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -19,32 +19,114 @@
 ; hardware setup
     
 .include "hardware.inc"
+
+FORTH_CODE
+ .global _warm
+_warm:	   ; ( -- )  démarrage à chaud
+    mov #pstack, DSP
+    mov #rstack, RSP
+    mov #edsoffset(ABORT),IP
+    NEXT
     
-.if (VIDEO_STD==NTSC)
-.include "ntsc_const.inc"    
-.else
-.include "pal_const.inc"
-.endif
+    .global ENTER
+ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
+    RPUSH IP   
+    mov WP,IP
+    NEXT
+
+    .global DOUSER
+DOUSER: ; empile pointeur sur variable utilisateur
+    DPUSH
+    mov [WP++],W0
+    add W0,UP,T
+    NEXT
+
+    .section .sysdict psv
+    .align 2
+    .global name_EXIT
+name_EXIT :
+    .word 0
+0:  .byte 4
+    .ascii "EXIT"
+    .align 2
+    .global EXIT
+EXIT:
+    .word code_EXIT	; codeword
+    FORTH_CODE
+    .global code_EXIT
+code_EXIT :			;pfa,  assembler code follows
+    RPOP IP
+    NEXT
     
-.include "video.inc"
-.include "core.inc"
+.include "core.s" 
+.include "TVout.S"
+.include "serial.s"
+.include "sound.s"
+.include "store.s"
+.include "keyboard.s"    
+    
     
 .section .hardware.bss  bss
     
-.global systicks , seed   
+.global systicks , seed  
+.align 2    
 systicks: ; compteur de millisecondes
 .space 2
 seed: ; PRNG 32 bits    
 .space 4
     
     
-INTR    
+INTR
+.global __MathError    
+__MathError:
+    reset
+    
 ; les interruptions non définies 
 ; réinitialisent le processeur    
 .global __DefaultInterrupt
 __DefaultInterrupt:
     reset
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;    
+; interruption TIMER1
+; interruption multi-tâches    
+; * incrémente 'systicks',
+; * minuterie durée son    
+; * clignotement du curseur texte    
+;;;;;;;;;;;;;;;;;;;;;;;;;
+.global __T1Interrupt   
+__T1Interrupt:
+    bclr IFS0, #T1IF
+    push.d W0
+    push.d W2
+    ; mise à jour compteur systicks
+    inc systicks
+    ; minuterie son
+    cp0 tone_len
+    bra z, 1f
+    dec tone_len
+    bra nz, 1f
+    bclr AUDIO_TMRCON, #TON
+1:   
+;clignotement curseur texte
+    cp0.b cursor_sema
+    bra nz, isr_exit
+    btsc.b fcursor, #CURSOR_ACTIVE
+    call cursor_blink
+isr_exit:
+    pop.d W2
+    pop.d W0
+    retfie
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+; réponse au signal /REBOOT
+; envoyé par l'interface clavier
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+.global __INT1Interrupt
+__INT1Interrupt:
+    reset
+    
+    
 ; vecteur de réinitialisation du processeur    
 .section .start.text code address(0x200)
 .global __reset    
@@ -64,7 +146,7 @@ __reset:
 .global _cold    
 _cold:
     .word HARDWARE_INIT,VARS_INIT
-    .word VERSION,ZTYPE,CR  
+    .word VERSION,COUNT,TYPE,CR 
     .word QUIT ; cette fonction ne quitte jamais
 
 ; initialisation matérielle    
@@ -148,8 +230,12 @@ HEADLESS VARS_INIT
     mov W0, _LATEST
     NEXT
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; mots dans le dictionnaire
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
 ; empile le compteur systicks    
-DEFCODE "TICKS",5,,TICKS,CMOVE  ; ( -- n )
+DEFCODE "TICKS",5,,TICKS  ; ( -- n )
     DPUSH
     mov systicks, T
     NEXT
@@ -157,7 +243,7 @@ DEFCODE "TICKS",5,,TICKS,CMOVE  ; ( -- n )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; délais en microsecondes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "USEC",4,,USEC,TICKS
+DEFCODE "USEC",4,,USEC
     mov #TCY_USEC,W0
     dec T,T
     mul.uu T,W0,W0
@@ -169,12 +255,12 @@ DEFCODE "USEC",4,,USEC,TICKS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  délais en millisecondes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "MSEC",4,,MSEC,USEC  ; ( n -- )
+DEFCODE "MSEC",4,,MSEC  ; ( n -- )
     mov systicks, W0
     add W0,T,W0
-0:    
+1:    
     cp systicks
-    bra neq, 0b
+    bra neq, 1b
     DPOP
     NEXT
 
@@ -184,15 +270,15 @@ DEFCODE "MSEC",4,,MSEC,USEC  ; ( n -- )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .equ TAPSH, 0x8020
 .equ TAPSL, 0x0002    
-DEFCODE "LFSR",4,,LFSR,MSEC  ; ( -- )
+DEFCODE "LFSR",4,,LFSR  ; ( -- )
     lsr seed+2 
     rrc seed
-    bra nc, 0f
+    bra nc, 1f
     mov #TAPSH, W0
     xor seed+2
     mov #TAPSL, W0
     xor seed
-0:    
+1:    
     DPUSH
     mov seed, T
     NEXT
@@ -205,16 +291,17 @@ DEFCODE "LFSR",4,,LFSR,MSEC  ; ( -- )
 ;  on ne garde que le bit
 ;  le moins significatif
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "RAND",4,,RAND,LFSR   ; ( -- n)
+DEFCODE "RAND",4,,RAND   ; ( -- n)
     clr W2
-    mov #15,W3
-0:
+    mov #16,W4 ; compteur boucle
+1:
     btss seed,#0
-    bra 1f
+    bra 2f
     inc seed
-    bra nc, 1f
+    bra nc, 2f
     inc seed+2
- 1:
+ 2:
+    ; 3*seed
     sl seed,WREG
     mov W0,W1
     rlc seed+2, WREG
@@ -222,12 +309,13 @@ DEFCODE "RAND",4,,RAND,LFSR   ; ( -- n)
     add seed
     mov W1,W0
     addc seed+2
+    ;seed/2
     lsr seed+2,
     rrc seed
     lsr seed, WREG
     rrc W3,W3
     dec W4,W4
-    bra c, 1b
+    bra nz, 2b
     DPUSH
     mov W3,T
     NEXT
@@ -237,7 +325,7 @@ DEFCODE "RAND",4,,RAND,LFSR   ; ( -- n)
 ; seed=systicks/3
 ; seed+2=systicks%3    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "SRAND",5,,SRAND,RAND  ; ( -- )
+DEFCODE "SRAND",5,,SRAND  ; ( -- )
     mov systicks,W0
     mov #3,W2
     div.u W0,W2
@@ -247,6 +335,6 @@ DEFCODE "SRAND",5,,SRAND,RAND  ; ( -- )
     
     
     
-.end
+;.end
     
 

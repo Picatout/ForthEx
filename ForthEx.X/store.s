@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015, Jacques Deschênes
+; Copyright 2015,2016,2017 Jacques Deschenes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -21,10 +21,7 @@
 ;Description:  interface avec les mémoire externe SPIRAM et SPIEEPROM
 ;Date: 2015-10-06
     
-.include "hardware.inc"
-.include "core.inc"
 .include "store.inc"
-.include "gen_macros.inc"
     
 .section .hardware.bss  bss
 sdc_status: .space 2 ; indicateur booléens carte SD
@@ -232,7 +229,7 @@ wait_wip0:
 ;initialisation carte SD 
 ;ref: http://elm-chan.org/docs/mmc/pic/sdinit.png    
 ;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "SDCINIT",7,,SDCINIT,TONE
+DEFCODE "SDCINIT",7,,SDCINIT
     clr sdc_status
     btsc SDC_PORT,#SDC_DETECT
     return
@@ -256,7 +253,7 @@ DEFCODE "SDCINIT",7,,SDCINIT,TONE
 ; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
 ; sortie aucune
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RSTORE",6,,RSTORE,SDCINIT ; ( addr-bloc addr-sramL addr-sramH n -- )
+DEFCODE "RSTORE",6,,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
     _enable_sram
     mov #RWRITE,W0
     spi_write
@@ -265,14 +262,14 @@ DEFCODE "RSTORE",6,,RSTORE,SDCINIT ; ( addr-bloc addr-sramL addr-sramH n -- )
     call spi_send_address
     mov T, W2 ; adresse bloc RAM
     DPOP
-0:
+1:
     cp0 W1
-    bra z, 1f
+    bra z, 2f
     mov.b [W2++], W0
     spi_write
     dec W1,W1
-    bra 0b
-1:    
+    bra 1b
+2:    
     _disable_sram
     NEXT
 
@@ -282,7 +279,7 @@ DEFCODE "RSTORE",6,,RSTORE,SDCINIT ; ( addr-bloc addr-sramL addr-sramH n -- )
 ; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
 ; sortie: aucune
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RLOAD",5,,RLOAD,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
+DEFCODE "RLOAD",5,,RLOAD ; ( addr-bloc addr-sramL addr-sramH n -- )
     _enable_sram
     mov #RREAD, W0
     spi_write
@@ -292,13 +289,13 @@ DEFCODE "RLOAD",5,,RLOAD,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
     mov T, W2 ; adresse bloc RAM
     DPOP
     mov #STR_SPIBUF, W3
-0:    
+1:    
     cp0 W1
     bra z, 3f
     spi_read
     mov.b [W3], [W2++]
     dec W1,W1
-    bra 0b
+    bra 1b
 3:
     _disable_sram
     NEXT
@@ -315,7 +312,7 @@ DEFCODE "RLOAD",5,,RLOAD,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
 ; cette routine est conçue pour programmer
 ; une page complète.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "ESTORE",6,,ESTORE,RLOAD  ;( addr-bloc page -- )
+DEFCODE "ESTORE",6,,ESTORE  ;( addr-bloc page -- )
     call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
     _enable_eeprom
     mov #EWREN, W0
@@ -345,7 +342,7 @@ DEFCODE "ESTORE",6,,ESTORE,RLOAD  ;( addr-bloc page -- )
 ; charque une page EEPROM
 ; en mémoire RAM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "ELOAD",5,,ELOAD,ESTORE   ; ( addr-bloc page -- )
+DEFCODE "ELOAD",5,,ELOAD   ; ( addr-bloc page -- )
     call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
     _enable_eeprom
     mov #EREAD, W0
@@ -368,6 +365,6 @@ DEFCODE "ELOAD",5,,ELOAD,ESTORE   ; ( addr-bloc page -- )
     NEXT
     
     
- .end
+ ;.end
     
     

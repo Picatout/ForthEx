@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015,2016 Jacques Deschênes
+; Copyright 2015,2016,2017 Jacques Deschenes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
+;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; bits de configuration du MCU
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -31,4 +32,4 @@
     
    
 
-
+.end

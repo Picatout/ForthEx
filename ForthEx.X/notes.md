@@ -10,4 +10,10 @@ devra communiquer avec les fonctions BIOS à travers cette interface.
 
 ![diagramme du système](/Documentation/diagramme-système.png)
 
+2017-01-24
+==========
+Réorganisation majeure du projet. Redéfinitions de macros lié à la création des mots forth. Pour faciliter
+la création des liens entre les mots du dictionnaire tous les fichiers doivent-être assemblés en même temps.
+J'ai donc créer un fichier **forthex.s** qui inclus les autres fichiers. Les autres fichiers sont retirés du
+**makefile** pour éviter un assemblage séparé.
 

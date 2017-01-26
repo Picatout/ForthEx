@@ -20,6 +20,12 @@
 ; constantes liées au générateur de caractères
 .ifndef VIDEO_INC
 .equ VIDEO_INC, 1
+
+.if (VIDEO_STD==NTSC)
+.include "ntsc_const.inc"    
+.else
+.include "pal_const.inc"
+.endif
     
 .equ CHAR_WIDTH,  (8)
 .equ CHAR_HEIGHT, (8)
