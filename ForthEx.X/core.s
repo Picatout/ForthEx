@@ -198,11 +198,11 @@ DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
     ze T, T
     NEXT
 
-DEFCODE "2@",2,,TWOFETCH ; ( addr -- n1 n2 )
-    mov [T],W0
+DEFCODE "2@",2,,TWOFETCH ; ( addr -- n1 n2 ) double en mémoire en format little indian
+    mov [T],W0 
     add #CELL_SIZE,T
-    mov [T],[++DSP]
-    mov W0,T
+    mov [T],T
+    mov W0,[++DSP]
     NEXT
     
 DEFCODE "!",1,,STORE  ; ( n  addr -- )
@@ -364,6 +364,13 @@ DEFCODE "DEPTH",5,,DEPTH ; ( -- +n1 ) nombre d'élément sur la pile data avant qu
     sub DSP,W0,W0
     DPUSH
     lsr W0,T
+    NEXT
+
+DEFCODE "PICK",4,,PICK ; ( +n1 -- n ) copie le nième élément de la pile au sommet
+    mov DSP,W0
+    sl T,T
+    sub W0,T,W0
+    mov [W0],T
     NEXT
     
 ;;;;;;;;;;;;;;;;
@@ -621,6 +628,19 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
     mov W0,T
     NEXT
 
+DEFCODE "ALIGNED",7,,ALIGNED ; ( addr -- addr )
+    btsc T,#0
+    inc T,T
+    NEXT
+    
+DEFCODE ">CHAR",5,,TOCHAR ; ( c -- c)
+    and #127,T
+    cp T,#32
+    bra ge, 1f
+    mov #'_',T
+1:  NEXT
+ 
+    
 DEFWORD "HERE",4,,HERE
     .word DP,FETCH,EXIT
 
@@ -885,13 +905,15 @@ not_found:
 ; +n1 longueur du buffer
 ; +n2 longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
-        .word OVER,DUP,TOIN,STORE,PLUS,OVER  ; 2,3,4,5,3,2,3 ( c-addr bound cursor )
-acc1:   .word TWODUP,EQUAL,TBRANCH,acc6-$ ; 3,5,4,3
-        .word KEY,DUP,LIT,13,EQUAL,TBRANCH,acc5-$ ; 3,4,5,6,5,4 ( c-addr bound cursor c )
-        .word DUP,LIT,8,EQUAL,ZBRANCH,acc3-$ ; 4,5,6,5,4 ( c-addr bound cursor c )
-	.word DROP,BACKCHAR,ONEMINUS,BRANCH,acc1-$ ; 4,3,3,3
-acc3:	.word DUP,EMIT,OVER,CSTORE,ONEPLUS ;4,5,4,5,3,3
+        .word OVER,DUP,TOIN,STORE,PLUS,OVER  ;  ( c-addr bound cursor )
+acc1:   .word KEY,DUP,LIT,13,EQUAL,TBRANCH,acc5-$ ; ( c-addr bound cursor c )
+        .word DUP,LIT,8,EQUAL,ZBRANCH,acc3-$ ; ( c-addr bound cursor c )
+	.word DROP,DUP,TOIN,FETCH,EQUAL,TBRANCH,acc1-$
+	.word BACKCHAR,ONEMINUS,BRANCH,acc1-$ 
+acc3:	.word TOR,OVER,OVER,EQUAL,TBRANCH,acc4-$
+	.word RFROM,DUP,EMIT,OVER,CSTORE,ONEPLUS 
         .word BRANCH,acc1-$
+acc4:   .word RFROM,DROP,BRANCH,acc1-$	
 acc5:   .word DROP; 4,3
 acc6:   .word LIT,0,OVER,CSTORE,NIP,SWAP,MINUS,EXIT ; 3,2,2,1
 
@@ -907,7 +929,7 @@ DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )
    .word SPACE,CLIT,'?',EMIT
    .word LIT,0,STATE,STORE
    .word S0,FETCH,SPSTORE
-   .word EXIT
+   .word CR,QUIT
    
 ; interprète une chaine  la chaîne indiquée par
 ; c-addr u   
@@ -942,7 +964,7 @@ DEFWORD "ABORT\"",6,,ABORTQ ; ( i*x x1 -- i*x )
     
 ; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT ; ( -- )
-    .word R0,FETCH,RPSTORE ;0,1,1,0
+1:  .word R0,FETCH,RPSTORE ;0,1,1,0
     .word LIT,0,DUP,STATE,STORE,SOURCE_ID,STORE ;0,1,2,0
     .word TIB,FETCH,TOIN,STORE ;1,1,2,0
 quit0:

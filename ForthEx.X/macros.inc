@@ -51,7 +51,7 @@
 .equ WP, W12  ;  pointeur paramètres
 .equ UP, W11  ; pointeur _USER_VARS
 .equ IP, W10  ; pointeur d'instruction machine virtuelle
-.equ I, W9   ; compteur de boucle    
+.equ I, W9    ; compteur de boucle    
 .equ LIMIT,W8 ; limite des boucles
     
     
