@@ -183,11 +183,20 @@ DEFCODE "REBOOT",6,,REBOOT ; ( -- )  démarrage à froid
     reset
     
     
-DEFCODE "EXECUTE",7,,EXECUTE ; ( i*x xt -- j*x ) 6.1.1370 exécute le code à l'adresse xt
-    mov T, WP
+DEFCODE "EXECUTE",7,,EXECUTE ; ( i*x cfa -- j*x ) 6.1.1370 exécute le code à l'adresse *cfa
+    mov T, WP ; CFA
     DPOP
-    mov [WP++],W0
+    mov [WP++],W0  ; code address
     goto W0
+
+DEFCODE "@EXECUTE",8,,FEXEC   ; ( *addr -- ) exécute le code à l'adresse *T
+    mov [T],W0
+    DPOP
+    mov #USER_BASE,W1
+    cp W0,W1
+    bra ltu, 1f
+    goto W0
+1:  NEXT    
     
 DEFCODE "@",1,,FETCH ; ( addr -- n )
     mov [T],T
@@ -243,6 +252,13 @@ DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) n1=LIMIT_J, n2=J
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 ; mots manipulant les arguments sur la pile
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+;DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
+;    .word STATE,FETCH,ZBRANCH,1f-$
+;    .word  DOES, 
+;1:  .word ABORTQ,err_cow
+;    .word  EXIT
+    
 DEFCODE "DUP",3,,DUP ; ( n -- n n )
     DPUSH
     NEXT
@@ -488,19 +504,40 @@ DEFCODE "/MOD",4,,DIVMOD ; ( n1 n2 -- r q )
     mov W1,[DSP] ; reste
     NEXT
 
-DEFCODE "UMAX",4,,UMAX ; ( u1 u2 -- max(u1,u2)
+DEFCODE "UM/MOD",6,,UMSLASHMOD ; ( ud u -- r q )
+    mov [DSP--],W1
+    mov [DSP--],W0
+    repeat #17
+    div.ud W0,T
+    mov W0,T
+    mov W1,[++DSP]
+    NEXT
+    
+DEFCODE "MAX",4,,UMAX ; ( n1 n2 -- max(n1,n2)
     mov [DSP--],W0
     cp T,W0
-    bra geu, 1f
+    bra ge, 1f
     exch T,W0
 1:  NEXT    
     
-DEFCODE "UMIN",4,,UMIN ; ( u1 u2 -- min(u1,u2)
-    mov [DSP--],w0
+DEFCODE "MIN",4,,UMIN ; ( n1 n2 -- min(n1,n2)
+    mov [DSP--],W0
     cp W0,T
-    bra geu, 1f
+    bra ge, 1f
     exch T,W0
 1:  NEXT
+    
+DEFCODE "WITHIN",6,,WITHIN ; ( u1 u2 u3 -- f ) u2<=u1<u3
+    clr W0
+    mov [DSP--],W2 ; u2
+    mov [DSP--],W1 ; u1
+    cp W1,W2
+    bra ltu, 1f
+    cp W1,T
+    bra geu, 1f
+    setm W0
+1:  mov W0,T    
+    NEXT
     
 DEFCODE "EVEN",4,,EVEN ; ( n -- f ) vrai si n pair
     setm W0
@@ -514,6 +551,11 @@ DEFCODE "ODD",3,,ODD ; ( n -- f ) vrai si n est impair
     btss T,#0
     clr W0
     mov W0,T
+    NEXT
+    
+DEFCODE "ABS",3,,ABS ; ( n -- +n ) valeur absolue de n
+    btsc T,#15
+    neg T,T
     NEXT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
@@ -628,7 +670,7 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
     mov W0,T
     NEXT
 
-DEFCODE "ALIGNED",7,,ALIGNED ; ( addr -- addr )
+DEFCODE "ALIGNED",7,,ALIGNED ; ( addr -- a-addr ) aligne addresse sur nombre pair.
     btsc T,#0
     inc T,T
     NEXT
@@ -646,7 +688,7 @@ DEFWORD "HERE",4,,HERE
 
 DEFWORD "IMMEDIATE",9,,IMMEDIATE
     .word LATEST,FETCH,DUP,SYSLATEST,FETCH,EQUAL,TBRANCH,1f-$
-    .word TWOPLUS,DUP,CFETCH,IMMED,OR,CSTORE,BRANCH,2f-$
+    .word DUP,CFETCH,IMMED,OR,CSTORE,EXIT
 1:  .word DROP  
 2:  .word EXIT
     
@@ -680,6 +722,55 @@ DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
     mov.b [W1++],[W2++]
 1:  NEXT
 
+; initialise un bloc mémoire
+DEFCODE "FILL",4,,FILL ; ( addr u n -- )  for{0:(u-1)}-> m[T++]=n
+    mov [DSP--],W0 ; n
+    mov [DSP--],W1 ; u
+    cp0 W1
+    bra z, 1f
+    dec W1,W1
+    repeat W1
+    mov W0,[T++]
+1:  DPOP    
+    NEXT
+    
+; initialise un bloc d'octets
+DEFCODE "CFILL",5,,CFILL ; ( addr u b -- ) for{0:(u-1)} -> m[T++]=b
+    mov [DSP--],W0
+    mov [DSP--],W1
+    cp0 W1
+    bra z, 1f
+    dec W1,W1
+    repeat W1
+    mov.b W0,[T++]
+1:  DPOP    
+    NEXT
+    
+; supprime tous les caractères <=32 à la fin d'une chaîne
+; par des zéro
+; u1 longueur initiale de la chaîne
+; u2 longueur finale de laq chaîne    
+DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )     
+    mov [DSP],W0
+    add W0,T,W0
+    mov #33,W1
+1:  dec W0,W0
+    cp.b W1,[W0]
+    bra gtu, 1f
+    inc W0,W0
+    sub W0,[DSP],T
+    NEXT
+ 
+; copie une chaine de caractère
+; sur une adresse alignée
+DEFWORD "PACK$",5,,PACKS ; ( src u dest -- a-dest )  copi src de longeur u vers aligned(dest)
+    .word ALIGNED,DUP,TOR  ; src u a-dest R: a-dest
+    .word OVER,DUP,LIT,0   ; src u a-dest u u 0
+    .word LIT,2,UMSLASHMOD,DROP ; src u a-dest u r
+    .word MINUS,OVER,PLUS ; src u a-dest a-dest+u
+    .word LIT,0,SWAP,STORE ; src u a-dest
+    .word TWODUP,CSTORE,LIT,1,PLUS ; src u a-dest+1
+    .word SWAP,CMOVE,RFROM,EXIT ; ( -- a-dest)
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -857,7 +948,7 @@ DEFCODE "WORD",4,,WORD  ; ( c -- c-addr)
 .equ CNTR, W5
 .equ NAME, W6 ; nom dans dictionnaire 
 .equ FLAGS,W7    
-DEFCODE "FIND",4,,FIND ; ( c-addr -- c-addr 0 | xt 1 | xt -1 )
+DEFCODE "FIND",4,,FIND ; ( c-addr -- c-addr 0 | cfa 1 | cfa -1 )
     mov T, TARGET
     DPUSH
     mov.b [TARGET++],LEN ; longueur
@@ -889,7 +980,7 @@ same_len:
 match:
     btsc NFA,#0 ; alignement sur adresse paire
     inc NFA,NFA ; CFA
-    mov NFA,[DSP] ; XT
+    mov NFA,[DSP] ; CFA
     setm T
     and.b #F_IMMED,FLAGS
     bra z, 2f
@@ -983,6 +1074,12 @@ DEFCODE "INFLOOP",7,,INFLOOP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   debug tool
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DEFWORD ".S",2,,DOTS
+    .word DEPTH,CLIT,'<',EMIT,DUP,DOT,CLIT,'>',EMIT,SPACE
+1:  .word QDUP,ZBRANCH,2f-$,DUP,PICK,DOT,ONEMINUS
+    .word BRANCH,1b-$  
+2:  .word EXIT
+    
 .text 
 prt_hex:; W0 entier à imprimer
     push.d W0

@@ -135,10 +135,11 @@
 ;REF: http://www.camelforth.com/news.php    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
-; Flags
-.equ F_IMMED,0x80
-.equ F_HIDDEN,0x20
-.equ F_LENMASK,0x1f	; length mask
+; indicateurs booléens entrée de dictionnaire
+.equ F_IMMED,0x80 ; mot immédiat
+.equ F_COMPO,0x40 ; mot en mode compilation seuelment    
+.equ F_HIDDEN,0x20 ; mot caché.
+.equ F_LENMASK,0x1f ; masque longueur nom.
 
 ;macro pour la création des entêtes de dictionnaire
 .macro HEADER name,namelen,flags=0,label

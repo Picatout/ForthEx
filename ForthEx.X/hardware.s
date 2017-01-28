@@ -21,12 +21,6 @@
 .include "hardware.inc"
 
 FORTH_CODE
- .global _warm
-_warm:	   ; ( -- )  démarrage à chaud
-    mov #pstack, DSP
-    mov #rstack, RSP
-    mov #edsoffset(ABORT),IP
-    NEXT
     
     .global ENTER
 ENTER: ; entre dans un mot de haut niveau (mot défini par ':')

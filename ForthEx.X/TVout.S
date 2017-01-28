@@ -612,29 +612,77 @@ DEFWORD "BACKCHAR",8,,BACKCHAR   ; ( -- )
 ; d'un entier en chaîne
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; convertion d'un chiffre en caractère    
+DEFWORD "DIGIT",5,,DIGIT ; ( u -- c )
+    .word LIT,9,OVER,LESS,LIT,7,AND,PLUS,LIT,48,PLUS
+    .word EXIT
+
+; extrait le chiffre le moins significatif
+; et le convertie en caractère    
+DEFWORD "EXTRACT",7,,EXTRACT ; ( n1 base -- n2 c )     
+    .word LIT,0,SWAP,UMSLASHMOD,SWAP,DIGIT,EXIT
+    
 ;débute la conversion
 ;en initialisant la variable HP    
 DEFWORD "<#",2,,LTSHARP ; ( -- )
     .word PAD,FETCH,PADSIZE,PLUS,HP,STORE
     .word EXIT
     
-;met le caractère dand T au
+;met le caractère dans T au
 ; début de la chaîne de conversion
 DEFWORD "HOLD",4,,HOLD ; ( c -- )
     .word LIT,-1,HP,PLUSSTORE
     .word HP,FETCH,CSTORE
     .word EXIT
 
-;    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; imprime l'entier au sommet de la pile
-; la présentation dépend de la valeur de
-; la variable BASE    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;converti un digit
+DEFWORD "#",1,,SHARP ; ( n1 -- n2 )
+    .word BASE,FETCH,EXTRACT,HOLD,EXIT
+
+;converti tous les digits
+DEFWORD "#S",2,,SHARPS ; ( n1 -- 0 )
+1:  .word SHARP,DUP,TBRANCH,1b-$,EXIT
+  
+;ajoute le signe au début de la chaîne numérique
+DEFWORD "SIGN",4,,SIGN ; ( n -- )
+    .word ZEROLT,ZBRANCH,1f-$
+    .word CLIT,'-',HOLD
+1:  .word EXIT
+  
+;termine la conversion en ajoutant la longueur
+;de la chaîne au début de celle-ci.
+DEFWORD "#>",2,,SHARPGT ; ( w -- addr u )
+  .word DROP,HP,FETCH,PAD,FETCH,OVER,MINUS, EXIT
+  
+; convertions entier en chaîne
+DEFWORD "STR",3,,STR ; ( n -- addr u )
+  .word DUP,TOR,ABS,LTSHARP,SHARPS,RFROM,SIGN,SHARPGT,EXIT
+  
+; imprime un nombre dans un colonne de largeur fixe
+; aligné à droite
+DEFWORD ".R",2,,DOTR  ; ( n +n -- ) +n est la largeur de la colonne
+  .word TOR, STR, RFROM,OVER,MINUS,SPACES,TYPE,EXIT
+  
+; imprime un nombre non sigé dans une colonne de 
+; largeur fixe, aligné à droite
+DEFWORD "U.R",3,,UDOTR ; ( u +n -- )
+  .word TOR,LTSHARP,SHARPS,SHARPGT,RFROM,OVER
+  .word MINUS,SPACES,TYPE,EXIT
+  
+; imprime un nombre non signé en format libre
+DEFWORD "U.",2,,UDOT ; ( n -- )
+UD:  .word LTSHARP,SHARPS,SHARPGT,SPACE,TYPE,EXIT
+  
+; imprime un nombre en format libre
 DEFWORD ".",1,,DOT ; ( n -- )
-    .word 
-    .word SPACE,EXIT
-    
-    
+  .word BASE,FETCH,LIT,10,XOR,TBRANCH, UD-$
+  .word SPACE,STR,EXIT
+  
+; imprime le contenu d'une adresse
+DEFWORD "?",1,,QUESTION ; ( addr -- )
+  .word FETCH,DOT,EXIT
+  
+  
+
 ;.end
 
