@@ -463,7 +463,7 @@ DEFCODE "M+",2,,ADDPLUS  ; ( d n --  d ) simple + double
     addc #0, T
     NEXT
  
-DEFCODE "*",1,,MULTIPLY ; ( n1 n2 -- n1*n2) 
+DEFCODE "*",1,,STAR ; ( n1 n2 -- n1*n2) 
     mov T, W0
     DPOP
     mul.ss W0,T,W0
@@ -787,7 +787,8 @@ DEFVAR "PAD",3,,PAD       ; tampon de travail
 DEFVAR "TIB",3,,TIB       ; tampon de saisie clavier
 DEFVAR ">IN",3,,TOIN     ; pointeur position début dernier mot retourné par WORD
 DEFVAR "HP",2,,HP       ; HOLD pointer
-DEFVAR "SOURCE-ID",9,,SOURCE_ID ; tampon source pour l'évaluation
+DEFVAR "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
+DEFVAR "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
@@ -804,21 +805,64 @@ DEFCONST "ULIMIT",6,,ULIMIT,RAM_END-1        ; limite espace dictionnaire
 DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
 
 ; addresse buffer pour l'évaluateur    
-DEFCODE "SOURCE",6,,SOURCE ; ( -- c-addr u ) 
+DEFCODE "'SOURCE",6,,SOURCE ; ( -- c-addr u ) 
     DPUSH
-    mov _SOURCE,T
+    mov _TICKSOURCE,T
     DPUSH
-    mov _SOURCE+2,T
+    mov _CNTSOURCE,T
     NEXT
 
 ; sauvegarde les valeur de source    
 DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
-    mov T,_SOURCE+2
+    mov T,_CNTSOURCE
     DPOP
-    mov T,_SOURCE
+    mov T,_TICKSOURCE
     DPOP
     NEXT
+
+;converti un caractère en entier    
+;selon la valeur de base    
+DEFWORD "DIGIT?",6,,DIGITQ ; ( c base -- u f )
+    .word TOR,LIT, 48,MINUS,LIT,9,OVER,LESS,ZBRANCH,1f-$
+    .word LIT, 7,MINUS, DUP,LIT,10,LESS,OR
+1:  .word DUP,RFROM,ULESS,EXIT
+
+; vérifie si la chaîne commence
+; avec un modificateur de base i.e. '$','%','#'
+; fixe la base en conséquence
+; ajustement de addr et n si requis  
+DEFWORD "BASE?",5,,BASEQ ; ( addr n -- addr1 n1 | addr n )
+    .word OVER,CFETCH,CLIT,'$',EQUAL,ZBRANCH,1f-$
+    .word HEX,BRANCH,4f-$
+1:  .word OVER,CFETCH,CLIT,'%',EQUAL,ZBRANCH, 3f-$
+    .word LIT,2,BASE,STORE,BRANCH,4f-$
+3:  .word OVER,CFETCH,CLIT,'#',EQUAL,ZBRANCH, 5f-$
+    .word DECIMAL
+4:  .word SWAP,ONEPLUS,SWAP,ONEMINUS    
+5:  .word EXIT
+  
+; vérifie sit la chaine débute avec un '-'
+; ajustement de addr et n si requis
+DEFWORD "NEG?",4,,NEGQ ; ( addr n -- addr n | addr1 n1 R: sign )
+    .word OVER,CFETCH,CLIT,'-',EQUAL,TOR
+    .word SWAP,RFETCH,MINUS,SWAP,RFETCH,PLUS
+    .word EXIT
     
+; converti une chaîne en entier
+; retourne entier et vrai ou addresse et faux  
+DEFWORD "NUMBER?",7,,NUMBERQ ; (addr -- n T | addr F )
+    .word BASE,FETCH,TOR,LIT,0,OVER,COUNT ;( a 0 addr+1 n) R: base
+    .word BASEQ,NEGQ ;( a 0 b n) R: base sign
+    .word QDUP, ZBRANCH, 4f-$ ; bout de la chaîne?
+    ; boucle de conversion des digits
+    .word LIT,0,SWAP,DODO ; ( a 0 b)
+2:  .word DUP,TOR,CFETCH,BASE,FETCH,DIGITQ,TBRANCH,5f-$
+    .word RFROM,DROP,UNLOOP,BRANCH,4f-$
+5:  .word SWAP,BASE,FETCH,STAR,PLUS,RFROM,ONEPLUS,DOLOOP,2b-$
+    .word DROP,RFETCH,ZBRANCH,7f-$
+    .word NEGATE ; ( a n ) R: base sign
+7:  .word SWAP ; ( n a ) R: base sign
+4:  .word RFROM,TWODROP,RFROM, BASE,STORE,EXIT
     
 ;vérifie si le caractère est un digit
 ;valide dans la base B
@@ -902,40 +946,51 @@ DEFCODE "UPPER",5,,UPPER ; ( c-addr -- )
     mov.b W0,[W1-1]
     bra 1b
 3:  NEXT
+
+;avance au delà de 'c'
+DEFCODE "SKIP",4,,SKIP ; ( addr u c -- addr' u' )
+    mov T, W1 ; c
+    mov [DSP--],W2 ; u
+2:  cp0 W2
+    bra z, 1f
+    cp.b [T++],W1
+    bra nz, 1f
+    dec W2,W2
+    bra 2b
+1:  DPUSH
+    mov W2,T
+    NEXT
+  
+; avance ajuste >IN
+DEFWORD "ADR>IN",7,,ADRTOIN ; ( adr' -- )
+    .word SOURCE,ROT,ROT,MINUS,MIN,lit,0,MAX
+    .word TOIN,STORE,EXIT
+    
+;avance a de n caractères     
+DEFWORD "/STRING",7,,SLASHSTRING ; ( a u n -- a+n u-n )
+    .word ROT,OVER,PLUS,ROT,ROT,MINUS,EXIT
+
+    
+DEFWORD "PARSE",5,,PARSE ; c addr -- 
+        .word SOURCE,TOIN,FETCH,SLASHSTRING
+        .word OVER,TOR,ROT,SCAN
+        .word OVER,SWAP,qbran, parse1-$
+        .word ONEPLUS  ; char+
+parse1: .word ADRTOIN
+        .word RFROM,TUCK,MINUS,EXIT
+    
     
 ; localise le prochain mot délimité par 'c'
 ; la variable TOIN indique la position courante
 ; le mot trouvé est copié dans lPAD 
-; met à jour TOIN    
-DEFCODE "WORD",4,,WORD  ; ( c -- c-addr)
-    mov #_PAD,W2 ; current dest pointer
-    mov W2,W3  ; PAD[0]
-    mov #_TIB,W0 ; TIB address
-    add #TIB_SIZE,W0 ; TIB end
-    mov W0,W4 ; limit
-    mov _TOIN,W1 
-1:  cp W1,W4  
-    bra geu, 4f 
-    mov.b [W1],W0
-    cp0.b W0
-    bra z,4f
-    inc W1,W1
-    cp.b w0,T
-    bra z, 1b
-2:  mov.b W0,[++W2]
-    cp W1,W4
-    bra geu, 4f
-    mov.b [W1],W0
-    cp0.b W0
-    bra z, 4f
-    inc W1,W1
-    cp.b W0,T
-    bra neq, 2b
-4:  mov W1, _TOIN
-    mov W3,T
-    sub W2,T,W2
-    mov.b W2,[T]
-    NEXT
+; met à jour >IN
+DEFWORD "WORD",4,,WORD ; ( c -- c-addr )
+    .word DUP,SOURCE,TOIN,FETCH,SLASHSTRING ; c c addr u
+    .word ROT,SKIP ; c addr' u'
+    .word DROP,ADRTOIN,PARSE
+    .word HERE,TOCOUNTED,HERE
+    .word BLANK,OVER,COUNT,PLUS,CSTORE,EXIT
+    
 
 ; recherche un mot dans le dictionnaire
 ; retourne: c-addr 0 si adresse non trouvée
@@ -1025,13 +1080,14 @@ DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )
 ; interprète une chaine  la chaîne indiquée par
 ; c-addr u   
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
+   .word SRCSTRORE,LIT,0,TOIN,STORE
 interp1:    
-    .word BL,WORD,DUP,CFETCH,ZEROEQ,TBRANCH,interp2-$ ; 0,1,1,2,2,2,1
-    .word FIND,DUP,ZBRANCH,interp15-$
+    .word BL,WORD,DUP,CFETCH,ZEROEQ,TBRANCH,interp2-$ 
+    .word FIND,QDUP,ZBRANCH,interp15-$
     .word DROP,EXECUTE
     .word CR,BRANCH,interp1-$ ; 2,3,2,1,1,2,0
 interp15:; le mot n'est pas dans le dictionnaire    
-    .word SWAP,ERROR
+    .word QNUMBER,DUP,TBRANCH,interp2-$,SWAP,ERROR
 interp2:    
     .word DROP,EXIT
     
@@ -1055,13 +1111,12 @@ DEFWORD "ABORT\"",6,,ABORTQ ; ( i*x x1 -- i*x )
     
 ; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT ; ( -- )
-1:  .word R0,FETCH,RPSTORE ;0,1,1,0
-    .word LIT,0,DUP,STATE,STORE,SOURCE_ID,STORE ;0,1,2,0
-    .word TIB,FETCH,TOIN,STORE ;1,1,2,0
+1:  .word R0,FETCH,RPSTORE
+    .word LIT,0,DUP,STATE,STORE
 quit0:
-    .word TIB, FETCH, LIT,CPL,ONEMINUS,ACCEPT,DROP ;0,1,1,2,2,1,0
-    .word SPACE,INTERPRET ; 0, 0
-    .word STATE, FETCH, ZEROEQ,ZBRANCH,quit1-$ ;0,1,1,1,0
+    .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT ; ( addr u )
+    .word SPACE,INTERPRET 
+    .word STATE,FETCH,TBRANCH,quit1-$
     .word OK
 quit1:
     .word CR

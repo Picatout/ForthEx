@@ -190,6 +190,16 @@ DEFWORD "KEY",3,,KEY ; ( -- c)
     .word ZBRANCH,1b-$
     .word DROP,EXIT 
     
+
+; vérifie s'il y a un caractère dans la file clavier
+; s'il n'y en a pas retourne F
+; sinon attend un autre caractère et retourne vrai
+; is ce caractère est 13    
+DEFWORD "NUF?",4,,NUFQ ; ( -- T|F)
+    .word QKEY, DUP,ZBRANCH,1f-$
+    .word TWODROP,KEY
+    .word LIT,13,EQUAL
+1:  .word EXIT   
     
 ;.end
     

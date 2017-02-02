@@ -683,6 +683,20 @@ DEFWORD "?",1,,QUESTION ; ( addr -- )
   .word FETCH,DOT,EXIT
   
   
+DEFWORD "CHARS",5,,CHARS ; ( +n c -- ) imprime n vois le caractère c
+    .word SWAP,LIT,0,DODO
+1:  .word DUP,EMIT,DOLOOP,1b-$
+    .word DROP,EXIT
 
+DEFWORD "DO$",3,,DOSTR ; ( -- addr )
+    .word RFROM, RFETCH, RFROM, COUNT, PLUS, ALIGNED, TOR, SWAP, TOR, EXIT
+    
+DEFWORD "$\"|",3,F_IMMED,STRQUOTP ; ( -- addr )    
+    .word DOSTR,EXIT
+    
+DEFWORD ".\"|",3,F_COMPO,DOTQP ; ( -- )
+    .word DOSTR,COUNT,TYPE,EXIT
+    
+    
 ;.end
 
