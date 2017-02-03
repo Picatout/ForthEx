@@ -211,9 +211,9 @@ HEADLESS VARS_INIT
     mov W0, _PAD
     mov #tib, W0
     mov W0, _TIB
-    mov W0,_SOURCE
+    mov W0,_TICKSOURCE
     mov #TIB_SIZE,W0
-    mov W0,_SOURCE+2
+    mov W0,_CNTSOURCE+2
     mov #USER_BASE, W0
     mov W0,_DP
     mov #_USER_VARS,UP

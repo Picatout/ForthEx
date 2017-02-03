@@ -52,12 +52,12 @@ _USER_VARS:
 _TIB: .space 2
 .global _PAD 
 _PAD: .space 2    
- .global _SOURCE
+ .global _TICKSOURCE
 ; adresse et longueur du buffer d'évaluation
-_SOURCE: .space 4
+_TICKSOURCE: .space 2
 ; identifiant de la source: 0->interactif, -1, fichier
- .global _SOURCE_ID
-_SOURCE_ID: .space 2
+ .global _CNTSOURCE
+_CNTSOURCE: .space 2
 ; pointeur data 
  .global _DP
 _DP: .space 2 
@@ -513,14 +513,14 @@ DEFCODE "UM/MOD",6,,UMSLASHMOD ; ( ud u -- r q )
     mov W1,[++DSP]
     NEXT
     
-DEFCODE "MAX",4,,UMAX ; ( n1 n2 -- max(n1,n2)
+DEFCODE "MAX",4,,MAX ; ( n1 n2 -- max(n1,n2)
     mov [DSP--],W0
     cp T,W0
     bra ge, 1f
     exch T,W0
 1:  NEXT    
     
-DEFCODE "MIN",4,,UMIN ; ( n1 n2 -- min(n1,n2)
+DEFCODE "MIN",4,,MIN ; ( n1 n2 -- min(n1,n2)
     mov [DSP--],W0
     cp W0,T
     bra ge, 1f
@@ -722,6 +722,25 @@ DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
     mov.b [W1++],[W2++]
 1:  NEXT
 
+; recherche du caractère 'c' dans le bloc
+; mémoire 'c-addr' de dimension 'u'
+; retourne la position de 'c' et
+; le nombre de caractères qui suit dans le bloc
+DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
+    mov T, W0   ; c
+    DPOP        ; T=U
+    mov [DSP],W1 ; W1=c-addr
+    cp0 T
+    bra z, 3f
+1:  cp.b W0,[W1]
+    bra z, 3f
+    inc W1,W1
+    dec T,T
+    bra nz, 1b
+3:  mov W1,[DSP]
+    NEXT
+
+    
 ; initialise un bloc mémoire
 DEFCODE "FILL",4,,FILL ; ( addr u n -- )  for{0:(u-1)}-> m[T++]=n
     mov [DSP--],W0 ; n
@@ -953,7 +972,7 @@ DEFCODE "SKIP",4,,SKIP ; ( addr u c -- addr' u' )
     mov [DSP--],W2 ; u
 2:  cp0 W2
     bra z, 1f
-    cp.b [T++],W1
+    cp.b W1,[T++]
     bra nz, 1f
     dec W2,W2
     bra 2b
@@ -963,7 +982,7 @@ DEFCODE "SKIP",4,,SKIP ; ( addr u c -- addr' u' )
   
 ; avance ajuste >IN
 DEFWORD "ADR>IN",7,,ADRTOIN ; ( adr' -- )
-    .word SOURCE,ROT,ROT,MINUS,MIN,lit,0,MAX
+    .word SOURCE,ROT,ROT,MINUS,MIN,LIT,0,MAX
     .word TOIN,STORE,EXIT
     
 ;avance a de n caractères     
@@ -974,7 +993,7 @@ DEFWORD "/STRING",7,,SLASHSTRING ; ( a u n -- a+n u-n )
 DEFWORD "PARSE",5,,PARSE ; c addr -- 
         .word SOURCE,TOIN,FETCH,SLASHSTRING
         .word OVER,TOR,ROT,SCAN
-        .word OVER,SWAP,qbran, parse1-$
+        .word OVER,SWAP,ZBRANCH, parse1-$
         .word ONEPLUS  ; char+
 parse1: .word ADRTOIN
         .word RFROM,TUCK,MINUS,EXIT
@@ -989,7 +1008,7 @@ DEFWORD "WORD",4,,WORD ; ( c -- c-addr )
     .word ROT,SKIP ; c addr' u'
     .word DROP,ADRTOIN,PARSE
     .word HERE,TOCOUNTED,HERE
-    .word BLANK,OVER,COUNT,PLUS,CSTORE,EXIT
+    .word BL,OVER,COUNT,PLUS,CSTORE,EXIT
     
 
 ; recherche un mot dans le dictionnaire
@@ -1076,11 +1095,16 @@ DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )
    .word LIT,0,STATE,STORE
    .word S0,FETCH,SPSTORE
    .word CR,QUIT
+
+; copie chaîne comptée de src vers dest
+DEFWORD ">COUNTED",8,,TOCOUNTED ; ( src n dest -- )
+    .word TWODUP,CSTORE,ONEPLUS,SWAP,CMOVE,EXIT
+
    
 ; interprète une chaine  la chaîne indiquée par
 ; c-addr u   
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
-   .word SRCSTRORE,LIT,0,TOIN,STORE
+   .word SRCSTORE,LIT,0,TOIN,STORE
 interp1:    
     .word BL,WORD,DUP,CFETCH,ZEROEQ,TBRANCH,interp2-$ 
     .word FIND,QDUP,ZBRANCH,interp15-$
