@@ -105,6 +105,38 @@ _compile_only:
 ; mot système qui ne sont pas
 ; dans le dictionnaire
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+FORTH_CODE
+    
+    .global ENTER
+ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
+    RPUSH IP   
+    mov WP,IP
+    NEXT
+
+    .global DOUSER
+DOUSER: ; empile pointeur sur variable utilisateur
+    DPUSH
+    mov [WP++],W0
+    add W0,UP,T
+    NEXT
+
+    .section .sysdict psv
+    .align 2
+    .global name_EXIT
+name_EXIT :
+    .word 0
+0:  .byte 4
+    .ascii "EXIT"
+    .align 2
+    .global EXIT
+EXIT:
+    .word code_EXIT	; codeword
+    FORTH_CODE
+    .global code_EXIT
+code_EXIT :			;pfa,  assembler code follows
+    RPOP IP
+    NEXT
+   
     
 HEADLESS LIT ; ( -- x ) empile une valeur  
     DPUSH
@@ -253,11 +285,10 @@ DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) n1=LIMIT_J, n2=J
 ; mots manipulant les arguments sur la pile
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 
-;DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
-;    .word STATE,FETCH,ZBRANCH,1f-$
-;    .word  DOES, 
-;1:  .word ABORTQ,err_cow
-;    .word  EXIT
+DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
+        .word STATE,FETCH,ZBRANCH,LITER1-$
+        .word LIT,LIT,COMPILE,COMPILE
+LITER1: .word EXIT
     
 DEFCODE "DUP",3,,DUP ; ( n -- n n )
     DPUSH
@@ -302,11 +333,12 @@ DEFCODE "2SWAP",5,,TWOSWAP ; ( n1 n2 n3 n4 -- n3 n4 n1 n2 )
     NEXT
     
 DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
-    mov T, W0
-    mov [DSP], T
-    mov [DSP-2], W1
-    mov W1, [DSP]
-    mov W0, [DSP-2]
+    mov [DSP], W0 ; n1
+    exch T,W0   ; W0=n3, T=n2
+    mov W0, [DSP]  ; n3
+    mov [DSP-2],W0 ; n1
+    exch W0,T ; T=n1, W0=n2
+    mov W0,[DSP-2] 
     NEXT
 
 DEFCODE "-ROT",4,,NROT ; ( n1 n2 n3 -- n3 n1 n2 )
@@ -356,7 +388,6 @@ DEFCODE "SP@",3,,SPFETCH ; ( -- n )
     
 DEFCODE "SP!",3,,SPSTORE  ; ( n -- )
     mov T, DSP
-    DPOP
     NEXT
     
 DEFCODE "RP@",3,,RPFETCH  ; ( -- n )
@@ -455,7 +486,7 @@ DEFCODE "+!",2,,PLUSSTORE  ; ( n addr  -- ) [addr]=[addr]+n
     DPOP
     NEXT
     
-DEFCODE "M+",2,,ADDPLUS  ; ( d n --  d ) simple + double
+DEFCODE "M+",2,,MPLUS  ; ( d n --  d ) simple + double
     mov [DSP-2], W0 ; d faible
     mov T, W1 ; n
     DPOP    ; T= d fort
@@ -469,6 +500,20 @@ DEFCODE "*",1,,STAR ; ( n1 n2 -- n1*n2)
     mul.ss W0,T,W0
     mov W0,T
     NEXT
+
+DEFCODE "UM*",3,,UMSTAR ; ( u1 u2 -- ud )
+    mul.uu T,[DSP],W0
+    mov W1,T
+    mov W0,[DSP]
+    NEXT
+    
+;multiplication 32*16->32
+; ud1 32 bits
+; d2 16 bits
+; ud3 32 bits    
+DEFWORD "UD*",3,,UDSTAR  ; ( ud1 d2 -- ud3 ) 32*16->32    
+    .word DUP,TOR,UMSTAR,DROP
+    .word SWAP,RFROM,UMSTAR,ROT,PLUS,EXIT
     
 DEFCODE "/",1,,DIVIDE ; ( n1 n2 -- n1/n2 )
     mov [DSP--],W2
@@ -824,7 +869,7 @@ DEFCONST "ULIMIT",6,,ULIMIT,RAM_END-1        ; limite espace dictionnaire
 DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
 
 ; addresse buffer pour l'évaluateur    
-DEFCODE "'SOURCE",6,,SOURCE ; ( -- c-addr u ) 
+DEFCODE "'SOURCE",6,,TSOURCE ; ( -- c-addr u ) 
     DPUSH
     mov _TICKSOURCE,T
     DPUSH
@@ -838,13 +883,6 @@ DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
     mov T,_TICKSOURCE
     DPOP
     NEXT
-
-;converti un caractère en entier    
-;selon la valeur de base    
-DEFWORD "DIGIT?",6,,DIGITQ ; ( c base -- u f )
-    .word TOR,LIT, 48,MINUS,LIT,9,OVER,LESS,ZBRANCH,1f-$
-    .word LIT, 7,MINUS, DUP,LIT,10,LESS,OR
-1:  .word DUP,RFROM,ULESS,EXIT
 
 ; vérifie si la chaîne commence
 ; avec un modificateur de base i.e. '$','%','#'
@@ -884,21 +922,18 @@ DEFWORD "NUMBER?",7,,NUMBERQ ; (addr -- n T | addr F )
 4:  .word RFROM,TWODROP,RFROM, BASE,STORE,EXIT
     
 ;vérifie si le caractère est un digit
-;valide dans la base B
 ; si valide retourne la valeur du digit et -1
-; si invalide retourne 0
-DEFWORD "?DIGIT",6,,QDIGIT ; ( c B -- 0| n -1 )
-    .word SWAP,CLIT,'0',MINUS,DUP,ZEROLT,TBRANCH,not_digit-$
-    .word DUP,LIT,10,ULESS,TBRANCH,base_test-$
-    .word LIT,7,MINUS
-base_test:
-    .word DUP,ROT,ULESS,ZBRANCH,1f-$
-    .word LIT,-1,BRANCH,2f-$
-not_digit:
-    .word DROP
-1:  .word DROP,LIT,0
-2:  .word EXIT
-    
+; si invalide retourne x 0
+DEFWORD "DIGIT?",6,,DIGITQ ; ( c -- x 0 | n -1 )
+    .word DUP,LIT,96,UGREATER,ZBRANCH,1f-$
+    .word LIT,32,MINUS ; lettre minuscule? convertie en minuscule
+1:  .word DUP,LIT,'9',UGREATER,ZBRANCH,3f-$
+    .word DUP,LIT,'A',ULESS,ZBRANCH,2f-$
+    .word LIT,0,EXIT ; pas un digit
+2:  .word LIT,7,MINUS    
+3:  .word LIT,'0',MINUS
+    .word DUP,BASE,FETCH,ULESS,EXIT
+  
 ;converti la chaîne en nombre
 ;en utilisant la valeur de BASE
 ;la conversion s'arrête au premier
@@ -906,33 +941,37 @@ not_digit:
 ; <c-addr1 u1> spécifie le début et le nombre
 ; de caractères de la chaîne    
 DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
-    .word BASE,FETCH,TOR
-1:  .word DUP,ZEROEQ,TBRANCH,4f-$
-    
-4:    
-    .word EXIT
-    
-;vérifie s'il y a un signe '-'|'+'
+TONUM1: .word DUP,ZBRANCH,TONUM3-$
+        .word OVER,CFETCH,DIGITQ
+        .word ZEROEQ,ZBRANCH,TONUM2-$
+        .word DROP,EXIT
+TONUM2: .word TOR,TWOSWAP,BASE,FETCH,UDSTAR
+        .word RFROM,MPLUS,TWOSWAP
+        .word LIT,1,SLASHSTRING,BRANCH,TONUM1-$
+TONUM3: .word EXIT
+   
+;vérifie s'il y a un signe '-'
 ; à la première postion de la chaîne spécifiée par <c-addr u>
-; retourne -1 si '-', retourne 1 si '+' autrement retourne 0    
+; retourne f=2 si '-' sinon f=0    
 ; s'il y a un signe incrémente c-addr et décrémente u    
-DEFWORD "?SIGN",5,,QSIGN ; ( c-addr u -- c-addr u 0|-1|1 )
-    .word OVER,FETCH,DUP,CLIT,'-',EQUAL,ZBRANCH,1f-$
-    .word DROP,LIT,-1,TOR, BRANCH,2f-$
-1: .word CLIT,'+',EQUAL,ZBRANCH,3f-$
-   .word LIT,1,TOR
-2: .word  TOR, ONEPLUS,RFROM, ONEMINUS,RFROM,BRANCH,4f-$
-3: .word LIT,0
-4:  .word EXIT
+DEFWORD "?SIGN",5,,QSIGN ; ( c-addr u -- c-addr' u' f )
+        .word OVER,CFETCH,LIT,',',MINUS,DUP,ABS
+        .word LIT,1,EQUAL,AND,DUP,ZBRANCH,QSIGN1-$
+        .word ONEPLUS,TOR,LIT,1,SLASHSTRING,RFROM
+QSIGN1: .word EXIT
     
 ;conversion d'une chaîne en nombre
 ; c-address indique le début de la chaîne
 ; utilise la base active
 DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0| n -1 )
-    .word DUP,LIT,0,DUP,ROT,COUNT ; c-addr 0 0 c-addr u
-    .word QSIGN,TOR,TONUMBER   
-    
-    .word EXIT
+        .word DUP,LIT,0,DUP,ROT,COUNT
+        .word QSIGN,TOR,TONUMBER,ZBRANCH,QNUM1-$
+        .word RFROM,TWODROP,TWODROP,LIT,0
+        .word BRANCH,QNUM3-$
+QNUM1:  .word TWODROP,NIP,RFROM,ZBRANCH,QNUM2-$
+        .word NEGATE
+QNUM2:  .word LIT,-1
+QNUM3:  .word EXIT
     
 ;imprime la liste des mots du dictionnaire
 DEFWORD "WORDS",5,,WORDS ; ( -- )
@@ -942,11 +981,7 @@ DEFWORD "WORDS",5,,WORDS ; ( -- )
     .word DUP,GETX,PLUS,LIT,64,ULESS,TBRANCH,2f-$
     .word CR
 2:  .word TOR,ONEPLUS,RFROM,TYPE,SPACE,TWOMINUS,BRANCH,1b-$
-;    .word GETX,LIT,54,ULESS,TBRANCH,2f-$
-;    .word CR
-;2:  .word DUP,TWOPLUS,DUP,CFETCH,LENMASK,AND,TOR,ONEPLUS,RFROM,TYPE,SPACE
-;    .word BRANCH,1b-$
-3:   .word DROP,CR,EXIT
+3:  .word DROP,CR,EXIT
     
 ; convertie la chaîne comptée en majuscules
 DEFCODE "UPPER",5,,UPPER ; ( c-addr -- )
@@ -968,21 +1003,22 @@ DEFCODE "UPPER",5,,UPPER ; ( c-addr -- )
 
 ;avance au delà de 'c'
 DEFCODE "SKIP",4,,SKIP ; ( addr u c -- addr' u' )
-    mov T, W1 ; c
-    mov [DSP--],W2 ; u
-2:  cp0 W2
+    mov T, W0 ; c
+    DPOP ; T=u
+    mov [DSP],W1 ; addr
+2:  cp0 T
     bra z, 1f
-    cp.b W1,[T++]
-    bra nz, 1f
-    dec W2,W2
+    cp.b W0,[W1++]
+    bra nz, 3f
+    dec T,T
     bra 2b
-1:  DPUSH
-    mov W2,T
+3:  dec W1,W1    
+1:  mov W1,[DSP]
     NEXT
   
 ; avance ajuste >IN
 DEFWORD "ADR>IN",7,,ADRTOIN ; ( adr' -- )
-    .word SOURCE,ROT,ROT,MINUS,MIN,LIT,0,MAX
+    .word TSOURCE,ROT,ROT,MINUS,MIN,LIT,0,MAX
     .word TOIN,STORE,EXIT
     
 ;avance a de n caractères     
@@ -990,13 +1026,13 @@ DEFWORD "/STRING",7,,SLASHSTRING ; ( a u n -- a+n u-n )
     .word ROT,OVER,PLUS,ROT,ROT,MINUS,EXIT
 
     
-DEFWORD "PARSE",5,,PARSE ; c addr -- 
-        .word SOURCE,TOIN,FETCH,SLASHSTRING
-        .word OVER,TOR,ROT,SCAN
-        .word OVER,SWAP,ZBRANCH, parse1-$
+DEFWORD "PARSE",5,,PARSE ; c -- c-addr n
+        .word TSOURCE,TOIN,FETCH,SLASHSTRING ; c src' u'
+        .word OVER,TOR,ROT,SCAN  ; src' u'
+        .word OVER,SWAP,ZBRANCH, parse1-$ 
         .word ONEPLUS  ; char+
-parse1: .word ADRTOIN
-        .word RFROM,TUCK,MINUS,EXIT
+parse1: .word ADRTOIN ; adr'
+        .word RFROM,TUCK,MINUS,EXIT 
     
     
 ; localise le prochain mot délimité par 'c'
@@ -1004,8 +1040,8 @@ parse1: .word ADRTOIN
 ; le mot trouvé est copié dans lPAD 
 ; met à jour >IN
 DEFWORD "WORD",4,,WORD ; ( c -- c-addr )
-    .word DUP,SOURCE,TOIN,FETCH,SLASHSTRING ; c c addr u
-    .word ROT,SKIP ; c addr' u'
+    .word DUP,TSOURCE,TOIN,FETCH,SLASHSTRING ; c c c-addr' u'
+    .word ROT,SKIP ; c c-addr' u'
     .word DROP,ADRTOIN,PARSE
     .word HERE,TOCOUNTED,HERE
     .word BL,OVER,COUNT,PLUS,CSTORE,EXIT
@@ -1070,18 +1106,17 @@ not_found:
 ; +n1 longueur du buffer
 ; +n2 longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
-        .word OVER,DUP,TOIN,STORE,PLUS,OVER  ;  ( c-addr bound cursor )
-acc1:   .word KEY,DUP,LIT,13,EQUAL,TBRANCH,acc5-$ ; ( c-addr bound cursor c )
-        .word DUP,LIT,8,EQUAL,ZBRANCH,acc3-$ ; ( c-addr bound cursor c )
-	.word DROP,DUP,TOIN,FETCH,EQUAL,TBRANCH,acc1-$
-	.word BACKCHAR,ONEMINUS,BRANCH,acc1-$ 
-acc3:	.word TOR,OVER,OVER,EQUAL,TBRANCH,acc4-$
-	.word RFROM,DUP,EMIT,OVER,CSTORE,ONEPLUS 
-        .word BRANCH,acc1-$
-acc4:   .word RFROM,DROP,BRANCH,acc1-$	
-acc5:   .word DROP; 4,3
-acc6:   .word LIT,0,OVER,CSTORE,NIP,SWAP,MINUS,EXIT ; 3,2,2,1
-
+    .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
+1:  .word KEY,DUP,LIT,13,EQUAL,ZBRANCH,2f-$
+    .word DROP,LIT,32,OVER,CSTORE,SWAP,MINUS,ONEPLUS,RFROM,DROP,EXIT
+2:  .word DUP,LIT,8,EQUAL,ZBRANCH,3f-$
+    .word DROP,TWODUP,EQUAL,TBRANCH,1b-$
+    .word BACKCHAR,ONEMINUS,BRANCH,1b-$
+3:  .word OVER,RFETCH,EQUAL,TBRANCH,4f-$
+    .word DUP,EMIT,OVER,CSTORE,ONEPLUS,BRANCH,1b-$
+4:  .word DROP,BRANCH,1b-$
+  
+   
 ; retourne la spécification
 ; de la chaîne comptée dont
 ; l'adresse est dans T   
@@ -1100,20 +1135,35 @@ DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )
 DEFWORD ">COUNTED",8,,TOCOUNTED ; ( src n dest -- )
     .word TWODUP,CSTORE,ONEPLUS,SWAP,CMOVE,EXIT
 
-   
-; interprète une chaine  la chaîne indiquée par
+
+DEFWORD "COMPILE",7,F_IMMED|F_COMPO,COMPILE  ; ( x -- ) compile x à la position DP
+    .word HERE,DUP,TOR,STORE
+    .word RFROM,CELLPLUS,DP,STORE,EXIT
+    
+    
+; interprète la chaîne indiquée par
 ; c-addr u   
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
-   .word SRCSTORE,LIT,0,TOIN,STORE
-interp1:    
-    .word BL,WORD,DUP,CFETCH,ZEROEQ,TBRANCH,interp2-$ 
-    .word FIND,QDUP,ZBRANCH,interp15-$
-    .word DROP,EXECUTE
-    .word CR,BRANCH,interp1-$ ; 2,3,2,1,1,2,0
-interp15:; le mot n'est pas dans le dictionnaire    
-    .word QNUMBER,DUP,TBRANCH,interp2-$,SWAP,ERROR
-interp2:    
-    .word DROP,EXIT
+        .word SRCSTORE,LIT,0,TOIN,STORE
+INTER1: .word BL,WORD,DUP,CFETCH,ZBRANCH,INTER9-$
+;	.word COUNT,TYPE,CR,BRANCH,INTER1-$ ;test line
+        .word FIND,QDUP,ZBRANCH,INTER4-$
+        .word ONEPLUS,STATE,FETCH,ZEROEQ,OR
+        .word ZBRANCH,INTER2-$
+        .word EXECUTE,BRANCH,INTER3-$
+INTER2: .word COMPILE
+INTER3: .word BRANCH,INTER1-$
+INTER4: .word QNUMBER,ZBRANCH,INTER5-$
+        .word LITERAL,BRANCH,INTER1-$
+INTER5: .word COUNT,TYPE,LIT,'?',EMIT,CR,ABORT
+INTER9: .word DROP,EXIT
+
+; interprète la chaîne à l'adrese 'c-addr' et de longueur 'u'
+DEFWORD "EVALUATE",8,,EVAL ; ( i*x c-addr u -- j*x )
+    .word TSOURCE,TOR,TOR ; sauvegarde source
+    .word TOIN,FETCH,TOR,INTERPRET
+    .word RFROM,TOIN,STORE,RFROM,RFROM,SRCSTORE 
+    .word EXIT
     
 ; imprime le prompt et passe à la ligne suivante    
 DEFWORD "OK",2,,OK  ; ( -- )
@@ -1136,7 +1186,7 @@ DEFWORD "ABORT\"",6,,ABORTQ ; ( i*x x1 -- i*x )
 ; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT ; ( -- )
 1:  .word R0,FETCH,RPSTORE
-    .word LIT,0,DUP,STATE,STORE
+    .word LIT,0,STATE,STORE
 quit0:
     .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT ; ( addr u )
     .word SPACE,INTERPRET 
@@ -1146,6 +1196,7 @@ quit1:
     .word CR
     .word BRANCH, quit0-$
     
+; boucle sans fin    
 DEFCODE "INFLOOP",7,,INFLOOP
     bra .
 

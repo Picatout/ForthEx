@@ -254,11 +254,6 @@
  
 .LIST
  
-; section pour regrouper les routine ISR    
-.macro INTR  
-.section .intr code
-.align 2
-.endm
 
 .endif
  

@@ -1,3 +1,8 @@
+2017-02-03
+==========
+Abadon du modèle eForth trop ancien au profit de CamelForth
+référence: [Camel forth pour msp430](http://www.camelforth.com/download.php?view.25)
+
 2017-01-23
 ==========
 Création de la branche eForth avec l'intention de recommencher le travail en m'inspirant du document

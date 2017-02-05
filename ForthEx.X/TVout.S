@@ -650,9 +650,9 @@ DEFWORD "SIGN",4,,SIGN ; ( n -- )
 1:  .word EXIT
   
 ;termine la conversion en ajoutant la longueur
-;de la chaîne au début de celle-ci.
+;en calculant la longueur de la chaîne.
 DEFWORD "#>",2,,SHARPGT ; ( w -- addr u )
-  .word DROP,HP,FETCH,PAD,FETCH,OVER,MINUS, EXIT
+  .word DROP,HP,FETCH,PAD,FETCH,PADSIZE,PLUS,OVER,MINUS, EXIT
   
 ; convertions entier en chaîne
 DEFWORD "STR",3,,STR ; ( n -- addr u )
@@ -676,7 +676,7 @@ UD:  .word LTSHARP,SHARPS,SHARPGT,SPACE,TYPE,EXIT
 ; imprime un nombre en format libre
 DEFWORD ".",1,,DOT ; ( n -- )
   .word BASE,FETCH,LIT,10,XOR,TBRANCH, UD-$
-  .word SPACE,STR,EXIT
+  .word SPACE,STR,TYPE,EXIT
   
 ; imprime le contenu d'une adresse
 DEFWORD "?",1,,QUESTION ; ( addr -- )

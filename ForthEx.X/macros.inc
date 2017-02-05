@@ -118,6 +118,12 @@
     dec2 RSP,RSP
 .endm
 
+; section pour regrouper les routine ISR    
+.macro INTR  
+.section .intr code
+.align 2
+.endm
+    
 ; section dictionnaire système 
 .macro SYSDICT
     .section .sysdict psv

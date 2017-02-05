@@ -19,39 +19,6 @@
 ; hardware setup
     
 .include "hardware.inc"
-
-FORTH_CODE
-    
-    .global ENTER
-ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
-    RPUSH IP   
-    mov WP,IP
-    NEXT
-
-    .global DOUSER
-DOUSER: ; empile pointeur sur variable utilisateur
-    DPUSH
-    mov [WP++],W0
-    add W0,UP,T
-    NEXT
-
-    .section .sysdict psv
-    .align 2
-    .global name_EXIT
-name_EXIT :
-    .word 0
-0:  .byte 4
-    .ascii "EXIT"
-    .align 2
-    .global EXIT
-EXIT:
-    .word code_EXIT	; codeword
-    FORTH_CODE
-    .global code_EXIT
-code_EXIT :			;pfa,  assembler code follows
-    RPOP IP
-    NEXT
-    
 .include "core.s" 
 .include "TVout.S"
 .include "serial.s"
@@ -213,7 +180,7 @@ HEADLESS VARS_INIT
     mov W0, _TIB
     mov W0,_TICKSOURCE
     mov #TIB_SIZE,W0
-    mov W0,_CNTSOURCE+2
+    mov W0,_CNTSOURCE
     mov #USER_BASE, W0
     mov W0,_DP
     mov #_USER_VARS,UP
