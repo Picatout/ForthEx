@@ -679,11 +679,17 @@ DEFWORD ".",1,,DOT ; ( n -- )
   .word SPACE,STR,TYPE,EXIT
   
 ; imprime le contenu d'une adresse
+; on s'assure de l'alignement sur
+; une adresse paire.  
 DEFWORD "?",1,,QUESTION ; ( addr -- )
-  .word FETCH,DOT,EXIT
+  .word LIT,0xFFFE,AND,FETCH,DOT,EXIT
+
+;lit et imprime l'octet à l'adresse c-addr
+DEFWORD "C?",2,,CQUESTION ; ( c-addr -- )    
+    .word CFETCH,DOT,EXIT
   
   
-DEFWORD "CHARS",5,,CHARS ; ( +n c -- ) imprime n vois le caractère c
+DEFWORD "CHARS",5,,CHARS ; ( +n c -- ) imprime n fois le caractère c
     .word SWAP,LIT,0,DODO
 1:  .word DUP,EMIT,DOLOOP,1b-$
     .word DROP,EXIT

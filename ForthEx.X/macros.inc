@@ -29,18 +29,46 @@
 ;  un programme pour la machine virtuelle
 ;  consiste en une liste d'adresse pointé par IP
 ;  fonctionnement de la machine virtuelle
-;   consiste en une boucle de 3 instructions    
-;	mov [IP++],W0
-;	call W0
-;	bra $-4
-;   chaque mot code doit donc se terminer par
-;   l'instruction 'return'
+;  consiste en une boucle de 3 instructions    
+;	mov [IP++],WP
+;	mov [WP++],W0
+;	goto W0
+;   Cette séquence est définie comme macro NEXT
+;   Chaque mot en code machine doit donc se
+;   terminé par NEXT    
 ;   Si une intruction de la VM a besoin de données
 ;   litérales celle-ci suivent l'adresse de son appel
 ;   dans le flux du programme. Donc IP doit-être 
 ;   avancé après ces données litérales avant la sortie
 ;   de l'instruction VM.    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+;   entête du dictionnaire
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  Le dictionnaire à la structure suivante, il est séparé du code.
+;     LINK  ; .word lien vers l'entrée précédente du dictionnaire
+;     NFA   ; NAME FIELD ADDRESS  le premier octet contient les
+            ; indicateurs booléens et la longueur du nom
+	    ; les autres octets contienne le nom. Un nom peut avoir
+	    ; une longueur maximale de 31 caractères
+;     CFA   ; CODE FIELD ADDRESS contient l'adresse d'entrée du code
+	    ; machine exécutant ce mot.
+	    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  mots de haut niveau	    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; A cause de l'architecture des PIC24 qui ne permet pas l'exécution de
+; code en mémoire RAM l'utilisateur du système ne peut définir que des
+; mots de haut niveau.  Il n'y a pas d'assembleur pour produire du code
+; machine (bien que ce soit faisable). Les mots de haut niveau sont des
+; liste d'adresses. Chaque adresse correspond au point d'entrée du 
+; code machine d'un mot de bas niveau enregistré en mémoire flash lors
+; de la conception du système. Une adresse peut-être suivie de données
+; en ligne de longueur variable. C'est le mot machine appellée qui prend
+; soin de traiter ses données de sorte qu'à la fin de l'exécution de celui-ci
+; IP pointe au delà de ces données à la prochaîne adresse à exécuter. Ces
+; adresses doivent obligatoirement être alignées sur des adresses paires.	    
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; utilisation des registres
 ; par la machine virtuelle
@@ -143,7 +171,7 @@
     
 ; indicateurs booléens entrée de dictionnaire
 .equ F_IMMED,0x80 ; mot immédiat
-.equ F_COMPO,0x40 ; mot en mode compilation seuelment    
+.equ F_COMPO,0x40 ; mot en mode compilation seulement    
 .equ F_HIDDEN,0x20 ; mot caché.
 .equ F_LENMASK,0x1f ; masque longueur nom.
 

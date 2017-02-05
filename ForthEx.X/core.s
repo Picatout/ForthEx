@@ -1202,36 +1202,67 @@ DEFCODE "INFLOOP",7,,INFLOOP
 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;   debug tool
+;     OUTILS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD ".S",2,,DOTS
+;  Les mots suivants sont
+;  des outils qui facilite
+;  le débogage.
+    
+; imprime le contenu de la pile des arguments
+; sans en affecté le contenu.
+; FORMAT:  < n >  X1 X2 X3 ... Xn=T
+;  n est le nombre d'éléments
+;  Xn  valeur sur la pile.  
+DEFWORD ".S",2,,DOTS  ; ( -- )
     .word DEPTH,CLIT,'<',EMIT,DUP,DOT,CLIT,'>',EMIT,SPACE
 1:  .word QDUP,ZBRANCH,2f-$,DUP,PICK,DOT,ONEMINUS
     .word BRANCH,1b-$  
 2:  .word EXIT
     
-.text 
-prt_hex:; W0 entier à imprimer
-    push.d W0
-    push.d W2
-    mov #_video_buffer,W3
-    add #32,W3
-1:  mov #16,W2
-    repeat #17
-    div.u W0,W2
-    exch W1,W0
-    add.b #'0',W0
-    cp.b W0,#'9'
-    bra leu, 2f
-    add.b #7,W0
-2:  mov.b W0,[W3--]
-    cp0 W1
-    exch W1,W0
-    bra nz,1b
-    pop.d W2
-    pop.d W0
-    return
-    
-   
+
+;lit et imprime une plage mémoire
+; n nombre de mots à lire
+; addr adresse de départ
+; 8 mots par ligne d'affichage
+DEFWORD "HDUMP",5,,HDUMP ; ( addr +n -- )
+    .word QDUP,TBRANCH,3f-$,EXIT
+3:  .word BASE,FETCH,TOR,HEX
+    .word SWAP,LIT,0xFFFE,AND,SWAP,LIT,0,DODO
+1:  .word DOI,LIT,7,AND,TBRANCH,2f-$
+    .word CR,DUP,LIT,5,UDOTR,SPACE
+2:  .word DUP,FETCH,LIT,5,UDOTR,LIT,2,PLUS
+    .word DOLOOP,1b-$
+    .word RFROM,BASE,STORE,EXIT
+
+; affice le code source d'un mot qui est
+; dans le dictionnaire
+DEFWORD "SEE",3,F_IMMED,SEE ; ( <ccc> -- )    
+    .word BL,WORD,FIND,TBRANCH,1f-$
+    .word SPACE,LIT,'?',EMIT,DROP,EXIT
+1:  .word DUP,FETCH,LIT,ENTER,EQUAL,TBRANCH,2f-$
+    .word DROP,DOTQP
+    .byte 9
+    .ascii "code word"
+    .align 2
+    .word EXIT
+2:  .word SEELIST,EXIT    
+
+DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
+    .word LIT, 0
+    .word EXIT
+  
+; imprime la liste des mots qui construite une définition
+; de HAUT-NIVEAU  
+DEFWORD "SEELIST",7,F_IMMED,SEELIST ; ( cfa -- )
+    .word BASE,FETCH,TOR,HEX,CR
+    .word LIT,2,PLUS ; première adresse du mot 
+1:  .word DUP,FETCH,DUP,CFATONFA,QDUP,ZBRANCH,NO_NAME-$
+    .word COUNT,LIT,F_LENMASK,AND,TYPE
+3:  .word LIT,EXIT,EQUAL,TBRANCH,2f-$
+    .word LIT,2,PLUS,BRANCH,1b-$
+NO_NAME:
+    .word UDOT,BRANCH,3b-$
+2:  .word DROP,RFROM,BASE,STORE,EXIT
+  
 ;.end
 
