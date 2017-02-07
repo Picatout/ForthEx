@@ -138,24 +138,24 @@ code_EXIT :			;pfa,  assembler code follows
     NEXT
    
     
-HEADLESS LIT ; ( -- x ) empile une valeur  
+DEFCODE "(LIT)",5,F_COMPO,LIT ; ( -- x ) empile une valeur  
     DPUSH
     mov [IP++], T
     NEXT
 
-HEADLESS CLIT  ; ( -- c )
+DEFCODE "(CLIT)",6,F_COMPO,CLIT  ; ( -- c )
     DPUSH
     mov [IP++], T
     ze T,T
     NEXT
 
 ; branchement inconditionnel
-HEADLESS BRANCH ; ( -- )
+DEFCODE "(BRANCH)",8,F_COMPO,BRANCH ; ( -- )
     add IP, [IP], IP
     NEXT
     
 ; branchement si T<>0
-HEADLESS TBRANCH ; ( f -- )
+DEFCODE "(TBRANCH)",9,,TBRANCH ; ( f -- )
     cp0 T
     DPOP
     bra nz, code_BRANCH
@@ -163,7 +163,7 @@ HEADLESS TBRANCH ; ( f -- )
     NEXT
 
 ; branchement si T==0
-HEADLESS ZBRANCH ; ( f -- )
+DEFCODE "(?BRANCH)",9,F_COMPO,ZBRANCH ; ( f -- )
     cp0 T
     DPOP
     bra z, code_BRANCH
@@ -172,7 +172,7 @@ HEADLESS ZBRANCH ; ( f -- )
     
     
 ; exécution de DO
-HEADLESS DODO ; ( n  n -- ) R( -- n n )
+DEFCODE "(DO)",4,F_COMPO,DODO ; ( n  n -- ) R( -- n n )
     RPUSH LIMIT
     RPUSH I
     mov T, I
@@ -182,7 +182,7 @@ HEADLESS DODO ; ( n  n -- ) R( -- n n )
     NEXT
 
 ; exécution de LOOP
-HEADLESS DOLOOP ; ( -- )  R( n n -- )
+DEFCODE "(LOOP)",6,F_COMPO,DOLOOP ; ( -- )  R( n n -- )
     inc I, I
     cp I, LIMIT
     bra z, 1f
@@ -195,21 +195,17 @@ HEADLESS DOLOOP ; ( -- )  R( n n -- )
     NEXT
 
 ; empile IP
-HEADLESS IPFETCH  ; ( -- n )
+DEFCODE "IP@",3,,IPFETCH  ; ( -- n )
     DPUSH
     mov IP,T
     NEXT
     
 ; T->IP
-HEADLESS IPSTORE ; ( n -- )
+DEFCODE "IP!",3,,IPSTORE ; ( n -- )
     mov T,IP
     DPOP
     NEXT
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; mots qui sont dans le dictionnaire
-; système
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
 DEFCODE "REBOOT",6,,REBOOT ; ( -- )  démarrage à froid
     reset
@@ -300,7 +296,8 @@ DEFCODE "2DUP",4,,TWODUP ; ( n1 n2 -- n1 n2 n1 n2 )
     mov W0,[++DSP]
     NEXT
     
-DEFCODE "?DUP",4,,QDUP ; ( n - n | n n )
+; duplique T si <> 0    
+DEFCODE "?DUP",4,,QDUP ; ( n -- 0 | n n )
     cp0 T
     bra z, 1f
     DPUSH
@@ -1167,7 +1164,8 @@ DEFWORD "EVALUATE",8,,EVAL ; ( i*x c-addr u -- j*x )
     
 ; imprime le prompt et passe à la ligne suivante    
 DEFWORD "OK",2,,OK  ; ( -- )
-.word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
+    .word GETX,LIT,3,PLUS,LIT,CPL,LESS,TBRANCH,1f-$,CR    
+1:  .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
     
 DEFWORD "ABORT",5,,ABORT
@@ -1238,31 +1236,43 @@ DEFWORD "HDUMP",5,,HDUMP ; ( addr +n -- )
 ; dans le dictionnaire
 DEFWORD "SEE",3,F_IMMED,SEE ; ( <ccc> -- )    
     .word BL,WORD,FIND,TBRANCH,1f-$
-    .word SPACE,LIT,'?',EMIT,DROP,EXIT
+    .word SPACE,LIT,'?',EMIT,DROP,BRANCH,3f-$
 1:  .word DUP,FETCH,LIT,ENTER,EQUAL,TBRANCH,2f-$
     .word DROP,DOTQP
     .byte 9
     .ascii "code word"
     .align 2
-    .word EXIT
-2:  .word SEELIST,EXIT    
+    .word BRANCH,3f-$
+2:  .word SEELIST
+3:  .word EXIT    
 
+; ajuste le pointeur nom sur le champ CFA  
+DEFWORD "NF>CFA",6,,NFTOCFA ; ( nf -- cfa )
+    .word DUP,CFETCH,LIT,F_LENMASK,AND,PLUS,ONEPLUS,ALIGNED,EXIT
+  
+;converti le CFA en NFA  
 DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
-    .word LIT, 0
-    .word EXIT
+    .word DUP,LIT,USER_BASE,ULESS,ZBRANCH,2f-$
+    .word DUP,XOR,BRANCH,5f-$
+2:  .word TOR,LATEST
+3:  .word FETCH,DUP,ZBRANCH,4f-$
+    .word DUP,NFTOCFA,RFETCH,EQUAL,TBRANCH,4f-$
+    .word LIT,2,MINUS,BRANCH,3b-$
+4:  .word RFROM,DROP
+5:  .word EXIT
   
 ; imprime la liste des mots qui construite une définition
 ; de HAUT-NIVEAU  
 DEFWORD "SEELIST",7,F_IMMED,SEELIST ; ( cfa -- )
     .word BASE,FETCH,TOR,HEX,CR
     .word LIT,2,PLUS ; première adresse du mot 
-1:  .word DUP,FETCH,DUP,CFATONFA,QDUP,ZBRANCH,NO_NAME-$
-    .word COUNT,LIT,F_LENMASK,AND,TYPE
-3:  .word LIT,EXIT,EQUAL,TBRANCH,2f-$
+1:  .word DUP,FETCH,DUP,CFATONFA,QDUP,ZBRANCH,4f-$
+    .word COUNT,LIT,F_LENMASK,AND
+    .word DUP,GETX,PLUS,LIT,CPL,LESS,TBRANCH,2f-$,CR 
+2:  .word TYPE
+3:  .word LIT,',',EMIT,FETCH,LIT,code_EXIT,EQUAL,TBRANCH,6f-$
     .word LIT,2,PLUS,BRANCH,1b-$
-NO_NAME:
-    .word UDOT,BRANCH,3b-$
-2:  .word DROP,RFROM,BASE,STORE,EXIT
+4:  .word UDOT,DUP,BRANCH,3b-$
+6:  .word DROP,RFROM,BASE,STORE,EXIT
   
-;.end
 
