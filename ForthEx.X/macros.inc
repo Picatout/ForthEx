@@ -170,11 +170,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
 ; indicateurs booléens entrée de dictionnaire
-.equ F_IMMED,0x80 ; mot immédiat
-.equ F_COMPO,0x40 ; mot en mode compilation seulement    
+.equ F_MARK,0x80 ; bit marqueur utilisé par le mot CFA>NFA    
+.equ F_IMMED,0x40 ; mot immédiat
 .equ F_HIDDEN,0x20 ; mot caché.
 .equ F_LENMASK,0x1f ; masque longueur nom.
-
+.equ F_NOMARK, 0x7f ; masque pour enlevé le bit F_MARK
+    
 ;macro pour la création des entêtes de dictionnaire
 .macro HEADER name,namelen,flags=0,label
 	.print "\label"
@@ -182,7 +183,7 @@
 	.global lfa_\label
 lfa_\label :  
 	.word 0b ; link
-0:	.byte \flags+\namelen	; NFA flags + length byte
+0:	.byte \flags+F_MARK+\namelen ; NFA flags + length byte
 	.ascii "\name"		; the name
 	.align 2		; padding to word boundary
 	.global \label

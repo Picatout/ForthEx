@@ -189,6 +189,7 @@ HEADLESS VARS_INIT
     mov [W0], W0 ; LFA du dernier mot système
     mov W0, _SYSLATEST
     mov W0, _LATEST
+    clr _LAST
     NEXT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

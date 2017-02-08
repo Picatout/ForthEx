@@ -700,7 +700,7 @@ DEFWORD "DO$",3,,DOSTR ; ( -- addr )
 DEFWORD "$\"|",3,F_IMMED,STRQUOTP ; ( -- addr )    
     .word DOSTR,EXIT
     
-DEFWORD ".\"|",3,F_COMPO,DOTQP ; ( -- )
+DEFWORD ".\"|",3,F_IMMED,DOTQP ; ( -- )
     .word DOSTR,COUNT,TYPE,EXIT
     
     
