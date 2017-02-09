@@ -98,9 +98,6 @@ _user_dict: .space RAM_SIZE-USER_BASE
 _version:
 .byte 12    
 .ascii "ForthEx V0.1"    
-.global _compile_only
-_compile_only:
-.ascii "compile only word"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; mot système qui ne sont pas
@@ -282,11 +279,7 @@ DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) n1=LIMIT_J, n2=J
 ; mots manipulant les arguments sur la pile
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 
-DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
-        .word STATE,FETCH,ZBRANCH,LITER1-$
-        .word LIT,LIT,COMPILE,COMPILE
-LITER1: .word EXIT
-    
+   
 DEFCODE "DUP",3,,DUP ; ( n -- n n )
     DPUSH
     NEXT
@@ -1194,33 +1187,38 @@ quit1:
 ;   compilateur
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; passage du champ NFA au chan LFA
+; les 3 mots suivants servent à 
+; passer d'un champ à l'autre dans
+; l'entête du dictionnaire
+    
+; passage du champ NFA au champ LFA
 ; simple puisqu'il est juste avant ce dernier    
 DEFWORD "NFA>LFA",7,,NFATOLFA ; ( nfa -- lfa )
     .word LIT,2,MINUS,EXIT
     
-; ajuste le pointeur nom sur le champ CFA
+; passe du champ NFA au champ CFA
 ; le CFA est après le nom aligné sur adresse paire.    
 DEFWORD "NFA>CFA",7,,NFATOCFA ; ( nfa -- cfa )
     .word DUP,CFETCH,LIT,F_LENMASK,AND,PLUS,ONEPLUS,ALIGNED,EXIT
   
-;converti le CFA en NFA
+;passe du champ CFA au champ NFA
 ;  Il n'y a pas de lien arrière entre le CFA et le NFA
-;  Le bit F_MARK est utilisé pour marqué l'octet à la position NFA
+;  Le bit F_MARK est utilisé pour marquer l'octet à la position NFA
 ;  le CFA étant immédiatement après le nom, il suffit de 
 ;  reculer octet par octet jusqu'à atteindre un octet avec le bit F_MARK==1
+;  puisque les caractères du nom sont tous < 128    
 DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
     .word DUP,LIT,USER_BASE,ULESS,ZBRANCH,1f-$ ; si cfa<USER_BASE ce n'est pas un cfa
     .word DUP,XOR,BRANCH,9f-$ ; ( cfa -- 0 )
-1:  .word DUP,TOR,LIT,33,TOR ; (cfa -- R: cfa 33 ) recule à maximum de 33 octets
-2:  .word ONEMINUS,DUP,CFETCH,DUP,LIT,F_MARK,AND,TBRANCH,3f-$
-    .word DROP,RFROM,ONEMINUS,DUP,ZBRANCH,7f-$
+1:  .word DUP,TOR,LIT,33,TOR ; (cfa -- R: cfa 33 ) recule au maximum de 33 octets
+2:  .word ONEMINUS,DUP,CFETCH,DUP,LIT,F_MARK,AND,TBRANCH,3f-$  ; F_MARK?
+    .word DROP,RFROM,ONEMINUS,DUP,ZBRANCH,7f-$ 
     .word TOR,BRANCH,2b-$
-3:  .word RFROM,DROP,LIT,F_LENMASK,AND
-    .word OVER,PLUS,ONEPLUS,ALIGNED,RFROM,EQUAL,DUP,ZBRANCH,8f-$
-    .word DROP,BRANCH,9f-$
-7:  .word RFROM,DROP
-8:  .word SWAP,DROP  
+3:  .word RFROM,DROP,LIT,F_LENMASK,AND   ; branche ici si F_MARK
+    .word OVER,PLUS,ONEPLUS,ALIGNED,RFROM,EQUAL,DUP,ZBRANCH,8f-$ ; aligned(NFA+LEN+1)==CFA ?
+    .word DROP,BRANCH,9f-$ ; oui
+7:  .word RFROM,DROP  ; compteur limite à zéro
+8:  .word SWAP,DROP  ;non
 9:  .word EXIT
   
     
@@ -1232,6 +1230,7 @@ DEFWORD "IMMEDIATE",9,,IMMEDIATE ; ( -- )
 9:  .word EXIT
     
 ;cache la définition en cours  
+; la variable LAST contient le NFA  
 DEFWORD "HIDE",4,,HIDE ; ( -- )
     .word LAST,FETCH,DUP,CFETCH,HIDDEN,OR,CSTORE
 9:  .word EXIT
@@ -1240,7 +1239,10 @@ DEFWORD "HIDE",4,,HIDE ; ( -- )
 ; avance DP
 DEFWORD "ALLOT",5,,ALLOT ; ( +n -- )
     .word DP,PLUSSTORE,EXIT
-    
+
+; Extrait le mot suivant du flux 
+; d'entrée et le recherche dans le dictionnaire
+; l'opération avorte en cas d'erreur.    
 DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
     .word BL,WORD,DUP,CFETCH,ZBRANCH,4f-$
     .word FIND,ZBRANCH,5f-$
@@ -1253,10 +1255,54 @@ DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
 5:  .word COUNT,TYPE,SPACE,LIT,'?',EMIT,CR,ABORT    
 9:  .word EXIT
  
-; compile le CFA du mot suivant dans le flue d'entrée  
+; compile le CFA du mot suivant dans le flux d'entrée  
 DEFWORD "[COMPILE]",9,F_IMMED,ICOMPILE ; ( x <cccc> -- )
     .word TICK,COMPILE,EXIT
   
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  les 4 mots suivants
+;  sont utilisés pour résoudre
+;  les adresses de sauts.    
+;  les sauts sont des relatifs.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; certains mots ne peuvent-être utilisés
+; que par le compilateur
+DEFWORD "COMPILE?",8,,F_IMMED,QCOMPILE ; ( -- )
+    .word STATE,FETCH,ZBRANCH,9f-$,EXIT
+9:  .word DOTQP
+    .byte 17
+    .ascii "compile only word"
+    .align 2
+    .word ABORT
+    
+;empile la position actuelle de DP
+; cette adresse sera la cible
+; d'un branchement arrière    
+DEFWORD "<MARK",5,,MARKADDR ; ( -- a )
+   .word QCOMPILE,HERE, EXIT
+
+;compile l'adresse d'un branchement arrière
+; complément de '<MARK'    
+; le branchement est relatif à la position
+; actuelle de DP    
+DEFWORD "<RESOLVE",8,F_IMMED,BACKJUMP ; ( a -- )    
+    .word QCOMPILE,HERE,MINUS,COMPILE, EXIT
+    
+;reserve un espace pour la cible d'un branchement avant qui
+; sera résolu ultérieurement.    
+DEFWORD ">MARK"5,F_IMMED,MARKSLOT ; ( -- slot )
+    .word QCOMPILE,HERE,LIT,0,COMPILE,EXIT
+    
+; compile l'adresse cible d'un branchement avant
+; complément de '>MARK'    
+; l'espace réservé pour la cible est indiquée
+; au sommet de la pile
+DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
+    .word QCOMPILE,DUP,HERE,MINUS,SWAP,STORE,EXIT
+    
+
+    
 ;cré une nouvelle entête dans le dictionnaire  
 DEFWORD "CREATE",6,,CREATE ; ( -- )
     .word HERE,FETCH
@@ -1272,7 +1318,73 @@ DEFWORD "]",1,F_IMMED,RBRACKET ; ( -- )
     .word LIT,-1,STATE,STORE
 9:  .word EXIT
 
+;compile le mot suivant dans le flux
+DEFWORD "[COMPILE]",9,F_IMMED,BRCOMPILE ; ( <cccc> -- )
+  .word QCOMPILE,TICK,COMPILE,EXIT
   
+;compile un cfa fourni en literal
+DEFWORD "COMPILE",7,F_IMMED,COMPILECFA  ; ( -- )
+  .word QCOMPILE,RFROM,DUP,FETCH,COMPILE,CELLPLUS,TOR,EXIT
+
+;diffère la compilation du mot qui suis dans le flux
+DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
+    .word BL,WORD,FIND,DUP,ZEROEQ,
+  
+DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
+    .word QCOMPILE
+    .word COMPILECFA,LIT,COMPILE 
+    .word EXIT
+
+DEFWORD "DO$",3,,DOSTR ; ( -- addr )
+    .word RFROM, RFETCH, RFROM, COUNT, PLUS, ALIGNED, TOR, SWAP, TOR, EXIT
+    
+DEFWORD "$\"|",3,F_IMMED,STRQUOTP ; ( -- addr u )    
+    .word DOSTR,COUNT,EXIT
+    
+DEFWORD ".\"|",3,F_IMMED,DOTQP ; ( -- )
+    .word DOSTR,COUNT,TYPE,EXIT
+    
+    
+DEFWORD "$,\"",3,,F_IMMED,STRCOMPILE ; ( -- )
+    .word LIT,'"',WORD,COUNT,PLUS,ALIGNED,DP,STORE,EXIT
+  
+DEFWORD "S\"",2,F_IMMED,SQUOTE ; ( -- c-addr u )
+    .word QCOMPILE,COMPILECFA,STRQOTP,STRCOMPILE,EXIT
+    
+DEFWORD ".\"",2,F_IMMED,DOTQUOTE ; ( -- )
+    .word QCOMPILE,COMPILECFA,DOTQP,STRCOMPILE,EXIT
+    
+    
+DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
+    .word LAST,FETCH,NFA>CFA,COMPILE,EXT 
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  mots contrôlant le flux
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+DEFWORD "BEGIN",5,F_IMMED,BEGIN ; ( -- a )
+    .word QCOMPILE, MARKADDR, EXIT
+    
+DEFWORD "AGAIN",5,F_IMMED,AGAIN ; ( a -- )
+    .word QCOMPILE,COMPILECFA,BRANCH,BACKJUMP,EXIT
+    
+DEFWORD "UNTIL",5,F_IMMED,UNTIL ; ( a -- )
+    .word QCOMPILE,COMPILECFA,ZBRANCH,BACKJUMP,EXIT
+
+DEFWORD "AHEAD",5,F_IMMED,AHEAD ; ( -- slot )
+    .word  QCOMPILE, COMPILECFA,BRANCH,MARKSLOT,EXIT
+    
+DEFWORD "IF",2,F_IMMED,IF ; ( -- slot )
+    .word QCOMPILE,COMPILECFA,ZBRANCH,MARKSLOT,EXIT
+
+DEFWORD "THEN",4,F_IMMED,THEN ; ( slot -- )
+    .word QCOMPILE,FOREJUMP,EXIT
+    
+DEFWORD "ELSE",4,F_IMMED,ELSE ; ( slot1 -- slot2 )     
+    .word QCOMPILE,COMPILECFA,BRANCH,MARKSLOT,SWAP,THEN,EXIT
+    
+DEFWORD "WHILE"5,F_IMMED,WHILE ;  (  -- )   
+    
 ; créé une nouvelle entrée dans le dictionnaire    
 DEFWORD ":",1,,COLON ; ( <ccc> -- addr )      
     
