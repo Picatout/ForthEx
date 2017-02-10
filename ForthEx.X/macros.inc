@@ -178,7 +178,7 @@
     
 ;macro pour la création des entêtes de dictionnaire
 .macro HEADER name,namelen,flags=0,label
-	.print "\label"
+	;.print "\label"
 	SYSDICT
 	.global lfa_\label
 lfa_\label :  
@@ -212,7 +212,7 @@ code_\label :	;point d'entrée du code assembleur
 	
 ; macro utilisé pour créer les mots sans entête de dictionnaire
 .macro HEADLESS label, type=CODE
-	.print "\label"
+	;.print "\label"
 	SYSDICT
 	.global \label
 \label :
