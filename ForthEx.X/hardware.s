@@ -181,7 +181,7 @@ HEADLESS VARS_INIT
     mov W0,_TICKSOURCE
     mov #TIB_SIZE,W0
     mov W0,_CNTSOURCE
-    mov #USER_BASE, W0
+    mov #DATA_BASE, W0
     mov W0,_DP
     mov #_USER_VARS,UP
     movpag #psvpage(_sys_latest),DSRPAG
@@ -189,7 +189,6 @@ HEADLESS VARS_INIT
     mov [W0], W0 ; LFA du dernier mot système
     mov W0, _SYSLATEST
     mov W0, _LATEST
-    clr _LAST
     NEXT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

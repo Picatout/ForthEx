@@ -584,14 +584,15 @@ DEFCODE "CLRLN",5,,CLRLN   ; ( n -- )
 ; caractère à l'écran
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
-.word DUP,TBRANCH,type1-$
-.word TWODROP, EXIT
-type1:    
-.word LIT, 0, DODO
-type0:
-.word  DUP, CFETCH, EMIT,ONEPLUS
-.word DOLOOP,type0-$
-.word DROP, EXIT     
+    .word DUP,TBRANCH,type1-$
+    .word TWODROP, EXIT
+    type1:    
+    .word LIT, 0, DODO
+    type0:
+    .word  DUP,CFETCH,QDUP,ZBRANCH,1f-$,EMIT,ONEPLUS
+    .word DOLOOP,type0-$,BRANCH,9f-$
+1:  .word UNLOOP    
+9:  .word DROP, EXIT     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; efface le caractère

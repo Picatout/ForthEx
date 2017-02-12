@@ -89,7 +89,7 @@
 .equ RSTK_GUARD, 24 ; réserve 16 octets pour les interrupts et exceptions    
 .equ TIB_SIZE, 80   ; Terminal Input Buffer,  80 octets
 .equ PAD_SIZE, 80   ; scratch pad, 80 octets
-.equ USER_BASE, 0x1900 ; début espace utilisateur
+.equ DATA_BASE, 0x1900 ; début espace utilisateur
     
 ;;;;;;;;;;;;    
 ; macros

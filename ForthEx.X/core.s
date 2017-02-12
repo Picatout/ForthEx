@@ -79,18 +79,17 @@ _R0: .space 2
 ; pointeur HOLD conversion numérique
  .global _HP
 _HP: .space 2
-; LFA dernière entrée dans le dictionnaire utilisateur
- .global _LATEST
-_LATEST: .space 2 
+; NFA dernière entrée dans le dictionnaire système
  .global _SYSLATEST
 _SYSLATEST: .space 2
- .global _NEWEST 
-_LAST: .space 2 
+; NFA dernière entrée dans le dictionnaire utilisateur
+ .global _LATEST
+_LATEST: .space 2 
  
 ; dictionnaire utilisateur dans la RAM 
-.section .user_dict bss  address(USER_BASE)
+.section .user_dict bss  address(DATA_BASE)
 .global _user_dict 
-_user_dict: .space RAM_SIZE-USER_BASE
+_user_dict: .space RAM_SIZE-DATA_BASE
     
 ; constantes dans la mémoire flash
 .section .ver_str.const psv       
@@ -128,7 +127,7 @@ DOALIAS:
     .global name_EXIT
 name_EXIT :
     .word 0
-0:  .byte 4
+0:  .byte 4|F_HIDDEN
     .ascii "EXIT"
     .align 2
     .global EXIT
@@ -140,25 +139,26 @@ code_EXIT :			;pfa,  assembler code follows
     RPOP IP
     NEXT
    
-    
-DEFCODE "(LIT)",5,F_IMMED,LIT ; ( -- x ) empile une valeur  
+; empile un litéral    
+DEFCODE "(LIT)",5,F_HIDDEN,LIT ; ( -- x ) 
     DPUSH
     mov [IP++], T
     NEXT
 
-DEFCODE "(CLIT)",6,F_IMMED,CLIT  ; ( -- c )
+; empile un caractère litaral    
+DEFCODE "(CLIT)",6,F_HIDDEN,CLIT  ; ( -- c )
     DPUSH
     mov [IP++], T
     ze T,T
     NEXT
 
 ; branchement inconditionnel
-DEFCODE "(BRANCH)",8,F_IMMED,BRANCH ; ( -- )
+DEFCODE "(BRANCH)",8,F_HIDDEN,BRANCH ; ( -- )
     add IP, [IP], IP
     NEXT
     
 ; branchement si T<>0
-DEFCODE "(TBRANCH)",9,,TBRANCH ; ( f -- )
+DEFCODE "(TBRANCH)",9,F_HIDDEN,TBRANCH ; ( f -- )
     cp0 T
     DPOP
     bra nz, code_BRANCH
@@ -166,7 +166,7 @@ DEFCODE "(TBRANCH)",9,,TBRANCH ; ( f -- )
     NEXT
 
 ; branchement si T==0
-DEFCODE "(?BRANCH)",9,F_IMMED,ZBRANCH ; ( f -- )
+DEFCODE "(?BRANCH)",9,F_HIDDEN,ZBRANCH ; ( f -- )
     cp0 T
     DPOP
     bra z, code_BRANCH
@@ -175,7 +175,7 @@ DEFCODE "(?BRANCH)",9,F_IMMED,ZBRANCH ; ( f -- )
     
     
 ; exécution de DO
-DEFCODE "(DO)",4,F_IMMED,DODO ; ( n  n -- ) R( -- n n )
+DEFCODE "(DO)",4,F_HIDDEN,DODO ; ( n  n -- ) R( -- n n )
     RPUSH LIMIT
     RPUSH I
     mov T, I
@@ -185,7 +185,7 @@ DEFCODE "(DO)",4,F_IMMED,DODO ; ( n  n -- ) R( -- n n )
     NEXT
 
 ; exécution de LOOP
-DEFCODE "(LOOP)",6,F_IMMED,DOLOOP ; ( -- )  R( n n -- )
+DEFCODE "(LOOP)",6,F_HIDDEN,DOLOOP ; ( -- )  R( n n -- )
     inc I, I
     cp I, LIMIT
     bra z, 1f
@@ -223,7 +223,7 @@ DEFCODE "EXECUTE",7,,EXECUTE ; ( i*x cfa -- j*x ) 6.1.1370 exécute le code à l'a
 DEFCODE "@EXECUTE",8,,FEXEC   ; ( *addr -- ) exécute le code à l'adresse *T
     mov [T],W0
     DPOP
-    mov #USER_BASE,W1
+    mov #DATA_BASE,W1
     cp W0,W1
     bra ltu, 1f
     goto W0
@@ -402,14 +402,20 @@ DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 -- n2 n1 n2 )
     mov W0,[++DSP]
     NEXT
 
-DEFCODE "DEPTH",5,,DEPTH ; ( -- +n1 ) nombre d'élément sur la pile data avant que +n1 soit inséré
+; nombre d'élément sur la pile data avant l'exécution
+; de DEPTH    
+DEFCODE "DEPTH",5,,DEPTH ; ( -- +n1 )
     mov _S0,W0
     sub DSP,W0,W0
     DPUSH
     lsr W0,T
     NEXT
 
-DEFCODE "PICK",4,,PICK ; ( +n1 -- n ) copie le nième élément de la pile au sommet
+; insère le nième élément de la pile au sommet
+; l'argument +n1 est retiré de la pile avant le comptage
+; si +n1==0 équivaut à DUP 
+; is +n1==1 équivaut à OVER    
+DEFCODE "PICK",4,,PICK ; ( +n1 -- n )
     mov DSP,W0
     sl T,T
     sub W0,T,W0
@@ -711,6 +717,11 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
     mov W0,T
     NEXT
 
+;aligne DP sur adresse paire    
+DEFCODE "ALIGN",5,,ALIGN ; ( -- )
+    .word HERE,DUP,LIT,1,AND,PLUS,DP,STORE,EXIT
+    
+    
 DEFCODE "ALIGNED",7,,ALIGNED ; ( addr -- a-addr ) aligne addresse sur nombre pair.
     btsc T,#0
     inc T,T
@@ -800,10 +811,10 @@ DEFCODE "CFILL",5,,CFILL ; ( addr u b -- ) for{0:(u-1)} -> m[T++]=b
 1:  DPOP    
     NEXT
     
-; supprime tous les caractères <=32 à la fin d'une chaîne
+; remplace tous les caractères <=32 à la fin d'une chaîne
 ; par des zéro
 ; u1 longueur initiale de la chaîne
-; u2 longueur finale de laq chaîne    
+; u2 longueur finale de la chaîne    
 DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )     
     mov [DSP],W0
     add W0,T,W0
@@ -843,7 +854,6 @@ DEFVAR ">IN",3,,TOIN     ; pointeur position début dernier mot retourné par WORD
 DEFVAR "HP",2,,HP       ; HOLD pointer
 DEFVAR "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
 DEFVAR "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
-DEFVAR "LAST",6,,LAST ; **NFA du mot en cours de définition
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
@@ -968,7 +978,9 @@ QNUM3:  .word EXIT
 DEFWORD "WORDS",5,,WORDS ; ( -- )
     .word CR,LATEST
 1:  .word FETCH,DUP,ZEROEQ,TBRANCH,3f-$
-    .word DUP,DUP,CFETCH,LENMASK,AND  ; NFA NFA LEN
+    .word DUP,CFETCH,HIDDEN,AND,ZBRANCH,4f-$ ; n'affiche pas les mots cachés
+    .word TWOMINUS,BRANCH,1b-$
+4:  .word DUP,DUP,CFETCH,LENMASK,AND  ; NFA NFA LEN
     .word DUP,GETX,PLUS,LIT,64,ULESS,TBRANCH,2f-$
     .word CR
 2:  .word TOR,ONEPLUS,RFROM,TYPE,SPACE,TWOMINUS,BRANCH,1b-$
@@ -997,14 +1009,14 @@ DEFCODE "SKIP",4,,SKIP ; ( addr u c -- addr' u' )
     mov T, W0 ; c
     DPOP ; T=u
     mov [DSP],W1 ; addr
-2:  cp0 T
-    bra z, 1f
-    cp.b W0,[W1++]
-    bra nz, 3f
+    cp0 T
+    bra z, 8f
+2:  cp.b W0,[W1]
+    bra nz, 8f
+    inc W1,W1
     dec T,T
-    bra 2b
-3:  dec W1,W1    
-1:  mov W1,[DSP]
+    bra nz, 2b
+8:  mov W1,[DSP]
     NEXT
   
 ; avance ajuste >IN
@@ -1016,7 +1028,9 @@ DEFWORD "ADR>IN",7,,ADRTOIN ; ( adr' -- )
 DEFWORD "/STRING",7,,SLASHSTRING ; ( a u n -- a+n u-n )
     .word ROT,OVER,PLUS,ROT,ROT,MINUS,EXIT
 
-    
+; saute touts less caractère 'c'
+; ensuite accumule les caractère jusqu'au
+; prochain 'c'    
 DEFWORD "PARSE",5,,PARSE ; c -- c-addr n
         .word TSOURCE,TOIN,FETCH,SLASHSTRING ; c src' u'
         .word OVER,TOR,ROT,SCAN  ; src' u'
@@ -1028,14 +1042,14 @@ parse1: .word ADRTOIN ; adr'
     
 ; localise le prochain mot délimité par 'c'
 ; la variable TOIN indique la position courante
-; le mot trouvé est copié dans le PAD 
+; le mot trouvé est copié à la position DP
 ; met à jour >IN
 DEFWORD "WORD",4,,WORD ; ( c -- c-addr )
     .word DUP,TSOURCE,TOIN,FETCH,SLASHSTRING ; c c c-addr' u'
     .word ROT,SKIP ; c c-addr' u'
     .word DROP,ADRTOIN,PARSE
     .word HERE,TOCOUNTED,HERE
-    .word BL,OVER,COUNT,PLUS,CSTORE,EXIT
+    .word EXIT
     
 
 ; recherche un mot dans le dictionnaire
@@ -1099,7 +1113,7 @@ not_found:
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
 1:  .word KEY,DUP,LIT,13,EQUAL,ZBRANCH,2f-$
-    .word DROP,LIT,32,OVER,CSTORE,SWAP,MINUS,ONEPLUS,RFROM,DROP,EXIT
+    .word DROP,BL,OVER,CSTORE,SWAP,MINUS,ONEPLUS,RFROM,DROP,EXIT
 2:  .word DUP,LIT,8,EQUAL,ZBRANCH,3f-$
     .word DROP,TWODUP,EQUAL,TBRANCH,1b-$
     .word BACKCHAR,ONEMINUS,BRANCH,1b-$
@@ -1170,13 +1184,12 @@ DEFWORD "ABORT",5,,ABORT
     
 ; si x1<>0 affiche message et appel ABORT
 DEFWORD "ABORT\"",6,,ABORTQ ; ( i*x x1 -- i*x )
-    .word ZBRANCH,2f-$
-    .word IPFETCH,DUP,CFETCH,TWODUP,TOR,TOR
-    .word SWAP,ONEPLUS,SWAP,TYPE
-    .word RFROM,RFROM,PLUS,ONEPLUS,DUP,EVEN,TBRANCH,1f-$
-    .word ONEPLUS
-1:  .word IPSTORE,ABORT  
-2:  .word EXIT
+    .word ZBRANCH,1f-$
+    .word RFETCH,DUP,CFETCH
+    .word SWAP,ONEPLUS,SWAP,TYPE,CR,ABORT
+1:  .word RFROM,DUP,CFETCH,PLUS,ONEPLUS,ALIGNED
+    .word TOR,EXIT  
+
     
 ; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT ; ( -- )
@@ -1190,6 +1203,10 @@ quit0:
 quit1:
     .word CR
     .word BRANCH, quit0-$
+    
+; commentaire
+DEFWORD "(",1,F_IMMED,LPAREN ; parse <ccccc)>
+    .word LIT,')',PARSE,TWODROP,EXIT
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1217,7 +1234,7 @@ DEFWORD "NFA>CFA",7,,NFATOCFA ; ( nfa -- cfa )
 ;  reculer octet par octet jusqu'à atteindre un octet avec le bit F_MARK==1
 ;  puisque les caractères du nom sont tous < 128    
 DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
-    .word DUP,LIT,USER_BASE,ULESS,ZBRANCH,1f-$ ; si cfa<USER_BASE ce n'est pas un cfa
+    .word DUP,LIT,DATA_BASE,ULESS,ZBRANCH,1f-$ ; si cfa<DATA_BASE ce n'est pas un cfa
     .word DUP,XOR,BRANCH,9f-$ ; ( cfa -- 0 )
 1:  .word DUP,TOR,LIT,33,TOR ; (cfa -- R: cfa 33 ) recule au maximum de 33 octets
 2:  .word ONEMINUS,DUP,CFETCH,DUP,LIT,F_MARK,AND,TBRANCH,3f-$  ; F_MARK?
@@ -1241,7 +1258,7 @@ DEFWORD "IMMEDIATE",9,,IMMEDIATE ; ( -- )
 ;cache la définition en cours  
 ; la variable LAST contient le NFA  
 DEFWORD "HIDE",4,,HIDE ; ( -- )
-    .word LAST,FETCH,DUP,CFETCH,HIDDEN,OR,CSTORE
+    .word LATEST,FETCH,DUP,CFETCH,HIDDEN,OR,SWAP,CSTORE
 9:  .word EXIT
 
 ; allocation de mémoire dans le dictionnaire
@@ -1285,10 +1302,10 @@ DEFWORD "COMPILE?",8,F_IMMED,QCOMPILE ; ( -- )
     .byte 17
     .ascii "compile only word"
     .align 2
-    .word ABORT
+    .word CR,ABORT
 
 ;alias pour COMMA    
-DEFWORD "COMPILE,",8,,COMMAXT
+DEFWORD "COMPILE,",8,F_IMMED,COMMAXT
     .word DOALIAS,COMMA
     
     
@@ -1320,9 +1337,15 @@ DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
 
     
 ;cré une nouvelle entête dans le dictionnaire  
-DEFWORD "CREATE",6,,CREATE ; ( -- )
-    .word HERE,FETCH
-9:  .word EXIT    
+DEFWORD "CREATE",6,F_IMMED,CREATE ; ( -- nfa )
+    .word LATEST,FETCH,COMMA,HERE,LATEST,STORE
+    .word BL,WORD,DUP,CFETCH,ZEROEQ,ABORTQ
+    .byte  12
+    .ascii "missing name"
+    .align 2
+    .word EXIT    
+  
+  
   
 ; passe en mode interprétation
 DEFWORD "[",1,F_IMMED,LBRACKET ; ( -- )
@@ -1352,9 +1375,9 @@ DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
 9:  .word EXIT    
   
 DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
-    .word QCOMPILE
+    .word STATE,FETCH,ZBRANCH,9f-$
     .word COMPILECFA,LIT,COMMA
-    .word EXIT
+9:  .word EXIT
 
 DEFWORD "DO$",3,,DOSTR ; ( -- addr )
     .word RFROM, RFETCH, RFROM, COUNT, PLUS, ALIGNED, TOR, SWAP, TOR, EXIT
@@ -1377,7 +1400,7 @@ DEFWORD ".\"",2,F_IMMED,DOTQUOTE ; ( -- )
     
     
 DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
-    .word LAST,FETCH,NFATOCFA,COMMAXT,EXIT 
+    .word LATEST,FETCH,NFATOCFA,COMMAXT,EXIT 
 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  mots contrôlant le flux
@@ -1451,30 +1474,30 @@ DEFWORD "HDUMP",5,,HDUMP ; ( addr +n -- )
 
 ; affice le code source d'un mot qui est
 ; dans le dictionnaire
-DEFWORD "SEE",3,F_IMMED,SEE ; ( <ccc> -- )    
-    .word BL,WORD,FIND,TBRANCH,1f-$
-    .word SPACE,LIT,'?',EMIT,DROP,BRANCH,3f-$
-1:  .word DUP,FETCH,LIT,ENTER,EQUAL,TBRANCH,2f-$
-    .word DROP,DOTQP
-    .byte 9
-    .ascii "code word"
-    .align 2
-    .word BRANCH,3f-$
-2:  .word SEELIST
-3:  .word EXIT    
+;DEFWORD "SEE",3,F_IMMED,SEE ; ( <ccc> -- )    
+;    .word BL,WORD,FIND,TBRANCH,1f-$
+;    .word SPACE,LIT,'?',EMIT,DROP,BRANCH,3f-$
+;1:  .word DUP,FETCH,LIT,ENTER,EQUAL,TBRANCH,2f-$
+;    .word DROP,DOTQP
+;    .byte 9
+;    .ascii "code word"
+;    .align 2
+;    .word BRANCH,3f-$
+;2:  .word SEELIST
+;3:  .word EXIT    
 
 ; imprime la liste des mots qui construite une définition
 ; de HAUT-NIVEAU  
-DEFWORD "SEELIST",7,F_IMMED,SEELIST ; ( cfa -- )
-    .word BASE,FETCH,TOR,HEX,CR
-    .word LIT,2,PLUS ; première adresse du mot 
-1:  .word DUP,FETCH,DUP,CFATONFA,QDUP,ZBRANCH,4f-$
-    .word COUNT,LIT,F_LENMASK,AND
-    .word DUP,GETX,PLUS,LIT,CPL,LESS,TBRANCH,2f-$,CR 
-2:  .word TYPE
-3:  .word LIT,',',EMIT,FETCH,LIT,code_EXIT,EQUAL,TBRANCH,6f-$
-    .word LIT,2,PLUS,BRANCH,1b-$
-4:  .word UDOT,DUP,BRANCH,3b-$
-6:  .word DROP,RFROM,BASE,STORE,EXIT
+;DEFWORD "SEELIST",7,F_IMMED,SEELIST ; ( cfa -- )
+;    .word BASE,FETCH,TOR,HEX,CR
+;    .word LIT,2,PLUS ; première adresse du mot 
+;1:  .word DUP,FETCH,DUP,CFATONFA,QDUP,ZBRANCH,4f-$
+;    .word COUNT,LIT,F_LENMASK,AND
+;    .word DUP,GETX,PLUS,LIT,CPL,LESS,TBRANCH,2f-$,CR 
+;2:  .word TYPE
+;3:  .word LIT,',',EMIT,FETCH,LIT,code_EXIT,EQUAL,TBRANCH,6f-$
+;    .word LIT,2,PLUS,BRANCH,1b-$
+;4:  .word UDOT,DUP,BRANCH,3b-$
+;6:  .word DROP,RFROM,BASE,STORE,EXIT
   
 
