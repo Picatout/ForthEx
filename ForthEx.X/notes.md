@@ -1,3 +1,11 @@
+2017-02-15
+===========
+testé IF ELSE THEN
+testé BEGIN UNTIL
+testé BEGIN WHILE REPEAT
+écrire et testé CASE OF ENDOF ENDCASE
+débute travail sur LEAVE
+
 2017-02-03
 ==========
 Abadon du modèle eForth trop ancien au profit de CamelForth

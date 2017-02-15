@@ -1446,9 +1446,6 @@ DEFWORD "AGAIN",5,F_IMMED,AGAIN ; ( a -- )
 DEFWORD "UNTIL",5,F_IMMED,UNTIL ; ( a -- )
     .word COMPILEQ,COMPILECFA,ZBRANCH,BACKJUMP,EXIT
 
-DEFWORD "AHEAD",5,F_IMMED,AHEAD ; ( -- slot )
-    .word  COMPILEQ, COMPILECFA,BRANCH,MARKSLOT,EXIT
-    
 DEFWORD "IF",2,F_IMMED,IIF ; ( -- slot )
     .word COMPILEQ,COMPILECFA,ZBRANCH,MARKSLOT,EXIT
 
@@ -1467,6 +1464,33 @@ DEFWORD "WHILE",5,F_IMMED,WHILE ;  ( a -- slot a)
 DEFWORD "REPEAT",6,F_IMMED,REPEAT ; ( slot a -- )
     .word COMPILEQ,COMPILECFA,BRANCH,BACKJUMP,FOREJUMP,EXIT
 
+;compile LEAVE
+DEFWORD "LEAVE",5,F_IMMED,LEAVE ; ( -- slot )
+    .word COMPILEQ,COMILECFA,UNLOOP
+    .word COMPILECFA,BRANCH,MARKSLOT,EXIT  ; ne marche pas si à l'intérieur d'un IF THEN
+    
+;marque le début d'une structure CASE ENDCASE
+DEFWORD "CASE",4,F_IMMED,CASE ; ( -- case-sys )
+    .word COMPILEQ,LIT,0,EXIT ; marque la fin de la liste des fixup
+
+;compile la strucutre d'un OF    
+DEFWORD "OF",2,F_IMMED,OF ; ( -- slot )    
+    .word COMPILEQ,COMPILECFA,OVER,COMPILECFA,EQUAL,COMPILECFA,ZBRANCH
+    .word MARKSLOT,EXIT
+    
+;compile la structure d'un ENDOF
+DEFWORD "ENDOF",5,F_IMMED,ENDOF ; ( slot 1 -- slot2 )
+    .word COMPILEQ,COMPILECFA,BRANCH,MARKSLOT,SWAP,FOREJUMP,EXIT
+    
+;résoue les sauts de chaque ENDOF
+; et compile un DROP
+DEFWORD "ENDCASE",7,F_IMMED,ENDCASE ; ( case-sys -- )    
+    .word COMPILEQ
+1:  .word QDUP,ZBRANCH,8f-$
+    .word FOREJUMP,BRANCH,1b-$
+8:  .word COMPILECFA,DROP,EXIT
+  
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
 ; crée une nouvelle définition dans le dictionnaire    
@@ -1521,7 +1545,7 @@ DEFWORD "HDUMP",5,,HDUMP ; ( addr +n -- )
 1:  .word DOI,LIT,7,AND,TBRANCH,2f-$
     .word CR,DUP,LIT,5,UDOTR,SPACE
 2:  .word DUP,FETCH,LIT,5,UDOTR,LIT,2,PLUS
-    .word DOLOOP,1b-$
+    .word DOLOOP,1b-$,DROP
     .word RFROM,BASE,STORE,EXIT
 
 ; affice le code source d'un mot qui est
