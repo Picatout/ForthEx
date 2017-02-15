@@ -119,11 +119,6 @@ DOUSER: ; empile pointeur sur variable utilisateur
     add W0,UP,T
     NEXT
 
-    .global DOALIAS
-DOALIAS:
-    mov [WP],WP
-    mov [WP++],IP
-    
     .section .sysdict psv
     .align 2
     .global name_EXIT
@@ -182,15 +177,16 @@ DEFCODE "(DO)",4,F_HIDDEN,DODO ; ( n  n -- ) R( -- n n )
     RPUSH I
     mov T, I
     DPOP
-    mov T, LIMIT
+    mov T,LIMIT
     DPOP
     NEXT
 
 ; exécution de LOOP
+; la boucle se termine quand I==LIMIT    
 DEFCODE "(LOOP)",6,F_HIDDEN,DOLOOP ; ( -- )
     inc I, I
-2:  cp I, LIMIT
-    bra ge, 1f
+    cp I, LIMIT
+    bra eq, 1f
     add IP, [IP], IP
     NEXT
 1:
@@ -200,10 +196,22 @@ DEFCODE "(LOOP)",6,F_HIDDEN,DOLOOP ; ( -- )
     NEXT
 
 ;exécution de +LOOP
+;La boucle s'arrête lorsque I franchi la frontière
+;entre LIMIT et LIMIT-1 dans un sens ou l'autre    
 DEFCODE "(+LOOP)",7,F_HIDDEN,DOPLOOP ; ( n -- )     
+    mov I,W0
     add I,T,I
     DPOP
-    bra 2b
+    cp W0, LIMIT
+    bra lt, 3f
+    dec LIMIT,W0
+    cp I,W0
+    bra le , 1b
+    bra 2f
+3:  cp I,LIMIT
+    bra ge, 1b
+2:  add IP,[IP],IP
+    NEXT
     
     
 ; empile IP
@@ -279,7 +287,7 @@ DEFCODE "I",1,,DOI  ; ( -- n )
     NEXT
 
 ; empile compteur boucle externe    
-DEFCODE "J",1,,DOJ  ; ( -- n )
+DEFCODE "J",1,,DOJ  ; ( -- n ) R: limitJ indexJ
     DPUSH
     mov [RSP-2],T
     NEXT
@@ -1169,7 +1177,7 @@ INTER1: .word BL,WORD,DUP,CFETCH,ZBRANCH,INTER9-$
         .word ONEPLUS,STATE,FETCH,ZEROEQ,OR
         .word ZBRANCH,INTER2-$
         .word EXECUTE,BRANCH,INTER3-$
-INTER2: .word COMMAXT
+INTER2: .word COMMA
 INTER3: .word BRANCH,INTER1-$
 INTER4: .word QNUMBER,ZBRANCH,INTER5-$
         .word LITERAL,BRANCH,INTER1-$
@@ -1195,6 +1203,7 @@ DEFWORD "ABORT",5,,ABORT
 ; si x1<>0 affiche message et appel ABORT
 DEFWORD "ABORT\"",6,,ABORTQ ; ( i*x x1 -- i*x )
     .word ZBRANCH,1f-$
+    .word HERE,COUNT,TYPE,SPACE
     .word RFETCH,DUP,CFETCH
     .word SWAP,ONEPLUS,SWAP,TYPE,CR,ABORT
 1:  .word RFROM,DUP,CFETCH,PLUS,ONEPLUS,ALIGNED
@@ -1303,7 +1312,7 @@ DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
  
 ; compile le CFA du mot suivant dans le flux d'entrée  
 DEFWORD "[COMPILE]",9,F_IMMED,ICOMPILE ; ( x <cccc> -- )
-    .word TICK,COMMAXT,EXIT
+    .word TICK,COMMA,EXIT
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  les 4 mots suivants
@@ -1321,15 +1330,10 @@ DEFWORD "COMPILE?",8,F_IMMED,COMPILEQ ; ( -- )
     .align 2
     .word EXIT
 
-;alias pour COMMA    
-DEFWORD "COMPILE,",8,F_IMMED,COMMAXT
-    .word DOALIAS,COMMA
-    
-    
 ;empile la position actuelle de DP
 ; cette adresse sera la cible
 ; d'un branchement arrière    
-DEFWORD "<MARK",5,,MARKADDR ; ( -- a )
+DEFWORD "<MARK",5,F_IMMED,MARKADDR ; ( -- a )
    .word COMPILEQ,HERE, EXIT
 
 ;compile l'adresse d'un branchement arrière
@@ -1337,19 +1341,19 @@ DEFWORD "<MARK",5,,MARKADDR ; ( -- a )
 ; le branchement est relatif à la position
 ; actuelle de DP    
 DEFWORD "<RESOLVE",8,F_IMMED,BACKJUMP ; ( a -- )    
-    .word COMPILEQ,HERE,MINUS,COMMAXT, EXIT
+    .word COMPILEQ,HERE,MINUS,COMMA, EXIT
     
 ;reserve un espace pour la cible d'un branchement avant qui
 ; sera résolu ultérieurement.    
 DEFWORD ">MARK"5,F_IMMED,MARKSLOT ; ( -- slot )
-    .word COMPILEQ,HERE,LIT,0,COMMAXT,EXIT
+    .word COMPILEQ,HERE,LIT,0,COMMA,EXIT
     
 ; compile l'adresse cible d'un branchement avant
 ; complément de '>MARK'    
 ; l'espace réservé pour la cible est indiquée
 ; au sommet de la pile
 DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
-    .word COMPILEQ,DUP,HERE,MINUS,SWAP,STORE,EXIT
+    .word COMPILEQ,DUP,HERE,SWAP,MINUS,SWAP,STORE,EXIT
     
 
     
@@ -1361,10 +1365,8 @@ DEFWORD "CREATE",6,,CREATE ; ( -- NFA )
     .ascii "missing name"
     .align 2
     .word DUP,CFETCH,ONEPLUS,ALLOT,ALIGN
-    .word DUP,CFETCH,HIDDEN,OR,OVER,CSTORE
+    .word DUP,CFETCH,HIDDEN,OR,SWAP,CSTORE
     .word EXIT    
-  
-  
   
 ; passe en mode interprétation
 DEFWORD "[",1,F_IMMED,LBRACKET ; ( -- )
@@ -1378,18 +1380,18 @@ DEFWORD "]",1,F_IMMED,RBRACKET ; ( -- )
 
 ;compile le mot suivant dans le flux
 DEFWORD "[COMPILE]",9,F_IMMED,BRCOMPILE ; ( <cccc> -- )
-  .word COMPILEQ,TICK,COMMAXT,EXIT
+  .word COMPILEQ,TICK,COMMA,EXIT
   
 ;compile un cfa fourni en argument
 DEFWORD "COMPILE",7,F_IMMED,COMPILECFA  ; ( -- )
-  .word COMPILEQ,RFROM,DUP,FETCH,COMMAXT,CELLPLUS,TOR,EXIT
+  .word COMPILEQ,RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
 
 ;diffère la compilation du mot qui suis dans le flux
 DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
     .word BL,WORD,FIND,DUP,ZEROEQ,ZBRANCH,2f-$
     .word DROP,COUNT,TYPE,LIT,'?',ABORT
 2:  .word ZEROGT,3f-$
-    .word LIT,COMMAXT,COMPILECFA,BRANCH,9f-$
+    .word LIT,COMMA,COMPILECFA,BRANCH,9f-$
 3:  .word     
 9:  .word EXIT    
   
@@ -1419,7 +1421,7 @@ DEFWORD ".\"",2,F_IMMED,DOTQUOTE ; ( -- )
     
     
 DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
-    .word NEWEST,FETCH,NFATOCFA,COMMAXT,EXIT 
+    .word NEWEST,FETCH,NFATOCFA,COMMA,EXIT 
 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  mots contrôlant le flux
@@ -1474,13 +1476,14 @@ DEFWORD ":",1,,COLON ; ( name --  )
 ;    .ascii "already compiling"
 ;    .align 2
     .word CREATE ; ( -- )
-    .word LIT,ENTER,COMMAXT,RBRACKET,EXIT
+    .word RBRACKET,COMPILECFA,ENTER,EXIT
 
 ; termine une définition débutée par ":"
 DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- ) 
     .word COMPILEQ
     .word COMPILECFA,EXIT
-    .word NEWEST,CFETCH,HIDDEN,INVERT,AND,LATEST,CSTORE
+    .word NEWEST,DUP,FETCH,DUP,CFETCH,HIDDEN,INVERT,AND,SWAP,CSTORE
+    .word FETCH,LATEST,STORE
     .word LBRACKET,EXIT
     
     
