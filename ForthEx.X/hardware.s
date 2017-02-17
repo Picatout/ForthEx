@@ -155,8 +155,8 @@ HEADLESS SET_CLOCK
 
 ; mise à zéro de la RAM
 HEADLESS CLR_RAM
-    mov #RAM_BASE+DSTK_SIZE+RSTK_SIZE, W0
-    repeat #((RAM_SIZE-DSTK_SIZE-RSTK_SIZE)/2-1)
+    mov #RAM_BASE+DSTK_SIZE+RSTK_SIZE+CSTK_SIZE, W0
+    repeat #((RAM_SIZE-DSTK_SIZE-RSTK_SIZE-CSTK_SIZE)/2-1)
     clr [W0++]
     NEXT
 
@@ -172,6 +172,8 @@ HEADLESS VARS_INIT
     mov W0,_R0
     mov #pstack, W0
     mov W0, _S0
+    mov #cstack, W0
+    mov W0,csp
     mov #10, W0  ; base numérique par défaut: décimale
     mov W0, _BASE
     mov #pad, W0

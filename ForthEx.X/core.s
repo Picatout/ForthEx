@@ -28,7 +28,7 @@
 ;   http://forthfiles.net/ting/sysguidefig.pdf    
     
     
-.global pstack, rstack, user,tib,pad
+.global pstack, rstack,cstack,user,tib,pad
     
 .section .core.bss bss
 .global user    
@@ -41,6 +41,12 @@ pstack:
 rstack:
 .space RSTK_SIZE
 
+.section .control.stack.bss bss, address(RAM_BASE+RSTK_SIZE+DSTK_SIZE)
+cstack:
+.space CSTK_SIZE 
+    .global csp
+csp: .space 2
+    
 .section .buffers.bss bss
 tib: .space TIB_SIZE
 pad: .space PAD_SIZE
@@ -88,6 +94,7 @@ _LATEST: .space 2
  .global _NEWEST
 _NEWEST: .space 2
  
+ 
 ; dictionnaire utilisateur dans la RAM 
 .section .user_dict.bss bss address(DATA_BASE)
 .global _user_dict 
@@ -118,7 +125,19 @@ DOUSER: ; empile pointeur sur variable utilisateur
     mov [WP++],W0
     add W0,UP,T
     NEXT
-
+    
+    .global DOVAR
+DOVAR:
+    DPUSH
+    mov WP,T
+    NEXT
+    
+    .global DOCONST
+DOCONST:
+    DPUSH
+    mov [WP],T
+    NEXT
+    
     .section .sysdict psv
     .align 2
     .global name_EXIT
@@ -414,9 +433,9 @@ DEFCODE "RP!",3,,RPSTORE  ; ( n -- )
     NEXT
     
 DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 -- n2 n1 n2 )
-    mov [DSP], W0
-    mov T, [DSP]
-    mov W0,[++DSP]
+    mov [DSP],W0 ; n1
+    mov T,[DSP]  ; n2 n2 
+    mov W0,[++DSP] ; n2 n1 n2
     NEXT
 
 ; nombre d'élément sur la pile data avant l'exécution
@@ -438,6 +457,25 @@ DEFCODE "PICK",4,,PICK ; ( +n1 -- n )
     sub W0,T,W0
     mov [W0],T
     NEXT
+    
+; tranfert de la pile des arguments 
+; vers la pile de contrôle
+DEFCODE ">CSTK",5,,TOCSTK ; ( x -- C: -- x )
+    mov csp,W0
+    mov T,[W0++]
+    mov W0,csp
+    DPOP
+    NEXT
+    
+; transfert de la pile de contrôle
+; vers la pile des arguments
+DEFCODE "CSTK>",5,,CSTKFROM ; ( -- x  C: x -- )
+    DPUSH
+    mov csp,W0
+    mov [--W0],T
+    mov W0,csp
+    NEXT
+    
     
 ;;;;;;;;;;;;;;;;
 ;     MATH
@@ -858,20 +896,20 @@ DEFWORD "PACK$",5,,PACKS ; ( src u dest -- a-dest )  copi src de longeur u vers 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  variables système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFVAR "STATE",5,,STATE   ; état compile=1/interprète=0
-DEFVAR "DP",2,,DP         ; pointeur fin dictionnaire
-DEFVAR "BASE",4,,BASE     ; base numérique
-DEFVAR "SYSLATEST",9,,SYSLATEST ; tête du dictionnaire en FLASH    
-DEFVAR "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
-DEFVAR "NEWEST",6,,NEWEST ; variable contenant le NFA du mot en cours de définition    
-DEFVAR "R0",2,,R0   ; base pile retour
-DEFVAR "S0",2,,S0   ; base pile arguments   
-DEFVAR "PAD",3,,PAD       ; tampon de travail
-DEFVAR "TIB",3,,TIB       ; tampon de saisie clavier
-DEFVAR ">IN",3,,TOIN     ; pointeur position début dernier mot retourné par WORD
-DEFVAR "HP",2,,HP       ; HOLD pointer
-DEFVAR "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
-DEFVAR "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
+DEFUSER "STATE",5,,STATE   ; état compile=1/interprète=0
+DEFUSER "DP",2,,DP         ; pointeur fin dictionnaire
+DEFUSER "BASE",4,,BASE     ; base numérique
+DEFUSER "SYSLATEST",9,,SYSLATEST ; tête du dictionnaire en FLASH    
+DEFUSER "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
+DEFUSER "NEWEST",6,,NEWEST ; variable contenant le NFA du mot en cours de définition    
+DEFUSER "R0",2,,R0   ; base pile retour
+DEFUSER "S0",2,,S0   ; base pile arguments   
+DEFUSER "PAD",3,,PAD       ; tampon de travail
+DEFUSER "TIB",3,,TIB       ; tampon de saisie clavier
+DEFUSER ">IN",3,,TOIN     ; pointeur position début dernier mot retourné par WORD
+DEFUSER "HP",2,,HP       ; HOLD pointer
+DEFUSER "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
+DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
@@ -1196,10 +1234,14 @@ DEFWORD "OK",2,,OK  ; ( -- )
     .word GETX,LIT,3,PLUS,LIT,CPL,LESS,TBRANCH,1f-$,CR    
 1:  .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
-    
+; vide la pile dstack et appel QUIT
+; si compilation en cours annulle les effets de celle-ci  
 DEFWORD "ABORT",5,,ABORT
-    .word S0,FETCH,SPSTORE,QUIT
+    .word STATE,FETCH,ZBRANCH,1f-$
+    .word NEWEST,FETCH,NFATOLFA,DUP,FETCH,LATEST,STORE,DP,STORE
+1:  .word S0,FETCH,SPSTORE,QUIT
     
+  
 ; si x1<>0 affiche message et appel ABORT
 DEFWORD "ABORT\"",6,,ABORTQ ; ( i*x x1 -- i*x )
     .word ZBRANCH,1f-$
@@ -1249,7 +1291,11 @@ DEFWORD "NFA>LFA",7,,NFATOLFA ; ( nfa -- lfa )
 ; le CFA est après le nom aligné sur adresse paire.    
 DEFWORD "NFA>CFA",7,,NFATOCFA ; ( nfa -- cfa )
     .word DUP,CFETCH,LIT,F_LENMASK,AND,PLUS,ONEPLUS,ALIGNED,EXIT
-  
+ 
+; passe du champ CFA au champ PFA
+DEFWORD ">BODY",5,,TOBODY ; ( cfa -- pfa )
+    .word CELLPLUS,EXIT;
+    
 ;passe du champ CFA au champ NFA
 ;  Il n'y a pas de lien arrière entre le CFA et le NFA
 ;  Le bit F_MARK est utilisé pour marquer l'octet à la position NFA
@@ -1270,23 +1316,29 @@ DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
 8:  .word SWAP,DROP  ;non
 9:  .word EXIT
   
+; vérifie si le dictionnaire utilisateur
+; est vide  
+DEFWORD "EMPTY",5,,EMPTY ; ( -- f)
+    .word LATEST,FETCH,SYSLATEST,FETCH,ZEROEQ,EXIT 
     
 ; met à 1 l'indicateur F_IMMED
 ; sur le dernier mot défini.    
 DEFWORD "IMMEDIATE",9,,IMMEDIATE ; ( -- )
-    .word LATEST,FETCH,SYSLATEST,FETCH,EQUAL,TBRANCH,9f-$
+    .word EMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,IMMED,OR,SWAP,CSTORE
 9:  .word EXIT
     
 ;cache la définition en cours  
 ; la variable LAST contient le NFA  
 DEFWORD "HIDE",4,,HIDE ; ( -- )
+    .word EMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,HIDDEN,OR,SWAP,CSTORE
 9:  .word EXIT
 
 DEFWORD "REVEAL",6,,REVEAL ; ( -- )
+    .word EMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,HIDDEN,INVERT,AND,SWAP,CSTORE
-    .word EXIT
+9:  .word EXIT
     
 ; allocation de mémoire dans le dictionnaire
 ; avance DP
@@ -1358,7 +1410,7 @@ DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
 
     
 ;cré une nouvelle entête dans le dictionnaire  
-DEFWORD "CREATE",6,,CREATE ; ( -- NFA )
+DEFWORD "CREATE",6,,CREATE ; ( -- )
     .word LATEST,FETCH,COMMA,HERE,NEWEST,STORE
     .word BL,WORD,DUP,CFETCH,ZEROEQ,ABORTQ
     .byte  12
@@ -1384,7 +1436,7 @@ DEFWORD "[COMPILE]",9,F_IMMED,BRCOMPILE ; ( <cccc> -- )
   
 ;compile un cfa fourni en argument
 DEFWORD "COMPILE",7,F_IMMED,COMPILECFA  ; ( -- )
-  .word COMPILEQ,RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
+  .word RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
 
 ;diffère la compilation du mot qui suis dans le flux
 DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
@@ -1426,14 +1478,36 @@ DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  mots contrôlant le flux
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "DO",2,F_IMMED,DO ; ( -- a ) compile xt de (DO)
-    .word COMPILEQ,COMPILECFA,DODO,MARKADDR,EXIT
+; compile xt de (DO)
+; empile l'adresse du début de la boucle sur cstack
+; empile 0 comme garde pour FIXLEAVE   
+DEFWORD "DO",2,F_IMMED,DO ; ( C: -- a 0 ) compile xt de (DO)
+    .word COMPILEQ,COMPILECFA,DODO
+    .word HERE,TOCSTK,LIT,0,TOCSTK,EXIT
+
+;compile LEAVE
+DEFWORD "LEAVE",5,F_IMMED,LEAVE ; (C: -- slot )
+    .word COMPILEQ,COMPILECFA,UNLOOP
+    .word COMPILECFA,BRANCH,MARKSLOT,TOCSTK,EXIT  
     
-DEFWORD "LOOP",4,F_IMMED,LOOP ; ( a -- ) compile xt de (LOOP)
-    .word COMPILEQ,COMPILECFA,DOLOOP,BACKJUMP,EXIT
     
-DEFWORD "+LOOP",5,F_IMMED,PLUSLOOP ; ( a -- ) compile execution de +LOOP
-    .word COMPILEQ,COMPILECFA,DOPLOOP,BACKJUMP,EXIT
+; résout toutes les adresses pour les branchements
+; à l'intérieur des boucles DO LOOP|+LOOP
+DEFWORD "FIXLOOP",7,F_IMMED|F_HIDDEN,FIXLOOP ; (C: a 0 i*slot -- )
+1:  .word CSTKFROM,QDUP,ZBRANCH,9f-$
+    .word DUP,HERE,CELLPLUS,SWAP,MINUS,SWAP,STORE
+    .word BRANCH,1b-$
+9:  .word CSTKFROM,BACKJUMP,EXIT    
+ 
+; compile xt de (LOOP)  
+; résout toutes les adresses de saut.  
+DEFWORD "LOOP",4,F_IMMED,LOOP ; ( -- )
+    .word COMPILEQ,COMPILECFA,DOLOOP,FIXLOOP,EXIT
+    
+; compile execution de +LOOP
+; résout toutes les adressess de saut.    
+DEFWORD "+LOOP",5,F_IMMED,PLUSLOOP ; ( -- )
+    .word COMPILEQ,COMPILECFA,DOPLOOP,FIXLOOP,EXIT
     
 ; compile le début d'une boucle    
 DEFWORD "BEGIN",5,F_IMMED,BEGIN ; ( -- a )
@@ -1464,11 +1538,6 @@ DEFWORD "WHILE",5,F_IMMED,WHILE ;  ( a -- slot a)
 DEFWORD "REPEAT",6,F_IMMED,REPEAT ; ( slot a -- )
     .word COMPILEQ,COMPILECFA,BRANCH,BACKJUMP,FOREJUMP,EXIT
 
-;compile LEAVE
-DEFWORD "LEAVE",5,F_IMMED,LEAVE ; ( -- slot )
-    .word COMPILEQ,COMILECFA,UNLOOP
-    .word COMPILECFA,BRANCH,MARKSLOT,EXIT  ; ne marche pas si à l'intérieur d'un IF THEN
-    
 ;marque le début d'une structure CASE ENDCASE
 DEFWORD "CASE",4,F_IMMED,CASE ; ( -- case-sys )
     .word COMPILEQ,LIT,0,EXIT ; marque la fin de la liste des fixup
@@ -1502,6 +1571,16 @@ DEFWORD ":",1,,COLON ; ( name --  )
     .word CREATE ; ( -- )
     .word RBRACKET,COMPILECFA,ENTER,EXIT
 
+; création d'une variable
+DEFWORD "VARIABLE",8,,VARIABLE ; ()
+    .word CREATE,RBRACKET,COMPILECFA,DOVAR,LIT,0,COMMA,SEMICOLON,EXIT
+
+; création d'une constante
+DEFWORD "CONSTANT",8,,CONSTANT ; ()
+    .word CREATE,RBRACKET,COMPILECFA,DOCONST,COMMA,SEMICOLON,EXIT
+    
+   
+    
 ; termine une définition débutée par ":"
 DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- ) 
     .word COMPILEQ

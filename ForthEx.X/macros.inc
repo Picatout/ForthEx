@@ -82,10 +82,10 @@
 .equ I, W9    ; compteur de boucle    
 .equ LIMIT,W8 ; limite des boucles
     
-    
 .equ CELL_SIZE, 2  ; 2 octets
 .equ DSTK_SIZE, 32*CELL_SIZE  ; dimension pile arguments
 .equ RSTK_SIZE, 64*CELL_SIZE  ; dimension pile des retours
+.equ CSTK_SIZE, 32*CELL_SIZE  ; dimension pile de contrôle	    
 .equ RSTK_GUARD, 24 ; réserve 16 octets pour les interrupts et exceptions    
 .equ TIB_SIZE, 80   ; Terminal Input Buffer,  80 octets
 .equ PAD_SIZE, 80   ; scratch pad, 80 octets
@@ -228,8 +228,8 @@ code_\label :
 .endm
     
 	
-; macro utilisée pour créer des variables
-.macro DEFVAR name, namelen, flags=0, label
+; macro utilisée pour créer des variables utilisateur
+.macro DEFUSER name, namelen, flags=0, label
 	HEADER "\name",\namelen,\flags,\label
         .word DOUSER
 ;pfa:  paramètres
@@ -237,7 +237,7 @@ code_\label :
 .endm
 
 	
-; macro utilisée pour créer des constantes
+; macro utilisée pour créer des constantes système
 .macro DEFCONST name, namelen, flags=0, label, value
 	DEFCODE "\name",\namelen,\flags,\label
 	DPUSH

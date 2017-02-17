@@ -1,3 +1,11 @@
+2017-02-16
+===========
+continuation du travail sur LEAVE
+LEAVE complété et testé.
+CONSTANT, VARIABLE complété et testé
+modification à ABORT pour annuler les effet d'une compilation en cours
+ajout du mot EMPTY qui vérifie si le dictionnaire utilisateur est vide.
+
 2017-02-15
 ===========
 testé IF ELSE THEN
