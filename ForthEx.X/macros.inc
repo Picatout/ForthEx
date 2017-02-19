@@ -193,7 +193,7 @@ lfa_\label :
 ;macro utilisée pour créer les entête des mots de haut niveaux.
 .macro DEFWORD name, namelen, flags=0, label
 	HEADER "\name",\namelen,\flags,\label
-	.word ENTER
+	.word ENTER  ; cfa
 	;pfa:  liste des paramètres
 .endm
 

@@ -1,3 +1,9 @@
+2017-02-18
+===========
+modification au compilateur suppression de NEWEST
+écrire et tester DOES> <BUILDS XJUMP (DOES>)
+
+
 2017-02-16
 ===========
 continuation du travail sur LEAVE

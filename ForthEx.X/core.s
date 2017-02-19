@@ -64,6 +64,9 @@ _TICKSOURCE: .space 2
 ; identifiant de la source: 0->interactif, -1, fichier
  .global _CNTSOURCE
 _CNTSOURCE: .space 2
+; début data
+ .global _DP0
+_DP0: .space 2 
 ; pointeur data 
  .global _DP
 _DP: .space 2 
@@ -91,8 +94,6 @@ _SYSLATEST: .space 2
 ; NFA dernière entrée dans le dictionnaire utilisateur
  .global _LATEST
 _LATEST: .space 2 
- .global _NEWEST
-_NEWEST: .space 2
  
  
 ; dictionnaire utilisateur dans la RAM 
@@ -119,13 +120,14 @@ ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
     mov WP,IP
     NEXT
 
+    
     .global DOUSER
 DOUSER: ; empile pointeur sur variable utilisateur
     DPUSH
     mov [WP++],W0
     add W0,UP,T
     NEXT
-    
+
     .global DOVAR
 DOVAR:
     DPUSH
@@ -253,17 +255,14 @@ DEFCODE "REBOOT",6,,REBOOT ; ( -- )  démarrage à froid
 DEFCODE "EXECUTE",7,,EXECUTE ; ( i*x cfa -- j*x ) 6.1.1370 exécute le code à l'adresse *cfa
     mov T, WP ; CFA
     DPOP
-    mov [WP++],W0  ; code address
+    mov [WP++],W0  ; code address, WP=PFA
     goto W0
 
-DEFCODE "@EXECUTE",8,,FEXEC   ; ( *addr -- ) exécute le code à l'adresse *T
+;exécute le code machine à l'adresse *addr
+DEFCODE "@EXECUTE",8,,FEXEC   ; ( *addr -- )
     mov [T],W0
     DPOP
-    mov #DATA_BASE,W1
-    cp W0,W1
-    bra ltu, 1f
     goto W0
-1:  NEXT    
     
 DEFCODE "@",1,,FETCH ; ( addr -- n )
     mov [T],T
@@ -897,11 +896,11 @@ DEFWORD "PACK$",5,,PACKS ; ( src u dest -- a-dest )  copi src de longeur u vers 
 ;  variables système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFUSER "STATE",5,,STATE   ; état compile=1/interprète=0
+DEFUSER "DP0",3,,DP0       ; début RAM data    
 DEFUSER "DP",2,,DP         ; pointeur fin dictionnaire
 DEFUSER "BASE",4,,BASE     ; base numérique
 DEFUSER "SYSLATEST",9,,SYSLATEST ; tête du dictionnaire en FLASH    
 DEFUSER "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
-DEFUSER "NEWEST",6,,NEWEST ; variable contenant le NFA du mot en cours de définition    
 DEFUSER "R0",2,,R0   ; base pile retour
 DEFUSER "S0",2,,S0   ; base pile arguments   
 DEFUSER "PAD",3,,PAD       ; tampon de travail
@@ -1238,7 +1237,7 @@ DEFWORD "OK",2,,OK  ; ( -- )
 ; si compilation en cours annulle les effets de celle-ci  
 DEFWORD "ABORT",5,,ABORT
     .word STATE,FETCH,ZBRANCH,1f-$
-    .word NEWEST,FETCH,NFATOLFA,DUP,FETCH,LATEST,STORE,DP,STORE
+    .word LATEST,FETCH,NFATOLFA,DUP,FETCH,LATEST,STORE,DP,STORE
 1:  .word S0,FETCH,SPSTORE,QUIT
     
   
@@ -1319,7 +1318,7 @@ DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
 ; vérifie si le dictionnaire utilisateur
 ; est vide  
 DEFWORD "EMPTY",5,,EMPTY ; ( -- f)
-    .word LATEST,FETCH,SYSLATEST,FETCH,ZEROEQ,EXIT 
+    .word DP0,FETCH,HERE,EQUAL,EXIT 
     
 ; met à 1 l'indicateur F_IMMED
 ; sur le dernier mot défini.    
@@ -1408,18 +1407,6 @@ DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
     .word COMPILEQ,DUP,HERE,SWAP,MINUS,SWAP,STORE,EXIT
     
 
-    
-;cré une nouvelle entête dans le dictionnaire  
-DEFWORD "CREATE",6,,CREATE ; ( -- )
-    .word LATEST,FETCH,COMMA,HERE,NEWEST,STORE
-    .word BL,WORD,DUP,CFETCH,ZEROEQ,ABORTQ
-    .byte  12
-    .ascii "missing name"
-    .align 2
-    .word DUP,CFETCH,ONEPLUS,ALLOT,ALIGN
-    .word DUP,CFETCH,HIDDEN,OR,SWAP,CSTORE
-    .word EXIT    
-  
 ; passe en mode interprétation
 DEFWORD "[",1,F_IMMED,LBRACKET ; ( -- )
     .word LIT,0,STATE,STORE
@@ -1473,7 +1460,7 @@ DEFWORD ".\"",2,F_IMMED,DOTQUOTE ; ( -- )
     
     
 DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
-    .word NEWEST,FETCH,NFATOCFA,COMMA,EXIT 
+    .word LATEST,FETCH,NFATOCFA,COMMA,EXIT 
 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  mots contrôlant le flux
@@ -1561,6 +1548,21 @@ DEFWORD "ENDCASE",7,F_IMMED,ENDCASE ; ( case-sys -- )
   
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+DEFWORD ",EXIT",5,F_IMMED,CEXIT ; ( -- )
+    .word COMPILECFA,EXIT,EXIT
+    
+;cré une nouvelle entête dans le dictionnaire  
+DEFWORD "CREATE",6,,CREATE ; ( -- )
+    .word LATEST,DUP,FETCH,COMMA,HERE,SWAP,STORE
+    .word BL,WORD,CFETCH,DUP,ZEROEQ,ABORTQ
+    .byte  12
+    .ascii "missing name"
+    .align 2
+    .word ONEPLUS,ALLOT,ALIGN
+    .word HIDE
+    .word EXIT    
+  
     
 ; crée une nouvelle définition dans le dictionnaire    
 DEFWORD ":",1,,COLON ; ( name --  )
@@ -1571,13 +1573,41 @@ DEFWORD ":",1,,COLON ; ( name --  )
     .word CREATE ; ( -- )
     .word RBRACKET,COMPILECFA,ENTER,EXIT
 
+    
+; crée une nouvelle définition pour un mot compilant    
+DEFWORD "<BUILDS",7,,BUILDS ; name 
+    .word COLON
+    .word COMPILECFA,XJUMP,HERE,CELLPLUS,COMMA,EXIT 
+
+;saut vers adresse absolue
+; IP pointe sur l'adresse destination
+; retourne le PFA sur la pile    
+HEADLESS "XJUMP"  ; ( -- pfa )
+    mov IP,WP
+    mov [WP++],IP
+    DPUSH
+    mov WP,T  ; PFA
+    NEXT
+    
+; runtime DOES    
+DEFWORD "(DOES>)",7,,DODOES ; ( -- pfa )
+    .word RFROM,DUP,CELLPLUS,TOR,FETCH
+    .word LATEST,FETCH,NFATOCFA,LIT,4,PLUS,STORE,EXIT
+    
+; ajoute le runtime (DOES>) à la fin du <BUILDS
+DEFWORD "DOES>",5,F_IMMED,COMMADOES  ; ( -- )
+    .word COMPILECFA,DODOES,HERE,LIT,CELL_SIZE,ALLOT
+    .word COMPILECFA,SEMICOLON
+    .word HERE,SWAP,STORE
+    .word EXIT
+    
 ; création d'une variable
 DEFWORD "VARIABLE",8,,VARIABLE ; ()
-    .word CREATE,RBRACKET,COMPILECFA,DOVAR,LIT,0,COMMA,SEMICOLON,EXIT
+    .word CREATE,RBRACKET,LIT,DOVAR,COMMA,LIT,0,COMMA,SEMICOLON,EXIT
 
 ; création d'une constante
 DEFWORD "CONSTANT",8,,CONSTANT ; ()
-    .word CREATE,RBRACKET,COMPILECFA,DOCONST,COMMA,SEMICOLON,EXIT
+    .word CREATE,RBRACKET,LIT,DOCONST,COMMA,COMMA,SEMICOLON,EXIT
     
    
     
@@ -1585,8 +1615,7 @@ DEFWORD "CONSTANT",8,,CONSTANT ; ()
 DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- ) 
     .word COMPILEQ
     .word COMPILECFA,EXIT
-    .word NEWEST,DUP,FETCH,DUP,CFETCH,HIDDEN,INVERT,AND,SWAP,CSTORE
-    .word FETCH,LATEST,STORE
+    .word REVEAL
     .word LBRACKET,EXIT
     
     
