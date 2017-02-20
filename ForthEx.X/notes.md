@@ -1,3 +1,11 @@
+2017-02-19
+===========
+ajout mot M*
+retravaillé ?NUMBER pour inclure modificateur de base et entrée nombre double précision
+ajout mot ?DOUBLE
+nettoyage mots redondants.
+
+
 2017-02-18
 ===========
 modification au compilateur suppression de NEWEST
