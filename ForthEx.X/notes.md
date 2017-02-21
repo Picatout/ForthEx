@@ -1,3 +1,17 @@
+2017-02-20
+==========
+Retravailler mot ?NUMBER pour qu'il soit conforme à la EBNF suivante
+ENTIER ::= SIMPLE | DOUBLE
+SIMPLE ::= [PREFIXE][SIGNE]{DIGIT}+
+DOUBLE ::= [PREFIXE][SIGNE]{DIGIT+['.'|',']}+
+PREFIXE ::= '$'|'#'|'%'
+SIGNE ::= '-'
+DIGIT ::= '0'|'1'...base-1
+'-' ::= nombre négatif
+'$' ::= base hexadécimale
+'#' ::= base décimale
+'%' ::= base binaire
+
 2017-02-19
 ===========
 ajout mot M*

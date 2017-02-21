@@ -113,6 +113,17 @@
     inc \reg, \reg
 .endm
 
+; set le registre DSRPAG pour l'accès à l'EDS
+.macro SET_EDS
+    mov DSRPAG,W7
+    movpag #1,DSRPAG
+.endm
+    
+; remet DSRPAG à sa valeur initiale
+.macro RESET_EDS 
+    mov W7,DSRPAG   
+.endm
+    
 ; empile le registre T
 ; sur la pile des arguments
 .macro DPUSH  

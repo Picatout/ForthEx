@@ -99,7 +99,7 @@ _LATEST: .space 2
 ; dictionnaire utilisateur dans la RAM 
 .section .user_dict.bss bss address(DATA_BASE)
 .global _user_dict 
-_user_dict: .space RAM_SIZE-DATA_BASE
+_user_dict: .space EDS_BASE-DATA_BASE
     
 ; constantes dans la mémoire flash
 .section .ver_str.const psv       
@@ -349,9 +349,9 @@ DEFCODE "2DROP",5,,TWODROP ; ( n1 n2 -- )
     NEXT
     
 DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
-    mov T, W0
-    mov [DSP], T
-    mov W0, [DSP]
+    mov [DSP],W0
+    exch W0,T
+    mov W0,[DSP]
     NEXT
 
 DEFCODE "2SWAP",5,,TWOSWAP ; ( n1 n2 n3 n4 -- n3 n4 n1 n2 )
@@ -374,7 +374,7 @@ DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
     NEXT
 
 DEFCODE "-ROT",4,,NROT ; ( n1 n2 n3 -- n3 n1 n2 )
-    mov T, W0
+    mov T, W0    
     mov [DSP],T
     mov [DSP-2],W1
     mov W1,[DSP]
@@ -438,8 +438,7 @@ DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 -- n2 n1 n2 )
     mov W0,[++DSP] ; n2 n1 n2
     NEXT
 
-; nombre d'élément sur la pile data avant l'exécution
-; de DEPTH    
+; nombre d'élément sur la pile data
 DEFCODE "DEPTH",5,,DEPTH ; ( -- +n1 )
     mov _S0,W0
     sub DSP,W0,W0
@@ -517,7 +516,7 @@ DEFCODE "2*",2,,TWOSTAR  ; ( n -- n ) 2*n
     NEXT
     
 DEFCODE "2/",2,,TWOSLASH ; ( n -- n ) n/2
-    lsr T,T
+    asr T,T
     NEXT
     
 DEFCODE "LSHIFT",6,,LSHIFT ; ( x1 u -- x2 ) x2=x1<<u    
@@ -557,7 +556,7 @@ DEFCODE "*",1,,STAR ; ( n1 n2 -- n1*n2)
     NEXT
 
 DEFCODE "M*",2,,MSTAR ; ( n1 n2 -- d )
-    mul.ss W0,[DSP],W0
+    mul.ss T,[DSP],W0
     mov W0,[DSP]
     mov W1,T
     NEXT
@@ -577,10 +576,10 @@ DEFWORD "UD*",3,,UDSTAR  ; ( ud1 d2 -- ud3 ) 32*16->32
     .word SWAP,RFROM,UMSTAR,ROT,PLUS,EXIT
     
 DEFCODE "/",1,,DIVIDE ; ( n1 n2 -- n1/n2 )
-    mov [DSP--],W2
+    mov [DSP--],W0
     repeat #17
-    div.s W2,T
-    mov W0, T
+    div.s W0,T
+    mov W0,T
     NEXT
 
 DEFCODE "*/",2,,STARSLASH  ; ( n1 n2 n3 -- n4 ) n1*n2/n3, n4 quotient
@@ -603,9 +602,9 @@ DEFCODE "*/MOD",5,,STARSLASHMOD ; ( n1 n2 n3 -- n4 n5 ) n1*n2/n3, n4 reste, n5 q
     NEXT
     
 DEFCODE "/MOD",4,,DIVMOD ; ( n1 n2 -- r q )
-    mov [DSP],W2
+    mov [DSP],W0
     repeat #17
-    div.sd W2,T
+    div.sd W0,T
     mov W0,T     ; quotient
     mov W1,[DSP] ; reste
     NEXT
@@ -626,7 +625,7 @@ DEFCODE "MAX",3,,MAX ; ( n1 n2 -- max(n1,n2)
     exch T,W0
 1:  NEXT    
     
-DEFCODE "MIN",3,,MIN ; ( n1 n2 -- min(n1,n2)
+DEFCODE "MIN",3,,MIN ; ( n1 n2 -- min(n1,n2) )
     mov [DSP--],W0
     cp W0,T
     bra ge, 1f
@@ -775,31 +774,37 @@ DEFCODE "U>",2,,UGREATER ; ( u1 u2 -- f) f=u1>u2
     mov W0,T
     NEXT
     
-    
+;empile la taille en octets d'une cellule.    
 DEFCODE "CELL",4,,CELL ; ( -- CELL_SIZE )
     DPUSH
     mov #CELL_SIZE, T
     NEXT
-    
+
+; incrémente T de la taille d'une cellule en octets    
 DEFCODE "CELL+",5,,CELLPLUS ; ( addr -- addr+CELL_SIZE )
     add #CELL_SIZE, T
     NEXT
-    
+
+; retourne le nombre d'octets occupées par n cellules    
 DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
     mul.uu T,#CELL_SIZE,W0
     mov W0,T
     NEXT
 
-;aligne DP sur adresse paire    
+;aligne DP sur adresse paire supérieure.
+; suppose un adressage par octet    
 DEFWORD "ALIGN",5,,ALIGN ; ( -- )
     .word HERE,DUP,LIT,1,AND,PLUS,DP,STORE,EXIT
     
-    
-DEFCODE "ALIGNED",7,,ALIGNED ; ( addr -- a-addr ) aligne addresse sur nombre pair.
+; aligne la valeur de T sur une valeur paire supérieure.    
+; suppose un adressage par octet    
+DEFCODE "ALIGNED",7,,ALIGNED ; ( addr -- a-addr )
     btsc T,#0
     inc T,T
     NEXT
-    
+
+; vérifie que T est dans l'intervalle ASCII 32..127
+; sinon remplace c par '_'    
 DEFCODE ">CHAR",5,,TOCHAR ; ( c -- c)
     and #127,T
     cp T,#32
@@ -807,11 +812,11 @@ DEFCODE ">CHAR",5,,TOCHAR ; ( c -- c)
     mov #'_',T
 1:  NEXT
  
-    
+; empile la valeur de DP    
 DEFWORD "HERE",4,,HERE
     .word DP,FETCH,EXIT
 
-; copie un bloc mémoire    
+; copie un bloc mémoire (mots de 16 bits)  
 DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
     mov T, W0 ; compte
     DPOP
@@ -842,7 +847,7 @@ DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
 1:  NEXT
 
 ; recherche du caractère 'c' dans le bloc
-; mémoire 'c-addr' de dimension 'u'
+; mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
 ; retourne la position de 'c' et
 ; le nombre de caractères qui suit dans le bloc
 DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
@@ -860,7 +865,7 @@ DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
     NEXT
 
     
-; initialise un bloc mémoire
+; initialise un bloc mémoire (mots de 16 bits)
 DEFCODE "FILL",4,,FILL ; ( addr u n -- )  for{0:(u-1)}-> m[T++]=n
     mov [DSP--],W0 ; n
     mov [DSP--],W1 ; u
@@ -901,7 +906,7 @@ DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )
  
 ; copie une chaine de caractère
 ; sur une adresse alignée
-DEFWORD "PACK$",5,,PACKS ; ( src u dest -- a-dest )  copi src de longeur u vers aligned(dest)
+DEFWORD "PACK$",5,,PACKS ; ( src u dest -- a-dest )  copie src de longeur u vers aligned(dest)
     .word ALIGNED,DUP,TOR  ; src u a-dest R: a-dest
     .word OVER,DUP,LIT,0   ; src u a-dest u u 0
     .word LIT,2,UMSLASHMOD,DROP ; src u a-dest u r
@@ -967,7 +972,7 @@ DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
 ;vérifie si le caractère est un digit
 ; si valide retourne la valeur du digit et -1
 ; si invalide retourne x 0
-DEFWORD "DIGIT?",6,,DIGITQ ; ( c -- x 0 | n -1 )
+DEFWORD "?DIGIT",6,,QDIGIT ; ( c -- x 0 | n -1 )
     .word DUP,LIT,96,UGREATER,ZBRANCH,1f-$
     .word LIT,32,MINUS ; lettre minuscule? convertie en minuscule
 1:  .word DUP,LIT,'9',UGREATER,ZBRANCH,3f-$
@@ -977,6 +982,18 @@ DEFWORD "DIGIT?",6,,DIGITQ ; ( c -- x 0 | n -1 )
 3:  .word LIT,'0',MINUS
     .word DUP,BASE,FETCH,ULESS,EXIT
   
+;vérifie si le caractère qui a mis fin à >NUMBER
+; est {'.'|','}. Si c'est le cas il s'agit d'un
+; nombre double précision. saute le caractère
+; et retourne -1. Dans le cas contraire retourne 0  
+DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
+    .word OVER,CFETCH,LIT,'.',EQUAL,ZBRANCH,2f-$
+1:  .word LIT,1,SLASHSTRING,LIT,-1,BRANCH,9f-$
+2:  .word OVER,CFETCH,LIT,',',EQUAL,ZBRANCH,8f-$
+    .word BRANCH,1b-$
+8:  .word LIT,0
+9:  .word EXIT  
+  
 ;converti la chaîne en nombre
 ;en utilisant la valeur de BASE
 ;la conversion s'arrête au premier
@@ -984,14 +1001,21 @@ DEFWORD "DIGIT?",6,,DIGITQ ; ( c -- x 0 | n -1 )
 ; <c-addr1 u1> spécifie le début et le nombre
 ; de caractères de la chaîne    
 DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
-1:   .word DUP,ZBRANCH,3f-$
-     .word OVER,CFETCH,DIGITQ  ; ud1 c-addr u1 n|x f
-     .word ZEROEQ,ZBRANCH,2f-$
-     .word DROP,EXIT
-2:   .word TOR,TWOSWAP,BASE,FETCH,UDSTAR
+1:   .word LIT,0,TOR ; indique si le dernier caractère était un digit
+2:   .word DUP,ZBRANCH,7f-$
+     .word OVER,CFETCH,QDIGIT  ; ud1 c-addr u1 n|x f
+     .word TBRANCH,4f-$
+     .word RFROM,ZBRANCH,8f-$
+     .word DROP,QDOUBLE,ZBRANCH,9f-$
+     .word RFROM,RFROM,LIT,2,OR,TOR,TOR ; on change le flag du signe pour ajouter le flag double
+     .word BRANCH,1b-$
+4:   .word RFROM,DROP,LIT,-1,TOR ; dernier caractère était un digit
+     .word TOR,TWOSWAP,BASE,FETCH,UDSTAR
      .word RFROM,MPLUS,TWOSWAP
-     .word LIT,1,SLASHSTRING,BRANCH,1b-$
-3:   .word EXIT
+     .word LIT,1,SLASHSTRING,BRANCH,2b-$
+7:   .word RFROM
+8:   .word DROP
+9:   .word EXIT
    
 ;vérifie s'il y a un signe '-'
 ; à la première postion de la chaîne spécifiée par <c-addr u>
@@ -1016,18 +1040,6 @@ DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
 8:  .word SWAP,ONEPLUS,SWAP,ONEMINUS    
 9:  .word EXIT
 
-;vérifie si le caractère qui a mis fin à >NUMBER
-; est {'.'|','}. Si c'est le cas il s'agit d'un
-; nombre double précision. saute le caractère
-; et retourne -1. Dans le cas contraire retourne 0  
-DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
-    .word OVER,CFETCH,LIT,'.',EQUAL,ZBRANCH,2f-$
-1:  .word LIT,1,SLASHSTRING,LIT,-1,BRANCH,9f-$
-2:  .word OVER,CFETCH,LIT,',',EQUAL,ZBRANCH,8f-$
-    .word BRANCH,1b-$
-8:  .word LIT,0
-9:  .word EXIT  
-  
 ; conversion d'une chaîne en nombre
 ; c-addr indique le début de la chaîne
 ; utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
@@ -1038,13 +1050,10 @@ DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
 DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
     .word BASE,FETCH,TOR ; sauvegarde la valeur de BASE 
     .word DUP,LIT,0,DUP,ROT,COUNT,QBASE  ; c-addr 0 0 c-addr' u'
-    .word QSIGN,TOR  ; c-addr 0 0 c-addr' u'
+    .word QSIGN,TOR  ; c-addr 0 0 c-addr' u' R: signFlag
 4:  .word TONUMBER ; c-addr n1 n2 c-addr' u'
-    .word QDUP,ZBRANCH,1f-$ 
-    .word QDOUBLE,ZBRANCH,5f-$
-    .word RFROM,LIT,2,OR,TOR,BRANCH,4b-$
-5:  .word TWODROP,TWODROP,RFROM,DROP,LIT,0 
-    .word BRANCH,8f-$
+    .word ZBRANCH,1f-$ 
+    .word RFROM,TWODROP,TWODROP,LIT,0,BRANCH,8f-$
 1:  .word DROP,ROT,DROP
     .word RFETCH,ODD,ZBRANCH,2f-$
     .word DNEGATE

@@ -46,7 +46,7 @@ cursor_dly: .space 2 ; contrôle vitesse clignotement
 cursor_sema: .space 1 ; sémaphore 
 fcursor: .space 1 ; indicateur booléens curseur texte
  
-.align 2 
+.section .tvout.buffer.bss bss ;address(RAM_BASE+RAM_SIZE-TV_BUFFER_SIZE)
 .global _video_buffer
 _video_buffer: .space TV_BUFFER_SIZE
  
