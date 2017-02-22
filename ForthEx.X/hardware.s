@@ -93,6 +93,9 @@ __INT1Interrupt:
 .global __reset    
 __reset: 
     clr ANSELA    ; désactivation entrées analogiques
+    ; priorité maximale pour _INT1Interrupt
+    mov #7, W0
+    ior IPC5
     mov #rstack, RSP
     mov #pstack, DSP
     mov DSP, W0
@@ -108,7 +111,7 @@ __reset:
 _cold:
     .word HARDWARE_INIT,VARS_INIT
     .word VERSION,COUNT,TYPE,CR 
-    .word QUIT ; cette fonction ne quitte jamais
+    .word QUIT ; boucle de l'interpréteur
 
 ; initialisation matérielle    
 HEADLESS HARDWARE_INIT, HWORD
@@ -184,6 +187,7 @@ HEADLESS VARS_INIT
     mov #TIB_SIZE,W0
     mov W0,_CNTSOURCE
     mov #DATA_BASE, W0
+    mov W0,_DP0
     mov W0,_DP
     mov #_USER_VARS,UP
     movpag #psvpage(_sys_latest),DSRPAG
@@ -295,6 +299,11 @@ DEFCODE "SRAND",5,,SRAND  ; ( -- )
     mov W0, seed
     mov W1, seed+2
     NEXT
+   
+    
+; imprime la quantité de RAM disponible    
+DEFWORD "FREE",4,,FREE    
+    .word LIT,EDS_BASE,HERE,MINUS,DOT,EXIT
     
     
     

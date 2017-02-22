@@ -1,3 +1,12 @@
+2018-02-21
+==========
+Déplacer la mémoire viédo à la fin de la mémoire RAM.
+Rendre le dictionnaire insensible à la casse en convertissants tous les noms en majuscules.
+Suppression du mot code INFLOOP, peut-être créer dans l'interpréteur.
+Compléter définition de POSTPONE.
+Changer le nom des runtime de s" et ."
+cacher certains runtime
+
 2017-02-20
 ==========
 Retravailler mot ?NUMBER pour qu'il soit conforme à la EBNF suivante

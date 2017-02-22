@@ -46,7 +46,7 @@ cursor_dly: .space 2 ; contrôle vitesse clignotement
 cursor_sema: .space 1 ; sémaphore 
 fcursor: .space 1 ; indicateur booléens curseur texte
  
-.section .tvout.buffer.bss bss ;address(RAM_BASE+RAM_SIZE-TV_BUFFER_SIZE)
+.section .tvout.buffer.bss bss address(RAM_BASE+RAM_SIZE-TV_BUFFER_SIZE)
 .global _video_buffer
 _video_buffer: .space TV_BUFFER_SIZE
  
@@ -141,7 +141,6 @@ __OC2Interrupt:
     push.D pVIDBUF
     push fINVERT
     push DSRPAG
-    movpag #edspage(_font),DSRPAG
     mov line_count, W1
     sub #TOPLINE, W1
     and  W1,#7,CH_ROW
@@ -160,6 +159,7 @@ __OC2Interrupt:
     bset VIDEO_SPISTAT, #SPIEN
 1:  cp0 CH_COUNT
     bra z, 3f
+    movpag #1,DSRPAG
     mov.b [pVIDBUF++], W0
     clr fINVERT
     btsc W0,#7
@@ -168,6 +168,7 @@ __OC2Interrupt:
     sl W0, #3, W0
     add pFONT,W0,W1
     add W1,CH_ROW, W1
+    movpag #edspage(_font),DSRPAG
     mov.b [W1],W0
     btsc fINVERT,#7
     com W0,W0
@@ -200,6 +201,7 @@ cursor_blink:
     mov W0,cursor_dly
     btg.b fcursor,#CURSOR_INV
 toggle_char:
+    SET_EDS
     cursor_incr_sema
     mov.b #CPL, W0
     mul.b ypos
@@ -210,6 +212,7 @@ toggle_char:
     add W0,W1,W1
     btg.b [W1],#7
     cursor_decr_sema
+    RESET_EDS
     return
 
 cursor_enable:
@@ -232,6 +235,7 @@ cursor_disable:
 
 .global scroll_up
 scroll_up:
+    SET_EDS
     cursor_incr_sema
     cursor_sync
     mov #_video_buffer, W1 ;destination
@@ -247,10 +251,12 @@ scroll_up:
     repeat #CPL/2-1
     mov W0, [W1++]
     cursor_decr_sema
+    RESET_EDS
     return
     
 .global scroll_down    
 scroll_down:
+    SET_EDS
     cursor_incr_sema
     cursor_sync
     mov #_video_buffer, W1
@@ -264,6 +270,7 @@ scroll_down:
     repeat #CPL/2-1
     mov W0,[--W2]
     cursor_decr_sema
+    RESET_EDS
     return
  
     
@@ -362,6 +369,7 @@ DEFCODE "CURENBL",7,,CURENBL  ; ( f -- )  T=active, F=désactive
 ; nettoie écran
 ;;;;;;;;;;;;;;;;;;
 DEFCODE "CLS",3,,CLS   ; ( -- )
+    SET_EDS
     cursor_incr_sema
     mov #0x2020, W0
     mov #_video_buffer, W1
@@ -370,6 +378,7 @@ DEFCODE "CLS",3,,CLS   ; ( -- )
     clr xpos  ; xpos=0, ypos=0
     bclr.b fcursor,#CURSOR_INV
     cursor_decr_sema
+    RESET_EDS
     NEXT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -550,12 +559,10 @@ DEFCODE "SPACE",5,,SPACE ; ( -- )
 ; imprime n espaces
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "SPACES",6,,SPACES ; ( n -- )
-    .word DUP,LIT,0,GREATER,TBRANCH,spaces1-$
+    .word DUP,LIT,0,GREATER,TBRANCH,1f-$
     .word DROP,EXIT
-spaces1:    
-    .word LIT,0,DODO
-spaces0:
-    .word SPACE,DOLOOP,spaces0-$
+1:  .word LIT,0,DODO
+2:  .word SPACE,DOLOOP,2b-$
     .word EXIT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -584,14 +591,12 @@ DEFCODE "CLRLN",5,,CLRLN   ; ( n -- )
 ; caractère à l'écran
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
-    .word DUP,TBRANCH,type1-$
+    .word DUP,TBRANCH,1f-$
     .word TWODROP, EXIT
-    type1:    
-    .word LIT, 0, DODO
-    type0:
-    .word  DUP,CFETCH,QDUP,ZBRANCH,1f-$,EMIT,ONEPLUS
-    .word DOLOOP,type0-$,BRANCH,9f-$
-1:  .word UNLOOP    
+1:  .word LIT, 0, DODO
+2:  .word  DUP,CFETCH,QDUP,ZBRANCH,8f-$,EMIT,ONEPLUS
+    .word DOLOOP,2b-$,BRANCH,9f-$
+8:  .word UNLOOP    
 9:  .word DROP, EXIT     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -689,8 +694,8 @@ DEFWORD "?",1,,QUESTION ; ( addr -- )
 DEFWORD "C?",2,,CQUESTION ; ( c-addr -- )    
     .word CFETCH,DOT,EXIT
   
-  
-DEFWORD "CHARS",5,,CHARS ; ( +n c -- ) imprime n fois le caractère c
+; imprime n fois le caractère c  
+DEFWORD "CHARS",5,,CHARS ; ( +n c -- )
     .word SWAP,LIT,0,DODO
 1:  .word DUP,EMIT,DOLOOP,1b-$
     .word DROP,EXIT

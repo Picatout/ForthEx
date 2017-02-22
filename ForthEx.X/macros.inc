@@ -89,7 +89,7 @@
 .equ RSTK_GUARD, 24 ; réserve 16 octets pour les interrupts et exceptions    
 .equ TIB_SIZE, 80   ; Terminal Input Buffer,  80 octets
 .equ PAD_SIZE, 80   ; scratch pad, 80 octets
-.equ DATA_BASE, 0x1900 ; début espace utilisateur
+.equ DATA_BASE, 0x1300 ; début espace utilisateur
     
 ;;;;;;;;;;;;    
 ; macros
@@ -115,13 +115,13 @@
 
 ; set le registre DSRPAG pour l'accès à l'EDS
 .macro SET_EDS
-    mov DSRPAG,W7
+    push DSRPAG
     movpag #1,DSRPAG
 .endm
     
 ; remet DSRPAG à sa valeur initiale
 .macro RESET_EDS 
-    mov W7,DSRPAG   
+    pop DSRPAG   
 .endm
     
 ; empile le registre T

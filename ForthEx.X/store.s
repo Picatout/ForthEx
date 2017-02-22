@@ -46,7 +46,7 @@ __CNInterrupt:
  ;;;;;;;;;;;;;;;;;;;;;;;
 ; initialisation SPI
 ; interface SPIRAM et
-; SPIEERPOM 
+; SPIEERPOM et SDCARD 
 ;;;;;;;;;;;;;;;;;;;;;;; 
 ;.global store_init 
 ;store_init:

@@ -728,7 +728,7 @@ DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
  1: 
     mov W0,T
     NEXT
-    
+
 DEFCODE "<>",2,,NOTEQ ; ( n1 n2 -- f ) f = n1<>n2
     clr W0
     cp T, [DSP--]
@@ -1077,20 +1077,20 @@ DEFWORD "WORDS",5,,WORDS ; ( -- )
 3:  .word DROP,CR,EXIT
     
 ; convertie la chaîne comptée en majuscules
-DEFCODE "UPPER",5,,UPPER ; ( c-addr -- )
+DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
     mov T, W1
-    DPOP 
-    mov.b [W1++],W2
+    mov.b [W1],W2
 1:  cp0.b W2
     bra z, 3f
-    mov.b [W1++],W0
+    inc W1,W1
+    mov.b [W1],W0
     dec.b W2,W2
     cp.b W0, #'a'
     bra ltu, 1b
     cp.b W0,#'z'
     bra gtu, 1b
     sub.b #32,W0
-    mov.b W0,[W1-1]
+    mov.b W0,[W1]
     bra 1b
 3:  NEXT
 
@@ -1245,7 +1245,7 @@ DEFWORD "C,",2,,CCOMMA ; ( c -- )
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
         .word SRCSTORE,LIT,0,TOIN,STORE
 1:      .word BL,WORD,DUP,CFETCH,ZBRANCH,9f-$
-        .word FIND,QDUP,ZBRANCH,4f-$
+        .word UPPER,FIND,QDUP,ZBRANCH,4f-$
         .word ONEPLUS,STATE,FETCH,ZEROEQ,OR
         .word ZBRANCH,2f-$
         .word EXECUTE,BRANCH,1b-$
@@ -1275,16 +1275,15 @@ DEFWORD "ABORT",5,,ABORT
     .word LATEST,FETCH,NFATOLFA,DUP,FETCH,LATEST,STORE,DP,STORE
 1:  .word S0,FETCH,SPSTORE,QUIT
     
+;runtime de ABORT"
+DEFWORD "?ABORT",6,F_HIDDEN,QABORT ; ( i*x f  -- | i*x) ( R: j*x -- | j*x )
+    .word DOSTR,SWAP,ZBRANCH,9f-$
+    .word COUNT,TYPE,CR,ABORT
+9:  .word DROP,EXIT
   
-; si x1<>0 affiche message et appel ABORT
-DEFWORD "ABORT\"",6,,ABORTQ ; ( i*x x1 -- i*x )
-    .word ZBRANCH,1f-$
-    .word HERE,COUNT,TYPE,SPACE
-    .word RFETCH,DUP,CFETCH
-    .word SWAP,ONEPLUS,SWAP,TYPE,CR,ABORT
-1:  .word RFROM,DUP,CFETCH,PLUS,ONEPLUS,ALIGNED
-    .word TOR,EXIT  
-
+; compile le runtime de ?ABORT
+DEFWORD "ABORT\"",6,F_IMMED,ABORTQUOTE ; (  --  )
+    .word COMPILECFA,QABORT,STRCOMPILE,EXIT
     
 ; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT ; ( -- )
@@ -1385,14 +1384,9 @@ DEFWORD "ALLOT",5,,ALLOT ; ( +n -- )
 ; d'entrée et le recherche dans le dictionnaire
 ; l'opération avorte en cas d'erreur.    
 DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
-    .word BL,WORD,DUP,CFETCH,ZBRANCH,4f-$
-    .word FIND,ZBRANCH,5f-$
+    .word BL,WORD,DUP,CFETCH,ZEROEQ,QNAME
+    .word UPPER,FIND,ZBRANCH,5f-$
     .word BRANCH,9f-$
-4:  .word DROP,DOTQP
-    .byte 16
-    .ascii "(') name missing"
-    .align 2
-    .word CR,ABORT
 5:  .word COUNT,TYPE,SPACE,LIT,'?',EMIT,CR,ABORT    
 9:  .word EXIT
  
@@ -1407,39 +1401,30 @@ DEFWORD "[COMPILE]",9,F_IMMED,ICOMPILE ; ( x <cccc> -- )
 ;  les sauts sont des relatifs.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; certains mots ne peuvent-être utilisés
-; que par le compilateur
-DEFWORD "COMPILE?",8,F_IMMED,COMPILEQ ; ( -- )
-    .word STATE,FETCH,ZEROEQ,ABORTQ
-    .byte 17
-    .ascii "compile only word"
-    .align 2
-    .word EXIT
-
 ;empile la position actuelle de DP
 ; cette adresse sera la cible
 ; d'un branchement arrière    
 DEFWORD "<MARK",5,F_IMMED,MARKADDR ; ( -- a )
-   .word COMPILEQ,HERE, EXIT
+   .word QCOMPILE,HERE, EXIT
 
 ;compile l'adresse d'un branchement arrière
 ; complément de '<MARK'    
 ; le branchement est relatif à la position
 ; actuelle de DP    
 DEFWORD "<RESOLVE",8,F_IMMED,BACKJUMP ; ( a -- )    
-    .word COMPILEQ,HERE,MINUS,COMMA, EXIT
+    .word QCOMPILE,HERE,MINUS,COMMA, EXIT
     
 ;reserve un espace pour la cible d'un branchement avant qui
 ; sera résolu ultérieurement.    
 DEFWORD ">MARK"5,F_IMMED,MARKSLOT ; ( -- slot )
-    .word COMPILEQ,HERE,LIT,0,COMMA,EXIT
+    .word QCOMPILE,HERE,LIT,0,COMMA,EXIT
     
 ; compile l'adresse cible d'un branchement avant
 ; complément de '>MARK'    
 ; l'espace réservé pour la cible est indiquée
 ; au sommet de la pile
 DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
-    .word COMPILEQ,DUP,HERE,SWAP,MINUS,SWAP,STORE,EXIT
+    .word QCOMPILE,DUP,HERE,SWAP,MINUS,SWAP,STORE,EXIT
     
 
 ; passe en mode interprétation
@@ -1454,7 +1439,7 @@ DEFWORD "]",1,F_IMMED,RBRACKET ; ( -- )
 
 ;compile le mot suivant dans le flux
 DEFWORD "[COMPILE]",9,F_IMMED,BRCOMPILE ; ( <cccc> -- )
-  .word COMPILEQ,TICK,COMMA,EXIT
+  .word QCOMPILE,TICK,COMMA,EXIT
   
 ;compile un cfa fourni en argument
 DEFWORD "COMPILE",7,F_IMMED,COMPILECFA  ; ( -- )
@@ -1462,11 +1447,14 @@ DEFWORD "COMPILE",7,F_IMMED,COMPILECFA  ; ( -- )
 
 ;diffère la compilation du mot qui suis dans le flux
 DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
-    .word BL,WORD,FIND,DUP,ZEROEQ,ZBRANCH,2f-$
+    .word QCOMPILE 
+    .word BL,WORD,UPPER,FIND,DUP,ZEROEQ,ZBRANCH,2f-$
     .word DROP,COUNT,TYPE,LIT,'?',ABORT
 2:  .word ZEROGT,3f-$
-    .word LIT,COMMA,COMPILECFA,BRANCH,9f-$
-3:  .word     
+  ; mot non immmédiat
+    .word LIT,LIT,COMMA,BRANCH,9f-$
+  ; mot immédiat  
+3:  .word COMMA    
 9:  .word EXIT    
   
 DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
@@ -1474,25 +1462,43 @@ DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- )
     .word COMPILECFA,LIT,COMMA
 9:  .word EXIT
 
-DEFWORD "DO$",3,,DOSTR ; ( -- addr )
+;RUNTIME  qui retourne l'adresse d'une chaîne litérale
+;utilisé par (S") et (.")  
+DEFWORD "(DO$)",5,F_HIDDEN,DOSTR ; ( -- addr )
     .word RFROM, RFETCH, RFROM, COUNT, PLUS, ALIGNED, TOR, SWAP, TOR, EXIT
-    
-DEFWORD "$\"|",3,F_IMMED,STRQUOTP ; ( -- addr u )    
+
+;RUNTIME  de s"
+; empile le descripteur de la chaîne litérale
+; qui suis.    
+DEFWORD "(S\")",4,F_HIDDEN,STRQUOTE ; ( -- addr u )    
     .word DOSTR,COUNT,EXIT
     
-DEFWORD ".\"|",3,F_IMMED,DOTQP ; ( -- )
+;RUNTIME DE ."
+; imprime la chaîne litérale    
+DEFWORD "(.\")",4,F_HIDDEN,DOTSTR ; ( -- )
     .word DOSTR,COUNT,TYPE,EXIT
+
+; empile le descripteur de la chaîne qui suis dans le flux.    
+DEFWORD "SLIT",4,F_HIDDEN, SLIT ; ( -- c-addr u )
+    .word LIT,'"',WORD,COUNT,EXIT
     
+; (,") compile une chaîne litérale    
+DEFWORD "(,\")",4,F_HIDDEN,STRCOMPILE ; ( -- )
+    .word SLIT,PLUS,ALIGNED,DP,STORE,EXIT
+
     
-DEFWORD "$,\"",3,F_IMMED,STRCOMPILE ; ( -- )
-    .word LIT,'"',WORD,COUNT,PLUS,ALIGNED,DP,STORE,EXIT
-  
-DEFWORD "S\"",2,F_IMMED,SQUOTE ; ( -- c-addr u )
-    .word COMPILEQ,COMPILECFA,STRQUOTP,STRCOMPILE,EXIT
+; interprétation: imprime la chaîne litérale qui suis.    
+; compilation: compile le runtine (S") et la chaîne litérale    
+DEFWORD "S\"",2,F_IMMED,SQUOTE ; ccccc" ( -- | c-addr u)
+    .word QCOMPILE
+    .word COMPILECFA,STRQUOTE,STRCOMPILE,EXIT
     
+; interprétation: imprime la chaîne litérale qui suis
+; compilation: compile le runtime  (.")    
 DEFWORD ".\"",2,F_IMMED,DOTQUOTE ; ( -- )
-    .word COMPILEQ,COMPILECFA,DOTQP,STRCOMPILE,EXIT
-    
+    .word STATE,FETCH,ZBRANCH,4f-$
+    .word COMPILECFA,DOTSTR,STRCOMPILE,EXIT
+4:  .word SLIT,TYPE,EXIT  
     
 DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
     .word LATEST,FETCH,NFATOCFA,COMMA,EXIT 
@@ -1504,12 +1510,12 @@ DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
 ; empile l'adresse du début de la boucle sur cstack
 ; empile 0 comme garde pour FIXLEAVE   
 DEFWORD "DO",2,F_IMMED,DO ; ( C: -- a 0 ) compile xt de (DO)
-    .word COMPILEQ,COMPILECFA,DODO
+    .word QCOMPILE,COMPILECFA,DODO
     .word HERE,TOCSTK,LIT,0,TOCSTK,EXIT
 
 ;compile LEAVE
 DEFWORD "LEAVE",5,F_IMMED,LEAVE ; (C: -- slot )
-    .word COMPILEQ,COMPILECFA,UNLOOP
+    .word QCOMPILE,COMPILECFA,UNLOOP
     .word COMPILECFA,BRANCH,MARKSLOT,TOCSTK,EXIT  
     
     
@@ -1524,59 +1530,59 @@ DEFWORD "FIXLOOP",7,F_IMMED|F_HIDDEN,FIXLOOP ; (C: a 0 i*slot -- )
 ; compile xt de (LOOP)  
 ; résout toutes les adresses de saut.  
 DEFWORD "LOOP",4,F_IMMED,LOOP ; ( -- )
-    .word COMPILEQ,COMPILECFA,DOLOOP,FIXLOOP,EXIT
+    .word QCOMPILE,COMPILECFA,DOLOOP,FIXLOOP,EXIT
     
 ; compile execution de +LOOP
 ; résout toutes les adressess de saut.    
 DEFWORD "+LOOP",5,F_IMMED,PLUSLOOP ; ( -- )
-    .word COMPILEQ,COMPILECFA,DOPLOOP,FIXLOOP,EXIT
+    .word QCOMPILE,COMPILECFA,DOPLOOP,FIXLOOP,EXIT
     
 ; compile le début d'une boucle    
 DEFWORD "BEGIN",5,F_IMMED,BEGIN ; ( -- a )
-    .word COMPILEQ, MARKADDR, EXIT
+    .word QCOMPILE, MARKADDR, EXIT
 
 ; compile une boucle infinie    
 DEFWORD "AGAIN",5,F_IMMED,AGAIN ; ( a -- )
-    .word COMPILEQ,COMPILECFA,BRANCH,BACKJUMP,EXIT
+    .word QCOMPILE,COMPILECFA,BRANCH,BACKJUMP,EXIT
     
 DEFWORD "UNTIL",5,F_IMMED,UNTIL ; ( a -- )
-    .word COMPILEQ,COMPILECFA,ZBRANCH,BACKJUMP,EXIT
+    .word QCOMPILE,COMPILECFA,ZBRANCH,BACKJUMP,EXIT
 
 DEFWORD "IF",2,F_IMMED,IIF ; ( -- slot )
-    .word COMPILEQ,COMPILECFA,ZBRANCH,MARKSLOT,EXIT
+    .word QCOMPILE,COMPILECFA,ZBRANCH,MARKSLOT,EXIT
 
 DEFWORD "THEN",4,F_IMMED,THEN ; ( slot -- )
-    .word COMPILEQ,FOREJUMP,EXIT
+    .word QCOMPILE,FOREJUMP,EXIT
     
 DEFWORD "ELSE",4,F_IMMED,ELSE ; ( slot1 -- slot2 )     
-    .word COMPILEQ,COMPILECFA,BRANCH,MARKSLOT,SWAP,THEN,EXIT
+    .word QCOMPILE,COMPILECFA,BRANCH,MARKSLOT,SWAP,THEN,EXIT
 
 ; compile un branchement avant    
 DEFWORD "WHILE",5,F_IMMED,WHILE ;  ( a -- slot a)   
-    .word COMPILEQ,COMPILECFA,ZBRANCH,MARKSLOT,SWAP,EXIT
+    .word QCOMPILE,COMPILECFA,ZBRANCH,MARKSLOT,SWAP,EXIT
     
 ; compile un branchement arrière et
 ; résout le branchement avant du WHILE    
 DEFWORD "REPEAT",6,F_IMMED,REPEAT ; ( slot a -- )
-    .word COMPILEQ,COMPILECFA,BRANCH,BACKJUMP,FOREJUMP,EXIT
+    .word QCOMPILE,COMPILECFA,BRANCH,BACKJUMP,FOREJUMP,EXIT
 
 ;marque le début d'une structure CASE ENDCASE
 DEFWORD "CASE",4,F_IMMED,CASE ; ( -- case-sys )
-    .word COMPILEQ,LIT,0,EXIT ; marque la fin de la liste des fixup
+    .word QCOMPILE,LIT,0,EXIT ; marque la fin de la liste des fixup
 
 ;compile la strucutre d'un OF    
 DEFWORD "OF",2,F_IMMED,OF ; ( -- slot )    
-    .word COMPILEQ,COMPILECFA,OVER,COMPILECFA,EQUAL,COMPILECFA,ZBRANCH
+    .word QCOMPILE,COMPILECFA,OVER,COMPILECFA,EQUAL,COMPILECFA,ZBRANCH
     .word MARKSLOT,EXIT
     
 ;compile la structure d'un ENDOF
 DEFWORD "ENDOF",5,F_IMMED,ENDOF ; ( slot 1 -- slot2 )
-    .word COMPILEQ,COMPILECFA,BRANCH,MARKSLOT,SWAP,FOREJUMP,EXIT
+    .word QCOMPILE,COMPILECFA,BRANCH,MARKSLOT,SWAP,FOREJUMP,EXIT
     
 ;résoue les sauts de chaque ENDOF
 ; et compile un DROP
 DEFWORD "ENDCASE",7,F_IMMED,ENDCASE ; ( case-sys -- )    
-    .word COMPILEQ
+    .word QCOMPILE
 1:  .word QDUP,ZBRANCH,8f-$
     .word FOREJUMP,BRANCH,1b-$
 8:  .word COMPILECFA,DROP,EXIT
@@ -1584,16 +1590,31 @@ DEFWORD "ENDCASE",7,F_IMMED,ENDCASE ; ( case-sys -- )
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; certains mots ne peuvent-être utilisés
+; que par le compilateur
+DEFWORD "?COMPILE",8,F_IMMED,QCOMPILE ; ( -- )
+    .word STATE,FETCH,ZEROEQ,QABORT
+    .byte 17
+    .ascii "compile only word"
+    .align 2
+    .word EXIT
+
+; Si f==0 affiche message "name missing" et appelle ABORT    
+DEFWORD "?NAME",5,,QNAME ; ( i*x f -- | i*x )
+    .word QABORT
+    .byte 12
+    .ascii "name missing"
+    .align 2
+    .word EXIT
+    
+
 DEFWORD ",EXIT",5,F_IMMED,CEXIT ; ( -- )
     .word COMPILECFA,EXIT,EXIT
     
 ;cré une nouvelle entête dans le dictionnaire  
 DEFWORD "CREATE",6,,CREATE ; ( -- )
     .word LATEST,DUP,FETCH,COMMA,HERE,SWAP,STORE
-    .word BL,WORD,CFETCH,DUP,ZEROEQ,ABORTQ
-    .byte  12
-    .ascii "missing name"
-    .align 2
+    .word BL,WORD,UPPER,CFETCH,DUP,ZEROEQ,QNAME
     .word ONEPLUS,ALLOT,ALIGN
     .word HIDE
     .word EXIT    
@@ -1601,10 +1622,6 @@ DEFWORD "CREATE",6,,CREATE ; ( -- )
     
 ; crée une nouvelle définition dans le dictionnaire    
 DEFWORD ":",1,,COLON ; ( name --  )
-;    .word STATE,FETCH,ABORTQ
-;    .byte  17 
-;    .ascii "already compiling"
-;    .align 2
     .word CREATE ; ( -- )
     .word RBRACKET,COMPILECFA,ENTER,EXIT
 
@@ -1648,7 +1665,7 @@ DEFWORD "CONSTANT",8,,CONSTANT ; ()
     
 ; termine une définition débutée par ":"
 DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- ) 
-    .word COMPILEQ
+    .word QCOMPILE
     .word COMPILECFA,EXIT
     .word REVEAL
     .word LBRACKET,EXIT
@@ -1662,8 +1679,8 @@ DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- )
 ;  le débogage.
     
 ; boucle sans fin    
-DEFCODE "INFLOOP",7,,INFLOOP
-    bra .
+;DEFCODE "INFLOOP",7,,INFLOOP
+;    bra .
 
 ; imprime le contenu de la pile des arguments
 ; sans en affecté le contenu.
@@ -1697,7 +1714,7 @@ DEFWORD "HDUMP",5,,HDUMP ; ( addr +n -- )
 ;    .word BL,WORD,FIND,TBRANCH,1f-$
 ;    .word SPACE,LIT,'?',EMIT,DROP,BRANCH,3f-$
 ;1:  .word DUP,FETCH,LIT,ENTER,EQUAL,TBRANCH,2f-$
-;    .word DROP,DOTQP
+;    .word DROP,DOTSTR
 ;    .byte 9
 ;    .ascii "code word"
 ;    .align 2
