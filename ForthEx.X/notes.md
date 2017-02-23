@@ -1,4 +1,10 @@
-2018-02-21
+2017-02-22
+==========
+Supprimer CFILL et réparer FILL
+Variable dp0 remplacée par constante dp0 cette valeur ne varie pas.
+ajout des mots E@,CE@,ERASE,USAVE,ULOAD
+
+2017-02-21
 ==========
 Déplacer la mémoire viédo à la fin de la mémoire RAM.
 Rendre le dictionnaire insensible à la casse en convertissants tous les noms en majuscules.

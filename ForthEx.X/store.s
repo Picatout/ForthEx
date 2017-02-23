@@ -179,7 +179,6 @@ wait_response:
     bra nz, 4f
     return
 4:  spi_read
-    mov.b STR_SPIBUF,WREG
     mov.b W0,[W4++]
     dec W3,W3
     bra 3b
@@ -254,6 +253,7 @@ DEFCODE "SDCINIT",7,,SDCINIT
 ; sortie aucune
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 DEFCODE "RSTORE",6,,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
+    SET_EDS
     _enable_sram
     mov #RWRITE,W0
     spi_write
@@ -271,6 +271,7 @@ DEFCODE "RSTORE",6,,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
     bra 1b
 2:    
     _disable_sram
+    RESET_EDS
     NEXT
 
 
@@ -288,12 +289,11 @@ DEFCODE "RLOAD",5,,RLOAD ; ( addr-bloc addr-sramL addr-sramH n -- )
     call spi_send_address
     mov T, W2 ; adresse bloc RAM
     DPOP
-    mov #STR_SPIBUF, W3
 1:    
     cp0 W1
     bra z, 3f
     spi_read
-    mov.b [W3], [W2++]
+    mov.b W0, [W2++]
     dec W1,W1
     bra 1b
 3:
@@ -307,12 +307,16 @@ DEFCODE "RLOAD",5,,RLOAD ; ( addr-bloc addr-sramL addr-sramH n -- )
 ; entrée: bloc-adress, page
 ; l'eeprom est organisée en 512 pages de
 ; 256 octets.
-; Bien qu'il soit possible de programmer
-; un seule octet à la fois
-; cette routine est conçue pour programmer
-; une page complète.
+; l'accès est fait par page, s'il y a
+; moins de 256 octets d'écris dans la page
+; ceux-ci sont inscris au début de la page.    
+; argumesnts:
+;   'addr-bloc' est le début du bloc RAM
+;   'page' est le numéro de page dans l'EEPROM
+;   'n+' est le nombre d'octets à écrire: {1-255}    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "ESTORE",6,,ESTORE  ;( addr-bloc page -- )
+DEFCODE "ESTORE",6,,ESTORE  ;( addr-bloc page n+ -- )
+    SET_EDS
     call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
     _enable_eeprom
     mov #EWREN, W0
@@ -322,6 +326,9 @@ DEFCODE "ESTORE",6,,ESTORE  ;( addr-bloc page -- )
     _enable_eeprom
     mov #EWRITE, W0
     spi_write
+    mov T,W3
+    and #255,W3
+    DPOP
     sl  T, #8, T
     DPUSH
     clr T
@@ -329,24 +336,33 @@ DEFCODE "ESTORE",6,,ESTORE  ;( addr-bloc page -- )
     call spi_send_address
     mov T, W2 ; addr-bloc
     DPOP
-    mov #256, W3
+    cp0 W3
+    bra z, 9f
 1:
     mov.b [W2++], W0
     spi_write
     dec W3,W3
     bra nz, 1b
-    _disable_eeprom
+9:  _disable_eeprom
+    RESET_EDS
     NEXT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; charque une page EEPROM
 ; en mémoire RAM
+; arguments:
+;   'addr-bloc' début RAM
+;   'page' page EEPROM contenant l'information
+;   'n+' nombre d'octets à lire    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "ELOAD",5,,ELOAD   ; ( addr-bloc page -- )
+DEFCODE "ELOAD",5,,ELOAD   ; ( addr-bloc page n+ -- )
     call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
     _enable_eeprom
     mov #EREAD, W0
     spi_write
+    mov T,W3
+    and #255,W3
+    DPOP
     sl  T, #8, T
     DPUSH
     clr T
@@ -354,17 +370,95 @@ DEFCODE "ELOAD",5,,ELOAD   ; ( addr-bloc page -- )
     call spi_send_address
     mov T, W2 ; addr-bloc
     DPOP
-    mov #256, W3
+    cp0 W3
+    bra z, 9f
 1:
     spi_read
-    mov STR_SPIBUF, W0
     mov.b W0, [W2++]
     dec W3,W3
     bra nz, 1b
-    _disable_eeprom
+9:  _disable_eeprom
     NEXT
     
+
+; efface le contenu de l'EEPROM    
+DEFCODE "ERASE",5,,ERASE ; ( -- )
+    call wait_wip0
+    _enable_eeprom
+    mov #EWREN, W0
+    spi_write
+    _disable_eeprom
+    nop
+    _enable_eeprom
+    mov #ECE, W0
+    spi_write
+    _disable_eeprom
+    NEXT
+
+;sauvegarde au début de l'EEPROM
+;les valeurs de SYSLATEST,LATEST et DP
+DEFWORD "USAVE",5,,USAVE ; ( -- )
+    .word ULIMIT,DUP 
+    .word SYSLATEST,FETCH, OVER, STORE
+    .word CELLPLUS, LATEST,FETCH,OVER,STORE
+    .word HERE,SWAP,CELLPLUS,STORE
+    .word LIT,0,LIT,3,CELLS,ESTORE
+    .word EXIT
     
- ;.end
+;initialisze les variables système avec les
+;valeur en page 0 de l'EEPROM
+; SYSLATEST,LATEST,DP
+DEFWORD "ULOAD",5,,ULOAD ;  ( -- )
+    .word ULIMIT,DUP,LIT,0,LIT,3,CELLS,ELOAD
+    .word DUP,EFETCH,SYSLATEST,STORE
+    .word CELLPLUS,DUP,EFETCH,LATEST,STORE
+    .word CELLPLUS,EFETCH,DP,STORE
+    .word EXIT
     
+    
+; retourne le plus petit de 
+;  256 et HERE-addr
+DEFWORD "BYTESLEFT",9,,BYTESLEFT ; ( addr -- n )
+    .word HERE,SWAP,MINUS,LIT,256
+    .word MIN, EXIT
+    
+;sauvegarde d'une page de data_space
+; arguments:
+;   'addr'  adresse début
+;   'page'  page EEPROM    
+; sortie:
+;   'n' nombre d'octets écris
+DEFWORD "PSAVE",5,,PSAVE ; ( addr page -- n )
+    .word OVER,BYTESLEFT,DUP,TOR
+    .word ESTORE,RFROM,EXIT 
+    
+    
+;chargement d'une page dans data_space
+; arguments:
+;   'addr'  adresse début
+;   'page'  page EEPROM    
+; sortie:
+;   'n' nombre d'octets lus
+DEFWORD "PLOAD",5,,PLOAD ; ( addr page -- n )
+    .word OVER,BYTESLEFT,DUP,TOR
+    .word ELOAD,RFROM,EXIT
+    
+
+    
+DEFWORD "DSAVE",5,,DSAVE ; ( -- )
+    .word USAVE,LIT,1,TOR,DP0
+1:  .word DUP, RFROM,DUP,ONEPLUS,TOR
+    .word PSAVE,QDUP,ZBRANCH,9f-$
+    .word PLUS,1b-$
+9:  .word RFROM,TWODROP,EXIT  
+ 
+;chargement d'une page de data_space
+; argument  
+;chargement d'une image à partir de l'EEPROM  
+DEFWORD "DLOAD",5,,DLOAD ; ( -- )
+    .word ULOAD,LIT,1,TOR,DP0
+1:  .word DUP,RFROM,DUP,ONEPLUS,TOR
+    .word PLOAD,QDUP,ZBRANCH,9f-$
+    .word PLUS,BRANCH,1b-$
+9:  .word RFROM,TWODROP,EXIT    
     

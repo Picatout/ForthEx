@@ -303,7 +303,7 @@ DEFCODE "SRAND",5,,SRAND  ; ( -- )
     
 ; imprime la quantité de RAM disponible    
 DEFWORD "FREE",4,,FREE    
-    .word LIT,EDS_BASE,HERE,MINUS,DOT,EXIT
+    .word ULIMIT,HERE,MINUS,DOT,EXIT
     
     
     

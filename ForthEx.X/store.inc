@@ -97,14 +97,15 @@
 .macro spi_write
     mov.b WREG, STR_SPIBUF
     btss STR_SPISTAT, #SPIRBF
-    bra .-2
+    bra $-2
     mov STR_SPIBUF, W0
 .endm
 
 .macro spi_read
     setm.b STR_SPIBUF    
     btss STR_SPISTAT, #SPIRBF
-    bra .-2
+    bra $-2
+    mov.b STR_SPIBUF,WREG
 .endm
 
 .macro _enable_sram

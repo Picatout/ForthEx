@@ -267,6 +267,22 @@ DEFCODE "@EXECUTE",8,,FEXEC   ; ( *addr -- )
 DEFCODE "@",1,,FETCH ; ( addr -- n )
     mov [T],T
     NEXT
+
+; la lecture de la mémoire RAM EDS
+; requiert une procédure spéciale    
+DEFCODE "E@",2,,EFETCH ; ( addr -- n )
+    SET_EDS
+    mov [T],T
+    RESET_EDS
+    NEXT
+    
+;lecture d'un caractère dans la mémoire RAM EDS
+DEFCODE "CE@",3,,CEFETCH ; ( c-addr -- c )
+    SET_EDS
+    mov.b [T],T
+    ze T,T
+    RESET_EDS
+    NEXT
     
 DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
     mov.b [T], T
@@ -286,7 +302,7 @@ DEFCODE "!",1,,STORE  ; ( n  addr -- )
     NEXT
     
 DEFCODE "C!",2,,CSTORE  ; ( char c-addr  -- )
-    mov [DSP--],w0
+    mov [DSP--],W0
     mov.b W0,[T]
     DPOP
     NEXT
@@ -865,29 +881,19 @@ DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
     NEXT
 
     
-; initialise un bloc mémoire (mots de 16 bits)
-DEFCODE "FILL",4,,FILL ; ( addr u n -- )  for{0:(u-1)}-> m[T++]=n
-    mov [DSP--],W0 ; n
+; initialise un bloc mémoire de dimension u avec
+; le caractère c.    
+DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
+    mov T,W0 ; c
     mov [DSP--],W1 ; u
+    mov [DSP--],W2 ; c-addr
+    DPOP
     cp0 W1
     bra z, 1f
     dec W1,W1
     repeat W1
-    mov W0,[T++]
-1:  DPOP    
-    NEXT
-    
-; initialise un bloc d'octets
-DEFCODE "CFILL",5,,CFILL ; ( addr u b -- ) for{0:(u-1)} -> m[T++]=b
-    mov [DSP--],W0
-    mov [DSP--],W1
-    cp0 W1
-    bra z, 1f
-    dec W1,W1
-    repeat W1
-    mov.b W0,[T++]
-1:  DPOP    
-    NEXT
+    mov.b W0,[W2++]
+1:  NEXT
     
 ; remplace tous les caractères <=32 à la fin d'une chaîne
 ; par des zéro
@@ -920,7 +926,6 @@ DEFWORD "PACK$",5,,PACKS ; ( src u dest -- a-dest )  copie src de longeur u vers
 ;  variables système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFUSER "STATE",5,,STATE   ; état compile=1/interprète=0
-DEFUSER "DP0",3,,DP0       ; début RAM data    
 DEFUSER "DP",2,,DP         ; pointeur fin dictionnaire
 DEFUSER "BASE",4,,BASE     ; base numérique
 DEFUSER "SYSLATEST",9,,SYSLATEST ; tête du dictionnaire en FLASH    
@@ -945,9 +950,10 @@ DEFCONST "LENMASK",7,,LENMASK,F_LENMASK ; masque longueur nom
 DEFCONST "BL",2,,BL,32                       ; caractère espace
 DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
 DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
-DEFCONST "ULIMIT",6,,ULIMIT,RAM_END-1        ; limite espace dictionnaire
+DEFCONST "DP0",3,,DP0,DATA_BASE         ; début dictionnaire utilisateur
+DEFCONST "ULIMIT",6,,ULIMIT,EDS_BASE        ; limite espace dictionnaire
 DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
-
+    
 ; addresse buffer pour l'évaluateur    
 DEFCODE "'SOURCE",6,,TSOURCE ; ( -- c-addr u ) 
     DPUSH
