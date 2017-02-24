@@ -65,11 +65,16 @@
 .equ PLLPOST, 0 ; 280Mhz/2, Fpllo=140Mhz
 .equ PLLDIV, 68 ; 4Mhz*70
     
-.equ RAM_SIZE, 0xC000 ; 48KO
 .equ RAM_BASE, 0x1000 ; 4096
 .equ EDS_BASE, 0x8000 ; 32768
-.equ RAM_END,  0xCFFF ; 53247    
-.equ EDS_RAM_SIZE, (RAM_END-EDS_BASE+1)
+.equ RAM_END,  0xD000 ; 53248    
+.equ RAM_SIZE, (RAM_END-RAM_BASE)    
+.equ DATA_SPACE, (EDS_BASE-RAM_BASE) ; 
+.equ EDS_SPACE, (RAM_END-EDS_BASE)
+.equ BUFF_BASE, EDS_BASE
+.equ BUFF_SPACE, (EDS_SPACE-VIDEO_BUFF_SIZE)    
+.equ BUFF_SIZE, 256 ; octets c'est la taille des pages de l'EEPROM
+.equ BUFF_COUNT, BUFF_SPACE/BUFF_SIZE    
     
 ; sortie vidéo
 .equ NTSC, 1

@@ -28,6 +28,11 @@
 .equ RMPAGE, (2<<6) 
 .equ RMSEQ, (1<<6)    
  
+;;;;;;;;;;;;;;;;;;;;
+; constantes EEPROM
+; 25LC1024 
+;;;;;;;;;;;;;;;;;;;;
+ 
 ; commandes EEPROM
 .equ EWRITE, 2 
 .equ EREAD,  3
@@ -48,8 +53,12 @@
 .equ BP1, 3
 .equ WPEN, 7
  
-.equ EPAGE_SIZE, 256
-
+.equ EPAGE_SIZE, 256  ;octets
+.equ EPAGE_COUNT, 512  ; nombre de pages
+.equ ESECTOR_SIZE, 32768 ; nombre de secteurs
+.equ EPG_SECTOR, (ESECTOR_SIZE/EPAGE_SIZE) ; page par secteur 
+ 
+ 
 ;ref: http://www.microchip.com/forums/m530149.aspx
 ;ref: http://elm-chan.org/docs/mmc/mmc_e.html 
 

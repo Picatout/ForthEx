@@ -300,11 +300,25 @@ DEFCODE "SRAND",5,,SRAND  ; ( -- )
     mov W1, seed+2
     NEXT
    
+
+; efface la mémoire programme utilisateur    
+DEFWORD "CLEAR",5,,CLEAR ; ( -- )
+    .word DP0,DP,STORE
+    .word SYSLATEST,FETCH,LATEST,STORE
+    .word EXIT
     
 ; imprime la quantité de RAM disponible    
 DEFWORD "FREE",4,,FREE    
     .word ULIMIT,HERE,MINUS,DOT,EXIT
     
+    
+; retourne l'adresse début d'un tampon
+; les tampons sont situés dans la mémoire EDS
+; et ont une dimension de 256 octets.    
+; #buffer {0..73}
+; si #buffer>73 alors utilise #buffer % 74    
+DEFWORD "BUFADDR",7,,BUFADDR ; ( #buffer -- addr )
+    .word LIT,74,MOD,LIT,256,STAR,ULIMIT,PLUS,EXIT
     
     
 ;.end

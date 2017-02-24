@@ -46,9 +46,9 @@ cursor_dly: .space 2 ; contrôle vitesse clignotement
 cursor_sema: .space 1 ; sémaphore 
 fcursor: .space 1 ; indicateur booléens curseur texte
  
-.section .tvout.buffer.bss bss address(RAM_BASE+RAM_SIZE-TV_BUFFER_SIZE)
+.section .tvout.buffer.bss bss address(RAM_END-VIDEO_BUFF_SIZE)
 .global _video_buffer
-_video_buffer: .space TV_BUFFER_SIZE
+_video_buffer: .space VIDEO_BUFF_SIZE
  
 
 ;********************
@@ -241,7 +241,7 @@ scroll_up:
     mov #_video_buffer, W1 ;destination
     mov #CPL, W0
     add W0,W1,W2  ; source
-    mov #TV_BUFFER_SIZE, W3
+    mov #VIDEO_BUFF_SIZE, W3
     sub W3,W0,W3
     lsr W3,W3
     dec W3,W3
@@ -260,11 +260,11 @@ scroll_down:
     cursor_incr_sema
     cursor_sync
     mov #_video_buffer, W1
-    mov #TV_BUFFER_SIZE, W0
+    mov #VIDEO_BUFF_SIZE, W0
     add W1,W0,W1  ; W1 source
     mov #CPL,W0
     sub W1,W0,W2  ; W2 destination
-    repeat #(TV_BUFFER_SIZE-CPL)/2-1
+    repeat #(VIDEO_BUFF_SIZE-CPL)/2-1
     mov [--W1],[--W2]
     mov 0x2020,W0
     repeat #CPL/2-1
@@ -373,7 +373,7 @@ DEFCODE "CLS",3,,CLS   ; ( -- )
     cursor_incr_sema
     mov #0x2020, W0
     mov #_video_buffer, W1
-    repeat #(TV_BUFFER_SIZE/2-1)
+    repeat #(VIDEO_BUFF_SIZE/2-1)
     mov W0,[W1++]
     clr xpos  ; xpos=0, ypos=0
     bclr.b fcursor,#CURSOR_INV

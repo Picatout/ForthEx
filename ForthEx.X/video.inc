@@ -38,7 +38,7 @@
 .equ XRES, (CHAR_WIDTH*CPL)
 .equ YRES, (CHAR_HEIGHT*LPS)
  ; grandeur du tampon vidéo    
-.equ TV_BUFFER_SIZE, (CPL*LPS)
+.equ VIDEO_BUFF_SIZE, (CPL*LPS)
 
  ; constantes pour curseur texte
 .equ CURSOR_ACTIVE, 0  ; clignotement activ

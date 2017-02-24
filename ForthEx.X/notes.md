@@ -1,8 +1,15 @@
+2017-02-23
+==========
+modification des mots ELOAD,ESTORE
+ajout des mots BOOT, CLEAR, ?IMG, IMG>
+ajout mots BUFADDR, BUFFER!, BUFFERC!, BUFFER@, BUFFERC@
+
 2017-02-22
 ==========
 Supprimer CFILL et réparer FILL
 Variable dp0 remplacée par constante dp0 cette valeur ne varie pas.
 ajout des mots E@,CE@,ERASE,USAVE,ULOAD
+débuté travail sur DSAVE DLOAD
 
 2017-02-21
 ==========

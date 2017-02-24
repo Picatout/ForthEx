@@ -289,6 +289,41 @@ DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
     ze T, T
     NEXT
 
+; écris un entier dans un tampon
+; arguments:
+;   '#t' numéro du tampon
+;   'ofs' position dans le tampon 
+;   'n' valeur à écrire    
+DEFWORD "BUFFER!",7,,BUFFERSTORE ; ( n ofs #t -- )
+    .word BUFADDR, PLUS, STORE, EXIT
+    
+; écris un octet dans le tampon
+; arguments:
+;   '#t' numéro du tampon
+;   'ofs' position dans le tampon 
+;   'c' valeur à écrire    
+DEFWORD "BUFFERC!",8,,BUFFERCSTORE ; ( c ofs #t -- )
+    .word BUFADDR, PLUS, CSTORE, EXIT
+    
+;lire un entier d'un tampon    
+; arguments
+;   '#t' numéro du tampon
+;   'ofs' position dans le tampon 
+;  retourne:
+;     'n'  entier lu
+DEFWORD "BUFFER@",7,,BUFFERFETCH ; ( ofs #t -- n )
+    .word BUFADDR,PLUS,EFETCH,EXIT
+    
+;lire un octet d'un tampon    
+; arguments
+;   '#t' numéro du tampon
+;   'ofs' position dans le tampon 
+;  retourne:
+;     'c'  octet lu
+DEFWORD "BUFFERC@",8,,BUFFERCFETCH 
+    .word BUFADDR, PLUS,CEFETCH,EXIT
+    
+    
 DEFCODE "2@",2,,TWOFETCH ; ( addr -- n1 n2 ) double en mémoire en format little indian
     mov [T],W0 
     add #CELL_SIZE,T
@@ -598,6 +633,14 @@ DEFCODE "/",1,,DIVIDE ; ( n1 n2 -- n1/n2 )
     mov W0,T
     NEXT
 
+; retourne le reste de la division entière.    
+DEFCODE "MOD",3,,MOD ; ( N1 n2 -- n1%n2 )
+   mov [DSP--],W0
+   repeat #17
+   div.s W0,T
+   mov W1,T
+   NEXT
+   
 DEFCODE "*/",2,,STARSLASH  ; ( n1 n2 n3 -- n4 ) n1*n2/n3, n4 quotient
     mov [DSP--],W0
     mov [DSP--],W1
@@ -832,8 +875,10 @@ DEFCODE ">CHAR",5,,TOCHAR ; ( c -- c)
 DEFWORD "HERE",4,,HERE
     .word DP,FETCH,EXIT
 
-; copie un bloc mémoire (mots de 16 bits)  
+; copie un bloc mémoire RAM (mots de 16 bits)
+; pas d'accès à la mémoire PSV    
 DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
+    SET_EDS
     mov T, W0 ; compte
     DPOP
     mov T, W2 ; destination
@@ -845,10 +890,13 @@ DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
     dec W0,W0
     repeat W0
     mov [W1++],[W2++]
-1:  NEXT
+1:  RESET_EDS
+    NEXT
 
-; copie un bloc d'octets    
+; copie un bloc d'octets RAM  
+; pas d'accès à la mémoire PSV    
 DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
+    SET_EDS
     mov T, W0 ; compte
     DPOP
     mov T, W2 ; destination
@@ -860,13 +908,16 @@ DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
     dec W0,W0
     repeat W0
     mov.b [W1++],[W2++]
-1:  NEXT
+1:  RESET_EDS
+    NEXT
 
 ; recherche du caractère 'c' dans le bloc
 ; mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
 ; retourne la position de 'c' et
 ; le nombre de caractères qui suit dans le bloc
+; le buffer doit-être en RAM, pas d'accès à la PSV    
 DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
+    SET_EDS
     mov T, W0   ; c
     DPOP        ; T=U
     mov [DSP],W1 ; W1=c-addr
@@ -878,12 +929,14 @@ DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
     dec T,T
     bra nz, 1b
 3:  mov W1,[DSP]
+    RESET_EDS
     NEXT
 
     
-; initialise un bloc mémoire de dimension u avec
+; initialise un bloc mémoire RAM de dimension u avec
 ; le caractère c.    
 DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
+    SET_EDS
     mov T,W0 ; c
     mov [DSP--],W1 ; u
     mov [DSP--],W2 ; c-addr
@@ -893,7 +946,8 @@ DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
     dec W1,W1
     repeat W1
     mov.b W0,[W2++]
-1:  NEXT
+1:  RESET_EDS
+    NEXT
     
 ; remplace tous les caractères <=32 à la fin d'une chaîne
 ; par des zéro
@@ -953,6 +1007,9 @@ DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
 DEFCONST "DP0",3,,DP0,DATA_BASE         ; début dictionnaire utilisateur
 DEFCONST "ULIMIT",6,,ULIMIT,EDS_BASE        ; limite espace dictionnaire
 DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
+DEFCONST "T",1,,TRUE,-1 ; valeur booléenne vrai
+DEFCONST "F",1,,FALSE,0 ; valeur booléenne faux
+    
     
 ; addresse buffer pour l'évaluateur    
 DEFCODE "'SOURCE",6,,TSOURCE ; ( -- c-addr u ) 
@@ -1710,7 +1767,7 @@ DEFWORD "HDUMP",5,,HDUMP ; ( addr +n -- )
     .word SWAP,LIT,0xFFFE,AND,SWAP,LIT,0,DODO
 1:  .word DOI,LIT,7,AND,TBRANCH,2f-$
     .word CR,DUP,LIT,5,UDOTR,SPACE
-2:  .word DUP,FETCH,LIT,5,UDOTR,LIT,2,PLUS
+2:  .word DUP,EFETCH,LIT,5,UDOTR,LIT,2,PLUS
     .word DOLOOP,1b-$,DROP
     .word RFROM,BASE,STORE,EXIT
 
