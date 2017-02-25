@@ -51,9 +51,9 @@ csp: .space 2
 tib: .space TIB_SIZE
 pad: .space PAD_SIZE
  
-.section .user_vars.bss bss
-.global _USER_VARS
-_USER_VARS:    
+.section .sys_vars.bss bss
+.global _SYS_VARS
+_SYS_VARS:    
 .global _TIB    
 _TIB: .space 2
 .global _PAD 
@@ -125,7 +125,7 @@ ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
 DOUSER: ; empile pointeur sur variable utilisateur
     DPUSH
     mov [WP++],W0
-    add W0,UP,T
+    add W0,VP,T
     NEXT
 
     .global DOVAR
@@ -850,10 +850,13 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
     mov W0,T
     NEXT
 
-;aligne DP sur adresse paire supérieure.
+; aligne DP sur adresse paire supérieure.
+; met 0 dans l'octet sauté.    
 ; suppose un adressage par octet    
 DEFWORD "ALIGN",5,,ALIGN ; ( -- )
-    .word HERE,DUP,LIT,1,AND,PLUS,DP,STORE,EXIT
+    .word HERE,ODD,ZBRANCH,9f-$
+    .word LIT,0,HERE,CSTORE,LIT,1,ALLOT
+9:  .word EXIT    
     
 ; aligne la valeur de T sur une valeur paire supérieure.    
 ; suppose un adressage par octet    
@@ -911,6 +914,7 @@ DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
 1:  RESET_EDS
     NEXT
 
+    
 ; recherche du caractère 'c' dans le bloc
 ; mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
 ; retourne la position de 'c' et
@@ -1712,7 +1716,7 @@ DEFWORD "(DOES>)",7,,DODOES ; ( -- pfa )
 ; ajoute le runtime (DOES>) à la fin du <BUILDS
 DEFWORD "DOES>",5,F_IMMED,COMMADOES  ; ( -- )
     .word COMPILECFA,DODOES,HERE,LIT,CELL_SIZE,ALLOT
-    .word COMPILECFA,SEMICOLON
+    .word COMPILECFA,LBRACKET,COMPILECFA,REVEAL,COMPILECFA,EXIT
     .word HERE,SWAP,STORE
     .word EXIT
     
@@ -1733,7 +1737,8 @@ DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- )
     .word REVEAL
     .word LBRACKET,EXIT
     
-    
+
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;     OUTILS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1796,7 +1801,7 @@ DEFWORD "HDUMP",5,,HDUMP ; ( addr +n -- )
 ;2:  .word TYPE
 ;3:  .word LIT,',',EMIT,FETCH,LIT,code_EXIT,EQUAL,TBRANCH,6f-$
 ;    .word LIT,2,PLUS,BRANCH,1b-$
-;4:  .word UDOT,DUP,BRANCH,3b-$
+;4:  .word UDOT,DVP,BRANCH,3b-$
 ;6:  .word DROP,RFROM,BASE,STORE,EXIT
   
 

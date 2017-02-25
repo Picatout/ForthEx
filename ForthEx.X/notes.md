@@ -1,3 +1,9 @@
+2017-02-24
+==========
+Continuation du travail sur la sauvegarde/restauration image BOOT 
+Modification de EERASE
+
+
 2017-02-23
 ==========
 modification des mots ELOAD,ESTORE

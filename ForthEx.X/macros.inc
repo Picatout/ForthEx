@@ -77,7 +77,7 @@
 .equ DSP, W14 ; pointeur pile arguments
 .equ T, W13   ; sommet pile arguments
 .equ WP, W12  ;  pointeur paramètres
-.equ UP, W11  ; pointeur _USER_VARS
+.equ VP, W11  ; pointeur _SYS_VARS
 .equ IP, W10  ; pointeur d'instruction machine virtuelle
 .equ I, W9    ; compteur de boucle    
 .equ LIMIT,W8 ; limite des boucles
@@ -244,7 +244,7 @@ code_\label :
 	HEADER "\name",\namelen,\flags,\label
         .word DOUSER
 ;pfa:  paramètres
-	.word _\label-_USER_VARS 
+	.word _\label-_SYS_VARS 
 .endm
 
 	

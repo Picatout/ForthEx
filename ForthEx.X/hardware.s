@@ -189,7 +189,7 @@ HEADLESS VARS_INIT
     mov #DATA_BASE, W0
     mov W0,_DP0
     mov W0,_DP
-    mov #_USER_VARS,UP
+    mov #_SYS_VARS,VP
     movpag #psvpage(_sys_latest),DSRPAG
     mov #psvoffset(_sys_latest),W0
     mov [W0], W0 ; LFA du dernier mot système
