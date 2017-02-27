@@ -106,13 +106,6 @@
     goto W0         ; saut vers code routine
 .endm    
  
-; aligment sur adresse paire
-; valeur registre    
-.macro SET_EVEN reg
-    btsc \reg, #0
-    inc \reg, \reg
-.endm
-
 ; set le registre DSRPAG pour l'accès à l'EDS
 .macro SET_EDS
     push DSRPAG
@@ -126,11 +119,8 @@
     
 ; empile le registre T
 ; sur la pile des arguments
-.macro DPUSH  
+.macro DPUSH
     mov T, [++DSP]
-;    cp DSP, #RBASE
-;    bra nz, .+4
-;    reset
 .endm
 
 ; dépile la pile des arguments

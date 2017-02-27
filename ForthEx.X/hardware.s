@@ -106,7 +106,10 @@ __reset:
     mov #psvoffset(_cold),IP
     NEXT
     
+    
 .text
+
+    
 .global _cold    
 _cold:
     .word HARDWARE_INIT,VARS_INIT

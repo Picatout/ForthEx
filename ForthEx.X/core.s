@@ -32,16 +32,18 @@
     
 .section .core.bss bss
 .global user    
-    
-.section .param.stack.bss, bss , address(RAM_BASE+RSTK_SIZE)    
+
+.equ _SP0, (RAM_BASE+RSTK_SIZE)    
+.section .param.stack.bss, bss , address(_SP0)    
 pstack:
 .space DSTK_SIZE
 
-.section .return.stack.bss stack , address(RAM_BASE)
+.equ _RP0, (RAM_BASE)    
+.section .return.stack.bss stack , address(_RP0)
 rstack:
 .space RSTK_SIZE
 
-.section .control.stack.bss bss, address(RAM_BASE+RSTK_SIZE+DSTK_SIZE)
+.section .control.stack.bss bss, address(_SP0+DSTK_SIZE)
 cstack:
 .space CSTK_SIZE 
     .global csp
@@ -97,7 +99,7 @@ _LATEST: .space 2
  
  
 ; dictionnaire utilisateur dans la RAM 
-.section .user_dict.bss bss address(DATA_BASE)
+.section .user_dict.bss bss  address (DATA_BASE)
 .global _user_dict 
 _user_dict: .space EDS_BASE-DATA_BASE
     
@@ -691,6 +693,21 @@ DEFCODE "MIN",3,,MIN ; ( n1 n2 -- min(n1,n2) )
     exch T,W0
 1:  NEXT
     
+DEFCODE "UMAX",4,,UMAX ; ( u1 u2 -- max(u1,u2) )
+    mov [DSP--],W0
+    cp T,W0
+    bra geu,1f
+    exch W0,T
+1:  NEXT
+    
+DEFCODE "UMIN",4,,UMIN ; ( u1 u2 -- min(u1,u2) )
+    mov [DSP--],W0
+    cp W0,T
+    bra geu, 1f
+    exch T,W0
+1:  NEXT
+    
+    
 DEFCODE "WITHIN",6,,WITHIN ; ( u1 u2 u3 -- f ) u2<=u1<u3
     clr W0
     mov [DSP--],W2 ; u2
@@ -720,6 +737,16 @@ DEFCODE "ODD",3,,ODD ; ( n -- f ) vrai si n est impair
 DEFCODE "ABS",3,,ABS ; ( n -- +n ) valeur absolue de n
     btsc T,#15
     neg T,T
+    NEXT
+
+; convertie valeur simple en 
+; valeur double    
+DEFCODE ">D",2,,TODOUBLE ; ( n -- d ) 
+    DPUSH
+    clr W0
+    btsc T,#15
+    com W0,W0
+    mov W0,T
     NEXT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
@@ -1004,16 +1031,16 @@ DEFCONST "VERSION",7,,VERSION,psvoffset(_version)        ; adresse chaîne versio
 DEFCONST "RAMEND",6,,RAMEND,RAM_END          ;  fin mémoire RAM
 DEFCONST "IMMED",5,,IMMED,F_IMMED       ; drapeau mot immédiat
 DEFCONST "HIDDEN",6,,HIDDEN,F_HIDDEN    ; drapeau mot caché
+DEFCONST "NMARK",5,,NMARK,F_MARK     ; drapeau marqueur utilisé par CFA>NFA
 DEFCONST "LENMASK",7,,LENMASK,F_LENMASK ; masque longueur nom   
 DEFCONST "BL",2,,BL,32                       ; caractère espace
 DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
 DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
-DEFCONST "DP0",3,,DP0,DATA_BASE         ; début dictionnaire utilisateur
 DEFCONST "ULIMIT",6,,ULIMIT,EDS_BASE        ; limite espace dictionnaire
 DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
 DEFCONST "T",1,,TRUE,-1 ; valeur booléenne vrai
 DEFCONST "F",1,,FALSE,0 ; valeur booléenne faux
-    
+DEFCONST "DP0",3,,DP0,DATA_BASE ; début espace utilisateur
     
 ; addresse buffer pour l'évaluateur    
 DEFCODE "'SOURCE",6,,TSOURCE ; ( -- c-addr u ) 
@@ -1435,6 +1462,14 @@ DEFWORD "HIDE",4,,HIDE ; ( -- )
     .word LATEST,FETCH,DUP,CFETCH,HIDDEN,OR,SWAP,CSTORE
 9:  .word EXIT
 
+; marque le champ compte du nom
+; pour la recherche de CFA>NFA
+DEFWORD "(NMARK)",7,F_HIDDEN,NAMEMARK
+    .word EMPTY,TBRANCH,9f-$
+    .word LATEST,FETCH,DUP,CFETCH,NMARK,OR,SWAP,CSTORE
+9:  .word EXIT
+  
+  
 DEFWORD "REVEAL",6,,REVEAL ; ( -- )
     .word EMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,HIDDEN,INVERT,AND,SWAP,CSTORE
@@ -1683,9 +1718,17 @@ DEFWORD "CREATE",6,,CREATE ; ( -- )
     .word LATEST,DUP,FETCH,COMMA,HERE,SWAP,STORE
     .word BL,WORD,UPPER,CFETCH,DUP,ZEROEQ,QNAME
     .word ONEPLUS,ALLOT,ALIGN
-    .word HIDE
+    .word HIDE,NAMEMARK
     .word EXIT    
   
+; efface le mot désignée et tous les suivant
+DEFWORD "FORGET",6,,FORGET ; cccc
+    .word TICK,CFATONFA,NFATOLFA,DUP,LIT,0x8000,UGREATER
+    .word QABORT
+    .byte  26
+    .ascii "Can't forget word in FLASH"
+    .align 2
+1:  .word DUP,DP,STORE,FETCH,LATEST,STORE,EXIT    
     
 ; crée une nouvelle définition dans le dictionnaire    
 DEFWORD ":",1,,COLON ; ( name --  )
@@ -1746,10 +1789,20 @@ DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- )
 ;  des outils qui facilite
 ;  le débogage.
     
-; boucle sans fin    
-;DEFCODE "INFLOOP",7,,INFLOOP
-;    bra .
-
+; vérifie si DSP est dans les limites    
+DEFWORD "?DSP",4,,QDSP    
+    .word SPFETCH,S0,FETCH,ULESS
+    .word QABORT
+    .byte 17
+    .ascii "S stack underflow"
+    .align 2
+    .word SPFETCH,S0,FETCH,LIT,DSTK_SIZE,TWOMINUS,PLUS,UGREATER
+    .word QABORT
+    .byte  16
+    .ascii "S stack overflow"
+    .align 2
+    .word EXIT
+    
 ; imprime le contenu de la pile des arguments
 ; sans en affecté le contenu.
 ; FORMAT:  < n >  X1 X2 X3 ... Xn=T
@@ -1760,8 +1813,16 @@ DEFWORD ".S",2,,DOTS  ; ( -- )
 1:  .word QDUP,ZBRANCH,2f-$,DUP,PICK,DOT,ONEMINUS
     .word BRANCH,1b-$  
 2:  .word EXIT
-    
 
+;imprime le contenu de la pile des retours  
+DEFWORD ".RTN",4,,DOTRTN ; ( -- )
+    .word BASE, FETCH, TOR,HEX
+    .word CLIT,'R',EMIT,CLIT,':',EMIT,SPACE
+    .word R0,FETCH
+1:  .word DUP,FETCH,DOT,TWOPLUS,DUP,RPFETCH,LIT,2,CELLS,MINUS,EQUAL
+    .word ZBRANCH,1b-$
+    .word CR,DROP,RFROM,BASE,STORE,EXIT  
+  
 ;lit et imprime une plage mémoire
 ; n nombre de mots à lire
 ; addr adresse de départ

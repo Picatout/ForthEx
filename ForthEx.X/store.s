@@ -70,7 +70,7 @@ HEADLESS STORE_INIT,CODE
     bset SDC_IEC,#SDC_IE
     bclr SDC_IFS,#SDC_IF
     ; configuration SPI
-    mov #(1<<MSTEN)|(1<<CKE)|SPI_CLK_17MHZ, W0 ; SCLK=FCY/4
+    mov #(1<<MSTEN)|(1<<CKE)|SCLK_FAST, W0 
     mov W0, STR_SPICON1
 ;    bset STR_SPICON2, #SPIBEN ; enhanced mode
     _enable_spi
@@ -215,11 +215,10 @@ wait_wip0:
     spi_write
     spi_read
     _disable_eeprom
-    btsc STR_SPIBUF, #WIP
+    btsc W0, #WIP
     bra wait_wip0
     return
 
-    
  ;;;;;;;;;;;;;;;
 ;  Forth words
 ;;;;;;;;;;;;;;;
@@ -233,7 +232,7 @@ DEFCODE "SDCINIT",7,,SDCINIT
     btsc SDC_PORT,#SDC_DETECT
     return
     bset sdc_status,#F_SDC_IN
-    mov #SPI_CLK_137KHZ,W1
+    mov #SCLK_SLOW,W1
     call set_spi_clock
     call dummy_clock
     _enable_sdc
@@ -316,6 +315,24 @@ DEFCODE "RLOAD",5,,RLOAD ; ( addr-bloc addr-sramL addr-sramH n -- )
 ;   les tampons EEPROM, donc il de l'espace pour 74 tampons
 ;   de 256 octets. l'interface EEPROM utilises les 4 premiers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;       
+
+; test eeprom WRITE IN PROCESS bit
+DEFCODE "?WIP",4,,QWIP ; ( -- f )
+    _enable_eeprom
+    mov #ERDSR, W0
+    spi_write
+    spi_read
+    and	#(1<<WIP),W0
+    DPUSH
+    mov W0,T
+    _disable_eeprom
+    NEXT
+    
+;boucle tant l'EEPROM n'a pas terminée
+; le cycle d'écriture.    
+DEFWORD "WWIP",4,,WWIP ; ( -- )
+1: .word QWIP,TBRANCH,1b-$,EXIT
+    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; enregistrement tampon dans l'EEPROM
@@ -330,27 +347,29 @@ DEFCODE "EEWRITE",7,,EEWRITE  ;( tampon page -- )
     mov #EWREN, W0 ; envoie de la commande d'authorisation d'écriture
     spi_write
     _disable_eeprom
-    nop
-    _enable_eeprom
-    mov #EWRITE, W0 ; envoide de la commande écriture
-    spi_write
-    and #511,T ; limite: page < 512
-    sl  T, #8, T ; bits 0:15 addresse EEPROM de la page
+    ; calcul de l'adresse EEPROM
+    and #0x1ff,T ; limite: page < 512
+    sl  T, #8, T ; bits 0:15 addresse EEPROM
     DPUSH
     clr T
     rlc T,T   ; bit 16 de l'adresse EEPROM
+    _enable_eeprom
+    mov #EWRITE, W0 ; envoide de la commande écriture
+    spi_write
     call spi_send_address
-    and #63,T ; limite: tampon < 64
+    ; calcul de l'adresse du tampon
+    ; EDS_BASE+256*page
+    and #0x3f,T ; limite: tampon < 64
     sl T,#8,T ; offset tampon
-    mov #EDS_BASE,W2  ; 0x8000 
-    add T,W2,W2 ; addresse début tampon: 0x8000+#tampon*256
+    mov #EDS_BASE,W2   
+    add T,W2,W2 
     DPOP
-    mov #BUFF_SIZE,W3 ; dimension du tampon en octets
+    mov #EPAGE_SIZE,W3 ; dimension d'une page EEPROM en octets
 1:  mov.b [W2++], W0
     spi_write
     dec W3,W3
-    bra nz, 1b
-9:  _disable_eeprom
+    bra nz, 1b  
+    _disable_eeprom
     RESET_EDS
     NEXT
     
@@ -363,33 +382,32 @@ DEFCODE "EEWRITE",7,,EEWRITE  ;( tampon page -- )
 DEFCODE "EEREAD",6,,EEREAD   ; ( tampon page -- )
      ; on s'assure qu'il n'y a pas d'écriture en cours
     call wait_wip0
-    _enable_eeprom
-    mov #EREAD, W0 ; envoie de la commande lecture
-    spi_write
     ;calcul et envoie de l'adresse EEPROM
-    and #511,T ; limite: page < 512
-    sl  T, #8, T  
+    and #0x1ff,T ; limite: page < 512
+    sl  T, #8, T  ; addresse=page*256
     DPUSH
     clr T
     rlc T,T
+    _enable_eeprom
+    mov #EREAD, W0 ; envoie de la commande lecture
+    spi_write
     call spi_send_address
     ; calcul de l'adresse tampon
-    ; 0x8000+#tampon*256
+    ; 0xEDS_BASEE+tampon*256
     and #63,T  ; limite: tampon < 64
     sl T,#8,T  
     mov #EDS_BASE,W2
     add T, W2,W2 
     DPOP
-    mov #BUFF_SIZE,W3 ; dimension tampon
+    mov #EPAGE_SIZE,W3 ; dimension tampon
 1:
     spi_read
     mov.b W0, [W2++]
     dec W3,W3
     bra nz, 1b
-9:  _disable_eeprom
+    _disable_eeprom
     NEXT
     
-DEFCONST "MAGIC",5,,MAGIC,0x55AA ; signature
 DEFCONST "EPAGE",5,,EPAGE,EPE ;efface page
 DEFCONST "ESECTOR",7,,ESECTOR,ESE ; efface secteur
 DEFCONST "EALL",4,,EALL,ECE    
@@ -404,20 +422,19 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
     mov #EWREN, W0
     spi_write
     _disable_eeprom
-    nop
     _enable_eeprom
     mov T,W2
     DPOP
     mov W2,W0
     spi_write
-    cp W2,#ECE
+    cp.b W2,#ECE
     bra z, 9f
-    cp W2,#EPE
+    cp.b W2,#EPE
     bra nz,2f
     ; efface page
-    mov #511,W0 ; page < 512
+    mov #0x1ff,W0 ; page < 512
     and T,W0,W0
-    mov EPAGE_SIZE,W1
+    mov #EPAGE_SIZE,W1
     bra 3f
 2:  ; efface un secteur
     ; calcule l'adresse du secteur
@@ -445,107 +462,148 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
 ; 0-255 data
 ; *************************    
 
+DEFCONST "MAGIC",5,,MAGIC,0x55AA ; signature
+DEFCONST "MAFIELD",7,,MAFIELD,0 ; champ signature
+DEFCONST "LAFIELD",7,,LAFIELD,2 ; champ LATEST    
+DEFCONST "DPFIELD",7,,DPFIELD,4 ; champ DP
+DEFCONST "SIFIELD",7,,SIFIELD,6 ; champ taille
+    
 ;vérifie s'il y a une image boot
-; retourne vrai|faux    
+; retourne:
+;     indicateur booléen vrai|faux
 DEFWORD "?BOOT",5,,QBOOT ; (  -- f )
     .word LIT,0,DUP,DUP,EEREAD
     .word BUFADDR, EFETCH,MAGIC ; vérification signature
     .word EQUAL,EXIT 
 
-; combiens d'octets à écrire dans la page suivante 
-;  arguments:
-;   'dp' position actuelle du pointer
-;  retourne:
-;    min(EPAGE_SIZE,HERE-dp)    
-DEFWORD "BYTESLEFT",9,,BYTESLEFT ; ( dp -- n )
-    .word HERE,SWAP,MINUS,LIT,EPAGE_SIZE,MIN
+;retourne la taille d'une image à partir
+;de l'entête de celle-ci chargée dans le
+;tampon 0.
+; retourne:
+;   'n'  taille en octets    
+DEFWORD "?SIZE",5,,QSIZE ; ( -- n )  
+    .word SIFIELD,LIT,0,BUFFERFETCH
     .word EXIT
     
-; lecture de l'entête d'image
-; réinitialise LATEST et DP
-; retourne:
-;    'n'  grandeur de l'image en octet    
-DEFWORD "BOOTHEAD",8,,BOOTHEAD ; ( -- n )
-    .word LIT,0,LIT,2,OVER,BUFFERFETCH,LATEST,STORE ; restaure LATEST
-    .word LIT,4,OVER,BUFFERFETCH,DP,STORE  ; restaure DP
-    .word LIT,6,SWAP,BUFFERCFETCH,EXIT
+; combiens d'octets à lire/écrire dans la page suivante 
+;  arguments:
+;   'dp' position actuelle du pointer data
+;  retourne:
+;    min(EPAGE_SIZE,HERE-dp)    
+DEFWORD "?BYTES",6,,QBYTES ; ( dp -- n )
+    .word HERE,SWAP,MINUS,LIT,EPAGE_SIZE,UMIN
+    .word EXIT
 
-; charge la page EEPROM à la position de dp
+;retourne l'état de l'opération de transfert
+; lorsque 'dp'==DP c'est complété
 ; arguments:
-;   'n' nombre d'octets restant à charger
+;   'dp'  pointeur de donnée
+; retourne:
+;    'f'  indicateur booléen vrai|faux    
+DEFWORD "?DONE",5,,QDONE ;  ( dp -- f )
+    .word QBYTES,ZEROEQ,EXIT
+    
+; lit la valeur de DP dans le tampon 0
+; et assigne cette valeur à la variable 
+; système DP.
+; doit-être appellée après que la page
+; 0 d'une image a étée chargée.    
+DEFWORD "SETDP",5,,SETDP ; ( -- )
+    .word DPFIELD,LIT,0,BUFFERFETCH
+    .word DP,STORE,EXIT
+    
+; lit la valeur de LATEST dans le tampon 0
+; et assigne cette valeur à la variable 
+; système LATEST.
+; doit-être appellée après que la page
+; 0 d'une image a étée chargée.    
+DEFWORD "SETLATEST",9,,SETLATEST ; ( -- )
+    .word LAFIELD,LIT,0,BUFFERFETCH
+    .word LATEST,STORE,EXIT
+    
+; charge la page EEPROM à la position de dp
+; utilise le tampon #1.    
+; arguments:
 ;   'dp' pointeur de donnée
 ;   'p' page eeprom à lire    
-DEFWORD "PGLOAD",6,,PGLOAD ; ( n dp p -- n' )
-    .word LIT,0,SWAP,EEREAD ; n dp
-    .word OVER,LIT,EPAGE_SIZE,MIN ; n dp n' 
-    .word DUP,TOR,LIT,0,BUFADDR,NROT,CMOVE
-    .word RFROM,DUP,ALLOT,MINUS,EXIT
+; retourne:
+;   'dp'  data pointer mis à jour
+DEFWORD "PGLOAD",6,,PGLOAD ; ( dp p -- dp )
+    ;lecture de l'EERPOM dans le tampon #1
+    .word LIT,1,SWAP,EEREAD ; dp
+    ;copie le tampon vers *dp
+    .word DUP,QBYTES ; S: dp n
+    .word TWODUP,PLUS,TOR ; S: dp n  R: dp+n
+    .word LIT,1,BUFADDR,NROT,CMOVE
+    .word RFROM,EXIT
     
 ; s'il y a une image système au début de l'EEPROM
 ; la charge en mémoire
-DEFWORD "BOOT",4,,BOOT ; ( --  )
+DEFWORD "BOOT",4,,BOOT ; ( -- )
     .word QBOOT,ZBRANCH,9f-$
-    .word CLEAR,BOOTHEAD,LIT,1,TOR
-1:  .word DUP,ZBRANCH,8f-$
-    .word HERE,RFROM,DUP,ONEPLUS,TOR
+    .word CLEAR,SETDP,DP0,LIT,1,TOR  ; S: dp  R: page
+1:  .word DUP,QDONE,TBRANCH,8f-$
+    .word RFROM,DUP,ONEPLUS,TOR
     .word PGLOAD,BRANCH,1b-$
-8:  .word RFROM,TWODROP    
+8:  .word RFROM,TWODROP,SETLATEST    
 9:  .word EXIT
     
     
-; copie le contenu du tampon dans le dataspace    
-; arguments:
-;   '*d' pointeur data
-;   '#t' no du tampon 
-; retourne:
-;   '*d'  pointeur data mis à jour    
-DEFWORD "BUF>DAT",7,,BUFTODAT ; ( #t *d -- *d' )
-    .word TOR,DUP,BUFADDR,CEFETCH ; S: #t n  R: *d
-    .word SWAP,BUFADDR,ONEPLUS,SWAP,RFETCH,SWAP
-    .word DUP,TOR,CMOVE
-    .word RFROM,RFROM,PLUS,EXIT
-    
-; convertie le no de secteur en no de page EEPROM
-; argument: 
-;   '#s' numéro de secteur 
-; retourne:
-;   '#p' numéro de page    
-DEFWORD "S>P",3,,SECTOPG ; ( #s -- #p )
-    .word LIT,3,AND ; #s<4
-    .word LIT,EPG_SECTOR,STAR,EXIT
-    
-    
+;; copie le contenu du tampon dans le dataspace    
+;; arguments:
+;;   '*d' pointeur data
+;;   '#t' no du tampon 
+;; retourne:
+;;   '*d'  pointeur data mis à jour    
+;DEFWORD "BUF>DAT",7,,BUFTODAT ; ( #t *d -- *d' )
+;    .word TOR,DUP,BUFADDR,CEFETCH ; S: #t n  R: *d
+;    .word SWAP,BUFADDR,ONEPLUS,SWAP,RFETCH,SWAP
+;    .word DUP,TOR,CMOVE
+;    .word RFROM,RFROM,PLUS,EXIT
+;    
+;; convertie le no de secteur en no de page EEPROM
+;; argument: 
+;;   '#s' numéro de secteur 
+;; retourne:
+;;   '#p' numéro de page    
+;DEFWORD "S>P",3,,SECTOPG ; ( #s -- #p )
+;    .word LIT,3,AND ; #s<4
+;    .word LIT,EPG_SECTOR,STAR,EXIT
+;    
+;    
     
 ;écris l'entête du boot sector, et retourne
-; la grandeur de l'image.    
-DEFWORD "HEADWRITE",9,,HEADWRITE ; ( -- dp )
-    .word MAGIC,LIT,0,DUP,BUFFERSTORE ; signature
-    .word LATEST,FETCH,LIT,2,LIT,0,BUFFERSTORE 
-    .word HERE,LIT,4,LIT,0,BUFFERSTORE
-    .word HERE,DP0,MINUS,LIT,6,LIT,0,BUFFERSTORE
-    .word LIT,0,DUP,EEWRITE,DP0,EXIT
+; la grandeur de l'image.
+; utilisation du tampon #0  
+DEFWORD "HEADWRITE",9,,HEADWRITE ; ( --  )
+    .word LIT,0,TOR ; R: 0
+    .word MAGIC,MAFIELD,RFETCH,BUFFERSTORE ; champ signature
+    .word LATEST,FETCH,LAFIELD,RFETCH,BUFFERSTORE; champ LATEST 
+    .word HERE,DPFIELD,RFETCH,BUFFERSTORE ; champ DP
+    .word HERE,DP0,MINUS,SIFIELD,RFETCH,BUFFERSTORE ; champ taille
+    .word RFROM,DUP,EEWRITE,EXIT ; tampon > EEPROM
     
 ;écris la page suivante dans l'EEPROM
+; utilise le tampon #1 pour le transfert > EEPROM.    
 ; arguments:
-;   'n' octets restant à écrire
-;   'dp' pointeur data
 ;   'p' no de page EEPROM
+;   'dp' pointeur data
 ; retourne:
-;     'p+1'  page EEPROM suivante
-;     'dp+n'  position de dp actualisée
-DEFWORD "PGWRITE",7,,PGWRITE ; ( p dp n -- p+1 dp+n )
+;   'dp+n'  position de dp actualisée
+DEFWORD "PGSAVE",6,,PGSAVE ; ( p dp -- dp+n )
     ; copie du data dans le tampon
-    .word TWODUP,PLUS,TOR; sauvegarde dp+n S: p dp n  R: dp+n
-    .word LIT,0,BUFADDR,SWAP,CMOVE ; S: p R: dp+n   
-    .word LIT,0,OVER,EEWRITE ; S: p R: dp+n
-    .word ONEPLUS,RFROM,EXIT ; S: p+1 dp+n R:
+    .word DUP,QBYTES,TWODUP,PLUS,NROT ; S: p dp+n dp n 
+    .word LIT,0,BUFADDR,SWAP,CMOVE ; S: p dp+n  
+    ; écriture du tampon dans l'EEPROM
+    .word LIT,0,ROT,DUP,DOT,EEWRITE ; S: dp+n
+    .word EXIT ; S: dp+n 
     
-; sauvarge une image au début de l'EEPROM
+; sauvegarde une image au début de l'EEPROM
 DEFWORD ">BOOT",5,,TOBOOT ; ( -- )
-    .word SYSLATEST,FETCH,LATEST,FETCH,EQUAL,ZBRANCH,1f-$
-    .word EXIT ; mémoire vide
-    .word LIT,1 ; S: p
-1:  .word HEADWRITE ; S: p dp
-2:  .word DUP,BYTESLEFT,QDUP,ZBRANCH,9f-$ ; S: p dp n 
-    .word PGWRITE,BRANCH,2b-$   
-9:  .word TWODROP,EXIT 
+    .word EMPTY,ZBRANCH,1f-$
+    .word EXIT ; rien à sauvegarder
+1:  .word LIT,1,TOR ; S:  R: page
+    .word HEADWRITE,DP0 ; S: dp  R: page
+2:  .word DUP,QDONE,TBRANCH,9f-$ ; S: dp R: p 
+    .word RFROM,DUP,ONEPLUS,TOR,SWAP,PGSAVE,BRANCH,2b-$   
+9:  .word RFROM,TWODROP,EXIT 

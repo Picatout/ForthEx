@@ -1,3 +1,17 @@
+2017-02-26
+==========
+Débogage interface SPI RAM externe et EEPROM
+Déblogage de PGSAVE, bug étrange... non résolu
+
+ajout mot FORGET
+
+
+2017-02-25
+==========
+Continuation du travail sur >BOOT et BOOT
+Ajout UMAX UMIN
+modifié wait_wip0
+
 2017-02-24
 ==========
 Continuation du travail sur la sauvegarde/restauration image BOOT 

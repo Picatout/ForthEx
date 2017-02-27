@@ -92,8 +92,8 @@
  
  
 ; fréquence SPI clock
-.equ SPI_CLK_137KHZ, 0    ; SPRE->8:1, PPRE->64:1
-.equ SPI_CLK_17MHZ, 0x1E  ; SPRE->1:1, PPRE->4:1 
+.equ SCLK_SLOW, (0<<2)|(0)  ; SPRE->8:1, PPRE->64:1 pour FCY=70Mhz > 136,7Khz 
+.equ SCLK_FAST, (7<<2)|(0)  ; SPRE->7:1, PPRE->1:1 pour FCY=70Mhz > 10Mhz
  
 .macro _disable_spi
     bclr STR_SPISTAT, #SPIEN
@@ -119,18 +119,28 @@
 
 .macro _enable_sram
     bclr STR_LAT, #SRAM_SEL
+    bra $+2  ; délais TCSS voir 23LC1024 datasheet
+    _enable_spi
 .endm
     
 .macro _disable_sram
     bset STR_LAT, #SRAM_SEL
+    bra $+2   ; délais TCSD voir 23LC1024 datasheet
+    _disable_spi
 .endm
     
 .macro _enable_eeprom
    bclr STR_LAT, #EEPROM_SEL
+   bra $+2  ; délais TCSS 
+   nop	    ;voir 25LC1024 datasheet
+   _enable_spi
 .endm
    
 .macro _disable_eeprom
    bset STR_LAT, #EEPROM_SEL
+   bra $+2    ; délais TCSD
+   nop        ; voir 25LC1024 datasheet
+   _disable_spi
 .endm
    
 .macro _enable_sdc
