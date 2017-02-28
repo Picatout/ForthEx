@@ -1,3 +1,12 @@
+2017-02-27
+==========
+Poursuite du débogage de PGSAVE. Toujours pas de solution en vue.
+EEWRITE ne fonctionne pas après le CMOVE. Par contre si j'ajoute
+DUP,DOT, ou simplement DOTS après CMOVE, EEWRITE fonctionne.
+Si j'enlève la copie de la RAM vers le tampon EEWRITE fonctionne.
+J'ai beau examiné le code de CMOVE je ne vois pas ce qui induit 
+le problème. A la sortie de CMOVE S: est dans le bon état!
+
 2017-02-26
 ==========
 Débogage interface SPI RAM externe et EEPROM

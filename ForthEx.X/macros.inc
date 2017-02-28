@@ -108,6 +108,7 @@
  
 ; set le registre DSRPAG pour l'accès à l'EDS
 .macro SET_EDS
+    ;push DSRPAG
     push DSRPAG
     movpag #1,DSRPAG
 .endm

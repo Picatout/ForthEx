@@ -911,34 +911,32 @@ DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
     SET_EDS
     mov T, W0 ; compte
     DPOP
-    mov T, W2 ; destination
-    DPOP
-    mov T, W1 ; source
+    mov T, W1 ; destination
     DPOP
     cp0 W0
     bra z, 1f
     dec W0,W0
     repeat W0
-    mov [W1++],[W2++]
-1:  RESET_EDS
+    mov [T++],[W1++]
+1:  DPOP
+    RESET_EDS
     NEXT
 
 ; copie un bloc d'octets RAM  
-; pas d'accès à la mémoire PSV    
+; DSRPAG configuré pour accès à L'EDS    
 DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
     SET_EDS
     mov T, W0 ; compte
     DPOP
-    mov T, W2 ; destination
-    DPOP
-    mov T, W1 ; source
+    mov T, W1 ; destination
     DPOP
     cp0 W0
     bra z, 1f
     dec W0,W0
     repeat W0
-    mov.b [W1++],[W2++]
-1:  RESET_EDS
+    mov.b [T++],[W1++]
+1:  DPOP
+    RESET_EDS
     NEXT
 
     
@@ -1816,12 +1814,12 @@ DEFWORD ".S",2,,DOTS  ; ( -- )
 
 ;imprime le contenu de la pile des retours  
 DEFWORD ".RTN",4,,DOTRTN ; ( -- )
-    .word BASE, FETCH, TOR,HEX
-    .word CLIT,'R',EMIT,CLIT,':',EMIT,SPACE
+    .word BASE, FETCH,HEX
+    .word CLIT,'R',EMIT,CLIT,':',EMIT
     .word R0,FETCH
-1:  .word DUP,FETCH,DOT,TWOPLUS,DUP,RPFETCH,LIT,2,CELLS,MINUS,EQUAL
+1:  .word DUP,FETCH,DOT,TWOPLUS,DUP,RPFETCH,LIT,CELL_SIZE,MINUS,EQUAL
     .word ZBRANCH,1b-$
-    .word CR,DROP,RFROM,BASE,STORE,EXIT  
+    .word CR,DROP,BASE,STORE,EXIT  
   
 ;lit et imprime une plage mémoire
 ; n nombre de mots à lire

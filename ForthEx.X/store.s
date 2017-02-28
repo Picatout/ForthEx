@@ -57,9 +57,11 @@ HEADLESS STORE_INIT,CODE
     ; EEPROM_SEL sélection EEPROM SPI
     ; STR_CLK  signal clock SPI
     ; STR_MOSI signal MOSI SPI
-    mov #((1<<SDC_SEL)+(1<<SRAM_SEL)+(1<<EEPROM_SEL)+(1<<STR_CLK)+(1<<STR_MOSI)), W0
+    mov #((1<<SDC_SEL)+(1<<SRAM_SEL)+(1<<EEPROM_SEL)), W0
     ior STR_LAT
-    com W0,W0
+    mov #~((1<<STR_CLK)+(1<<STR_MOSI)),W0
+    and STR_LAT
+    mov #~((1<<SDC_SEL)+(1<<SRAM_SEL)+(1<<EEPROM_SEL)+(1<<STR_CLK)+(1<<STR_MOSI)),W0
     and STR_TRIS
     ; initialisation détection carte SD
     bset SDC_CNEN,#SDC_DETECT
@@ -210,13 +212,14 @@ spi_send_address:
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;.global wait_wip0    
 wait_wip0:
-    _enable_eeprom  
+    _enable_eeprom
+_wip0:    
     mov #ERDSR, W0
     spi_write
     spi_read
-    _disable_eeprom
     btsc W0, #WIP
-    bra wait_wip0
+    bra _wip0
+    _disable_eeprom
     return
 
  ;;;;;;;;;;;;;;;
@@ -592,18 +595,19 @@ DEFWORD "HEADWRITE",9,,HEADWRITE ; ( --  )
 ;   'dp+n'  position de dp actualisée
 DEFWORD "PGSAVE",6,,PGSAVE ; ( p dp -- dp+n )
     ; copie du data dans le tampon
-    .word DUP,QBYTES,TWODUP,PLUS,NROT ; S: p dp+n dp n 
-    .word LIT,0,BUFADDR,SWAP,CMOVE ; S: p dp+n  
+    .word DUP,QBYTES,TWODUP,PLUS,NROT ; S: p dp+n dp n   
+    .word LIT,1,BUFADDR,SWAP,CMOVE,SWAP ; S: dp+n p  
     ; écriture du tampon dans l'EEPROM
-    .word LIT,0,ROT,DUP,DOT,EEWRITE ; S: dp+n
+    .word LIT,1,SWAP,EEWRITE ; S: dp+n
     .word EXIT ; S: dp+n 
     
 ; sauvegarde une image au début de l'EEPROM
 DEFWORD ">BOOT",5,,TOBOOT ; ( -- )
     .word EMPTY,ZBRANCH,1f-$
     .word EXIT ; rien à sauvegarder
-1:  .word LIT,1,TOR ; S:  R: page
-    .word HEADWRITE,DP0 ; S: dp  R: page
-2:  .word DUP,QDONE,TBRANCH,9f-$ ; S: dp R: p 
-    .word RFROM,DUP,ONEPLUS,TOR,SWAP,PGSAVE,BRANCH,2b-$   
-9:  .word RFROM,TWODROP,EXIT 
+1:  .word LIT,1 ; S: p 
+    .word HEADWRITE,DP0 ; S: p dp
+2:  .word DUP,QDONE,TBRANCH,9f-$ ; S: p dp  
+    .word OVER,ONEPLUS,NROT ; S: p+1 p dp 
+    .word PGSAVE,BRANCH,2b-$   
+9:  .word TWODROP,EXIT 
