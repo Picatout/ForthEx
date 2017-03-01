@@ -1,3 +1,16 @@
+2017-02-28
+==========
+travail dans store.s
+
+Ajout du mot >BUFFER et modifié  mot PGSAVE pour utiliser >BUFFER
+au lieu du code utilisant CMOVE. Conternement du bogue que je n'arrivais
+pas à résoudre.
+
+Interpréteur et compilateur complété permettant de d'ajouter des mots à partir
+de l'ordinateur forthex lui-même. L'image RAM est sauvegardée dans l'EEPROM
+en utilisant le mot >BOOT et restaurée au démarrage avec le mot BOOT.
+
+
 2017-02-27
 ==========
 Poursuite du débogage de PGSAVE. Toujours pas de solution en vue.

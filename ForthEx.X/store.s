@@ -585,6 +585,14 @@ DEFWORD "HEADWRITE",9,,HEADWRITE ; ( --  )
     .word HERE,DPFIELD,RFETCH,BUFFERSTORE ; champ DP
     .word HERE,DP0,MINUS,SIFIELD,RFETCH,BUFFERSTORE ; champ taille
     .word RFROM,DUP,EEWRITE,EXIT ; tampon > EEPROM
+
+DEFWORD ">BUFFER",7,,TOBUFFER ; ( dp t -- dp' )
+    .word BUFADDR,OVER,DUP ; S: dp addr dp dp 
+    .word QBYTES,DUP,ROT,PLUS,TOR ; S: dp addr n   R: dp+n
+    .word LIT,0,DODO
+1:  .word SWAP,DUP,ONEPLUS,NROT
+    .word CFETCH,OVER,CSTORE,ONEPLUS,DOLOOP,1b-$
+    .word TWODROP,RFROM,EXIT
     
 ;écris la page suivante dans l'EEPROM
 ; utilise le tampon #1 pour le transfert > EEPROM.    
@@ -595,8 +603,9 @@ DEFWORD "HEADWRITE",9,,HEADWRITE ; ( --  )
 ;   'dp+n'  position de dp actualisée
 DEFWORD "PGSAVE",6,,PGSAVE ; ( p dp -- dp+n )
     ; copie du data dans le tampon
-    .word DUP,QBYTES,TWODUP,PLUS,NROT ; S: p dp+n dp n   
-    .word LIT,1,BUFADDR,SWAP,CMOVE,SWAP ; S: dp+n p  
+    .word LIT,1,TOBUFFER,SWAP
+;    .word DUP,QBYTES,TWODUP,PLUS,NROT ; S: p dp+n dp n   
+;    .word LIT,1,BUFADDR,SWAP,CMOVE,SWAP ; S: dp+n p  
     ; écriture du tampon dans l'EEPROM
     .word LIT,1,SWAP,EEWRITE ; S: dp+n
     .word EXIT ; S: dp+n 
