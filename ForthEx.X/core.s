@@ -147,7 +147,7 @@ DOCONST:
     .global name_EXIT
 name_EXIT :
     .word 0
-0:  .byte 4|F_HIDDEN
+0:  .byte 4|F_MARK
     .ascii "EXIT"
     .align 2
     .global EXIT
@@ -741,7 +741,7 @@ DEFCODE "ABS",3,,ABS ; ( n -- +n ) valeur absolue de n
 
 ; convertie valeur simple en 
 ; valeur double    
-DEFCODE ">D",2,,TODOUBLE ; ( n -- d ) 
+DEFCODE "S>D",3,,STOD ; ( n -- d ) 
     DPUSH
     clr W0
     btsc T,#15
@@ -939,6 +939,35 @@ DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
     RESET_EDS
     NEXT
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  manipulation de caractères
+;  et chaînes
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+; retourne l'espace occupée
+; par n caractères en unité adresse
+DEFWORD "CHARS",5,,CHARS ; ( n1 -- n2 )
+9:  .word EXIT
+   
+; incrémente l'adresse d'un caractère
+DEFWORD "CHAR+",5,,CHARPLUS ; ( addr -- addr' )  
+    .word ONEPLUS,EXIT
+    
+; recherche le prochain mot séparé
+; par un espace dans le flux d'entré.    
+; et empile le premier caractère de ce mot
+DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
+    .word BL,WORD,DUP,CFETCH,ZEROEQ
+    .word QABORT
+    .byte 16
+    .ascii "missing caracter"
+    .align 2
+    .word ONEPLUS,CFETCH,EXIT
+    
+DEFWORD "[CHAR]",6,F_IMMED,COMPILECHAR ; cccc 
+    .word QCOMPILE
+    .word CHAR,COMPILECFA,LIT,COMMA,EXIT
+    
     
 ; recherche du caractère 'c' dans le bloc
 ; mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
@@ -1158,15 +1187,15 @@ DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
   
 ;imprime la liste des mots du dictionnaire
 DEFWORD "WORDS",5,,WORDS ; ( -- )
-    .word CR,LATEST
+    .word LIT,0,CR,LATEST
 1:  .word FETCH,DUP,ZEROEQ,TBRANCH,3f-$
     .word DUP,CFETCH,HIDDEN,AND,ZBRANCH,4f-$ ; n'affiche pas les mots cachés
     .word TWOMINUS,BRANCH,1b-$
 4:  .word DUP,DUP,CFETCH,LENMASK,AND  ; NFA NFA LEN
     .word DUP,GETX,PLUS,LIT,64,ULESS,TBRANCH,2f-$
     .word CR
-2:  .word TOR,ONEPLUS,RFROM,TYPE,SPACE,TWOMINUS,BRANCH,1b-$
-3:  .word DROP,CR,EXIT
+2:  .word TOR,ONEPLUS,RFROM,TYPE,SPACE,TWOMINUS,SWAP,ONEPLUS,SWAP,BRANCH,1b-$
+3:  .word DROP,CR,DOT,EXIT
     
 ; convertie la chaîne comptée en majuscules
 DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
@@ -1489,7 +1518,13 @@ DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
     .word BRANCH,9f-$
 5:  .word COUNT,TYPE,SPACE,LIT,'?',EMIT,CR,ABORT    
 9:  .word EXIT
- 
+
+; version immédiate de '
+DEFWORD "[']",3,F_IMMED,COMPILETICK ; cccc 
+    .word QCOMPILE
+    .word TICK,COMPILECFA,LIT,COMMA,EXIT
+    
+    
 ; compile le CFA du mot suivant dans le flux d'entrée  
 DEFWORD "[COMPILE]",9,F_IMMED,ICOMPILE ; ( x <cccc> -- )
     .word TICK,COMMA,EXIT

@@ -93,7 +93,7 @@
  
 ; fréquence SPI clock
 .equ SCLK_SLOW, (0<<2)|(0)  ; SPRE->8:1, PPRE->64:1 pour FCY=70Mhz > 136,7Khz 
-.equ SCLK_FAST, (7<<2)|(0)  ; SPRE->7:1, PPRE->1:1 pour FCY=70Mhz > 10Mhz
+.equ SCLK_FAST, (4<<2)|(0)  ; SPRE->4:1, PPRE->1:1 pour FCY=70Mhz > 17,5Mhz
  
 .macro _disable_spi
     bclr STR_SPISTAT, #SPIEN

@@ -1,15 +1,26 @@
+2017-03-01
+==========
+Ajout des mots CHARS, CHAR+ et CHAR
+Modification du mot WORDS: affiche le nombre de mots trouvés dans el dictionnaire
+EXIT est maintenant visible.
+>> à faire:
+     corrigé TONE
+     ajouter FM/MOD SM/REM ['] [CHAR]
+     relire 6.1.1900
+
 2017-02-28
 ==========
 travail dans store.s
 
 Ajout du mot >BUFFER et modifié  mot PGSAVE pour utiliser >BUFFER
-au lieu du code utilisant CMOVE. Conternement du bogue que je n'arrivais
+au lieu du code utilisant CMOVE. Contournement du bogue que je n'arrivais
 pas à résoudre.
 
 Interpréteur et compilateur complété permettant de d'ajouter des mots à partir
 de l'ordinateur forthex lui-même. L'image RAM est sauvegardée dans l'EEPROM
 en utilisant le mot >BOOT et restaurée au démarrage avec le mot BOOT.
 
+Ajout du mot FORGET
 
 2017-02-27
 ==========

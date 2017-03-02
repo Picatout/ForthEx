@@ -694,12 +694,6 @@ DEFWORD "?",1,,QUESTION ; ( addr -- )
 DEFWORD "C?",2,,CQUESTION ; ( c-addr -- )    
     .word CFETCH,DOT,EXIT
   
-; imprime n fois le caractère c  
-DEFWORD "CHARS",5,,CHARS ; ( +n c -- )
-    .word SWAP,LIT,0,DODO
-1:  .word DUP,EMIT,DOLOOP,1b-$
-    .word DROP,EXIT
-
     
 ;.end
 

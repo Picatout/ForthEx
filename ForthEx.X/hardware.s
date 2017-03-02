@@ -115,7 +115,8 @@ _cold:
     .word HARDWARE_INIT,VARS_INIT
     .word VERSION,COUNT,TYPE,CR 
     .word QUIT ; boucle de l'interpréteur
-
+    .word BRANCH,_cold-$
+    
 ; initialisation matérielle    
 HEADLESS HARDWARE_INIT, HWORD
     .word SET_CLOCK
