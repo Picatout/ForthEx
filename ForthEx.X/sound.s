@@ -23,7 +23,7 @@
     
 .include "sound.inc"
 
-.equ FCT, (FCY/8)
+.equ FCT, (FCY/64)
     
 .section .sound.bss bss
     
@@ -43,10 +43,11 @@ HEADLESS SOUND_INIT,CODE
     mov #(AUDIO_FN<<AUDIO_PPSbit),W0
     ior AUDIO_RPOR
     ; configuration output compare
-    clr AUDIO_OCCON2
-    mov #((1<<OCTSEL0)|(5<<OCM0)), W0
+    mov #((1<<OCTRIG)|(0xd)),W0 ; trigger on OCxRS compare
+    mov W0,AUDIO_OCCON2
+    mov #((AUDIO_TMR<<OCTSEL0)|(3<<OCM0)), W0  ; toggle mode
     mov W0, AUDIO_OCCON1
-    mov #(1<<TCKPS0),W0  ; Fct=Fcy/8
+    mov #(2<<TCKPS0),W0  ; Fct=Fcy/64
     mov W0, AUDIO_TMRCON
    ; return
     NEXT
@@ -56,10 +57,13 @@ HEADLESS SOUND_INIT,CODE
  ;;;;;;;;;;;;;;;;;;
  
  DEFCODE "TONE",4,,TONE  ; ( duration Nfr -- )
-    mov T, AUDIO_PER
-    mov T, AUDIO_OCRS
-    lsr T, T
-    mov T, AUDIO_OCR
+    mov #((FCT/2)&0xffff),W0
+    mov #((FCT/2)>>16),W1
+    repeat #17
+    div.ud W0,T
+    dec W0,W0
+    mov W0, AUDIO_OCRS
+    mov W0, AUDIO_OCR
     DPOP
     bset AUDIO_TMRCON, #TON
     mov T, tone_len

@@ -739,6 +739,18 @@ DEFCODE "ABS",3,,ABS ; ( n -- +n ) valeur absolue de n
     neg T,T
     NEXT
 
+;valeur absolue d'un entier double
+DEFCODE "DABS",4,,DABS ; ( d -- +d )
+    btss T,#15
+    bra 9f
+    mov [DSP],W0
+    com T,T
+    com W0,W0
+    add #1,W0
+    addc #0,T
+    mov W0,[DSP]
+9:  NEXT    
+    
 ; convertie valeur simple en 
 ; valeur double    
 DEFCODE "S>D",3,,STOD ; ( n -- d ) 
@@ -748,6 +760,34 @@ DEFCODE "S>D",3,,STOD ; ( n -- d )
     com W0,W0
     mov W0,T
     NEXT
+
+; inverse n1 si n2 est négatif    
+DEFCODE "?NEGATE",7,,QNEGATE ; ( n1 n2 -- n3)
+    mov T,W0
+    DPOP
+    btsc W0,#15
+    neg T,T
+    NEXT    
+    
+; division symétrique entier double par simple
+; arrondie vers zéro    
+; adapté de camel Forth pour MSP430
+DEFWORD "SM/REM",6,,SMSLASHREM ; ( d1 n1 -- n2 n3 )
+    .word TWODUP,XOR,TOR,OVER,TOR
+    .word ABS,TOR,DABS,RFROM,UMSLASHMOD
+    .word SWAP,RFROM,QNEGATE,SWAP,RFROM,QNEGATE
+    .word EXIT
+
+; division double/simple arrondie au plus petit.
+; adapté de camel Forth pour MSP430    
+DEFWORD "FM/MOD",6,,FMSLASHMOD ; ( d1 n1 -- n2 n3 )    
+    .word DUP,TOR,TWODUP,XOR,TOR,TOR
+    .word DABS,RFETCH,ABS,UMSLASHMOD
+    .word SWAP,RFROM,QNEGATE,SWAP,RFROM,ZEROLT,ZBRANCH,9f-$
+    .word NEGATE,OVER,ZBRANCH,9f-$
+    .word RFETCH,ROT,MINUS,SWAP,ONEMINUS
+9:  .word RFROM,DROP,EXIT
+
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 ; opérations logiques bit à bit
@@ -790,10 +830,21 @@ DEFCODE "DNEGATE",7,,DNEGATE ; ( d -- n )
 ;;;;;;;;;;;;;;;
 ; comparaisons
 ;;;;;;;;;;;;;;;
+    
 DEFCODE "0=",2,,ZEROEQ  ; ( n -- f )  f=  n==0
     sub #1,T
     subb T,T,T
     NEXT
+
+;vrai si n différent d0 0    
+DEFCODE "0<>",3,,ZERODIFF ; ( n -- f ) 
+    clr W0
+    cp0 T
+    bra z, 9f
+    com W0,W0
+9:  mov W0,T
+    NEXT
+    
     
 DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
     add T,T,T
@@ -1814,7 +1865,37 @@ DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- )
     .word LBRACKET,EXIT
     
 
-  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  mots du core étendu
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; imprime le commentaire délimité par )
+DEFWORD ".(",2,F_IMMED,DOTPAREN ; ccccc    
+    .word LIT,')',WORD,COUNT,TYPE,EXIT
+    
+; envoie 2 élément de S au sommet de R
+; de sorte qu'il soient dans le même ordre
+; >>> ne pas utiliser en mode interprétation    
+DEFWORD "2>R",3,,TWOTOR ;  S: x1 x2 --  R: -- x1 x2
+    .word RFROM,NROT,SWAP,TOR,TOR,TOR,EXIT
+    
+; envoie 2 éléments de R vers de sorte
+; qu'ils soient dans le même ordre
+; >>> ne pas utiliser en mode interprétation    
+DEFWORD "2R>"3,,TWORFROM ; S: -- x1 x2  R: x1 x2 --
+    .word RFROM,RFROM,RFROM,SWAP,ROT,TOR,EXIT
+    
+; copie 2 éléments de R vers S en consversant l'ordre    
+; >>> ne pas utiliser en mode interprétation
+; >>> 2R> doit-être appellé avant la sortie
+; >>> de la routine qui utilise ce mot.    
+; >>> Au préalable 2>R a été appellé dans la même routine.    
+DEFWORD "2R@",3,,TWORFETCH ; S: -- x1 x2 R: x1 x2 -- x1 x2    
+    .word RFROM,RFROM,RFETCH,OVER,TOR,ROT,TOR
+    .word SWAP,EXIT
+    
+    
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;     OUTILS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -1,12 +1,23 @@
+2017-03-02
+==========
+Réparé SOUND_INIT et TONE
+ajouté mots DABS, FM/MOD SM/REM, ?NEGATE
+complété tous les mots du core selon ref: http://lars.nocrew.org/forth2012/core.html
+excepté ENVIRONMENT?
+
+ajout à core extension:
+ .(  0<> 2>R  2R> 2R@
+
+
 2017-03-01
 ==========
-Ajout des mots CHARS, CHAR+ et CHAR
-Modification du mot WORDS: affiche le nombre de mots trouvés dans el dictionnaire
+Ajout des mots CHARS, CHAR+ et CHAR  [CHAR] [']
+Modification du mot WORDS: affiche le nombre de mots trouvés dans le dictionnaire
 EXIT est maintenant visible.
 >> à faire:
      corrigé TONE
-     ajouter FM/MOD SM/REM ['] [CHAR]
-     relire 6.1.1900
+     ajouter FM/MOD SM/REM
+     relire 6.1.1900 concernant MOVE, CMOVE et CMOVE>
 
 2017-02-28
 ==========
