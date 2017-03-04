@@ -195,7 +195,8 @@ DEFCODE "(?BRANCH)",9,F_HIDDEN,ZBRANCH ; ( f -- )
     
     
 ; exécution de DO
-DEFCODE "(DO)",4,F_HIDDEN,DODO ; ( n  n -- ) R( -- n n )
+DEFCODE "(DO)",4,F_HIDDEN,DODO ; ( n  n -- ) R( -- I LIMIT )
+doit:
     RPUSH LIMIT
     RPUSH I
     mov T, I
@@ -204,6 +205,16 @@ DEFCODE "(DO)",4,F_HIDDEN,DODO ; ( n  n -- ) R( -- n n )
     DPOP
     NEXT
 
+; exécution de ?DO
+DEFCODE "(?DO)",5,F_HIDDEN,DOQDO ; ( n n -- ) R( -- | I LIMIT )    
+    cp T,[DSP]
+    bra z, 9f
+    add #(2*CELL_SIZE),IP ; saute le branchement inconditionnel
+    bra doit
+9:  DPOP
+    DPOP
+    NEXT
+    
 ; exécution de LOOP
 ; la boucle se termine quand I==LIMIT    
 DEFCODE "(LOOP)",6,F_HIDDEN,DOLOOP ; ( -- )
@@ -255,6 +266,7 @@ DEFCODE "REBOOT",6,,REBOOT ; ( -- )  démarrage à froid
     
     
 DEFCODE "EXECUTE",7,,EXECUTE ; ( i*x cfa -- j*x ) 6.1.1370 exécute le code à l'adresse *cfa
+exec:
     mov T, WP ; CFA
     DPOP
     mov [WP++],W0  ; code address, WP=PFA
@@ -262,9 +274,8 @@ DEFCODE "EXECUTE",7,,EXECUTE ; ( i*x cfa -- j*x ) 6.1.1370 exécute le code à l'a
 
 ;exécute le code machine à l'adresse *addr
 DEFCODE "@EXECUTE",8,,FEXEC   ; ( *addr -- )
-    mov [T],W0
-    DPOP
-    goto W0
+    mov [T],T
+    bra exec
     
 DEFCODE "@",1,,FETCH ; ( addr -- n )
     mov [T],T
@@ -1404,7 +1415,7 @@ DEFWORD ">COUNTED",8,,TOCOUNTED ; ( src n dest -- )
 
 ; alloue une cellule pour x à la position DP
 DEFWORD ",",1,,COMMA  ; ( x -- )
-    .word HERE,STORE,LIT,2,ALLOT
+    .word HERE,STORE,LIT,CELL_SIZE,ALLOT
     .word EXIT
     
 ; alloue le caractère 'c' à la position DP    
@@ -1500,6 +1511,7 @@ DEFWORD "NFA>CFA",7,,NFATOCFA ; ( nfa -- cfa )
 ; passe du champ CFA au champ PFA
 DEFWORD ">BODY",5,,TOBODY ; ( cfa -- pfa )
     .word CELLPLUS,EXIT;
+
     
 ;passe du champ CFA au champ NFA
 ;  Il n'y a pas de lien arrière entre le CFA et le NFA
@@ -1576,10 +1588,6 @@ DEFWORD "[']",3,F_IMMED,COMPILETICK ; cccc
     .word TICK,COMPILECFA,LIT,COMMA,EXIT
     
     
-; compile le CFA du mot suivant dans le flux d'entrée  
-DEFWORD "[COMPILE]",9,F_IMMED,ICOMPILE ; ( x <cccc> -- )
-    .word TICK,COMMA,EXIT
-  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  les 4 mots suivants
 ;  sont utilisés pour résoudre
@@ -1658,6 +1666,11 @@ DEFWORD "(DO$)",5,F_HIDDEN,DOSTR ; ( -- addr )
 ; qui suis.    
 DEFWORD "(S\")",4,F_HIDDEN,STRQUOTE ; ( -- addr u )    
     .word DOSTR,COUNT,EXIT
+ 
+;RUNTIME de C"
+; empile l'adresse de la chaîne comptée.
+DEFWORD "(C\")",4,F_HIDDEN,RT_CQUOTE ; ( -- c-addr )
+    .word DOSTR,EXIT
     
 ;RUNTIME DE ."
 ; imprime la chaîne litérale    
@@ -1675,9 +1688,14 @@ DEFWORD "(,\")",4,F_HIDDEN,STRCOMPILE ; ( -- )
     
 ; interprétation: imprime la chaîne litérale qui suis.    
 ; compilation: compile le runtine (S") et la chaîne litérale    
-DEFWORD "S\"",2,F_IMMED,SQUOTE ; ccccc" ( -- | c-addr u)
+DEFWORD "S\"",2,F_IMMED,SQUOTE ; ccccc" runtime: ( -- | c-addr u)
     .word QCOMPILE
     .word COMPILECFA,STRQUOTE,STRCOMPILE,EXIT
+    
+DEFWORD "C\"",2,F_IMMED,CQUOTE ; ccccc" runtime ( -- c-addr )
+    .word QCOMPILE
+    .word COMPILECFA,RT_CQUOTE,STRCOMPILE,EXIT
+    
     
 ; interprétation: imprime la chaîne litérale qui suis
 ; compilation: compile le runtime  (.")    
@@ -1699,6 +1717,18 @@ DEFWORD "DO",2,F_IMMED,DO ; ( C: -- a 0 ) compile xt de (DO)
     .word QCOMPILE,COMPILECFA,DODO
     .word HERE,TOCSTK,LIT,0,TOCSTK,EXIT
 
+; compile xt de (?DO) ref: 6.2.0620
+; ?DO est semblabe à DO excepté que la 
+; boucle n'est exécutée qui si les paramètres initiaux
+; ne sont pas égaux: start<>limit    
+; empile l'adresse de début de la boucle sur cstack
+; empile 0 comme garde pour FIXLEAVE
+DEFWORD "?DO",3,F_IMMED,QDO ; ( C: -- a 0 )
+    .word QCOMPILE,COMPILECFA,DOQDO
+    .word HERE,LIT,2,CELLS,PLUS,TOCSTK,LIT,0,TOCSTK
+    .word COMPILECFA,BRANCH,MARKSLOT,TOCSTK,EXIT
+    
+    
 ;compile LEAVE
 DEFWORD "LEAVE",5,F_IMMED,LEAVE ; (C: -- slot )
     .word QCOMPILE,COMPILECFA,UNLOOP
@@ -1796,13 +1826,17 @@ DEFWORD "?NAME",5,,QNAME ; ( i*x f -- | i*x )
 
 DEFWORD ",EXIT",5,F_IMMED,CEXIT ; ( -- )
     .word COMPILECFA,EXIT,EXIT
+
+DEFWORD "HEADER",6,,HEADER ; ( -- )
+    .word LATEST,DUP,FETCH,COMMA,HERE
+    .word SWAP,STORE
+    .word BL,WORD,UPPER,CFETCH,DUP,ZEROEQ,QNAME
+    .word ONEPLUS,ALLOT,ALIGN,NAMEMARK,HIDE,EXIT
     
 ;cré une nouvelle entête dans le dictionnaire  
 DEFWORD "CREATE",6,,CREATE ; ( -- )
-    .word LATEST,DUP,FETCH,COMMA,HERE,SWAP,STORE
-    .word BL,WORD,UPPER,CFETCH,DUP,ZEROEQ,QNAME
-    .word ONEPLUS,ALLOT,ALIGN
-    .word HIDE,NAMEMARK
+    .word HEADER,REVEAL
+    .word LIT,DOVAR,COMMA
     .word EXIT    
   
 ; efface le mot désignée et tous les suivant
@@ -1816,7 +1850,7 @@ DEFWORD "FORGET",6,,FORGET ; cccc
     
 ; crée une nouvelle définition dans le dictionnaire    
 DEFWORD ":",1,,COLON ; ( name --  )
-    .word CREATE ; ( -- )
+    .word HEADER ; ( -- )
     .word RBRACKET,COMPILECFA,ENTER,EXIT
 
     
@@ -1849,11 +1883,11 @@ DEFWORD "DOES>",5,F_IMMED,COMMADOES  ; ( -- )
     
 ; création d'une variable
 DEFWORD "VARIABLE",8,,VARIABLE ; ()
-    .word CREATE,RBRACKET,LIT,DOVAR,COMMA,LIT,0,COMMA,SEMICOLON,EXIT
+    .word CREATE,LIT,0,COMMA,EXIT
 
 ; création d'une constante
 DEFWORD "CONSTANT",8,,CONSTANT ; ()
-    .word CREATE,RBRACKET,LIT,DOCONST,COMMA,COMMA,SEMICOLON,EXIT
+    .word HEADER,REVEAL,LIT,DOCONST,COMMA,COMMA,EXIT
     
    
     
@@ -1869,6 +1903,14 @@ DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- )
 ;  mots du core étendu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+DEFWORD "DEFER",5,,DEFER ; ccccc ( -- )
+    .word CREATE,RBRACKET,LIT,code_FEXEC,COMMA,COMPILECFA,ABORT
+    .word SEMICOLON,EXIT
+    
+DEFWORD "DEFER!",6,,DEFERSTORE ;  ( xt1 xt2 -- )
+    .word TOBODY,STORE,EXIT
+    
+    
 ; imprime le commentaire délimité par )
 DEFWORD ".(",2,F_IMMED,DOTPAREN ; ccccc    
     .word LIT,')',WORD,COUNT,TYPE,EXIT
