@@ -1,8 +1,18 @@
+2017-03-05
+==========
+Ajout de :NONAME
+
+2017-03-04
+==========
+Ajout de DEFER DEFER! DEFER@  IS  ?WORD
+
 2017-03-03
 ==========
 Suppression du mot [COMPILE]
 Ajout de ?DO  C"
+modification à CREATE VARIABLE CONSTANT :
 
+à faire: revoir le système <BUILDS  DOES>  pas correct.
 
 2017-03-02
 ==========

@@ -130,6 +130,7 @@ DOUSER: ; empile pointeur sur variable utilisateur
     add W0,VP,T
     NEXT
 
+    
     .global DOVAR
 DOVAR:
     DPUSH
@@ -141,6 +142,8 @@ DOCONST:
     DPUSH
     mov [WP],T
     NEXT
+
+    
     
     .section .sysdict psv
     .align 2
@@ -157,6 +160,17 @@ EXIT:
     .global code_EXIT
 code_EXIT :			;pfa,  assembler code follows
     RPOP IP
+    NEXT
+
+;    .global DODOES
+;HEADLESS "DODOES" ; sémantique d'initialisation deDOES>
+;    RPUSH IP
+;    mov [WP++],IP
+;    DPUSH
+;    mov WP,T
+;    NEXT
+    
+HEADLESS "NOP" ; ( -- )
     NEXT
    
 ; empile un litéral    
@@ -1028,7 +1042,7 @@ DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
     
 DEFWORD "[CHAR]",6,F_IMMED,COMPILECHAR ; cccc 
     .word QCOMPILE
-    .word CHAR,COMPILECFA,LIT,COMMA,EXIT
+    .word CHAR,CFA_COMMA,LIT,COMMA,EXIT
     
     
 ; recherche du caractère 'c' dans le bloc
@@ -1466,7 +1480,7 @@ DEFWORD "?ABORT",6,F_HIDDEN,QABORT ; ( i*x f  -- | i*x) ( R: j*x -- | j*x )
   
 ; compile le runtime de ?ABORT
 DEFWORD "ABORT\"",6,F_IMMED,ABORTQUOTE ; (  --  )
-    .word COMPILECFA,QABORT,STRCOMPILE,EXIT
+    .word CFA_COMMA,QABORT,STRCOMPILE,EXIT
     
 ; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT ; ( -- )
@@ -1585,7 +1599,7 @@ DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
 ; version immédiate de '
 DEFWORD "[']",3,F_IMMED,COMPILETICK ; cccc 
     .word QCOMPILE
-    .word TICK,COMPILECFA,LIT,COMMA,EXIT
+    .word TICK,CFA_COMMA,LIT,COMMA,EXIT
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1635,16 +1649,20 @@ DEFWORD "]",1,F_IMMED,RBRACKET ; ( -- )
 DEFWORD "[COMPILE]",9,F_IMMED,BRCOMPILE ; ( <cccc> -- )
   .word QCOMPILE,TICK,COMMA,EXIT
   
-;compile un cfa fourni en argument
-DEFWORD "COMPILE",7,F_IMMED,COMPILECFA  ; ( -- )
+;compile un cfa fourni en literal
+DEFWORD "CFA,",6,F_IMMED,CFA_COMMA  ; ( -- )
   .word RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
 
+; abort si le nom n'est pas trouvé dans le dictionnaire  
+DEFWORD "?WORD",5,,QWORD ; ( c-addr -- cfa 1 | cfa -1 )
+   .word BL,WORD,UPPER,FIND,QDUP,ZEROEQ,ZBRANCH,2f-$
+   .word COUNT,TYPE,LIT,'?',EMIT,ABORT
+2: .word EXIT   
+  
 ;diffère la compilation du mot qui suis dans le flux
 DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
-    .word QCOMPILE 
-    .word BL,WORD,UPPER,FIND,DUP,ZEROEQ,ZBRANCH,2f-$
-    .word DROP,COUNT,TYPE,LIT,'?',ABORT
-2:  .word ZEROGT,3f-$
+    .word QCOMPILE ,QWORD
+    .word ZEROGT,3f-$
   ; mot non immmédiat
     .word LIT,LIT,COMMA,BRANCH,9f-$
   ; mot immédiat  
@@ -1653,7 +1671,7 @@ DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
   
 DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
     .word STATE,FETCH,ZBRANCH,9f-$
-    .word COMPILECFA,LIT,COMMA
+    .word CFA_COMMA,LIT,COMMA
 9:  .word EXIT
 
 ;RUNTIME  qui retourne l'adresse d'une chaîne litérale
@@ -1690,18 +1708,18 @@ DEFWORD "(,\")",4,F_HIDDEN,STRCOMPILE ; ( -- )
 ; compilation: compile le runtine (S") et la chaîne litérale    
 DEFWORD "S\"",2,F_IMMED,SQUOTE ; ccccc" runtime: ( -- | c-addr u)
     .word QCOMPILE
-    .word COMPILECFA,STRQUOTE,STRCOMPILE,EXIT
+    .word CFA_COMMA,STRQUOTE,STRCOMPILE,EXIT
     
 DEFWORD "C\"",2,F_IMMED,CQUOTE ; ccccc" runtime ( -- c-addr )
     .word QCOMPILE
-    .word COMPILECFA,RT_CQUOTE,STRCOMPILE,EXIT
+    .word CFA_COMMA,RT_CQUOTE,STRCOMPILE,EXIT
     
     
 ; interprétation: imprime la chaîne litérale qui suis
 ; compilation: compile le runtime  (.")    
 DEFWORD ".\"",2,F_IMMED,DOTQUOTE ; ( -- )
     .word STATE,FETCH,ZBRANCH,4f-$
-    .word COMPILECFA,DOTSTR,STRCOMPILE,EXIT
+    .word CFA_COMMA,DOTSTR,STRCOMPILE,EXIT
 4:  .word SLIT,TYPE,EXIT  
     
 DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
@@ -1714,7 +1732,7 @@ DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
 ; empile l'adresse du début de la boucle sur cstack
 ; empile 0 comme garde pour FIXLEAVE   
 DEFWORD "DO",2,F_IMMED,DO ; ( C: -- a 0 ) compile xt de (DO)
-    .word QCOMPILE,COMPILECFA,DODO
+    .word QCOMPILE,CFA_COMMA,DODO
     .word HERE,TOCSTK,LIT,0,TOCSTK,EXIT
 
 ; compile xt de (?DO) ref: 6.2.0620
@@ -1724,15 +1742,15 @@ DEFWORD "DO",2,F_IMMED,DO ; ( C: -- a 0 ) compile xt de (DO)
 ; empile l'adresse de début de la boucle sur cstack
 ; empile 0 comme garde pour FIXLEAVE
 DEFWORD "?DO",3,F_IMMED,QDO ; ( C: -- a 0 )
-    .word QCOMPILE,COMPILECFA,DOQDO
+    .word QCOMPILE,CFA_COMMA,DOQDO
     .word HERE,LIT,2,CELLS,PLUS,TOCSTK,LIT,0,TOCSTK
-    .word COMPILECFA,BRANCH,MARKSLOT,TOCSTK,EXIT
+    .word CFA_COMMA,BRANCH,MARKSLOT,TOCSTK,EXIT
     
     
 ;compile LEAVE
 DEFWORD "LEAVE",5,F_IMMED,LEAVE ; (C: -- slot )
-    .word QCOMPILE,COMPILECFA,UNLOOP
-    .word COMPILECFA,BRANCH,MARKSLOT,TOCSTK,EXIT  
+    .word QCOMPILE,CFA_COMMA,UNLOOP
+    .word CFA_COMMA,BRANCH,MARKSLOT,TOCSTK,EXIT  
     
     
 ; résout toutes les adresses pour les branchements
@@ -1746,12 +1764,12 @@ DEFWORD "FIXLOOP",7,F_IMMED|F_HIDDEN,FIXLOOP ; (C: a 0 i*slot -- )
 ; compile xt de (LOOP)  
 ; résout toutes les adresses de saut.  
 DEFWORD "LOOP",4,F_IMMED,LOOP ; ( -- )
-    .word QCOMPILE,COMPILECFA,DOLOOP,FIXLOOP,EXIT
+    .word QCOMPILE,CFA_COMMA,DOLOOP,FIXLOOP,EXIT
     
 ; compile execution de +LOOP
 ; résout toutes les adressess de saut.    
 DEFWORD "+LOOP",5,F_IMMED,PLUSLOOP ; ( -- )
-    .word QCOMPILE,COMPILECFA,DOPLOOP,FIXLOOP,EXIT
+    .word QCOMPILE,CFA_COMMA,DOPLOOP,FIXLOOP,EXIT
     
 ; compile le début d'une boucle    
 DEFWORD "BEGIN",5,F_IMMED,BEGIN ; ( -- a )
@@ -1759,28 +1777,28 @@ DEFWORD "BEGIN",5,F_IMMED,BEGIN ; ( -- a )
 
 ; compile une boucle infinie    
 DEFWORD "AGAIN",5,F_IMMED,AGAIN ; ( a -- )
-    .word QCOMPILE,COMPILECFA,BRANCH,BACKJUMP,EXIT
+    .word QCOMPILE,CFA_COMMA,BRANCH,BACKJUMP,EXIT
     
 DEFWORD "UNTIL",5,F_IMMED,UNTIL ; ( a -- )
-    .word QCOMPILE,COMPILECFA,ZBRANCH,BACKJUMP,EXIT
+    .word QCOMPILE,CFA_COMMA,ZBRANCH,BACKJUMP,EXIT
 
 DEFWORD "IF",2,F_IMMED,IIF ; ( -- slot )
-    .word QCOMPILE,COMPILECFA,ZBRANCH,MARKSLOT,EXIT
+    .word QCOMPILE,CFA_COMMA,ZBRANCH,MARKSLOT,EXIT
 
 DEFWORD "THEN",4,F_IMMED,THEN ; ( slot -- )
     .word QCOMPILE,FOREJUMP,EXIT
     
 DEFWORD "ELSE",4,F_IMMED,ELSE ; ( slot1 -- slot2 )     
-    .word QCOMPILE,COMPILECFA,BRANCH,MARKSLOT,SWAP,THEN,EXIT
+    .word QCOMPILE,CFA_COMMA,BRANCH,MARKSLOT,SWAP,THEN,EXIT
 
 ; compile un branchement avant    
 DEFWORD "WHILE",5,F_IMMED,WHILE ;  ( a -- slot a)   
-    .word QCOMPILE,COMPILECFA,ZBRANCH,MARKSLOT,SWAP,EXIT
+    .word QCOMPILE,CFA_COMMA,ZBRANCH,MARKSLOT,SWAP,EXIT
     
 ; compile un branchement arrière et
 ; résout le branchement avant du WHILE    
 DEFWORD "REPEAT",6,F_IMMED,REPEAT ; ( slot a -- )
-    .word QCOMPILE,COMPILECFA,BRANCH,BACKJUMP,FOREJUMP,EXIT
+    .word QCOMPILE,CFA_COMMA,BRANCH,BACKJUMP,FOREJUMP,EXIT
 
 ;marque le début d'une structure CASE ENDCASE
 DEFWORD "CASE",4,F_IMMED,CASE ; ( -- case-sys )
@@ -1788,12 +1806,12 @@ DEFWORD "CASE",4,F_IMMED,CASE ; ( -- case-sys )
 
 ;compile la strucutre d'un OF    
 DEFWORD "OF",2,F_IMMED,OF ; ( -- slot )    
-    .word QCOMPILE,COMPILECFA,OVER,COMPILECFA,EQUAL,COMPILECFA,ZBRANCH
+    .word QCOMPILE,CFA_COMMA,OVER,CFA_COMMA,EQUAL,CFA_COMMA,ZBRANCH
     .word MARKSLOT,EXIT
     
 ;compile la structure d'un ENDOF
 DEFWORD "ENDOF",5,F_IMMED,ENDOF ; ( slot 1 -- slot2 )
-    .word QCOMPILE,COMPILECFA,BRANCH,MARKSLOT,SWAP,FOREJUMP,EXIT
+    .word QCOMPILE,CFA_COMMA,BRANCH,MARKSLOT,SWAP,FOREJUMP,EXIT
     
 ;résoue les sauts de chaque ENDOF
 ; et compile un DROP
@@ -1801,7 +1819,7 @@ DEFWORD "ENDCASE",7,F_IMMED,ENDCASE ; ( case-sys -- )
     .word QCOMPILE
 1:  .word QDUP,ZBRANCH,8f-$
     .word FOREJUMP,BRANCH,1b-$
-8:  .word COMPILECFA,DROP,EXIT
+8:  .word CFA_COMMA,DROP,EXIT
   
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1822,23 +1840,35 @@ DEFWORD "?NAME",5,,QNAME ; ( i*x f -- | i*x )
     .ascii "name missing"
     .align 2
     .word EXIT
+
+; insère le lien vers le NFA du mot dont
+; CFA est au sommet de S à la fin de la chaîne
+; de liens du dictionnaire.
+; si xt1 n'a pas de nom dans le dictionnaire
+; le résultat est imprévisible.    
+;DEFWORD "LINK",4,F_IMMED,LINK ; ( S: xt1 -- )
+;    ; met le NFA qui est dans LATEST dans le NFA de xt1
+;    .word CFATONFA,DUP,LATEST,FETCH,OVER,NFATOLFA,STORE
+;    ; met le NFA de xt1 dans LATEST
+;    .word LATEST,STORE,EXIT 
+
+; cré une définition sans nom dans le dictionnaire
+; et laisse son CFA (xt) sur la pile S
+; met STATE en mode compilation    
+DEFWORD ":NONAME",7,,COLON_NO_NAME ; ( S: -- xt )
+    .word HERE,CFA_COMMA,ENTER,RBRACKET,EXIT
     
+DEFWORD "EXIT,",5,F_IMMED,EXITCOMMA ; ( -- )
+    .word CFA_COMMA,EXIT,EXIT
 
-DEFWORD ",EXIT",5,F_IMMED,CEXIT ; ( -- )
-    .word COMPILECFA,EXIT,EXIT
-
+; ajoute un nouveau nom dans le dictionnaire
+; à la sortie HERE retourne l'adresse du CFA    
 DEFWORD "HEADER",6,,HEADER ; ( -- )
     .word LATEST,DUP,FETCH,COMMA,HERE
     .word SWAP,STORE
     .word BL,WORD,UPPER,CFETCH,DUP,ZEROEQ,QNAME
     .word ONEPLUS,ALLOT,ALIGN,NAMEMARK,HIDE,EXIT
-    
-;cré une nouvelle entête dans le dictionnaire  
-DEFWORD "CREATE",6,,CREATE ; ( -- )
-    .word HEADER,REVEAL
-    .word LIT,DOVAR,COMMA
-    .word EXIT    
-  
+ 
 ; efface le mot désignée et tous les suivant
 DEFWORD "FORGET",6,,FORGET ; cccc
     .word TICK,CFATONFA,NFATOLFA,DUP,LIT,0x8000,UGREATER
@@ -1851,34 +1881,54 @@ DEFWORD "FORGET",6,,FORGET ; cccc
 ; crée une nouvelle définition dans le dictionnaire    
 DEFWORD ":",1,,COLON ; ( name --  )
     .word HEADER ; ( -- )
-    .word RBRACKET,COMPILECFA,ENTER,EXIT
+    .word RBRACKET,CFA_COMMA,ENTER,EXIT
 
+;RUNTIME utilisé pa CREATE
+HEADLESS "RT_CREATE"  ; ( -- addr )
+     DPUSH
+     mov IP,T
+     add #2*CELL_SIZE,T
+     NEXT
     
-; crée une nouvelle définition pour un mot compilant    
+;cré une nouvelle entête dans le dictionnaire
+;qui peut-être étendue par DOES>
+DEFWORD "CREATE",6,,CREATE ; ( -- hook )
+    .word HEADER,REVEAL
+    .word CFA_COMMA,ENTER
+    .word CFA_COMMA,RT_CREATE
+    .word CFA_COMMA,NOP
+    .word EXITCOMMA
+    .word EXIT    
+  
+    
+; crée une nouvelle définition dont la sématique est vide
+; la sémantique sera normalement complétée par DOES>
+; réserve une cellule qui sera utilisée par DOES>
 DEFWORD "<BUILDS",7,,BUILDS ; name 
-    .word COLON
-    .word COMPILECFA,XJUMP,HERE,CELLPLUS,COMMA,EXIT 
+    .word HEADER,CFA_COMMA,ENTER,EXITCOMMA ;,LIT,1,CELLS,ALLOT
+    .word EXIT 
+    
 
 ;saut vers adresse absolue
 ; IP pointe sur l'adresse destination
 ; retourne le PFA sur la pile    
-HEADLESS "XJUMP"  ; ( -- pfa )
-    mov IP,WP
-    mov [WP++],IP
-    DPUSH
-    mov WP,T  ; PFA
-    NEXT
+;HEADLESS "XJUMP"  ; ( -- pfa )
+;    mov IP,WP
+;    mov [WP++],IP
+;    DPUSH
+;    mov WP,T  ; PFA
+;    NEXT
+
+; runtime DOES>    
+HEADLESS "RT_DOES", HWORD ; ( -- )
+    .word RFROM,DUP,CELLPLUS,TOR,FETCH,LATEST,FETCH
+    .word NFATOCFA,LIT,2,CELLS,PLUS,STORE
+    .word EXIT
     
-; runtime DOES    
-DEFWORD "(DOES>)",7,,DODOES ; ( -- pfa )
-    .word RFROM,DUP,CELLPLUS,TOR,FETCH
-    .word LATEST,FETCH,NFATOCFA,LIT,4,PLUS,STORE,EXIT
-    
-; ajoute le runtime (DOES>) à la fin du <BUILDS
-DEFWORD "DOES>",5,F_IMMED,COMMADOES  ; ( -- )
-    .word COMPILECFA,DODOES,HERE,LIT,CELL_SIZE,ALLOT
-    .word COMPILECFA,LBRACKET,COMPILECFA,REVEAL,COMPILECFA,EXIT
-    .word HERE,SWAP,STORE
+; ajoute le runtime RT_DOES
+DEFWORD "DOES>",5,F_IMMED,DOESTO  ; ( -- )
+    .word CFA_COMMA,RT_DOES,HERE,LIT,2,CELLS,PLUS,COMMA
+    .word EXITCOMMA,COLON_NO_NAME,DROP
     .word EXIT
     
 ; création d'une variable
@@ -1894,7 +1944,7 @@ DEFWORD "CONSTANT",8,,CONSTANT ; ()
 ; termine une définition débutée par ":"
 DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- ) 
     .word QCOMPILE
-    .word COMPILECFA,EXIT
+    .word EXITCOMMA
     .word REVEAL
     .word LBRACKET,EXIT
     
@@ -1902,13 +1952,37 @@ DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  mots du core étendu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DEFWORD "DEFER",5,,DEFER ; ccccc ( -- )
-    .word CREATE,RBRACKET,LIT,code_FEXEC,COMMA,COMPILECFA,ABORT
-    .word SEMICOLON,EXIT
+;RUNTIME COMPILÉE PAR DEFER    
+DEFWORD "(NOINIT)",8,F_HIDDEN,NOINIT ; ( -- )
+    .word DOTSTR
+    .byte  26
+    .ascii "Uninitialized defered word"
+    .align 2
+    .word CR,ABORT
     
+; création d'un mot la définition de la sémantique d'exécution
+; est différée.
+; Utilise à sémantique par défaut (NOINIT)
+DEFWORD "DEFER",5,,DEFER ; ccccc ( -- )
+    .word HEADER,CFA_COMMA,ENTER,CFA_COMMA,NOINIT
+    .word CFA_COMMA,EXIT,REVEAL,EXIT
+
+; initialise la sémantique d'exécution d'un mot définit avec DEFER 
+;  xt1  CFA de la sémantique que le mot doit exécuté
+;  xt2  CFA du mot diféré.    
 DEFWORD "DEFER!",6,,DEFERSTORE ;  ( xt1 xt2 -- )
-    .word TOBODY,STORE,EXIT
+    .word CELLPLUS,STORE,EXIT
+
+; empile le xt interprété par un mot défini avec DEFER
+; xt1 CFA du mot diféré
+; xt2 CFA de la sémantique d'exécution de ce mot.    
+DEFWORD "DEFER@",6,,DEFERFETCH ; ( xt1 -- xt2 )
+    .word CELLPLUS,FETCH,EXIT
+ 
+; initilalise la sémantique d'exécution d'un mot définit avec DEFER
+; le nom du mot diféré est fourni en texte    
+DEFWORD "IS",2,,IS  ; ( xt1 cccc -- )
+    .word QWORD,DROP,CELLPLUS,STORE,EXIT
     
     
 ; imprime le commentaire délimité par )
