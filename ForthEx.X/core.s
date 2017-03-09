@@ -97,7 +97,10 @@ _SYSLATEST: .space 2
  .global _LATEST
 _LATEST: .space 2 
  
- 
+; enregistrement information boot loader
+.section .boot.bss bss address(BOOT_HEADER)
+.global _boot_header
+_boot_header: .space BOOT_HEADER_SIZE
 ; dictionnaire utilisateur dans la RAM 
 .section .user_dict.bss bss  address (DATA_BASE)
 .global _user_dict 
@@ -683,15 +686,15 @@ DEFCODE "*/MOD",5,,STARSLASHMOD ; ( n1 n2 n3 -- n4 n5 ) n1*n2/n3, n4 reste, n5 q
     mov [DSP--],W1
     mul.ss W0,W1,W0
     repeat #17
-    div.s W0,T 
+    div.sd W0,T 
     mov W1,[++DSP]
     mov W0,T
     NEXT
     
-DEFCODE "/MOD",4,,DIVMOD ; ( n1 n2 -- r q )
+DEFCODE "/MOD",4,,SLASHMOD ; ( n1 n2 -- r q )
     mov [DSP],W0
     repeat #17
-    div.sd W0,T
+    div.s W0,T
     mov W0,T     ; quotient
     mov W1,[DSP] ; reste
     NEXT
@@ -1145,6 +1148,22 @@ DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
 DEFCONST "TRUE",1,,TRUE,-1 ; valeur booléenne vrai
 DEFCONST "FALSE",1,,FALSE,0 ; valeur booléenne faux
 DEFCONST "DP0",3,,DP0,DATA_BASE ; début espace utilisateur
+; constantes liées au chargeur système (boot loader)
+DEFCONST "BTHEAD",6,,BTHEAD,BOOT_HEADER ; entête secteur démarrage
+DEFCONST "MAGIC",5,,MAGIC,0x55AA ; signature
+DEFCONST "BTSIGN",6,,BTSIGN,0 ; champ signature
+DEFCONST "BTLATST",7,,BTLATST,2 ; champ LATEST    
+DEFCONST "BTDP",4,,BTDP,4 ; champ DP
+DEFCONST "BTSIZE",6,,BTSIZE,6 ; champ taille
+DEFCONST "FBTROW",6,,FBTROW,FLASH_FIRST_ROW     
+; identifiant périphériques
+DEFCONST "KEYBOARD",8,,KEYBOARD,_KEYBOARD ; clavier
+DEFCONST "SCREEN",6,,SCREEN,_SCREEN ; écran
+DEFCONST "SERIAL",6,,SERIAL,_SERIAL ; port série    
+DEFCONST "XRAM",4,,XRAM,_SPIRAM ;  mémoire RAM externe
+DEFCONST "EEPROM",6,,EEPROM,_SPIEEPROM ; mémoire EEPROM externe
+DEFCONST "SDCARD",6,,SDCARD,_SDCARD ; carte mémoire SD
+DEFCONST "MFLASH",6,,MFLASH,_MCUFLASH ; mémoire FLASH du MCU    
     
 ; addresse buffer pour l'évaluateur    
 DEFCODE "'SOURCE",6,,TSOURCE ; ( -- c-addr u ) 

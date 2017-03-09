@@ -465,27 +465,19 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
 ; 0-255 data
 ; *************************    
 
-DEFCONST "MAGIC",5,,MAGIC,0x55AA ; signature
-DEFCONST "MAFIELD",7,,MAFIELD,0 ; champ signature
-DEFCONST "LAFIELD",7,,LAFIELD,2 ; champ LATEST    
-DEFCONST "DPFIELD",7,,DPFIELD,4 ; champ DP
-DEFCONST "SIFIELD",7,,SIFIELD,6 ; champ taille
-    
 ;vérifie s'il y a une image boot
 ; retourne:
 ;     indicateur booléen vrai|faux
 DEFWORD "?BOOT",5,,QBOOT ; (  -- f )
-    .word LIT,0,DUP,DUP,EEREAD
-    .word BUFADDR, EFETCH,MAGIC ; vérification signature
-    .word EQUAL,EXIT 
+    .word BTHEAD,BTSIGN,PLUS,FETCH
+    .word MAGIC,EQUAL,EXIT 
 
 ;retourne la taille d'une image à partir
 ;de l'entête de celle-ci chargée dans le
-;tampon 0.
 ; retourne:
 ;   'n'  taille en octets    
 DEFWORD "?SIZE",5,,QSIZE ; ( -- n )  
-    .word SIFIELD,LIT,0,BUFFERFETCH
+    .word BTHEAD,BTSIZE,PLUS,FETCH
     .word EXIT
     
 ; combiens d'octets à lire/écrire dans la page suivante 
@@ -512,7 +504,7 @@ DEFWORD "?DONE",5,,QDONE ;  ( dp -- f )
 ; doit-être appellée après que la page
 ; 0 d'une image a étée chargée.    
 DEFWORD "SETDP",5,,SETDP ; ( -- )
-    .word DPFIELD,LIT,0,BUFFERFETCH
+    .word BTDP,LIT,0,BUFFERFETCH
     .word DP,STORE,EXIT
     
 ; lit la valeur de LATEST dans le tampon 0
@@ -521,7 +513,7 @@ DEFWORD "SETDP",5,,SETDP ; ( -- )
 ; doit-être appellée après que la page
 ; 0 d'une image a étée chargée.    
 DEFWORD "SETLATEST",9,,SETLATEST ; ( -- )
-    .word LAFIELD,LIT,0,BUFFERFETCH
+    .word BTLATST,LIT,0,BUFFERFETCH
     .word LATEST,STORE,EXIT
     
 ; charge la page EEPROM à la position de dp
@@ -580,10 +572,10 @@ DEFWORD "BOOT",4,,BOOT ; ( -- )
 ; utilisation du tampon #0  
 DEFWORD "HEADWRITE",9,,HEADWRITE ; ( --  )
     .word LIT,0,TOR ; R: 0
-    .word MAGIC,MAFIELD,RFETCH,BUFFERSTORE ; champ signature
-    .word LATEST,FETCH,LAFIELD,RFETCH,BUFFERSTORE; champ LATEST 
-    .word HERE,DPFIELD,RFETCH,BUFFERSTORE ; champ DP
-    .word HERE,DP0,MINUS,SIFIELD,RFETCH,BUFFERSTORE ; champ taille
+    .word MAGIC,BTSIGN,RFETCH,BUFFERSTORE ; champ signature
+    .word LATEST,FETCH,BTLATST,RFETCH,BUFFERSTORE; champ LATEST 
+    .word HERE,BTDP,RFETCH,BUFFERSTORE ; champ DP
+    .word HERE,DP0,MINUS,BTSIZE,RFETCH,BUFFERSTORE ; champ taille
     .word RFROM,DUP,EEWRITE,EXIT ; tampon > EEPROM
 
 DEFWORD ">BUFFER",7,,TOBUFFER ; ( dp t -- dp' )

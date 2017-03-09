@@ -17,6 +17,14 @@
 ;
 ;****************************************************************************
 
+; idendificateurs devices
+.equ _KEYBOARD, 0
+.equ _SCREEN, 1
+.equ _SERIAL, 2    
+.equ _SPIRAM, 3
+.equ _SPIEEPROM, 4
+.equ _SDCARD, 5
+.equ _MCUFLASH, 6
     
  ; commandes SPIRAM   
 .equ WRMR, 1
