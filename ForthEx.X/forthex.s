@@ -28,7 +28,7 @@
 .include "macros.inc" ; toutes les macros sont dans ce fichier
 .include "hardware.s" ; initialisaton matérielle. 
 
-.section .link psv  address(0x7FFE)    
+.section .link psv  address(FLASH_DRIVE_BASE-2)    
 .global _sys_latest
 _sys_latest:
 .word 0b

@@ -64,7 +64,16 @@
 .equ PLLPRE, 0  ; 8Mhz/2
 .equ PLLPOST, 0 ; 280Mhz/2, Fpllo=140Mhz
 .equ PLLDIV, 68 ; 4Mhz*70
-    
+ 
+.equ FLASH_PAGE_MASK, 0x3FF    
+.equ FLASH_END_EP512, 0x557EC
+.equ FLASH_END, FLASH_END_EP512
+.equ FLASH_ROW_SIZE,2048    
+.equ FLASH_FIRST_ROW, 16 ; ligne 0:15 réservé pour le système 
+.equ FLASH_LAST_ROW, 171 ; dernière ligne    
+.equ FLASH_DRIVE_BASE, 32768 ; adresse base flash drive
+.equ FLASH_DRIVE_SIZE, FLASH_END-FLASH_DRIVE_BASE ; en octets
+.equ FLASH_PAGE_SIZE, 3*1024 ; 1024 instructions par bloc pour l'effacement, 3 octets/instructions    
 .equ RAM_BASE, 0x1000 ; 4096
 .equ EDS_BASE, 0x8000 ; 32768
 .equ RAM_END,  0xD000 ; 53248    

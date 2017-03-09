@@ -1,3 +1,20 @@
+2017-03-08
+===========
+
+Renommé  mots T -> TRUE  et F -> FALSE 
+ajouté  mot UNUSED 
+Modification des mots >BOOT et BOOT pour utiliser le flash drive au lieu de
+l'EEPROM externe. Ce qui signifie que le système boot à partir de la mémoire
+flash du MCU au lieu de la mémoire EEPROM externe.
+Ajouté mots UDREL ?FLIMITS FERASE >FLASH  CALL
+
+
+2017-03-07
+==========
+suppression de <BUILDS et XJUMP  mots compilant créer avec CREATE ET DOES>
+ajout :NONAME
+
+
 2017-03-05
 ==========
 Ajout de :NONAME

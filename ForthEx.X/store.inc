@@ -58,6 +58,10 @@
 .equ ESECTOR_SIZE, 32768 ; nombre de secteurs
 .equ EPG_SECTOR, (ESECTOR_SIZE/EPAGE_SIZE) ; page par secteur 
  
+; opérations mémoire FLASH MCU
+.equ FOP_EPAGE,3  ; efface une page
+.equ FOP_WDWRITE,1   ; écriture d'un double mots
+ 
  
 ;ref: http://www.microchip.com/forums/m530149.aspx
 ;ref: http://elm-chan.org/docs/mmc/mmc_e.html 

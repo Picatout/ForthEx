@@ -162,17 +162,17 @@ code_EXIT :			;pfa,  assembler code follows
     RPOP IP
     NEXT
 
-;    .global DODOES
-;HEADLESS "DODOES" ; sémantique d'initialisation deDOES>
-;    RPUSH IP
-;    mov [WP++],IP
-;    DPUSH
-;    mov WP,T
-;    NEXT
-    
 HEADLESS "NOP" ; ( -- )
     NEXT
-   
+
+DEFCODE "CALL",4,,CALL ; ( ud -- )
+    mov T, W1
+    DPOP
+    mov T, W0
+    DPOP
+    call.l W0
+    NEXT
+    
 ; empile un litéral    
 DEFCODE "(LIT)",5,F_HIDDEN,LIT ; ( -- x ) 
     DPUSH
@@ -632,7 +632,8 @@ DEFCODE "*",1,,STAR ; ( n1 n2 -- n1*n2)
     mul.ss T,[DSP--],W0
     mov W0,T
     NEXT
-
+    
+; produit de 2 entier simple conserve entier double
 DEFCODE "M*",2,,MSTAR ; ( n1 n2 -- d )
     mul.ss T,[DSP],W0
     mov W0,[DSP]
@@ -1141,8 +1142,8 @@ DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
 DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
 DEFCONST "ULIMIT",6,,ULIMIT,EDS_BASE        ; limite espace dictionnaire
 DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
-DEFCONST "T",1,,TRUE,-1 ; valeur booléenne vrai
-DEFCONST "F",1,,FALSE,0 ; valeur booléenne faux
+DEFCONST "TRUE",1,,TRUE,-1 ; valeur booléenne vrai
+DEFCONST "FALSE",1,,FALSE,0 ; valeur booléenne faux
 DEFCONST "DP0",3,,DP0,DATA_BASE ; début espace utilisateur
     
 ; addresse buffer pour l'évaluateur    
@@ -1901,24 +1902,6 @@ DEFWORD "CREATE",6,,CREATE ; ( -- hook )
     .word EXIT    
   
     
-; crée une nouvelle définition dont la sématique est vide
-; la sémantique sera normalement complétée par DOES>
-; réserve une cellule qui sera utilisée par DOES>
-DEFWORD "<BUILDS",7,,BUILDS ; name 
-    .word HEADER,CFA_COMMA,ENTER,EXITCOMMA ;,LIT,1,CELLS,ALLOT
-    .word EXIT 
-    
-
-;saut vers adresse absolue
-; IP pointe sur l'adresse destination
-; retourne le PFA sur la pile    
-;HEADLESS "XJUMP"  ; ( -- pfa )
-;    mov IP,WP
-;    mov [WP++],IP
-;    DPUSH
-;    mov WP,T  ; PFA
-;    NEXT
-
 ; runtime DOES>    
 HEADLESS "RT_DOES", HWORD ; ( -- )
     .word RFROM,DUP,CELLPLUS,TOR,FETCH,LATEST,FETCH

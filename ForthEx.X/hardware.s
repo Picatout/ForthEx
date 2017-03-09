@@ -25,8 +25,12 @@
 .include "sound.s"
 .include "store.s"
 .include "keyboard.s"    
+.include "flash.s"
     
-    
+.section .heap.bss bss address (EDS_BASE)
+.global _heap
+_heap: .space RAM_END-EDS_BASE-VIDEO_BUFF_SIZE-FLASH_PAGE_SIZE
+ 
 .section .hardware.bss  bss
     
 .global systicks , seed  
@@ -311,10 +315,13 @@ DEFWORD "CLEAR",5,,CLEAR ; ( -- )
     .word SYSLATEST,FETCH,LATEST,STORE
     .word EXIT
     
-; imprime la quantité de RAM disponible    
-DEFWORD "FREE",4,,FREE    
-    .word ULIMIT,HERE,MINUS,DOT,EXIT
+; retourne la quantité de RAM disponible    
+DEFWORD "UNUSED",6,,UNUSED    
+    .word ULIMIT,HERE,MINUS,EXIT
     
+; imprime UNUSED
+DEFWORD "FREE",4,,FREE
+    .word UNUSED,DOT,EXIT
     
 ; retourne l'adresse début d'un tampon
 ; les tampons sont situés dans la mémoire EDS
