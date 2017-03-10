@@ -118,6 +118,7 @@ __reset:
 _cold:
     .word HARDWARE_INIT,VARS_INIT
     .word VERSION,COUNT,TYPE,CR 
+    .word FLASHTOIMG ; autochargement système en RAM à partir de la flash du MCU
     .word QUIT ; boucle de l'interpréteur
     .word BRANCH,_cold-$
     
