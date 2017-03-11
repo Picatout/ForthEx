@@ -29,7 +29,7 @@
     
 .section .heap.bss bss address (EDS_BASE)
 .global _heap
-_heap: .space RAM_END-EDS_BASE-VIDEO_BUFF_SIZE-FLASH_PAGE_SIZE
+_heap: .space RAM_END-EDS_BASE-VIDEO_BUFF_SIZE
  
 .section .hardware.bss  bss
     
@@ -97,8 +97,8 @@ __INT1Interrupt:
 .global __reset    
 __reset: 
     clr ANSELA    ; désactivation entrées analogiques
-    ; priorité maximale pour _INT1Interrupt
-    mov #7, W0
+    ; priorité 6 pour _INT1Interrupt
+    mov #6, W0
     ior IPC5
     mov #rstack, RSP
     mov #pstack, DSP
@@ -179,33 +179,21 @@ HEADLESS IO_LOCK
 
 ; initialisation registres système forth
 ; initialisation variables utilisateur
-HEADLESS VARS_INIT    
-    mov #rstack, W0
-    mov W0,_R0
-    mov #pstack, W0
-    mov W0, _S0
-    mov #cstack, W0
-    mov W0,csp
-    mov #10, W0  ; base numérique par défaut: décimale
-    mov W0, _BASE
-    mov #pad, W0
-    mov W0, _PAD
-    mov #tib, W0
-    mov W0, _TIB
-    mov W0,_TICKSOURCE
-    mov #TIB_SIZE,W0
-    mov W0,_CNTSOURCE
-    mov #DATA_BASE, W0
-    mov W0,_DP0
-    mov W0,_DP
-    mov #_SYS_VARS,VP
-    movpag #psvpage(_sys_latest),DSRPAG
-    mov #psvoffset(_sys_latest),W0
-    mov [W0], W0 ; LFA du dernier mot système
-    mov W0, _SYSLATEST
-    mov W0, _LATEST
+HEADLESS VARS_INIT
+    push DSRPAG
+    mov #_SYS_VARS,W2
+    mov W2,VP
+    mov #psvpage(vars_count),W0
+    mov W0,DSRPAG
+    mov #psvoffset(vars_count),W0
+    mov [W0++],W1
+    dec W1,W1
+    repeat W1
+    mov [W0++],[W2++]
+    pop DSRPAG
     NEXT
 
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; mots dans le dictionnaire
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -323,14 +311,6 @@ DEFWORD "UNUSED",6,,UNUSED
 ; imprime UNUSED
 DEFWORD "FREE",4,,FREE
     .word UNUSED,DOT,EXIT
-    
-; retourne l'adresse début d'un tampon
-; les tampons sont situés dans la mémoire EDS
-; et ont une dimension de 256 octets.    
-; #buffer {0..73}
-; si #buffer>73 alors utilise #buffer % 74    
-DEFWORD "BUFADDR",7,,BUFADDR ; ( #buffer -- addr )
-    .word LIT,74,MOD,LIT,256,STAR,ULIMIT,PLUS,EXIT
     
     
 ;.end

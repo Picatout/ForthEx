@@ -46,8 +46,6 @@ rstack:
 .section .control.stack.bss bss, address(_SP0+DSTK_SIZE)
 cstack:
 .space CSTK_SIZE 
-    .global csp
-csp: .space 2
     
 .section .buffers.bss bss
 tib: .space TIB_SIZE
@@ -56,6 +54,16 @@ pad: .space PAD_SIZE
 .section .sys_vars.bss bss
 .global _SYS_VARS
 _SYS_VARS:    
+; control stack pointer
+.global csp
+csp: .space 2
+; NFA dernière entrée dans le dictionnaire système
+ .global _SYSLATEST
+_SYSLATEST: .space 2
+; NFA dernière entrée dans le dictionnaire utilisateur
+ .global _LATEST
+_LATEST: .space 2
+; Terminal input buffer
 .global _TIB    
 _TIB: .space 2
 .global _PAD 
@@ -72,30 +80,29 @@ _DP0: .space 2
 ; pointeur data 
  .global _DP
 _DP: .space 2 
-; état interpréteur : 0 interpréteur, -1 compilation
- .global _STATE
-_STATE: .space 2
-; base numérique utilisée pour l'affichage des entiers
- .global _BASE
-_BASE: .space 2
-; pointeur position parser
- .global _TOIN
-_TOIN: .space 2 
-; adresse début pile arguments
- .global _S0
-_S0: .space 2
 ; adresse début pile des retours
  .global _R0
 _R0: .space 2
+; adresse début pile arguments
+ .global _S0
+_S0: .space 2
+; base numérique utilisée pour l'affichage des entiers
+ .global _BASE
+_BASE: .space 2
+; boot device id
+.global _BOOTDEV 
+_BOOTDEV: .space 2 
+; état interpréteur : 0 interpréteur, -1 compilation
+; cfa de la fonction à utiliser pour l'opération de chargement système
+_BOOTFN: .space 2 
+ .global _STATE
+_STATE: .space 2
+; pointeur position parser
+ .global _TOIN
+_TOIN: .space 2 
 ; pointeur HOLD conversion numérique
  .global _HP
 _HP: .space 2
-; NFA dernière entrée dans le dictionnaire système
- .global _SYSLATEST
-_SYSLATEST: .space 2
-; NFA dernière entrée dans le dictionnaire utilisateur
- .global _LATEST
-_LATEST: .space 2 
  
 ; enregistrement information boot loader
 .section .boot.bss bss address(BOOT_HEADER)
@@ -289,17 +296,16 @@ exec:
     mov [WP++],W0  ; code address, WP=PFA
     goto W0
 
-;exécute le code machine à l'adresse *addr
-DEFCODE "@EXECUTE",8,,FEXEC   ; ( *addr -- )
-    mov [T],T
-    bra exec
-    
 DEFCODE "@",1,,FETCH ; ( addr -- n )
     mov [T],T
     NEXT
 
-; la lecture de la mémoire RAM EDS
-; requiert une procédure spéciale    
+DEFCODE "C@",2,,CFETCH ; ( addr -- c)
+    mov.b [T],T
+    ze T,T
+    NEXT
+    
+; lecture d'un entier dans la mémoire EDS    
 DEFCODE "E@",2,,EFETCH ; ( addr -- n )
     SET_EDS
     mov [T],T
@@ -307,51 +313,12 @@ DEFCODE "E@",2,,EFETCH ; ( addr -- n )
     NEXT
     
 ;lecture d'un caractère dans la mémoire RAM EDS
-DEFCODE "CE@",3,,CEFETCH ; ( c-addr -- c )
+DEFCODE "EC@",3,,ECFETCH ; ( c-addr -- c )
     SET_EDS
     mov.b [T],T
     ze T,T
     RESET_EDS
     NEXT
-    
-DEFCODE "C@",2,,CFETCH  ; ( c-addr -- c )
-    mov.b [T], T
-    ze T, T
-    NEXT
-
-; écris un entier dans un tampon
-; arguments:
-;   '#t' numéro du tampon
-;   'ofs' position dans le tampon 
-;   'n' valeur à écrire    
-DEFWORD "BUFFER!",7,,BUFFERSTORE ; ( n ofs #t -- )
-    .word BUFADDR, PLUS, STORE, EXIT
-    
-; écris un octet dans le tampon
-; arguments:
-;   '#t' numéro du tampon
-;   'ofs' position dans le tampon 
-;   'c' valeur à écrire    
-DEFWORD "BUFFERC!",8,,BUFFERCSTORE ; ( c ofs #t -- )
-    .word BUFADDR, PLUS, CSTORE, EXIT
-    
-;lire un entier d'un tampon    
-; arguments
-;   '#t' numéro du tampon
-;   'ofs' position dans le tampon 
-;  retourne:
-;     'n'  entier lu
-DEFWORD "BUFFER@",7,,BUFFERFETCH ; ( ofs #t -- n )
-    .word BUFADDR,PLUS,EFETCH,EXIT
-    
-;lire un octet d'un tampon    
-; arguments
-;   '#t' numéro du tampon
-;   'ofs' position dans le tampon 
-;  retourne:
-;     'c'  octet lu
-DEFWORD "BUFFERC@",8,,BUFFERCFETCH 
-    .word BUFADDR, PLUS,CEFETCH,EXIT
     
     
 DEFCODE "2@",2,,TWOFETCH ; ( addr -- n1 n2 ) double en mémoire en format little indian
@@ -1130,6 +1097,8 @@ DEFUSER ">IN",3,,TOIN     ; pointeur position début dernier mot retourné par WOR
 DEFUSER "HP",2,,HP       ; HOLD pointer
 DEFUSER "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
 DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
+DEFUSER "BOOTDEV",7,,BOOTDEV ; détermine le périphérique utilisé par BOOT et >BOOT
+DEFUSER "BOOTFN",6,,BOOTFN ; CFA de l'opération à effectuer
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
@@ -1154,7 +1123,7 @@ DEFCONST "MAGIC",5,,MAGIC,0x55AA ; signature
 DEFCONST "BTSIGN",6,,BTSIGN,0 ; champ signature
 DEFCONST "BTLATST",7,,BTLATST,2 ; champ LATEST    
 DEFCONST "BTDP",4,,BTDP,4 ; champ DP
-DEFCONST "BTSIZE",6,,BTSIZE,6 ; champ taille
+DEFCONST "BTSIZE",6,,BTSIZE,BOOT_HEADER_SIZE ; champ taille
 DEFCONST "FBTROW",6,,FBTROW,FLASH_FIRST_ROW     
 ; identifiant périphériques
 DEFCONST "KEYBOARD",8,,KEYBOARD,_KEYBOARD ; clavier
@@ -2065,7 +2034,7 @@ DEFWORD "HDUMP",5,,HDUMP ; ( addr +n -- )
     .word SWAP,LIT,0xFFFE,AND,SWAP,LIT,0,DODO
 1:  .word DOI,LIT,7,AND,TBRANCH,2f-$
     .word CR,DUP,LIT,5,UDOTR,SPACE
-2:  .word DUP,EFETCH,LIT,5,UDOTR,LIT,2,PLUS
+2:  .word DUP,FETCH,LIT,5,UDOTR,LIT,2,PLUS
     .word DOLOOP,1b-$,DROP
     .word RFROM,BASE,STORE,EXIT
 

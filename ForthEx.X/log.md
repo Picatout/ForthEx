@@ -1,3 +1,12 @@
+2017-03-10
+----------
+Suppression du mot @EXECUTE
+Éliminer _flash_buffer  cette espace RAM EDS fait maintenant partie du heap.
+Création d'une section .vars_init pour l'initialisation des variables système et
+modfication de VARS_INIT 
+Réécrire BOOT et >BOOT pour vectoriser l'opération en fonction du périphérique
+utilisé.
+
 2017-03-09
 ----------
 Suite du travail sur flash.s

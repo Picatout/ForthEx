@@ -18,17 +18,62 @@
 ;****************************************************************************
 
 ;NOM: flash.s
-;Description:  stockage dans la mémoire flash du MCU
-;  n'utilise que les bits 0:15 les bits 16:23 sont ignorés    
-;  donc seul les instructions TBLRDL ET TBLWTL  sont utilisées.
-;  REF: family reference manual # DS70609D    
-;Date: 2017-03-07
+;DESCRIPTION:
+;  Permet l'accès à des données stockées dans la mémoire flash du MCU.
+;  Pour protéger le système l'écriture n'est autorisée qu'à partir de l'adresse 
+;  0x8000. Le système au complet doit résidé en déça de cette adresse sauf
+;  pour une image du dictionnaire en RAM  qui peut-être sauvegardé dans la FLASH 
+;  à partir de l'adresse 0x8000 avec le mot IMG>FLASH. Cette image est 
+;  automatiquement récupérée au démarrage du sytème par le mot FLASH>IMG.  
+;
+; REF:    
+;  documents de référence Microchip: DS70609D et DS70000613D
+;    
+;DATE: 2017-03-07
     
-.section .flash.buffer.bss bss address(RAM_END-VIDEO_BUFF_SIZE-FLASH_PAGE_SIZE)
-.global _flash_buffer
-_flash_buffer: .space FLASH_PAGE_SIZE    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; mots de bas niveau pour
+; l'accès à la mémoire FLASH
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; lecture d'un mot dans la mémoire flash low word
+DEFCODE "TBL@L",5,,TBLFETCHL ; ( ud1 -- n )
+    RPUSH TBLPAG
+    mov T,TBLPAG
+    DPOP
+    tblrdl [T],T
+    RPOP TBLPAG
+    NEXT
+    
+; lecture d'un mot dans la mémoire flash low word
+DEFCODE "TBL@H",5,,TBLFETCHH ; ( ud1 -- n )
+    RPUSH TBLPAG
+    mov T,TBLPAG
+    DPOP
+    tblrdh [T],T
+    RPOP TBLPAG
+    NEXT
 
+;lit 1 instruction de la mémoire flash
+;  'ud'  adresse 24 bits mémoire flash
+; retourne:
+;   'n1' bits 16:23 
+;   'n2' bits 8:15
+;   'n3' bits 0:7    
+DEFCODE "I@",2,,IFETCH ; ( ud -- n1 n2 n3 )
+    RPUSH TBLPAG
+    mov T,TBLPAG
+    DPOP
+    mov T, W0
+    tblrdh [W0],[++DSP]
+    tblrdl.b [W0++],T
+    ze T,T
+    tblrdl.b [W0],W0
+    ze W0,W0
+    mov W0,[++DSP]
+    RPOP TBLPAG
+    NEXT
+ 
 ; addresse 24 bits mémoire FLASH 
 DEFCODE "FADDR",5,,FADDR ; ( ud -- )
     mov T, NVMADRU
@@ -43,6 +88,8 @@ DEFCODE "FNEXT",5,,FNEXT ; ( -- )
     clr W0
     addc NVMADRU
     NEXT
+
+
     
 ; écriture de 6 octets dans les latches    
 ; addr adresse tampon RAM    
@@ -144,44 +191,6 @@ DEFWORD ">FLASH",6,,TOFLASH ; ( adr ud -- )
     .word WRITE_LATCH,LIT,FOP_WDWRITE,FLASH_OP,EXIT
     
   
-; lecture d'un mot dans la mémoire flash low word
-DEFCODE "TBL@L",5,,TBLFETCHL ; ( ud1 -- n )
-    RPUSH TBLPAG
-    mov T,TBLPAG
-    DPOP
-    tblrdl [T],T
-    RPOP TBLPAG
-    NEXT
-    
-; lecture d'un mot dans la mémoire flash low word
-DEFCODE "TBL@H",5,,TBLFETCHH ; ( ud1 -- n )
-    RPUSH TBLPAG
-    mov T,TBLPAG
-    DPOP
-    tblrdh [T],T
-    RPOP TBLPAG
-    NEXT
-
-;lit 1 instruction de la mémoire flash
-;  'ud'  adresse 24 bits mémoire flash
-; retourne:
-;   'n1' bits 16:23 
-;   'n2' bits 8:15
-;   'n3' bits 0:7    
-DEFCODE "I@",2,,IFETCH ; ( ud -- n1 n2 n3 )
-    RPUSH TBLPAG
-    mov T,TBLPAG
-    DPOP
-    mov T, W0
-    tblrdh [W0],[++DSP]
-    tblrdl.b [W0++],T
-    ze T,T
-    tblrdl.b [W0],W0
-    ze W0,W0
-    mov W0,[++DSP]
-    RPOP TBLPAG
-    NEXT
-    
 ;écris en mémoire flash un bloc RAM
 ;  'adr' début bloc RAM
 ;  'size' nombre d'octets

@@ -28,13 +28,30 @@
 .include "macros.inc" ; toutes les macros sont dans ce fichier
 .include "hardware.s" ; initialisaton matérielle. 
 
-.section .link psv  address(FLASH_DRIVE_BASE-2)    
-.global _sys_latest
-_sys_latest:
-.word 0b
-    
-    
-    
+; .sysinfo contient les données d'initialisation des 
+; variables système.    
+.section .vars_init psv  address(FLASH_DRIVE_BASE-FLASH_ROW_SIZE)    
+.global vars_count
+vars_count: .word 17
+csp_init: .word cstack
+syslatest_init: .word 0b
+latest_init: .word 0b    
+tib_init: .word tib
+pad_init: .word pad
+ticksource_init: .word tib 
+cntsource_init: .word TIB_SIZE 
+dp0_init: .word DATA_BASE
+dp_init: .word DATA_BASE
+r0_init: .word rstack
+s0_init: .word pstack    
+base_init: .word 10
+btdev_init: .word _MCUFLASH
+btfn_init: .word FLASHTORAM 
+state_init: .word 0
+toin_init: .word 0
+hp_init: .word 0
+ 
+ 
 .end
 
     

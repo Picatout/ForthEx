@@ -90,7 +90,7 @@
 .equ TIB_SIZE, 80   ; Terminal Input Buffer,  80 octets
 .equ PAD_SIZE, 80   ; scratch pad, 80 octets
 .equ DATA_BASE, 0x1300 ; début espace utilisateur
-.equ BOOT_HEADER_SIZE, 8 ; enregistrement d'information pour le boot loader.	    
+.equ BOOT_HEADER_SIZE, 6 ; enregistrement d'information pour le boot loader.	    
 .equ BOOT_HEADER, (DATA_BASE-BOOT_HEADER_SIZE)    
 ;;;;;;;;;;;;    
 ; macros

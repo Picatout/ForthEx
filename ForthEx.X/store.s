@@ -308,15 +308,10 @@ DEFCODE "RLOAD",5,,RLOAD ; ( addr-bloc addr-sramL addr-sramH n -- )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; INFORMATION:
 ;   l'EEPROM 25LC1024 est divisée en 
-;   512 pages de 256 octets pour la commande EWRITE.
-;   L'accès de base de l'EEPROM se fait
-;   par l'intermédiaire de mémoires tampons de 256 octets
-;   situées dans l'EDS (adresse commençant à $8000)    
-;   Il y a 20480 octets de mémoire EDS
-;   les 1536 derniers sont occupés par
-;   le tampon vidéo. Il reste donc 18944 octets pour
-;   les tampons EEPROM, donc il de l'espace pour 74 tampons
-;   de 256 octets. l'interface EEPROM utilises les 4 premiers
+;   512 rangées de 256 octets pour la commande EWRITE.
+;   Il est possible de mette à jour 1 seul octet mais
+;   on ne peut donc écrire qu'un maximum de 
+;   256 octets par commande EWRITE.    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;       
 
 ; test eeprom WRITE IN PROCESS bit
@@ -338,36 +333,40 @@ DEFWORD "WWIP",4,,WWIP ; ( -- )
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; enregistrement tampon dans l'EEPROM
+; enregistrement d'une plage RAM dans l'EEPROM
+; IMPORTANT:
+;     la mémoire EEPROM est divisée en
+;     rangées de 256 octets. Lorsque le pointeur
+;     d'adresse atteint la fin d'une rangée il 
+;     revient au début de celle-ci. Donc si 'ud'
+;     est au début de la rangée un maximum de 256
+;     octets peuvent-être écris avant l'écrasement
+;     des premiers octets. 
 ; arguments: 
-;    'tampon' est le numéro du tampon {0-63}
-;    'page'   page EEPROM destination    
+;    'r-addr'  entier simple, adresse 16 bits début RAM
+;    'size'  entier simple, nombre d'octets à enregistrer 
+;    'ee-addr'  entier double, adresse 24 bits destination EEPROM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "EEWRITE",7,,EEWRITE  ;( tampon page -- )
+DEFCODE "EEWRITE",7,,EEWRITE  ;( r-addr size ee-addr -- )
     SET_EDS
-    call wait_wip0 ; on s'assure qu'il n'y a pas une écrire en cours
+    ; on s'assure qu'il n'y a pas une écrire en cours
+    call wait_wip0 
+    ; envoie de la commande d'authorisation d'écriture
     _enable_eeprom
-    mov #EWREN, W0 ; envoie de la commande d'authorisation d'écriture
+    mov #EWREN, W0 
     spi_write
     _disable_eeprom
-    ; calcul de l'adresse EEPROM
-    and #0x1ff,T ; limite: page < 512
-    sl  T, #8, T ; bits 0:15 addresse EEPROM
-    DPUSH
-    clr T
-    rlc T,T   ; bit 16 de l'adresse EEPROM
+    ; envoie la commande écriture et l'adresse EEPROM
     _enable_eeprom
     mov #EWRITE, W0 ; envoide de la commande écriture
     spi_write
     call spi_send_address
-    ; calcul de l'adresse du tampon
-    ; EDS_BASE+256*page
-    and #0x3f,T ; limite: tampon < 64
-    sl T,#8,T ; offset tampon
-    mov #EDS_BASE,W2   
-    add T,W2,W2 
+    ; compte dans W1
+    mov T,W1
     DPOP
-    mov #EPAGE_SIZE,W3 ; dimension d'une page EEPROM en octets
+    ; adresse RAM dans W2
+    mov T,W2
+    DPOP
 1:  mov.b [W2++], W0
     spi_write
     dec W3,W3
@@ -377,36 +376,30 @@ DEFCODE "EEWRITE",7,,EEWRITE  ;( tampon page -- )
     NEXT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; lecture d'une page EEPROM dans un tampon
+; lecture d'une plage EEPROM vers la mémoire RAM
 ; arguments:
-;   'tampon' numéro du tampon
-;   'page' page EEPROM à lire
+;    'r-addr'  entier simple, adresse 16 bits début RAM
+;    'size'  entier simple, nombre d'octets à lire 
+;    'ee-addr'  entier double, adresse 24 bits destination EEPROM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "EEREAD",6,,EEREAD   ; ( tampon page -- )
+DEFCODE "EEREAD",6,,EEREAD   ; ( addr size ud -- )
      ; on s'assure qu'il n'y a pas d'écriture en cours
     call wait_wip0
-    ;calcul et envoie de l'adresse EEPROM
-    and #0x1ff,T ; limite: page < 512
-    sl  T, #8, T  ; addresse=page*256
-    DPUSH
-    clr T
-    rlc T,T
+    ;envoie de la commande et de l'adresse EEPROM
     _enable_eeprom
     mov #EREAD, W0 ; envoie de la commande lecture
     spi_write
     call spi_send_address
-    ; calcul de l'adresse tampon
-    ; 0xEDS_BASEE+tampon*256
-    and #63,T  ; limite: tampon < 64
-    sl T,#8,T  
-    mov #EDS_BASE,W2
-    add T, W2,W2 
+    ; size dans W1
+    mov T, W1
     DPOP
-    mov #EPAGE_SIZE,W3 ; dimension tampon
+    ; adresse RAM dans W2
+    mov T,W2
+    DPOP
 1:
     spi_read
     mov.b W0, [W2++]
-    dec W3,W3
+    dec W1,W1
     bra nz, 1b
     _disable_eeprom
     NEXT
@@ -452,19 +445,58 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
     NEXT
 
 ; le BOOT charge en RAM une image système
-; si la page 0 indique la présence d'une telle image    
 ; *** format image boot ****
-; page 0, entête d'image    
 ; 00 signature MAGIC, 2 octets
 ; 02 sauvegarde de LATEST, 2 octets
 ; 04 sauvegarde de DP, 2 octets  
 ; 06 data_size 2 octets
-; 08-255 pas utilisé   
-;    
-; pages suivantes:
-; 0-255 data
+; 08 données image débute ici.    
 ; *************************    
 
+;; retourne l'adresse début d'un tampon
+;; les tampons sont situés dans la mémoire EDS
+;; et ont une dimension de 256 octets.    
+;; #buffer {0..73}
+;; si #buffer>73 alors utilise #buffer % 74    
+;DEFWORD "BUFADDR",7,,BUFADDR ; ( #buffer -- addr )
+;    .word LIT,74,MOD,LIT,256,STAR,ULIMIT,PLUS,EXIT
+;    
+;    
+;; écris un entier dans un tampon
+;; arguments:
+;;   '#t' numéro du tampon
+;;   'ofs' position dans le tampon 
+;;   'n' valeur à écrire    
+;DEFWORD "BUFFER!",7,,BUFFERSTORE ; ( n ofs #t -- )
+;    .word BUFADDR, PLUS, STORE, EXIT
+;    
+;; écris un octet dans le tampon
+;; arguments:
+;;   '#t' numéro du tampon
+;;   'ofs' position dans le tampon 
+;;   'c' valeur à écrire    
+;DEFWORD "BUFFERC!",8,,BUFFERCSTORE ; ( c ofs #t -- )
+;    .word BUFADDR, PLUS, CSTORE, EXIT
+;    
+;;lire un entier d'un tampon    
+;; arguments
+;;   '#t' numéro du tampon
+;;   'ofs' position dans le tampon 
+;;  retourne:
+;;     'n'  entier lu
+;DEFWORD "BUFFER@",7,,BUFFERFETCH ; ( ofs #t -- n )
+;    .word BUFADDR,PLUS,FETCH,EXIT
+;    
+;;lire un octet d'un tampon    
+;; arguments
+;;   '#t' numéro du tampon
+;;   'ofs' position dans le tampon 
+;;  retourne:
+;;     'c'  octet lu
+;DEFWORD "BUFFERC@",8,,BUFFERCFETCH 
+;    .word BUFADDR, PLUS,CFETCH,EXIT
+    
+    
 ;vérifie s'il y a une image boot
 ; retourne:
 ;     indicateur booléen vrai|faux
@@ -543,29 +575,6 @@ DEFWORD "BOOT",4,,BOOT ; ( -- )
 8:  .word RFROM,TWODROP,SETLATEST    
 9:  .word EXIT
     
-    
-;; copie le contenu du tampon dans le dataspace    
-;; arguments:
-;;   '*d' pointeur data
-;;   '#t' no du tampon 
-;; retourne:
-;;   '*d'  pointeur data mis à jour    
-;DEFWORD "BUF>DAT",7,,BUFTODAT ; ( #t *d -- *d' )
-;    .word TOR,DUP,BUFADDR,CEFETCH ; S: #t n  R: *d
-;    .word SWAP,BUFADDR,ONEPLUS,SWAP,RFETCH,SWAP
-;    .word DUP,TOR,CMOVE
-;    .word RFROM,RFROM,PLUS,EXIT
-;    
-;; convertie le no de secteur en no de page EEPROM
-;; argument: 
-;;   '#s' numéro de secteur 
-;; retourne:
-;;   '#p' numéro de page    
-;DEFWORD "S>P",3,,SECTOPG ; ( #s -- #p )
-;    .word LIT,3,AND ; #s<4
-;    .word LIT,EPG_SECTOR,STAR,EXIT
-;    
-;    
     
 ;écris l'entête du boot sector, et retourne
 ; la grandeur de l'image.
