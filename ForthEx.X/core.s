@@ -1117,22 +1117,6 @@ DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
 DEFCONST "TRUE",1,,TRUE,-1 ; valeur booléenne vrai
 DEFCONST "FALSE",1,,FALSE,0 ; valeur booléenne faux
 DEFCONST "DP0",3,,DP0,DATA_BASE ; début espace utilisateur
-; constantes liées au chargeur système (boot loader)
-DEFCONST "BTHEAD",6,,BTHEAD,BOOT_HEADER ; entête secteur démarrage
-DEFCONST "MAGIC",5,,MAGIC,0x55AA ; signature
-DEFCONST "BTSIGN",6,,BTSIGN,0 ; champ signature
-DEFCONST "BTLATST",7,,BTLATST,2 ; champ LATEST    
-DEFCONST "BTDP",4,,BTDP,4 ; champ DP
-DEFCONST "BTSIZE",6,,BTSIZE,BOOT_HEADER_SIZE ; champ taille
-DEFCONST "FBTROW",6,,FBTROW,FLASH_FIRST_ROW     
-; identifiant périphériques
-DEFCONST "KEYBOARD",8,,KEYBOARD,_KEYBOARD ; clavier
-DEFCONST "SCREEN",6,,SCREEN,_SCREEN ; écran
-DEFCONST "SERIAL",6,,SERIAL,_SERIAL ; port série    
-DEFCONST "XRAM",4,,XRAM,_SPIRAM ;  mémoire RAM externe
-DEFCONST "EEPROM",6,,EEPROM,_SPIEEPROM ; mémoire EEPROM externe
-DEFCONST "SDCARD",6,,SDCARD,_SDCARD ; carte mémoire SD
-DEFCONST "MFLASH",6,,MFLASH,_MCUFLASH ; mémoire FLASH du MCU    
     
 ; addresse buffer pour l'évaluateur    
 DEFCODE "'SOURCE",6,,TSOURCE ; ( -- c-addr u ) 
@@ -1538,33 +1522,33 @@ DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
   
 ; vérifie si le dictionnaire utilisateur
 ; est vide  
-DEFWORD "EMPTY",5,,EMPTY ; ( -- f)
-    .word DP0,FETCH,HERE,EQUAL,EXIT 
+DEFWORD "?EMPTY",5,,QEMPTY ; ( -- f)
+    .word DP0,HERE,EQUAL,EXIT 
     
 ; met à 1 l'indicateur F_IMMED
 ; sur le dernier mot défini.    
 DEFWORD "IMMEDIATE",9,,IMMEDIATE ; ( -- )
-    .word EMPTY,TBRANCH,9f-$
+    .word QEMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,IMMED,OR,SWAP,CSTORE
 9:  .word EXIT
     
 ;cache la définition en cours  
 ; la variable LAST contient le NFA  
 DEFWORD "HIDE",4,,HIDE ; ( -- )
-    .word EMPTY,TBRANCH,9f-$
+    .word QEMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,HIDDEN,OR,SWAP,CSTORE
 9:  .word EXIT
 
 ; marque le champ compte du nom
 ; pour la recherche de CFA>NFA
 DEFWORD "(NMARK)",7,F_HIDDEN,NAMEMARK
-    .word EMPTY,TBRANCH,9f-$
+    .word QEMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,NMARK,OR,SWAP,CSTORE
 9:  .word EXIT
   
   
 DEFWORD "REVEAL",6,,REVEAL ; ( -- )
-    .word EMPTY,TBRANCH,9f-$
+    .word QEMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,HIDDEN,INVERT,AND,SWAP,CSTORE
 9:  .word EXIT
     
@@ -2028,13 +2012,13 @@ DEFWORD ".RTN",4,,DOTRTN ; ( -- )
 ; n nombre de mots à lire
 ; addr adresse de départ
 ; 8 mots par ligne d'affichage
-DEFWORD "HDUMP",5,,HDUMP ; ( addr +n -- )
+DEFWORD "DUMP",4,,DUMP ; ( addr +n -- )
     .word QDUP,TBRANCH,3f-$,EXIT
 3:  .word BASE,FETCH,TOR,HEX
     .word SWAP,LIT,0xFFFE,AND,SWAP,LIT,0,DODO
-1:  .word DOI,LIT,7,AND,TBRANCH,2f-$
-    .word CR,DUP,LIT,5,UDOTR,SPACE
-2:  .word DUP,FETCH,LIT,5,UDOTR,LIT,2,PLUS
+1:  .word DOI,LIT,15,AND,TBRANCH,2f-$
+    .word CR,DUP,LIT,4,UDOTR,SPACE
+2:  .word DUP,ECFETCH,LIT,3,UDOTR,LIT,1,PLUS
     .word DOLOOP,1b-$,DROP
     .word RFROM,BASE,STORE,EXIT
 

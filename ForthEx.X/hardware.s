@@ -118,7 +118,7 @@ __reset:
 _cold:
     .word HARDWARE_INIT,VARS_INIT
     .word VERSION,COUNT,TYPE,CR 
-    .word FLASHTOIMG ; autochargement système en RAM à partir de la flash du MCU
+    .word BOOTDEV,FETCH,BOOT; autochargement système en RAM à partir d'une en FLASH MCU ou EEPROM
     .word QUIT ; boucle de l'interpréteur
     .word BRANCH,_cold-$
     
@@ -311,6 +311,9 @@ DEFWORD "UNUSED",6,,UNUSED
 ; imprime UNUSED
 DEFWORD "FREE",4,,FREE
     .word UNUSED,DOT,EXIT
+    
+; retourne la quantité RAM disponible sur le HEAP
+DEFCONST "HEAPSIZE",8,,HEAPSIZE,(RAM_END-VIDEO_BUFF_SIZE-EDS_BASE) ; ( -- n )
     
     
 ;.end

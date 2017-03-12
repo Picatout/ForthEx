@@ -181,13 +181,13 @@ DEFWORD "FERASE",6,,FERASE ; ( u -- )
 9:  .word EXIT
   
 
-;écriture de W1 et W2 dans les latch FLASH MCU
-; w1,w2 mots à écriredans la flash
-; ud  adresse mémoire flash  
-DEFWORD ">FLASH",6,,TOFLASH ; ( adr ud -- )
+;écriture de 6 octets dans les latch FLASH MCU
+; addr adresse RAM source
+; ud  adresse mémoire flash  24 bits
+DEFWORD ">FLASH",6,,TOFLASH ; ( addr ud -- )
     .word QFLIMITS,TBRANCH,1f-$
     .word TWODROP,DROP,EXIT ; jette les 2 adresses avant de quitter
-1:  .word FADDR  ; S: adr
+1:  .word FADDR  ; S: addr
     .word WRITE_LATCH,LIT,FOP_WDWRITE,FLASH_OP,EXIT
     
   
@@ -198,8 +198,8 @@ DEFWORD ">FLASH",6,,TOFLASH ; ( adr ud -- )
 DEFWORD "RAM>FLASH",9,,RAMTOFLASH ; ( adr size ud -- )    
     .word QFLIMITS,TBRANCH,1f-$
     .word TWODROP,TWODROP,EXIT
-1:  .word FADDR  ; S: adr size
-    .word LIT,0,DODO
+1:  .word FADDR  ; S: addr size
+    .word LIT,0,DODO ; S: addr
 2:  .word DUP, WRITE_LATCH, LIT, FOP_WDWRITE, FLASH_OP
     .word FNEXT,LIT,6,PLUS,LIT,6,DOPLOOP,2b-$,DROP
 9:  .word EXIT
@@ -219,18 +219,6 @@ DEFWORD "FLASH>RAM",9,,FLASHTORAM ; ( adr size ud -- )
     .word TWODROP,DROP
 9:  .word EXIT  
   
-DEFWORD "FLASHPG>",8,,FLASHPGFROM ; ( adr ud -- )
-  
-9:  .word EXIT
-  
-; initialise l'enregistrement de boot  
-DEFWORD "SETHEADER",9,,SETHEADER ; ( -- )
-    .word MAGIC,BTHEAD,BTSIGN,PLUS,STORE ; signature
-    .word HERE,BTHEAD,BTDP,PLUS,STORE ; DP
-    .word LATEST,FETCH,BTHEAD,BTLATST,PLUS,STORE ; latest
-    .word HERE,DP0,MINUS,BTHEAD,BTSIZE,PLUS,STORE ; size
-    .word EXIT
-
 ; efface les lignes qui seront utilisées
 ; pour la sauvegarde de l'image RAM    
 DEFWORD "ERASEROWS",9,,ERASEROWS ; ( -- )
@@ -243,22 +231,4 @@ DEFWORD "ERASEROWS",9,,ERASEROWS ; ( -- )
 2:  .word DUP,FERASE,ONEPLUS,DOLOOP,2b-$
     .word DROP,EXIT
   
-; sauvegarde de l'image RAM dans la FLASH du MCU  
-DEFWORD "IMG>FLASH",9,,IMGTOFLASH ; ( -- ) 
-    .word SETHEADER,ERASEROWS
-    .word BTHEAD,HERE,DP0,MINUS,LIT,BOOT_HEADER_SIZE,PLUS ; adr size
-    .word FBTROW,ROWTOFADR,RAMTOFLASH,EXIT
-
-    
-; restauraton de l'image RAM à partir de la FLASH du MCU
-DEFWORD "FLASH>IMG",9,,FLASHTOIMG ; ( -- )
-    ; lecture de l'entête boot
-    .word BTHEAD,LIT,BOOT_HEADER_SIZE ; adr size
-    .word FBTROW,ROWTOFADR,FLASHTORAM ; entête lue
-    .word QBOOT,ZBRANCH,8f-$
-    .word QSIZE,QDUP,ZBRANCH,8f-$
-    .word CLEAR,BTHEAD,BTDP,PLUS,FETCH,DP,STORE 
-    .word BTHEAD,BTLATST,PLUS,FETCH,LATEST,STORE
-    .word BTHEAD,SWAP,LIT,BOOT_HEADER_SIZE,PLUS,FBTROW,ROWTOFADR,FLASHTORAM
-8:  .word EXIT
   

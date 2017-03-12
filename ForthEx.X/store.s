@@ -193,7 +193,7 @@ wait_response:
 ; adresse de 24 bits
 ;;;;;;;;;;;;;;;;;;;;   
 ;.global spi_send_address    
-spi_send_address:
+spi_send_address: ; ( ud -- )
     mov T, W0
     DPOP
     spi_write
@@ -369,7 +369,7 @@ DEFCODE "EEWRITE",7,,EEWRITE  ;( r-addr size ee-addr -- )
     DPOP
 1:  mov.b [W2++], W0
     spi_write
-    dec W3,W3
+    dec W1,W1
     bra nz, 1b  
     _disable_eeprom
     RESET_EDS
@@ -453,73 +453,31 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
 ; 08 données image débute ici.    
 ; *************************    
 
-;; retourne l'adresse début d'un tampon
-;; les tampons sont situés dans la mémoire EDS
-;; et ont une dimension de 256 octets.    
-;; #buffer {0..73}
-;; si #buffer>73 alors utilise #buffer % 74    
-;DEFWORD "BUFADDR",7,,BUFADDR ; ( #buffer -- addr )
-;    .word LIT,74,MOD,LIT,256,STAR,ULIMIT,PLUS,EXIT
-;    
-;    
-;; écris un entier dans un tampon
-;; arguments:
-;;   '#t' numéro du tampon
-;;   'ofs' position dans le tampon 
-;;   'n' valeur à écrire    
-;DEFWORD "BUFFER!",7,,BUFFERSTORE ; ( n ofs #t -- )
-;    .word BUFADDR, PLUS, STORE, EXIT
-;    
-;; écris un octet dans le tampon
-;; arguments:
-;;   '#t' numéro du tampon
-;;   'ofs' position dans le tampon 
-;;   'c' valeur à écrire    
-;DEFWORD "BUFFERC!",8,,BUFFERCSTORE ; ( c ofs #t -- )
-;    .word BUFADDR, PLUS, CSTORE, EXIT
-;    
-;;lire un entier d'un tampon    
-;; arguments
-;;   '#t' numéro du tampon
-;;   'ofs' position dans le tampon 
-;;  retourne:
-;;     'n'  entier lu
-;DEFWORD "BUFFER@",7,,BUFFERFETCH ; ( ofs #t -- n )
-;    .word BUFADDR,PLUS,FETCH,EXIT
-;    
-;;lire un octet d'un tampon    
-;; arguments
-;;   '#t' numéro du tampon
-;;   'ofs' position dans le tampon 
-;;  retourne:
-;;     'c'  octet lu
-;DEFWORD "BUFFERC@",8,,BUFFERCFETCH 
-;    .word BUFADDR, PLUS,CFETCH,EXIT
-    
-    
-;vérifie s'il y a une image boot
+;vérifie s'il y a une image sur le périphérique
+; désigné par BOOTDEV    
 ; retourne:
 ;     indicateur booléen vrai|faux
 DEFWORD "?BOOT",5,,QBOOT ; (  -- f )
-    .word BTHEAD,BTSIGN,PLUS,FETCH
-    .word MAGIC,EQUAL,EXIT 
-
+    .word BTHEAD,LIT,BOOT_HEADER_SIZE,BOOTADR
+    .word BOOTFN,FETCH,EXECUTE
+    .word BTSIGN,FETCH,MAGIC,EQUAL
+    .word EXIT
+    
 ;retourne la taille d'une image à partir
 ;de l'entête de celle-ci chargée dans le
 ; retourne:
 ;   'n'  taille en octets    
 DEFWORD "?SIZE",5,,QSIZE ; ( -- n )  
-    .word BTHEAD,BTSIZE,PLUS,FETCH
-    .word EXIT
+    .word BTSIZE,FETCH,EXIT
     
 ; combiens d'octets à lire/écrire dans la page suivante 
 ;  arguments:
 ;   'dp' position actuelle du pointer data
 ;  retourne:
 ;    min(EPAGE_SIZE,HERE-dp)    
-DEFWORD "?BYTES",6,,QBYTES ; ( dp -- n )
-    .word HERE,SWAP,MINUS,LIT,EPAGE_SIZE,UMIN
-    .word EXIT
+;DEFWORD "?BYTES",6,,QBYTES ; ( dp -- n )
+;    .word HERE,SWAP,MINUS,LIT,EPAGE_SIZE,UMIN
+;    .word EXIT
 
 ;retourne l'état de l'opération de transfert
 ; lorsque 'dp'==DP c'est complété
@@ -527,97 +485,113 @@ DEFWORD "?BYTES",6,,QBYTES ; ( dp -- n )
 ;   'dp'  pointeur de donnée
 ; retourne:
 ;    'f'  indicateur booléen vrai|faux    
-DEFWORD "?DONE",5,,QDONE ;  ( dp -- f )
-    .word QBYTES,ZEROEQ,EXIT
-    
-; lit la valeur de DP dans le tampon 0
-; et assigne cette valeur à la variable 
-; système DP.
-; doit-être appellée après que la page
-; 0 d'une image a étée chargée.    
-DEFWORD "SETDP",5,,SETDP ; ( -- )
-    .word BTDP,LIT,0,BUFFERFETCH
-    .word DP,STORE,EXIT
-    
-; lit la valeur de LATEST dans le tampon 0
-; et assigne cette valeur à la variable 
-; système LATEST.
-; doit-être appellée après que la page
-; 0 d'une image a étée chargée.    
-DEFWORD "SETLATEST",9,,SETLATEST ; ( -- )
-    .word BTLATST,LIT,0,BUFFERFETCH
-    .word LATEST,STORE,EXIT
-    
-; charge la page EEPROM à la position de dp
-; utilise le tampon #1.    
-; arguments:
-;   'dp' pointeur de donnée
-;   'p' page eeprom à lire    
-; retourne:
-;   'dp'  data pointer mis à jour
-DEFWORD "PGLOAD",6,,PGLOAD ; ( dp p -- dp )
-    ;lecture de l'EERPOM dans le tampon #1
-    .word LIT,1,SWAP,EEREAD ; dp
-    ;copie le tampon vers *dp
-    .word DUP,QBYTES ; S: dp n
-    .word TWODUP,PLUS,TOR ; S: dp n  R: dp+n
-    .word LIT,1,BUFADDR,NROT,CMOVE
-    .word RFROM,EXIT
-    
-; s'il y a une image système au début de l'EEPROM
-; la charge en mémoire
-DEFWORD "BOOT",4,,BOOT ; ( -- )
-    .word QBOOT,ZBRANCH,9f-$
-    .word CLEAR,SETDP,DP0,LIT,1,TOR  ; S: dp  R: page
-1:  .word DUP,QDONE,TBRANCH,8f-$
-    .word RFROM,DUP,ONEPLUS,TOR
-    .word PGLOAD,BRANCH,1b-$
-8:  .word RFROM,TWODROP,SETLATEST    
-9:  .word EXIT
-    
-    
-;écris l'entête du boot sector, et retourne
-; la grandeur de l'image.
-; utilisation du tampon #0  
-DEFWORD "HEADWRITE",9,,HEADWRITE ; ( --  )
-    .word LIT,0,TOR ; R: 0
-    .word MAGIC,BTSIGN,RFETCH,BUFFERSTORE ; champ signature
-    .word LATEST,FETCH,BTLATST,RFETCH,BUFFERSTORE; champ LATEST 
-    .word HERE,BTDP,RFETCH,BUFFERSTORE ; champ DP
-    .word HERE,DP0,MINUS,BTSIZE,RFETCH,BUFFERSTORE ; champ taille
-    .word RFROM,DUP,EEWRITE,EXIT ; tampon > EEPROM
+;DEFWORD "?DONE",5,,QDONE ;  ( dp -- f )
+;    .word QBYTES,ZEROEQ,EXIT
 
-DEFWORD ">BUFFER",7,,TOBUFFER ; ( dp t -- dp' )
-    .word BUFADDR,OVER,DUP ; S: dp addr dp dp 
-    .word QBYTES,DUP,ROT,PLUS,TOR ; S: dp addr n   R: dp+n
-    .word LIT,0,DODO
-1:  .word SWAP,DUP,ONEPLUS,NROT
-    .word CFETCH,OVER,CSTORE,ONEPLUS,DOLOOP,1b-$
-    .word TWODROP,RFROM,EXIT
+; constantes liées au chargeur système (boot loader)
+DEFCONST "BTHEAD",6,,BTHEAD,BOOT_HEADER ; entête secteur démarrage
+DEFCONST "MAGIC",5,,MAGIC,0x55AA ; signature
+DEFCONST "FBTROW",6,,FBTROW,FLASH_FIRST_ROW  ; numéro première ligne FLASH BOOT  
+
+; champ signature    
+DEFWORD "BTSIGN",6,,BTSIGN  ; ( -- addr )
+    .word BTHEAD,EXIT
+
+; champ LATEST    
+DEFWORD "BTLATST",7,,BTLATST  ; ( -- addr )
+    .word BTHEAD,LIT,1,CELLS,PLUS,EXIT
+
+; champ DP    
+DEFWORD "BTDP",4,,BTDP ; ( -- addr )
+    .word BTHEAD,LIT,2,CELLS,PLUS,EXIT
     
-;écris la page suivante dans l'EEPROM
-; utilise le tampon #1 pour le transfert > EEPROM.    
+; champ taille    
+DEFWORD "BTSIZE",6,,BTSIZE ; ( -- addr )
+    .word BTHEAD,LIT,3,CELLS,PLUS,EXIT
+    
+    
+; initialise l'enregistrement de boot  
+DEFWORD "SETHEADER",9,,SETHEADER ; ( -- )
+    .word MAGIC,BTSIGN,STORE ; signature
+    .word HERE,BTDP,STORE ; DP
+    .word LATEST,FETCH,BTLATST,STORE ; latest
+    .word HERE,DP0,MINUS,BTSIZE,STORE ; size
+    .word EXIT
+
+; écriture d'une plage RAM dans l'EEPROM externe 
+; doit tenir compte des limites de plages    
 ; arguments:
-;   'p' no de page EEPROM
-;   'dp' pointeur data
-; retourne:
-;   'dp+n'  position de dp actualisée
-DEFWORD "PGSAVE",6,,PGSAVE ; ( p dp -- dp+n )
-    ; copie du data dans le tampon
-    .word LIT,1,TOBUFFER,SWAP
-;    .word DUP,QBYTES,TWODUP,PLUS,NROT ; S: p dp+n dp n   
-;    .word LIT,1,BUFADDR,SWAP,CMOVE,SWAP ; S: dp+n p  
-    ; écriture du tampon dans l'EEPROM
-    .word LIT,1,SWAP,EEWRITE ; S: dp+n
-    .word EXIT ; S: dp+n 
+;   'r-addr' entier simple, adresse RAM début
+;   'size' entier simple, nombre d'octets à écrire
+;   'e-addr'  entier double, adresse EEPROM début    
+DEFWORD "RAM>EE",6,,RAMTOEE ; ( r-adr size e-addr -- )    
+1:  .word TWOTOR,QDUP,ZBRANCH,8f-$
+    .word TWODUP,TWORFETCH,LIT,256,UMSLASHMOD
+    .word DROP,LIT,256,SWAP,MINUS,MIN,SWAP,OVER,DUP,TWORFETCH
+    .word ROT,TOR,EEWRITE,RFETCH,MINUS,RFROM,TWORFROM,ROT,MPLUS
+    .word BRANCH,1b-$
+8:  .word DROP,TWORFROM,TWODROP
+    .word EXIT
+
+; identifiant périphériques
+DEFCONST "KEYBOARD",8,,KEYBOARD,_KEYBOARD ; clavier
+DEFCONST "SCREEN",6,,SCREEN,_SCREEN ; écran
+DEFCONST "SERIAL",6,,SERIAL,_SERIAL ; port série    
+DEFCONST "XRAM",4,,XRAM,_SPIRAM ;  mémoire RAM externe
+DEFCONST "EEPROM",6,,EEPROM,_SPIEEPROM ; mémoire EEPROM externe
+DEFCONST "SDCARD",6,,SDCARD,_SDCARD ; carte mémoire SD
+DEFCONST "MFLASH",6,,MFLASH,_MCUFLASH ; mémoire FLASH du MCU    
+; opérations    
+DEFCONST "FN_READ",7,,FN_READ,0
+DEFCONST "FN_WRITE",8,,FN_WRITE,1
+
+; initialise le périphérique d'autochargement
+;  'dev' périphérique  {MFLASH, EEPROM}
+;  'fn' function    {FN_READ, FN_WRITE}
+DEFWORD "SETBOOT",7,,SETBOOT  ; ( dev fn -- ) 
+    .word OVER
+    .word MFLASH,EQUAL,ZBRANCH,4f-$
+  ; mcu flash
+    .word FN_WRITE,EQUAL,ZBRANCH,2f-$
+    ; opération écriture
+    .word LIT,RAMTOFLASH,BRANCH,9f-$
+    ; opération lecture
+2:  .word LIT,FLASHTORAM,BRANCH,9f-$
+  ; eeprom externe
+4:  .word FN_WRITE,EQUAL,ZBRANCH,5f-$
+    ;opération écriture
+    .word LIT,RAMTOEE,BRANCH, 9f-$
+    ;opération lecture
+5:  .word LIT,EEREAD    
+9:  .word BOOTFN,STORE,BOOTDEV,STORE
+    .word EXIT
+
+; initialise l'adresse boot du périphérique
+; ud adresse 24 bits EEPROM ou MCU_FLASH
+DEFWORD "BOOTADR",7,,BOOTADR ; ( -- ud )
+    .word BOOTDEV,FETCH,MFLASH,EQUAL,ZBRANCH,2f-$
+    .word BOOTFN,FETCH,LIT,RAMTOFLASH,EQUAL,ZBRANCH,1f-$
+    .word ERASEROWS
+1:  .word FBTROW,ROWTOFADR,EXIT
+2:  .word LIT,0,DUP,EXIT    
     
-; sauvegarde une image au début de l'EEPROM
-DEFWORD ">BOOT",5,,TOBOOT ; ( -- )
-    .word EMPTY,ZBRANCH,1f-$
-    .word EXIT ; rien à sauvegarder
-1:  .word LIT,1 ; S: p 
-    .word HEADWRITE,DP0 ; S: p dp
-2:  .word DUP,QDONE,TBRANCH,9f-$ ; S: p dp  
-    .word OVER,ONEPLUS,NROT ; S: p+1 p dp 
-    .word PGSAVE,BRANCH,2b-$   
-9:  .word TWODROP,EXIT 
+; sauvegarde une image boot sur un périphérique
+;  dev -> { MFLASH, EEPROM }  
+DEFWORD ">BOOT",5,,TOBOOT ; ( dev -- )
+    .word FN_WRITE,SETBOOT
+    .word QEMPTY,TBRANCH,9f-$ ; si RAM vide quitte
+    .word SETHEADER
+    .word BTHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS,BOOTADR
+    .word BOOTFN,FETCH,EXECUTE
+9:  .word EXIT 
+
+; charge une image RAM à partir du périphérique désigné.
+; dev -> { MFLASH, EEPROM }
+DEFWORD "BOOT",4,,BOOT ; ( dev -- )
+    .word FN_READ,SETBOOT,QBOOT,ZBRANCH,9f-$
+    .word BTHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS,BOOTADR ; S: r-addr size e-addr
+    .word BOOTFN,FETCH,EXECUTE
+    .word BTDP,FETCH,DP,STORE 
+    .word BTLATST,FETCH,LATEST,STORE
+9:  .word EXIT
+  
