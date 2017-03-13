@@ -1,3 +1,16 @@
+2017-03-12
+----------
+Tests et nettoyage 
+Suppression du mot  IP!
+corrigé 2!
+corrigé LSHIFT et RSHIFT
+Ajout constante MSB=0x8000,  MAX-INT=32767 et MIN-INT= -32768
+Ajout CMOVE> et réécriture de CMOVE
+ 
+2017-03-11
+----------
+Refais le travail de sauvegarde/récupération d'images RAM avec >BOOT et BOOT
+
 2017-03-10
 ----------
 Suppression du mot @EXECUTE

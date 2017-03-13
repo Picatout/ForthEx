@@ -278,13 +278,6 @@ DEFCODE "IP@",3,,IPFETCH  ; ( -- n )
     mov IP,T
     NEXT
     
-; T->IP
-DEFCODE "IP!",3,,IPSTORE ; ( n -- )
-    mov T,IP
-    DPOP
-    NEXT
-    
-    
 DEFCODE "REBOOT",6,,REBOOT ; ( -- )  démarrage à froid
     reset
     
@@ -320,31 +313,32 @@ DEFCODE "EC@",3,,ECFETCH ; ( c-addr -- c )
     RESET_EDS
     NEXT
     
-    
-DEFCODE "2@",2,,TWOFETCH ; ( addr -- n1 n2 ) double en mémoire en format little indian
+; empile un entier double    
+DEFCODE "2@",2,,TWOFETCH ; ( addr -- n1 n2 ) 
     mov [T],W0 
     add #CELL_SIZE,T
     mov [T],T
     mov W0,[++DSP]
     NEXT
     
+; met en mémoire un entier simple    
 DEFCODE "!",1,,STORE  ; ( n  addr -- )
     mov [DSP--],[T]
     DPOP
     NEXT
-    
+  
+; met en mémoire 1 octet    
 DEFCODE "C!",2,,CSTORE  ; ( char c-addr  -- )
     mov [DSP--],W0
     mov.b W0,[T]
     DPOP
     NEXT
 
-; entier double stocké  BIG INDIAN    
+; met en mémoire un entier double    
 DEFCODE "2!",2,,TWOSTORE ; ( n1 n2 addr -- ) n2->addr, n1->addr+CELL_SÌZE
-    mov [DSP--],[T]
-    add #CELL_SIZE,T
-    mov [DSP--],[T]
-    DPOP
+    mov [DSP--],[++T]
+    mov [DSP--],[--T]
+    mov [DSP],T
     NEXT
     
 ; empile compteur de boucle    
@@ -570,18 +564,30 @@ DEFCODE "2/",2,,TWOSLASH ; ( n -- n ) n/2
 DEFCODE "LSHIFT",6,,LSHIFT ; ( x1 u -- x2 ) x2=x1<<u    
     mov T, W0
     DPOP
-    dec W0,W0
+    cp0 W0
+    bra z,9f
+    mov #16,W1
+    cp W0,W1
+    bra leu, 1f
+    mov W1,W0
+1:  dec W0,W0
     repeat W0
     sl T,T
-    NEXT
+9:  NEXT
     
 DEFCODE "RSHIFT",6,,RSHIFT ; ( x1 u -- x2 ) x2=x1>>u
     mov T,W0
     DPOP
-    dec W0,W0
+    cp0 W0
+    bra z, 9f
+    mov #16,W1
+    cp W0,W1
+    bra leu, 1f
+    mov W1,W0    
+1:  dec W0,W0
     repeat W0
     lsr T,T
-    NEXT
+9:  NEXT
     
 DEFCODE "+!",2,,PLUSSTORE  ; ( n addr  -- ) [addr]=[addr]+n     
     mov [T], W0
@@ -632,11 +638,11 @@ DEFCODE "/",1,,DIVIDE ; ( n1 n2 -- n1/n2 )
     NEXT
 
 ; retourne le reste de la division entière.    
-DEFCODE "MOD",3,,MOD ; ( N1 n2 -- n1%n2 )
+DEFCODE "MOD",3,,MOD ; ( n1 n2 -- n1%n2 )
    mov [DSP--],W0
    repeat #17
    div.s W0,T
-   mov W1,T
+1: mov W1,T
    NEXT
    
 DEFCODE "*/",2,,STARSLASH  ; ( n1 n2 n3 -- n4 ) n1*n2/n3, n4 quotient
@@ -653,8 +659,8 @@ DEFCODE "*/MOD",5,,STARSLASHMOD ; ( n1 n2 n3 -- n4 n5 ) n1*n2/n3, n4 reste, n5 q
     mov [DSP--],W1
     mul.ss W0,W1,W0
     repeat #17
-    div.sd W0,T 
-    mov W1,[++DSP]
+    div.sd W0,T
+1:  mov W1,[++DSP]
     mov W0,T
     NEXT
     
@@ -662,7 +668,7 @@ DEFCODE "/MOD",4,,SLASHMOD ; ( n1 n2 -- r q )
     mov [DSP],W0
     repeat #17
     div.s W0,T
-    mov W0,T     ; quotient
+1:  mov W0,T     ; quotient
     mov W1,[DSP] ; reste
     NEXT
 
@@ -849,8 +855,11 @@ DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
     NEXT
 
 DEFCODE "0>",2,,ZEROGT ; ( n -- f ) f= n>0
-    add T,T,T
-    subb T,T,T
+    clr W0
+    cp0 T
+    bra le, 8f
+    setm W0
+8:  mov W0,T    
     NEXT
     
 DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
@@ -952,26 +961,19 @@ DEFCODE ">CHAR",5,,TOCHAR ; ( c -- c)
 DEFWORD "HERE",4,,HERE
     .word DP,FETCH,EXIT
 
-; copie un bloc mémoire RAM (mots de 16 bits)
-; pas d'accès à la mémoire PSV    
+; copie un bloc mémoire RAM
+; en évitant la propagation    
 DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
-    SET_EDS
-    mov T, W0 ; compte
-    DPOP
-    mov T, W1 ; destination
-    DPOP
-    cp0 W0
-    bra z, 1f
-    dec W0,W0
-    repeat W0
-    mov [T++],[W1++]
-1:  DPOP
-    RESET_EDS
-    NEXT
-
+    mov [DSP-2],W0 ; source
+    cp W0,[DSP]    
+    bra ltu, move_dn ; source < dest
+    bra move_up      ; source > dest
+    
 ; copie un bloc d'octets RAM  
-; DSRPAG configuré pour accès à L'EDS    
+; DSRPAG configuré pour accès à L'EDS
+; copie de l'adresse la plus basse vers la plus haute    
 DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
+move_up:
     SET_EDS
     mov T, W0 ; compte
     DPOP
@@ -986,6 +988,27 @@ DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
     RESET_EDS
     NEXT
 
+; copie un bloc d'octets RAM  
+; DSRPAG configuré pour accès à L'EDS
+; copie de l'adresse la plus haute vers la plus basse    
+DEFCODE "CMOVE>",6,,CMOVETO ; ( c-addr1 c-addr2 u -- )
+move_dn:
+    SET_EDS
+    mov T, W0
+    DPOP
+    mov T,W1
+    add W0,W1,W1
+    DPOP
+    add W0,T,T
+    cp0 W0
+    bra z, 1f
+    dec W0,W0
+    repeat W0
+    mov.b [--T],[--W1]
+1:  DPOP
+    RESET_EDS
+    NEXT
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  manipulation de caractères
 ;  et chaînes
@@ -1027,13 +1050,13 @@ DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
     DPOP        ; T=U
     mov [DSP],W1 ; W1=c-addr
     cp0 T
-    bra z, 3f
+    bra z, 4f
 1:  cp.b W0,[W1]
-    bra z, 3f
+    bra z, 4f
     inc W1,W1
     dec T,T
     bra nz, 1b
-3:  mov W1,[DSP]
+4:  mov W1,[DSP]
     RESET_EDS
     NEXT
 
@@ -1069,18 +1092,6 @@ DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )
     sub W0,[DSP],T
     NEXT
  
-; copie une chaine de caractère
-; sur une adresse alignée
-DEFWORD "PACK$",5,,PACKS ; ( src u dest -- a-dest )  copie src de longeur u vers aligned(dest)
-    .word ALIGNED,DUP,TOR  ; src u a-dest R: a-dest
-    .word OVER,DUP,LIT,0   ; src u a-dest u u 0
-    .word LIT,2,UMSLASHMOD,DROP ; src u a-dest u r
-    .word MINUS,OVER,PLUS ; src u a-dest a-dest+u
-    .word LIT,0,SWAP,STORE ; src u a-dest
-    .word TWODUP,CSTORE,LIT,1,PLUS ; src u a-dest+1
-    .word SWAP,CMOVE,RFROM,EXIT ; ( -- a-dest)
-    
-    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  variables système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1114,9 +1125,12 @@ DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
 DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
 DEFCONST "ULIMIT",6,,ULIMIT,EDS_BASE        ; limite espace dictionnaire
 DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
-DEFCONST "TRUE",1,,TRUE,-1 ; valeur booléenne vrai
-DEFCONST "FALSE",1,,FALSE,0 ; valeur booléenne faux
+DEFCONST "TRUE",4,,TRUE,-1 ; valeur booléenne vrai
+DEFCONST "FALSE",5,,FALSE,0 ; valeur booléenne faux
 DEFCONST "DP0",3,,DP0,DATA_BASE ; début espace utilisateur
+DEFCONST "MSB",3,,MSB,0x8000 ; bit le plus significatif (1<<15).
+DEFCONST "MAX-INT"7,,MAXINT,0x7FFF ; 32767
+DEFCONST "MIN-INT"7,,MININT,0x8000 ; -32768
     
 ; addresse buffer pour l'évaluateur    
 DEFCODE "'SOURCE",6,,TSOURCE ; ( -- c-addr u ) 
@@ -1400,16 +1414,6 @@ DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )
 DEFWORD ">COUNTED",8,,TOCOUNTED ; ( src n dest -- )
     .word TWODUP,CSTORE,ONEPLUS,SWAP,CMOVE,EXIT
 
-; alloue une cellule pour x à la position DP
-DEFWORD ",",1,,COMMA  ; ( x -- )
-    .word HERE,STORE,LIT,CELL_SIZE,ALLOT
-    .word EXIT
-    
-; alloue le caractère 'c' à la position DP    
-DEFWORD "C,",2,,CCOMMA ; ( c -- )    
-    .word HERE,CSTORE,LIT,1,ALLOT
-    .word EXIT
-    
 ; interprète la chaîne indiquée par
 ; c-addr u   
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
@@ -1557,6 +1561,16 @@ DEFWORD "REVEAL",6,,REVEAL ; ( -- )
 DEFWORD "ALLOT",5,,ALLOT ; ( +n -- )
     .word DP,PLUSSTORE,EXIT
 
+; alloue une cellule pour x à la position DP
+DEFWORD ",",1,,COMMA  ; ( x -- )
+    .word HERE,STORE,LIT,CELL_SIZE,ALLOT
+    .word EXIT
+    
+; alloue le caractère 'c' à la position DP    
+DEFWORD "C,",2,,CCOMMA ; ( c -- )    
+    .word HERE,CSTORE,LIT,1,ALLOT
+    .word EXIT
+    
     
     
 ; Extrait le mot suivant du flux 
