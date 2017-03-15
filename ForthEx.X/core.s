@@ -43,7 +43,8 @@ pstack:
 rstack:
 .space RSTK_SIZE
 
-.section .control.stack.bss bss, address(_SP0+DSTK_SIZE)
+.equ  CSTK_BASE, _SP0+DSTK_SIZE    
+.section .control.stack.bss bss, address(CSTK_BASE)
 cstack:
 .space CSTK_SIZE 
     
@@ -172,8 +173,8 @@ code_EXIT :			;pfa,  assembler code follows
     RPOP IP
     NEXT
 
-HEADLESS "NOP" ; ( -- )
-    NEXT
+HEADLESS "NOP",HWORD ; ( -- )
+    .word EXIT
 
 DEFCODE "CALL",4,,CALL ; ( ud -- )
     mov T, W1
@@ -521,6 +522,11 @@ DEFCODE "CSTK>",5,,CSTKFROM ; ( -- x  C: x -- )
 ;;;;;;;;;;;;;;;;
 ;     MATH
 ;;;;;;;;;;;;;;;;
+
+DEFCONST "MSB",3,,MSB,0x8000 ; bit le plus significatif (1<<15).
+DEFCONST "MAX-INT"7,,MAXINT,0x7FFF ; 32767
+DEFCONST "MIN-INT"7,,MININT,0x8000 ; -32768
+
     
 DEFWORD "HEX",3,,HEX ; ( -- )
     .word LIT,16,BASE,STORE,EXIT
@@ -1033,7 +1039,8 @@ DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
     .ascii "missing caracter"
     .align 2
     .word ONEPLUS,CFETCH,EXIT
-    
+
+; version compilateur de CHAR  
 DEFWORD "[CHAR]",6,F_IMMED,COMPILECHAR ; cccc 
     .word QCOMPILE
     .word CHAR,CFA_COMMA,LIT,COMMA,EXIT
@@ -1128,12 +1135,9 @@ DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
 DEFCONST "TRUE",4,,TRUE,-1 ; valeur booléenne vrai
 DEFCONST "FALSE",5,,FALSE,0 ; valeur booléenne faux
 DEFCONST "DP0",3,,DP0,DATA_BASE ; début espace utilisateur
-DEFCONST "MSB",3,,MSB,0x8000 ; bit le plus significatif (1<<15).
-DEFCONST "MAX-INT"7,,MAXINT,0x7FFF ; 32767
-DEFCONST "MIN-INT"7,,MININT,0x8000 ; -32768
     
 ; addresse buffer pour l'évaluateur    
-DEFCODE "'SOURCE",6,,TSOURCE ; ( -- c-addr u ) 
+DEFCODE "'SOURCE",7,,TSOURCE ; ( -- c-addr u ) 
     DPUSH
     mov _TICKSOURCE,T
     DPUSH
@@ -1182,6 +1186,7 @@ DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
 ;en utilisant la valeur de BASE
 ;la conversion s'arrête au premier
 ;caractère non numérique
+; 'ud1' est initialisé à zéro  
 ; <c-addr1 u1> spécifie le début et le nombre
 ; de caractères de la chaîne    
 DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
@@ -1327,6 +1332,7 @@ DEFWORD "WORD",4,,WORD ; ( c -- c-addr )
     
 
 ; recherche un mot dans le dictionnaire
+; ne retourne pas les mots cachés (attribut: F_HIDDEN)    
 ; retourne: c-addr 0 si adresse non trouvée
 ;           xt 1 trouvé mot immédiat
 ;	    xt -1 trouvé mot non-immédiat
@@ -1381,6 +1387,9 @@ not_found:
 2:  NEXT
     
 ; lecture d'une ligne de texte au clavier
+; chaîne terminée par touche 'ENTER'
+; cette touche est remplacée par un espace (ASCII 32 )
+; et est compté dans la longueur de la chaîne.    
 ; c-addr addresse du buffer
 ; +n1 longueur du buffer
 ; +n2 longueur de la chaîne lue    
@@ -1398,11 +1407,14 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
    
 ; retourne la spécification
 ; de la chaîne comptée dont
-; l'adresse est dans T   
+; l'adresse est c-addr1  
 DEFWORD "COUNT",5,,COUNT ; ( c-addr1 -- c-addr2 u )
    .word DUP,CFETCH,TOR,ONEPLUS,RFROM,EXIT
    
-; imprime 'mot ?'        
+; imprime 'mot?'
+; signifiant que le mot n'a pas
+; été trouvé dans le dictionnaire.
+; réinitialise DSP et appel QUIT   
 DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )  
    .word SPACE,COUNT,TYPE
    .word SPACE,CLIT,'?',EMIT
@@ -1411,11 +1423,14 @@ DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )
    .word CR,QUIT
 
 ; copie chaîne comptée de src vers dest
+; src addresse chaîne à copiée
+; n longueur de la chaîne
+; dest adresse destination   
 DEFWORD ">COUNTED",8,,TOCOUNTED ; ( src n dest -- )
-    .word TWODUP,CSTORE,ONEPLUS,SWAP,CMOVE,EXIT
+    .word TWODUP,CSTORE,ONEPLUS,SWAP,MOVE,EXIT
 
-; interprète la chaîne indiquée par
-; c-addr u   
+; interprète la chaîne indiquée par c-addr u   
+; facteur commun entre QUIT et EVALUATE    
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
         .word SRCSTORE,LIT,0,TOIN,STORE
 1:      .word BL,WORD,DUP,CFETCH,ZBRANCH,9f-$
@@ -1431,6 +1446,8 @@ DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
 9:      .word DROP,EXIT
 
 ; interprète la chaîne à l'adrese 'c-addr' et de longueur 'u'
+; sauvegarde la valeur de source SUR R: à l'entrée
+; et restaure avant de quitter.      
 DEFWORD "EVALUATE",8,,EVAL ; ( i*x c-addr u -- j*x )
     .word TSOURCE,TOR,TOR ; sauvegarde source
     .word TOIN,FETCH,TOR,INTERPRET
@@ -1456,6 +1473,7 @@ DEFWORD "?ABORT",6,F_HIDDEN,QABORT ; ( i*x f  -- | i*x) ( R: j*x -- | j*x )
 9:  .word DROP,EXIT
   
 ; compile le runtime de ?ABORT
+; a utilisé à l'intérieur d'une définition  
 DEFWORD "ABORT\"",6,F_IMMED,ABORTQUOTE ; (  --  )
     .word CFA_COMMA,QABORT,STRCOMPILE,EXIT
     
@@ -1501,7 +1519,9 @@ DEFWORD "NFA>CFA",7,,NFATOCFA ; ( nfa -- cfa )
  
 ; passe du champ CFA au champ PFA
 DEFWORD ">BODY",5,,TOBODY ; ( cfa -- pfa )
-    .word CELLPLUS,EXIT;
+    .word DUP,FETCH,LIT,FETCH_EXEC,EQUAL,ZBRANCH,1f-$
+    .word CELLPLUS
+1:  .word CELLPLUS,EXIT;
 
     
 ;passe du champ CFA au champ NFA
@@ -1526,7 +1546,7 @@ DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
   
 ; vérifie si le dictionnaire utilisateur
 ; est vide  
-DEFWORD "?EMPTY",5,,QEMPTY ; ( -- f)
+DEFWORD "?EMPTY",6,,QEMPTY ; ( -- f)
     .word DP0,HERE,EQUAL,EXIT 
     
 ; met à 1 l'indicateur F_IMMED
@@ -1640,7 +1660,7 @@ DEFWORD "[COMPILE]",9,F_IMMED,BRCOMPILE ; ( <cccc> -- )
 DEFWORD "CFA,",6,F_IMMED,CFA_COMMA  ; ( -- )
   .word RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
 
-; abort si le nom n'est pas trouvé dans le dictionnaire  
+; avorte si le nom n'est pas trouvé dans le dictionnaire  
 DEFWORD "?WORD",5,,QWORD ; ( c-addr -- cfa 1 | cfa -1 )
    .word BL,WORD,UPPER,FIND,QDUP,ZEROEQ,ZBRANCH,2f-$
    .word COUNT,TYPE,LIT,'?',EMIT,ABORT
@@ -1870,28 +1890,30 @@ DEFWORD ":",1,,COLON ; ( name --  )
     .word HEADER ; ( -- )
     .word RBRACKET,CFA_COMMA,ENTER,EXIT
 
-;RUNTIME utilisé pa CREATE
-HEADLESS "RT_CREATE"  ; ( -- addr )
+;RUNTIME utilisé par CREATE
+; remplace ENTER    
+    .global FETCH_EXEC
+    FORTH_CODE
+FETCH_EXEC: ; ( -- pfa )
      DPUSH
-     mov IP,T
-     add #2*CELL_SIZE,T
-     NEXT
+     mov WP,T         
+     mov [T++],WP  ; CFA
+     mov [WP++],W0
+     goto W0
     
 ;cré une nouvelle entête dans le dictionnaire
 ;qui peut-être étendue par DOES>
 DEFWORD "CREATE",6,,CREATE ; ( -- hook )
     .word HEADER,REVEAL
-    .word CFA_COMMA,ENTER
-    .word CFA_COMMA,RT_CREATE
+    .word LIT,FETCH_EXEC,COMMA
     .word CFA_COMMA,NOP
-    .word EXITCOMMA
     .word EXIT    
   
     
 ; runtime DOES>    
 HEADLESS "RT_DOES", HWORD ; ( -- )
     .word RFROM,DUP,CELLPLUS,TOR,FETCH,LATEST,FETCH
-    .word NFATOCFA,LIT,2,CELLS,PLUS,STORE
+    .word NFATOCFA,CELLPLUS,STORE
     .word EXIT
     
 ; ajoute le runtime RT_DOES

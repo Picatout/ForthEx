@@ -266,6 +266,8 @@
  .equ AUDIO_PPSbit, RP37R0
  .equ AUDIO_FN, 18
  
+; warm boot flag
+ .equ WBOOT, 0x5742
 .LIST
  
 

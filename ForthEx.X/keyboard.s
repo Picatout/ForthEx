@@ -37,6 +37,7 @@ kbd_head:
 kbd_tail:
 .space 2
 
+  
 INTR ; section routines d'interruptions   
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -49,9 +50,15 @@ __U2RXInterrupt:
     push.d W0
     push.d W2
     mov KBD_RXREG,W0
+    mov.b #VK_CTRL_C,W1
+    cp.b W1,W0
+    bra nz, 1f
+    mov #WBOOT,W0
+    mov W0, fwarm
+    reset
 ; tranfert code dans file
 ; kbd_queue
-    mov #kbd_queue, W1
+1:  mov #kbd_queue, W1
     mov kbd_tail, W2
     add W2,W1,W1
     mov.b W0,[W1]

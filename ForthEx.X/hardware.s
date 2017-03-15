@@ -33,14 +33,15 @@ _heap: .space RAM_END-EDS_BASE-VIDEO_BUFF_SIZE
  
 .section .hardware.bss  bss
     
-.global systicks , seed  
+.global systicks , seed, fwarm  
 .align 2    
 systicks: ; compteur de millisecondes
 .space 2
 seed: ; PRNG 32 bits    
 .space 4
-    
-    
+ ; si contient .ascii WM lance un warm boot au lieu d'un cold boot       
+fwarm: .space 2  
+ 
 INTR
 .global __MathError    
 __MathError:
@@ -106,26 +107,35 @@ __reset:
     sub #RSTK_GUARD, W0
     mov W0, SPLIM
     movpag #1,DSWPAG
-    movpag #psvpage(_cold),DSRPAG
-    mov #psvoffset(_cold),IP
+    movpag #psvpage(_reboot),DSRPAG
+    mov #psvoffset(_reboot),IP
     NEXT
     
     
 .text
 
-    
-.global _cold    
-_cold:
+   
+_reboot:
+    .word QWARM,ZBRANCH,_cold-$
+_warm:
+    .word LIT,_DP,FETCH,LIT,_LATEST,FETCH
+    .word CLS,CLR_LOW_RAM
     .word HARDWARE_INIT,VARS_INIT
+    .word LATEST,STORE,DP,STORE
+    .word QUIT
+_cold:
+    .word CLR_RAM,HARDWARE_INIT,VARS_INIT
     .word VERSION,COUNT,TYPE,CR 
     .word BOOTDEV,FETCH,BOOT; autochargement système en RAM à partir d'une en FLASH MCU ou EEPROM
     .word QUIT ; boucle de l'interpréteur
-    .word BRANCH,_cold-$
+
+; est-ce un warm reboot    
+HEADLESS QWARM,HWORD
+    .word LIT,fwarm,FETCH,LIT,WBOOT,EQUAL,EXIT
     
 ; initialisation matérielle    
 HEADLESS HARDWARE_INIT, HWORD
     .word SET_CLOCK
-    .word CLR_RAM    
     .word TICKS_INIT
     .word TVOUT_INIT
     .word KBD_INIT
@@ -165,10 +175,17 @@ HEADLESS SET_CLOCK
     bclr INTCON1, #NSTDIS ; interruption multi-niveaux
     NEXT
 
+; efface seulement l'espace avant USER_DICT
+HEADLESS CLR_LOW_RAM
+    mov #CSTK_BASE,W0
+    repeat #((DATA_BASE-CSTK_BASE)/2-1)
+    clr [W0++]
+    NEXT
+    
 ; mise à zéro de la RAM
 HEADLESS CLR_RAM
-    mov #RAM_BASE+DSTK_SIZE+RSTK_SIZE+CSTK_SIZE, W0
-    repeat #((RAM_SIZE-DSTK_SIZE-RSTK_SIZE-CSTK_SIZE)/2-1)
+    mov #CSTK_BASE, W0
+    repeat #((RAM_END-CSTK_BASE)/2-1)
     clr [W0++]
     NEXT
 

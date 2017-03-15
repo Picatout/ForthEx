@@ -32,6 +32,7 @@
 .equ VK_TAB,	9	    ; touche TAB    
 .equ VK_ESCAPE,	27	    ;	Esc
 .equ VK_RETURN,	13	    ; touche Entrée 
+.equ VK_CTRL_C, 17          ; control C    
 .equ VK_SPACE,	32          ; touche espace    
 .equ VK_F1,	128
 .equ VK_F2,	129

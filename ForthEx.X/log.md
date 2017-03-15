@@ -1,7 +1,16 @@
+2017-03-14
+----------
+tests et nettoyage suite
+corrigé longueur nom ?EMPTY
+Modifié  CREATE, >BODY 
+remplacé RT_CREATE par FETCH_EXEC
+ajout d'un redémarrage à chaud avec par CTRL-C.
+
+
 2017-03-12
 ----------
 Tests et nettoyage 
-Suppression du mot  IP!
+Suppression du mot  IP! et PACK$
 corrigé 2!
 corrigé LSHIFT et RSHIFT
 Ajout constante MSB=0x8000,  MAX-INT=32767 et MIN-INT= -32768
