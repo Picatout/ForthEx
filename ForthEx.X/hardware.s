@@ -45,7 +45,16 @@ fwarm: .space 2
 INTR
 .global __MathError    
 __MathError:
+    mov #MATH_EXCEPTION,W0
+    mov W0,fwarm
     reset
+    
+.global __StackError
+__StackError:
+    mov #STACK_EXCEPTION,W0
+    mov W0,fwarm
+    reset
+    
     
 ; les interruptions non définies 
 ; réinitialisent le processeur    
@@ -107,22 +116,34 @@ __reset:
     sub #RSTK_GUARD, W0
     mov W0, SPLIM
     movpag #1,DSWPAG
-    movpag #psvpage(_reboot),DSRPAG
+    btsc RCON,#SWR
+    bra 1f
+    movpag #psvpage(_cold),DSRPAG
+    mov #psvoffset(_cold),IP
+    NEXT
+1:  movpag #psvpage(_reboot),DSRPAG
     mov #psvoffset(_reboot),IP
     NEXT
-    
     
 .text
 
    
 _reboot:
-    .word QWARM,ZBRANCH,_cold-$
+    .word QWARM,TBRANCH,_cold-$
 _warm:
-    .word LIT,_DP,FETCH,LIT,_LATEST,FETCH
+    .word LIT,fwarm,FETCH,LIT,_DP,FETCH,LIT,_LATEST,FETCH
     .word CLS,CLR_LOW_RAM
     .word HARDWARE_INIT,VARS_INIT
     .word LATEST,STORE,DP,STORE
-    .word QUIT
+    .word DUP,LIT,USER_ABORT,EQUAL,ZBRANCH,1f-$
+    .word DROP,LIT,_user_aborted,BRANCH,8f-$
+1:  .word DUP,LIT,MATH_EXCEPTION,EQUAL,ZBRANCH,2f-$
+    .word DROP,LIT,_math_error,BRANCH,8f-$
+2:  .word DUP,LIT,STACK_EXCEPTION,EQUAL,ZBRANCH,3f-$
+    .word DROP,LIT,_stack_reset,BRANCH,8f-$
+3:  .word DROP,LIT,_unknown_reset    
+8:  .word COUNT,TYPE,CR,QUIT
+  
 _cold:
     .word CLR_RAM,HARDWARE_INIT,VARS_INIT
     .word VERSION,COUNT,TYPE,CR 
@@ -131,7 +152,7 @@ _cold:
 
 ; est-ce un warm reboot    
 HEADLESS QWARM,HWORD
-    .word LIT,fwarm,FETCH,LIT,WBOOT,EQUAL,EXIT
+    .word LIT,fwarm,FETCH,ZEROEQ,EXIT
     
 ; initialisation matérielle    
 HEADLESS HARDWARE_INIT, HWORD

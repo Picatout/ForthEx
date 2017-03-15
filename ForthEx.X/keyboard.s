@@ -53,7 +53,7 @@ __U2RXInterrupt:
     mov.b #VK_CTRL_C,W1
     cp.b W1,W0
     bra nz, 1f
-    mov #WBOOT,W0
+    mov #USER_ABORT,W0
     mov W0, fwarm
     reset
 ; tranfert code dans file

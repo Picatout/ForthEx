@@ -266,8 +266,11 @@
  .equ AUDIO_PPSbit, RP37R0
  .equ AUDIO_FN, 18
  
-; warm boot flag
- .equ WBOOT, 0x5742
+; warm boot cause
+ .equ USER_ABORT, 0x1
+ .equ MATH_EXCEPTION, 0x2
+ .equ STACK_EXCEPTION, 0x4
+ 
 .LIST
  
 

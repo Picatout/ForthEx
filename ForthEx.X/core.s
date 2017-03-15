@@ -104,6 +104,10 @@ _TOIN: .space 2
 ; pointeur HOLD conversion numérique
  .global _HP
 _HP: .space 2
+; sauvegarde de RSP par BREAK
+_RPBREAK: .space 2 
+; flag activation/désactivaton break points
+_DBGEN: .space 2 
  
 ; enregistrement information boot loader
 .section .boot.bss bss address(BOOT_HEADER)
@@ -116,11 +120,23 @@ _user_dict: .space EDS_BASE-DATA_BASE
     
 ; constantes dans la mémoire flash
 .section .ver_str.const psv       
-.global _version
+.global _version,_math_error,_user_aborted,_stack_reset,_unknown_reset
 _version:
 .byte 12    
 .ascii "ForthEx V0.1"    
-
+_math_error:
+.byte  21
+.ascii "Math exception reset."
+_user_aborted:
+.byte  24
+.ascii "Program aborted by user."
+_stack_reset:
+.byte  18
+.ascii "Stack error reset."   
+_unknown_reset:
+.byte  22
+.ascii "unknowned event reset."
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; mot système qui ne sont pas
 ; dans le dictionnaire
@@ -1117,6 +1133,8 @@ DEFUSER "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
 DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
 DEFUSER "BOOTDEV",7,,BOOTDEV ; détermine le périphérique utilisé par BOOT et >BOOT
 DEFUSER "BOOTFN",6,,BOOTFN ; CFA de l'opération à effectuer
+DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
+DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
@@ -1477,18 +1495,20 @@ DEFWORD "?ABORT",6,F_HIDDEN,QABORT ; ( i*x f  -- | i*x) ( R: j*x -- | j*x )
 DEFWORD "ABORT\"",6,F_IMMED,ABORTQUOTE ; (  --  )
     .word CFA_COMMA,QABORT,STRCOMPILE,EXIT
     
+; boucle lecture/exécution/impression
+DEFWORD "REPL",4,F_HIDDEN,REPL ; ( -- )
+1:  .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT ; ( addr u )
+    .word SPACE,INTERPRET 
+    .word STATE,FETCH,TBRANCH,2f-$
+    .word OK
+2:  .word CR
+    .word BRANCH, 1b-$
+    
 ; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT ; ( -- )
-1:  .word R0,FETCH,RPSTORE
+    .word R0,FETCH,RPSTORE
     .word LIT,0,STATE,STORE
-quit0:
-    .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT ; ( addr u )
-    .word SPACE,INTERPRET 
-    .word STATE,FETCH,TBRANCH,quit1-$
-    .word OK
-quit1:
-    .word CR
-    .word BRANCH, quit0-$
+    .word REPL
     
 ; commentaire limité par ')'
 DEFWORD "(",1,F_IMMED,LPAREN ; parse ccccc)
@@ -2058,6 +2078,33 @@ DEFWORD "DUMP",4,,DUMP ; ( addr +n -- )
     .word DOLOOP,1b-$,DROP
     .word RFROM,BASE,STORE,EXIT
 
+; active/désactive les breaks points    
+DEFWORD "DEBUG",5,,DEBUG ; ( f -- )
+    .word DBGEN,STORE    
+    .word EXIT
+    
+; interrompt le programme en cours d'exécution et
+; entre en mode interpréteur
+DEFWORD "BREAK",5,,BREAK ; ( ix n -- ix )
+    .word DBGEN,FETCH,TBRANCH,1f-$
+    .word DROP,EXIT
+1:  .word RPFETCH,RPBREAK,STORE
+    .word CR,DOTSTR
+    .byte  13
+    .ascii "break point: "
+    .align 2
+    .word DOT,CR,DOTS,CR,REPL
+    .word EXIT
+
+; résume le programme interrompu par BREAK
+DEFWORD "RESUME",6,,RESUME ; ( -- )
+    .word DBGEN,FETCH,ZBRANCH,9f-$
+    .word RPBREAK,FETCH,QDUP,ZBRANCH,9f-$
+    .word RPSTORE,LIT,0,RPBREAK,STORE
+9:  .word EXIT
+    
+    
+    
 ; affice le code source d'un mot qui est
 ; dans le dictionnaire
 ;DEFWORD "SEE",3,F_IMMED,SEE ; ( <ccc> -- )    

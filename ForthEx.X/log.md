@@ -1,3 +1,10 @@
+2017-03-15
+----------
+ajout messages pour les réinitialisation causé par CTRL-C, MATCH_EXCEPTION et 
+STACK_ERROR.
+ajouté outils de débogage mots: DEBUG,BREAK et RESUME, variables: RPBREAK ET DBGEN
+Modification à QUIT pour extraire la boucle REPL
+
 2017-03-14
 ----------
 tests et nettoyage suite
