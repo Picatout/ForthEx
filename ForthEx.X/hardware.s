@@ -353,6 +353,173 @@ DEFWORD "FREE",4,,FREE
 ; retourne la quantité RAM disponible sur le HEAP
 DEFCONST "HEAPSIZE",8,,HEAPSIZE,(RAM_END-VIDEO_BUFF_SIZE-EDS_BASE) ; ( -- n )
     
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; périphérique CRC
+; document de référence Microchip: DS70346B
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; activation désactivation périphérique CRC    
+DEFCODE "CRCENBL",7,,CRCENBL  ; ( f -- )    
+    bclr CRCCON1,#CRCEN
+    cp0 T
+    bra z, 8f
+    bset CRCCON1,#CRCEN
+8:  DPOP
+    NEXT
+
+; vérifie l'état du CRC FIFO
+; retourne:
+;       0 plein
+;       1 vide
+;       2 ni plein ni vide    
+DEFCODE "?CRCFIFO",8,,QCRCFIFO ; ( -- n )
+    DPUSH
+    clr T
+    btsc CRCCON1,#CRCFUL
+    bra 9f
+    mov #1,T
+    btss CRCCON1,#CRCMPT
+    inc T,T
+9:  NEXT
+    
+
+; sélection de l'orde des bits de données
+;  argument:
+;      FALSE  bit le plus significatif en premier
+;      TRUE   bit le moins significatif en premier (Little Endian)
+DEFCODE "CRCLE",5,,CRCLE ; ( f -- )
+    bclr CRCCON1,#LENDIAN
+    cp0 T
+    bra z, 9f
+    bset CRCCON1,#LENDIAN
+9:  DPOP
+    NEXT
+    
+    
+    
+;démarrage du CRC shift register     
+DEFCODE "CRCSTART",8,,CRCSTART ; ( -- )
+    bset CRCCON1,#CRCGO
+    NEXT
+    
+; longueur du data  (data width)
+; argument:
+;   'n' nombre de bits  {1..32}  
+DEFCODE "CRCDW",5,,CRCDW ; ( n -- )    
+    dec T,T
+    ze T,T
+    swap T
+    mov CRCCON2,W0
+    ze W0,W0
+    ior W0,T,W0
+    mov W0,CRCCON2
+    DPOP
+    NEXT
+    
+; longeur du polynome (polynomial length)
+; argument:
+;    'n' nombre de bits  {1..32]
+DEFCODE "CRCPL",5,,CRCPL ; ( n -- )
+    dec T,T
+    ze T,T
+    mov 0xFF00,W0
+    and CRCCON2,WREG
+    ior T,W0,W0
+    mov W0,CRCCON2
+    DPOP
+    NEXT
+    
+; détermine le polynome utilisé
+;  argument:
+;   ud  entier double non signée    
+DEFCODE "CRCPOLY",7,,CRCPOLY ; ( ud -- )
+    mov T,CRCXORH
+    DPOP
+    mov T,CRCXORL
+    DPOP
+    NEXT
+    
+; lecture du CRC résultant
+DEFCODE "CRC@",4,,CRCFETCH ; ( -- ud )
+    DPUSH
+    mov CRCWDATL,T
+    DPUSH
+    mov CRCWDATH,T
+    NEXT
+    
+; initialize CRCWDAT à zéro
+; et reset bit interruption    
+DEFCODE "CRC0",4,,CRC0 ; ( -- )
+    clr CRCWDATL
+    clr CRCWDATH
+    bclr IFS4,#CRCIF
+    NEXT
+
+; envoie un datum de 8 bits au CRC
+DEFCODE "CRCC!",5,,CRCCSTORE ; ( c -- )
+1:  btsc CRCCON1,#CRCFUL
+    bra 1b
+    mov T,W0
+    mov.b WREG,CRCDATL
+    btss CRCCON1,#CRCGO
+    bset CRCCON1,#CRCGO
+    DPOP
+    NEXT
+    
+; envoie ua datum de 16 bits au CRC    
+DEFCODE "CRC!",4,,CRCSTORE ; ( n -- )
+1:  btsc CRCCON1,#CRCFUL
+    bra 1b
+    mov T,CRCDATL
+    btss CRCCON1,#CRCGO
+    bset CRCCON1,#CRCGO
+    DPOP
+    NEXT
+    
+; envoie un datum de 32 bits au CRC    
+DEFCODE "CRCD!",5,,CRCDSTORE, ; ( d -- )
+1:  btsc CRCCON1,#CRCFUL
+    bra 1b
+    mov T,W0
+    DPOP
+    mov T,CRCDATL
+    mov W0,CRCDATH
+    btss CRCCON1,#CRCGO
+    bset CRCCON1,#CRCGO
+    DPOP
+    NEXT
+    
+; vérifie que l'opération CRC est complétée
+DEFCODE "CRCDONE",7,,CRCDONE ; ( -- f )
+    DPUSH
+    clr T
+    btss IFS4,#CRCIF
+    bra 9f
+    setm T
+    bclr IFS4,#CRCIF
+9:  NEXT
+    
+    
+; configure le CRC pour les blocs data des cartes SD
+; C'est le polynome utilisé par les cartes secure digital    
+; polynome:  x^16+x^12+x^5+1
+; data width : 8
+; poly length : 16
+DEFWORD "CRC_SDC",7,,CRC_SDC ; ( -- )
+    ; mise à zéro du checksum
+    ; et du bit d'interruption
+    .word CRC0
+    ; activation du périphérique
+    .word TRUE,CRCENBL
+    ; data 8 bits
+    .word LIT,8,CRCDW
+    ; polynome 16 bits
+    .word LIT,16,CRCPL
+    ; polynome: CRC16-CCITT x^16+x^12+x^5+1
+    .word LIT,0x1021,LIT,1,CRCPOLY
+    ; big indian
+    .word FALSE,CRCLE
+    .word EXIT
     
 ;.end
     

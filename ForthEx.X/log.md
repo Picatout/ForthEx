@@ -1,3 +1,8 @@
+2017-03-16
+----------
+travail sur les fonctions de base du périphérique CRC
+
+
 2017-03-15
 ----------
 ajout messages pour les réinitialisation causé par CTRL-C, MATCH_EXCEPTION et 
