@@ -1,3 +1,9 @@
+2017-03-17
+----------
+travail sur CRC
+ajout mot NOT qui inverse la valeur logique. i.e. 0 -> -1, n<>0 -> 0
+à faire: continuer le développement support de base carte SD.
+
 2017-03-16
 ----------
 travail sur les fonctions de base du périphérique CRC

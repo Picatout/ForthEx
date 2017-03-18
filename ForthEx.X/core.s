@@ -828,6 +828,15 @@ DEFCODE "XOR",3,,XOR ; ( n1 n2 -- n ) OU exclusif bit à bit
     xor T,[DSP--],T
     NEXT
     
+; inverse la valeur logique de f    
+DEFCODE "NOT",3,,NOT ; ( f -- f)
+    cp0 T
+    bra nz, 1f
+    setm T
+    bra 9f
+1:  clr T
+9:  NEXT
+    
     
 DEFCODE "INVERT",6,,INVERT ; ( n -- n ) inversion des bits
     com T, T

@@ -41,6 +41,11 @@ seed: ; PRNG 32 bits
 .space 4
  ; si contient .ascii WM lance un warm boot au lieu d'un cold boot       
 fwarm: .space 2  
+; adresse buffer CRC
+crcbuffer: .space 2
+; nombre d'octets bloc crc
+blksize: .space 2
+ 
  
 INTR
 .global __MathError    
@@ -399,6 +404,7 @@ DEFCODE "CRCLE",5,,CRCLE ; ( f -- )
     
 ;démarrage du CRC shift register     
 DEFCODE "CRCSTART",8,,CRCSTART ; ( -- )
+    bclr IFS4,#CRCIF
     bset CRCCON1,#CRCGO
     NEXT
     
@@ -438,18 +444,26 @@ DEFCODE "CRCPOLY",7,,CRCPOLY ; ( ud -- )
     mov T,CRCXORL
     DPOP
     NEXT
+
+; lecture d'un CRC < 32 bits
+DEFCODE "CRC@",4,,CRCFETCH ; ( -- u )
+    DPUSH
+    mov CRCWDATL,T
+    NEXT
     
-; lecture du CRC résultant
-DEFCODE "CRC@",4,,CRCFETCH ; ( -- ud )
+; lecture du CRC-32 bits
+DEFCODE "CRCD@",5,,CRCDFETCH ; ( -- ud )
     DPUSH
     mov CRCWDATL,T
     DPUSH
     mov CRCWDATH,T
     NEXT
     
+    
 ; initialize CRCWDAT à zéro
 ; et reset bit interruption    
 DEFCODE "CRC0",4,,CRC0 ; ( -- )
+    bclr CRCCON1,#CRCGO
     clr CRCWDATL
     clr CRCWDATH
     bclr IFS4,#CRCIF
@@ -461,8 +475,6 @@ DEFCODE "CRCC!",5,,CRCCSTORE ; ( c -- )
     bra 1b
     mov T,W0
     mov.b WREG,CRCDATL
-    btss CRCCON1,#CRCGO
-    bset CRCCON1,#CRCGO
     DPOP
     NEXT
     
@@ -471,8 +483,6 @@ DEFCODE "CRC!",4,,CRCSTORE ; ( n -- )
 1:  btsc CRCCON1,#CRCFUL
     bra 1b
     mov T,CRCDATL
-    btss CRCCON1,#CRCGO
-    bset CRCCON1,#CRCGO
     DPOP
     NEXT
     
@@ -484,8 +494,6 @@ DEFCODE "CRCD!",5,,CRCDSTORE, ; ( d -- )
     DPOP
     mov T,CRCDATL
     mov W0,CRCDATH
-    btss CRCCON1,#CRCGO
-    bset CRCCON1,#CRCGO
     DPOP
     NEXT
     
@@ -493,10 +501,8 @@ DEFCODE "CRCD!",5,,CRCDSTORE, ; ( d -- )
 DEFCODE "CRCDONE",7,,CRCDONE ; ( -- f )
     DPUSH
     clr T
-    btss IFS4,#CRCIF
-    bra 9f
+    btsc IFS4,#CRCIF
     setm T
-    bclr IFS4,#CRCIF
 9:  NEXT
     
     
@@ -516,11 +522,13 @@ DEFWORD "CRC_SDC",7,,CRC_SDC ; ( -- )
     ; polynome 16 bits
     .word LIT,16,CRCPL
     ; polynome: CRC16-CCITT x^16+x^12+x^5+1
-    .word LIT,0x1021,LIT,1,CRCPOLY
+    .word LIT,0x1021,LIT,0,CRCPOLY
     ; big indian
     .word FALSE,CRCLE
+    .word CRCSTART
     .word EXIT
     
-;.end
     
-
+    
+   
+    
