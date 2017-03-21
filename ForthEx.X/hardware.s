@@ -26,6 +26,8 @@
 .include "store.s"
 .include "keyboard.s"    
 .include "flash.s"
+.include "sdcard.s"
+    
     
 .section .heap.bss bss address (EDS_BASE)
 .global _heap
@@ -478,7 +480,7 @@ DEFCODE "CRCC!",5,,CRCCSTORE ; ( c -- )
     DPOP
     NEXT
     
-; envoie ua datum de 16 bits au CRC    
+; envoie un datum de 16 bits au CRC    
 DEFCODE "CRC!",4,,CRCSTORE ; ( n -- )
 1:  btsc CRCCON1,#CRCFUL
     bra 1b
@@ -511,7 +513,7 @@ DEFCODE "CRCDONE",7,,CRCDONE ; ( -- f )
 ; polynome:  x^16+x^12+x^5+1
 ; data width : 8
 ; poly length : 16
-DEFWORD "CRC_SDC",7,,CRC_SDC ; ( -- )
+DEFWORD "CRC16",5,,CRC16 ; ( -- )
     ; mise à zéro du checksum
     ; et du bit d'interruption
     .word CRC0
@@ -529,6 +531,14 @@ DEFWORD "CRC_SDC",7,,CRC_SDC ; ( -- )
     .word EXIT
     
     
-    
+ DEFWORD "CRC7",4,,CRC7 ; ( -- )   
+   .word CRC0
+   .word TRUE,CRCENBL
+   .word LIT,6,CRCDW
+   .word LIT,6,CRCPL
+   .word LIT,0x88,LIT,0,CRCPOLY
+   .word FALSE,CRCLE
+   .word CRCSTART
+   .word EXIT
    
-    
+  

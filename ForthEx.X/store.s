@@ -23,11 +23,6 @@
     
 .include "store.inc"
     
-.section .hardware.bss  bss
-sdc_status: .space 2 ; indicateur booléens carte SD
-sdc_size: .space 4 ; nombre de secteurs de 512 octets
-sdc_R: .space 5; réponse de la carte 
- 
 INTR
 ;la broche SDC_DETECT
 ; a changée d'état
@@ -83,110 +78,30 @@ HEADLESS STORE_INIT,CODE
 ; entrée: W1 contient la nouvelle valeur
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 set_spi_clock:
-    _disable_spi
-    mov #0x1f,W0
+;    _disable_spi
+    mov #0xFFE0,W0
     and STR_SPICON1
     mov W1,W0
     ior STR_SPICON1
-    _enable_spi
     return
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-; envoie 80 cycles clock SPI
-; la carte est désélectionnée
-; pendant cette procédure
-;  SDC_SEL=MOSI=1    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-dummy_clock:
-    _disable_sdc
-    _enable_spi
-    mov.b #0xff,W0
-    mov #10,W1
-1:  spi_write
-    dec W1,W1
-    bra nz, 1b
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; vérifie si le bit WIP (Write In Progress)
+; est actif et attend
+; qu'il revienne à zéro.
+;;;;;;;;;;;;;;;;;;;;;;;;;
+;.global wait_wip0    
+wait_wip0:
+    _enable_eeprom
+_wip0:    
+    mov #ERDSR, W0
+    spi_write
+    spi_read
+    btsc W0, #WIP
+    bra _wip0
+    _disable_eeprom
     return
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-; désélection de la carte SD
-; 1 octet doit-être envoyée
-; après que CS est ramené à 1
-; pour libéré la ligne MISO
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-sdc_deselect:
-    _disable_sdc
-    mov.b #0xff,W0
-    spi_write
-    return
-  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; envoie d'une commande carte SD
-; entrée: 
-;    W0  index commande
-;    W1  argb1b2  b15:8->byte1,b7:0->byte2
-;    W2  argb3b4  b15:7->byte3,b7:0->byte4
-;    W3  nombre d'octets supplémentaire dans la réponse
-;    W4  pointeur buffer réponse    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-sdc_cmd:
-    mov W0,W5
-    ;initialisation générateur CRC
-    ;mode CRC7=x?+x³+1
-    mov #0x89,W0
-    mov W0,CRCXORL
-    clr CRCXORH
-    bset CRCCON1,#CRCEN
-    mov #(7<<DWIDTH0)+(7<<PLEN0),W0
-    mov W0, CRCCON2
-    clr CRCWDATL
-    clr CRCWDATH
-    mov.b W5,W0
-    bset W0,#6
-    bclr W0,#7
-    mov.b WREG,CRCDATL
-    spi_write
-    mov W1,W0
-    swap W0
-    mov.b WREG,CRCDATL
-    spi_write
-    mov W1,W0
-    mov.b WREG,CRCDATL
-    spi_write
-    mov W2,W0
-    swap W0
-    mov.b WREG,CRCDATL
-    spi_write
-    mov W2,W0
-    mov.b WREG,CRCDATL
-    bset CRCCON1,#CRCGO
-    spi_write
-    btsc CRCCON1,#CRCGO
-    bra .-2
-    mov.b CRCWDATL,WREG
-    spi_write
-wait_response:
-    mov #8,W1
-1:
-    mov.b #0xff,W0
-    spi_write
-    xor.b #0xFF,W0
-    bra nz, 2f
-    dec W1,W1
-    bra nz, 1b
-    bset sdc_status, #F_SDC_TO
-    return
-2:
-    mov.b W0, [W4++]
-3:  cp0 W3
-    bra nz, 4f
-    return
-4:  spi_read
-    mov.b W0,[W4++]
-    dec W3,W3
-    bra 3b
-    
-    
-    
 ;;;;;;;;;;;;;;;;;;;;
 ; envoie d'une adresse via STR_SPI
 ; adresse sur dstack
@@ -205,50 +120,11 @@ spi_send_address: ; ( ud -- )
     DPOP
     return
  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; vérifie si le bit WIP (Write In Progress)
-; est actif et attend
-; qu'il revienne à zéro.
-;;;;;;;;;;;;;;;;;;;;;;;;;
-;.global wait_wip0    
-wait_wip0:
-    _enable_eeprom
-_wip0:    
-    mov #ERDSR, W0
-    spi_write
-    spi_read
-    btsc W0, #WIP
-    bra _wip0
-    _disable_eeprom
-    return
-
- ;;;;;;;;;;;;;;;
+    
+;;;;;;;;;;;;;;;
 ;  Forth words
 ;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;    
-;initialisation carte SD 
-;ref: http://elm-chan.org/docs/mmc/pic/sdinit.png    
-;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "SDCINIT",7,,SDCINIT
-    clr sdc_status
-    btsc SDC_PORT,#SDC_DETECT
-    return
-    bset sdc_status,#F_SDC_IN
-    mov #SCLK_SLOW,W1
-    call set_spi_clock
-    call dummy_clock
-    _enable_sdc
-    ;envoie CMD0
-    mov #GO_IDLE_STATE,W0
-    clr W1
-    clr W2
-    clr W3
-    mov #sdc_R,W4
-    call sdc_cmd
-    
-    NEXT
- 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; transfert un bloc d'octets de la RAM du MCU vers la RAM SPI
 ; entrée: adresse RAM, adresse SPIRAM, nombre d'octet

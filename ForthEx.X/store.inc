@@ -86,7 +86,7 @@
 .equ F_BAD_CARD,8 ; la carte ne répond pas
  
 ;commandes carte SD
-.equ GO_IDLE_STATE,         0    ; CMD0 - réinitialise carte
+.equ GO_IDLE_STATE, 0            ; CMD0 - réinitialise carte
 .equ SEND_OP_COND,        1      ; CMD1 - requête condition d'opération
 .equ SEND_IF_COND,        8      ; CMD8 - requête condition d'interface
 .equ SEND_CSD,            9      ; CMD9 - requête status
@@ -157,10 +157,12 @@
    
 .macro _enable_sdc
    bclr SDC_LAT,#SDC_SEL
+   _enable_spi
 .endm
    
 .macro _disable_sdc
    bset SDC_LAT,#SDC_SEL
+   _disable_spi
 .endm
    
    
