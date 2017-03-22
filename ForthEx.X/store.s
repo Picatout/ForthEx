@@ -23,18 +23,6 @@
     
 .include "store.inc"
     
-INTR
-;la broche SDC_DETECT
-; a changée d'état
-; carte insérée ou retirée. 
-.global __CNInterrupt
-__CNInterrupt:
-    clr sdc_status
-    btss SDC_PORT,#SDC_DETECT
-    bset sdc_status,#F_SDC_IN
-    bclr SDC_IFS,#SDC_IF
-    retfie
-    
  .text
  
    

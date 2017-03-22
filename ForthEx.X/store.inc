@@ -77,13 +77,14 @@
 ; indicateurs booléens carte SD
 .equ F_SDC_IN, 0 ; carte dans la fente
 .equ F_SDC_OK,1 ; carte insérée et initialisée
-.equ F_SDC_V1,2 ; carte version 1
+.equ F_SDC_V2,2 ; carte version 1
 .equ F_SDC_HC,3 ; carte haute capacité
 .equ F_SDC_TO,4 ; commande time out
 .equ F_SDC_WE,5 ; erreur écriture
 .equ F_SDC_RE,6 ; erreur lecture
 .equ F_SDC_IE,7 ; erreur initialisation  
 .equ F_BAD_CARD,8 ; la carte ne répond pas
+.equ F_BLK_ADDR,9 ; carte adressable par bloc
  
 ;commandes carte SD
 .equ GO_IDLE_STATE, 0            ; CMD0 - réinitialise carte
@@ -96,7 +97,7 @@
 .equ READ_OCR,            58     ; CMD58 - requête registre ocr
 .equ CRC_ON_OFF,            59   ; CMD59 - activation/désactivation CRC
 .equ SD_STATUS,            13    ; ACMD13 - requête status
-.equ SD_SEND_OP_COND,        41  ; ACMD41 - requête condition d'opération
+.equ SEND_OP_COND,        41  ; ACMD41 - requête condition d'opération
 ; certaines commandes requière une valeur pour CRC
 .equ CMD0_CRC, 0x95 
 .equ CMD8_CRC, 0x87
