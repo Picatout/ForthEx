@@ -1,3 +1,8 @@
+2017-03-22
+-----------
+mots de base pour carte SD complétées
+SDCINIT,SDREAD, SDWRITE,?SDC 
+
 2017-03-21
 ----------
 travail sur interface carte SD

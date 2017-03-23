@@ -77,7 +77,7 @@
 ; indicateurs booléens carte SD
 .equ F_SDC_IN, 0 ; carte dans la fente
 .equ F_SDC_OK,1 ; carte insérée et initialisée
-.equ F_SDC_V2,2 ; carte version 1
+.equ F_SDC_V2,2 ; carte version 2
 .equ F_SDC_HC,3 ; carte haute capacité
 .equ F_SDC_TO,4 ; commande time out
 .equ F_SDC_WE,5 ; erreur écriture
@@ -92,6 +92,7 @@
 .equ SEND_IF_COND,        8      ; CMD8 - requête condition d'interface
 .equ SEND_CSD,            9      ; CMD9 - requête status
 .equ SET_BLOCKLEN,        16     ; CMD16 - fixe longueur bloc
+.equ READ_SINGLE_BLOCK,   17     ; CMD17 - lecture d'un seul bloc
 .equ WRITE_SINGLE_BLOCK,    24   ; CMD24 - écriture d'un bloc
 .equ APP_CMD,                55  ; CMD55 - commande escape
 .equ READ_OCR,            58     ; CMD58 - requête registre ocr
