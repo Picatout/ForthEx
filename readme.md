@@ -17,4 +17,4 @@ Schématique
 
 ![interface clavier](/Documentation/forthex_schematic_ps2.png)
 
-![vidéo description matérielle](http://www.youtube.com/watch?v=hgAJy2Itfcw)
+[![vidéo description matérielle](https://img.youtube.com/vi/VID/0.jpg)](https://www.youtube.com/watch?v=hgAJy2Itfcw)
