@@ -18,3 +18,11 @@ Schématique
 ![interface clavier](/Documentation/forthex_schematic_ps2.png)
 
 [![vidéo description matérielle](https://img.youtube.com/vi/VID/0.jpg)](https://www.youtube.com/watch?v=hgAJy2Itfcw)
+
+2017-03-24
+==========
+
+À ce moment ci le projet est suffisamment avancé pour utilisé l'ordinateur. L'interpréteur et le compilateur sont complétés. Le support de base pour
+utiliser la carte SD est complété ainsi que pour la RAM externe, l'EEPROM externe et la mémoire FLASH libre du PIC24EP512GP202. 
+
+[vidéo 1 utilisation de l'ordinateur](https://youtu.be/jwFQXd6zAQ0)
