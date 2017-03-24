@@ -630,6 +630,7 @@ DEFCODE "*",1,,STAR ; ( n1 n2 -- n1*n2)
     mul.ss T,[DSP--],W0
     mov W0,T
     NEXT
+
     
 ; produit de 2 entier simple conserve entier double
 DEFCODE "M*",2,,MSTAR ; ( n1 n2 -- d )
@@ -644,11 +645,11 @@ DEFCODE "UM*",3,,UMSTAR ; ( u1 u2 -- ud )
     mov W0,[DSP]
     NEXT
     
-;multiplication 32*16->32
+;multiplication non signée 32*16->32
 ; ud1 32 bits
-; d2 16 bits
+; u2 16 bits
 ; ud3 32 bits    
-DEFWORD "UD*",3,,UDSTAR  ; ( ud1 d2 -- ud3 ) 32*16->32    
+DEFWORD "UD*",3,,UDSTAR  ; ( ud1 u2 -- ud3 ) 32*16->32    
     .word DUP,TOR,UMSTAR,DROP
     .word SWAP,RFROM,UMSTAR,ROT,PLUS,EXIT
     
@@ -694,6 +695,8 @@ DEFCODE "/MOD",4,,SLASHMOD ; ( n1 n2 -- r q )
     mov W1,[DSP] ; reste
     NEXT
 
+; division d'un entier double non signé
+; par un entier simple non signé
 DEFCODE "UM/MOD",6,,UMSLASHMOD ; ( ud u -- r q )
     mov [DSP--],W1
     mov [DSP--],W0

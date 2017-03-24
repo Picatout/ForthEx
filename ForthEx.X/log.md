@@ -1,3 +1,12 @@
+2017-03-24
+----------
+Enchassement d'un vidéo dans le fichier readme.md
+
+2017-03-23
+-----------
+débuter la documentation du projet par la création d'une entrée sur mon blog.
+
+
 2017-03-22
 -----------
 mots de base pour carte SD complétées
