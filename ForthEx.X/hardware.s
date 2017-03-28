@@ -41,7 +41,7 @@ systicks: ; compteur de millisecondes
 .space 2
 seed: ; PRNG 32 bits    
 .space 4
- ; si contient .ascii WM lance un warm boot au lieu d'un cold boot       
+ ; si contient une valeur autre que 0 lance un warm boot       
 fwarm: .space 2  
 ; adresse buffer CRC
 crcbuffer: .space 2
@@ -136,7 +136,7 @@ __reset:
 
    
 _reboot:
-    .word QWARM,TBRANCH,_cold-$
+    .word QCOLD,TBRANCH,_cold-$
 _warm:
     .word LIT,fwarm,FETCH,LIT,_DP,FETCH,LIT,_LATEST,FETCH
     .word CLS,CLR_LOW_RAM
@@ -157,8 +157,8 @@ _cold:
     .word BOOTDEV,FETCH,BOOT; autochargement système en RAM à partir d'une en FLASH MCU ou EEPROM
     .word QUIT ; boucle de l'interpréteur
 
-; est-ce un warm reboot    
-HEADLESS QWARM,HWORD
+; est-ce un cold reboot    
+HEADLESS QCOLD,HWORD
     .word LIT,fwarm,FETCH,ZEROEQ,EXIT
     
 ; initialisation matérielle    

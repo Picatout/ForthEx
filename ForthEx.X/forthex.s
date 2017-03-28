@@ -46,12 +46,15 @@ r0_init: .word rstack
 s0_init: .word pstack    
 base_init: .word 10
 btdev_init: .word _MCUFLASH
-btfn_init: .word FLASHTORAM 
+btfn_init: .word FLASHTORAM
 state_init: .word 0
 toin_init: .word 0
 hp_init: .word 0
  
- 
+.text
+.global _code_end
+_code_end: .space 4
+    
 .end
 
     

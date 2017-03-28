@@ -1,3 +1,19 @@
+2017-03-27
+---------
+ajout division:  UD/MOD  32u/16u -> Q:32u R: 16u
+modifié impression des nombres la conversion des nombres est maintenant basé
+sur la conversion des entiers doubles. Les entiers simples sont convertis en
+entiers double avant d'être imprimés. Les mots suivants ont été ajoutés:
+COLFILL D. UD. D.R et UD.R
+
+2017-03-26
+----------
+travail blog partie 2
+
+2017-03-25
+----------
+renommé QWARM QCOLD
+
 2017-03-24
 ----------
 Enchassement d'un vidéo dans le fichier readme.md

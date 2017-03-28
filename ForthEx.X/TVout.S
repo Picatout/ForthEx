@@ -624,9 +624,12 @@ DEFWORD "DIGIT",5,,DIGIT ; ( u -- c )
     .word EXIT
 
 ; extrait le chiffre le moins significatif
-; et le convertie en caractère    
-DEFWORD "EXTRACT",7,,EXTRACT ; ( n1 base -- n2 c )     
-    .word LIT,0,SWAP,UMSLASHMOD,SWAP,DIGIT,EXIT
+; et le convertie en caractère
+; arguments:
+;   ud entier double non signé ( nombre à convertir)
+;   u  entier simple non signé ( base numérique )    
+DEFWORD "EXTRACT",7,,EXTRACT ; ( ud u -- ud2 c )     
+    .word UDSLASHMOD,ROT,DIGIT,EXIT
     
 ;débute la conversion
 ;en initialisant la variable HP    
@@ -641,15 +644,27 @@ DEFWORD "HOLD",4,,HOLD ; ( c -- )
     .word HP,FETCH,CSTORE
     .word EXIT
 
-;converti un digit
-DEFWORD "#",1,,SHARP ; ( n1 -- n2 )
+;converti un digit d'un entier double
+; non signé
+;  argument:
+;     ud1  entier double non signé
+;     ud2  entier double non signé restant    
+DEFWORD "#",1,,SHARP ; ( ud1 -- ud2 )
     .word BASE,FETCH,EXTRACT,HOLD,EXIT
 
-;converti tous les digits
-DEFWORD "#S",2,,SHARPS ; ( n1 -- 0 )
-1:  .word SHARP,DUP,TBRANCH,1b-$,EXIT
+;converti tous les digits d'un entier double
+; non signé.
+; arguments:
+;   entier double non signé à convertir en chaîne
+; sortie:
+;   entier double de valeur nulle.    
+DEFWORD "#S",2,,SHARPS ; ( ud1 -- ud2==0 )
+1:  .word SHARP,TWODUP,OR,TBRANCH,1b-$,EXIT
   
 ;ajoute le signe au début de la chaîne numérique
+; argument:
+;  n est la partie forte du nombre
+;  qui a été converti.  
 DEFWORD "SIGN",4,,SIGN ; ( n -- )
     .word ZEROLT,ZBRANCH,1f-$
     .word CLIT,'-',HOLD
@@ -657,32 +672,50 @@ DEFWORD "SIGN",4,,SIGN ; ( n -- )
   
 ;termine la conversion en ajoutant la longueur
 ;en calculant la longueur de la chaîne.
-DEFWORD "#>",2,,SHARPGT ; ( w -- addr u )
-  .word DROP,HP,FETCH,PAD,FETCH,PADSIZE,PLUS,OVER,MINUS, EXIT
+DEFWORD "#>",2,,SHARPGT ; ( d -- addr u )
+  .word TWODROP,HP,FETCH,PAD,FETCH,PADSIZE,PLUS,OVER,MINUS, EXIT
   
-; convertions entier en chaîne
-DEFWORD "STR",3,,STR ; ( n -- addr u )
-  .word DUP,TOR,ABS,LTSHARP,SHARPS,RFROM,SIGN,SHARPGT,EXIT
+; convertions entier double en chaîne
+; argument:
+;   d   entier double à convertir en chaîne
+; sortie:
+;   addr   adresse premier caractère de la chaîne
+;   u  longueur de la chaîne.  
+DEFWORD "STR",3,,STR ; ( d -- addr u )
+  .word DUP,TOR,DABS,LTSHARP,SHARPS,RFROM,SIGN,SHARPGT,EXIT
+
+; imprime les espaces nécessaires au début
+; de la colonne pour que le nombre
+; soit aligé à droite.
+; argument:
+;   n1+ largeur de la colonne
+;   n2+ longueur de la chaîne numérique  
+DEFWORD "COLFILL",7,,COLFILL ; ( n1+ n2+ -- )
+    .word MINUS,DUP,ZEROGT,TBRANCH,1f-$
+    .word DROP,BRANCH,8f-$
+1:  .word SPACES
+8:  .word EXIT
   
 ; imprime un nombre dans un colonne de largeur fixe
 ; aligné à droite
+; arguments:
+;   n  nombre à imprimer
+;   n+ largeur de la colonne  
 DEFWORD ".R",2,,DOTR  ; ( n +n -- ) +n est la largeur de la colonne
-  .word TOR, STR, RFROM,OVER,MINUS,SPACES,TYPE,EXIT
-  
+    .word TOR,STOD,RFROM,DDOTR,EXIT
+    
 ; imprime un nombre non sigé dans une colonne de 
 ; largeur fixe, aligné à droite
 DEFWORD "U.R",3,,UDOTR ; ( u +n -- )
-  .word TOR,LTSHARP,SHARPS,SHARPGT,RFROM,OVER
-  .word MINUS,SPACES,TYPE,EXIT
+  .word TOR,LIT,0,RFROM,UDDOTR,EXIT
   
-; imprime un nombre non signé en format libre
+; imprime un entier simple non signé en format libre
 DEFWORD "U.",2,,UDOT ; ( n -- )
-UD:  .word LTSHARP,SHARPS,SHARPGT,SPACE,TYPE,EXIT
+UD:  .word LIT,0,UDDOT,EXIT
   
-; imprime un nombre en format libre
+; imprime un entier simple en format libre
 DEFWORD ".",1,,DOT ; ( n -- )
-  .word BASE,FETCH,LIT,10,XOR,TBRANCH, UD-$
-  .word SPACE,STR,TYPE,EXIT
+  .word STOD,DDOT,EXIT
   
 ; imprime le contenu d'une adresse
 ; on s'assure de l'alignement sur
@@ -694,6 +727,22 @@ DEFWORD "?",1,,QUESTION ; ( addr -- )
 DEFWORD "C?",2,,CQUESTION ; ( c-addr -- )    
     .word CFETCH,DOT,EXIT
   
+; imprime un entier double non signé en format libre
+DEFWORD "UD."3,,UDDOT ; ( ud -- )    
+    .word LTSHARP,SHARPS,SHARPGT,SPACE,TYPE
+    .word EXIT
     
-;.end
+; imprime un entier double en format libre    
+DEFWORD "D.",2,,DDOT ; ( d -- )
+    .word STR,SPACE,TYPE
+    .word EXIT
+    
+; imprime un entier double dans une colonne de largeur fixe
+; alignée à droite    
+DEFWORD "D.R",3,,DDOTR ; ( d n+ -- )
+    .word TOR,STR,RFROM,OVER,COLFILL,TYPE,EXIT
 
+DEFWORD "UD.R",4,,UDDOTR ; ( ud n+ -- )
+    .word TOR,LTSHARP,SHARPS,SHARPGT,RFROM,OVER
+    .word COLFILL,TYPE,EXIT
+    

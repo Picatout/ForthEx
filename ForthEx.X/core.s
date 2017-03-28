@@ -149,7 +149,6 @@ ENTER: ; entre dans un mot de haut niveau (mot défini par ':')
     mov WP,IP
     NEXT
 
-    
     .global DOUSER
 DOUSER: ; empile pointeur sur variable utilisateur
     DPUSH
@@ -697,7 +696,10 @@ DEFCODE "/MOD",4,,SLASHMOD ; ( n1 n2 -- r q )
 
 ; division d'un entier double non signé
 ; par un entier simple non signé
-DEFCODE "UM/MOD",6,,UMSLASHMOD ; ( ud u -- r q )
+; résulant en un quotient et reste simple
+; u1 reste
+; u2 quotient    
+DEFCODE "UM/MOD",6,,UMSLASHMOD ; ( ud u -- u1 u2 )
     mov [DSP--],W1
     mov [DSP--],W0
     repeat #17
@@ -705,6 +707,30 @@ DEFCODE "UM/MOD",6,,UMSLASHMOD ; ( ud u -- r q )
     mov W0,T
     mov W1,[++DSP]
     NEXT
+    
+;division d'un entier double non signé
+; par un entier simple non signé résultant
+; en un quotient double et un reste simple
+; arguments:
+;   ud1 ->dividend
+;    u1 -> diviseur
+; résultat:
+;   u2 reste entier simple
+;   ud2 quotient entier double    
+DEFCODE "UD/MOD",6,,UDSLASHMOD ; ( ud1 u1 -- u2 ud2 )
+    clr W1
+    mov [DSP],W0
+    repeat #17
+    div.ud W0,T
+    mov W0,W4  ; partie forte du quotient
+    mov [DSP-2],W0 
+    repeat #17
+    div.ud W0,T
+    mov W1,[DSP-2] ;reste entier simple
+    mov W0,[DSP]  ; partie faible du quotient
+    mov W4,T  ; partie forte du quotient
+    NEXT
+    
     
 DEFCODE "MAX",3,,MAX ; ( n1 n2 -- max(n1,n2)
     mov [DSP--],W0
