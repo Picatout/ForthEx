@@ -1,3 +1,10 @@
+2017-03-28
+----------
+Documentation du projet:
+  * installer sigil et lecture des tutoriels dans l'intention de créer un eBook
+    pour le projet.
+  * installer FBReader pour la lecture des eBooks.
+
 2017-03-27
 ---------
 ajout division:  UD/MOD  32u/16u -> Q:32u R: 16u
