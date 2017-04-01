@@ -1,3 +1,7 @@
+2017-04-01
+----------
+correction bogue dans routine scroll_down, fichier TVout.S
+
 2017-03-28
 ----------
 Documentation du projet:
@@ -6,7 +10,7 @@ Documentation du projet:
   * installer FBReader pour la lecture des eBooks.
 
 2017-03-27
----------
+----------
 ajout division:  UD/MOD  32u/16u -> Q:32u R: 16u
 modifié impression des nombres la conversion des nombres est maintenant basé
 sur la conversion des entiers doubles. Les entiers simples sont convertis en

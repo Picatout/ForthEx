@@ -106,7 +106,8 @@ section                    address      alignment gaps    total length  (dec)
 .return.stack.bss           0x1000                   0            0x80  (128)
 .param.stack.bss            0x1080                   0            0x40  (64)
 .control.stack.bss          0x10c0                   0            0x40  (64)
-.buffers.bss                0x1100                   0            0xa0  (160)
+.tib.bss                    0x1100                   0            0x50  (80)
+.pad.bss                    0x1150                   0            0x50  (80)
 .serial.bss                 0x11a0                   0            0x28  (40)
 .sys_vars.bss               0x11c8                   0            0x26  (38)
 .keyboard.bss               0x11ee                   0            0x24  (36)
@@ -4197,9 +4198,12 @@ LOAD FGS
  .boot.bss          0x12f8          0x8 build/default/production/forthex.o
                     0x12f8                  _boot_header
 
-.buffers.bss        0x1100         0xa0
- .buffers.bss       0x1100         0xa0 build/default/production/forthex.o
+.tib.bss            0x1100         0x50
+ .tib.bss           0x1100         0x50 build/default/production/forthex.o
                     0x1100                  tib
+
+.pad.bss            0x1150         0x50
+ .pad.bss           0x1150         0x50 build/default/production/forthex.o
                     0x1150                  pad
 
 .serial.bss         0x11a0         0x28

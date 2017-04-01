@@ -48,8 +48,9 @@ rstack:
 cstack:
 .space CSTK_SIZE 
     
-.section .buffers.bss bss
+.section .tib.bss bss
 tib: .space TIB_SIZE
+.section .pad.bss bss 
 pad: .space PAD_SIZE
  
 .section .sys_vars.bss bss

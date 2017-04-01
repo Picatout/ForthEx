@@ -261,14 +261,14 @@ scroll_down:
     cursor_sync
     mov #_video_buffer, W1
     mov #VIDEO_BUFF_SIZE, W0
-    add W1,W0,W1  ; W1 source
+    add W1,W0,W1  ; W1 destination
     mov #CPL,W0
-    sub W1,W0,W2  ; W2 destination
+    sub W1,W0,W2  ; W2 source
     repeat #(VIDEO_BUFF_SIZE-CPL)/2-1
-    mov [--W1],[--W2]
+    mov [--W2],[--W1]
     mov 0x2020,W0
     repeat #CPL/2-1
-    mov W0,[--W2]
+    mov W0,[--W1]
     cursor_decr_sema
     RESET_EDS
     return
