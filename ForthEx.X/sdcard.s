@@ -21,7 +21,7 @@
 ;Description:  interface avec carte SC en utilisant l'interface SPI
 ;Date: 2017-03-20
     
-    
+.equ BLOCK_SIZE, 512 ; nombre d'octets par secteur carte SD.    
     
 .section .hardware.bss  bss
 .global sdc_status
@@ -86,7 +86,19 @@ sdc_wait_ready:
 2:  pop W0
     return
     
-    
+; calcule l'adresse à partir du no de bloc
+; argument 
+;   ud1 no. de secteur
+; sortie:
+;   ud2   adresse absolue    
+sector_to_address: ;   ( ud1 -- ud2 )    
+    mov #BLOCK_SIZE,W2
+    mul.uu T,W2,W0
+    mov W0,T
+    mul.uu W2,[DSP],W0
+    add T,W1,T
+    mov W0,[DSP]
+    return
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; envoie d'une commande carte SD
@@ -261,6 +273,7 @@ DEFCODE "?SDC",4,,QSDC ; ( -- u )
     mov sdc_status,T
     NEXT
 
+    
 ; lecture d'un secteur de la carte
 ; bloc de 512 octets    
 ;  arguments:
@@ -270,29 +283,28 @@ DEFCODE "?SDC",4,,QSDC ; ( -- u )
 ;   f  indicateur booléen échec/succcès    
 DEFCODE "SDCREAD",7,,SDCREAD ; ( addr ud -- f )
     _enable_sdc
-    mov T,W1 ; no de bloc hiword
+    btss sdc_status, #F_BLK_ADDR
+    call sector_to_address
+    mov T,W1 ; addresse Hi(address)
     DPOP
-    mov T,W0 ; no de block loword
+    mov T,W2 ; addresse Lo(address)
     DPOP
-    mov T, W5 ; adresse RAM
+    mov T,W5 ; adresse tampon RAM
     clr T
-    mov #512,W4 ; W4 compteur pour lecture 
-    btss sdc_status, #F_BLK_ADDR 
-    mul.uu W4,W0,W0 ; W0 adresse carte SD
-    mov W0,W2 ; addresse loword, W1 addresse hiword
     clr W3
     mov #READ_SINGLE_BLOCK,W0
     call sdc_cmd
     cp0 T
     DPOP
     bra nz, read_failed
-1:  spi_read
-    cp.b W0,#0xfe
-    bra nz, 1b
 2:  spi_read
+    cp.b W0,#0xfe
+    bra nz, 2b
+    mov #BLOCK_SIZE,W4
+3:  spi_read
     mov.b W0,[W5++]
     dec W4,W4
-    bra nz, 2b
+    bra nz, 3b
     com T,T
 read_failed:
     call sdc_deselect
@@ -306,16 +318,14 @@ read_failed:
 DEFCODE "SDCWRITE",8,,SDCWRITE ; ( addr ud -- )
     SET_EDS
     _enable_sdc
-    mov T,W1  ; no secteur hiword
+    btss sdc_status,#F_BLK_ADDR
+    call sector_to_address
+    mov T,W1  ; Hi(address)
     DPOP
-    mov T,W0  ; no secteur loword
+    mov T,W2  ; Lo(address)
     DPOP
     mov T,W5  ; adresse RAM
     clr T
-    mov #512,W4
-    btss sdc_status,#F_BLK_ADDR
-    mul.uu W4,W0,W0
-    mov W0,W2
     clr W3
     mov #WRITE_SINGLE_BLOCK,W0
     call sdc_cmd
@@ -324,6 +334,7 @@ DEFCODE "SDCWRITE",8,,SDCWRITE ; ( addr ud -- )
     bra nz, write_failed
     mov.b #0xFE,W0
     spi_write
+    mov #BLOCK_SIZE,W4
 2:  mov.b [W5++],W0
     spi_write
     dec W4,W4

@@ -1,3 +1,7 @@
+2017-04-02
+----------
+modification à SDCREAD et SDCWRITE
+
 2017-04-01
 ----------
 correction bogue dans routine scroll_down, fichier TVout.S

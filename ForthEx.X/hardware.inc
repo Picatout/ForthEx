@@ -66,7 +66,7 @@
 .equ PLLDIV, 68 ; 4Mhz*70
  
 .equ FLASH_PAGE_MASK, 0x7FF    
-.equ FLASH_END_EP512, 0x557FF
+.equ FLASH_END_EP512, 0x557EB
 .equ FLASH_END, FLASH_END_EP512
 .equ FLASH_ROW_SIZE,2048 ; unités PC   
 .equ FLASH_FIRST_ROW, 16 ; ligne 0:15 réservé pour le système 
