@@ -148,6 +148,8 @@ wait_response:
     dec W1,W1
     bra nz, 1b
     bset sdc_status, #F_SDC_TO
+    DPUSH
+    clr T
     pop W5
     return
 2:
@@ -168,10 +170,10 @@ wait_response:
 ;initialisation carte SD 
 ;ref: http://elm-chan.org/docs/mmc/pic/sdinit.png    
 ;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "SDCINIT",7,,SDCINIT
-    btss sdc_status,#F_SDC_IN
-    bra failed
+DEFCODE "SDCINIT",7,,SDCINIT ; ( -- f )
     clr sdc_status
+    btsc SDC_PORT,#SDC_DETECT
+    bra failed
     bset sdc_status,#F_SDC_IN
     mov #SCLK_SLOW,W1
     call set_spi_clock
@@ -237,7 +239,7 @@ cmd58:
     mov #4,W3
     call sdc_cmd
     cp0 T
-    bra nz, 9f
+    bra nz, 8f
     mov [--W4],W0
     cp W0,#0x40
     bra z, cmd16
@@ -262,8 +264,8 @@ succeed:
     bset sdc_status,#F_SDC_OK
     DPUSH
     mov #-1,T
-9:  call sdc_deselect
-    mov #SCLK_FAST,W1
+8:  call sdc_deselect
+9:  mov #SCLK_FAST,W1
     call set_spi_clock
     NEXT
  
@@ -273,6 +275,10 @@ DEFCODE "?SDC",4,,QSDC ; ( -- u )
     mov sdc_status,T
     NEXT
 
+; la carte SD est-elle prête?    
+DEFWORD "?SDCOK",6,,QSDCOK ; ( -- f )
+    .word QSDC,LIT,1,LIT,F_SDC_OK,LSHIFT,AND,EXIT
+    
     
 ; lecture d'un secteur de la carte
 ; bloc de 512 octets    
@@ -352,5 +358,61 @@ write_failed:
     call sdc_deselect
     RESET_EDS
     NEXT
+
+; ajuste le compteur et le pointeur pour
+; le secteur suivant
+; arguments:
+;    u1  adresse RAM
+;    u2  nombre d'octets à lire ou écrire
+; sortie:
+;    u3  adresse RAM incrémentée de BLOCK_SIZE
+;    u4  nombre d'octets décrémentés de BLOCK_SIZE
+;        MAX(0,u4') 
+;    ajuste le no. de secteur qui est sur R: IP ud    
+DEFWORD "NSECTOR",7,,NSECTOR ; ( u1 u2 -- u3 u4 )
+    .word LIT,BLOCK_SIZE,MINUS,LIT,0,MAX ; u1 u4
+    .word SWAP,LIT,BLOCK_SIZE,PLUS,SWAP  ; u3 u4
+    .word RFROM,TWORFROM,LIT,1,MPLUS ; u3 u4 IP ud1+1
+    .word TWOTOR,TOR ; u3 u4 R: ud1+1 IP
+    .word EXIT
+    
+; sauvegarde image système sur la carte SD
+; arugments:
+;   u1  adresse ram début
+;   u2  nombre d'octets à sauvegarder
+;   ud1 no. de secteur début sauvegarde    
+DEFWORD "IMG>SDC",7,,IMGTOSDC ; ( u1 u2 ud1 -- )
+    .word TWOTOR,QSDCOK,TBRANCH,5f-$ 
+    .word SDCINIT,ZBRANCH,9f-$
+5:  .word OVER,TWORFETCH,SDCWRITE 
+    .word NSECTOR,DUP,ZBRANCH,8f-$
+    .word BRANCH,5b-$
+8:  .word TWODROP,TWORFROM,TWODROP,EXIT
+9:  .word DOTSTR
+    .byte  18
+    .ascii "SDcard write error"
+    .align 2
+    .word CR,ABORT
+    
+    
+; récupération image système à partir de la carte SD.
+; arguments:
+;   u1 adresse RAM
+;   u2 nombre d'octets à lire    
+;   ud1 no de secteur début image sur carte SD.    
+DEFWORD "SDC>IMG",7,,SDCTOIMG ; ( u1 u2 ud1 -- )
+    .word TWOTOR,QSDCOK,TBRANCH,4f-$
+    .word SDCINIT,ZBRANCH,9f-$
+4:  .word OVER,TWORFETCH,SDCREAD,ZBRANCH,9f-$
+    .word NSECTOR,DUP,ZBRANCH,8f-$
+    .word BRANCH,4b-$
+8:  .word TWODROP,TWORFROM,TWODROP,EXIT
+9:  .word DOTSTR
+    .byte  17
+    .ascii "SDcard read error"
+    .align 2
+    .word CR,ABORT
+    
+    
 
 

@@ -46,7 +46,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L USB_A P2
+L USB_A-RESCUE-forthEx P2
 U 1 1 5872D906
 P 6900 3950
 F 0 "P2" V 6600 3950 50  0000 C CNN

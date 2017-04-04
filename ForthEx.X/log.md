@@ -1,3 +1,9 @@
+2017-04-03
+----------
+include la carte SD dans les périphérique boot.
+ajout des mots ?SDCOK, IMG>SDC et SDC>IMG, NSECTOR dans sdcard.s
+modfications dans store.s
+
 2017-04-02
 ----------
 modification à SDCREAD et SDCWRITE

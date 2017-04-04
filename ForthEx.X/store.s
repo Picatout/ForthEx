@@ -330,7 +330,7 @@ DEFWORD "?BOOT",5,,QBOOT ; (  -- f )
     .word EXIT
     
 ;retourne la taille d'une image à partir
-;de l'entête de celle-ci chargée dans le
+;de l'entête de celle-ci. 
 ; retourne:
 ;   'n'  taille en octets    
 DEFWORD "?SIZE",5,,QSIZE ; ( -- n )  
@@ -412,37 +412,44 @@ DEFCONST "FN_READ",7,,FN_READ,0
 DEFCONST "FN_WRITE",8,,FN_WRITE,1
 
 ; initialise le périphérique d'autochargement
-;  'dev' périphérique  {MFLASH, EEPROM}
+;  'dev' périphérique  {MFLASH, EEPROM, SDcard}
 ;  'fn' function    {FN_READ, FN_WRITE}
 DEFWORD "SETBOOT",7,,SETBOOT  ; ( dev fn -- ) 
-    .word OVER
-    .word MFLASH,EQUAL,ZBRANCH,4f-$
+    .word OVER, BOOTDEV,STORE,SWAP
+    .word DUP,MFLASH,EQUAL,ZBRANCH,3f-$
   ; mcu flash
-    .word FN_WRITE,EQUAL,ZBRANCH,2f-$
+    .word DROP,FN_WRITE,EQUAL,ZBRANCH,2f-$
     ; opération écriture
     .word LIT,RAMTOFLASH,BRANCH,9f-$
     ; opération lecture
 2:  .word LIT,FLASHTORAM,BRANCH,9f-$
+3:  .word SDCARD,EQUAL,ZBRANCH,5f-$
+    ; carte SD
+    .word FN_WRITE,EQUAL,ZBRANCH,4f-$
+    .word LIT,IMGTOSDC,BRANCH,9f-$
+4:  .word LIT,SDCTOIMG,BRANCH,9f-$
   ; eeprom externe
-4:  .word FN_WRITE,EQUAL,ZBRANCH,5f-$
+5:  .word FN_WRITE,EQUAL,ZBRANCH,6f-$
     ;opération écriture
     .word LIT,RAMTOEE,BRANCH, 9f-$
     ;opération lecture
-5:  .word LIT,EEREAD    
-9:  .word BOOTFN,STORE,BOOTDEV,STORE
+6:  .word LIT,EEREAD    
+9:  .word BOOTFN,STORE
     .word EXIT
 
 ; initialise l'adresse boot du périphérique
-; ud adresse 24 bits EEPROM ou MCU_FLASH
+; ud adresse 24 bits EEPROM, MCU_FLASH ou carte SD    
 DEFWORD "BOOTADR",7,,BOOTADR ; ( -- ud )
-    .word BOOTDEV,FETCH,MFLASH,EQUAL,ZBRANCH,2f-$
-    .word BOOTFN,FETCH,LIT,RAMTOFLASH,EQUAL,ZBRANCH,1f-$
+    .word BOOTDEV,FETCH,MFLASH,EQUAL,TBRANCH,1f-$
+    .word BOOTDEV,FETCH,SDCARD,EQUAL,ZBRANCH,3f-$
+    .word LIT,1,LIT,0,EXIT
+1:  .word BOOTFN,FETCH,LIT,RAMTOFLASH,EQUAL,ZBRANCH,2f-$
     .word ERASEROWS
-1:  .word FBTROW,ROWTOFADR,EXIT
-2:  .word LIT,0,DUP,EXIT    
+2:  .word FBTROW,ROWTOFADR,EXIT
+3:  .word LIT,0,DUP,EXIT    
     
 ; sauvegarde une image boot sur un périphérique
-;  dev -> { MFLASH, EEPROM }  
+;  dev -> { MFLASH, EEPROM, SDCARD }  
 DEFWORD ">BOOT",5,,TOBOOT ; ( dev -- )
     .word FN_WRITE,SETBOOT
     .word QEMPTY,TBRANCH,9f-$ ; si RAM vide quitte

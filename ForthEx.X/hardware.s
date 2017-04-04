@@ -172,6 +172,7 @@ HEADLESS HARDWARE_INIT, HWORD
     .word SOUND_INIT
     .word IO_LOCK
     .word KBD_RESET
+    .word SDCINIT,DROP
     .word EXIT
 
 ; initialisation TIMER1
