@@ -1,3 +1,8 @@
+2017-04-04
+----------
+Modification à ACCEPT dans fichier core.s pour que CTRL-BACKSPACE efface la ligne au complet.
+modification à KEYFLILTER dans fichier keyboard.s pour accepter VK_CTRL_BACK.
+
 2017-04-03
 ----------
 include la carte SD dans les périphérique boot.

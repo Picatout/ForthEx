@@ -134,14 +134,15 @@ HEADLESS KBD_RESET  ; ( -- )
 
 ; filtre le caractère dans T    
 ; accepte seulement
-; VK_ENTER,VK_BKSP,{32-126}
-; code 255 déclenche un RESET    
+; VK_ENTER,VK_BKSP,VK_CLTRL_BACK, {32-126}
 HEADLESS KEYFILTER,CODE  ; ( c|0 -- c|0 )
 1:  cp T, #32
     bra ge, 7f
     cp T, #VK_RETURN
     bra eq, 9f
     cp T, #VK_BACK
+    bra eq, 9f
+    cp T, #VK_CTRL_BACK
     bra eq, 9f
     bra 8f
 7:
@@ -184,9 +185,8 @@ DEFCODE "GETKEY",6,,GETKEY   ; (  -- c|0 )
 DEFWORD "?KEY",4,,QKEY  ; ( -- 0 | c T )
     .word GETKEY,KEYFILTER,DUP
     .word ZBRANCH,1f-$
-    .word LIT,0xffff
-1:    
-    .word EXIT
+    .word LIT,-1
+1:  .word EXIT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ; attend une touche
@@ -198,15 +198,4 @@ DEFWORD "KEY",3,,KEY ; ( -- c)
     .word DROP,EXIT 
     
 
-; vérifie s'il y a un caractère dans la file clavier
-; s'il n'y en a pas retourne F
-; sinon attend un autre caractère et retourne vrai
-; is ce caractère est 13    
-DEFWORD "NUF?",4,,NUFQ ; ( -- T|F)
-    .word QKEY, DUP,ZBRANCH,1f-$
-    .word TWODROP,KEY
-    .word LIT,13,EQUAL
-1:  .word EXIT   
-    
-;.end
     

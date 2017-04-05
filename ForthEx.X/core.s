@@ -1452,14 +1452,16 @@ not_found:
 ; +n2 longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
-1:  .word KEY,DUP,LIT,13,EQUAL,ZBRANCH,2f-$
+1:  .word KEY,DUP,LIT,VK_RETURN,EQUAL,ZBRANCH,2f-$
     .word DROP,BL,OVER,CSTORE,SWAP,MINUS,ONEPLUS,RFROM,DROP,EXIT
-2:  .word DUP,LIT,8,EQUAL,ZBRANCH,3f-$
+2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,3f-$
     .word DROP,TWODUP,EQUAL,TBRANCH,1b-$
     .word BACKCHAR,ONEMINUS,BRANCH,1b-$
-3:  .word OVER,RFETCH,EQUAL,TBRANCH,4f-$
+3:  .word DUP,LIT,VK_CTRL_BACK,EQUAL,ZBRANCH,4f-$
+    .word DROP,LIT,0,SETX,GETY,CLRLN,DROP,DUP,BRANCH,1b-$
+4:  .word OVER,RFETCH,EQUAL,TBRANCH,5f-$
     .word DUP,EMIT,OVER,CSTORE,ONEPLUS,BRANCH,1b-$
-4:  .word DROP,BRANCH,1b-$
+5:  .word DROP,BRANCH,1b-$
   
    
 ; retourne la spécification
