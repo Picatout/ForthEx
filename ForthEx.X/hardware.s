@@ -149,11 +149,11 @@ _warm:
 2:  .word DUP,LIT,STACK_EXCEPTION,EQUAL,ZBRANCH,3f-$
     .word DROP,LIT,_stack_reset,BRANCH,8f-$
 3:  .word DROP,LIT,_unknown_reset    
-8:  .word COUNT,TYPE,CR,QUIT
+8:  .word COUNT,TYPE,NEWLINE,QUIT
   
 _cold:
     .word CLR_RAM,HARDWARE_INIT,VARS_INIT
-    .word VERSION,COUNT,TYPE,CR 
+    .word VERSION,COUNT,TYPE,NEWLINE 
     .word BOOTDEV,FETCH,BOOT; autochargement système en RAM à partir d'une en FLASH MCU ou EEPROM
     .word QUIT ; boucle de l'interpréteur
 

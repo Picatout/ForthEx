@@ -21,8 +21,12 @@
 ;Description:  communication port sériel RS232 via USART
 ;Date: 2015-10-07
 
-.equ  XON,  17
-.equ  XOFF, 19
-
+; codes de contrôle ASCII    
+.equ  A_XON,  17  ; minicom vt102 mode: CTRL-Q
+.equ  A_XOFF, 19  ; minicom vt102 mode: CTRL-S
+.equ  A_STX , 2   ; minicom vt102 mode: CTRL-B
+.equ  A_ETX , 3   ; minicom vt102 mode: CTRL-C
+    
+    
 .equ QUEUE_SIZE, 16
     

@@ -162,7 +162,7 @@ HEADLESS KEYFILTER,CODE  ; ( c|0 -- c|0 )
 ; en tête de file kbd_queue    
 ; retourne 0 si file vide.    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "GETKEY",6,,GETKEY   ; (  -- c|0 )  
+DEFCODE "EKEY",4,,EKEY   ; (  -- c|0 )  
     clr W0
     mov kbd_head, W1
     mov kbd_tail, W2
@@ -183,7 +183,7 @@ DEFCODE "GETKEY",6,,GETKEY   ; (  -- c|0 )
     
 ; lecture clavier sans attente.    
 DEFWORD "?KEY",4,,QKEY  ; ( -- 0 | c T )
-    .word GETKEY,KEYFILTER,DUP
+    .word EKEY,KEYFILTER,DUP
     .word ZBRANCH,1f-$
     .word LIT,-1
 1:  .word EXIT
@@ -193,9 +193,9 @@ DEFWORD "?KEY",4,,QKEY  ; ( -- 0 | c T )
 ; du clavier
 ;;;;;;;;;;;;;;;;;;;;;;;;    
 DEFWORD "KEY",3,,KEY ; ( -- c)    
-1:  .word QKEY,QDUP
+1:  .word QKEY
     .word ZBRANCH,1b-$
-    .word DROP,EXIT 
+    .word EXIT 
     
 
     

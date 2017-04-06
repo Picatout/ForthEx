@@ -23,8 +23,7 @@
     
 .include "serial.inc"
    
-
-
+.equ F_STOP, 0
     
 .section .serial.bss bss
 ;.global tx_wait, tx_tail,tx_queue,rx_head,rx_queue,rx_in    
@@ -36,6 +35,7 @@ tx_tail:  .space 1
 rx_in:	  .space 2 ; nombre de caractère dans rx_queue
 rx_head:  .space 1
 rx_tail:  .space 1
+ser_flags: .space 2
  
  
 .text
@@ -46,8 +46,7 @@ INTR
 .global __U1RXInterrupt
 __U1RXInterrupt:
     bclr  SER_RX_IFS, #SER_RX_IF
-    push W0
-    push W1
+    push.d W0
     mov.b rx_tail, WREG
     ze W0,W0
     mov #rx_queue, W1
@@ -55,7 +54,14 @@ __U1RXInterrupt:
     btss SER_STA, #URXDA
     bra 1f
     mov SER_RXREG, W0
-    mov.b W0, [W1]
+    cp.b W0,#A_XOFF
+    bra nz, 1f
+    bset ser_flags,#F_STOP
+    bra 9f
+1:  cp.b W0,#A_XON
+    bra nz, 2f
+    bclr ser_flags,#F_STOP
+2:  mov.b W0, [W1]
     inc rx_in
     inc.b rx_tail
     mov #(QUEUE_SIZE-1), W0
@@ -67,9 +73,8 @@ __U1RXInterrupt:
 ;    bra 1f
 ;    mov #XOFF, W0
 ;    mov.b WREG, SER_TXREG
-1:    
-    pop W1
-    pop W0
+9:    
+    pop.d W0
     retfie
  
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
@@ -78,8 +83,7 @@ __U1RXInterrupt:
 .global __U1TXInterrupt
 __U1TXInterrupt:
     bclr SER_TX_IFS, #SER_TX_IF
-    push W0
-    push W1
+    push.d W0
     cp0 tx_wait
     bra z, 2f
     mov.b tx_head,WREG
@@ -93,8 +97,7 @@ __U1TXInterrupt:
     mov #(QUEUE_SIZE-1), W0
     and.b tx_head
 2:    
-    pop W1
-    pop W0
+    pop.d W0
     retfie
     
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -102,8 +105,10 @@ __U1TXInterrupt:
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;initialisation port série  
-; BAUD par défaut 9600
+; BAUD par défaut 57600
 HEADLESS SERIAL_INIT,CODE ; ( -- )
+    ; met broche à 1 lorsque le UARTX est désactivé
+    bset SER_LAT,#SER_TX_OUT
     ; mettre broche en mode sortie
     bclr SER_TRIS, #SER_TX_OUT
     ; sélection PPS pour transmission
@@ -116,8 +121,8 @@ HEADLESS SERIAL_INIT,CODE ; ( -- )
     and SER_RX_RPINR
     mov #(SER_RX_INP<<SER_RX_PPSbit), W0
     ior SER_RX_RPINR
-    ; baud rate 9600
-    mov #(FCY/(16*9600)-1), W0
+    ; baud rate 57600
+    mov #(FCY/(16*57600)-1), W0
     mov W0, SER_BRG
     ; activation  8 bits, 1 stop, pas de paritée
     bset SER_MODE, #UARTEN
@@ -130,32 +135,78 @@ HEADLESS SERIAL_INIT,CODE ; ( -- )
     and SER_RX_IPC
     mov #(3<<SER_RX_IPbit), W0
     ior SER_RX_IPC
-    ; activation interrupts
+    call serial_enable
+    NEXT
+
+; vide les files
+empty_queues:
+    push.d W0
+    mov #tx_wait,W1
+    repeat #7
+    clr.b [W1++]
+    pop.d W0
+    return
+    
+; activation port sériel
+serial_enable:
+    call empty_queues
     bclr SER_TX_IFS, #SER_TX_IF
     bset SER_TX_IEC, #SER_TX_IE
     bclr SER_RX_IFS, #SER_RX_IF
     bset SER_RX_IEC, #SER_RX_IE
     clr.b SER_TXREG
     bset SER_STA, #UTXEN
-    NEXT
+    return
+
+; désactivation port sériel    
+serial_disable:
+    bclr SER_TX_IEC,#SER_TX_IE
+    bclr SER_RX_IEC,#SER_RX_IE
+    bclr SER_STA,#UTXEN
+    return
     
-DEFCODE "BAUD",4,,BAUD   ; ( u -- ) u<=57600
-    bclr SER_MODE, #UARTEN
+; activation/désactivation port série
+;  argument:
+;     f TRUE activation FALSE désactivation    
+DEFCODE "SERENBL",7,,SERENBL ; ( f -- )
+    cp0 T
+    DPOP
+    bra z, 1f
+    call serial_enable
+    bra 9f
+1:  call serial_disable
+9:  NEXT
+    
+; ajuste la vitesse du port sériel et l'active.
+; argument:
+;   u   baud rate maximum: 57600
+; sortie:
+;   port actif.    
+DEFCODE "BAUD",4,,BAUD   ; ( u -- )
+    call serial_disable
     mov #FCY&0xffff,W0
     mov #FCY>>16,W1
     mov #4,W2 ; FCY/16
 1:  lsr W1,W1
     rrc W0,W0
     dec W2,W2
+    bra nz, 1b
     repeat #17  ; W1:W0/T
     div.ud W0,T
     dec W0,W0
     mov W0, SER_BRG
-    bset SER_MODE, #UARTEN
+    call serial_enable
     DPOP
     NEXT
     
-DEFCODE "SEMIT",5,,SEMIT
+; transmission d'un caractère par
+; le port sériel.
+; argument:
+;    c  caractère à transmettre.
+; note:
+;   si le transmit buffer est plein
+;   le caractère est placé dans la file d'attente.    
+DEFCODE "SPUTC",5,,SPUTC ; ( c -- )
     cp0 tx_wait
     bra neq, 1f
     btsc SER_STA, #UTXBF
@@ -181,8 +232,9 @@ DEFCODE "SEMIT",5,,SEMIT
     and.b tx_tail
 4:    
     NEXT
-    
-DEFCODE "SGET",4,,SGET
+ 
+; attend un careactère du port sériel    
+DEFCODE "SGETC",5,,SGETC  ; ( -- c )
     DPUSH
 1:    
     cp0 rx_in
@@ -194,14 +246,52 @@ DEFCODE "SGET",4,,SGET
     mov #rx_queue, W1
     add W0,W1,W1
     mov.b [W1], T
+    ze T,T
     dec rx_in
     inc.b rx_head
     mov #(QUEUE_SIZE-1), W0
     and.b rx_head
     NEXT
+ 
+DEFWORD "VTCRLF",6,,VTCRLF ; ( -- )
+    .word LIT,13,SPUTC
+    .word LIT,10,SPUTC
+    .word EXIT
+   
+DEFWORD "VTDELBACK",9,,VTDELBACK ; ( -- )
+    .word LIT,VK_BACK,SPUTC
+    .word BL,SPUTC,LIT,VK_BACK,SPUTC
+    .word EXIT
+
+; code VT100 pour suprimer la ligne courante.    
+DEFWORD "VTDELLN",7,,VTDELLN ; ( -- )
+    .word LIT,27,SPUTC,LIT,'[',SPUTC
+    .word LIT,'2',SPUTC
+    .word LIT,'K',SPUTC,LIT,13,SPUTC,EXIT
+
+DEFWORD "VT?CURSOR",9,,VTQCURSOR ; ( -- )
+    .word LIT,27,SPUTC,LIT,'[',SPUTC,LIT,'6',SPUTC
+    .word LIT,'n',SPUTC,EXIT
     
-
-
+; demande la position du curseur
+; sortie:
+;   v position verticale
+;   H position horizontale    
+DEFWORD "VTGETYX",7,,VTGETYX ; ( -- v h )
+    .word VTQCURSOR
+1:  .word SGETC,LIT,27,EQUAL,ZBRANCH,1b-$
+    .word SGETC,DROP ; [
+    .word SGETC,LIT,'0',MINUS
+    .word SGETC,DUP,LIT,';',EQUAL,TBRANCH,2f-$
+    .word LIT,'0',MINUS,SWAP,LIT,10,STAR,PLUS,SGETC
+2:  .word DROP,SGETC,LIT,'0',MINUS
+    .word SGETC,DUP,LIT,'R',EQUAL,TBRANCH,9f-$
+    .word LIT,'0',MINUS,SWAP,LIT,10,STAR,PLUS,SGETC
+9:  .word DROP,EXIT
+    
+; caractères de contrôle de flux.
+DEFCONST "XON",3,,XON,A_XON 
+DEFCONST "XOFF",4,,XOFF,A_XOFF
 
     
 ;.end

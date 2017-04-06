@@ -32,7 +32,7 @@
 ; variables système.    
 .section .vars_init psv  address(FLASH_DRIVE_BASE-FLASH_ROW_SIZE)    
 .global vars_count
-vars_count: .word 17
+vars_count: .word 19
 csp_init: .word cstack
 syslatest_init: .word 0b
 latest_init: .word 0b    
@@ -50,6 +50,8 @@ btfn_init: .word FLASHTORAM
 state_init: .word 0
 toin_init: .word 0
 hp_init: .word 0
+stdin_init: .word KEY
+stdout_init: .word PUTC
  
 .text
 .global _code_end

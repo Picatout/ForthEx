@@ -221,12 +221,13 @@
 .equ STR_SPIIF,   SPI1IF    
 
 ; communication port série
+; utilisation USART1    
 .equ  RPI44, 44  ; code PPS de la broche 23  
 .equ  SER_PORT, PORTB
 .equ  SER_LAT,  LATB
 .equ  SER_TRIS, TRISB
 .equ  SER_TX_OUT, RB11  ; pin 22, RP43
-.equ  SER_RX_INP, 44    ; pin 23, RPI44  
+.equ  SER_RX_INP, RPI44 ; pin 23, RPI44  
 .equ  SER_MODE, U1MODE
 .equ  SER_STA,  U1STA
 .equ  SER_BRG,  U1BRG
@@ -234,7 +235,7 @@
 .equ  SER_RXREG, U1RXREGL
 .equ  SER_RX_RPINR, RPINR18 ; select RX PPS
 .equ  SER_RX_PPSbit, U1RXR0     
-.equ  SER_TX_FN, 3
+.equ  SER_TX_FN, 1
 .equ  SER_TX_RPOR,  RPOR4 
 .equ  SER_TX_PPSbit, RP43R0    
 .equ  SER_TX_IFS, IFS0

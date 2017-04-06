@@ -1,3 +1,10 @@
+2017-04-05
+----------
+Modification au système pour pouvoir utiliser le port sériel comme console
+REMOTE CONSOLE pour transférer la console au port RS-232
+LOCAL CONSOLE pour transférer la console au clavier/écran local.
+Sur le PC on doit utiliser un émulateur de terminal compatible VT100.
+
 2017-04-04
 ----------
 Modification à ACCEPT dans fichier core.s pour que CTRL-BACKSPACE efface la ligne au complet.

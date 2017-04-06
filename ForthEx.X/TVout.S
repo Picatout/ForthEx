@@ -516,11 +516,13 @@ DEFCODE "TGLCHAR",7,,TGLCHAR  ; ( -- )
     
     
 ;;;;;;;;;;;;;;;;;;;;;;
-; place caractère 
-; au sommet de la pile
-; dans le buffer video    
-;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "EMIT",4,,EMIT  ; ( c -- )
+; envoie un caractère à la sortie standard
+;  argument:
+;    caractère à transmettre
+DEFWORD "EMIT",4,,EMIT ; ( c -- )
+    .word STDOUT,FETCH,EXECUTE,EXIT
+    
+DEFCODE "PUTC",4,,PUTC  ; ( c -- )
     cursor_incr_sema
     cursor_sync
     mov.b #CPL, W0
@@ -535,9 +537,6 @@ DEFCODE "EMIT",4,,EMIT  ; ( c -- )
     cursor_decr_sema
     bra code_RIGHT
 
-;;;;;;;;;;;;;;;;;;;
-; retour à la ligne
-;;;;;;;;;;;;;;;;;;;;
 DEFCODE "CR",2,,CR ; ( -- )
     cursor_incr_sema
     cursor_sync
@@ -549,10 +548,8 @@ DEFCODE "CR",2,,CR ; ( -- )
 ;;;;;;;;;;;;;;;;;;;;;;
 ; imprime un espace
 ;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "SPACE",5,,SPACE ; ( -- )
-    DPUSH
-    mov #32, T
-    bra code_EMIT
+DEFWORD "SPACE",5,,SPACE ; ( -- )
+    .word LIT, 32, EMIT,EXIT
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;

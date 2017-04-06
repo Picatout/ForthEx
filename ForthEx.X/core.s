@@ -105,6 +105,10 @@ _TOIN: .space 2
 ; pointeur HOLD conversion numérique
  .global _HP
 _HP: .space 2
+; XT pour fonctions terminal
+; par défaut KEY,EMIT, peut-être SGET,SEMIT 
+_STDIN: .space 2
+_STDOUT: .space 2
 ; sauvegarde de RSP par BREAK
 _RPBREAK: .space 2 
 ; flag activation/désactivaton break points
@@ -1174,6 +1178,8 @@ DEFUSER "BOOTDEV",7,,BOOTDEV ; détermine le périphérique utilisé par BOOT et >BO
 DEFUSER "BOOTFN",6,,BOOTFN ; CFA de l'opération à effectuer
 DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
 DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
+DEFUSER "STDIN",5,,STDIN ; entrée standard
+DEFUSER "STDOUT",6,,STDOUT ; sortie standard
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
@@ -1312,15 +1318,18 @@ DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
   
 ;imprime la liste des mots du dictionnaire
 DEFWORD "WORDS",5,,WORDS ; ( -- )
-    .word LIT,0,CR,LATEST
-1:  .word FETCH,DUP,ZEROEQ,TBRANCH,3f-$
+    .word LIT,0,NEWLINE,LATEST
+1:  .word FETCH,DUP,ZEROEQ,TBRANCH,8f-$
     .word DUP,CFETCH,HIDDEN,AND,ZBRANCH,4f-$ ; n'affiche pas les mots cachés
     .word TWOMINUS,BRANCH,1b-$
 4:  .word DUP,DUP,CFETCH,LENMASK,AND  ; NFA NFA LEN
-    .word DUP,GETX,PLUS,LIT,64,ULESS,TBRANCH,2f-$
-    .word CR
-2:  .word TOR,ONEPLUS,RFROM,TYPE,SPACE,TWOMINUS,SWAP,ONEPLUS,SWAP,BRANCH,1b-$
-3:  .word DROP,CR,DOT,EXIT
+    .word DUP,STDOUT,FETCH,LIT,SPUTC,EQUAL,ZBRANCH,2f-$
+    .word VTGETYX,SWAP,DROP,BRANCH,5f-$
+2:  .word  GETX
+5:  .word  PLUS,LIT,64,ULESS,TBRANCH,3f-$
+    .word NEWLINE
+3:  .word TOR,ONEPLUS,RFROM,TYPE,SPACE,TWOMINUS,SWAP,ONEPLUS,SWAP,BRANCH,1b-$
+8:  .word DROP,NEWLINE,DOT,EXIT
     
 ; convertie la chaîne comptée en majuscules
 DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
@@ -1442,7 +1451,29 @@ match:
 not_found:    
     mov #0,T
 2:  NEXT
+
+; attend un caractère de l'entrée standard    
+DEFWORD "GETC",4,,GETC ; (  -- c )
+    .word STDIN,FETCH,EXECUTE,EXIT
     
+; supprime le dernier caractère reçu    
+DEFWORD "DELLAST",7,,DELLAST ; ( -- )
+    .word STDOUT,FETCH,LIT,PUTC,EQUAL,ZBRANCH,2f-$
+    .word BACKCHAR,EXIT
+2:  .word VTDELBACK,EXIT    
+
+; supprime la ligne en cours de saisie.
+DEFWORD "DELLINE",7,,DELLINE ; ( -- )
+    .word STDOUT,FETCH,LIT,PUTC,EQUAL,ZBRANCH,2f-$
+    .word LIT,0,SETX,GETY,CLRLN,EXIT
+2:  .word VTDELLN,EXIT
+  
+; envoie une commande nouvelle ligne à la console
+DEFWORD "NEWLINE",7,,NEWLINE ; ( -- )
+    .word STDOUT,FETCH,LIT,PUTC,EQUAL,ZBRANCH,2f-$
+    .word CR,EXIT
+2:  .word VTCRLF,EXIT
+  
 ; lecture d'une ligne de texte au clavier
 ; chaîne terminée par touche 'ENTER'
 ; cette touche est remplacée par un espace (ASCII 32 )
@@ -1452,13 +1483,13 @@ not_found:
 ; +n2 longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
-1:  .word KEY,DUP,LIT,VK_RETURN,EQUAL,ZBRANCH,2f-$
+1:  .word GETC,DUP,LIT,VK_RETURN,EQUAL,ZBRANCH,2f-$
     .word DROP,BL,OVER,CSTORE,SWAP,MINUS,ONEPLUS,RFROM,DROP,EXIT
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,3f-$
     .word DROP,TWODUP,EQUAL,TBRANCH,1b-$
-    .word BACKCHAR,ONEMINUS,BRANCH,1b-$
+    .word DELLAST,ONEMINUS,BRANCH,1b-$
 3:  .word DUP,LIT,VK_CTRL_BACK,EQUAL,ZBRANCH,4f-$
-    .word DROP,LIT,0,SETX,GETY,CLRLN,DROP,DUP,BRANCH,1b-$
+    .word DROP,DELLINE,DROP,DUP,BRANCH,1b-$
 4:  .word OVER,RFETCH,EQUAL,TBRANCH,5f-$
     .word DUP,EMIT,OVER,CSTORE,ONEPLUS,BRANCH,1b-$
 5:  .word DROP,BRANCH,1b-$
@@ -1479,7 +1510,7 @@ DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )
    .word SPACE,CLIT,'?',EMIT
    .word LIT,0,STATE,STORE
    .word S0,FETCH,SPSTORE
-   .word CR,QUIT
+   .word NEWLINE,QUIT
 
 ; copie chaîne comptée de src vers dest
 ; src addresse chaîne à copiée
@@ -1501,7 +1532,7 @@ DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
 3:      .word BRANCH,1b-$
 4:      .word QNUMBER,ZBRANCH,5f-$
         .word LITERAL,BRANCH,1b-$
-5:      .word COUNT,TYPE,LIT,'?',EMIT,CR,ABORT
+5:      .word COUNT,TYPE,LIT,'?',EMIT,NEWLINE,ABORT
 9:      .word DROP,EXIT
 
 ; interprète la chaîne à l'adrese 'c-addr' et de longueur 'u'
@@ -1515,7 +1546,7 @@ DEFWORD "EVALUATE",8,,EVAL ; ( i*x c-addr u -- j*x )
     
 ; imprime le prompt et passe à la ligne suivante    
 DEFWORD "OK",2,,OK  ; ( -- )
-    .word GETX,LIT,3,PLUS,LIT,CPL,LESS,TBRANCH,1f-$,CR    
+    .word GETX,LIT,3,PLUS,LIT,CPL,LESS,TBRANCH,1f-$,NEWLINE    
 1:  .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
 ; vide la pile dstack et appel QUIT
@@ -1528,7 +1559,7 @@ DEFWORD "ABORT",5,,ABORT
 ;runtime de ABORT"
 DEFWORD "?ABORT",6,F_HIDDEN,QABORT ; ( i*x f  -- | i*x) ( R: j*x -- | j*x )
     .word DOSTR,SWAP,ZBRANCH,9f-$
-    .word COUNT,TYPE,CR,ABORT
+    .word COUNT,TYPE,NEWLINE,ABORT
 9:  .word DROP,EXIT
   
 ; compile le runtime de ?ABORT
@@ -1542,7 +1573,7 @@ DEFWORD "REPL",4,F_HIDDEN,REPL ; ( -- )
     .word SPACE,INTERPRET 
     .word STATE,FETCH,TBRANCH,2f-$
     .word OK
-2:  .word CR
+2:  .word NEWLINE
     .word BRANCH, 1b-$
     
 ; boucle de l'interpréteur    
@@ -1558,8 +1589,19 @@ DEFWORD "(",1,F_IMMED,LPAREN ; parse ccccc)
 ; commentaire jusqu'à la fin de la ligne
 DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
     .word TSOURCE,PLUS,ADRTOIN,EXIT
-    
-    
+
+DEFCONST "LOCAL",5,,LOCAL,1   ; clavier/écran 
+DEFCONST "REMOTE",6,,REMOTE,2 ; port sériel
+
+; sélection de la console
+; argument:
+;   n  indentifiant terminal {LOCAL,SERIAL}    
+DEFWORD "CONSOLE",7,,CONSOLE ; ( n -- )
+    .word REMOTE,EQUAL,TBRANCH,2f-$
+    .word LIT,PUTC,LIT,KEY,BRANCH,9f-$
+2:  .word LIT,SPUTC,LIT,SGETC
+9:  .word STDIN,STORE,STDOUT,STORE,EXIT
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   compilateur
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1661,7 +1703,7 @@ DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
     .word BL,WORD,DUP,CFETCH,ZEROEQ,QNAME
     .word UPPER,FIND,ZBRANCH,5f-$
     .word BRANCH,9f-$
-5:  .word COUNT,TYPE,SPACE,LIT,'?',EMIT,CR,ABORT    
+5:  .word COUNT,TYPE,SPACE,LIT,'?',EMIT,NEWLINE,ABORT    
 9:  .word EXIT
 
 ; version immédiate de '
@@ -1951,7 +1993,7 @@ DEFWORD ":",1,,COLON ; ( name --  )
     .word HEADER ; ( -- )
     .word RBRACKET,CFA_COMMA,ENTER,EXIT
 
-;RUNTIME utilisé par CREATE
+;RUNTIME utilisé par NEWLINEEATE
 ; remplace ENTER    
     .global FETCH_EXEC
     FORTH_CODE
@@ -1964,7 +2006,7 @@ FETCH_EXEC: ; ( -- pfa )
     
 ;cré une nouvelle entête dans le dictionnaire
 ;qui peut-être étendue par DOES>
-DEFWORD "CREATE",6,,CREATE ; ( -- hook )
+DEFWORD "NEWLINEEATE",6,,NEWLINEEATE ; ( -- hook )
     .word HEADER,REVEAL
     .word LIT,FETCH_EXEC,COMMA
     .word CFA_COMMA,NOP
@@ -1985,7 +2027,7 @@ DEFWORD "DOES>",5,F_IMMED,DOESTO  ; ( -- )
     
 ; création d'une variable
 DEFWORD "VARIABLE",8,,VARIABLE ; ()
-    .word CREATE,LIT,0,COMMA,EXIT
+    .word NEWLINEEATE,LIT,0,COMMA,EXIT
 
 ; création d'une constante
 DEFWORD "CONSTANT",8,,CONSTANT ; ()
@@ -2010,7 +2052,7 @@ DEFWORD "(NOINIT)",8,F_HIDDEN,NOINIT ; ( -- )
     .byte  26
     .ascii "Uninitialized defered word"
     .align 2
-    .word CR,ABORT
+    .word NEWLINE,ABORT
     
 ; création d'un mot la définition de la sémantique d'exécution
 ; est différée.
@@ -2103,7 +2145,7 @@ DEFWORD ".RTN",4,,DOTRTN ; ( -- )
     .word R0,FETCH
 1:  .word DUP,FETCH,DOT,TWOPLUS,DUP,RPFETCH,LIT,CELL_SIZE,MINUS,EQUAL
     .word ZBRANCH,1b-$
-    .word CR,DROP,BASE,STORE,EXIT  
+    .word NEWLINE,DROP,BASE,STORE,EXIT  
   
 ;lit et imprime une plage mémoire
 ; n nombre de mots à lire
@@ -2114,7 +2156,7 @@ DEFWORD "DUMP",4,,DUMP ; ( addr +n -- )
 3:  .word BASE,FETCH,TOR,HEX
     .word SWAP,LIT,0xFFFE,AND,SWAP,LIT,0,DODO
 1:  .word DOI,LIT,15,AND,TBRANCH,2f-$
-    .word CR,DUP,LIT,4,UDOTR,SPACE
+    .word NEWLINE,DUP,LIT,4,UDOTR,SPACE
 2:  .word DUP,ECFETCH,LIT,3,UDOTR,LIT,1,PLUS
     .word DOLOOP,1b-$,DROP
     .word RFROM,BASE,STORE,EXIT
@@ -2130,11 +2172,11 @@ DEFWORD "BREAK",5,,BREAK ; ( ix n -- ix )
     .word DBGEN,FETCH,TBRANCH,1f-$
     .word DROP,EXIT
 1:  .word RPFETCH,RPBREAK,STORE
-    .word CR,DOTSTR
+    .word NEWLINE,DOTSTR
     .byte  13
     .ascii "break point: "
     .align 2
-    .word DOT,CR,DOTS,CR,REPL
+    .word DOT,NEWLINE,DOTS,NEWLINE,REPL
     .word EXIT
 
 ; résume le programme interrompu par BREAK
@@ -2163,11 +2205,11 @@ DEFWORD "RESUME",6,,RESUME ; ( -- )
 ; imprime la liste des mots qui construite une définition
 ; de HAUT-NIVEAU  
 ;DEFWORD "SEELIST",7,F_IMMED,SEELIST ; ( cfa -- )
-;    .word BASE,FETCH,TOR,HEX,CR
+;    .word BASE,FETCH,TOR,HEX,NEWLINE
 ;    .word LIT,2,PLUS ; première adresse du mot 
 ;1:  .word DUP,FETCH,DUP,CFATONFA,QDUP,ZBRANCH,4f-$
 ;    .word COUNT,LIT,F_LENMASK,AND
-;    .word DUP,GETX,PLUS,LIT,CPL,LESS,TBRANCH,2f-$,CR 
+;    .word DUP,GETX,PLUS,LIT,CPL,LESS,TBRANCH,2f-$,NEWLINE 
 ;2:  .word TYPE
 ;3:  .word LIT,',',EMIT,FETCH,LIT,code_EXIT,EQUAL,TBRANCH,6f-$
 ;    .word LIT,2,PLUS,BRANCH,1b-$
