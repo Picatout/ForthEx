@@ -1,3 +1,12 @@
+2017-04-06
+----------
+Travail dans serial.s
+modificcation au projet ps_rs232 pour que la combinaison CTRL_x où x est une 
+lettre renvoie les même codes que l'émumateur de terminal minicon en mode VT102.
+modification à ACCEPT maintenant CTRL_X efface la ligne au lieu de CTRL_BACK
+
+Ajout de CTRL_x pour réentrer la ligne de commande précédente.
+
 2017-04-05
 ----------
 Modification au système pour pouvoir utiliser le port sériel comme console

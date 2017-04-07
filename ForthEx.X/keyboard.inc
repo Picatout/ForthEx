@@ -33,7 +33,9 @@
 .equ VK_ESCAPE,	27	    ;	Esc
 .equ VK_RETURN,	13	    ; touche Entrée 
 .equ VK_CTRL_C, 17          ; control C
-.equ VK_CTRL_BACK,18        ; CONTROL-BACKSPACE    
+.equ VK_CTRL_BACK,18        ; CONTROL-BACKSPACE   
+.equ VK_SYN,    22          ; CTRL_V    
+.equ VK_CANCEL, 24          ; CTRL_X    
 .equ VK_SPACE,	32          ; touche espace    
 .equ VK_F1,	128
 .equ VK_F2,	129

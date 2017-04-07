@@ -142,7 +142,9 @@ HEADLESS KEYFILTER,CODE  ; ( c|0 -- c|0 )
     bra eq, 9f
     cp T, #VK_BACK
     bra eq, 9f
-    cp T, #VK_CTRL_BACK
+    cp T, #VK_CANCEL
+    bra eq, 9f
+    cp T, #VK_SYN
     bra eq, 9f
     bra 8f
 7:

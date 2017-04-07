@@ -52,6 +52,11 @@ cstack:
 tib: .space TIB_SIZE
 .section .pad.bss bss 
 pad: .space PAD_SIZE
+.section .paste.bss bss
+; copie de la dernière interprétée en mode interactif
+; permet de réafficher cette ligne avec CTRL_v 
+paste: .space TIB_SIZE+2
+ 
  
 .section .sys_vars.bss bss
 .global _SYS_VARS
@@ -69,7 +74,9 @@ _LATEST: .space 2
 .global _TIB    
 _TIB: .space 2
 .global _PAD 
-_PAD: .space 2    
+_PAD: .space 2   
+.global _PASTE
+_PASTE: .space 2 
  .global _TICKSOURCE
 ; adresse et longueur du buffer d'évaluation
 _TICKSOURCE: .space 2
@@ -113,7 +120,7 @@ _STDOUT: .space 2
 _RPBREAK: .space 2 
 ; flag activation/désactivaton break points
 _DBGEN: .space 2 
- 
+
 ; enregistrement information boot loader
 .section .boot.bss bss address(BOOT_HEADER)
 .global _boot_header
@@ -1027,7 +1034,11 @@ DEFWORD "HERE",4,,HERE
     .word DP,FETCH,EXIT
 
 ; copie un bloc mémoire RAM
-; en évitant la propagation    
+; en évitant la propagation 
+;  arguments:
+;   addr1  source
+;   addr2  dest
+;   u      compte    
 DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
     mov [DSP-2],W0 ; source
     cp W0,[DSP]    
@@ -1170,6 +1181,7 @@ DEFUSER "R0",2,,R0   ; base pile retour
 DEFUSER "S0",2,,S0   ; base pile arguments   
 DEFUSER "PAD",3,,PAD       ; tampon de travail
 DEFUSER "TIB",3,,TIB       ; tampon de saisie clavier
+DEFUSER "PASTE",5,,PASTE   ; copie de TIB     
 DEFUSER ">IN",3,,TOIN     ; pointeur position début dernier mot retourné par WORD
 DEFUSER "HP",2,,HP       ; HOLD pointer
 DEFUSER "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
@@ -1478,9 +1490,11 @@ DEFWORD "NEWLINE",7,,NEWLINE ; ( -- )
 ; chaîne terminée par touche 'ENTER'
 ; cette touche est remplacée par un espace (ASCII 32 )
 ; et est compté dans la longueur de la chaîne.    
-; c-addr addresse du buffer
-; +n1 longueur du buffer
-; +n2 longueur de la chaîne lue    
+; arguments:
+;   c-addr addresse du buffer
+;   +n1 longueur du buffer
+; retourne:
+;   +n2 longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
 1:  .word GETC,DUP,LIT,VK_RETURN,EQUAL,ZBRANCH,2f-$
@@ -1488,11 +1502,14 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,3f-$
     .word DROP,TWODUP,EQUAL,TBRANCH,1b-$
     .word DELLAST,ONEMINUS,BRANCH,1b-$
-3:  .word DUP,LIT,VK_CTRL_BACK,EQUAL,ZBRANCH,4f-$
+3:  .word DUP,LIT,VK_CANCEL,EQUAL,ZBRANCH,4f-$
     .word DROP,DELLINE,DROP,DUP,BRANCH,1b-$
-4:  .word OVER,RFETCH,EQUAL,TBRANCH,5f-$
+4:  .word DUP,LIT,VK_SYN,EQUAL,ZBRANCH,5f-$
+    .word DROP,DELLINE,PASTE,FETCH,COUNT,TYPE
+    .word DROP,DUP,GETCLIP,PLUS,BRANCH,1b-$
+5:  .word OVER,RFETCH,EQUAL,TBRANCH,6f-$
     .word DUP,EMIT,OVER,CSTORE,ONEPLUS,BRANCH,1b-$
-5:  .word DROP,BRANCH,1b-$
+6:  .word DROP,BRANCH,1b-$
   
    
 ; retourne la spécification
@@ -1567,9 +1584,24 @@ DEFWORD "?ABORT",6,F_HIDDEN,QABORT ; ( i*x f  -- | i*x) ( R: j*x -- | j*x )
 DEFWORD "ABORT\"",6,F_IMMED,ABORTQUOTE ; (  --  )
     .word CFA_COMMA,QABORT,STRCOMPILE,EXIT
     
+; copie le TIB dans PASTE
+;  le premier caractère dans PASTE est le compte    
+;  arguments:
+;	n+ nombre de caractères    
+DEFWORD "CLIP",4,,CLIP ; ( n+ -- )
+    .word DUP,PASTE,FETCH,STORE
+    .word TIB,FETCH,SWAP,PASTE,FETCH,ONEPLUS,SWAP,MOVE,EXIT
+
+; copie PASTE dans TIB
+; retourne le compte.    
+DEFWORD "GETCLIP",7,,GETCLIP ; ( -- n+ )
+    .word PASTE,FETCH,COUNT,SWAP,OVER 
+    .word TIB,FETCH,SWAP,MOVE  
+    .word EXIT
+    
 ; boucle lecture/exécution/impression
 DEFWORD "REPL",4,F_HIDDEN,REPL ; ( -- )
-1:  .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT ; ( addr u )
+1:  .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT,DUP,ONEMINUS,CLIP ; ( addr u )
     .word SPACE,INTERPRET 
     .word STATE,FETCH,TBRANCH,2f-$
     .word OK
@@ -1599,7 +1631,7 @@ DEFCONST "REMOTE",6,,REMOTE,2 ; port sériel
 DEFWORD "CONSOLE",7,,CONSOLE ; ( n -- )
     .word REMOTE,EQUAL,TBRANCH,2f-$
     .word LIT,PUTC,LIT,KEY,BRANCH,9f-$
-2:  .word LIT,SPUTC,LIT,SGETC
+2:  .word LIT,SPUTC,LIT,VTKEY
 9:  .word STDIN,STORE,STDOUT,STORE,EXIT
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

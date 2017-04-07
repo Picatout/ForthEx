@@ -32,12 +32,13 @@
 ; variables système.    
 .section .vars_init psv  address(FLASH_DRIVE_BASE-FLASH_ROW_SIZE)    
 .global vars_count
-vars_count: .word 19
+vars_count: .word 20
 csp_init: .word cstack
 syslatest_init: .word 0b
 latest_init: .word 0b    
 tib_init: .word tib
 pad_init: .word pad
+paste_init: .word paste 
 ticksource_init: .word tib 
 cntsource_init: .word TIB_SIZE 
 dp0_init: .word DATA_BASE

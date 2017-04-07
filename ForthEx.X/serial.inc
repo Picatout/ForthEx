@@ -24,9 +24,18 @@
 ; codes de contrôle ASCII    
 .equ  A_XON,  17  ; minicom vt102 mode: CTRL-Q
 .equ  A_XOFF, 19  ; minicom vt102 mode: CTRL-S
+.equ  A_ESC,  27  ;     
 .equ  A_STX , 2   ; minicom vt102 mode: CTRL-B
 .equ  A_ETX , 3   ; minicom vt102 mode: CTRL-C
+; séquence VT_100
+.equ ESC_A, 'A'   ; ESC[A  cursor up
+.equ ESC_B, 'B'   ; ESC[B  cursor down
+.equ ESC_C, 'C'   ; ESC[C  cursor right
+.equ ESC_D, 'D'   ; ESC[D  cursor left 
     
+; pour la combinaison CTRL_x où x est une lettre
+; minicom envoie l'ordre de la lettre dans l'alphabet
+; i.e.  CTRL_a -> 1,  CTRL_b -> 2, CTRL_z -> 26    
     
-.equ QUEUE_SIZE, 16
+.equ QUEUE_SIZE, 32
     

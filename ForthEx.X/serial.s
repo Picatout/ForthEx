@@ -23,7 +23,11 @@
     
 .include "serial.inc"
    
-.equ F_STOP, 0
+.equ F_TXSTOP, 0 ; un caractère XOFF a été reçu du terminal
+.equ F_RXSTOP, 1 ; un caractère XOFF a été envoyé au terminal    
+.equ F_ESC,    2 ; le caractère A_ESC (27) a été reçu
+.equ F_LBRA,   3 ; le caractère '[' (91) a été reçu après A_ESC
+.equ F_RXDAT,  4 ; data en attente dans la file rx_queue
     
 .section .serial.bss bss
 ;.global tx_wait, tx_tail,tx_queue,rx_head,rx_queue,rx_in    
@@ -46,35 +50,38 @@ INTR
 .global __U1RXInterrupt
 __U1RXInterrupt:
     bclr  SER_RX_IFS, #SER_RX_IF
-    push.d W0
+    DPUSH
+    btss SER_STA,#URXDA
+    bra 9f
+    mov SER_RXREG, T
+    cp.b T,#A_XOFF
+    bra nz, 1f
+    bset ser_flags,#F_TXSTOP ; XOFF reçu du terminal
+    bra 9f
+1:  cp.b T,#A_XON
+    bra nz, 2f
+    bclr ser_flags,#F_TXSTOP ; XON reçu du terminal
+    bra 9f
+2:  push.d W0
     mov.b rx_tail, WREG
     ze W0,W0
     mov #rx_queue, W1
     add W0,W1,W1
-    btss SER_STA, #URXDA
-    bra 1f
-    mov SER_RXREG, W0
-    cp.b W0,#A_XOFF
-    bra nz, 1f
-    bset ser_flags,#F_STOP
-    bra 9f
-1:  cp.b W0,#A_XON
-    bra nz, 2f
-    bclr ser_flags,#F_STOP
-2:  mov.b W0, [W1]
+    mov.b T, [W1]
+    bset ser_flags,#F_RXDAT
     inc rx_in
     inc.b rx_tail
     mov #(QUEUE_SIZE-1), W0
     and.b rx_tail
-;    mov #(QUEUE_SIZE-4), W0
-;    cp rx_in
-;    bra ltu, 1f   
-;    btsc SER_STA, #UTXBF
-;    bra 1f
-;    mov #XOFF, W0
-;    mov.b WREG, SER_TXREG
-9:    
-    pop.d W0
+    mov #(QUEUE_SIZE/4), W1
+    sub W0,W1,W0
+    cp.b rx_in
+    bra ltu, 8f   
+    mov #A_XOFF, W0
+    mov.b WREG, SER_TXREG   ; envoie un XOFF au terminal
+    bset ser_flags,#F_RXSTOP 
+8:  pop.d W0
+9:  DPOP
     retfie
  
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
@@ -82,6 +89,8 @@ __U1RXInterrupt:
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .global __U1TXInterrupt
 __U1TXInterrupt:
+    btsc ser_flags,#F_TXSTOP
+    retfie 
     bclr SER_TX_IFS, #SER_TX_IF
     push.d W0
     cp0 tx_wait
@@ -248,11 +257,46 @@ DEFCODE "SGETC",5,,SGETC  ; ( -- c )
     mov.b [W1], T
     ze T,T
     dec rx_in
-    inc.b rx_head
+    bra nz,1f
+    bclr ser_flags, #F_RXDAT
+1:  inc.b rx_head
     mov #(QUEUE_SIZE-1), W0
     and.b rx_head
-    NEXT
- 
+    btss ser_flags,#F_RXSTOP
+    bra 2f
+    mov #(QUEUE_SIZE/4),W1
+    sub W0,W1,W0
+    cp.b rx_in
+    bra gtu, 2f
+    mov #A_XON,W0
+    mov.b WREG, SER_TXREG
+    bclr ser_flags,#F_RXSTOP
+2:  NEXT
+
+; filtre la réception des caractères reçus
+DEFWORD "VTFILTER",5,,VTFILTER ; ( c -- c )
+    .word DUP,LIT,31,GREATER,ZBRANCH,1f-$
+    .word EXIT
+1:  .word DUP,CLIT,27,EQUAL,ZBRANCH,6f-$
+    .word DROP,SGETC,EXIT 
+6:  .word LIT,CTRL_TABLE,PLUS,CFETCH,EXIT    
+
+; pour la combinaison CTRL_x où x est une lettre
+; minicom envoie l'ordre de la lettre dans l'alphabet
+; i.e.  CTRL_a -> 1,  CTRL_b -> 2, CTRL_z -> 26    
+CTRL_TABLE:
+    .byte 32,32,32,32
+    .byte 32,32,32,32
+    .byte VK_BACK,32,32,32
+    .byte 32,VK_RETURN,32,32
+    .byte 32,VK_CTRL_C,32,32
+    .byte 32,32,VK_SYN,32
+    .byte VK_CTRL_BACK,32,32,32
+    
+    
+DEFWORD "VTKEY",5,,VTKEY ; ( -- )
+    .word SGETC,VTFILTER,EXIT
+  
 DEFWORD "VTCRLF",6,,VTCRLF ; ( -- )
     .word LIT,13,SPUTC
     .word LIT,10,SPUTC
