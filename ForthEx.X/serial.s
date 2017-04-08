@@ -44,6 +44,35 @@ ser_flags: .space 2
  
 .text
 
+; vide les files
+empty_queues:
+    push.d W0
+    mov #tx_wait,W1
+    repeat #7
+    clr.b [W1++]
+    pop.d W0
+    return
+    
+; activation port sériel
+serial_enable:
+    call empty_queues
+    bclr SER_TX_IFS, #SER_TX_IF
+    bset SER_TX_IEC, #SER_TX_IE
+    bclr SER_RX_IFS, #SER_RX_IF
+    bset SER_RX_IEC, #SER_RX_IE
+    clr.b SER_TXREG
+    bset SER_LAT,#SER_TX_OUT
+    bset SER_STA, #UTXEN
+    return
+
+; désactivation port sériel    
+serial_disable:
+    bclr SER_TX_IEC,#SER_TX_IE
+    bclr SER_RX_IEC,#SER_RX_IE
+    bclr SER_STA,#UTXEN
+    bclr SER_LAT,#SER_TX_OUT
+    return
+    
     
     
 INTR
@@ -62,7 +91,12 @@ __U1RXInterrupt:
     bra nz, 2f
     bclr ser_flags,#F_TXSTOP ; XON reçu du terminal
     bra 9f
-2:  push.d W0
+2:  cp.b T,#A_ETX
+    bra nz, 3f
+    mov #USER_ABORT,W0
+    mov W0, fwarm
+    reset
+3:  push.d W0
     mov.b rx_tail, WREG
     ze W0,W0
     mov #rx_queue, W1
@@ -101,6 +135,7 @@ __U1TXInterrupt:
     add W0,W1,W1
     mov.b [W1],W0
     mov.b WREG, SER_TXREG
+    clr.b [W1]
     dec tx_wait
     inc.b tx_head
     mov #(QUEUE_SIZE-1), W0
@@ -147,33 +182,6 @@ HEADLESS SERIAL_INIT,CODE ; ( -- )
     call serial_enable
     NEXT
 
-; vide les files
-empty_queues:
-    push.d W0
-    mov #tx_wait,W1
-    repeat #7
-    clr.b [W1++]
-    pop.d W0
-    return
-    
-; activation port sériel
-serial_enable:
-    call empty_queues
-    bclr SER_TX_IFS, #SER_TX_IF
-    bset SER_TX_IEC, #SER_TX_IE
-    bclr SER_RX_IFS, #SER_RX_IF
-    bset SER_RX_IEC, #SER_RX_IE
-    clr.b SER_TXREG
-    bset SER_STA, #UTXEN
-    return
-
-; désactivation port sériel    
-serial_disable:
-    bclr SER_TX_IEC,#SER_TX_IE
-    bclr SER_RX_IEC,#SER_RX_IE
-    bclr SER_STA,#UTXEN
-    return
-    
 ; activation/désactivation port série
 ;  argument:
 ;     f TRUE activation FALSE désactivation    
@@ -289,9 +297,9 @@ CTRL_TABLE:
     .byte 32,32,32,32
     .byte VK_BACK,32,32,32
     .byte VK_FF,VK_RETURN,32,32
-    .byte 32,VK_CTRL_C,32,32
+    .byte 32,32,32,32
     .byte 32,32,VK_SYN,32
-    .byte VK_CTRL_BACK,32,32,32
+    .byte VK_SYN,32,32,32
     
     
 DEFWORD "VTKEY",5,,VTKEY ; ( -- )

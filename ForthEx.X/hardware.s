@@ -119,6 +119,7 @@ __reset:
     ior IPC5
     mov #rstack, RSP
     mov #pstack, DSP
+    mov #_SYS_VARS,VP 
     mov DSP, W0
     sub #RSTK_GUARD, W0
     mov W0, SPLIM
@@ -138,9 +139,11 @@ __reset:
 _reboot:
     .word QCOLD,TBRANCH,_cold-$
 _warm:
-    .word LIT,fwarm,FETCH,LIT,_DP,FETCH,LIT,_LATEST,FETCH
+    .word LIT,fwarm,DUP,FETCH,LIT,0,ROT,STORE,DP,FETCH,LATEST,FETCH
+    .word STDIN,FETCH,STDOUT,FETCH
     .word CLS,CLR_LOW_RAM
     .word HARDWARE_INIT,VARS_INIT
+    .word STDOUT,STORE,STDIN,STORE
     .word LATEST,STORE,DP,STORE
     .word DUP,LIT,USER_ABORT,EQUAL,ZBRANCH,1f-$
     .word DROP,LIT,_user_aborted,BRANCH,8f-$
@@ -227,8 +230,7 @@ HEADLESS IO_LOCK
 ; initialisation variables utilisateur
 HEADLESS VARS_INIT
     push DSRPAG
-    mov #_SYS_VARS,W2
-    mov W2,VP
+    mov VP,W2
     mov #psvpage(vars_count),W0
     mov W0,DSRPAG
     mov #psvoffset(vars_count),W0

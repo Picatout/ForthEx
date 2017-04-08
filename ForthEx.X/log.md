@@ -1,3 +1,8 @@
+2017-04-08
+----------
+Corriger bogue dans TONE
+Modification à _WARM dans hardware.s
+
 2017-04-07
 ----------
 Mise à jour schématique

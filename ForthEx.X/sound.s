@@ -57,6 +57,8 @@ HEADLESS SOUND_INIT,CODE
  ;;;;;;;;;;;;;;;;;;
  
  DEFCODE "TONE",4,,TONE  ; ( duration Nfr -- )
+1:  cp0 tone_len
+    bra nz, 1b
     mov #((FCT/2)&0xffff),W0
     mov #((FCT/2)>>16),W1
     repeat #17
