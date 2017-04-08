@@ -288,7 +288,7 @@ CTRL_TABLE:
     .byte 32,32,32,32
     .byte 32,32,32,32
     .byte VK_BACK,32,32,32
-    .byte 32,VK_RETURN,32,32
+    .byte VK_FF,VK_RETURN,32,32
     .byte 32,VK_CTRL_C,32,32
     .byte 32,32,VK_SYN,32
     .byte VK_CTRL_BACK,32,32,32

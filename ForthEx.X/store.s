@@ -461,9 +461,18 @@ DEFWORD ">BOOT",5,,TOBOOT ; ( dev -- )
 ; charge une image RAM à partir du périphérique désigné.
 ; dev -> { MFLASH, EEPROM }
 DEFWORD "BOOT",4,,BOOT ; ( dev -- )
-    .word FN_READ,SETBOOT,QBOOT,ZBRANCH,9f-$
+    .word FN_READ,SETBOOT,QBOOT,NOT,QABORT
+    .byte 24
+    .ascii "No boot image available."
+    .align 2
     .word BTHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS,BOOTADR ; S: r-addr size e-addr
     .word BOOTFN,FETCH,EXECUTE
+    ; après le chargement de l'image, *DP0==*SYSLATEST
+    ; si ce n'est pas le cas l'image est invalide.
+    .word SYSLATEST,FETCH,DP0,FETCH,NOTEQ,QABORT
+    .byte  20
+    .ascii "Boot image outdated."
+    .align 2
     .word BTDP,FETCH,DP,STORE 
     .word BTLATST,FETCH,LATEST,STORE
 9:  .word EXIT

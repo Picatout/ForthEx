@@ -31,6 +31,7 @@
 .equ VK_BACK,	8	    ;	Backspace
 .equ VK_TAB,	9	    ; touche TAB    
 .equ VK_ESCAPE,	27	    ;	Esc
+.equ VK_FF,     12          ; form feed    
 .equ VK_RETURN,	13	    ; touche Entrée 
 .equ VK_CTRL_C, 17          ; control C
 .equ VK_CTRL_BACK,18        ; CONTROL-BACKSPACE   

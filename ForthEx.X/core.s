@@ -649,7 +649,9 @@ DEFCODE "M*",2,,MSTAR ; ( n1 n2 -- d )
     mov W0,[DSP]
     mov W1,T
     NEXT
-    
+
+; muttiplication non signée 16x16
+; résultat entier double    
 DEFCODE "UM*",3,,UMSTAR ; ( u1 u2 -- ud )
     mul.uu T,[DSP],W0
     mov W1,T
@@ -659,10 +661,20 @@ DEFCODE "UM*",3,,UMSTAR ; ( u1 u2 -- ud )
 ;multiplication non signée 32*16->32
 ; ud1 32 bits
 ; u2 16 bits
-; ud3 32 bits    
-DEFWORD "UD*",3,,UDSTAR  ; ( ud1 u2 -- ud3 ) 32*16->32    
-    .word DUP,TOR,UMSTAR,DROP
-    .word SWAP,RFROM,UMSTAR,ROT,PLUS,EXIT
+; ud3 32 bits  
+DEFCODE "UD*",3,,UDSTAR ; ( ud1 u2 -- ud3 )
+    mul.uu T,[DSP],W0
+    mov W0,[DSP]
+    mov T,W0
+    DPOP
+    mul.uu W0,[DSP],W0
+    add W1,T,T
+    mov W0,[DSP]
+    NEXT
+    
+;DEFWORD "UD*",3,,UDSTAR  ; ( ud1 u2 -- ud3 ) 32*16->32    
+;    .word DUP,TOR,UMSTAR,DROP
+;    .word SWAP,RFROM,UMSTAR,ROT,PLUS,EXIT
     
 DEFCODE "/",1,,DIVIDE ; ( n1 n2 -- n1/n2 )
     mov [DSP--],W0

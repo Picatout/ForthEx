@@ -1,7 +1,13 @@
+2017-04-07
+----------
+Mise à jour schématique
+Modification à BOOT, protection contre les images passées date. Lorsque le système
+est mis à jour les images sauvegardées avant cette mise à jour sont invalides.
+
 2017-04-06
 ----------
 Travail dans serial.s
-modificcation au projet ps_rs232 pour que la combinaison CTRL_x où x est une 
+Modificcation au projet ps_rs232 pour que la combinaison CTRL_x où x est une 
 lettre renvoie les même codes que l'émumateur de terminal minicon en mode VT102.
 modification à ACCEPT maintenant CTRL_X efface la ligne au lieu de CTRL_BACK
 
