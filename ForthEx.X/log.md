@@ -1,3 +1,10 @@
+2017-04-10
+----------
+retravaillé accès périphériques en créant des descripteurs de périphiriques
+Ajout TBL@ et TBL! dans fichier core.s
+Travail dans store.s
+Renommé:  BOOT -> IMG@ et >BOOT -> IMG!
+
 2017-04-08
 ----------
 Corriger bogue dans TONE

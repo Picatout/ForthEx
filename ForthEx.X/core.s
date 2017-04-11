@@ -101,10 +101,8 @@ _BASE: .space 2
 ; boot device id
 .global _BOOTDEV 
 _BOOTDEV: .space 2 
-; état interpréteur : 0 interpréteur, -1 compilation
-; cfa de la fonction à utiliser pour l'opération de chargement système
-_BOOTFN: .space 2 
  .global _STATE
+; état interpréteur : 0 interpréteur, -1 compilation
 _STATE: .space 2
 ; pointeur position parser
  .global _TOIN
@@ -200,7 +198,7 @@ code_EXIT :			;pfa,  assembler code follows
     RPOP IP
     NEXT
 
-HEADLESS "NOP",HWORD ; ( -- )
+DEFWORD "NOP",3,,NOP ; ( -- )
     .word EXIT
 
 DEFCODE "CALL",4,,CALL ; ( ud -- )
@@ -348,6 +346,27 @@ DEFCODE "2@",2,,TWOFETCH ; ( addr -- n1 n2 )
     mov [T],T
     mov W0,[++DSP]
     NEXT
+    
+; lecture élément d'un vecteur
+DEFCODE "TBL@",4,,TBLFETCH ; ( n addr -- x )
+    mov [DSP--],W0
+    mov #CELL_SIZE,W1
+    mul.ss W1,W0,W0
+    add T,W0,W0
+    mov [W0],T
+    NEXT
+    
+; écriture d'un élément dans une table
+DEFCODE "TBL!",4,,TBLSTORE ; ( n1 n2 addr -- )    
+    mov [DSP--],W0
+    mov #CELL_SIZE,W1
+    mul.ss W0,W1,W0
+    add T,W0,W0
+    DPOP 
+    mov T,[W0]
+    DPOP
+    NEXT
+    
     
 ; met en mémoire un entier simple    
 DEFCODE "!",1,,STORE  ; ( n  addr -- )
@@ -1199,7 +1218,6 @@ DEFUSER "HP",2,,HP       ; HOLD pointer
 DEFUSER "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
 DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
 DEFUSER "BOOTDEV",7,,BOOTDEV ; détermine le périphérique utilisé par BOOT et >BOOT
-DEFUSER "BOOTFN",6,,BOOTFN ; CFA de l'opération à effectuer
 DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
 DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
 DEFUSER "STDIN",5,,STDIN ; entrée standard

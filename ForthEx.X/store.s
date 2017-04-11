@@ -117,17 +117,19 @@ spi_send_address: ; ( ud -- )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; transfert un bloc d'octets de la RAM du MCU vers la RAM SPI
-; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
-; sortie aucune
+; arguments: 
+;    u1  adresse bloc RAM
+;    n+  nombre d'octets
+;    ud1  adresse SPIRAM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RSTORE",6,,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
+DEFCODE "RSTORE",6,,RSTORE ; ( u1 n+ ud1 -- )
     SET_EDS
     _enable_sram
     mov #RWRITE,W0
     spi_write
+    call spi_send_address
     mov T, W1 ; nombre d'octets
     DPOP
-    call spi_send_address
     mov T, W2 ; adresse bloc RAM
     DPOP
 1:
@@ -145,16 +147,18 @@ DEFCODE "RSTORE",6,,RSTORE ; ( addr-bloc addr-sramL addr-sramH n -- )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; transfert un bloc d'octets de la RAM SPI vers la RAM du MCU
-; entrée: adresse RAM, adresse SPIRAM, nombre d'octet
-; sortie: aucune
+; arguments: 
+;    u1  adresse bloc RAM
+;    n+  nombre d'octets
+;    ud1  adresse SPIRAM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RLOAD",5,,RLOAD ; ( addr-bloc addr-sramL addr-sramH n -- )
+DEFCODE "RLOAD",5,,RLOAD ; ( u1 n+ ud1 -- )
     _enable_sram
     mov #RREAD, W0
     spi_write
+    call spi_send_address
     mov T, W1 ; nombre d'octets à transférer
     DPOP
-    call spi_send_address
     mov T, W2 ; adresse bloc RAM
     DPOP
 1:    
@@ -310,7 +314,7 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
 9:  _disable_eeprom
     NEXT
 
-; le BOOT charge en RAM une image système
+; IMG>RAM charge en RAM une image système
 ; *** format image boot ****
 ; 00 signature MAGIC, 2 octets
 ; 02 sauvegarde de LATEST, 2 octets
@@ -323,10 +327,10 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
 ; désigné par BOOTDEV    
 ; retourne:
 ;     indicateur booléen vrai|faux
-DEFWORD "?BOOT",5,,QBOOT ; (  -- f )
-    .word BTHEAD,LIT,BOOT_HEADER_SIZE,BOOTADR
-    .word BOOTFN,FETCH,EXECUTE
-    .word BTSIGN,FETCH,MAGIC,EQUAL
+DEFWORD "?IMG",4,,QIMG ; (  -- f )
+    .word BTHEAD,LIT,BOOT_HEADER_SIZE,FN_IMGFROM,DUP,BOOTADR
+    .word ROT,BOOTDEV,FETCH,TBLFETCH,EXECUTE
+    .word BTSIGN,TBLFETCH,MAGIC,EQUAL
     .word EXIT
     
 ;retourne la taille d'une image à partir
@@ -334,7 +338,7 @@ DEFWORD "?BOOT",5,,QBOOT ; (  -- f )
 ; retourne:
 ;   'n'  taille en octets    
 DEFWORD "?SIZE",5,,QSIZE ; ( -- n )  
-    .word BTSIZE,FETCH,EXIT
+    .word BTSIZE,TBLFETCH,EXIT
     
 ; combiens d'octets à lire/écrire dans la page suivante 
 ;  arguments:
@@ -361,27 +365,27 @@ DEFCONST "FBTROW",6,,FBTROW,FLASH_FIRST_ROW  ; numéro première ligne FLASH BOOT
 
 ; champ signature    
 DEFWORD "BTSIGN",6,,BTSIGN  ; ( -- addr )
-    .word BTHEAD,EXIT
+    .word LIT,0,BTHEAD,EXIT
 
 ; champ LATEST    
 DEFWORD "BTLATST",7,,BTLATST  ; ( -- addr )
-    .word BTHEAD,LIT,1,CELLS,PLUS,EXIT
+    .word LIT,1,BTHEAD,EXIT
 
 ; champ DP    
 DEFWORD "BTDP",4,,BTDP ; ( -- addr )
-    .word BTHEAD,LIT,2,CELLS,PLUS,EXIT
+    .word LIT,2,BTHEAD,EXIT
     
 ; champ taille    
 DEFWORD "BTSIZE",6,,BTSIZE ; ( -- addr )
-    .word BTHEAD,LIT,3,CELLS,PLUS,EXIT
+    .word LIT,3,BTHEAD,EXIT
     
     
-; initialise l'enregistrement de boot  
+; initialise l'entête d'image  
 DEFWORD "SETHEADER",9,,SETHEADER ; ( -- )
-    .word MAGIC,BTSIGN,STORE ; signature
-    .word HERE,BTDP,STORE ; DP
-    .word LATEST,FETCH,BTLATST,STORE ; latest
-    .word HERE,DP0,MINUS,BTSIZE,STORE ; size
+    .word MAGIC,BTSIGN,TBLSTORE ; signature
+    .word HERE,BTDP,TBLSTORE ; DP
+    .word LATEST,FETCH,BTLATST,TBLSTORE ; latest
+    .word HERE,DP0,MINUS,BTSIZE,TBLSTORE ; size
     .word EXIT
 
 ; écriture d'une plage RAM dans l'EEPROM externe 
@@ -399,81 +403,137 @@ DEFWORD "RAM>EE",6,,RAMTOEE ; ( r-adr size e-addr -- )
 8:  .word DROP,TWORFROM,TWODROP
     .word EXIT
 
-; identifiant périphériques
-DEFCONST "KEYBOARD",8,,KEYBOARD,_KEYBOARD ; clavier
-DEFCONST "SCREEN",6,,SCREEN,_SCREEN ; écran
-DEFCONST "SERIAL",6,,SERIAL,_SERIAL ; port série    
-DEFCONST "XRAM",4,,XRAM,_SPIRAM ;  mémoire RAM externe
-DEFCONST "EEPROM",6,,EEPROM,_SPIEEPROM ; mémoire EEPROM externe
-DEFCONST "SDCARD",6,,SDCARD,_SDCARD ; carte mémoire SD
-DEFCONST "MFLASH",6,,MFLASH,_MCUFLASH ; mémoire FLASH du MCU    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
+; descripteurs de périphérique ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; il s'agit d'une structure de données
+; contenants les pointeurs de fonctions
+; des périphériques    
+;  champs:
+;   identifiant
+;   XT lecture
+;   XT écriture
+;   XT autre fonction
+    
+; descripteur SPIRAM    
+DEFTABLE "XRAM",4,,XRAM
+    .word _SPIRAM ; RAM SPI externe
+    .word RLOAD   ; lecture
+    .word RSTORE  ; écriture
+    .word RLOAD   ; IMG>
+    .word RSTORE  ; >IMG
+    
+; descripteur clavier
+DEFTABLE "KEYBOARD",8,,KEYBOARD
+    .word _KEYBOARD ; clavier
+    .word KEY       ; lecture du clavier
+    .word KBD_RESET ; réinitialiation du clavier
+    .word EKEY      ; lecture canonique du clavier
+    .word NOP
+    
+; descripteur écran    
+DEFTABLE "SCREEN",6,,SCREEN
+    .word _SCREEN ; écran
+    .word SCRCHAR ; 
+    .word PUTC
+    .word NOP
+    .word NOP
+    
+; descripteur port sériel    
+DEFTABLE "SERIAL",6,,SERIAL
+    .word _SERIAL ; port série
+    .word VTKEY  ;
+    .word SPUTC  ;
+    .word SGETC  ; lecture canonique du port sériel
+    .word NOP
+    
+; descripteur EEPROM SPI    
+DEFTABLE "EEPROM",6,,EEPROM
+    .word _SPIEEPROM ; mémoire EEPROM externe
+    .word EEREAD
+    .word EEWRITE
+    .word EEREAD     ;IMG>
+    .word RAMTOEE    ;>IMG
+    
+; descripteur carte Secure Digital    
+DEFTABLE "SDCARD",6,,SDCARD
+    .word _SDCARD ; carte mémoire SD
+    .word SDCREAD
+    .word SDCWRITE
+    .word SDCTOIMG  ; IMG>
+    .word IMGTOSDC  ; >IMG
+    
+; descripteur mémoire FLASH MCU    
+DEFTABLE "MFLASH",6,,MFLASH
+    .word _MCUFLASH ; mémoire FLASH du MCU    
+    .word TBLFETCHL
+    .word TOFLASH
+    .word FLASHTORAM
+    .word RAMTOFLASH
+    
+; acceseurs de champs    
+DEFCONST "DEVID",5,,DEVID,0    
 ; opérations    
-DEFCONST "FN_READ",7,,FN_READ,0
-DEFCONST "FN_WRITE",8,,FN_WRITE,1
-
-; initialise le périphérique d'autochargement
-;  'dev' périphérique  {MFLASH, EEPROM, SDcard}
-;  'fn' function    {FN_READ, FN_WRITE}
-DEFWORD "SETBOOT",7,,SETBOOT  ; ( dev fn -- ) 
-    .word OVER, BOOTDEV,STORE,SWAP
-    .word DUP,MFLASH,EQUAL,ZBRANCH,3f-$
-  ; mcu flash
-    .word DROP,FN_WRITE,EQUAL,ZBRANCH,2f-$
-    ; opération écriture
-    .word LIT,RAMTOFLASH,BRANCH,9f-$
-    ; opération lecture
-2:  .word LIT,FLASHTORAM,BRANCH,9f-$
-3:  .word SDCARD,EQUAL,ZBRANCH,5f-$
-    ; carte SD
-    .word FN_WRITE,EQUAL,ZBRANCH,4f-$
-    .word LIT,IMGTOSDC,BRANCH,9f-$
-4:  .word LIT,SDCTOIMG,BRANCH,9f-$
-  ; eeprom externe
-5:  .word FN_WRITE,EQUAL,ZBRANCH,6f-$
-    ;opération écriture
-    .word LIT,RAMTOEE,BRANCH, 9f-$
-    ;opération lecture
-6:  .word LIT,EEREAD    
-9:  .word BOOTFN,STORE
-    .word EXIT
-
+DEFCONST "FN_READ",7,,FN_READ,1
+DEFCONST "FN_WRITE",8,,FN_WRITE,2
+DEFCONST "FN_IMG>",7,,FN_IMGFROM,3
+DEFCONST "FN_>IMG",7,,FN_TOIMG,4    
+    
 ; initialise l'adresse boot du périphérique
-; ud adresse 24 bits EEPROM, MCU_FLASH ou carte SD    
-DEFWORD "BOOTADR",7,,BOOTADR ; ( -- ud )
-    .word BOOTDEV,FETCH,MFLASH,EQUAL,TBRANCH,1f-$
-    .word BOOTDEV,FETCH,SDCARD,EQUAL,ZBRANCH,3f-$
+; arguments
+;     fn fonction à exécuter    
+; retourne:
+;   ud adresse  EEPROM, MCU_FLASH,SDCARD,SPIRAM   
+DEFWORD "BOOTADR",7,,BOOTADR ; ( fn -- ud )
+    .word BOOTDEV,FETCH,DUP,MFLASH,EQUAL,TBRANCH,1f-$
+    .word SWAP,DROP,SDCARD,EQUAL,ZBRANCH,3f-$
     .word LIT,1,LIT,0,EXIT
-1:  .word BOOTFN,FETCH,LIT,RAMTOFLASH,EQUAL,ZBRANCH,2f-$
+1:  .word DROP,FN_TOIMG,EQUAL,ZBRANCH,2f-$
     .word ERASEROWS
 2:  .word FBTROW,ROWTOFADR,EXIT
 3:  .word LIT,0,DUP,EXIT    
     
-; sauvegarde une image boot sur un périphérique
-;  dev -> { MFLASH, EEPROM, SDCARD }  
-DEFWORD ">BOOT",5,,TOBOOT ; ( dev -- )
-    .word FN_WRITE,SETBOOT
-    .word QEMPTY,TBRANCH,9f-$ ; si RAM vide quitte
-    .word SETHEADER
-    .word BTHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS,BOOTADR
-    .word BOOTFN,FETCH,EXECUTE
+; sauvegarde une image du système en RAM sur un périphérique
+;  dev -> { MFLASH, EEPROM, SDCARD, SPIRAM }  
+DEFWORD "IMG!",4,,IMGSTORE ; ( dev -- )
+    .word QEMPTY,ZBRANCH,2f-$ ; si RAM vide quitte
+    .word DROP,EXIT
+2:  .word BOOTDEV,STORE,SETHEADER
+    .word FN_TOIMG
+    .word BTHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS,ROT,DUP,BOOTADR
+    .word ROT,BOOTDEV,FETCH,TBLFETCH,EXECUTE
 9:  .word EXIT 
 
-; charge une image RAM à partir du périphérique désigné.
-; dev -> { MFLASH, EEPROM }
-DEFWORD "BOOT",4,,BOOT ; ( dev -- )
-    .word FN_READ,SETBOOT,QBOOT,NOT,QABORT
+; charge une image système en RAM à partir d'un périphérique.
+; dev -> { MFLASH, EEPROM, SDCARD, SPIRAM }
+DEFWORD "IMG@",4,,IMGFETCH ; ( dev -- )
+    .word BOOTDEV,STORE,QIMG,NOT,QABORT
     .byte 24
     .ascii "No boot image available."
     .align 2
-    .word BTHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS,BOOTADR ; S: r-addr size e-addr
-    .word BOOTFN,FETCH,EXECUTE
+    .word BTHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS
+    .word FN_IMGFROM,DUP,BOOTADR,ROT ; S: r-addr size e-addr fn
+    .word BOOTDEV,FETCH,TBLFETCH,EXECUTE
     ; après le chargement de l'image, *DP0==*SYSLATEST
     ; si ce n'est pas le cas l'image est invalide.
     .word SYSLATEST,FETCH,DP0,FETCH,NOTEQ,QABORT
     .byte  20
     .ascii "Boot image outdated."
     .align 2
-    .word BTDP,FETCH,DP,STORE 
-    .word BTLATST,FETCH,LATEST,STORE
+    .word BTDP,TBLFETCH,DP,STORE 
+    .word BTLATST,TBLFETCH,LATEST,STORE
 9:  .word EXIT
-  
+
+; lecture d'un écran
+; arguments
+;    u1   adresse RAM
+;    u2   no. de bloc
+;    u3   no. de périphéque
+; sortie:
+;    n2   nombre de lignes
+DEFWORD "LOAD",4,,LOAD ; ( u1 u2 u3 -- n2 )  
+    .word FN_READ,SWAP,TBLFETCH
+    
+    .word EXIT
+
+    

@@ -48,10 +48,9 @@ INTR ; section routines d'interruptions
 __U2RXInterrupt:
     bclr KBD_RX_IFS,#KBD_RX_IF
     push.d W0
-    push.d W2
+    push W2
     mov KBD_RXREG,W0
-    mov.b #VK_CTRL_C,W1
-    cp.b W1,W0
+    cp.b W0,#VK_CTRL_C
     bra nz, 1f
     mov #USER_ABORT,W0
     mov W0, fwarm
@@ -65,21 +64,17 @@ __U2RXInterrupt:
     add #1,W2
     and #(KBD_QUEUE_SIZE-1),W2
     mov W2, kbd_tail
-    pop.d W2
+8:  pop W2
     pop.d W0
     retfie
-    
-    
-    
 
-
-
+    
 ;;;;;;;;;;;;;;;;;;;;;;
 ; définitions Forth
 ;;;;;;;;;;;;;;;;;;;;;;    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; initialistaion interface clavier 
+; initialisation interface clavier 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 HEADLESS KBD_INIT,CODE ; ( -- )
 ; configuration en sortie de la broche ~HRST

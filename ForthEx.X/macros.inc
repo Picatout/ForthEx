@@ -239,6 +239,11 @@ code_\label :
 	.word _\label-_SYS_VARS 
 .endm
 
+; macro utilisé pour créer des tables de constantes
+.macro DEFTABLE name,namelen,flags=0,label
+	HEADER "\name",\namelen,\flags,\label
+	.word DOVAR
+.endm	
 	
 ; macro utilisée pour créer des constantes système
 .macro DEFCONST name, namelen, flags=0, label, value

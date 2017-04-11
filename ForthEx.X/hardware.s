@@ -132,10 +132,10 @@ __reset:
 1:  movpag #psvpage(_reboot),DSRPAG
     mov #psvoffset(_reboot),IP
     NEXT
-    
-.text
 
-   
+.text
+    
+    
 _reboot:
     .word QCOLD,TBRANCH,_cold-$
 _warm:
@@ -157,7 +157,7 @@ _warm:
 _cold:
     .word CLR_RAM,HARDWARE_INIT,VARS_INIT
     .word VERSION,COUNT,TYPE,NEWLINE 
-    .word BOOTDEV,FETCH,BOOT; autochargement système en RAM à partir d'une en FLASH MCU ou EEPROM
+    .word BOOTDEV,FETCH,IMGFETCH; autochargement système en RAM 
     .word QUIT ; boucle de l'interpréteur
 
 ; est-ce un cold reboot    

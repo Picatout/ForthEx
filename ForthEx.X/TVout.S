@@ -458,6 +458,26 @@ DEFCODE "SETY",4,,SETY  ; ( n -- )
 DEFWORD "CURPOS",6,,CURPOS  ; ( ny nx -- )
 .word SETX, SETY, EXIT
  
+; retourne le caractère à la position du curseur
+DEFCODE "SCRCHAR",7,,SCRCHAR ; ( -- c )
+    SET_EDS
+    mov.b ypos,WREG
+    ze W0,W0
+    mov #CPL,W1
+    mul.ss W0,W1,W0
+    exch W0,W1
+    mov.b xpos,WREG
+    ze W0,W0
+    add W0,W1,W0
+    DPUSH
+    mov _video_buffer,W1
+    add W1,W0,W0
+    mov.b [W0],T
+    ze T,T
+    bclr T,#7
+    RESET_EDS
+    NEXT
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; déplace le curseur 1 caractère
 ; vers la gauche
