@@ -1,3 +1,12 @@
+2017-04-11
+----------
+Déboguage: autochargement ne fonctionnais plus.
+    La valeur d'initialisation de bootdev_init était incorrecte.
+    ERASEROWS avait un bogue régressif suite au modifications d'hier.
+
+À faire: Cet ordinateur a besoin d'un éditeur de texte et d'un moyen de
+         sauvegarder et charger des fichiers texte pour réédition ou exécution.
+
 2017-04-10
 ----------
 retravaillé accès périphériques en créant des descripteurs de périphiriques

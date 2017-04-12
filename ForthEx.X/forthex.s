@@ -46,7 +46,7 @@ dp_init: .word DATA_BASE
 r0_init: .word rstack
 s0_init: .word pstack    
 base_init: .word 10
-btdev_init: .word MFLASH
+btdev_init: .word MFLASH+2 ; PFA du descripteur de périphérique
 state_init: .word 0
 toin_init: .word 0
 hp_init: .word 0

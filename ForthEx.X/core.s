@@ -348,19 +348,29 @@ DEFCODE "2@",2,,TWOFETCH ; ( addr -- n1 n2 )
     NEXT
     
 ; lecture élément d'un vecteur
+; arguments:
+;   n  indice
+;   addr  adresse table
+; retourne:
+;   x  = table[n]    
 DEFCODE "TBL@",4,,TBLFETCH ; ( n addr -- x )
     mov [DSP--],W0
     mov #CELL_SIZE,W1
-    mul.ss W1,W0,W0
+    mul.uu W1,W0,W0
     add T,W0,W0
     mov [W0],T
     NEXT
     
 ; écriture d'un élément dans une table
+;  table[n2] = n1
+; arguments:
+;   n1  valeur à affecté à l'élément
+;   n2  indice de l'élément
+;   addr  adresse de la table    
 DEFCODE "TBL!",4,,TBLSTORE ; ( n1 n2 addr -- )    
     mov [DSP--],W0
     mov #CELL_SIZE,W1
-    mul.ss W0,W1,W0
+    mul.uu W0,W1,W0
     add T,W0,W0
     DPOP 
     mov T,[W0]

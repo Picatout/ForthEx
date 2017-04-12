@@ -222,7 +222,7 @@ DEFWORD "FLASH>RAM",9,,FLASHTORAM ; ( adr size ud -- )
 ; efface les lignes qui seront utilisées
 ; pour la sauvegarde de l'image RAM    
 DEFWORD "ERASEROWS",9,,ERASEROWS ; ( -- )
-    .word BTHEAD,BTSIZE,PLUS,FETCH
+    .word BTSIZE,TBLFETCH
     .word LIT,BOOT_HEADER_SIZE,PLUS
     .word LIT,FLASH_PAGE_SIZE,SLASHMOD
     .word SWAP,ZBRANCH,1f-$

@@ -505,7 +505,8 @@ DEFWORD "IMG!",4,,IMGSTORE ; ( dev -- )
 9:  .word EXIT 
 
 ; charge une image système en RAM à partir d'un périphérique.
-; dev -> { MFLASH, EEPROM, SDCARD, SPIRAM }
+; arguments:
+;    dev PFA du descripteur de périphérique.
 DEFWORD "IMG@",4,,IMGFETCH ; ( dev -- )
     .word BOOTDEV,STORE,QIMG,NOT,QABORT
     .byte 24
