@@ -27,7 +27,7 @@
 .include "keyboard.s"    
 .include "flash.s"
 .include "sdcard.s"
-    
+.include "ed.s"    
     
 .section .heap.bss bss address (EDS_BASE)
 .global _heap

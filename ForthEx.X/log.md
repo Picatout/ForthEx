@@ -1,3 +1,10 @@
+2017-04-12
+----------
+
+Correction bogue dans SCRCHAR
+Création fichiers ed.s et vt102.s
+
+
 2017-04-11
 ----------
 Déboguage: autochargement ne fonctionnais plus.

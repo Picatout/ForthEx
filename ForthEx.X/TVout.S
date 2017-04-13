@@ -432,8 +432,7 @@ DEFCODE "SETX",4,, SETX ; ( n -- )
     cp T, W0
     bra gtu, 1f
     mov T, W0
- 1:
-    mov.b WREG,xpos
+1:  mov.b WREG,xpos
     cursor_decr_sema
     DPOP
     NEXT
@@ -445,12 +444,11 @@ DEFCODE "SETX",4,, SETX ; ( n -- )
 DEFCODE "SETY",4,,SETY  ; ( n -- )
     cursor_incr_sema
     cursor_sync
-    cp T, #LPS
-    bra ltu, 1f
-    mov #(LPS-1), T
-1:
+    mov #LPS-1,W0
+    cp T, W0
+    bra gtu, 1f
     mov T, W0
-    mov.b WREG,ypos
+1:  mov.b WREG,ypos
     cursor_decr_sema
     DPOP
     NEXT
@@ -464,13 +462,13 @@ DEFCODE "SCRCHAR",7,,SCRCHAR ; ( -- c )
     mov.b ypos,WREG
     ze W0,W0
     mov #CPL,W1
-    mul.ss W0,W1,W0
+    mul.uu W0,W1,W0
     exch W0,W1
     mov.b xpos,WREG
     ze W0,W0
     add W0,W1,W0
     DPUSH
-    mov _video_buffer,W1
+    mov #_video_buffer,W1
     add W1,W0,W0
     mov.b [W0],T
     ze T,T
