@@ -371,7 +371,7 @@ DEFCODE "CURENBL",7,,CURENBL  ; ( f -- )  T=active, F=désactive
 DEFCODE "CLS",3,,CLS   ; ( -- )
     SET_EDS
     cursor_incr_sema
-    mov #0x2020, W0
+    clr W0
     mov #_video_buffer, W1
     repeat #(VIDEO_BUFF_SIZE/2-1)
     mov W0,[W1++]
@@ -475,6 +475,50 @@ DEFCODE "SCRCHAR",7,,SCRCHAR ; ( -- c )
     bclr T,#7
     RESET_EDS
     NEXT
+
+; met le caractère c la position x,y de l'écran.
+; arguments
+;   c caractère    
+;   x colonne
+;   y ligne
+DEFCODE "CHR>SCR",7,,CHRTOSCR ; ( x y c -- )
+    mov [DSP--],W0
+    ze W0,W0
+    mov #CPL,W1
+    mul.uu W0,W1,W0
+    mov [DSP--],W1
+    ze W1,W1
+    add W0,W1,W0
+    mov #_video_buffer,W1
+    add W1,W0,W0
+    mov.b T,[W0]
+    DPOP
+    NEXT
+    
+; inverse ligne écran
+; arguments:
+;   n   no. de ligne {0..23}
+;   f   TRUE -> inverse vidéo, FALSE -> vidéo normal
+DEFCODE "INVLN",5,,INVLN ; ( n f -- )
+    SET_EDS
+    mov #CPL,W0
+    mov [DSP--],W1
+    ze W1,W1
+    mul.uu W0,W1,W0
+    mov #_video_buffer,W1
+    add W1,W0,W0
+    cp0 T
+    bra z, normal_video
+    repeat #CPL-1
+    bset.b [W0++],#7
+    bra 9f
+normal_video:
+    repeat #CPL-1
+    bclr.b [W0++],#7
+9:  RESET_EDS
+    DPOP
+    NEXT
+    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; déplace le curseur 1 caractère
@@ -619,14 +663,14 @@ DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
 ; sous le curseur
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "DELETE",6,,DELETE  ; ( -- )
-    .word BL,EMIT,EXIT
+    .word BL,EMIT,LEFT,EXIT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;efface le carctère à gauche
 ; du curseur
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "BACKCHAR",8,,BACKCHAR   ; ( -- )
-    .word LEFT,DELETE,LEFT,EXIT
+    .word LEFT,DELETE,EXIT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; routines pour la conversion

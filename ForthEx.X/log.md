@@ -1,3 +1,8 @@
+2017-04-13
+----------
+Correction bogue dans firmware ps2_rs232
+Travail sur ed.s
+
 2017-04-12
 ----------
 

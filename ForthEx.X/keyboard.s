@@ -50,7 +50,7 @@ __U2RXInterrupt:
     push.d W0
     push W2
     mov KBD_RXREG,W0
-    cp.b W0,#VK_CTRL_C
+    cp.b W0,#CTRL_C
     bra nz, 1f
     mov #USER_ABORT,W0
     mov W0, fwarm
@@ -133,7 +133,7 @@ HEADLESS KBD_RESET  ; ( -- )
 HEADLESS KEYFILTER,CODE  ; ( c|0 -- c|0 )
 1:  cp T, #32
     bra ge, 7f
-    cp T, #VK_RETURN
+    cp T, #VK_CR
     bra eq, 9f
     cp T, #VK_BACK
     bra eq, 9f

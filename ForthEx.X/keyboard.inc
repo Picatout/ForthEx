@@ -28,16 +28,63 @@
 
 ; touches qui ne corespondes pas un symbole ASCII    
 ;Nom			valeur	    Description
-.equ VK_BACK,	8	    ;	Backspace
-.equ VK_TAB,	9	    ; touche TAB    
-.equ VK_ESCAPE,	27	    ;	Esc
-.equ VK_FF,     12          ; form feed    
-.equ VK_RETURN,	13	    ; touche Entrée 
-.equ VK_CTRL_C, 3           ; control C
-.equ VK_CTRL_BACK,18        ; CONTROL-BACKSPACE   
-.equ VK_SYN,    22          ; CTRL_V    
-.equ VK_CANCEL, 24          ; CTRL_X    
+.equ VK_NUL,    0
+.equ VK_SOH,    1           
+.equ CTRL_A,	1    
+.equ VK_STX,    2
+.equ CTRL_B,	2    
+.equ VK_ETX,    3
+.equ CTRL_C,	3    
+.equ VK_EOT,    4
+.equ CTRL_D,	4
+.equ VK_ENQ,	5
+.equ CTRL_E,	5    
+.equ VK_ACK,    6
+.equ CTRL_F,	6    
+.equ VK_BEL,	7
+.equ CTRL_G,	7
+.equ VK_BACK,	8
+.equ CTRL_H,	8
+.equ VK_TAB,	9
+.equ CTRL_I,	9
+.equ VK_LF,	10
+.equ CTRL_J,	10
+.equ VK_VT,	11
+.equ CTRL_K,	11
+.equ VK_FF,     12
+.equ CTRL_L,	12
+.equ VK_CR,	13
+.equ CTRL_M,	13
+.equ VK_SO,	14
+.equ CTRL_N,	14
+.equ VK_SI,	15
+.equ CTRL_O,	15
+.equ VK_DLE,	16
+.equ CTRL_P    ,16
+.equ VK_DC1,	17
+.equ CTRL_Q,	17
+.equ VK_DC2,	18
+.equ CTRL_R    ,18
+.equ VK_DC3,    19
+.equ CTRL_S,    19
+.equ CTRL_BS,	19
+.equ VK_DC4,	20
+.equ CTRL_T,	20
+.equ VK_NAK,	21
+.equ CTRL_U  ,  21
+.equ VK_SYN,    22
+.equ CTRL_V    ,22
+.equ VK_ETB,	23
+.equ CTRL_W,	23
+.equ VK_CANCEL, 24
+.equ CTRL_X,	24
+.equ VK_EM,	25
+.equ CTRL_Y,	25
+.equ VK_SUB,	26
+.equ CTRL_Z    ,26
+.equ VK_ESCAPE,	27	    ; ESC
 .equ VK_SPACE,	32          ; touche espace    
+.equ VK_DELETE,	127         
 .equ VK_F1,	128
 .equ VK_F2,	129
 .equ VK_F3,	130
@@ -59,7 +106,6 @@
 .equ VK_PGUP,	147
 .equ VK_PGDN,	148
 .equ VK_INSERT,	149
-.equ VK_DELETE,	150
 .equ VK_APPS,	151
 .equ VK_PRN,	152
 .equ VK_PAUSE,	153

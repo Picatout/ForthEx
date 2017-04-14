@@ -1537,7 +1537,7 @@ DEFWORD "NEWLINE",7,,NEWLINE ; ( -- )
 ;   +n2 longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
-1:  .word GETC,DUP,LIT,VK_RETURN,EQUAL,ZBRANCH,2f-$
+1:  .word GETC,DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
     .word DROP,BL,OVER,CSTORE,SWAP,MINUS,ONEPLUS,RFROM,DROP,EXIT
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,3f-$
     .word DROP,TWODUP,EQUAL,TBRANCH,1b-$

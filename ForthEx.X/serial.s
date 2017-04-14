@@ -296,7 +296,7 @@ CTRL_TABLE:
     .byte 32,32,32,32
     .byte 32,32,32,32
     .byte VK_BACK,32,32,32
-    .byte VK_FF,VK_RETURN,32,32
+    .byte VK_FF,VK_CR,32,32
     .byte 32,32,32,32
     .byte 32,32,VK_SYN,32
     .byte VK_SYN,32,32,32
