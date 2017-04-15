@@ -92,6 +92,19 @@ DEFWORD "MOVLN",5,,MOVLN ; (	n1 n2 xt -- )
     .word SWAP,RFETCH,MSTAR
     .word RFROM,NROT,RFROM,EXECUTE,EXIT
     
+; arguments:
+;   n1  indice ligne dans SPIRAM  {0..2047}  
+;   n2  indice ligne écran {0..23}
+DEFWORD "PRTLN",5,,PRTLN ; ( n1 n2 -- )
+    .word LIT,RLOAD,MOVLN,EXIT
+    
+; arguments:
+;   n1  indice ligne dans SPIRAM  {0..2047}  
+;   n2  indice ligne écran {0..23}
+DEFWORD "STORLN",6,,STORLN ; ( n1 n2 -- )
+    .word LIT,RSTORE,MOVLN,EXIT
+    
+    
 ; déplace le curseur à la fin de la ligne
 ; arguments:
 ;   aucun
@@ -124,6 +137,23 @@ DEFWORD "CLREOL",6,,CLREOL ; ( -- )
 8:  .word LIT,0,EMIT,RFROM,RFROM,CURPOS
     .word EXIT
 
+; déplace le curseur sur la ligne précédente.    
+DEFWORD "LNUP",4,,LNUP ; ( -- )
+    .word GAP,EFETCH,TBRANCH,1f-$,EXIT
+1:  .word GETY,TBRANCH,2f-$
+    .word SCRLDN,SCROFS,EFETCH,ONEMINUS,SCROFS,STORE
+    .word SCROFS,EFETCH,LIT,0,PRTLN
+2:  .word GAPTOTAIL
+    .word GETY,QDUP,ZBRANCH,9f-$
+    .word ONEMINUS,SETY
+9:  .word EXIT
+
+; déplace le curseur sur la ligne suivante.    
+DEFWORD "LNDN",4,,LNDN ; ( -- )
+    .word GAP,EFETCH,LNCNT,EFETCH,EQUAL,ZBRANCH,1f-$,EXIT
+1:  .word     
+    .word EXIT
+    
 ; retour à la ligne suivante
 DEFWORD "DOCRLF",6,,DOCRLF ; ( -- )
     .word FALSE,CURENBL
@@ -217,7 +247,7 @@ DEFWORD "GAP>TAIL",8,,GAPTOTAIL ; ( -- )
      
 ; sauvegarde la ligne écran dans la SPIRAM
 DEFWORD "SAVELN",6,,SAVELN ; ( -- )
-     .word GETY,DUP,SCROFS,EFETCH,PLUS,SWAP,LIT,RSTORE,MOVLN
+     .word GETY,DUP,SCROFS,EFETCH,PLUS,SWAP,STORLN
 9:   .word EXIT
 
 ; met à jour l'affichage à partir de la mémoire SPIRAM
@@ -281,7 +311,10 @@ DEFWORD "ED",2,,ED ; ( -- )
 4:  .word LIT,VK_LEFT,KCASE,ZBRANCH,4f-$,LEFT,BRANCH,1b-$
 4:  .word LIT,VK_RIGHT,KCASE,ZBRANCH,4f-$,RIGHT,BRANCH,1b-$ 
 4:  .word LIT,VK_HOME,KCASE,ZBRANCH,4f-$,LIT,0,SETX,BRANCH,1b-$
-4:  .word LIT,VK_END,KCASE,ZBRANCH,4f-$,TOEOL,BRANCH,1b-$  
+4:  .word LIT,VK_END,KCASE,ZBRANCH,4f-$,TOEOL,BRANCH,1b-$
+4:  .word LIT,VK_UP,KCASE,ZBRANCH,4f-$,LNUP,BRANCH,1b-$
+4:  .word LIT,VK_DOWN,KCASE,ZBRANCH,4f-$,LNDN,BRANCH,1b-$
+  
 4:  .word DROP,BRANCH,1b-$
    
     .word EXIT

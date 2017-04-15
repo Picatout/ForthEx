@@ -1,3 +1,9 @@
+2017-04-14
+----------
+Travail sur ed.s
+Création du fichier fat8.s, plus tard j'aurai besoin d'un système de fichier
+pour l'EEPROM 25LC1024 pour conserver les fichiers créés dans l'éditeur.
+
 2017-04-13
 ----------
 Correction bogue dans firmware ps2_rs232
