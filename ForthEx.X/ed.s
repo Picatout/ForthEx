@@ -76,8 +76,20 @@ DEFWORD "EDINIT",6,,EDINIT ; ( -- )
     .word MAXLN,TAIL,STORE
     .word CLS
     .word EXIT
+ 
+; met à 0 un indicateur booléen dans ED_FLAGS
+; arguments:
+;   n  masque booléen    
+DEFWORD "CLREFLAG",8,,CLRFLAG ; ( n -- )
+    .word INVERT,ED_FLAGS,DUP,EFETCH,ROT,AND,SWAP,STORE,EXIT
     
+; met à 1 un indicateur booléen dans ED_FLAGS
+; arguments:
+;   n masque booléen    
+DEFWORD "SETEFLAG",8,,SETEFLAG ; ( n -- )
+    .word ED_FLAGS,DUP,EFETCH,ROT,OR,SWAP,STORE,EXIT
     
+   
 ; déplace une ligne de texte entre l'écran et 
 ; la SPIRAM
 ; arguments:
@@ -207,14 +219,6 @@ DEFWORD "EDKEY",5,,EDKEY ; ( -- c T | 0 )
 1:   .word EKEY,QDUP,ZBRANCH,1b-$
      .word EXIT
 
-;incrémente le compteur de lignes
-DEFWORD "INCLNCNT",8,,INCLNCNT ; ( -- )
-     .word LNCNT,EFETCH,ONEPLUS,LNCNT,STORE,EXIT
-     
-;décrémente le compteur de lignes
-DEFWORD "DECLNCNT",8,,DECLNCNT ; ( -- )
-     .word LNCNT,EFETCH,ONEMINUS,LNCNT,STORE,EXIT
-     
 ;déplace la fente d'une ligne vers la fin
 DEFWORD "GAPFWD",6,,GAPFWD ; ( -- )
      .word GAP,EFETCH,ONEPLUS,GAP,STORE

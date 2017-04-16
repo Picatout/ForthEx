@@ -894,6 +894,18 @@ DEFWORD "FM/MOD",6,,FMSLASHMOD ; ( d1 n1 -- n2 n3 )
     .word RFETCH,ROT,MINUS,SWAP,ONEMINUS
 9:  .word RFROM,DROP,EXIT
 
+; incrémente une variable EDS
+; arguments:
+;   addr   adresse de la variable    
+DEFWORD "EVAR+",5,,EVARPLUS ; ( addr -- )
+    .word DUP,EFETCH,ONEPLUS,SWAP,STORE,EXIT
+    
+; décrémente une variable EDS
+; arguments:    
+;    addr   adresse de la variable
+DEFWORD "EVAR-",5,,EVARMINUS ; ( addr -- )
+    .word DUP,EFETCH,ONEMINUS,SWAP,STORE,EXIT
+    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 ; opérations logiques bit à bit
@@ -2058,14 +2070,24 @@ DEFWORD "FORGET",6,,FORGET ; cccc
     .byte  26
     .ascii "Can't forget word in FLASH"
     .align 2
-1:  .word DUP,DP,STORE,FETCH,LATEST,STORE,EXIT    
+    .word DUP,DP,STORE,FETCH,LATEST,STORE,EXIT    
+
+; crée un mot marker qui efface tous les mots qui le suivent
+; lorsqu'il est invoqué.
+DEFWORD "MARKER",6,,MARKER ; cccc
+    .word HEADER,HERE,CFA_COMMA,ENTER,CFA_COMMA,LIT,COMMA
+    .word CFA_COMMA,RT_MARKER,EXITCOMMA,REVEAL,EXIT
     
+HEADLESS  RT_MARKER,HWORD   
+    .word CFATONFA,NFATOLFA,DUP,DP,STORE,FETCH,LATEST,STORE
+    .word EXIT
+  
 ; crée une nouvelle définition dans le dictionnaire    
 DEFWORD ":",1,,COLON ; ( name --  )
     .word HEADER ; ( -- )
     .word RBRACKET,CFA_COMMA,ENTER,EXIT
 
-;RUNTIME utilisé par NEWLINEEATE
+;RUNTIME utilisé par CREATE
 ; remplace ENTER    
     .global FETCH_EXEC
     FORTH_CODE
@@ -2078,7 +2100,7 @@ FETCH_EXEC: ; ( -- pfa )
     
 ;cré une nouvelle entête dans le dictionnaire
 ;qui peut-être étendue par DOES>
-DEFWORD "NEWLINEEATE",6,,NEWLINEEATE ; ( -- hook )
+DEFWORD "CREATE",6,,CREATE ; ( -- hook )
     .word HEADER,REVEAL
     .word LIT,FETCH_EXEC,COMMA
     .word CFA_COMMA,NOP
@@ -2099,7 +2121,7 @@ DEFWORD "DOES>",5,F_IMMED,DOESTO  ; ( -- )
     
 ; création d'une variable
 DEFWORD "VARIABLE",8,,VARIABLE ; ()
-    .word NEWLINEEATE,LIT,0,COMMA,EXIT
+    .word CREATE,LIT,0,COMMA,EXIT
 
 ; création d'une constante
 DEFWORD "CONSTANT",8,,CONSTANT ; ()

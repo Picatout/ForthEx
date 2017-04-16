@@ -1,3 +1,9 @@
+2017-04-15
+----------
+Travail sur ed.s
+Ajout mot MARKER dans fichier core.s
+Création du fichier dynamem.s pour développement ultérieur.
+
 2017-04-14
 ----------
 Travail sur ed.s
