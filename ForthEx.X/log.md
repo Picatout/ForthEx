@@ -1,3 +1,7 @@
+2017-04-16
+----------
+Création et travail dans eefs.s et strings.s
+
 2017-04-15
 ----------
 Travail sur ed.s

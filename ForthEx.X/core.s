@@ -146,6 +146,9 @@ _stack_reset:
 _unknown_reset:
 .byte  22
 .ascii "unknowned event reset."
+_eefs_magic:
+.byte 4
+.ascii "EEFS"
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; mot système qui ne sont pas

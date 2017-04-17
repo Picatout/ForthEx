@@ -252,7 +252,7 @@ DEFCODE "EEWRITE",7,,EEWRITE  ;( r-addr size ee-addr -- )
 ;    'size'  entier simple, nombre d'octets à lire 
 ;    'ee-addr'  entier double, adresse 24 bits destination EEPROM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "EEREAD",6,,EEREAD   ; ( addr size ud -- )
+DEFCODE "EEREAD",6,,EEREAD   ; ( r-addr size ud -- )
      ; on s'assure qu'il n'y a pas d'écriture en cours
     call wait_wip0
     ;envoie de la commande et de l'adresse EEPROM

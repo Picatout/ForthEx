@@ -60,15 +60,23 @@
 .equ BP0, 2
 .equ BP1, 3
 .equ WPEN, 7
+
+; 25LC1024 EEPROM
+.equ LC1024_PGSIZE, 256
+.equ LC1024_PGCOUNT, 512
+; 25LC512 EEPROM
+.equ LC512_PGSIZE, 128
+.equ LC512_PGCOUNT, 512
  
-.equ EPAGE_SIZE, 256  ;octets
-.equ EPAGE_COUNT, 512  ; nombre de pages
+.equ EPAGE_SIZE, LC1024_PGSIZE    ;octets
+.equ EPAGE_COUNT, LC1024_PGCOUNT  ; nombre de pages
 .equ ESECTOR_SIZE, 32768 ; nombre de secteurs
 .equ EPG_SECTOR, (ESECTOR_SIZE/EPAGE_SIZE) ; page par secteur 
  
 ; opérations mémoire FLASH MCU
 .equ FOP_EPAGE,3  ; efface une page
 .equ FOP_WDWRITE,1   ; écriture d'un double mots
+ 
  
  
 ;ref: http://www.microchip.com/forums/m530149.aspx

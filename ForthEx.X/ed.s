@@ -257,9 +257,9 @@ DEFWORD "SAVELN",6,,SAVELN ; ( -- )
 ; met à jour l'affichage à partir de la mémoire SPIRAM
 DEFWORD "REFRESH",7,,REFRESH ;  ( -- )
      .word LIT,LPS+1,LIT,0,DODO
-2:   .word IFETCH,SCROFS,EFETCH,PLUS,DUP,GAP,EFETCH,LESS,ZBRANCH,4f-$
+2:   .word DOI,SCROFS,EFETCH,PLUS,DUP,GAP,EFETCH,LESS,ZBRANCH,4f-$
      ;avant le GAP
-3:   .word IFETCH,LIT,RLOAD,MOVLN,BRANCH,8f-$
+3:   .word DOI,LIT,RLOAD,MOVLN,BRANCH,8f-$
      ;après le GAP
 4:   .word TAIL,EFETCH,GAP,EFETCH,MINUS,PLUS,BRANCH,3b-$      
 8:   .word DOLOOP, 2b-$
@@ -282,7 +282,7 @@ DEFWORD "FSAVE",5,,FSAVE ; ( -- )
      .word EXIT
      
 ; ouverture d'un fichier
-DEFWORD "FOPEN",5,,FOPEN ; ( -- )
+DEFWORD "EDOPEN",6,,EDOPEN ; ( -- )
      
      .word EXIT
      
