@@ -114,6 +114,7 @@ _HP: .space 2
 ; par défaut KEY,EMIT, peut-être SGET,SEMIT 
 _STDIN: .space 2
 _STDOUT: .space 2
+ 
 ; sauvegarde de RSP par BREAK
 _RPBREAK: .space 2 
 ; flag activation/désactivaton break points
@@ -128,28 +129,7 @@ _boot_header: .space BOOT_HEADER_SIZE
 .global _user_dict 
 _user_dict: .space EDS_BASE-DATA_BASE
     
-; constantes dans la mémoire flash
-.section .ver_str.const psv       
-.global _version,_math_error,_user_aborted,_stack_reset,_unknown_reset
-_version:
-.byte 12    
-.ascii "ForthEx V0.1"    
-_math_error:
-.byte  21
-.ascii "Math exception reset."
-_user_aborted:
-.byte  24
-.ascii "Program aborted by user."
-_stack_reset:
-.byte  18
-.ascii "Stack error reset."   
-_unknown_reset:
-.byte  22
-.ascii "unknowned event reset."
-_eefs_magic:
-.byte 4
-.ascii "EEFS"
-    
+   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; mot système qui ne sont pas
 ; dans le dictionnaire

@@ -1,3 +1,8 @@
+2017-04-17
+----------
+Travail dans dynamem.s
+
+
 2017-04-16
 ----------
 Création et travail dans eefs.s et strings.s

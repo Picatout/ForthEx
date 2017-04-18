@@ -80,10 +80,10 @@
 .equ RAM_SIZE, (RAM_END-RAM_BASE)    
 .equ DATA_SPACE, (EDS_BASE-RAM_BASE) ; 
 .equ EDS_SPACE, (RAM_END-EDS_BASE)
-.equ BUFF_BASE, EDS_BASE
-.equ BUFF_SPACE, (EDS_SPACE-VIDEO_BUFF_SIZE)    
-.equ BUFF_SIZE, 256 ; octets c'est la taille des pages de l'EEPROM
-.equ BUFF_COUNT, BUFF_SPACE/BUFF_SIZE    
+;.equ BUFF_BASE, EDS_BASE
+.equ HEAP_SIZE, (EDS_SPACE-VIDEO_BUFF_SIZE)    
+;.equ BUFF_SIZE, 256 ; octets c'est la taille des pages de l'EEPROM
+;.equ BUFF_COUNT, EDS_SPACE/BUFF_SIZE    
     
 ; sortie vidéo
 .equ NTSC, 1

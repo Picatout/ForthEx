@@ -28,9 +28,29 @@
 .include "flash.s"
 .include "sdcard.s"
 .include "strings.s"    
+.include "dynamem.s"
 .include "eefile.s"    
 .include "ed.s"    
     
+; constantes dans la mémoire flash
+.section .str.const psv       
+.global _version,_math_error,_user_aborted,_stack_reset,_unknown_reset
+_version:
+.byte 12    
+.ascii "ForthEx V0.1"    
+_math_error:
+.byte  21
+.ascii "Math exception reset."
+_user_aborted:
+.byte  24
+.ascii "Program aborted by user."
+_stack_reset:
+.byte  18
+.ascii "Stack error reset."   
+_unknown_reset:
+.byte  22
+.ascii "unknowned event reset."
+     
 .section .heap.bss bss address (EDS_BASE)
 .global _heap
 _heap: .space RAM_END-EDS_BASE-VIDEO_BUFF_SIZE
@@ -176,6 +196,7 @@ HEADLESS HARDWARE_INIT, HWORD
     .word STORE_INIT
     .word SOUND_INIT
     .word IO_LOCK
+    .word HEAP_INIT
     .word KBD_RESET
     .word SDCINIT,DROP
     .word EXIT
@@ -362,8 +383,6 @@ DEFWORD "UNUSED",6,,UNUSED
 DEFWORD "FREE",4,,FREE
     .word UNUSED,DOT,EXIT
     
-; retourne la quantité RAM disponible sur le HEAP
-DEFCONST "HEAPSIZE",8,,HEAPSIZE,(RAM_END-VIDEO_BUFF_SIZE-EDS_BASE) ; ( -- n )
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; périphérique CRC
