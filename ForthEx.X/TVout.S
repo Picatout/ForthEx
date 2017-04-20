@@ -770,11 +770,11 @@ DEFWORD "U.R",3,,UDOTR ; ( u +n -- )
   
 ; imprime un entier simple non signé en format libre
 DEFWORD "U.",2,,UDOT ; ( n -- )
-UD:  .word LIT,0,UDDOT,EXIT
+udot:  .word LIT,0,UDDOT,EXIT
   
 ; imprime un entier simple en format libre
 DEFWORD ".",1,,DOT ; ( n -- )
-  .word STOD,DDOT,EXIT
+  .word BASE,FETCH,LIT,10,EQUAL,ZBRANCH,udot-$,STOD,DDOT,EXIT
   
 ; imprime le contenu d'une adresse
 ; on s'assure de l'alignement sur
@@ -788,11 +788,13 @@ DEFWORD "C?",2,,CQUESTION ; ( c-addr -- )
   
 ; imprime un entier double non signé en format libre
 DEFWORD "UD."3,,UDDOT ; ( ud -- )    
+_uddot:
     .word LTSHARP,SHARPS,SHARPGT,SPACE,TYPE
     .word EXIT
     
 ; imprime un entier double en format libre    
 DEFWORD "D.",2,,DDOT ; ( d -- )
+    .word BASE,FETCH,LIT,10,EQUAL,ZBRANCH,_uddot-$
     .word STR,SPACE,TYPE
     .word EXIT
     

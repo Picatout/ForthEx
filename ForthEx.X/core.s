@@ -430,6 +430,10 @@ DEFCODE "2DROP",5,,TWODROP ; ( n1 n2 -- )
     DPOP
     NEXT
     
+DEFCODE "RDROP",5,,RDROP ; ( R: n -- )
+    sub #CELL_SIZE,RSP
+    NEXT
+    
 DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
     mov [DSP],W0
     exch W0,T
@@ -875,7 +879,7 @@ DEFWORD "FM/MOD",6,,FMSLASHMOD ; ( d1 n1 -- n2 n3 )
     .word SWAP,RFROM,QNEGATE,SWAP,RFROM,ZEROLT,ZBRANCH,9f-$
     .word NEGATE,OVER,ZBRANCH,9f-$
     .word RFETCH,ROT,MINUS,SWAP,ONEMINUS
-9:  .word RFROM,DROP,EXIT
+9:  .word RDROP,EXIT
 
 ; incrémente une variable EDS
 ; arguments:
@@ -1308,7 +1312,7 @@ DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
      .word DROP,QDOUBLE,ZBRANCH,9f-$
      .word RFROM,RFROM,LIT,2,OR,TOR,TOR ; on change le flag du signe pour ajouter le flag double
      .word BRANCH,1b-$
-4:   .word RFROM,DROP,LIT,-1,TOR ; dernier caractère était un digit
+4:   .word RDROP,LIT,-1,TOR ; dernier caractère était un digit
      .word TOR,TWOSWAP,BASE,FETCH,UDSTAR
      .word RFROM,MPLUS,TWOSWAP
      .word LIT,1,SLASHSTRING,BRANCH,2b-$
@@ -1533,7 +1537,7 @@ DEFWORD "NEWLINE",7,,NEWLINE ; ( -- )
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
 1:  .word GETC,DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
-    .word DROP,BL,OVER,CSTORE,SWAP,MINUS,ONEPLUS,RFROM,DROP,EXIT
+    .word DROP,BL,OVER,CSTORE,SWAP,MINUS,ONEPLUS,RDROP,EXIT
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,3f-$
     .word DROP,TWODUP,EQUAL,TBRANCH,1b-$
     .word DELLAST,ONEMINUS,BRANCH,1b-$
@@ -1707,10 +1711,10 @@ DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
 2:  .word ONEMINUS,DUP,CFETCH,DUP,LIT,F_MARK,AND,TBRANCH,3f-$  ; F_MARK?
     .word DROP,RFROM,ONEMINUS,DUP,ZBRANCH,7f-$ 
     .word TOR,BRANCH,2b-$
-3:  .word RFROM,DROP,LIT,F_LENMASK,AND   ; branche ici si F_MARK
+3:  .word RDROP,LIT,F_LENMASK,AND   ; branche ici si F_MARK
     .word OVER,PLUS,ONEPLUS,ALIGNED,RFROM,EQUAL,DUP,ZBRANCH,8f-$ ; aligned(NFA+LEN+1)==CFA ?
     .word DROP,BRANCH,9f-$ ; oui
-7:  .word RFROM,DROP  ; compteur limite à zéro
+7:  .word RDROP  ; compteur limite à zéro
 8:  .word SWAP,DROP  ;non
 9:  .word EXIT
   

@@ -1,3 +1,13 @@
+2017-04-19
+----------
+Travail dans dynamem.s
+
+Ajout RDROP
+Modification à UD.
+
+à faire: déboguer dynamem.s et simplifier mots.
+         Compléter LISTSORT et HDEFRAG
+
 2017-04-18
 ----------
 Travail dans dynamem.s

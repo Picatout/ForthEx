@@ -56,10 +56,12 @@ _heap_used: .space 2
     mov #EDS_BASE+HEAD_SIZE,W0
     mov W0,_heap_free
     mov #HEAP_SIZE-HEAD_SIZE,W1
-    mov W1,[W0-HEAD_SIZE]
+    mov W1,[W0-BSIZE]
     mov W1,_free_bytes
-    clr W0
-    mov W0,_heap_used
+    clr W1
+    mov W1,[W0-NLNK]
+    mov W1,[W0-PLNK]
+    mov W1,_heap_used
     NEXT
     
 ; retourne la grandeur du HEAP
@@ -70,17 +72,34 @@ DEFCODE "HEAPFREE",8,,HEAPFREE ; ( -- n )
     DPUSH
     mov _free_bytes,T
     NEXT
+
+HEADLESS FREE_BYTES_STORE
+    mov T,_free_bytes
+    DPOP
+    NEXT
+    
+; retourne la variable _heap_free
+DEFCODE "FREELIST",8,,FREELIST
+    DPUSH
+    mov #_heap_free,T
+    NEXT
+    
+; retourne la variable _heap_used
+DEFCODE "USEDLIST",8,,USEDLIST
+    DPUSH
+    mov #_heap_used,T
+    NEXT
     
 ; retourne le pointeur de tête
 ; de la liste libre.
-DEFCODE "FREELIST",8,,FREELIST ; ( -- addr )
+DEFCODE "FREEHEAD",8,,FREEHEAD ; ( -- addr )
     DPUSH
     mov _heap_free,T
     NEXT
  
 ; retourne le pointeur de tête
 ; de la liste utililés.
-DEFCODE "USEDLIST",8,,USEDLIST ; ( -- addr )
+DEFCODE "USEDHEAD",8,,USEDHEAD ; ( -- addr )
     DPUSH
     mov _heap_used,T
     NEXT
@@ -132,7 +151,30 @@ DEFWORD "NLNK!",5,,NLNKSTORE  ; ( n addr -- )
 DEFWORD "PLNK!",5,,PLNKSTORE  ; ( n addr -- )
     .word LIT,PLNK,MINUS,STORE,EXIT
     
-;vérifie si n < addr.bsize
+; retire un bloc de la liste auquel il apartient.
+; arguments:
+;   addr   pointeur du bloc
+; retourne:
+;   addr   pointeur du bloc avec NLNK et PLNK à 0
+DEFWORD "UNLINK",6,,UNLINK ; ( addr -- addr )
+    .word DUP,TOR,DUP,NLNKFETCH,SWAP,PLNKFETCH ; S: nlnk plnk R: addr
+    .word QDUP,ZBRANCH,2f-$,TWODUP,NLNKSTORE
+2:  .word SWAP,QDUP,ZBRANCH,8f-$,PLNKSTORE    
+8:  .word RFROM,EXIT
+    
+; insère un bloc orphelin au début d'une liste
+; arguments:
+;    addr1  pointeur du bloc à insérer
+;    list   variable contenant le pointeur de tête de la liste.
+; retourne:
+;    rien
+DEFWORD "PREPEND",7,,PREPEND ; ( addr1 list -- )
+    .word DUP,TOR,EFETCH,DUP,ZBRANCH,2f-$ ; S: addr1 first R: list
+    .word TWODUP,PLNKSTORE ; S: addr1 first R: list
+2:  .word OVER,NLNKSTORE,RFROM,STORE
+    .word EXIT
+    
+;vérifie si n < addr->bsize
 ; arguments:
 ;    addr   pointeur bloc
 ; retourne:
@@ -140,17 +182,51 @@ DEFWORD "PLNK!",5,,PLNKSTORE  ; ( n addr -- )
 DEFWORD "?FIT",4,,QFIT ;  ( n addr1 -- f )    
     .word BSIZEFETCH,LESS,EXIT
 
-; retourne le plus petit des 2 blocs
+; retourne le pointeur du plus petit bloc
 ; arguments:
-;    addr1   pointeur bloc 1
-;    addr2   pointeur bloc 2    
+;   addr1   pointeur bloc 1
+;   addr2    pointeur bloc 2
+DEFWORD "SMALLBLK",8,,SMALLBLK ; ( addr1 addr2 -- addr )
+    .word QDUP,ZBRANCH,9f-$
+    .word TOR,DUP,ZBRANCH,2f-$,DUP,BSIZEFETCH ; S: addr1 size1 R: addr2
+    .word RFETCH,BSIZEFETCH,ULESS,ZBRANCH,2f-$
+1:  .word RDROP,EXIT
+2:  .word DROP,RFROM
+9:  .word EXIT
+  
+    
+; retourne le plus petit bloc de liste
+; qui peut contenir 'n' octets.    
+; arguments:
+;    n       taille requise
+;    addr1   tête de liste.    
 ; retourne:
-;    addr    pointeur du plus petit.
-DEFWORD "SMALLEST",8,,SMALLEST ; ( addr1 addr2 -- addr )
-    .word TOR, DUP ,BSIZEFETCH,RFETCH,BSIZEFETCH
-    .word LESS, ZBRANCH,2f-$
-    .word RFROM,DROP,EXIT
-2:  .word DROP,RFROM,EXIT
+;    addr|0    pointeur sur le bloc|0.
+DEFWORD "SMALLEST",8,,SMALLEST ; ( n addr1 -- addr|0 )
+    .word LIT,0,TOR ; S: n addr1 R: 0
+    ; début boucle
+2:  .word QDUP,ZBRANCH,8f-$    
+    .word TWODUP,QFIT,ZBRANCH,4f-$
+    .word DUP,RFROM,SMALLBLK,TOR
+4:  .word NLNKFETCH,BRANCH,2b-$
+8:  .word DROP,RFROM
+9:  .word EXIT
+  
+;enlève l'excédent du bloc en créant un nouveau bloc libre.
+; arguments:
+;    n    octets requis
+;    addr pointeur bloc à réduire
+; retourne:
+;    addr pointeur du bloc de taille ajusté.
+DEFWORD "CUT",3,,CUT ; ( n addr -- addr )
+    .word DUP,TOR,BSIZEFETCH,OVER,MINUS ; S: n diff R: addr
+    .word DUP,LIT,HEAD_SIZE,GREATER,ZBRANCH,8f-$ ; S: n diff R: addr
+    .word SWAP,DUP,RFETCH,BSIZESTORE,RFETCH,PLUS ; S: diff addr2 R: addr
+    .word LIT,HEAD_SIZE,TUCK,PLUS,TOR,MINUS,RFETCH,BSIZESTORE ; R: addr2 addr
+    .word RFROM,FREELIST,PREPEND
+    .word HEAPFREE,LIT,HEAD_SIZE,MINUS,FREE_BYTES_STORE
+    .word RFROM,EXIT
+8:  .word TWODROP,RFROM,EXIT    
   
 ; allocation d'un bloc de mémoire
 ; recherche d'un bloc libre dont la taille est le plus
@@ -161,16 +237,12 @@ DEFWORD "SMALLEST",8,,SMALLEST ; ( addr1 addr2 -- addr )
 ;  retourne
 ;     addr|0   
 DEFWORD "MALLOC",6,,MALLOC ; ( n -- addr|0 )
-    .word DUP,ODD,ZBRANCH,2f-$,ONEPLUS ; n doit-êter pair.
-2:  .word HEAPFREE,OVER,LESS,ZBRANCH,2f-$
-    .word DROP,LIT,0,EXIT ;trop grrand.
-2:  .word FREELIST,DUP,TWOTOR
-2:  .word RFROM,TWODUP,QFIT,ZBRANCH,4f-$
-    .word RFROM,SMALLEST,DUP,TOR
-4:  .word NLNKFETCH,QDUP,ZBRANCH,6f-$,TOR,BRANCH,2b-$
-6:  .word DUP,RFROM,DUP,BSIZEFETCH,ROT,SWAP,MINUS ; S: n addr n-n2
-    .word DUP,LIT,HEAD_SIZE,GREATER,ZBRANCH,8f-$
-    .word ;....
+    .word ALIGNED ; n doit-êter pair.
+    .word DUP,FREEHEAD,SMALLEST ; S: n addr|0
+    .word DUP,TBRANCH,2f-$
+    .word SWAP,DROP,EXIT
+2:  .word UNLINK,CUT,DUP,BSIZEFETCH,FREE_BYTES_STORE
+2:  .word USEDLIST,PREPEND
 9:  .word EXIT
     
 ;libération d'un bloc mémoire
@@ -179,14 +251,9 @@ DEFWORD "MALLOC",6,,MALLOC ; ( n -- addr|0 )
 ; arguments:
 ;   addr pointeur retourné par MALLOC    
 DEFWORD "BLKFREE",7,,BLKFREE ; ( addr -- )
-    .word TOR 
-    ; sortir le bloc de la chaîne des blocs alloués.
-    .word RFETCH,NLNKFETCH,RFETCH,PLNKFETCH,NLNKSTORE
-    .word RFETCH,PLNKFETCH,RFETCH,NLNKFETCH,PLNKSTORE
-    ; insérer le bloc au début de la chaîne des blocs libres
-    .word RFETCH,LIT,0,PLNKSTORE ; il sera la premier de la liste
-    .word FREELIST,RFETCH,NLNKSTORE ; _heap_free devient le second 
-    .word RFROM,LIT,_heap_free,STORE ; bloc libéré devient la tête.
+    .word DUP,ZBRANCH,9f-$
+    .word UNLINK,DUP,BSIZEFETCH,HEAPFREE,PLUS,FREE_BYTES_STORE
+    .word FREELIST,PREPEND
 9:  .word EXIT
    
 ; échanges liens PLNK et NLNK des 2 blocs
@@ -212,17 +279,19 @@ DEFWORD "BSORT",5,,BSORT ; ( addr1 addr2 -- addr < addr )
     .word SWAP,TWODUP,LNKSWAP  
 8:  .word EXIT
 
-; fusionne 2 blocs adjacents
+; fusionne 2 blocs s'ils sont adjacents
 ; arguments:
 ;   addr1   pointeur bloc 1
 ;   addr2   pointeur bloc 2
 ; retourne:
 ;   f    indicateur booléen de fusion
 DEFWORD "BMERGE",6,,BMERGE  ; ( addr1 addr2 -- f )
-    .word BSORT,TOR,DUP,BSIZEFETCH,LIT,HEAD_SIZE,PLUS
+    .word BSORT,TOR,DUP,BSIZEFETCH,LIT,HEAD_SIZE,PLUS ; S: addr size R: addr
     .word OVER,PLUS,RFETCH,EQUAL,ZBRANCH,8f-$
     .word RFETCH,BSIZEFETCH,LIT,HEAD_SIZE,PLUS,OVER,BSIZESTORE
-    .word RFROM,NLNKFETCH,SWAP,NLNKSTORE,LIT,-1,EXIT
+    .word RFROM,NLNKFETCH,SWAP,NLNKSTORE,LIT,HEAD_SIZE,HEAPFREE,PLUS
+    .word FREE_BYTES_STORE
+    .word LIT,-1,EXIT
 8:  .word RFROM,TWODROP,LIT,0,EXIT    
     
 ;trie croissant des éléments de la liste chaînée
@@ -232,7 +301,7 @@ DEFWORD "BMERGE",6,,BMERGE  ; ( addr1 addr2 -- f )
 ;   addr1  pointeur tête de liste
 ; retourne:
 ;   addr2  pointeur nouvelle tête de liste.  
-DEFWORD "LISTSORT",8,,LISTSORT ; ( addr1 -- addr2 )
+DEFWORD "LISTSORT",8,F_HIDDEN,LISTSORT ; ( addr1 -- addr2 )
     .word LIT,0,SWAP ; insérer indicateur de commutation
 2:  ; begin loop
     .word DUP,NLNKFETCH,QDUP,ZBRANCH,4f-$
@@ -241,9 +310,9 @@ DEFWORD "LISTSORT",8,,LISTSORT ; ( addr1 -- addr2 )
     
     
 ;défragmentation des block libres
-; 1) trier en ordre croissant  
+; 1) trier la liste ordre croissant des pointeurs.  
 ; 2) fusionner les blocs contigus  
-DEFWORD "MDEFRAG",7,,MDEFRAG ; ( -- )
+DEFWORD "HDEFRAG",7,F_HIDDEN,HDEFRAG ; ( -- )
     .word FREELIST,LISTSORT
     .word EXIT
     
