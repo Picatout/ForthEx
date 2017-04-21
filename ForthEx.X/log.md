@@ -1,3 +1,7 @@
+2017-04-20
+----------
+Travail dans dynamem.s
+
 2017-04-19
 ----------
 Travail dans dynamem.s

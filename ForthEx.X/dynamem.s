@@ -151,16 +151,28 @@ DEFWORD "NLNK!",5,,NLNKSTORE  ; ( n addr -- )
 DEFWORD "PLNK!",5,,PLNKSTORE  ; ( n addr -- )
     .word LIT,PLNK,MINUS,STORE,EXIT
     
+; retire le premier bloc de la chaîne
+; arguments:
+;    addr   pointeur bloc
+; retourne:
+;   rien    
+DEFWORD "ULNKFIRST",9,,ULNKFIRST ; ( addr -- )
+    .word FREEHEAD,OVER,EQUAL,ZBRANCH,2f-$
+    .word NLNKFETCH,FREELIST,STORE,EXIT
+2:  .word NLNKFETCH,USEDLIST,STORE,EXIT
+  
 ; retire un bloc de la liste auquel il apartient.
 ; arguments:
 ;   addr   pointeur du bloc
 ; retourne:
 ;   addr   pointeur du bloc avec NLNK et PLNK à 0
 DEFWORD "UNLINK",6,,UNLINK ; ( addr -- addr )
-    .word DUP,TOR,DUP,NLNKFETCH,SWAP,PLNKFETCH ; S: nlnk plnk R: addr
-    .word QDUP,ZBRANCH,2f-$,TWODUP,NLNKSTORE
-2:  .word SWAP,QDUP,ZBRANCH,8f-$,PLNKSTORE    
-8:  .word RFROM,EXIT
+    .word DUP,NLNKFETCH,OVER,PLNKFETCH ; S: addr nlnk plnk
+    .word DUP,ZBRANCH,2f-$,TWODUP,NLNKSTORE,BRANCH,4f-$
+2:  .word LIT,2,PICK,ULNKFIRST  ; S: addr nlnk plnk  
+4:  .word SWAP,DUP,ZBRANCH,8f-$,PLNKSTORE,EXIT    
+8:  .word TWODROP
+    .word EXIT
     
 ; insère un bloc orphelin au début d'une liste
 ; arguments:
@@ -169,9 +181,9 @@ DEFWORD "UNLINK",6,,UNLINK ; ( addr -- addr )
 ; retourne:
 ;    rien
 DEFWORD "PREPEND",7,,PREPEND ; ( addr1 list -- )
-    .word DUP,TOR,EFETCH,DUP,ZBRANCH,2f-$ ; S: addr1 first R: list
-    .word TWODUP,PLNKSTORE ; S: addr1 first R: list
-2:  .word OVER,NLNKSTORE,RFROM,STORE
+    .word TUCK,EFETCH,DUP,ZBRANCH,2f-$ ; S: list addr1 listhead
+    .word TWODUP,PLNKSTORE ; S: list addr1 listhead
+2:  .word OVER,NLNKSTORE,SWAP,STORE
     .word EXIT
     
 ;vérifie si n < addr->bsize
@@ -241,8 +253,9 @@ DEFWORD "MALLOC",6,,MALLOC ; ( n -- addr|0 )
     .word DUP,FREEHEAD,SMALLEST ; S: n addr|0
     .word DUP,TBRANCH,2f-$
     .word SWAP,DROP,EXIT
-2:  .word UNLINK,CUT,DUP,BSIZEFETCH,FREE_BYTES_STORE
-2:  .word USEDLIST,PREPEND
+2:  ; S: n addr
+    .word UNLINK,CUT,DUP,BSIZEFETCH,HEAPFREE,SWAP,MINUS,FREE_BYTES_STORE
+    .word DUP,USEDLIST,PREPEND
 9:  .word EXIT
     
 ;libération d'un bloc mémoire
@@ -285,7 +298,7 @@ DEFWORD "BSORT",5,,BSORT ; ( addr1 addr2 -- addr < addr )
 ;   addr2   pointeur bloc 2
 ; retourne:
 ;   f    indicateur booléen de fusion
-DEFWORD "BMERGE",6,,BMERGE  ; ( addr1 addr2 -- f )
+DEFWORD "BMERGE",6,F_HIDDEN,BMERGE  ; ( addr1 addr2 -- f )
     .word BSORT,TOR,DUP,BSIZEFETCH,LIT,HEAD_SIZE,PLUS ; S: addr size R: addr
     .word OVER,PLUS,RFETCH,EQUAL,ZBRANCH,8f-$
     .word RFETCH,BSIZEFETCH,LIT,HEAD_SIZE,PLUS,OVER,BSIZESTORE
