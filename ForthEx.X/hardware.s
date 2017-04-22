@@ -190,13 +190,13 @@ HEADLESS QCOLD,HWORD
 HEADLESS HARDWARE_INIT, HWORD
     .word SET_CLOCK
     .word TICKS_INIT
+    .word HEAP_INIT
     .word TVOUT_INIT
     .word KBD_INIT
     .word SERIAL_INIT
     .word STORE_INIT
     .word SOUND_INIT
     .word IO_LOCK
-    .word HEAP_INIT
     .word KBD_RESET
     .word SDCINIT,DROP
     .word EXIT
@@ -240,7 +240,7 @@ HEADLESS CLR_LOW_RAM
 ; mise à zéro de la RAM
 HEADLESS CLR_RAM
     mov #CSTK_BASE, W0
-    repeat #((RAM_END-CSTK_BASE)/2-1)
+    repeat #((EDS_BASE-CSTK_BASE)/2-1)
     clr [W0++]
     NEXT
 

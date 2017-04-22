@@ -340,7 +340,7 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     clr.b cursor_sema
     bset fcursor, #CURSOR_ACTIVE
     bclr fcursor, #CURSOR_INV
-    NEXT
+    bra _cls
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; active/désactive sortie vidéo
@@ -369,16 +369,14 @@ DEFCODE "CURENBL",7,,CURENBL  ; ( f -- )  T=active, F=désactive
 ; nettoie écran
 ;;;;;;;;;;;;;;;;;;
 DEFCODE "CLS",3,,CLS   ; ( -- )
-    SET_EDS
+_cls:
     cursor_incr_sema
-    clr W0
-    mov #_video_buffer, W1
+    mov #_video_buffer, W0
     repeat #(VIDEO_BUFF_SIZE/2-1)
-    mov W0,[W1++]
+    clr [W0++]
     clr xpos  ; xpos=0, ypos=0
     bclr.b fcursor,#CURSOR_INV
     cursor_decr_sema
-    RESET_EDS
     NEXT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
