@@ -414,6 +414,7 @@ DEFWORD "RAM>EE",6,,RAMTOEE ; ( r-adr size e-addr -- )
 ;   XT lecture
 ;   XT écriture
 ;   XT autre fonction
+;   ...
     
 ; descripteur SPIRAM    
 DEFTABLE "XRAM",4,,XRAM
@@ -454,6 +455,8 @@ DEFTABLE "EEPROM",6,,EEPROM
     .word EEWRITE
     .word EEREAD     ;IMG>
     .word RAMTOEE    ;>IMG
+    .word EEMOUNT    ; monte le système de fichier EEFS
+    .word EEUMOUNT   ; démonte le système de fichier EEFS
     
 ; descripteur carte Secure Digital    
 DEFTABLE "SDCARD",6,,SDCARD
@@ -478,6 +481,22 @@ DEFCONST "FN_READ",7,,FN_READ,1
 DEFCONST "FN_WRITE",8,,FN_WRITE,2
 DEFCONST "FN_IMG>",7,,FN_IMGFROM,3
 DEFCONST "FN_>IMG",7,,FN_TOIMG,4    
+DEFCONST "MOUNT",5,,FN_MOUNT,5
+DEFCONST "UMOUNT",6,,FN_UMOUNT,6
+
+; execute une commande pour un périphérique
+; les opcodes ainsi que les paramètres d'entrées
+; et les résultats en sortie dépendandent de
+; l'opération effectuée ainsi que du périphérique.
+; arguments:
+;    i*x    arguments en entrée spécifique au opcode et au devid
+;    opcode code de l'opération à effectuer
+;    devid  identifiant du périphérique
+; retourne:
+;    j*x   dépend du opcode et du devid    
+DEFWORD "DEVIO",5,,DEVIO ; ( i*x opcode devid -- j*x )
+    .word SWAP,CELLS,PLUS,FETCH,EXECUTE,EXIT
+    
     
 ; initialise l'adresse boot du périphérique
 ; arguments

@@ -1750,9 +1750,11 @@ DEFWORD "REVEAL",6,,REVEAL ; ( -- )
     .word LATEST,FETCH,DUP,CFETCH,HIDDEN,INVERT,AND,SWAP,CSTORE
 9:  .word EXIT
     
-; allocation de mémoire dans le dictionnaire
-; avance DP
-DEFWORD "ALLOT",5,,ALLOT ; ( +n -- )
+; allocation/rendition de mémoire dans le dictionnaire
+; si n est négatif n octets seront rendus.
+;  arguements:
+;     n   nombre d'octets
+DEFWORD "ALLOT",5,,ALLOT ; ( n -- )
     .word DP,PLUSSTORE,EXIT
 
 ; alloue une cellule pour x à la position DP

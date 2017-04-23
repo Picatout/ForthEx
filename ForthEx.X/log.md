@@ -1,6 +1,16 @@
+2017-04-22
+----------
+Épuration: suppression de FREE dans hardware.s
+           suppression de FREEHEAD, USEDHEAD, LNKSWAP, BSORT, SORTLIST, BMERGE,
+                          HDEFRAG dans dynamem.s
+
+Renommé BLKFREE -> FREE dans dynamem.s
+Ajout de ?>LIST dans dynamem.s
+
 2017-04-21
 ----------
 Travail sur dynamem.s
+Test dynamem.s
 
 2017-04-20
 ----------

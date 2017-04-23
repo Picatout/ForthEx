@@ -77,6 +77,7 @@ _eefs_magic:
 
     
 DEFCONST "EEFS_MAGIC",10,,EEFS_MAGIC,_eefs_magic
+
     
 ; formatate du système de fichier
 ; arguments:
@@ -101,7 +102,21 @@ DEFWORD "?EEFS",5,,QEEFS ; ( -- f )
     .word TIB,FETCH,DUP,LIT,6,LIT,0,DUP,EEREAD ; S: tib
     .word EEFS_MAGIC,PAD,FETCH,DUP,TOR,CSTRTORAM
     .word RFROM,STREQUAL,EXIT
-  
+
+; monte le système de fichier EEFS
+; retourne:
+;   f    indicateur booléen succès/échec
+DEFWORD "EEMOUNT",7,,EEMOUNT ; ( -- f )
+    .word QEEFS,DUP,TBRANCH,2f-$,EXIT
+2:       
+    .word EXIT
+    
+; démonte le système de fichier EEFS    
+DEFWORD "EEUMOUNT",8,,EEUMOUNT ; ( -- )
+
+    .word EXIT
+    
+    
 ; recherche d'un nom dans le répertoire. 
 ;  arguments:
 ;    addr   adresse du nom comme chaîne comptée.
@@ -156,6 +171,10 @@ DEFWORD "FCLOSE",6,,FCLOSE ;  ( addr -- )
 DEFWORD "FDELETE",7,,FDELETE  ; ( addr -- )
 
     .word EXIT
+
+; renommer un fichier.
+    
+; copier un fichier.
     
 ; écriture dans le fichier.
     

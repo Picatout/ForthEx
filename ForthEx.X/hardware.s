@@ -379,10 +379,6 @@ DEFWORD "CLEAR",5,,CLEAR ; ( -- )
 DEFWORD "UNUSED",6,,UNUSED    
     .word ULIMIT,HERE,MINUS,EXIT
     
-; imprime UNUSED
-DEFWORD "FREE",4,,FREE
-    .word UNUSED,DOT,EXIT
-    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; périphérique CRC

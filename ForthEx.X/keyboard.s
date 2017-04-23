@@ -157,7 +157,8 @@ HEADLESS KEYFILTER,CODE  ; ( c|0 -- c|0 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; retourne le caractère
 ; en tête de file kbd_queue    
-; retourne 0 si file vide.    
+; retourne 0 si file vide.
+; Il n'y a pas de filtre appliqué.    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFCODE "EKEY",4,,EKEY   ; (  -- c|0 )  
     clr W0
