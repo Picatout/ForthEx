@@ -22,7 +22,7 @@
 ;    
 ; DESCRIPTION: 
 ;   Un système de fichiers simple pour utiliser avec l'EEPROM externe
-;   le système à basé sur la dimension d'une page qui est de 256 octets pour la
+;   le système est basé sur la dimension d'une page qui est de 256 octets pour la
 ;   25LC1024. Un bitmap de 64 octets est réservé pour indiquer les pages utilisées.
 ;   Au début de chaque page 2 octets sont réservées pour indiquer la prochaine 
 ;   page du fichier.    
@@ -31,7 +31,6 @@
 ;   * Ce système ne supporte pas les répertoires.
 ;   * Un maximum de 27 fichiers par EEPROM.
 ;   * La première page de donnée est la numéro 2.    
-;   * secteur de 512 octets.    
 ;    
 ;   STRUCTURE:
 ;   ==========
@@ -44,7 +43,7 @@
 ;    8    2     indique la grandeur de l'image en octets
 ;    10   4     réservé.    
 ;    16   64    bitmap de l'utilisation des pages
-;    64   255   11 entrées de répertoire
+;    80   255   11 entrées de répertoire
 ;    
 ;   page 1   entrées de répertoires supplémentaires
 ;----------    
@@ -75,6 +74,31 @@ _eefs_magic:
 .byte 4
 .ascii "EEFS"
 
+; files buffers    
+.equ MAX_BUFFERS, 4 ; nombre maximum de buffers utilisés.
+.equ BUFFER_SIZE, 1024
+; buffer structure
+.equ BLOCK_NBR, 0
+.equ BUFFER_FLAGS, 2
+.equ BUFFER_STRUCT_SIZE, 4
+;indicateurs booléens
+.equ F_BUFFER_USED, (1<<0)   ; le buffer est libre
+.equ F_BUFFER_UPDATE, (1<<1) ; le buffer a été modifié
+    
+; files descriptors
+.equ MAX_FILES, 4 ; nombre maximum de fichiers ouverts simultanément.
+; descriptor structure    
+.equ FD_FIRST_SECTOR,0  ; no. du premier secteur de ce fichier. 0 si fd libre
+.equ FD_CURRENT,2 ; no. du secteur courant.    
+.equ FD_FSIZE,4  ; grandeur du fichier
+.equ FD_DENTRY,6 ; no. d'entrée dans le répertoire
+.equ FD_POS,8    ; position dans le fichier
+.equ FD_STRUCT_SIZE, 10
+    
+    
+.section .hardware.bss  bss
+_eefs_buffers: .space MAX_BUFFERS*BUFFER_STRUCT_SIZE
+_eefs_fd: .space MAX_FILES*FD_STRUCT_SIZE 
     
 DEFCONST "EEFS_MAGIC",10,,EEFS_MAGIC,_eefs_magic
 
