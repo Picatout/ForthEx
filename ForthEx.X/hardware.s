@@ -181,9 +181,19 @@ _warm:
 _cold:
     .word CLR_RAM,HARDWARE_INIT,VARS_INIT
     .word VERSION,COUNT,TYPE,NEWLINE 
-    .word BOOTDEV,FETCH,IMGFETCH; autochargement système en RAM 
+    .word IMGLOAD; autochargement d'une image  RAM 
+;    .word QAUTORUN
     .word QUIT ; boucle de l'interpréteur
 
+;HEADLESS QAUTORUN,HWORD
+;    .word DOSTR
+;    .byte 7
+;    .ascii "AUTORUN"
+;    .align 2
+;    .word FIND,ZBRANCH,2f-$,EXECUTE,BRANCH,9f-$
+;2:  .word DROP
+;9:  .word EXIT
+  
 ; est-ce un cold reboot    
 HEADLESS QCOLD,HWORD
     .word LIT,fwarm,FETCH,ZEROEQ,EXIT
@@ -197,6 +207,7 @@ HEADLESS HARDWARE_INIT, HWORD
     .word KBD_INIT
     .word SERIAL_INIT
     .word STORE_INIT
+    .word BLOCK_INIT
     .word SOUND_INIT
     .word IO_LOCK
     .word KBD_RESET

@@ -293,6 +293,9 @@ scroll_down:
 ;  mots du système FORTH
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; adresse du buffer d'écran    
+DEFCONST "SCRBUF",6,,SCRBUF,_video_buffer
+    
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; initialisation générateur vidéo
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -372,7 +375,7 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     mov #(5<<OC4IP0),W0
     ior OC4IPC
 ; fin test code    
-    bra _cls
+    bra code_CLS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; active/désactive sortie vidéo
@@ -401,11 +404,11 @@ DEFCODE "CURENBL",7,,CURENBL  ; ( f -- )  T=active, F=désactive
 ; nettoie écran
 ;;;;;;;;;;;;;;;;;;
 DEFCODE "CLS",3,,CLS   ; ( -- )
-_cls:
     cursor_incr_sema
-    mov #_video_buffer, W0
+    mov #0x2020,W0
+    mov #_video_buffer, W1
     repeat #(VIDEO_BUFF_SIZE/2-1)
-    clr [W0++]
+    mov W0, [W1++]
     clr xpos  ; xpos=0, ypos=0
     bclr.b fcursor,#CURSOR_INV
     cursor_decr_sema

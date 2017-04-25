@@ -31,11 +31,33 @@
 ;    
 ;DATE: 2017-03-07
     
+.section .hardware.bss  bss
+; adresse du buffer pour écriture mémoire flash du MCU
+_mflash_buffer: .space 2 
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; mots de bas niveau pour
 ; l'accès à la mémoire FLASH
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; descripteur mémoire FLASH MCU    
+DEFTABLE "MFLASH",6,,MFLASH
+    .word _MCUFLASH ; mémoire FLASH du MCU    
+    .word TBLFETCHL ;
+    .word TOFLASH
+    .word FLASHTORAM
+    .word RAMTOFLASH
+    
+ 
+;réservation de mémoire pour écriture flash MCU
+; arguments:
+;   aucun
+; retourne:
+;   a-addr   adresse du buffer
+DEFWORD "FBUFFER",7,,FBUFFER ; ( -- a-addr ) 
+    .word LIT,FLASH_PAGE_SIZE,MALLOC,DUP,LIT,_mflash_buffer,STORE
+    .word EXIT
+ 
 ; lecture d'un mot dans la mémoire flash low word
 DEFCODE "TBL@L",5,,TBLFETCHL ; ( ud1 -- n )
     RPUSH TBLPAG
@@ -155,9 +177,9 @@ DEFCODE "UDREL",5,,UDREL ; ( ud1 ud2 -- n )
 9:  NEXT
     
 ; vérifie si l'adresse est valide
-;  FLASH_DRIVE_BASE <= addr < FLASH_END    
+;  IMG_FLASH_ADDR <= addr < FLASH_END    
 DEFWORD "?FLIMITS",8,,QFLIMITS ; ( addrl addrh -- addrl addrh f )
-    .word TWODUP, LIT,FLASH_DRIVE_BASE&0xFFFF,LIT,(FLASH_DRIVE_BASE>>16)
+    .word TWODUP, LIT,IMG_FLASH_ADDR&0xFFFF,LIT,(IMG_FLASH_ADDR>>16)
     .word UDREL,ZEROLT,ZBRANCH,1f-$
     .word LIT,0,EXIT
 1:  .word TWODUP,LIT,FLASH_END&0xFFFF,LIT,(FLASH_END>>16)
@@ -218,17 +240,113 @@ DEFWORD "FLASH>RAM",9,,FLASHTORAM ; ( adr size ud -- )
     .word TWORFROM,LIT,3,DOPLOOP,1b-$
     .word TWODROP,DROP
 9:  .word EXIT  
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;   Sauvegarde et restauration
+;   image binaire dans la mémoire
+;   flash du MCU. Cette image
+;   est rechargée automatiquement
+;   au démarrage de l'ordinateur.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  
+; IMG>RAM charge en RAM une image système
+; *** format image boot ****
+; 00 signature MAGIC, 2 octets
+; 02 sauvegarde de LATEST, 2 octets
+; 04 sauvegarde de DP, 2 octets  
+; 06 data_size 2 octets
+; 08 données image débute ici.    
+; *************************    
+
+; constantes liées au chargeur système (boot loader)
+DEFCONST "IMGHEAD",7,,IMGHEAD,BOOT_HEADER ; entête secteur démarrage
+DEFCONST "MAGIC",5,,MAGIC,0x55AA ; signature
+DEFCONST "IMGROW",6,,IMGROW,FLASH_FIRST_ROW  ; numéro première ligne FLASH IMG  
+
+; champ signature    
+DEFWORD "IMGSIGN",7,,IMGSIGN  ; ( -- n addr )
+    .word LIT,0,IMGHEAD,EXIT
+
+; champ LATEST    
+DEFWORD "IMGLATST",8,,IMGLATST  ; ( -- n addr )
+    .word LIT,1,IMGHEAD,EXIT
+
+; champ DP    
+DEFWORD "IMGDP",5,,IMGDP ; ( -- n addr )
+    .word LIT,2,IMGHEAD,EXIT
+    
+; champ taille    
+DEFWORD "IMGSIZE",7,,IMGSIZE ; ( -- n addr )
+    .word LIT,3,IMGHEAD,EXIT
+    
+    
+; initialise l'entête d'image  
+DEFWORD "SETHEADER",9,,SETHEADER ; ( -- )
+    .word MAGIC,IMGSIGN,TBLSTORE ; signature
+    .word HERE,IMGDP,TBLSTORE ; DP
+    .word LATEST,FETCH,IMGLATST,TBLSTORE ; latest
+    .word HERE,DP0,MINUS,IMGSIZE,TBLSTORE ; size
+    .word EXIT
+
+  
+; position en mémoire flash de l'image. 
+; arguments:
+;   aucun
+; retourne:
+;   ud   adresse 32 bits  
+DEFWORD "IMGADDR",7,,IMGADDR ; ( -- ud )
+    .word LIT,IMG_FLASH_ADDR,LIT,0,EXIT
+    
+;vérifie s'il y a une image disponible
+; retourne:
+;     indicateur booléen vrai|faux
+DEFWORD "?IMG",4,,QIMG ; (  -- f )
+    .word IMGHEAD,LIT,BOOT_HEADER_SIZE,IMGADDR
+    .word FLASHTORAM
+    .word IMGSIGN,TBLFETCH,MAGIC,EQUAL
+    .word EXIT
+    
+;retourne la taille d'une image à partir
+;de l'entête de celle-ci. 
+; retourne:
+;   'n'  taille en octets    
+DEFWORD "?SIZE",5,,QSIZE ; ( -- n )  
+    .word IMGSIZE,TBLFETCH,EXIT
+    
   
 ; efface les lignes qui seront utilisées
 ; pour la sauvegarde de l'image RAM    
 DEFWORD "ERASEROWS",9,,ERASEROWS ; ( -- )
-    .word BTSIZE,TBLFETCH
+    .word IMGSIZE,TBLFETCH
     .word LIT,BOOT_HEADER_SIZE,PLUS
     .word LIT,FLASH_PAGE_SIZE,SLASHMOD
     .word SWAP,ZBRANCH,1f-$
     .word ONEPLUS
-1:  .word FBTROW,SWAP,LIT,0,DODO
+1:  .word IMGROW,SWAP,LIT,0,DODO
 2:  .word DUP,FERASE,ONEPLUS,DOLOOP,2b-$
     .word DROP,EXIT
-  
+ 
+; sauvegarde une image de la RAM dans la mémoire flash du MCU
+DEFWORD "IMGSAVE",7,,IMGSAVE ; ( -- )
+    .word QEMPTY,ZBRANCH,2f-$ ; si RAM vide quitte
+    .word EXIT
+2:  .word SETHEADER
+    .word ERASEROWS
+    .word IMGHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS,IMGADDR
+    .word RAMTOFLASH
+9:  .word EXIT 
+
+; charge une image système RAM à partir de la mémoire flash du MCU.
+DEFWORD "IMGLOAD",4,,IMGLOAD ; ( -- )
+    .word QIMG,NOT,QABORT
+    .byte 24
+    .ascii "No boot image available."
+    .align 2
+    .word IMGHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS
+    .word IMGADDR,FLASHTORAM
+    .word IMGDP,TBLFETCH,DP,STORE
+    .word IMGLATST,TBLFETCH,LATEST,STORE
+    .word EXIT
+
   

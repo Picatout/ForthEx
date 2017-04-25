@@ -30,9 +30,9 @@
 
 ; .sysinfo contient les données d'initialisation des 
 ; variables système.    
-.section .vars_init psv  address(FLASH_DRIVE_BASE-FLASH_ROW_SIZE)    
+.section .vars_init psv  address(IMG_FLASH_ADDR-FLASH_ROW_SIZE)    
 .global vars_count
-vars_count: .word 21
+vars_count: .word 20
 csp_init: .word cstack
 syslatest_init: .word 0b
 latest_init: .word 0b    
@@ -46,7 +46,6 @@ dp_init: .word DATA_BASE
 r0_init: .word rstack
 s0_init: .word pstack    
 base_init: .word 10
-btdev_init: .word MFLASH+2 ; PFA du descripteur de périphérique
 state_init: .word 0
 toin_init: .word 0
 hp_init: .word 0

@@ -314,95 +314,19 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
 9:  _disable_eeprom
     NEXT
 
-; IMG>RAM charge en RAM une image système
-; *** format image boot ****
-; 00 signature MAGIC, 2 octets
-; 02 sauvegarde de LATEST, 2 octets
-; 04 sauvegarde de DP, 2 octets  
-; 06 data_size 2 octets
-; 08 données image débute ici.    
-; *************************    
-
-;vérifie s'il y a une image sur le périphérique
-; désigné par BOOTDEV    
-; retourne:
-;     indicateur booléen vrai|faux
-DEFWORD "?IMG",4,,QIMG ; (  -- f )
-    .word BTHEAD,LIT,BOOT_HEADER_SIZE,FN_IMGFROM,DUP,BOOTADR
-    .word ROT,BOOTDEV,FETCH,TBLFETCH,EXECUTE
-    .word BTSIGN,TBLFETCH,MAGIC,EQUAL
-    .word EXIT
-    
-;retourne la taille d'une image à partir
-;de l'entête de celle-ci. 
-; retourne:
-;   'n'  taille en octets    
-DEFWORD "?SIZE",5,,QSIZE ; ( -- n )  
-    .word BTSIZE,TBLFETCH,EXIT
-    
-; combiens d'octets à lire/écrire dans la page suivante 
-;  arguments:
-;   'dp' position actuelle du pointer data
-;  retourne:
-;    min(EPAGE_SIZE,HERE-dp)    
-;DEFWORD "?BYTES",6,,QBYTES ; ( dp -- n )
-;    .word HERE,SWAP,MINUS,LIT,EPAGE_SIZE,UMIN
-;    .word EXIT
-
-;retourne l'état de l'opération de transfert
-; lorsque 'dp'==DP c'est complété
-; arguments:
-;   'dp'  pointeur de donnée
-; retourne:
-;    'f'  indicateur booléen vrai|faux    
-;DEFWORD "?DONE",5,,QDONE ;  ( dp -- f )
-;    .word QBYTES,ZEROEQ,EXIT
-
-; constantes liées au chargeur système (boot loader)
-DEFCONST "BTHEAD",6,,BTHEAD,BOOT_HEADER ; entête secteur démarrage
-DEFCONST "MAGIC",5,,MAGIC,0x55AA ; signature
-DEFCONST "FBTROW",6,,FBTROW,FLASH_FIRST_ROW  ; numéro première ligne FLASH BOOT  
-
-; champ signature    
-DEFWORD "BTSIGN",6,,BTSIGN  ; ( -- addr )
-    .word LIT,0,BTHEAD,EXIT
-
-; champ LATEST    
-DEFWORD "BTLATST",7,,BTLATST  ; ( -- addr )
-    .word LIT,1,BTHEAD,EXIT
-
-; champ DP    
-DEFWORD "BTDP",4,,BTDP ; ( -- addr )
-    .word LIT,2,BTHEAD,EXIT
-    
-; champ taille    
-DEFWORD "BTSIZE",6,,BTSIZE ; ( -- addr )
-    .word LIT,3,BTHEAD,EXIT
-    
-    
-; initialise l'entête d'image  
-DEFWORD "SETHEADER",9,,SETHEADER ; ( -- )
-    .word MAGIC,BTSIGN,TBLSTORE ; signature
-    .word HERE,BTDP,TBLSTORE ; DP
-    .word LATEST,FETCH,BTLATST,TBLSTORE ; latest
-    .word HERE,DP0,MINUS,BTSIZE,TBLSTORE ; size
-    .word EXIT
-
 ; écriture d'une plage RAM dans l'EEPROM externe 
-; doit tenir compte des limites de plages    
+; l'écriture se fait par segment de 256 octets.    
 ; arguments:
 ;   'r-addr' entier simple, adresse RAM début
-;   'size' entier simple, nombre d'octets à écrire
-;   'e-addr'  entier double, adresse EEPROM début    
-DEFWORD "RAM>EE",6,,RAMTOEE ; ( r-adr size e-addr -- )    
-1:  .word TWOTOR,QDUP,ZBRANCH,8f-$
-    .word TWODUP,TWORFETCH,LIT,256,UMSLASHMOD
-    .word DROP,LIT,256,SWAP,MINUS,MIN,SWAP,OVER,DUP,TWORFETCH
-    .word ROT,TOR,EEWRITE,RFETCH,MINUS,RFROM,TWORFROM,ROT,MPLUS
-    .word BRANCH,1b-$
-8:  .word DROP,TWORFROM,TWODROP
-    .word EXIT
+;   'size' entier simple, nombre d'octets à écrire, multiple de 256
+;   'e-addr'  entier double, adresse EEPROM début alignée % 256    
+DEFWORD "RAM>EE",6,,RAMTOEE ; ( r-addr size e-addr -- )    
+    .word ROT,LIT,0,DODO
+1:  .word TWOTOR,LIT,256,TWODUP,TWORFETCH,EEWRITE ; S: r-addr 256 R: e-addr
+    .word PLUS,TWORFROM,LIT,256,MPLUS,LIT,256,DOPLOOP,1b-$
+    .word TWODROP,DROP,EXIT
 
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
 ; descripteurs de périphérique ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -430,15 +354,12 @@ DEFTABLE "KEYBOARD",8,,KEYBOARD
     .word KEY       ; lecture du clavier
     .word KBD_RESET ; réinitialiation du clavier
     .word EKEY      ; lecture canonique du clavier
-    .word NOP
     
 ; descripteur écran    
 DEFTABLE "SCREEN",6,,SCREEN
     .word _SCREEN ; écran
     .word SCRCHAR ; 
     .word PUTC
-    .word NOP
-    .word NOP
     
 ; descripteur port sériel    
 DEFTABLE "SERIAL",6,,SERIAL
@@ -446,7 +367,6 @@ DEFTABLE "SERIAL",6,,SERIAL
     .word VTKEY  ;
     .word SPUTC  ;
     .word SGETC  ; lecture canonique du port sériel
-    .word NOP
     
 ; descripteur EEPROM SPI    
 DEFTABLE "EEPROM",6,,EEPROM
@@ -465,14 +385,6 @@ DEFTABLE "SDCARD",6,,SDCARD
     .word SDCWRITE
     .word SDCTOIMG  ; IMG>
     .word IMGTOSDC  ; >IMG
-    
-; descripteur mémoire FLASH MCU    
-DEFTABLE "MFLASH",6,,MFLASH
-    .word _MCUFLASH ; mémoire FLASH du MCU    
-    .word TBLFETCHL
-    .word TOFLASH
-    .word FLASHTORAM
-    .word RAMTOFLASH
     
 ; acceseurs de champs    
 DEFCONST "DEVID",5,,DEVID,0    
@@ -498,52 +410,6 @@ DEFWORD "DEVIO",5,,DEVIO ; ( i*x opcode devid -- j*x )
     .word SWAP,CELLS,PLUS,FETCH,EXECUTE,EXIT
     
     
-; initialise l'adresse boot du périphérique
-; arguments
-;     fn fonction à exécuter    
-; retourne:
-;   ud adresse  EEPROM, MCU_FLASH,SDCARD,SPIRAM   
-DEFWORD "BOOTADR",7,,BOOTADR ; ( fn -- ud )
-    .word BOOTDEV,FETCH,DUP,MFLASH,EQUAL,TBRANCH,1f-$
-    .word SWAP,DROP,SDCARD,EQUAL,ZBRANCH,3f-$
-    .word LIT,1,LIT,0,EXIT
-1:  .word DROP,FN_TOIMG,EQUAL,ZBRANCH,2f-$
-    .word ERASEROWS
-2:  .word FBTROW,ROWTOFADR,EXIT
-3:  .word LIT,0,DUP,EXIT    
-    
-; sauvegarde une image du système en RAM sur un périphérique
-;  dev -> { MFLASH, EEPROM, SDCARD, SPIRAM }  
-DEFWORD "IMG!",4,,IMGSTORE ; ( dev -- )
-    .word QEMPTY,ZBRANCH,2f-$ ; si RAM vide quitte
-    .word DROP,EXIT
-2:  .word BOOTDEV,STORE,SETHEADER
-    .word FN_TOIMG
-    .word BTHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS,ROT,DUP,BOOTADR
-    .word ROT,BOOTDEV,FETCH,TBLFETCH,EXECUTE
-9:  .word EXIT 
-
-; charge une image système en RAM à partir d'un périphérique.
-; arguments:
-;    dev PFA du descripteur de périphérique.
-DEFWORD "IMG@",4,,IMGFETCH ; ( dev -- )
-    .word BOOTDEV,STORE,QIMG,NOT,QABORT
-    .byte 24
-    .ascii "No boot image available."
-    .align 2
-    .word BTHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS
-    .word FN_IMGFROM,DUP,BOOTADR,ROT ; S: r-addr size e-addr fn
-    .word BOOTDEV,FETCH,TBLFETCH,EXECUTE
-    ; après le chargement de l'image, *DP0==*SYSLATEST
-    ; si ce n'est pas le cas l'image est invalide.
-    .word SYSLATEST,FETCH,DP0,FETCH,NOTEQ,QABORT
-    .byte  20
-    .ascii "Boot image outdated."
-    .align 2
-    .word BTDP,TBLFETCH,DP,STORE 
-    .word BTLATST,TBLFETCH,LATEST,STORE
-9:  .word EXIT
-
 ; lecture d'un écran
 ; arguments
 ;    u1   adresse RAM

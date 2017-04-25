@@ -98,9 +98,6 @@ _S0: .space 2
 ; base numérique utilisée pour l'affichage des entiers
  .global _BASE
 _BASE: .space 2
-; boot device id
-.global _BOOTDEV 
-_BOOTDEV: .space 2 
  .global _STATE
 ; état interpréteur : 0 interpréteur, -1 compilation
 _STATE: .space 2
@@ -387,6 +384,12 @@ DEFCODE "I",1,,DOI  ; ( -- n )
     mov I, T
     NEXT
 
+; empile la limite de boucle
+DEFCODE "L",1,,DOL ; ( -- n )
+    DPUSH
+    mov LIMIT,T
+    NEXT
+    
 ; empile compteur boucle externe    
 DEFCODE "J",1,,DOJ  ; ( -- n ) R: limitJ indexJ
     DPUSH
@@ -1226,7 +1229,6 @@ DEFUSER ">IN",3,,TOIN     ; pointeur position début dernier mot retourné par WOR
 DEFUSER "HP",2,,HP       ; HOLD pointer
 DEFUSER "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
 DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
-DEFUSER "BOOTDEV",7,,BOOTDEV ; détermine le périphérique utilisé par BOOT et >BOOT
 DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
 DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
 DEFUSER "STDIN",5,,STDIN ; entrée standard
@@ -1601,7 +1603,7 @@ DEFWORD "EVALUATE",8,,EVAL ; ( i*x c-addr u -- j*x )
     .word EXIT
     
 ; imprime le prompt et passe à la ligne suivante    
-DEFWORD "OK",2,,OK  ; ( -- )
+HEADLESS OK  ; ( -- )
     .word GETX,LIT,3,PLUS,LIT,CPL,LESS,TBRANCH,1f-$,NEWLINE    
 1:  .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
@@ -1860,7 +1862,7 @@ DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- )
 ;RUNTIME  qui retourne l'adresse d'une chaîne litérale
 ;utilisé par (S") et (.")  
 DEFWORD "(DO$)",5,F_HIDDEN,DOSTR ; ( -- addr )
-    .word RFROM, RFETCH, RFROM, COUNT, PLUS, ALIGNED, TOR, SWAP, TOR, EXIT
+    .word RFROM, RFETCH, RFROM, COUNT,PLUS, ALIGNED, TOR, SWAP, TOR, EXIT
 
 ;RUNTIME  de s"
 ; empile le descripteur de la chaîne litérale

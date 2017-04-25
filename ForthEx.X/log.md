@@ -1,3 +1,15 @@
+2017-04-25
+----------
+Travail sur block.s
+
+Épuration réorganisation:
+    modification à RAM>EE  
+    modification à IMG! et IMG@  qui maintenant ne s'applique qu'à la mémoire flash
+    du MCU. Supression de la variable BOOTDEV.
+    IMG! renommé IMGSAVE
+    IMG@ renommé IMGLOAD
+    déplacement du code pour IMGSAVE et IMGSTORE dans flash.s
+
 2017-04-23/24
 ----------
 Modification au générateur vidéo pour ajouter un seuil noir en utilisant OC4.
