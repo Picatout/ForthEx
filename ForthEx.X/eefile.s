@@ -74,17 +74,6 @@ _eefs_magic:
 .byte 4
 .ascii "EEFS"
 
-; files buffers    
-.equ MAX_BUFFERS, 4 ; nombre maximum de buffers utilisés.
-.equ BUFFER_SIZE, 1024
-; buffer structure
-.equ BLOCK_NBR, 0
-.equ BUFFER_FLAGS, 2
-.equ BUFFER_STRUCT_SIZE, 4
-;indicateurs booléens
-.equ F_BUFFER_USED, (1<<0)   ; le buffer est libre
-.equ F_BUFFER_UPDATE, (1<<1) ; le buffer a été modifié
-    
 ; files descriptors
 .equ MAX_FILES, 4 ; nombre maximum de fichiers ouverts simultanément.
 ; descriptor structure    
@@ -95,9 +84,8 @@ _eefs_magic:
 .equ FD_POS,8    ; position dans le fichier
 .equ FD_STRUCT_SIZE, 10
     
-    
 .section .hardware.bss  bss
-_eefs_buffers: .space MAX_BUFFERS*BUFFER_STRUCT_SIZE
+; espace réservé pour les descripteurs de fichiers.
 _eefs_fd: .space MAX_FILES*FD_STRUCT_SIZE 
     
 DEFCONST "EEFS_MAGIC",10,,EEFS_MAGIC,_eefs_magic

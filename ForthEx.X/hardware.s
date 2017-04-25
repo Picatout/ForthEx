@@ -29,7 +29,8 @@
 .include "sdcard.s"
 .include "strings.s"    
 .include "dynamem.s"
-.include "eefile.s"    
+.include "block.s"    
+;.include "eefile.s"    
 .include "ed.s"    
     
 ; constantes dans la mémoire flash
@@ -136,6 +137,7 @@ __INT1Interrupt:
 .global __reset    
 __reset: 
     clr ANSELA    ; désactivation entrées analogiques
+    bset CNPDA,#CNPDA1 ; pulldown pour éviter entrée flottante
     ; priorité 6 pour _INT1Interrupt
     mov #6, W0
     ior IPC5

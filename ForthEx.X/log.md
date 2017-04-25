@@ -1,6 +1,10 @@
-2017-04-23
+2017-04-23/24
 ----------
-Travail sur eefs.s
+Modification au générateur vidéo pour ajouter un seuil noir en utilisant OC4.
+
+Création et travail sur block.s
+Retiré eefs.s du projet.
+
 
 2017-04-22
 ----------

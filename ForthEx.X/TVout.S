@@ -51,6 +51,10 @@ fcursor: .space 1 ; indicateur booléens curseur texte
 _video_buffer: .space VIDEO_BUFF_SIZE
  
 
+.equ OC4IFS,IFS1 
+.equ OC4IEC,IEC1
+.equ OC4IPC,IPC6
+ 
 ;********************
 ; interruption TIMER2
 ; synchronisation  vidéo  
@@ -59,6 +63,7 @@ INTR
 .global __T2Interrupt
 __T2Interrupt:
     bclr SYNC_IFS, #SYNC_IF
+    bset VIDEO_BLKLEVEL_TRIS,#VIDEO_BLKLEVEL_OUT
     bclr VIDEO_SPISTAT, #SPIEN
     push W0
     inc line_count
@@ -87,6 +92,7 @@ odd_field:
     bra neq, 1f
     com.b even
     setm line_count
+    bclr OC4IEC,#OC4IE
 1:
     pop W0
     retfie
@@ -111,6 +117,8 @@ odd_field:
     mov #HLINE, W0
     mov W0, SYNC_OCRS
     mov W0, SYNC_PER
+    bclr OC4IFS,#OC4IF
+    bset OC4IEC,#OC4IE
     bra 1b
 6: ; line_count==TOPLINE  activation interruption video
     cp0.b video_on
@@ -122,6 +130,13 @@ odd_field:
     bclr VIDEO_IEC, #VIDEO_IE
     bra 1b
 
+    
+; début seuil niveau noir    
+.global __OC4Interrupt    
+__OC4Interrupt:
+    bclr OC4IFS,#OC4IF
+    bclr VIDEO_BLKLEVEL_TRIS,#VIDEO_BLKLEVEL_OUT
+    retfie
     
 ;*********************
 ; interruption OC2
@@ -285,6 +300,7 @@ scroll_down:
 HEADLESS TVOUT_INIT, CODE ;tvout_init:
     bclr VIDEO_TRIS, #VIDEO_OUT ; sortie vidéo
     bclr SYNC_TRIS, #SYNC_OUT  ; sortie sync vidéo
+    bset VIDEO_BLKLEVEL_LAT,#VIDEO_BLKLEVEL_OUT
     ; configuration PPS
     mov VIDEO_RPOR, W0
     mov #~(0x1f<<VIDEO_RPORbit),W1 ;mask
@@ -340,6 +356,22 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     clr.b cursor_sema
     bset fcursor, #CURSOR_ACTIVE
     bclr fcursor, #CURSOR_INV
+; test code    
+    ; contrôle niveau de noir
+    ; OC4 termine le front porch
+    ; OC3 débute le back porch
+    mov #2*HSYNC,W0
+    mov W0,OC4RS
+    mov #HSYNC,W0
+    mov W0, OC4R
+    mov #5|(7<<OCTSEL0), W0
+    mov W0,OC4CON1
+    bset OC4CON2,#OCTRIS
+    mov #~(7<<OC4IP0),W0
+    and OC4IPC
+    mov #(5<<OC4IP0),W0
+    ior OC4IPC
+; fin test code    
     bra _cls
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

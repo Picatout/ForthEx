@@ -121,6 +121,9 @@
 .equ VIDEO_SPI_IF, SPI2IF
 .equ VIDEO_SPI_IPC, IPC8
 .equ VIDEO_SPI_IPbit, SPI2IP0    
+.equ VIDEO_BLKLEVEL_OUT,RA4
+.equ VIDEO_BLKLEVEL_TRIS,TRISA
+.equ VIDEO_BLKLEVEL_LAT,LATA
     
 ; synchronistation vidéo
 ; vidéo SYNC RB4 (pin 11) périphérique OC1

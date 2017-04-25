@@ -455,8 +455,8 @@ DEFTABLE "EEPROM",6,,EEPROM
     .word EEWRITE
     .word EEREAD     ;IMG>
     .word RAMTOEE    ;>IMG
-    .word EEMOUNT    ; monte le système de fichier EEFS
-    .word EEUMOUNT   ; démonte le système de fichier EEFS
+;    .word EEMOUNT    ; monte le système de fichier EEFS
+;    .word EEUMOUNT   ; démonte le système de fichier EEFS
     
 ; descripteur carte Secure Digital    
 DEFTABLE "SDCARD",6,,SDCARD

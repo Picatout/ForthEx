@@ -294,6 +294,10 @@ DEFWORD "ESCAPED",7,,ESCAPED ; ( -- )
     
 2:  .word DROP,EXIT
   
+; FOPEN
+DEFWORD "FOPEN",5,,FOPEN ;
+  .word EXIT
+  
 ;éditeur de texte simple
 DEFWORD "ED",2,,ED ; ( -- )
     .word EDINIT
