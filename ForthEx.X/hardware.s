@@ -182,17 +182,18 @@ _cold:
     .word CLR_RAM,HARDWARE_INIT,VARS_INIT
     .word VERSION,COUNT,TYPE,NEWLINE 
     .word IMGLOAD; autochargement d'une image  RAM 
-;    .word QAUTORUN
+    .word QAUTORUN
+    .byte 7
+    .ascii "AUTORUN"
+    .align 2
     .word QUIT ; boucle de l'interpréteur
 
-;HEADLESS QAUTORUN,HWORD
-;    .word DOSTR
-;    .byte 7
-;    .ascii "AUTORUN"
-;    .align 2
-;    .word FIND,ZBRANCH,2f-$,EXECUTE,BRANCH,9f-$
-;2:  .word DROP
-;9:  .word EXIT
+; s'il y a un mot appellé AUTORUN exécute le.    
+HEADLESS QAUTORUN,HWORD
+    .word DOSTR
+    .word FIND,ZBRANCH,2f-$,EXECUTE,BRANCH,9f-$
+2:  .word DROP
+9:  .word EXIT
   
 ; est-ce un cold reboot    
 HEADLESS QCOLD,HWORD

@@ -1603,7 +1603,8 @@ DEFWORD "EVALUATE",8,,EVAL ; ( i*x c-addr u -- j*x )
     .word EXIT
     
 ; imprime le prompt et passe à la ligne suivante    
-HEADLESS OK  ; ( -- )
+;DEFWORD "OK",2,,OK 
+HEADLESS OK,HWORD  ; ( -- )
     .word GETX,LIT,3,PLUS,LIT,CPL,LESS,TBRANCH,1f-$,NEWLINE    
 1:  .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 

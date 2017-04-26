@@ -359,10 +359,6 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     clr.b cursor_sema
     bset fcursor, #CURSOR_ACTIVE
     bclr fcursor, #CURSOR_INV
-; test code    
-    ; contrôle niveau de noir
-    ; OC4 termine le front porch
-    ; OC3 débute le back porch
     mov #2*HSYNC,W0
     mov W0,OC4RS
     mov #HSYNC,W0
@@ -374,7 +370,6 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     and OC4IPC
     mov #(5<<OC4IP0),W0
     ior OC4IPC
-; fin test code    
     bra code_CLS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

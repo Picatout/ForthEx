@@ -9,6 +9,7 @@ Travail sur block.s
     IMG! renommé IMGSAVE
     IMG@ renommé IMGLOAD
     déplacement du code pour IMGSAVE et IMGSTORE dans flash.s
+    mot OK n'est plus dans le dictionnaire est maintenant HEADLESS.
 
 2017-04-23/24
 ----------
