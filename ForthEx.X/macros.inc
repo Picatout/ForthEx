@@ -215,7 +215,6 @@ code_\label :	;point d'entrée du code assembleur
 	
 ; macro utilisé pour créer les mots sans entête de dictionnaire
 .macro HEADLESS label, type=CODE
-	;.print "\label"
 	SYSDICT
 	.global \label
 \label :

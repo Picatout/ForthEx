@@ -1,3 +1,18 @@
+2017-04-26
+----------
+Les mots définis dans le dictionnaire avec l'attibru F_HIDDEN ont été redéfinis
+avec la macro HEADLESS, ce qui a permis de sauver de l'espace et d'épurer le dictionnaire.
+R0,S0 et DP0 sont passés de variables système à constantes.
+
+À faire: Repenser le système console pour que le fonctionnement soit identique
+         en REMOTE CONSOLE qu'en LOCAL CONSOLE. Modifier le vocabulaire pour
+         qu'il soit conforme à DPANS-94: http://lars.nocrew.org/dpans/dpans10.htm#10.6.1
+         Il faudrait vectorisé les mots KEY,KEY?,EKEY,EKEY? ainsi que EMIT
+         laisser tomber le mot ?KEY qui provient de EFORTH. Modifier le mot LOCAL
+         pour qu'il empile la table SCREEN et modifier le mot REMOTE pour qu'il 
+         empile la table SERIAL. Fusionner les tables SCREEN et KEYBOARD et renommer
+         LCONSOLE. 
+
 2017-04-25
 ----------
 Travail sur block.s

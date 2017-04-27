@@ -33,15 +33,15 @@
 .section .core.bss bss
 .global user    
 
-.equ _SP0, (RAM_BASE+RSTK_SIZE)    
-.section .param.stack.bss, bss , address(_SP0)    
-pstack:
-.space DSTK_SIZE
-
 .equ _RP0, (RAM_BASE)    
 .section .return.stack.bss stack , address(_RP0)
 rstack:
 .space RSTK_SIZE
+
+.equ _SP0, (RAM_BASE+RSTK_SIZE)    
+.section .param.stack.bss, bss , address(_SP0)    
+pstack:
+.space DSTK_SIZE
 
 .equ  CSTK_BASE, _SP0+DSTK_SIZE    
 .section .control.stack.bss bss, address(CSTK_BASE)
@@ -83,18 +83,9 @@ _TICKSOURCE: .space 2
 ; identifiant de la source: 0->interactif, -1, fichier
  .global _CNTSOURCE
 _CNTSOURCE: .space 2
-; début data
- .global _DP0
-_DP0: .space 2 
 ; pointeur data 
  .global _DP
 _DP: .space 2 
-; adresse début pile des retours
- .global _R0
-_R0: .space 2
-; adresse début pile arguments
- .global _S0
-_S0: .space 2
 ; base numérique utilisée pour l'affichage des entiers
  .global _BASE
 _BASE: .space 2
@@ -189,26 +180,30 @@ DEFCODE "CALL",4,,CALL ; ( ud -- )
     call.l W0
     NEXT
     
-; empile un litéral    
-DEFCODE "(LIT)",5,F_HIDDEN,LIT ; ( -- x ) 
+; empile un litéral
+HEADLESS LIT    
+;DEFCODE "(LIT)",5,F_HIDDEN,LIT ; ( -- x ) 
     DPUSH
     mov [IP++], T
     NEXT
 
-; empile un caractère litaral    
-DEFCODE "(CLIT)",6,F_HIDDEN,CLIT  ; ( -- c )
+; empile un caractère litaral
+HEADLESS CLIT    
+;DEFCODE "(CLIT)",6,F_HIDDEN,CLIT  ; ( -- c )
     DPUSH
     mov [IP++], T
     ze T,T
     NEXT
 
 ; branchement inconditionnel
-DEFCODE "(BRANCH)",8,F_HIDDEN,BRANCH ; ( -- )
+HEADLESS BRANCH    
+;DEFCODE "(BRANCH)",8,F_HIDDEN,BRANCH ; ( -- )
     add IP, [IP], IP
     NEXT
     
 ; branchement si T<>0
-DEFCODE "(TBRANCH)",9,F_HIDDEN,TBRANCH ; ( f -- )
+HEADLESS TBRANCH
+;DEFCODE "(TBRANCH)",9,F_HIDDEN,TBRANCH ; ( f -- )
     cp0 T
     DPOP
     bra nz, code_BRANCH
@@ -216,7 +211,8 @@ DEFCODE "(TBRANCH)",9,F_HIDDEN,TBRANCH ; ( f -- )
     NEXT
 
 ; branchement si T==0
-DEFCODE "(?BRANCH)",9,F_HIDDEN,ZBRANCH ; ( f -- )
+HEADLESS ZBRANCH
+;DEFCODE "(?BRANCH)",9,F_HIDDEN,ZBRANCH ; ( f -- )
     cp0 T
     DPOP
     bra z, code_BRANCH
@@ -225,7 +221,8 @@ DEFCODE "(?BRANCH)",9,F_HIDDEN,ZBRANCH ; ( f -- )
     
     
 ; exécution de DO
-DEFCODE "(DO)",4,F_HIDDEN,DODO ; ( n  n -- ) R( -- I LIMIT )
+HEADLESS DODO    
+;DEFCODE "(DO)",4,F_HIDDEN,DODO ; ( n  n -- ) R( -- I LIMIT )
 doit:
     RPUSH LIMIT
     RPUSH I
@@ -236,7 +233,8 @@ doit:
     NEXT
 
 ; exécution de ?DO
-DEFCODE "(?DO)",5,F_HIDDEN,DOQDO ; ( n n -- ) R( -- | I LIMIT )    
+HEADLESS DOQDO
+;DEFCODE "(?DO)",5,F_HIDDEN,DOQDO ; ( n n -- ) R( -- | I LIMIT )    
     cp T,[DSP]
     bra z, 9f
     add #(2*CELL_SIZE),IP ; saute le branchement inconditionnel
@@ -247,7 +245,8 @@ DEFCODE "(?DO)",5,F_HIDDEN,DOQDO ; ( n n -- ) R( -- | I LIMIT )
     
 ; exécution de LOOP
 ; la boucle se termine quand I==LIMIT    
-DEFCODE "(LOOP)",6,F_HIDDEN,DOLOOP ; ( -- )
+HEADLESS DOLOOP
+;DEFCODE "(LOOP)",6,F_HIDDEN,DOLOOP ; ( -- )
     inc I, I
     cp I, LIMIT
     bra eq, 1f
@@ -262,7 +261,8 @@ DEFCODE "(LOOP)",6,F_HIDDEN,DOLOOP ; ( -- )
 ;exécution de +LOOP
 ;La boucle s'arrête lorsque I franchi la frontière
 ;entre LIMIT et LIMIT-1 dans un sens ou l'autre    
-DEFCODE "(+LOOP)",7,F_HIDDEN,DOPLOOP ; ( n -- )     
+HEADLESS DOPLOOP
+;DEFCODE "(+LOOP)",7,F_HIDDEN,DOPLOOP ; ( n -- )     
     mov I,W0
     add I,T,I
     DPOP
@@ -529,7 +529,7 @@ DEFCODE "TUCK",4,,TUCK  ; ( n1 n2 -- n2 n1 n2 )
 
 ; nombre d'élément sur la pile data
 DEFCODE "DEPTH",5,,DEPTH ; ( -- +n1 )
-    mov _S0,W0
+    mov #pstack,W0
     sub DSP,W0,W0
     DPUSH
     lsr W0,T
@@ -1220,8 +1220,6 @@ DEFUSER "DP",2,,DP         ; pointeur fin dictionnaire
 DEFUSER "BASE",4,,BASE     ; base numérique
 DEFUSER "SYSLATEST",9,,SYSLATEST ; tête du dictionnaire en FLASH    
 DEFUSER "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
-DEFUSER "R0",2,,R0   ; base pile retour
-DEFUSER "S0",2,,S0   ; base pile arguments   
 DEFUSER "PAD",3,,PAD       ; tampon de travail
 DEFUSER "TIB",3,,TIB       ; tampon de saisie clavier
 DEFUSER "PASTE",5,,PASTE   ; copie de TIB     
@@ -1238,6 +1236,8 @@ DEFUSER "STDOUT",6,,STDOUT ; sortie standard
 ; constantes système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;    
 DEFCONST "VERSION",7,,VERSION,psvoffset(_version)        ; adresse chaîne version
+DEFCONST "R0",2,,R0,rstack   ; base pile retour
+DEFCONST "S0",2,,S0,pstack   ; base pile arguments   
 DEFCONST "RAMEND",6,,RAMEND,RAM_END          ;  fin mémoire RAM
 DEFCONST "IMMED",5,,IMMED,F_IMMED       ; drapeau mot immédiat
 DEFCONST "HIDDEN",6,,HIDDEN,F_HIDDEN    ; drapeau mot caché
@@ -1613,10 +1613,11 @@ HEADLESS OK,HWORD  ; ( -- )
 DEFWORD "ABORT",5,,ABORT
     .word STATE,FETCH,ZBRANCH,1f-$
     .word LATEST,FETCH,NFATOLFA,DUP,FETCH,LATEST,STORE,DP,STORE
-1:  .word S0,FETCH,SPSTORE,QUIT
+1:  .word S0,SPSTORE,QUIT
     
 ;runtime de ABORT"
-DEFWORD "?ABORT",6,F_HIDDEN,QABORT ; ( i*x f  -- | i*x) ( R: j*x -- | j*x )
+HEADLESS QABORT,HWORD  
+;DEFWORD "?ABORT",6,F_HIDDEN,QABORT ; ( i*x f  -- | i*x) ( R: j*x -- | j*x )
     .word DOSTR,SWAP,ZBRANCH,9f-$
     .word COUNT,TYPE,NEWLINE,ABORT
 9:  .word DROP,EXIT
@@ -1642,7 +1643,8 @@ DEFWORD "GETCLIP",7,,GETCLIP ; ( -- n+ )
     .word EXIT
     
 ; boucle lecture/exécution/impression
-DEFWORD "REPL",4,F_HIDDEN,REPL ; ( -- )
+HEADLESS REPL,HWORD    
+;DEFWORD "REPL",4,F_HIDDEN,REPL ; ( -- )
 1:  .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT,DUP,ONEMINUS,CLIP ; ( addr u )
     .word SPACE,INTERPRET 
     .word STATE,FETCH,TBRANCH,2f-$
@@ -1652,7 +1654,7 @@ DEFWORD "REPL",4,F_HIDDEN,REPL ; ( -- )
     
 ; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT ; ( -- )
-    .word R0,FETCH,RPSTORE
+    .word R0,RPSTORE
     .word LIT,0,STATE,STORE
     .word REPL
     
@@ -1742,7 +1744,8 @@ DEFWORD "HIDE",4,,HIDE ; ( -- )
 
 ; marque le champ compte du nom
 ; pour la recherche de CFA>NFA
-DEFWORD "(NMARK)",7,F_HIDDEN,NAMEMARK
+HEADLESS NAMEMARK,HWORD  
+;DEFWORD "(NMARK)",7,F_HIDDEN,NAMEMARK
     .word QEMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,NMARK,OR,SWAP,CSTORE
 9:  .word EXIT
@@ -1861,32 +1864,38 @@ DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- )
 9:  .word EXIT
 
 ;RUNTIME  qui retourne l'adresse d'une chaîne litérale
-;utilisé par (S") et (.")  
-DEFWORD "(DO$)",5,F_HIDDEN,DOSTR ; ( -- addr )
+;utilisé par (S") et (.")
+HEADLESS DOSTR, HWORD  
+;DEFWORD "(DO$)",5,F_HIDDEN,DOSTR ; ( -- addr )
     .word RFROM, RFETCH, RFROM, COUNT,PLUS, ALIGNED, TOR, SWAP, TOR, EXIT
 
 ;RUNTIME  de s"
 ; empile le descripteur de la chaîne litérale
 ; qui suis.    
-DEFWORD "(S\")",4,F_HIDDEN,STRQUOTE ; ( -- addr u )    
+HEADLESS STRQUOTE, HWORD    
+;DEFWORD "(S\")",4,F_HIDDEN,STRQUOTE ; ( -- addr u )    
     .word DOSTR,COUNT,EXIT
  
 ;RUNTIME de C"
 ; empile l'adresse de la chaîne comptée.
-DEFWORD "(C\")",4,F_HIDDEN,RT_CQUOTE ; ( -- c-addr )
+HEADLESS RT_CQUOTE, HWORD    
+;DEFWORD "(C\")",4,F_HIDDEN,RT_CQUOTE ; ( -- c-addr )
     .word DOSTR,EXIT
     
 ;RUNTIME DE ."
 ; imprime la chaîne litérale    
-DEFWORD "(.\")",4,F_HIDDEN,DOTSTR ; ( -- )
+HEADLESS DOTSTR, HWORD    
+;DEFWORD "(.\")",4,F_HIDDEN,DOTSTR ; ( -- )
     .word DOSTR,COUNT,TYPE,EXIT
 
 ; empile le descripteur de la chaîne qui suis dans le flux.    
-DEFWORD "SLIT",4,F_HIDDEN, SLIT ; ( -- c-addr u )
+HEADLESS SLIT, HWORD    
+;DEFWORD "SLIT",4,F_HIDDEN, SLIT ; ( -- c-addr u )
     .word LIT,'"',WORD,COUNT,EXIT
     
 ; (,") compile une chaîne litérale    
-DEFWORD "(,\")",4,F_HIDDEN,STRCOMPILE ; ( -- )
+HEADLESS STRCOMPILE, HWORD    
+;DEFWORD "(,\")",4,F_HIDDEN,STRCOMPILE ; ( -- )
     .word SLIT,PLUS,ALIGNED,DP,STORE,EXIT
 
     
@@ -1941,7 +1950,8 @@ DEFWORD "LEAVE",5,F_IMMED,LEAVE ; (C: -- slot )
     
 ; résout toutes les adresses pour les branchements
 ; à l'intérieur des boucles DO LOOP|+LOOP
-DEFWORD "FIXLOOP",7,F_IMMED|F_HIDDEN,FIXLOOP ; (C: a 0 i*slot -- )
+HEADLESS FIXLOOP, HWORD    
+;DEFWORD "FIXLOOP",7,F_IMMED|F_HIDDEN,FIXLOOP ; (C: a 0 i*slot -- )
 1:  .word CSTKFROM,QDUP,ZBRANCH,9f-$
     .word DUP,HERE,CELLPLUS,SWAP,MINUS,SWAP,STORE
     .word BRANCH,1b-$
@@ -2133,7 +2143,8 @@ DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- )
 ;  mots du core étendu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;RUNTIME COMPILÉE PAR DEFER    
-DEFWORD "(NOINIT)",8,F_HIDDEN,NOINIT ; ( -- )
+HEADLESS NOINIT,HWORD
+;DEFWORD "(NOINIT)",8,F_HIDDEN,NOINIT ; ( -- )
     .word DOTSTR
     .byte  26
     .ascii "Uninitialized defered word"
@@ -2228,10 +2239,9 @@ DEFWORD ".S",2,,DOTS  ; ( -- )
 DEFWORD ".RTN",4,,DOTRTN ; ( -- )
     .word BASE, FETCH,HEX
     .word CLIT,'R',EMIT,CLIT,':',EMIT
-    .word R0,FETCH
-1:  .word DUP,FETCH,DOT,TWOPLUS,DUP,RPFETCH,LIT,CELL_SIZE,MINUS,EQUAL
-    .word ZBRANCH,1b-$
-    .word NEWLINE,DROP,BASE,STORE,EXIT  
+    .word RPFETCH,R0,DODO
+1:  .word DOI,FETCH,DOT,LIT,2,DOPLOOP,1b-$
+    .word BASE,STORE,EXIT
   
 ;lit et imprime une plage mémoire
 ; n nombre de mots à lire
