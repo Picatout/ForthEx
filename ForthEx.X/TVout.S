@@ -39,8 +39,9 @@ video_on: .space 1
 .align 2 
 xpos: .space 1
 ypos: .space 1
+_htab: .space 1 ; largeur tabulation
 
-
+.align 2
 .global fcursor, cursor_dly , cursor_sema
 cursor_dly: .space 2 ; contrôle vitesse clignotement
 cursor_sema: .space 1 ; sémaphore 
@@ -295,8 +296,11 @@ scroll_down:
 
 ; adresse du buffer d'écran    
 DEFCONST "SCRBUF",6,,SCRBUF,_video_buffer
+; adresse de la variable
+; contenant la largeur des tabulations.    
+DEFCONST "TAB",3,,TAB,_htab
     
- ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; initialisation générateur vidéo
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;.global tvout_init
@@ -370,21 +374,29 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     and OC4IPC
     mov #(5<<OC4IP0),W0
     ior OC4IPC
+    mov #4,W0  ; largeur tabulation
+    mov.b _htab
     bra code_CLS
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; active/désactive sortie vidéo
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "VIDON",5,,VIDON ; ( f -- )  T=on F=off  
+; nom: VIDEO  ( f -- ) \ T=on F=off 
+;   active/désactive sortie vidéo
+; arguments:
+;    f indicateur booléen VRAI active la sortie vidéo, FAUX la désactive 
+; retourne:
+;   rien    
+DEFCODE "VIDEO",5,,VIDEO   
     mov T, W0
     mov.b WREG,video_on
     DPOP
     NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; active ou désactive le curseur texte
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "CURENBL",7,,CURENBL  ; ( f -- )  T=active, F=désactive
+; nom: CURENBL   ( f -- ) \ T=active, F=désactive
+;  active ou désactive le curseur texte
+; arguments:
+;   f   indicateur booléen,VRAI active le curseur, FAUX le désactive.
+; retourne:    
+;   rien
+DEFCODE "CURENBL",7,,CURENBL 
     mov T, W0
     DPOP
     cp0 W0
@@ -395,10 +407,13 @@ DEFCODE "CURENBL",7,,CURENBL  ; ( f -- )  T=active, F=désactive
     call cursor_disable
     NEXT
     
-;;;;;;;;;;;;;;;;;;
-; nettoie écran
-;;;;;;;;;;;;;;;;;;
-DEFCODE "CLS",3,,CLS   ; ( -- )
+; nom: CLS  ( -- )
+;   vide l'écran.
+; arguments:    
+;   aucun
+; retourne:    
+;   rien
+DEFCODE "CLS",3,,CLS
     cursor_incr_sema
     mov #0x2020,W0
     mov #_video_buffer, W1
@@ -409,51 +424,63 @@ DEFCODE "CLS",3,,CLS   ; ( -- )
     cursor_decr_sema
     NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-; glisse affichage vers le
-; haut d'une ligne texte
-; dernière ligne effacée
-;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "SCRLUP",6,,SCRLUP  ; ( -- )
+; nom: SCRLUP  ( -- )
+;   glisse affichage vers le
+;   haut d'une ligne texte
+;   dernière ligne effacée.
+; arguments:
+;   aucun
+; retourne:    
+;   rien
+DEFCODE "SCRLUP",6,,SCRLUP
     call scroll_up
     NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; glisse affichage vers le
-; bas d'une ligne texte
-; première ligne effacée
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "SCRLDN",6,,SCRLDN  ; ( -- )
+; nom: SCRLDN  ( -- )
+;   glisse affichage vers le
+;   bas d'une ligne texte
+;   première ligne effacée.
+; arguments:
+;   aucun
+; retourne:    
+;   rien
+DEFCODE "SCRLDN",6,,SCRLDN 
     call scroll_down
     NEXT
     
-;;;;;;;;;;;;;;;;;;;;;
-; obtient la valeur
-; de xpos
-;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "GETX",4,,GETX; ( -- n )
+; nom: GETX ( -- u )
+;   retourne la colonne du curseur texte.
+; arguments:
+;   aucun
+; retourne:    
+;   u    colonne du curseur    
+DEFCODE "GETX",4,,GETX
     DPUSH
     mov.b xpos, WREG
     mov W0,T
     ze T,T
     NEXT
     
-;;;;;;;;;;;;;;;;;;;;;;
-; obtient la valeur
-; de ypos
-;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "GETY",4,,GETY ; ( -- n )
+; nom: GETY  ( -- u )
+;   retourne la ligne du curseur.
+; arguments:
+;   aucun
+; retourne:    
+;   u    ligne du curseur    
+DEFCODE "GETY",4,,GETY
     DPUSH
     mov.b ypos, WREG
     mov W0,T
     ze T,T
     NEXT
     
-;;;;;;;;;;;;;;;;;;;;;;
-; définie position X
-; du curseur texte
-;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "SETX",4,, SETX ; ( n -- )
+; nom: SETX
+;  Positionne le curseur texte à la colonne u.
+; arguments:
+;    u   colonne.
+; retourne:    
+;    rien
+DEFCODE "SETX",4,, SETX ; ( u -- )
     cursor_incr_sema
     cursor_sync
     mov #CPL-1,W0
@@ -465,11 +492,13 @@ DEFCODE "SETX",4,, SETX ; ( n -- )
     DPOP
     NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;
-; définie position Y
-; du curseur texte
-;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "SETY",4,,SETY  ; ( n -- )
+; nom: SETX
+;  Positionne le curseur texte à la ligne u.
+; arguments:
+;    u   ligne
+; retourne:    
+;    rien
+DEFCODE "SETY",4,,SETY  ; ( u -- )
     cursor_incr_sema
     cursor_sync
     mov #LPS-1,W0
@@ -480,11 +509,23 @@ DEFCODE "SETY",4,,SETY  ; ( n -- )
     cursor_decr_sema
     DPOP
     NEXT
-    
-DEFWORD "CURPOS",6,,CURPOS  ; ( ny nx -- )
-.word SETX, SETY, EXIT
- 
-; retourne le caractère à la position du curseur
+
+; nom: CURPOS  ( u1 u2 -- )
+;  positionne le curseur texte à la colonne u1 et la ligne u2
+; arguments:
+;    u1    colonne
+;    u2    ligne
+; retourne:
+;   rien    
+DEFWORD "CURPOS",6,,CURPOS  ; ( u1 u2 -- )
+    .word SETY, SETX, EXIT
+
+; nom: SCRCHAR  ( -- c )    
+;   retourne le caractère à la position du curseur
+; arguments:
+;   aucun
+; retourne:
+;   c   caractère à la position du curseur.    
 DEFCODE "SCRCHAR",7,,SCRCHAR ; ( -- c )
     SET_EDS
     mov.b ypos,WREG
@@ -504,12 +545,15 @@ DEFCODE "SCRCHAR",7,,SCRCHAR ; ( -- c )
     RESET_EDS
     NEXT
 
-; met le caractère c la position x,y de l'écran.
-; arguments
-;   c caractère    
+; nom: CHR>SCR  ( x y c -- )    
+;   Met le caractère c la position x,y de l'écran.
+; arguments:
 ;   x colonne
 ;   y ligne
-DEFCODE "CHR>SCR",7,,CHRTOSCR ; ( x y c -- )
+;   c caractère    
+; retourne:
+;   rien    
+DEFCODE "CHR>SCR",7,,CHRTOSCR
     mov [DSP--],W0
     ze W0,W0
     mov #CPL,W1
@@ -523,11 +567,14 @@ DEFCODE "CHR>SCR",7,,CHRTOSCR ; ( x y c -- )
     DPOP
     NEXT
     
+; nom: INVLN  ( n f -- )    
 ; inverse ligne écran
 ; arguments:
 ;   n   no. de ligne {0..23}
 ;   f   TRUE -> inverse vidéo, FALSE -> vidéo normal
-DEFCODE "INVLN",5,,INVLN ; ( n f -- )
+; retourne:
+;   rien    
+DEFCODE "INVLN",5,,INVLN
     SET_EDS
     mov #CPL,W0
     mov [DSP--],W1
@@ -548,71 +595,133 @@ normal_video:
     NEXT
     
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; déplace le curseur 1 caractère
-; vers la gauche
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "LEFT",4,,LEFT ; ( -- )
+; nom: LEFT  ( -- )
+;   Déplace le curseur 1 caractère vers la gauche.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFCODE "LEFT",4,,LEFT
     cursor_incr_sema
     cursor_sync
+    cp0.b xpos
+    bra z,2f
     dec.b xpos
-    bra nn, 2f
-    dec.b ypos
-    bra nn, 1f
-    call scroll_down
-    clr.b ypos
-1:
-    mov #CPL,W0
-    dec W0,W0
-    mov.b WREG,xpos
 2:
     cursor_decr_sema
     NEXT
     
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; déplace le curseur 1 caractère
-; vers la droite
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "RIGHT",5,,RIGHT  ; ( -- )
+; nom: RIGHT  ( -- )
+;   Déplace le curseur 1 caractère vers la droite.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFCODE "RIGHT",5,,RIGHT
     cursor_incr_sema
     cursor_sync
-    inc.b xpos
-    mov #CPL, W0
+    mov #CPL-1,W0
     cp.b xpos
-    bra ltu, 2f
-    clr.b xpos
-    inc.b ypos
-    mov #LPS, W0
-    cp.b ypos
-    bra ltu, 2f
-    call scroll_up
-    dec.b ypos
+    bra z,2f
+    inc.b xpos
 2:    
     cursor_decr_sema
     NEXT
 
+
+; nom: HOME  ( -- )
+;   Déplace le curseur au début de la ligne.
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFCODE "LC-HOME",7,,LCHOME
+    cursor_incr_sema
+    cursor_sync
+    clr.b xpos
+    cursor_decr_sema
+    NEXT
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; inverse le bit #7 du caractère 
-; à la position du curseur
-; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "TGLCHAR",7,,TGLCHAR  ; ( -- )
+; nom: END  ( -- )
+;   Déplace le curseur après le dernier caractère de la ligne.
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFCODE "LC-END",6,,LCEND
+    cursor_incr_sema
+    cursor_sync
+    mov #CPL,W0
+    mov #_video_buffer,W1
+    mul.b ypos
+    add W2,W1,W1
+    add #CPL,W1
+1:  mov.b [--W1],W0
+    and #127,W0
+    cp W0,#VK_SPACE
+    bra z, 1b
+    and #CPL-1,W1
+    inc W1,W0
+    mov.b WREG,xpos
+    cursor_decr_sema
+    NEXT
+    
+; nom: LNUP   ( -- )
+;  déplace le curseur d'une ligne vers le haut.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFCODE "LC-UP",5,,LCUP
+    cursor_incr_sema
+    cursor_sync
+    cp0.b ypos
+    bra z, 9f
+    dec.b ypos
+9:  cursor_decr_sema
+    NEXT
+
+; nom: LNDOWN   ( -- )
+;  déplace le curseur d'une ligne vers le bas.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFCODE "LC-DOWN",6,,LCDOWN
+    cursor_incr_sema
+    cursor_sync
+    mov #LPS-1,W0
+    cp.b ypos
+    bra z, 9f
+    inc.b ypos
+9:  cursor_decr_sema
+    NEXT
+    
+    
+; nom: TGLCHAR  ( -- )
+;   inverse le bit #7 du caractère à la position du curseur.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFCODE "TGLCHAR",7,,TGLCHAR 
     cursor_incr_sema
     cursor_sync
     call toggle_char
     cursor_decr_sema
     NEXT
     
-    
-;;;;;;;;;;;;;;;;;;;;;;
-; envoie un caractère à la sortie standard
-;  argument:
-;    caractère à transmettre
-DEFWORD "EMIT",4,,EMIT ; ( c -- )
-    .word STDOUT,FETCH,EXECUTE,EXIT
-    
-DEFCODE "PUTC",4,,PUTC  ; ( c -- )
+; nom: PUTC  ( c -- )
+;   Affiche le caractère à la position du curseur et avance
+;   le curseur vers la droite. Si le curseur est en fin de ligne
+;   passe au début de la ligne suivante sauf si c'est la dernière ligne
+;   de l'affichage.    
+; arguments:
+;   c   caractère à afficher
+; retourne:
+;   rien    
+DEFCODE "PUTC",4,,PUTC 
     cursor_incr_sema
     cursor_sync
     mov.b #CPL, W0
@@ -624,81 +733,172 @@ DEFCODE "PUTC",4,,PUTC  ; ( c -- )
     add W0,W1,W1
     mov.b T, [W1]
     DPOP
+    mov #(CPL-1),W0
+    cp.b xpos
+    bra ltu, 2f
     cursor_decr_sema
-    bra code_RIGHT
-
-DEFCODE "CR",2,,CR ; ( -- )
-    cursor_incr_sema
-    cursor_sync
-    mov #CPL-1,W0
-    mov.b WREG,xpos
-    cursor_decr_sema
-    bra code_RIGHT
-
-;;;;;;;;;;;;;;;;;;;;;;
-; imprime un espace
-;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "SPACE",5,,SPACE ; ( -- )
-    .word LIT, 32, EMIT,EXIT
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; imprime n espaces
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "SPACES",6,,SPACES ; ( n -- )
-    .word DUP,LIT,0,GREATER,TBRANCH,1f-$
-    .word DROP,EXIT
-1:  .word LIT,0,DODO
-2:  .word SPACE,DOLOOP,2b-$
-    .word EXIT
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; efface la ligne indiquée
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "CLRLN",5,,CLRLN   ; ( n -- )
-    cursor_incr_sema
-    cursor_sync
-    mov #_video_buffer, W2
-    mov #LPS, W0
-    cp T, W0
-    bra geu, 1f
-    mov #CPL, W0
-    mul.uu T, W0,W0
-    add W0, W2,W2
-    mov #0x2020, W0
-    repeat #(CPL/2-1)
-    mov W0, [W2++]
-1:    
-    cursor_decr_sema
-    DPOP
+    bra code_CR
+2:  inc.b xpos
+9:  cursor_decr_sema
     NEXT
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-; imprime une chaîne de
-; caractère à l'écran
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
-    .word DUP,TBRANCH,1f-$
-    .word TWODROP, EXIT
-1:  .word LIT, 0, DODO
-2:  .word  DUP,CFETCH,QDUP,ZBRANCH,8f-$,EMIT,ONEPLUS
-    .word DOLOOP,2b-$,BRANCH,9f-$
-8:  .word UNLOOP    
-9:  .word DROP, EXIT     
+; nom: CR ( -- )
+; Envoie le curseur au début de la ligne suivante sauf si
+; c'est la dernière ligne de l'affichage.    
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFCODE "CR",2,,CR 
+    cursor_incr_sema
+    cursor_sync
+    mov #(LPS-1),W0
+    cp.b ypos
+    bra eq, 9f
+    clr.b xpos
+    inc.b ypos
+9:  cursor_decr_sema
+    NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; efface le caractère
-; sous le curseur
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "DELETE",6,,DELETE  ; ( -- )
-    .word BL,EMIT,LEFT,EXIT
+
+; nom: NEXT-COLON  ( -- )    
+;   avance le curseur à la prochaine tabulation    
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFCODE "NEXT-COLON",10,,NEXTCOLON 
+    mov #(CPL-4),W0
+    cp.b xpos
+    bra geu, 9f
+    mov.b xpos,WREG
+    ze W0,W0
+2:  add #4,W0
+    and.b #~3,W0
+    mov.b WREG,xpos
+9:  NEXT
+
+; nom: DELETE ( -- )
+;  Supprime le caractère à la position du curseur
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "LC-DEL",6,,LCDEL
+    .word SCRBUF,GETY,LIT,CPL,STAR,PLUS,GETX,PLUS
+    .word ONEPLUS,LIT,CPL,GETX,ONEPLUS,DOQDO
+1:  .word DUP,EFETCH,OVER,ONEMINUS,STORE,ONEPLUS,DOLOOP,1b-$
+    .word ONEMINUS,LIT,VK_SPACE,SWAP,STORE,EXIT
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;efface le carctère à gauche
-; du curseur
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "BACKCHAR",8,,BACKCHAR   ; ( -- )
-    .word LEFT,DELETE,EXIT
+; nom: BACKDEL ( -- )
+;  efface le carctère à gauche du curseur
+; arguments:
+;   aucun
+; retourne:
+;   rien  
+DEFWORD "BACKDEL",7,,BACKDEL   ; ( -- )
+    .word GETX,ZBRANCH,9f-$
+    .word LEFT,DELETE
+9:  .word EXIT
+    
+; nom: CLRLN ( -- )
+;  efface toute la ligne sur laquelle se trouve le curseur
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFCODE "CLRLN",5,,CLRLN 
+    cursor_incr_sema
+    cursor_sync
+    mov #CPL,W0
+    mul.b ypos
+    mov #_video_buffer,W1
+    add W2,W1,W1
+    mov #0x2020,W0
+    repeat #(CPL/2-1)
+    mov W0,[W1++]
+    clr.b xpos
+    cursor_decr_sema
+    NEXT
+    
+;;;;;;;;;;;;;;;;;;;;;;
+; imprime un caractère à l'écran ou accepte un caractère de contrôle.
+; Liste des contrôles reconnus:
+;  déplacement du curseur.    
+;     VK_CR   retour de chariot et ligne suivante.
+;     VK_TAB  avance à la colonne de tabulation suivante.
+;     VK_LEFT déplace le curseur à gauche d'un caractère
+;     VL_RIGHT déplace le curseur à droite d'un caractère.    
+;     VK_HOME déplace le curseur au début de la ligne.
+;     VK_END  déplace le curseur à la fin de la ligne.
+;     VK_UP   déplace le curseur 1 ligne vers le haut.
+;     VK_DOWN déplace le curseur 1 ligne vers le bas.
+;  modification de l'affichage
+;     VK_BACK déplace le curseur à gauche d'un caractère et efface le caractère.    
+;     CTRL_X  efface la ligne sur laquelle le curseur est.
+;     VK_DELETE efface le caractère à la position du curseur.    
+;     CTRL_L  efface l'écran au complet
+;    
+;  argument:
+;    caractère à transmettre
+DEFWORD "LC-EMIT",4,,LCEMIT ; ( c -- )
+    ; caractères imprimables 32-126
+    .word DUP,LIT,VK_SPACE,LESS,TBRANCH,2f-$
+    .word DUP,LIT,126,GREATER,TBRANCH,2f-$
+    .word BRANCH,9f-$
+    ; déplacement du curseur
+2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
+    .word DROP,CR,EXIT
+2:  .word DUP,LIT,VK_TAB,EQUAL,ZBRANCH,2f-$
+    .word DROP,NEXTCOLON,EXIT
+2:  .word DUP,LIT,VK_LEFT,EQUAL,ZBRANCH,2f-$
+    .word DROP,LEFT,EXIT
+2:  .word DUP,LIT,VK_RIGHT,EQUAL,ZBRANCH,2f-$
+    .word DROP,RIGHT,EXIT
+2:  .word DUP,LIT,VK_HOME,EQUAL,ZBRANCH,2f-$
+    .word DROP,HOME,EXIT
+2:  .word DUP,LIT,VK_END,EQUAL,ZBRANCH,2f-$
+    .word DROP,END,EXIT
+2:  .word DUP,LIT,VK_UP,EQUAL,ZBRANCH,2f-$
+    .word DROP,LCUP,EXIT
+2:  .word DUP,LIT,VK_DOWN,EQUAL,ZBRANCH,2f-$
+    .word DROP,LCDOWN,EXIT
+    ; modification de l'affichage
+2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
+    .word DROP,BACKDEL,EXIT
+2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
+    .word DROP,CLRLN,EXIT
+2:  .word DUP,LIT,VK_DELETE,EQUAL,ZBRANCH,2f-$
+    .word DROP,DELETE,EXIT
+2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
+    .word DROP,CLS,EXIT
+    ; les codes non reconnus sont imprimés.
+9:    
+2:  .word PUTC,EXIT
+    
+    
+; nom: LC-EMIT?  ( -- f )
+;  retourne toujrours VRAI
+; arguments:
+;  aucun
+; retourne:
+;   f   VRAI  
+DEFCODE "LC-EMIT?",8,,LCEMITQ  
+    DPUSH
+    mov #-1,T
+    NEXT
+    
+
+; nom: LC-PAGE ( -- )
+;  Efface l'écran du terminal
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "LC-PAGE",7,,TVPAGE
+    .word CLS
+    .word EXIT
+    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; routines pour la conversion

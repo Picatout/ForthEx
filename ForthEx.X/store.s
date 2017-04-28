@@ -348,19 +348,6 @@ DEFTABLE "XRAM",4,,XRAM
     .word RLOAD   ; IMG>
     .word RSTORE  ; >IMG
     
-; descripteur clavier
-DEFTABLE "KEYBOARD",8,,KEYBOARD
-    .word _KEYBOARD ; clavier
-    .word KEY       ; lecture du clavier
-    .word KBD_RESET ; réinitialiation du clavier
-    .word EKEY      ; lecture canonique du clavier
-    
-; descripteur écran    
-DEFTABLE "SCREEN",6,,SCREEN
-    .word _SCREEN ; écran
-    .word SCRCHAR ; 
-    .word PUTC
-    
 ; descripteur port sériel    
 DEFTABLE "SERIAL",6,,SERIAL
     .word _SERIAL ; port série

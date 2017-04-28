@@ -32,7 +32,7 @@
 ; variables système.    
 .section .vars_init psv  address(IMG_FLASH_ADDR-FLASH_ROW_SIZE)    
 .global vars_count
-vars_count: .word 17
+vars_count: .word 16
 csp_init: .word cstack
 syslatest_init: .word 0b
 latest_init: .word 0b    
@@ -46,8 +46,7 @@ base_init: .word 10
 state_init: .word 0
 toin_init: .word 0
 hp_init: .word 0
-stdin_init: .word KEY
-stdout_init: .word PUTC
+syscons_init: .word LCCONS+CELL_SIZE
 efree_init: .word EDS_BASE
 efsize_init: .word HEAP_SIZE
  

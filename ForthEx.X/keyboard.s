@@ -127,19 +127,77 @@ HEADLESS KBD_RESET  ; ( -- )
     bset KBD_RST_LAT,#KBD_RST_OUT
     NEXT
 
-; filtre le caractère dans T    
-; accepte seulement
-; VK_ENTER,VK_BKSP,VK_CLTRL_BACK, {32-126}
-HEADLESS KEYFILTER,CODE  ; ( c|0 -- c|0 )
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  mots dans le dictionnaire
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+; nom: LC-EKEY? ( -- f )
+;  vérifie s'il y a un caractère en attente
+;   dans la file et retourne un indicateur booléen.
+; arguments:
+;   aucun
+; retourne:
+;   f   indicateur vrai|faux
+DEFCODE "LC-EKEY?",8,,LCEKEYQ
+    DPUSH
+    clr T
+    mov kbd_head,W0
+    cp kbd_tail
+    bra z, 9f
+    com T,T
+9:  NEXT
+    
+    
+; nom: LC-EKEY  ( -- u )
+;  Attend jusqu'à réception d'un code du clavier
+;  retourne le premier code reçu.
+; arguments:
+;  aucun
+; retourne:
+;   u   caractère non filtré.    
+DEFCODE "LC-EKEY",7,,LCEKEY  
+    DPUSH
+1:  mov kbd_tail, W0
+    cp kbd_head
+    bra z, 1b
+    mov kbd_head,W0
+    mov #kbd_queue,W1
+    add W0,W1,W1
+    inc kbd_head
+    mov #(KBD_QUEUE_SIZE-1), W0
+    and kbd_head
+    mov.b [W1], T
+    ze T,T
+    NEXT
+
+    
+; nom: LC-FILTER ( u -- u false | c true )    
+;   filtre  et retourne un caractère 'c' et 'vrai'
+;   si u fait partie de l'ensemble reconnu.
+;   sinon retourne 'u' et 'faux'   
+;   accèpte:
+;      VK_CR, VK_BACK, CTRL_X, CTRL_V {32-126}
+; arguments:
+;   u    code à vérifier
+; retourne:
+;   code refusé:    
+;   u       même code
+;   false   indicateur booléen 
+;   code reconnu:
+;   c       caractère reconnu.
+;   true    indicateur booléen.
+DEFCODE "LC-FILTER",9,,LCFILTER
+    DPUSH
 1:  cp T, #32
     bra ge, 7f
     cp T, #VK_CR
     bra eq, 9f
     cp T, #VK_BACK
     bra eq, 9f
-    cp T, #VK_CANCEL
+    cp T, #CTRL_X
     bra eq, 9f
-    cp T, #VK_SYN
+    cp T, #CTRL_V
     bra eq, 9f
     bra 8f
 7:
@@ -150,48 +208,30 @@ HEADLESS KEYFILTER,CODE  ; ( c|0 -- c|0 )
 9:    
     NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;  mots dans le dictionnaire
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; retourne le caractère
-; en tête de file kbd_queue    
-; retourne 0 si file vide.
-; Il n'y a pas de filtre appliqué.    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "EKEY",4,,EKEY   ; (  -- c|0 )  
-    clr W0
-    mov kbd_head, W1
-    mov kbd_tail, W2
-    cp  W1,W2
-    bra eq, 1f
-    mov #kbd_queue,W2
-    add W1,W2,W2
-    inc kbd_head
-    mov #(KBD_QUEUE_SIZE-1), W0
-    and kbd_head
-    mov.b [W2], W0
-    ze W0,W0
-1:
-    DPUSH
-    mov W0,T
-    NEXT
-
+; nom: LC-KEY? ( -- 0|c)
+;   vérifie s'il y a un caractère répondant aux 
+;   critères du filtre disponible dans la file. 
+;   S'il y a des caractères non valides les jettes.    
+; arguments:
+;   aucun
+; retourne:
+;   0   aucun caractère disponible
+;   c   le premier caractère valide de la file.    
+DEFWORD "LC-KEY?",7,,LCKEYQ
+1: .word LCEKEYQ,DUP,ZBRANCH,9f-$
+   .word DROP,LCEKEY,LCFILTER,TBRANCH,9f-$
+   .word DROP,BRANCH,1b-$
+9: .word EXIT
     
-; lecture clavier sans attente.    
-DEFWORD "?KEY",4,,QKEY  ; ( -- 0 | c T )
-    .word EKEY,KEYFILTER,DUP
-    .word ZBRANCH,1f-$
-    .word LIT,-1
-1:  .word EXIT
-    
-;;;;;;;;;;;;;;;;;;;;;;;;
-; attend une touche
-; du clavier
-;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFWORD "KEY",3,,KEY ; ( -- c)    
-1:  .word QKEY
+; nom: LC-KEY  ( -- c )
+;   Attend la réception d'un caractère valide du clavier
+; arguments:
+;   aucun 
+; retourne:
+;   c   caractère filtré 
+DEFWORD "LC-KEY",6,,LCKEY
+1:  .word LCKEYQ
     .word ZBRANCH,1b-$
     .word EXIT 
     

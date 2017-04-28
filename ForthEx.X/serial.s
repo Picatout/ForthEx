@@ -148,6 +148,7 @@ __U1TXInterrupt:
 ; mots système FORTH
 ;;;;;;;;;;;;;;;;;;;;;;
 
+
 ;initialisation port série  
 ; BAUD par défaut 57600
 HEADLESS SERIAL_INIT,CODE ; ( -- )
@@ -215,6 +216,7 @@ DEFCODE "BAUD",4,,BAUD   ; ( u -- )
     call serial_enable
     DPOP
     NEXT
+
     
 ; transmission d'un caractère par
 ; le port sériel.
@@ -281,69 +283,17 @@ DEFCODE "SGETC",5,,SGETC  ; ( -- c )
     bclr ser_flags,#F_RXSTOP
 2:  NEXT
 
-; filtre la réception des caractères reçus
-DEFWORD "VTFILTER",5,,VTFILTER ; ( c -- c )
-    .word DUP,LIT,31,GREATER,ZBRANCH,1f-$
-    .word EXIT
-1:  .word DUP,CLIT,27,EQUAL,ZBRANCH,6f-$
-    .word DROP,SGETC,EXIT 
-6:  .word LIT,CTRL_TABLE,PLUS,CFETCH,EXIT    
-
-; pour la combinaison CTRL_x où x est une lettre
-; minicom envoie l'ordre de la lettre dans l'alphabet
-; i.e.  CTRL_a -> 1,  CTRL_b -> 2, CTRL_z -> 26    
-CTRL_TABLE:
-    .byte 32,32,32,32
-    .byte 32,32,32,32
-    .byte VK_BACK,32,32,32
-    .byte VK_FF,VK_CR,32,32
-    .byte 32,32,32,32
-    .byte 32,32,VK_SYN,32
-    .byte VK_SYN,32,32,32
-    
-    
-DEFWORD "VTKEY",5,,VTKEY ; ( -- )
-    .word SGETC,VTFILTER,EXIT
-  
-DEFWORD "VTCRLF",6,,VTCRLF ; ( -- )
-    .word LIT,13,SPUTC
-    .word LIT,10,SPUTC
-    .word EXIT
-   
-DEFWORD "VTDELBACK",9,,VTDELBACK ; ( -- )
-    .word LIT,VK_BACK,SPUTC
-    .word BL,SPUTC,LIT,VK_BACK,SPUTC
-    .word EXIT
-
-; code VT100 pour suprimer la ligne courante.    
-DEFWORD "VTDELLN",7,,VTDELLN ; ( -- )
-    .word LIT,27,SPUTC,LIT,'[',SPUTC
-    .word LIT,'2',SPUTC
-    .word LIT,'K',SPUTC,LIT,13,SPUTC,EXIT
-
-DEFWORD "VT?CURSOR",9,,VTQCURSOR ; ( -- )
-    .word LIT,27,SPUTC,LIT,'[',SPUTC,LIT,'6',SPUTC
-    .word LIT,'n',SPUTC,EXIT
-    
-; demande la position du curseur
-; sortie:
-;   v position verticale
-;   H position horizontale    
-DEFWORD "VTGETYX",7,,VTGETYX ; ( -- v h )
-    .word VTQCURSOR
-1:  .word SGETC,LIT,27,EQUAL,ZBRANCH,1b-$
-    .word SGETC,DROP ; [
-    .word SGETC,LIT,'0',MINUS
-    .word SGETC,DUP,LIT,';',EQUAL,TBRANCH,2f-$
-    .word LIT,'0',MINUS,SWAP,LIT,10,STAR,PLUS,SGETC
-2:  .word DROP,SGETC,LIT,'0',MINUS
-    .word SGETC,DUP,LIT,'R',EQUAL,TBRANCH,9f-$
-    .word LIT,'0',MINUS,SWAP,LIT,10,STAR,PLUS,SGETC
-9:  .word DROP,EXIT
-    
-; caractères de contrôle de flux.
-DEFCONST "XON",3,,XON,A_XON 
-DEFCONST "XOFF",4,,XOFF,A_XOFF
-
+; nom: SREADY?  ( -- f )
+;  Vérifie si le terminal est prêt à recevoir.
+; arguments:
+;    aucun
+; retourne:
+;    f   indicateur booléen VRAI si prêt.    
+DEFCODE "SREADY?",7,,SREADYQ
+    DPUSH
+    clr T
+    btss ser_flags,#F_TXSTOP
+    com T,T
+    NEXT
     
 ;.end

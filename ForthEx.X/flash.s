@@ -197,8 +197,8 @@ DEFWORD "FERASE",6,,FERASE ; ( u -- )
     .word ROWTOFADR ; S: ud
     .word QFLIMITS,ZBRANCH, 8f-$
     .word SWAP,LIT,0xF800,AND,SWAP ; ligne aligné sur 11 bits
-    .word FALSE,VIDON
-    .word FADDR,LIT,FOP_EPAGE, FLASH_OP,TRUE,VIDON,EXIT   
+    .word FALSE,VIDEO
+    .word FADDR,LIT,FOP_EPAGE, FLASH_OP,TRUE,VIDEO,EXIT   
 8:  .word DOTS,TWODROP
 9:  .word EXIT
   

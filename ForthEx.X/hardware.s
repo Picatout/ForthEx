@@ -24,14 +24,16 @@
 .include "serial.s"
 .include "sound.s"
 .include "store.s"
-.include "keyboard.s"    
+.include "keyboard.s"
+.include "vt102.s"    
+.include "console.s"    
 .include "flash.s"
 .include "sdcard.s"
 .include "strings.s"    
 .include "dynamem.s"
 .include "block.s"    
 ;.include "eefile.s"    
-.include "ed.s"    
+;.include "ed.s"    
     
 ; constantes dans la mémoire flash
 .section .str.const psv       
@@ -164,10 +166,10 @@ _reboot:
     .word QCOLD,TBRANCH,_cold-$
 _warm:
     .word LIT,fwarm,DUP,FETCH,LIT,0,ROT,STORE,DP,FETCH,LATEST,FETCH
-    .word STDIN,FETCH,STDOUT,FETCH
+    .word SYSCONS,FETCH
     .word CLS,CLR_LOW_RAM
     .word HARDWARE_INIT,VARS_INIT
-    .word STDOUT,STORE,STDIN,STORE
+    .word SYSCONS,STORE
     .word LATEST,STORE,DP,STORE
     .word DUP,LIT,USER_ABORT,EQUAL,ZBRANCH,1f-$
     .word DROP,LIT,_user_aborted,BRANCH,8f-$
@@ -180,7 +182,8 @@ _warm:
   
 _cold:
     .word CLR_RAM,HARDWARE_INIT,VARS_INIT
-    .word VERSION,COUNT,TYPE,NEWLINE 
+    .word VERSION,COUNT,TYPE,NEWLINE
+;1:  .word LIT,65,EMIT,LIT,100,MSEC,BRANCH,1b-$
     .word IMGLOAD; autochargement d'une image  RAM 
     .word QAUTORUN
     .byte 7

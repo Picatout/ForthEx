@@ -98,11 +98,9 @@ _TOIN: .space 2
 ; pointeur HOLD conversion numérique
  .global _HP
 _HP: .space 2
-; XT pour fonctions terminal
-; par défaut KEY,EMIT, peut-être SGET,SEMIT 
-_STDIN: .space 2
-_STDOUT: .space 2
- 
+; vecteur pour le terminal actif.
+; par défaut LCONSOLE 
+_SYSCONS: .space 2
 ; sauvegarde de RSP par BREAK
 _RPBREAK: .space 2 
 ; flag activation/désactivaton break points
@@ -295,6 +293,33 @@ exec:
     mov [WP++],W0  ; code address, WP=PFA
     goto W0
 
+; nom: @XT
+;   Exécution vectorisée. 
+;   Lit le contenu d'une variable qui contient un XT
+;   et exécute ce XT.
+; arguments:
+;    i*x  arguments attendus par la fonction qui sera exécutée.    
+;    a-addr   adresse contenant le vecteur XT
+; retourne:
+;    j*x  dépend de la fonction exécutée.    
+DEFCODE "@EXEC",5,,FETCHEXEC ; ( i*x a-addr -- j*x )
+    mov [T],T
+    bra exec
+
+; nom: VECEXEC ( i*x a-addr n -- j*x )
+;   excécute la fonction n dans une table de vecteur
+; arguments:
+;    i*x   arguments requis par la fonction à exécuter.
+;    a-addr  adresse de la table de vecteurs.
+;    n     numéro du vecteur à exécuter.
+DEFCODE "VEXEC",5,,VEXEC
+    mul.uu T,#CELL_SIZE,W0
+    DPOP
+    add W0,T,T
+    mov [T],T
+    bra exec
+    
+    
 DEFCODE "@",1,,FETCH ; ( addr -- n )
     mov [T],T
     NEXT
@@ -1229,8 +1254,7 @@ DEFUSER "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
 DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
 DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
 DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
-DEFUSER "STDIN",5,,STDIN ; entrée standard
-DEFUSER "STDOUT",6,,STDOUT ; sortie standard
+DEFUSER "SYSCONS",7,,SYSCONS ; entrée standard
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
@@ -1376,7 +1400,7 @@ DEFWORD "WORDS",5,,WORDS ; ( -- )
     .word DUP,CFETCH,HIDDEN,AND,ZBRANCH,4f-$ ; n'affiche pas les mots cachés
     .word TWOMINUS,BRANCH,1b-$
 4:  .word DUP,DUP,CFETCH,LENMASK,AND  ; NFA NFA LEN
-    .word DUP,STDOUT,FETCH,LIT,SPUTC,EQUAL,ZBRANCH,2f-$
+    .word DUP,SYSCONS,FETCH,LIT,SERCONS,EQUAL,ZBRANCH,2f-$
     .word VTGETYX,SWAP,DROP,BRANCH,5f-$
 2:  .word  GETX
 5:  .word  PLUS,LIT,64,ULESS,TBRANCH,3f-$
@@ -1505,28 +1529,8 @@ not_found:
     mov #0,T
 2:  NEXT
 
-; attend un caractère de l'entrée standard    
-DEFWORD "GETC",4,,GETC ; (  -- c )
-    .word STDIN,FETCH,EXECUTE,EXIT
-    
-; supprime le dernier caractère reçu    
-DEFWORD "DELLAST",7,,DELLAST ; ( -- )
-    .word STDOUT,FETCH,LIT,PUTC,EQUAL,ZBRANCH,2f-$
-    .word BACKCHAR,EXIT
-2:  .word VTDELBACK,EXIT    
-
-; supprime la ligne en cours de saisie.
-DEFWORD "DELLINE",7,,DELLINE ; ( -- )
-    .word STDOUT,FETCH,LIT,PUTC,EQUAL,ZBRANCH,2f-$
-    .word LIT,0,SETX,GETY,CLRLN,EXIT
-2:  .word VTDELLN,EXIT
   
-; envoie une commande nouvelle ligne à la console
-DEFWORD "NEWLINE",7,,NEWLINE ; ( -- )
-    .word STDOUT,FETCH,LIT,PUTC,EQUAL,ZBRANCH,2f-$
-    .word CR,EXIT
-2:  .word VTCRLF,EXIT
-  
+ 
 ; lecture d'une ligne de texte au clavier
 ; chaîne terminée par touche 'ENTER'
 ; cette touche est remplacée par un espace (ASCII 32 )
@@ -1538,14 +1542,14 @@ DEFWORD "NEWLINE",7,,NEWLINE ; ( -- )
 ;   +n2 longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
-1:  .word GETC,DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
+1:  .word KEY,DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
     .word DROP,BL,OVER,CSTORE,SWAP,MINUS,ONEPLUS,RDROP,EXIT
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,3f-$
     .word DROP,TWODUP,EQUAL,TBRANCH,1b-$
-    .word DELLAST,ONEMINUS,BRANCH,1b-$
-3:  .word DUP,LIT,VK_CANCEL,EQUAL,ZBRANCH,4f-$
+    .word DELBACK,ONEMINUS,BRANCH,1b-$
+3:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,4f-$
     .word DROP,DELLINE,DROP,DUP,BRANCH,1b-$
-4:  .word DUP,LIT,VK_SYN,EQUAL,ZBRANCH,5f-$
+4:  .word DUP,LIT,CTRL_V,EQUAL,ZBRANCH,5f-$
     .word DROP,DELLINE,PASTE,FETCH,COUNT,TYPE
     .word DROP,DUP,GETCLIP,PLUS,BRANCH,1b-$
 5:  .word OVER,RFETCH,EQUAL,TBRANCH,6f-$
@@ -1666,18 +1670,6 @@ DEFWORD "(",1,F_IMMED,LPAREN ; parse ccccc)
 DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
     .word TSOURCE,PLUS,ADRTOIN,EXIT
 
-DEFCONST "LOCAL",5,,LOCAL,1   ; clavier/écran 
-DEFCONST "REMOTE",6,,REMOTE,2 ; port sériel
-
-; sélection de la console
-; argument:
-;   n  indentifiant terminal {LOCAL,SERIAL}    
-DEFWORD "CONSOLE",7,,CONSOLE ; ( n -- )
-    .word REMOTE,EQUAL,TBRANCH,2f-$
-    .word LIT,PUTC,LIT,KEY,BRANCH,9f-$
-2:  .word FALSE,SERENBL,LIT,SPUTC,LIT,VTKEY,TRUE,SERENBL
-9:  .word STDIN,STORE,STDOUT,STORE,EXIT
-  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   compilateur
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

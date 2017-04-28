@@ -1,3 +1,10 @@
+2017-04-27
+----------
+Refaire le système console en le basant sur des tables de vecteurs pour chaque
+terminal. les tables contiennent le CFA de chaque fonction.
+ref: http://lars.nocrew.org/dpans/dpans10.htm#10.6.1
+
+
 2017-04-26
 ----------
 Les mots définis dans le dictionnaire avec l'attibru F_HIDDEN ont été redéfinis
