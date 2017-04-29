@@ -82,6 +82,9 @@ __T2Interrupt:
     mov #18, W0
     cp line_count
     bra z, 5f
+    mov #29,W0
+    cp line_count
+    bra z, 8f
     mov #TOPLINE, W0
     cp line_count
     bra z, 6f
@@ -118,7 +121,7 @@ even2:
     mov W0, SYNC_PER
     bra 1b
 3: ; line_count==6 , 6 half line large neg. pulses
-    mov #(HALFLINE-SERATION), W0
+    mov #(HALFLINE-HSYNC), W0
     mov W0, SYNC_OCR
     bra 1b
 4: ; line_count==12 , 6 half line narrow neg. pulses
@@ -131,8 +134,6 @@ even2:
     mov #HLINE, W0
     mov W0, SYNC_OCRS
     mov W0, SYNC_PER
-    bclr OC4IFS,#OC4IF
-    bset OC4IEC,#OC4IE
     bra 1b
 6: ; line_count==TOPLINE  activation interruption video
     cp0.b video_on
@@ -143,7 +144,10 @@ even2:
 7: ; line_count==TOPLINE+VIDEDO désactivaion int. video
     bclr VIDEO_IEC, #VIDEO_IE
     bra 1b
-
+8:  
+    bclr OC4IFS,#OC4IF
+    bset OC4IEC,#OC4IE
+    bra 1b
     
 ; début seuil niveau noir    
 .global __OC4Interrupt    

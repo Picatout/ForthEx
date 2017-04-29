@@ -1,3 +1,7 @@
+2017-04-29
+----------
+Travail sur __OC2Interrupt pour améliorer la synchronisation vidéo.
+
 2017-04-28
 ----------
 Continuation du travail commencé hier sur console.
