@@ -39,6 +39,7 @@ video_on: .space 1
 .align 2 
 xpos: .space 1
 ypos: .space 1
+ .global _htab
 _htab: .space 1 ; largeur tabulation
 
 .align 2
@@ -212,11 +213,15 @@ cursor_blink:
     dec cursor_dly
     bra z, 1f
     return
-1:    
+1:  
+    push W0
     mov #CURSOR_DELAY,W0
     mov W0,cursor_dly
     btg.b fcursor,#CURSOR_INV
+    pop W0 ; attention toggle_char est un point d'entré!!
 toggle_char:
+    push.d W0
+    push W2
     SET_EDS
     cursor_incr_sema
     mov.b #CPL, W0
@@ -229,9 +234,12 @@ toggle_char:
     btg.b [W1],#7
     cursor_decr_sema
     RESET_EDS
+    pop W2
+    pop.d W0
     return
 
 cursor_enable:
+    push W0
     btsc.b fcursor,#CURSOR_ACTIVE
     return
     mov	#CURSOR_DELAY, W0
@@ -239,6 +247,7 @@ cursor_enable:
     clr.b cursor_sema
     mov #1<<CURSOR_ACTIVE,W0
     mov.b WREG, fcursor
+    pop W0
     return
     
 cursor_disable:
@@ -251,6 +260,8 @@ cursor_disable:
 
 .global scroll_up
 scroll_up:
+    push.d W0
+    push.d W2
     SET_EDS
     cursor_incr_sema
     cursor_sync
@@ -268,10 +279,14 @@ scroll_up:
     mov W0, [W1++]
     cursor_decr_sema
     RESET_EDS
+    pop.d W2
+    pop.d W0
     return
     
 .global scroll_down    
 scroll_down:
+    push.d W0
+    push W2
     SET_EDS
     cursor_incr_sema
     cursor_sync
@@ -287,6 +302,8 @@ scroll_down:
     mov W0,[--W1]
     cursor_decr_sema
     RESET_EDS
+    pop W2
+    pop.d W0
     return
  
     
@@ -298,7 +315,7 @@ scroll_down:
 DEFCONST "SCRBUF",6,,SCRBUF,_video_buffer
 ; adresse de la variable
 ; contenant la largeur des tabulations.    
-DEFCONST "TAB",3,,TAB,_htab
+DEFCONST "HTAB",4,,HTAB,_htab
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; initialisation générateur vidéo
@@ -374,7 +391,7 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     and OC4IPC
     mov #(5<<OC4IP0),W0
     ior OC4IPC
-    mov #4,W0  ; largeur tabulation
+    mov.b #4,W0 ; largeur tabulation
     mov.b _htab
     bra code_CLS
     
@@ -510,6 +527,25 @@ DEFCODE "SETY",4,,SETY  ; ( u -- )
     DPOP
     NEXT
 
+; nom: CURADR  ( -- c-addr )
+;  Retourne l'adresse dans le buffer d'écran correspondant
+;  à la position actuelle du curseur
+; arguments:
+;   aucun
+; retourne
+;   c-addr   addresse buffer du curseur    
+DEFCODE "CURADR",6,,CURADR
+    DPUSH
+    mov #_video_buffer,T
+    mov #CPL,W0
+    mul.b ypos
+    add W2,T,T
+    mov.b xpos,WREG
+    ze W0,W0
+    add T,W0,T
+    NEXT
+    
+    
 ; nom: CURPOS  ( u1 u2 -- )
 ;  positionne le curseur texte à la colonne u1 et la ligne u2
 ; arguments:
@@ -554,6 +590,8 @@ DEFCODE "SCRCHAR",7,,SCRCHAR ; ( -- c )
 ; retourne:
 ;   rien    
 DEFCODE "CHR>SCR",7,,CHRTOSCR
+    cursor_incr_sema
+    cursor_sync
     mov [DSP--],W0
     ze W0,W0
     mov #CPL,W1
@@ -565,6 +603,7 @@ DEFCODE "CHR>SCR",7,,CHRTOSCR
     add W1,W0,W0
     mov.b T,[W0]
     DPOP
+    cursor_decr_sema
     NEXT
     
 ; nom: INVLN  ( n f -- )    
@@ -595,13 +634,13 @@ normal_video:
     NEXT
     
     
-; nom: LEFT  ( -- )
+; nom: LC-LEFT  ( -- )
 ;   Déplace le curseur 1 caractère vers la gauche.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
-DEFCODE "LEFT",4,,LEFT
+DEFCODE "LC-LEFT",7,,LCLEFT
     cursor_incr_sema
     cursor_sync
     cp0.b xpos
@@ -612,13 +651,13 @@ DEFCODE "LEFT",4,,LEFT
     NEXT
     
     
-; nom: RIGHT  ( -- )
+; nom: LC-RIGHT  ( -- )
 ;   Déplace le curseur 1 caractère vers la droite.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
-DEFCODE "RIGHT",5,,RIGHT
+DEFCODE "LC-RIGHT",8,,LCRIGHT
     cursor_incr_sema
     cursor_sync
     mov #CPL-1,W0
@@ -630,7 +669,7 @@ DEFCODE "RIGHT",5,,RIGHT
     NEXT
 
 
-; nom: HOME  ( -- )
+; nom: LC-HOME  ( -- )
 ;   Déplace le curseur au début de la ligne.
 ; arguments:
 ;   aucun
@@ -643,31 +682,25 @@ DEFCODE "LC-HOME",7,,LCHOME
     cursor_decr_sema
     NEXT
     
-; nom: END  ( -- )
+; nom: LC-END  ( -- )
 ;   Déplace le curseur après le dernier caractère de la ligne.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFCODE "LC-END",6,,LCEND
-    cursor_incr_sema
-    cursor_sync
-    mov #CPL,W0
-    mov #_video_buffer,W1
-    mul.b ypos
-    add W2,W1,W1
-    add #CPL,W1
-1:  mov.b [--W1],W0
-    and #127,W0
-    cp W0,#VK_SPACE
-    bra z, 1b
-    and #CPL-1,W1
-    inc W1,W0
-    mov.b WREG,xpos
-    cursor_decr_sema
-    NEXT
+DEFWORD "LC-END",6,,LCEND
+    .word FALSE,CURENBL
+    .word CURADR,LIT,63,DUP,INVERT,ROT,AND ; S: 63 _video_buffer+cpl*ypos
+1:  .word TWODUP,PLUS,ECFETCH,BL,EQUAL,ZBRANCH,4f-$ ; S: 63 c-addr
+    .word SWAP,ONEMINUS,DUP,ZBRANCH,2f-$
+    .word SWAP,BRANCH,1b-$
+2:  .word SETX,DROP,BRANCH,8f-$
+4:  .word DROP,SETX,LCRIGHT
+8:  .word TRUE,CURENBL  
+    .word EXIT
     
-; nom: LNUP   ( -- )
+    
+; nom: LC-UP   ( -- )
 ;  déplace le curseur d'une ligne vers le haut.
 ; arguments:
 ;   aucun
@@ -682,7 +715,7 @@ DEFCODE "LC-UP",5,,LCUP
 9:  cursor_decr_sema
     NEXT
 
-; nom: LNDOWN   ( -- )
+; nom: LC-DOWN   ( -- )
 ;  déplace le curseur d'une ligne vers le bas.
 ; arguments:
 ;   aucun
@@ -735,16 +768,22 @@ DEFCODE "PUTC",4,,PUTC
     DPOP
     mov #(CPL-1),W0
     cp.b xpos
-    bra ltu, 2f
-    cursor_decr_sema
-    bra code_CR
-2:  inc.b xpos
+    bra z, 2f
+    inc.b xpos
+    bra 9f
+2:  clr.b xpos
+    mov #(LPS-1),W0
+    cp.b ypos
+    bra z,8f
+    inc.b ypos
+    bra 9f
+8:  call scroll_up
 9:  cursor_decr_sema
     NEXT
     
 ; nom: CR ( -- )
-; Envoie le curseur au début de la ligne suivante sauf si
-; c'est la dernière ligne de l'affichage.    
+; Envoie le curseur au début de la ligne suivante défile l'écran
+; vers le haut si nécessaire.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -752,11 +791,13 @@ DEFCODE "PUTC",4,,PUTC
 DEFCODE "CR",2,,CR 
     cursor_incr_sema
     cursor_sync
+    clr.b xpos
     mov #(LPS-1),W0
     cp.b ypos
-    bra eq, 9f
-    clr.b xpos
+    bra z, 2f
     inc.b ypos
+    bra 9f
+2:  call scroll_up    
 9:  cursor_decr_sema
     NEXT
 
@@ -766,30 +807,61 @@ DEFCODE "CR",2,,CR
 ; arguments:
 ;   aucun
 ; retourne:
-;   rien    
-DEFCODE "NEXT-COLON",10,,NEXTCOLON 
-    mov #(CPL-4),W0
-    cp.b xpos
-    bra geu, 9f
-    mov.b xpos,WREG
-    ze W0,W0
-2:  add #4,W0
-    and.b #~3,W0
-    mov.b WREG,xpos
-9:  NEXT
+;   rien 
+DEFWORD "NEXT-COLON",10,,NEXTCOLON
+    .word FALSE,CURENBL
+    .word HTAB,CFETCH,TBRANCH,2f-$,LIT,4,HTAB,CSTORE
+2:  .word GETX,DUP,LIT,CPL-4,LESS,TBRANCH,2f-$
+    .word DROP,BRANCH,9f-$
+2:  .word HTAB,CFETCH,PLUS
+    .word HTAB,CFETCH,ONEMINUS,INVERT,AND,SETX    
+9:  .word TRUE,CURENBL,EXIT
+    
+;DEFCODE "NEXT-COLON",10,,NEXTCOLON 
+;    cursor_incr_sema
+;    cursor_sync
+;    mov #(CPL-4),W0
+;    cp.b xpos
+;    bra geu, 9f
+;    mov.b xpos,WREG
+;    ze W0,W0
+;2:  add #4,W0
+;    and.b #~3,W0
+;    mov.b WREG,xpos
+;9:  cursor_decr_sema
+;    NEXT
 
-; nom: DELETE ( -- )
+; nom: LC-DEL ( -- )
 ;  Supprime le caractère à la position du curseur
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
 DEFWORD "LC-DEL",6,,LCDEL
-    .word SCRBUF,GETY,LIT,CPL,STAR,PLUS,GETX,PLUS
-    .word ONEPLUS,LIT,CPL,GETX,ONEPLUS,DOQDO
-1:  .word DUP,EFETCH,OVER,ONEMINUS,STORE,ONEPLUS,DOLOOP,1b-$
-    .word ONEMINUS,LIT,VK_SPACE,SWAP,STORE,EXIT
+    .word FALSE,CURENBL
+    .word CURADR,ONEPLUS ; S: c-addr
+    .word LIT,CPL,GETX,ONEPLUS,DOQDO,BRANCH,2f-$
+1:  .word DUP,ECFETCH,OVER,ONEMINUS,CSTORE,ONEPLUS,DOLOOP,1b-$
+2:  .word ONEMINUS,BL,SWAP,CSTORE,TRUE,CURENBL,EXIT
     
+; nom: LC-INSRT ( -- )
+;    Insère un espace à la position du curseur si la ligne.
+;    2 conditions pour refuser l'insertion:  
+;       1) le curseur est après le dernier caractère de la ligne.
+;       2) la ligne est pleine.
+;  
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "LC-INSRT",8,,LCINSRT 
+    .word GETX,LCEND,GETX,TWODUP,EQUAL,TBRANCH,9f-$ ; si vrai curseur en fin de ligne
+    .word DUP,LIT,CPL-1,EQUAL,TBRANCH,9f-$ ; si vrai ligne pleine.
+1:  .word LCLEFT,SCRCHAR,GETX,ONEPLUS,GETY,ROT,CHRTOSCR
+    .word ONEMINUS,TWODUP,EQUAL,ZBRANCH,1b-$
+    .word OVER,GETY,BL,CHRTOSCR
+9:  .word DROP,SETX,EXIT
+  
 ; nom: BACKDEL ( -- )
 ;  efface le carctère à gauche du curseur
 ; arguments:
@@ -798,7 +870,7 @@ DEFWORD "LC-DEL",6,,LCDEL
 ;   rien  
 DEFWORD "BACKDEL",7,,BACKDEL   ; ( -- )
     .word GETX,ZBRANCH,9f-$
-    .word LEFT,DELETE
+    .word LCLEFT,LCDEL
 9:  .word EXIT
     
 ; nom: CLRLN ( -- )
@@ -821,6 +893,17 @@ DEFCODE "CLRLN",5,,CLRLN
     cursor_decr_sema
     NEXT
     
+    
+; nom: LC-BEL ( -- )
+;  fait entendre un beep.
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "LC-BEL",6,,LCBEL
+    .word LIT,200,LIT,1000,TONE,EXIT
+    
+    
 ;;;;;;;;;;;;;;;;;;;;;;
 ; imprime un caractère à l'écran ou accepte un caractère de contrôle.
 ; Liste des contrôles reconnus:
@@ -838,27 +921,29 @@ DEFCODE "CLRLN",5,,CLRLN
 ;     CTRL_X  efface la ligne sur laquelle le curseur est.
 ;     VK_DELETE efface le caractère à la position du curseur.    
 ;     CTRL_L  efface l'écran au complet
+;     VK_INSERT  insère un espace
+;  autres fonctions:    
 ;    
 ;  argument:
 ;    caractère à transmettre
 DEFWORD "LC-EMIT",4,,LCEMIT ; ( c -- )
     ; caractères imprimables 32-126
-    .word DUP,LIT,VK_SPACE,LESS,TBRANCH,2f-$
-    .word DUP,LIT,126,GREATER,TBRANCH,2f-$
-    .word BRANCH,9f-$
+    .word DUP,LIT,VK_SPACE,ULESS,TBRANCH,2f-$
+    .word DUP,LIT,126,UGREATER,TBRANCH,2f-$
+    .word PUTC,EXIT
     ; déplacement du curseur
 2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
     .word DROP,CR,EXIT
 2:  .word DUP,LIT,VK_TAB,EQUAL,ZBRANCH,2f-$
     .word DROP,NEXTCOLON,EXIT
 2:  .word DUP,LIT,VK_LEFT,EQUAL,ZBRANCH,2f-$
-    .word DROP,LEFT,EXIT
+    .word DROP,LCLEFT,EXIT
 2:  .word DUP,LIT,VK_RIGHT,EQUAL,ZBRANCH,2f-$
-    .word DROP,RIGHT,EXIT
+    .word DROP,LCRIGHT,EXIT
 2:  .word DUP,LIT,VK_HOME,EQUAL,ZBRANCH,2f-$
-    .word DROP,HOME,EXIT
+    .word DROP,LCHOME,EXIT
 2:  .word DUP,LIT,VK_END,EQUAL,ZBRANCH,2f-$
-    .word DROP,END,EXIT
+    .word DROP,LCEND,EXIT
 2:  .word DUP,LIT,VK_UP,EQUAL,ZBRANCH,2f-$
     .word DROP,LCUP,EXIT
 2:  .word DUP,LIT,VK_DOWN,EQUAL,ZBRANCH,2f-$
@@ -869,11 +954,15 @@ DEFWORD "LC-EMIT",4,,LCEMIT ; ( c -- )
 2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
     .word DROP,CLRLN,EXIT
 2:  .word DUP,LIT,VK_DELETE,EQUAL,ZBRANCH,2f-$
-    .word DROP,DELETE,EXIT
+    .word DROP,LCDEL,EXIT
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
     .word DROP,CLS,EXIT
-    ; les codes non reconnus sont imprimés.
-9:    
+2:  .word DUP,LIT,VK_INSERT,EQUAL,ZBRANCH,2f-$
+    .word DROP,LCINSRT,EXIT
+    ; autres fonctions
+2:  .word DUP,LIT,CTRL_G,EQUAL,ZBRANCH,2f-$
+    .word DROP,LCBEL,EXIT
+    ; les codes non reconnus sont imprimés.    
 2:  .word PUTC,EXIT
     
     

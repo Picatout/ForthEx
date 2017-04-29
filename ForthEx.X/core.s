@@ -218,7 +218,7 @@ HEADLESS ZBRANCH
     NEXT
     
     
-; exécution de DO
+; runtime de DO
 HEADLESS DODO    
 ;DEFCODE "(DO)",4,F_HIDDEN,DODO ; ( n  n -- ) R( -- I LIMIT )
 doit:
@@ -230,7 +230,8 @@ doit:
     DPOP
     NEXT
 
-; exécution de ?DO
+    
+; runtime de ?DO
 HEADLESS DOQDO
 ;DEFCODE "(?DO)",5,F_HIDDEN,DOQDO ; ( n n -- ) R( -- | I LIMIT )    
     cp T,[DSP]
@@ -273,6 +274,29 @@ HEADLESS DOPLOOP
 3:  cp I,LIMIT
     bra ge, 1b
 2:  add IP,[IP],IP
+    NEXT
+    
+; empile compteur de boucle    
+DEFCODE "I",1,,DOI  ; ( -- n )
+    DPUSH
+    mov I, T
+    NEXT
+
+; empile la limite de boucle
+DEFCODE "L",1,,DOL ; ( -- n )
+    DPUSH
+    mov LIMIT,T
+    NEXT
+    
+; empile compteur boucle externe    
+DEFCODE "J",1,,DOJ  ; ( -- n ) R: limitJ indexJ
+    DPUSH
+    mov [RSP-2],T
+    NEXT
+    
+DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) n1=LIMIT_J, n2=J
+    RPOP I
+    RPOP LIMIT
     NEXT
     
     
@@ -401,29 +425,6 @@ DEFCODE "2!",2,,TWOSTORE ; ( n1 n2 addr -- ) n2->addr, n1->addr+CELL_SÌZE
     mov [DSP--],[++T]
     mov [DSP--],[--T]
     mov [DSP],T
-    NEXT
-    
-; empile compteur de boucle    
-DEFCODE "I",1,,DOI  ; ( -- n )
-    DPUSH
-    mov I, T
-    NEXT
-
-; empile la limite de boucle
-DEFCODE "L",1,,DOL ; ( -- n )
-    DPUSH
-    mov LIMIT,T
-    NEXT
-    
-; empile compteur boucle externe    
-DEFCODE "J",1,,DOJ  ; ( -- n ) R: limitJ indexJ
-    DPUSH
-    mov [RSP-2],T
-    NEXT
-    
-DEFCODE "UNLOOP",6,,UNLOOP   ; R:( n1 n2 -- ) n1=LIMIT_J, n2=J
-    RPOP I
-    RPOP LIMIT
     NEXT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
@@ -1928,22 +1929,22 @@ DEFWORD "DO",2,F_IMMED,DO ; ( C: -- a 0 ) compile xt de (DO)
 ; ne sont pas égaux: start<>limit    
 ; empile l'adresse de début de la boucle sur cstack
 ; empile 0 comme garde pour FIXLEAVE
-DEFWORD "?DO",3,F_IMMED,QDO ; ( C: -- a 0 )
+DEFWORD "?DO",3,F_IMMED,QDO ; ( C: -- a-addr1 0 a-addr2 )
     .word QCOMPILE,CFA_COMMA,DOQDO
-    .word HERE,LIT,2,CELLS,PLUS,TOCSTK,LIT,0,TOCSTK
-    .word CFA_COMMA,BRANCH,MARKSLOT,TOCSTK,EXIT
+    .word HERE,LIT,2*CELL_SIZE,PLUS,TOCSTK,LIT,0,TOCSTK
+    .word CFA_COMMA,BRANCH,HERE,TOCSTK,EXIT
     
     
 ;compile LEAVE
 DEFWORD "LEAVE",5,F_IMMED,LEAVE ; (C: -- slot )
     .word QCOMPILE,CFA_COMMA,UNLOOP
-    .word CFA_COMMA,BRANCH,MARKSLOT,TOCSTK,EXIT  
+    .word CFA_COMMA,BRANCH,HERE,TOCSTK,EXIT  
     
     
 ; résout toutes les adresses pour les branchements
 ; à l'intérieur des boucles DO LOOP|+LOOP
-HEADLESS FIXLOOP, HWORD    
-;DEFWORD "FIXLOOP",7,F_IMMED|F_HIDDEN,FIXLOOP ; (C: a 0 i*slot -- )
+HEADLESS FIXLEAVE, HWORD    
+;DEFWORD "FIXLEAVE",8,F_IMMED|F_HIDDEN,FIXLEAVE ; (C: a 0 i*slot -- )
 1:  .word CSTKFROM,QDUP,ZBRANCH,9f-$
     .word DUP,HERE,CELLPLUS,SWAP,MINUS,SWAP,STORE
     .word BRANCH,1b-$
@@ -1952,12 +1953,12 @@ HEADLESS FIXLOOP, HWORD
 ; compile xt de (LOOP)  
 ; résout toutes les adresses de saut.  
 DEFWORD "LOOP",4,F_IMMED,LOOP ; ( -- )
-    .word QCOMPILE,CFA_COMMA,DOLOOP,FIXLOOP,EXIT
+    .word QCOMPILE,CFA_COMMA,DOLOOP,FIXLEAVE,EXIT
     
 ; compile execution de +LOOP
 ; résout toutes les adressess de saut.    
 DEFWORD "+LOOP",5,F_IMMED,PLUSLOOP ; ( -- )
-    .word QCOMPILE,CFA_COMMA,DOPLOOP,FIXLOOP,EXIT
+    .word QCOMPILE,CFA_COMMA,DOPLOOP,FIXLEAVE,EXIT
     
 ; compile le début d'une boucle    
 DEFWORD "BEGIN",5,F_IMMED,BEGIN ; ( -- a )

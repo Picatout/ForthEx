@@ -104,8 +104,8 @@ __DefaultInterrupt:
 .global __T1Interrupt   
 __T1Interrupt:
     bclr IFS0, #T1IF
-    push.d W0
-    push.d W2
+;    push.d W0
+;    push.d W2
     ; mise à jour compteur systicks
     inc systicks
     ; minuterie son
@@ -121,8 +121,8 @@ __T1Interrupt:
     btsc.b fcursor, #CURSOR_ACTIVE
     call cursor_blink
 isr_exit:
-    pop.d W2
-    pop.d W0
+;    pop.d W2
+;    pop.d W0
     retfie
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
@@ -181,9 +181,8 @@ _warm:
 8:  .word COUNT,TYPE,NEWLINE,QUIT
   
 _cold:
-    .word CLR_RAM,HARDWARE_INIT,VARS_INIT
+    .word CLR_RAM,VARS_INIT,HARDWARE_INIT
     .word VERSION,COUNT,TYPE,NEWLINE
-;1:  .word LIT,65,EMIT,LIT,100,MSEC,BRANCH,1b-$
     .word IMGLOAD; autochargement d'une image  RAM 
     .word QAUTORUN
     .byte 7

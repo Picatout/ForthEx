@@ -188,22 +188,21 @@ DEFCODE "LC-EKEY",7,,LCEKEY
 ;   c       caractère reconnu.
 ;   true    indicateur booléen.
 DEFCODE "LC-FILTER",9,,LCFILTER
+    mov T,W0
     DPUSH
-1:  cp T, #32
-    bra ge, 7f
-    cp T, #VK_CR
-    bra eq, 9f
-    cp T, #VK_BACK
-    bra eq, 9f
-    cp T, #CTRL_X
-    bra eq, 9f
-    cp T, #CTRL_V
-    bra eq, 9f
-    bra 8f
-7:
-    cp T, #127
-    bra lt,9f
-8:    
+    setm T
+    cp.b W0, #32
+    bra ltu, 2f
+    cp.b W0,#127
+    bra ltu, 9f
+2:  cp.b W0, #VK_CR
+    bra z, 9f
+    cp.b W0, #VK_BACK
+    bra z, 9f
+    cp.b W0, #CTRL_X
+    bra z, 9f
+    cp.b W0, #CTRL_V
+    bra z, 9f
     clr T  
 9:    
     NEXT
@@ -231,7 +230,7 @@ DEFWORD "LC-KEY?",7,,LCKEYQ
 ; retourne:
 ;   c   caractère filtré 
 DEFWORD "LC-KEY",6,,LCKEY
-1:  .word LCKEYQ
+1:  .word LCKEYQ,QDUP
     .word ZBRANCH,1b-$
     .word EXIT 
     

@@ -1,3 +1,7 @@
+2017-04-28
+----------
+Continuation du travail commencé hier sur console.
+
 2017-04-27
 ----------
 Refaire le système console en le basant sur des tables de vecteurs pour chaque
