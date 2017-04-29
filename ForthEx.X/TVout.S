@@ -76,6 +76,9 @@ __T2Interrupt:
     mov #12, W0
     cp line_count
     bra z, 4f
+    mov #17,W0
+    cp line_count
+    bra z, even2
     mov #18, W0
     cp line_count
     bra z, 5f
@@ -86,19 +89,28 @@ __T2Interrupt:
     cp line_count
     bra z, 7f
     mov	 #FIELD_LINES, W0
-    cp0.b even
-    bra z, odd_field
-    inc W0,W0
-odd_field:    
     cp line_count
     bra neq, 1f
+    cp0.b even
+    bra nz, even1
+    mov #HALFLINE, W0
+    mov W0, SYNC_OCRS
+    mov W0, SYNC_PER
+even1:    
     com.b even
     setm line_count
-    bclr OC4IEC,#OC4IE
 1:
     pop W0
     retfie
+even2:
+    cp0.b even
+    bra z, 1b
+    mov #HLINE,W0
+    mov W0,SYNC_OCRS
+    mov W0,SYNC_PER
+    bra 1b
 2: ; line_count==0 start VSYNC 6 half line narrow neg. pulses
+    bclr OC4IEC,#OC4IE
     mov #SERATION, W0
     mov W0, SYNC_OCR
     mov #HALFLINE, W0
