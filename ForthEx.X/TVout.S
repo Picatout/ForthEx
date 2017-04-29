@@ -34,19 +34,19 @@
 
 .global video_on, xpos,ypos    
 line_count: .space 2
+;state: .space 1 
 even: .space 1
 video_on: .space 1
 .align 2 
 xpos: .space 1
 ypos: .space 1
- .global _htab
-_htab: .space 1 ; largeur tabulation
 
 .align 2
 .global fcursor, cursor_dly , cursor_sema
 cursor_dly: .space 2 ; contrôle vitesse clignotement
 cursor_sema: .space 1 ; sémaphore 
 fcursor: .space 1 ; indicateur booléens curseur texte
+_htab: .space 1 ; largeur tabulation
  
 .section .tvout.buffer.bss bss address(RAM_END-VIDEO_BUFF_SIZE)
 .global _video_buffer
@@ -57,6 +57,25 @@ _video_buffer: .space VIDEO_BUFF_SIZE
 .equ OC4IEC,IEC1
 .equ OC4IPC,IPC6
  
+;.section .video.states.psv psv
+;states: 
+;.word preSync
+;.word VSync
+;.word PostSyncOdd
+;.word HLineOdd    
+;.word PreVideo
+;.word VideoTop
+;.word VideoActive
+;.word PostVideoOdd
+;.word preSync
+;.word VSync
+;.word PostSyncEven
+;.word HLineEven
+;.word PreVideo
+;.word VideoTop
+;.word VideoActive
+;.word PostVideoEven
+
 ;********************
 ; interruption TIMER2
 ; synchronisation  vidéo  
@@ -64,90 +83,230 @@ _video_buffer: .space VIDEO_BUFF_SIZE
 INTR    
 .global __T2Interrupt
 __T2Interrupt:
+; ****** Test nouvel algorithme video sync*****
+;    bclr SYNC_IFS, #SYNC_IF
+;    bset VIDEO_BLKLEVEL_TRIS,#VIDEO_BLKLEVEL_OUT
+;    push.d W0
+;    bclr VIDEO_SPISTAT, #SPIEN
+;    inc line_count
+;    mov #states,W1
+;    mov.b state,WREG
+;    ze W0,W0
+;    sl W0,W0
+;    add W0 ,W1,W1
+;    mov [W1],W0
+;    goto W0
+;preSync:
+;    bclr OC4IEC,#OC4IE
+;    mov #1,W0
+;    cp line_count
+;    bra z,1f
+;    mov #6,W0
+;    cp line_count
+;    bra nz, isr_sync_exit
+;    inc.b state
+;    bra isr_sync_exit
+;1:   
+;    mov #SERATION, W0
+;    mov W0, SYNC_OCR
+;    mov #HALFLINE, W0
+;    mov W0, SYNC_OCRS
+;    mov W0, SYNC_PER
+;    bra isr_sync_exit
+;VSync:
+;    mov #7,W0 
+;    cp line_count
+;    bra nz,1f
+;    mov #(HALFLINE-HSYNC), W0
+;    mov W0, SYNC_OCR
+;    bra isr_sync_exit
+;1:  mov #12,W0
+;    cp line_count
+;    bra nz, isr_sync_exit
+;    inc.b state
+;    bra isr_sync_exit
+;PostSyncOdd:
+;    mov #13,W0 
+;    cp line_count
+;    bra nz,1f
+;    mov #SERATION, W0
+;    mov W0, SYNC_OCR
+;    bra isr_sync_exit
+;1:  mov #18,W0
+;    cp line_count
+;    bra nz,isr_sync_exit
+;    mov #9,W0
+;    mov W0,line_count
+;    inc.b state
+;    bra isr_sync_exit
+;HLineOdd:
+;    mov #HSYNC, W0
+;    mov W0, SYNC_OCR
+;    mov #HLINE, W0
+;    mov W0, SYNC_OCRS
+;    mov W0, SYNC_PER
+;    inc.b state
+;    bra isr_sync_exit
+;PreVideo:
+;    mov #21,W0
+;    cp line_count
+;    bra nz, isr_sync_exit
+;    bclr OC4IFS,#OC4IF
+;    bset OC4IEC,#OC4IE
+;    inc.b state
+;    bra isr_sync_exit
+;VideoTop:
+;    mov #TOPLINE,W0
+;    cp line_count
+;    bra nz,isr_sync_exit
+;    cp0.b video_on
+;    bra z, isr_sync_exit
+;    bclr VIDEO_IFS, #VIDEO_IF
+;    bset VIDEO_IEC, #VIDEO_IE
+;    inc.b state
+;    bra isr_sync_exit
+;VideoActive:
+;    mov #TOPLINE+YRES, W0
+;    cp line_count
+;    bra nz, isr_sync_exit
+;    bclr VIDEO_IEC, #VIDEO_IE
+;    inc.b state
+;    bra isr_sync_exit
+;PostVideoOdd:
+;    mov #263,W0
+;    cp line_count
+;    bra nz,isr_sync_exit
+;    mov #HALFLINE, W0
+;    mov W0, SYNC_OCRS
+;    mov W0, SYNC_PER
+;    clr line_count
+;    inc.b state
+;    bra isr_sync_exit
+;PostSyncEven:
+;    mov #13,W0
+;    cp line_count
+;    bra nz, 1f
+;    mov #SERATION, W0
+;    mov W0, SYNC_OCR
+;    bra isr_sync_exit
+;1:  mov #18,W0
+;    cp line_count
+;    bra nz, isr_sync_exit
+;    mov #HLINE,W0
+;    mov W0,SYNC_PER
+;    mov W0,SYNC_OCRS
+;    inc.b state
+;    mov #9,W0
+;    mov W0,line_count
+;    bra isr_sync_exit
+;HLineEven:
+;    mov	#HSYNC,W0
+;    mov W0,SYNC_OCR
+;    inc.b state
+;    bra isr_sync_exit
+;PostVideoEven:
+;    mov #262,W0
+;    cp line_count
+;    bra nz,isr_sync_exit
+;    clr.b state
+;    clr line_count
+;isr_sync_exit:
+;    pop.d W0
+;    retfie
+    
+; ******  fin test video sync ***********
+    
     bclr SYNC_IFS, #SYNC_IF
     bset VIDEO_BLKLEVEL_TRIS,#VIDEO_BLKLEVEL_OUT
     bclr VIDEO_SPISTAT, #SPIEN
     push W0
     inc line_count
-    bra z, 2f
+    bra z, PreEqual
     mov #6, W0
     cp line_count
-    bra z, 3f
+    bra z, Vsync
     mov #12, W0
     cp line_count
-    bra z, 4f
+    bra z, PostEqual
     mov #17,W0
     cp line_count
-    bra z, even2
+    bra z, EvenFieldFL
     mov #18, W0
     cp line_count
-    bra z, 5f
+    bra z, OddFieldFL
     mov #29,W0
     cp line_count
-    bra z, 8f
+    bra z, BackPorchEnable
     mov #TOPLINE, W0
     cp line_count
-    bra z, 6f
+    bra z, EnableVideo
     mov #TOPLINE+YRES, W0
     cp line_count
-    bra z, 7f
-    mov	 #FIELD_LINES, W0
-    cp line_count
-    bra neq, 1f
+    bra z, DisableVideo
+    mov #FIELD_LINES,W0
     cp0.b even
-    bra nz, even1
+    bra z, OddField
+EvenField:    
+    dec W0,W0
+    cp line_count
+    bra nz, T2isr_exit
+    bra FieldEnd
+OddField:    
+    cp line_count
+    bra nz, T2isr_exit
     mov #HALFLINE, W0
     mov W0, SYNC_OCRS
     mov W0, SYNC_PER
-even1:    
+FieldEnd:    
     com.b even
     setm line_count
-1:
-    pop W0
-    retfie
-even2:
-    cp0.b even
-    bra z, 1b
-    mov #HLINE,W0
-    mov W0,SYNC_OCRS
-    mov W0,SYNC_PER
-    bra 1b
-2: ; line_count==0 start VSYNC 6 half line narrow neg. pulses
+    bra T2isr_exit
+PreEqual: ; line_count==0 6 impulsion de pré-égalisation
     bclr OC4IEC,#OC4IE
     mov #SERATION, W0
     mov W0, SYNC_OCR
     mov #HALFLINE, W0
     mov W0, SYNC_OCRS
     mov W0, SYNC_PER
-    bra 1b
-3: ; line_count==6 , 6 half line large neg. pulses
+    bra T2isr_exit
+Vsync: ; line_count==6 , 6 impulsion vertical sync
     mov #(HALFLINE-HSYNC), W0
     mov W0, SYNC_OCR
-    bra 1b
-4: ; line_count==12 , 6 half line narrow neg. pulses
+    bra T2isr_exit
+PostEqual: ; line_count==12 , 6 impulsion de post-égalisation.
     mov #SERATION, W0
     mov W0, SYNC_OCR
-    bra 1b
-5: ; line_count==18 , end of VSYNC
+    bra T2isr_exit
+EvenFieldFL: ; champ pair première ligne complète
+    cp0.b even
+    bra z, T2isr_exit
+    mov #HLINE,W0
+    mov W0,SYNC_OCRS
+    mov W0,SYNC_PER
+    bra T2isr_exit
+OddFieldFL: ; champ impair première ligne complète.
     mov #HSYNC, W0
     mov W0, SYNC_OCR
     mov #HLINE, W0
     mov W0, SYNC_OCRS
     mov W0, SYNC_PER
-    bra 1b
-6: ; line_count==TOPLINE  activation interruption video
+    bra T2isr_exit
+EnableVideo: ; line_count==TOPLINE  activation interruption video
     cp0.b video_on
     bra z, 1b
     bclr VIDEO_IFS, #VIDEO_IF
     bset VIDEO_IEC, #VIDEO_IE
-    bra 1b
-7: ; line_count==TOPLINE+VIDEDO désactivaion int. video
+    bra T2isr_exit
+DisableVideo: ; line_count==TOPLINE+VIDEDO désactivaion int. video
     bclr VIDEO_IEC, #VIDEO_IE
-    bra 1b
-8:  
+    bra T2isr_exit
+BackPorchEnable:  
     bclr OC4IFS,#OC4IF
     bset OC4IEC,#OC4IE
-    bra 1b
+T2isr_exit:
+    pop W0
+    retfie
+    
     
 ; début seuil niveau noir    
 .global __OC4Interrupt    
