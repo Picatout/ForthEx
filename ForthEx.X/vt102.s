@@ -84,28 +84,7 @@ CPGDN: ; CTRL_PGDN
 DEFCONST "XON",3,,XON,CTRL_Q 
 DEFCONST "XOFF",4,,XOFF,CTRL_S
  
-; nom: VT-EKEY? ( -- f )
-;  vérifie s'il y a un caractère en attente
-;   dans la file et retourne un indicateur booléen.
-; arguments:
-;   aucun
-; retourne:
-;   f   indicateur vrai|faux
-DEFWORD "VT-EKEY?",8,,VTEKEYQ
- 
-    .word EXIT
 
-; nom: VT-EKEY  ( -- u )
-;  Attend jusqu'à réception d'un code du clavier
-;  retourne le premier code reçu.
-; arguments:
-;  aucun
-; retourne:
-;   u   caractère non filtré.    
-DEFWORD "VT-EKEY",7,,VTEKEY
-    
-    .word EXIT
-    
 ; nom: VT-FILTER ( u -- u false | c true )    
 ;   filtre  et retourne un caractère 'c' et 'vrai'
 ;   si u fait partie de l'ensemble reconnu.
@@ -123,10 +102,10 @@ DEFWORD "VT-EKEY",7,,VTEKEY
 ;   true    indicateur booléen.
 DEFWORD "VT-FILTER",9,,VTFILTER
     .word DUP,LIT,31,GREATER,ZBRANCH,1f-$
-    .word EXIT
+    .word TRUE,EXIT
 1:  .word DUP,CLIT,27,EQUAL,ZBRANCH,6f-$
-    .word DROP,SGETC,EXIT 
-6:  .word LIT,CTRL_TABLE,PLUS,CFETCH,EXIT    
+    .word DROP,SGETC,TRUE,EXIT 
+6:  .word LIT,CTRL_TABLE,PLUS,CFETCH,TRUE,EXIT    
 
 ; pour la combinaison CTRL_x où x est une lettre
 ; minicom envoie l'ordre de la lettre dans l'alphabet
@@ -150,8 +129,10 @@ CTRL_TABLE:
 ;   0   aucun caractère disponible
 ;   c   le premier caractère valide de la file.    
 DEFWORD "VT-KEY?",7,,VTKEYQ
-    
-    .word EXIT
+1: .word SGETCQ,DUP,ZBRANCH,9f-$
+   .word DROP,SGETC,VTFILTER,TBRANCH,9f-$
+   .word DROP,BRANCH,1b-$
+9: .word EXIT
     
 ; nom: VT-KEY  ( -- c )
 ;   Attend la réception d'un caractère valide du clavier
@@ -160,8 +141,9 @@ DEFWORD "VT-KEY?",7,,VTKEYQ
 ; retourne:
 ;   c   caractère filtré 
 DEFWORD "VT-KEY",6,,VTKEY    
-    
-    .word EXIT
+1:  .word VTKEYQ,QDUP
+    .word ZBRANCH,1b-$
+    .word EXIT 
 
 ; nom: VT-EMIT ( c -- )
 ;  transmet un caractère à la console.
@@ -173,16 +155,7 @@ DEFWORD "VT-EMIT",7,,VTEMIT
     
     .word EXIT
 
-; nom: VT-EMIT? ( -- f )
-;  vérifie si le terminal est prêt à recevoir
-; arguments:
-;    aucun
-; retourne:
-;    f      indicateur booléen vrai si terminal prêt à recevoir.
-DEFWORD "VT-EMIT?",8,,VTEMITQ
-    .word SREADYQ
-    .word EXIT
-    
+   
 ; nom: AT-XY ( u1 u2 -- )
 ;   Positionne le curseur de la console.
 ; arguments:

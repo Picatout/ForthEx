@@ -43,7 +43,7 @@
 ;0      KEY        LC-KEY       VT-KEY
 ;1      KEY?       LC-KEY?      VT-CHAR?
 ;2      EKEY       LC-EKEY      VT-ECHAR
-;3      EKEY?      LC-EKEY?     VT-ECHAR?
+;3      EKEY?      LC-EKEY?     SGETC?
 ;4      EMIT       LC-EMIT      VT-EMIT
 ;5      EMIT?      LC-EMIT?     VT-EMIT?    
 ;6      AT-XY      CURPOS       VT-AT-XY
@@ -89,10 +89,10 @@ DEFTABLE "LC-CONS",7,,LCCONS
 DEFTABLE "SERCONS",7,,SERCONS
     .word VTKEY    ; vt102.s
     .word VTKEYQ   ; vt102.s
-    .word VTEKEY   ; vt102.s
-    .word VTEKEYQ  ; vt102.s
+    .word SGETC    ; serial.s
+    .word SGETCQ   ; serial.s
     .word VTEMIT   ; vt102.s
-    .word VTEMITQ  ; vt102.s
+    .word SREADYQ  ; serial.s
     .word VTATXY   ; vt102.s
     .word VTPAGE   ; vt102.s
     .word VTFILTER ; vt102.s

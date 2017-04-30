@@ -1,6 +1,7 @@
 2017-04-29
 ----------
-Travail sur __OC2Interrupt pour améliorer la synchronisation vidéo.
+Travail sur __T2Interrupt pour améliorer la synchronisation vidéo.
+Travaril sur vt102.s
 
 2017-04-28
 ----------

@@ -22,7 +22,7 @@
 .ifndef NTSC_CONST
 .equ NTSC_CONST, 1
     
-.equ HFREQ, 15748 ; fréquence horizontale pour information seulement
+.equ HFREQ, 15734 ; fréquence horizontale pour information seulement
 .equ HLINE, (FCY/HFREQ-1) ; PR2= période ligne horizontale
 .equ HSYNC, (47*FCY_MHZ/10-1)  ; OC1R=47e-6*FCY-1 sync pulse horizontal
 .equ HALFLINE, (HLINE/2) ; période demi-ligne horizontale (VSYNC)

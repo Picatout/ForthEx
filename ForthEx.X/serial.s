@@ -217,7 +217,7 @@ DEFCODE "BAUD",4,,BAUD   ; ( u -- )
     DPOP
     NEXT
 
-    
+
 ; transmission d'un caractère par
 ; le port sériel.
 ; argument:
@@ -283,12 +283,12 @@ DEFCODE "SGETC",5,,SGETC  ; ( -- c )
     bclr ser_flags,#F_RXSTOP
 2:  NEXT
 
-; nom: SREADY?  ( -- f )
-;  Vérifie si le terminal est prêt à recevoir.
+; nom: SREADY? ( -- f )
+;  vérifie si le terminal est prêt à recevoir
 ; arguments:
 ;    aucun
 ; retourne:
-;    f   indicateur booléen VRAI si prêt.    
+;    f      indicateur booléen, vrai si terminal prêt à recevoir.
 DEFCODE "SREADY?",7,,SREADYQ
     DPUSH
     clr T
@@ -296,4 +296,20 @@ DEFCODE "SREADY?",7,,SREADYQ
     com T,T
     NEXT
     
-;.end
+; nom: SGETC? ( -- f )
+;   Vérifie s'il y a un caractère de disponible dans
+;   la file de réception
+; arguments:
+;    aucun    
+; retourne:
+;   f   indicateur booléen, VRAI si caractère disponible
+DEFCODE "SGETC?",6,,SGETCQ
+    DPUSH
+    clr T
+    mov.b rx_head,WREG
+    cp.b rx_tail
+    bra z,9f
+    setm T
+9:  NEXT
+    
+    
