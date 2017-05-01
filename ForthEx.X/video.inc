@@ -46,6 +46,7 @@
 .equ CURSOR_DELAY, 333
 .equ INV_MASK,(1<<7) 
  
+ 
 .macro cursor_incr_sema  ; verrouille accès à fcursor 
     inc.b cursor_sema
 .endm

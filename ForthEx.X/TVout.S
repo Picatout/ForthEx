@@ -34,7 +34,6 @@
 
 .global video_on, xpos,ypos    
 line_count: .space 2
-;state: .space 1 
 even: .space 1
 video_on: .space 1
 .align 2 
@@ -52,29 +51,11 @@ _htab: .space 1 ; largeur tabulation
 .global _video_buffer
 _video_buffer: .space VIDEO_BUFF_SIZE
  
-
+.ifdef BLACKLEVEL
 .equ OC4IFS,IFS1 
 .equ OC4IEC,IEC1
 .equ OC4IPC,IPC6
- 
-;.section .video.states.psv psv
-;states: 
-;.word preSync
-;.word VSync
-;.word PostSyncOdd
-;.word HLineOdd    
-;.word PreVideo
-;.word VideoTop
-;.word VideoActive
-;.word PostVideoOdd
-;.word preSync
-;.word VSync
-;.word PostSyncEven
-;.word HLineEven
-;.word PreVideo
-;.word VideoTop
-;.word VideoActive
-;.word PostVideoEven
+.endif 
 
 ;********************
 ; interruption TIMER2
@@ -83,141 +64,10 @@ _video_buffer: .space VIDEO_BUFF_SIZE
 INTR    
 .global __T2Interrupt
 __T2Interrupt:
-; ****** Test nouvel algorithme video sync*****
-;    bclr SYNC_IFS, #SYNC_IF
-;    bset VIDEO_BLKLEVEL_TRIS,#VIDEO_BLKLEVEL_OUT
-;    push.d W0
-;    bclr VIDEO_SPISTAT, #SPIEN
-;    inc line_count
-;    mov #states,W1
-;    mov.b state,WREG
-;    ze W0,W0
-;    sl W0,W0
-;    add W0 ,W1,W1
-;    mov [W1],W0
-;    goto W0
-;preSync:
-;    bclr OC4IEC,#OC4IE
-;    mov #1,W0
-;    cp line_count
-;    bra z,1f
-;    mov #6,W0
-;    cp line_count
-;    bra nz, isr_sync_exit
-;    inc.b state
-;    bra isr_sync_exit
-;1:   
-;    mov #SERATION, W0
-;    mov W0, SYNC_OCR
-;    mov #HALFLINE, W0
-;    mov W0, SYNC_OCRS
-;    mov W0, SYNC_PER
-;    bra isr_sync_exit
-;VSync:
-;    mov #7,W0 
-;    cp line_count
-;    bra nz,1f
-;    mov #(HALFLINE-HSYNC), W0
-;    mov W0, SYNC_OCR
-;    bra isr_sync_exit
-;1:  mov #12,W0
-;    cp line_count
-;    bra nz, isr_sync_exit
-;    inc.b state
-;    bra isr_sync_exit
-;PostSyncOdd:
-;    mov #13,W0 
-;    cp line_count
-;    bra nz,1f
-;    mov #SERATION, W0
-;    mov W0, SYNC_OCR
-;    bra isr_sync_exit
-;1:  mov #18,W0
-;    cp line_count
-;    bra nz,isr_sync_exit
-;    mov #9,W0
-;    mov W0,line_count
-;    inc.b state
-;    bra isr_sync_exit
-;HLineOdd:
-;    mov #HSYNC, W0
-;    mov W0, SYNC_OCR
-;    mov #HLINE, W0
-;    mov W0, SYNC_OCRS
-;    mov W0, SYNC_PER
-;    inc.b state
-;    bra isr_sync_exit
-;PreVideo:
-;    mov #21,W0
-;    cp line_count
-;    bra nz, isr_sync_exit
-;    bclr OC4IFS,#OC4IF
-;    bset OC4IEC,#OC4IE
-;    inc.b state
-;    bra isr_sync_exit
-;VideoTop:
-;    mov #TOPLINE,W0
-;    cp line_count
-;    bra nz,isr_sync_exit
-;    cp0.b video_on
-;    bra z, isr_sync_exit
-;    bclr VIDEO_IFS, #VIDEO_IF
-;    bset VIDEO_IEC, #VIDEO_IE
-;    inc.b state
-;    bra isr_sync_exit
-;VideoActive:
-;    mov #TOPLINE+YRES, W0
-;    cp line_count
-;    bra nz, isr_sync_exit
-;    bclr VIDEO_IEC, #VIDEO_IE
-;    inc.b state
-;    bra isr_sync_exit
-;PostVideoOdd:
-;    mov #263,W0
-;    cp line_count
-;    bra nz,isr_sync_exit
-;    mov #HALFLINE, W0
-;    mov W0, SYNC_OCRS
-;    mov W0, SYNC_PER
-;    clr line_count
-;    inc.b state
-;    bra isr_sync_exit
-;PostSyncEven:
-;    mov #13,W0
-;    cp line_count
-;    bra nz, 1f
-;    mov #SERATION, W0
-;    mov W0, SYNC_OCR
-;    bra isr_sync_exit
-;1:  mov #18,W0
-;    cp line_count
-;    bra nz, isr_sync_exit
-;    mov #HLINE,W0
-;    mov W0,SYNC_PER
-;    mov W0,SYNC_OCRS
-;    inc.b state
-;    mov #9,W0
-;    mov W0,line_count
-;    bra isr_sync_exit
-;HLineEven:
-;    mov	#HSYNC,W0
-;    mov W0,SYNC_OCR
-;    inc.b state
-;    bra isr_sync_exit
-;PostVideoEven:
-;    mov #262,W0
-;    cp line_count
-;    bra nz,isr_sync_exit
-;    clr.b state
-;    clr line_count
-;isr_sync_exit:
-;    pop.d W0
-;    retfie
-    
-; ******  fin test video sync ***********
-    
     bclr SYNC_IFS, #SYNC_IF
+.ifdef BLACKLEVEL    
     bset VIDEO_BLKLEVEL_TRIS,#VIDEO_BLKLEVEL_OUT
+.endif    
     bclr VIDEO_SPISTAT, #SPIEN
     push W0
     inc line_count
@@ -234,9 +84,11 @@ __T2Interrupt:
     mov #18, W0
     cp line_count
     bra z, OddFieldFL
+.ifdef BLACKLEVEL
     mov #29,W0
     cp line_count
     bra z, BackPorchEnable
+.endif    
     mov #TOPLINE, W0
     cp line_count
     bra z, EnableVideo
@@ -262,7 +114,9 @@ FieldEnd:
     setm line_count
     bra T2isr_exit
 PreEqual: ; line_count==0 6 impulsion de pré-égalisation
+.ifdef BLACKLEVEL
     bclr OC4IEC,#OC4IE
+.endif    
     mov #SERATION, W0
     mov W0, SYNC_OCR
     mov #HALFLINE, W0
@@ -300,20 +154,23 @@ EnableVideo: ; line_count==TOPLINE  activation interruption video
 DisableVideo: ; line_count==TOPLINE+VIDEDO désactivaion int. video
     bclr VIDEO_IEC, #VIDEO_IE
     bra T2isr_exit
+.ifdef BLACKLEVEL    
 BackPorchEnable:  
     bclr OC4IFS,#OC4IF
     bset OC4IEC,#OC4IE
+.endif    
 T2isr_exit:
     pop W0
     retfie
     
-    
+.ifdef BLACKLEVEL    
 ; début seuil niveau noir    
 .global __OC4Interrupt    
 __OC4Interrupt:
     bclr OC4IFS,#OC4IF
     bclr VIDEO_BLKLEVEL_TRIS,#VIDEO_BLKLEVEL_OUT
     retfie
+.endif
     
 ;*********************
 ; interruption OC2
@@ -555,6 +412,7 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     clr.b cursor_sema
     bset fcursor, #CURSOR_ACTIVE
     bclr fcursor, #CURSOR_INV
+.ifdef BLACKLEVEL    
     mov #2*HSYNC,W0
     mov W0,OC4RS
     mov #HSYNC,W0
@@ -566,6 +424,7 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     and OC4IPC
     mov #(5<<OC4IP0),W0
     ior OC4IPC
+.endif    
     mov.b #4,W0 ; largeur tabulation
     mov.b _htab
     bra code_CLS
@@ -731,6 +590,16 @@ DEFCODE "CURADR",6,,CURADR
 DEFWORD "CURPOS",6,,CURPOS  ; ( u1 u2 -- )
     .word SETY, SETX, EXIT
 
+; nom: LC-GETCUR  ( -- u1 u2 )
+;   retourne la position du curseur texte.
+; arguments:
+;   aucun
+; retourne:
+;   u1    colonne  {0..63}
+;   u2    ligne    {0..23}
+DEFWORD "LC-GETCUR",9,,LCGETCUR
+    .word GETX,GETY,EXIT
+    
 ; nom: SCRCHAR  ( -- c )    
 ;   retourne le caractère à la position du curseur
 ; arguments:
@@ -1101,7 +970,7 @@ DEFWORD "LC-BEL",6,,LCBEL
 ;    
 ;  argument:
 ;    caractère à transmettre
-DEFWORD "LC-EMIT",4,,LCEMIT ; ( c -- )
+DEFWORD "LC-EMIT",7,,LCEMIT ; ( c -- )
     ; caractères imprimables 32-126
     .word DUP,LIT,VK_SPACE,ULESS,TBRANCH,2f-$
     .word DUP,LIT,126,UGREATER,TBRANCH,2f-$

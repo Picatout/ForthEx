@@ -31,7 +31,9 @@
 ; à cause des demi-lignes de synchronisation vertical on ajoute 9 lignes    
 .equ FIELD_LINES,  271  ; nombre de lignes par frame pair 
 .equ VIDEO_DLY, (2*HSYNC+250) ; délais déclenche interruption video=HSYNC+VIDEO_DLY
-
+; définir BLACKLEVEL si on veut que le signal vidéo est un niveau de noir
+;.equ BLACKLEVEL,1    
+    
 .endif
 
 

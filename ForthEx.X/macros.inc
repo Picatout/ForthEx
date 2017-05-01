@@ -176,8 +176,9 @@
 .equ F_MARK,0x80 ; bit marqueur utilisé par le mot CFA>NFA    
 .equ F_IMMED,0x40 ; mot immédiat
 .equ F_HIDDEN,0x20 ; mot caché.
-.equ F_LENMASK,0x1f ; masque longueur nom.
-.equ F_NOMARK, 0x7f ; masque pour enlevé le bit F_MARK
+
+.equ LEN_MASK,0x1f ; masque longueur nom.
+.equ NOMARK, 0x7f ; masque pour enlevé le bit F_MARK
     
 ;macro pour la création des entêtes de dictionnaire
 .macro HEADER name,namelen,flags=0,label

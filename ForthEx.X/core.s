@@ -1267,7 +1267,7 @@ DEFCONST "RAMEND",6,,RAMEND,RAM_END          ;  fin mémoire RAM
 DEFCONST "IMMED",5,,IMMED,F_IMMED       ; drapeau mot immédiat
 DEFCONST "HIDDEN",6,,HIDDEN,F_HIDDEN    ; drapeau mot caché
 DEFCONST "NMARK",5,,NMARK,F_MARK     ; drapeau marqueur utilisé par CFA>NFA
-DEFCONST "LENMASK",7,,LENMASK,F_LENMASK ; masque longueur nom   
+DEFCONST "LENMASK",7,,LENMASK,LEN_MASK ; masque longueur nom   
 DEFCONST "BL",2,,BL,32                       ; caractère espace
 DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
 DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
@@ -1297,6 +1297,30 @@ DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
 ;   conversion d'une chaîne
 ;   en nombre
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; nom: "DECIMAL?"  ( c -- f )
+;   vérifie si c est dans l'ensemble ASCII {'0'..'9'}
+; arguments:
+;   c   caractère ASCII à vérifier.
+; retourne:
+;   f   indicateur booléen.
+DEFWORD "DECIMAL?",8,,DECIMALQ
+    .word DUP,LIT,'0',LESS,ZBRANCH,2f-$
+    .word DROP,FALSE,EXIT
+2:  .word LIT,'9',GREATER,INVERT,EXIT
+  
+    
+; nom: >BASE10  ( u1 c -- u2 )
+;   étape de conversion d'une chaîne de caractère en 
+;   entier décimal.
+; arguments:
+;   u1  entier résultant de la conversion d'une chaîne en décimal
+;   c  caractère ASCII  dans l'intervalle {'0'..'9'}
+; retourne:
+;   u2    
+DEFWORD ">BASE10",7,,TOBASE10
+    .word LIT,'0',MINUS,LIT,10,ROT,STAR
+    .word PLUS,EXIT
     
 ;vérifie si le caractère est un digit
 ; si valide retourne la valeur du digit et -1
@@ -1397,17 +1421,14 @@ DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
 ;imprime la liste des mots du dictionnaire
 DEFWORD "WORDS",5,,WORDS ; ( -- )
     .word LIT,0,NEWLINE,LATEST
-1:  .word FETCH,DUP,ZEROEQ,TBRANCH,8f-$
-    .word DUP,CFETCH,HIDDEN,AND,ZBRANCH,4f-$ ; n'affiche pas les mots cachés
-    .word TWOMINUS,BRANCH,1b-$
-4:  .word DUP,DUP,CFETCH,LENMASK,AND  ; NFA NFA LEN
-    .word DUP,SYSCONS,FETCH,LIT,SERCONS,EQUAL,ZBRANCH,2f-$
-    .word VTGETYX,SWAP,DROP,BRANCH,5f-$
-2:  .word  GETX
-5:  .word  PLUS,LIT,64,ULESS,TBRANCH,3f-$
+1:  .word FETCH,QDUP,ZBRANCH,8f-$
+    .word DUP,CFETCH,LENMASK,AND  ; n NFA LEN
+    .word GETCUR,DROP
+5:  .word PLUS,LIT,64,ULESS,TBRANCH,3f-$ ; n NFA
     .word NEWLINE
-3:  .word TOR,ONEPLUS,RFROM,TYPE,SPACE,TWOMINUS,SWAP,ONEPLUS,SWAP,BRANCH,1b-$
-8:  .word DROP,NEWLINE,DOT,EXIT
+3:  .word TOR,ONEPLUS,RFETCH,COUNT,TYPE,SPACE
+    .word RFROM,TWOMINUS,BRANCH,1b-$
+8:  .word NEWLINE,DOT,EXIT
     
 ; convertie la chaîne comptée en majuscules
 DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
@@ -1451,7 +1472,7 @@ DEFWORD "ADR>IN",7,,ADRTOIN ; ( adr' -- )
 DEFWORD "/STRING",7,,SLASHSTRING ; ( a u n -- a+n u-n )
     .word ROT,OVER,PLUS,ROT,ROT,MINUS,EXIT
 
-; saute touts less caractère 'c'
+; saute touts les caractère 'c'
 ; ensuite accumule les caractère jusqu'au
 ; prochain 'c'    
 DEFWORD "PARSE",5,,PARSE ; c -- c-addr n
@@ -1498,7 +1519,7 @@ try_next:
     dec2 NFA, LFA  
     mov.b [NFA++],W0 ; flags+name_lengh
     mov.b W0,FLAGS
-    and.b #F_LENMASK+F_HIDDEN,W0
+    and.b #LEN_MASK+F_HIDDEN,W0
     cp.b W0,LEN
     bra z, same_len
 next_entry:    
@@ -1562,7 +1583,7 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
 ; de la chaîne comptée dont
 ; l'adresse est c-addr1  
 DEFWORD "COUNT",5,,COUNT ; ( c-addr1 -- c-addr2 u )
-   .word DUP,CFETCH,TOR,ONEPLUS,RFROM,EXIT
+   .word DUP,CFETCH,TOR,ONEPLUS,RFROM,LENMASK,AND,EXIT
    
 ; imprime 'mot?'
 ; signifiant que le mot n'a pas
@@ -1687,7 +1708,7 @@ DEFWORD "NFA>LFA",7,,NFATOLFA ; ( nfa -- lfa )
 ; passe du champ NFA au champ CFA
 ; le CFA est après le nom aligné sur adresse paire.    
 DEFWORD "NFA>CFA",7,,NFATOCFA ; ( nfa -- cfa )
-    .word DUP,CFETCH,LIT,F_LENMASK,AND,PLUS,ONEPLUS,ALIGNED,EXIT
+    .word DUP,CFETCH,LENMASK,AND,PLUS,ONEPLUS,ALIGNED,EXIT
  
 ; passe du champ CFA au champ PFA
 DEFWORD ">BODY",5,,TOBODY ; ( cfa -- pfa )
@@ -1709,7 +1730,7 @@ DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
 2:  .word ONEMINUS,DUP,CFETCH,DUP,LIT,F_MARK,AND,TBRANCH,3f-$  ; F_MARK?
     .word DROP,RFROM,ONEMINUS,DUP,ZBRANCH,7f-$ 
     .word TOR,BRANCH,2b-$
-3:  .word RDROP,LIT,F_LENMASK,AND   ; branche ici si F_MARK
+3:  .word RDROP,LENMASK,AND   ; branche ici si F_MARK
     .word OVER,PLUS,ONEPLUS,ALIGNED,RFROM,EQUAL,DUP,ZBRANCH,8f-$ ; aligned(NFA+LEN+1)==CFA ?
     .word DROP,BRANCH,9f-$ ; oui
 7:  .word RDROP  ; compteur limite à zéro
@@ -2297,7 +2318,7 @@ DEFWORD "RESUME",6,,RESUME ; ( -- )
 ;    .word BASE,FETCH,TOR,HEX,NEWLINE
 ;    .word LIT,2,PLUS ; première adresse du mot 
 ;1:  .word DUP,FETCH,DUP,CFATONFA,QDUP,ZBRANCH,4f-$
-;    .word COUNT,LIT,F_LENMASK,AND
+;    .word COUNT,LENMASK,AND
 ;    .word DUP,GETX,PLUS,LIT,CPL,LESS,TBRANCH,2f-$,NEWLINE 
 ;2:  .word TYPE
 ;3:  .word LIT,',',EMIT,FETCH,LIT,code_EXIT,EQUAL,TBRANCH,6f-$

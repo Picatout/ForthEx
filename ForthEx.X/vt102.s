@@ -152,7 +152,18 @@ DEFWORD "VT-KEY",6,,VTKEY
 ; retourne:
 ;    rien    
 DEFWORD "VT-EMIT",7,,VTEMIT
-    
+    .word DUP,BL,LESS,TBRANCH,2f-$
+    .word DUP,LIT,127,LESS,ZBRANCH,2f-$
+    .word SPUTC,EXIT
+2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
+    .word SPUTC,EXIT
+2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTCRLF,EXIT
+2:  .word DUP,LIT,CTRL_J,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTCRLF,EXIT
+2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTDELBACK,EXIT
+2:  .word DROP    
     .word EXIT
 
    
@@ -178,10 +189,10 @@ DEFWORD "VT-PAGE",7,,VTPAGE
     .word EXIT
     
   
-DEFWORD "VT-CRLF",7,,VTCRLF ; ( -- )
-    .word LIT,13,SPUTC
-    .word LIT,10,SPUTC
-    .word EXIT
+;DEFWORD "VT-CRLF",7,,VTCRLF ; ( -- )
+;    .word LIT,13,SPUTC
+;    .word LIT,10,SPUTC
+;    .word EXIT
    
 DEFWORD "VT-DELBACK",10,,VTDELBACK ; ( -- )
     .word LIT,VK_BACK,SPUTC
@@ -194,24 +205,69 @@ DEFWORD "VT-DELLN",8,,VTDELLN ; ( -- )
     .word LIT,'2',SPUTC
     .word LIT,'K',SPUTC,LIT,13,SPUTC,EXIT
 
-DEFWORD "VT-CURSOR?",10,,VTCURSORQ ; ( -- )
+; nom: DSR  ( -- )
+;  envoie la séquence de contrôle VT102 DSR: ESC [ 6 n    
+; arguments:
+;   aucun
+; retourne
+;   rien    
+DEFWORD "DSR",3,,DSR ; ( -- )
     .word LIT,27,SPUTC,LIT,'[',SPUTC,LIT,'6',SPUTC
     .word LIT,'n',SPUTC,EXIT
+
+; nom: VT-GETP  ( c -- n f )
+;   lecture d'une valeur numérique terminée par le caractère c    
+; arguments:
+;   c caractère délimitant la chaîne numérique.
+; retourne:
+;   n    nombre lue
+;   f    indicateur booléen de succès.
+DEFWORD "VT-GETP",7,,VTGETP
+    .word TOR,LIT,0
+1:  .word SGETC,DUP,RFETCH,EQUAL,TBRANCH,8f-$
+    .word DUP,DECIMALQ,ZBRANCH,2f-$ ; si ce n'est pas un digit décimial erreur
+    .word TOBASE10,BRANCH,1b-$
+2:  .word DROP,RDROP,FALSE,EXIT    
+8:  .word DROP,RDROP,TRUE,EXIT  
     
-; demande la position du curseur
-; sortie:
-;   v position verticale
-;   H position horizontale    
-DEFWORD "VT-GETYX",8,,VTGETYX ; ( -- v h )
-    .word VTCURSORQ
-1:  .word SGETC,LIT,27,EQUAL,ZBRANCH,1b-$
-    .word SGETC,DROP ; [
-    .word SGETC,LIT,'0',MINUS
-    .word SGETC,DUP,LIT,';',EQUAL,TBRANCH,2f-$
-    .word LIT,'0',MINUS,SWAP,LIT,10,STAR,PLUS,SGETC
-2:  .word DROP,SGETC,LIT,'0',MINUS
-    .word SGETC,DUP,LIT,'R',EQUAL,TBRANCH,9f-$
-    .word LIT,'0',MINUS,SWAP,LIT,10,STAR,PLUS,SGETC
-9:  .word DROP,EXIT
-    
-    
+; nom: ESCSEQ?  ( -- f )
+;   attend une séquence ESC [
+; arguemnts:
+;   aucun
+; retourne:
+;   f  indicateur booléen, FAUX si séquence reçu n'est pas ESC [  
+DEFWORD "ESCSEQ?",7,,ESCSEQQ  ; ( -- f )
+    .word SGETC,LIT,27,EQUAL,ZBRANCH,9b-$
+    .word SGETC,LIT,'[',EQUAL,ZBRANCH,9b-$
+    .word TRUE,EXIT
+9:  .word FALSE,EXIT
+
+  
+; nom: LC-GETCUR  ( -- u1 u2 | -1 -1 )
+;   retourne la position du curseur texte.
+; arguments:
+;   aucun
+; retourne:
+;   u1    colonne  {0..63}
+;   u2    ligne    {0..23}
+;   en cas d'erreur reoturne -1 -1  
+DEFWORD "VT-GETCUR",9,,VTGETCUR ; ( -- u1 u2 | -1 -1 )
+    .word DSR ; requête position du curseur
+    ; attend la réponse
+    .word ESCSEQQ,ZBRANCH,8f-$
+    .word LIT,';',VTGETP,TBRANCH,2f-$
+    .word DROP,BRANCH,8f-$
+2:  .word LIT,'R',VTGETP,TBRANCH,2f-$
+    .word TWODROP,BRANCH,8f-$
+2:  .word SWAP,EXIT
+8:  .word LIT,-1,DUP,EXIT    
+   
+; nom: VT-CRLF 
+;   Envoie la séquence CRTL_M CTRL_J  i.e. ASCII 13,10
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "VT-CRLF",7,,VTCRLF
+   .word LIT,CTRL_M,SPUTC,LIT,CTRL_J,SPUTC,EXIT
+   

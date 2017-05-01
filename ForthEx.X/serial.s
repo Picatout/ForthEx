@@ -222,35 +222,33 @@ DEFCODE "BAUD",4,,BAUD   ; ( u -- )
 ; le port sériel.
 ; argument:
 ;    c  caractère à transmettre.
-; note:
-;   si le transmit buffer est plein
-;   le caractère est placé dans la file d'attente.    
 DEFCODE "SPUTC",5,,SPUTC ; ( c -- )
-    cp0 tx_wait
-    bra neq, 1f
-    btsc SER_STA, #UTXBF
-    bra 1f
-    mov T, SER_TXREG
+1:  btsc SER_STA,#UTXBF
+    bra 1b
+    ze T,T
+    mov T,SER_TXREG
     DPOP
-    bra 4f
-1:    
-    mov #QUEUE_SIZE, W0
-2:
-    cp tx_wait
-    bra eq, 2b
-3:    
-    mov.b tx_tail, WREG
-    ze W0,W0
-    mov #tx_queue, W1
-    add W0,W1,W1
-    mov.b T, [W1]
-    DPOP
-    inc tx_wait
-    inc.b tx_tail
-    mov #(QUEUE_SIZE-1), W0
-    and.b tx_tail
-4:    
     NEXT
+;     ; vérification file transmission
+;     ; attend libération d'un espace
+;     bset SER_TX_IFS, #SER_TX_IF 
+;     mov #QUEUE_SIZE,W0
+;1:   cp.b tx_wait  
+;     bra z,1b
+;     mov.b tx_tail,WREG
+;     ze W0,W0
+;     mov #tx_queue,W1
+;     add W0,W1,W1
+;     mov.b T,[W1]
+;     DPOP
+;     bclr SER_TX_IEC,#SER_TX_IE
+;     inc.b tx_wait
+;     inc.b tx_tail
+;     mov.b #(QUEUE_SIZE-1),W0
+;     and.b tx_tail
+;     bset SER_TX_IFS,#SER_TX_IF
+;     bset SER_TX_IEC,#SER_TX_IE
+;     NEXT
  
 ; attend un careactère du port sériel    
 DEFCODE "SGETC",5,,SGETC  ; ( -- c )

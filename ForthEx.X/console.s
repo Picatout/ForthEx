@@ -49,6 +49,7 @@
 ;6      AT-XY      CURPOS       VT-AT-XY
 ;7      PAGE       CLS          VT-PAGE
 ;8      EKEY>CHAR  LC-FILTER    VT-FILTER
+;9                 LC-GETCUR    VT-GETCUR
     
 ;
 ;  Exemple de définition d'un mot vectorisé.
@@ -72,6 +73,7 @@
 .equ FN_ATXY,6
 .equ FN_PAGE,7
 .equ FN_EKEYTOCHAR,8
+.equ FN_GETCUR,9    
  
 ;table de vecteur pour la console locale
 DEFTABLE "LC-CONS",7,,LCCONS
@@ -84,6 +86,7 @@ DEFTABLE "LC-CONS",7,,LCCONS
     .word CURPOS   ; TVout.s
     .word CLS      ; TVout.s
     .word LCFILTER ; keyboard.s
+    .word LCGETCUR ; TVout.s
     
 ; table des vecteurs pour la console sérielle.    
 DEFTABLE "SERCONS",7,,SERCONS
@@ -96,6 +99,7 @@ DEFTABLE "SERCONS",7,,SERCONS
     .word VTATXY   ; vt102.s
     .word VTPAGE   ; vt102.s
     .word VTFILTER ; vt102.s
+    .word VTGETCUR ; vt102.s
     
 ; nom: LOCAL ( -- a-addr )
 ;  empile le vecteur de la table LCONSOLE
@@ -266,10 +270,9 @@ DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
     .word DUP,TBRANCH,1f-$
     .word TWODROP, EXIT
 1:  .word LIT, 0, DODO
-2:  .word  DUP,CFETCH,QDUP,ZBRANCH,8f-$,EMIT,ONEPLUS
-    .word DOLOOP,2b-$,BRANCH,9f-$
-8:  .word UNLOOP    
-9:  .word DROP, EXIT     
+2:  .word DUP,CFETCH,EMIT,ONEPLUS
+    .word DOLOOP,2b-$
+    .word DROP, EXIT     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; efface le caractère
@@ -290,4 +293,12 @@ DEFWORD "DELLINE",7,,DELLINE ; ( -- )
 DEFWORD "NEWLINE",7,,NEWLINE ; ( -- )
     .word LIT,VK_CR,EMIT,EXIT
     
-    
+; nom: GETCUR  ( -- u1 u2 )
+;   retourne la position du curseur texte.
+; arguments:
+;   aucun
+; retourne:
+;   u1    colonne  {0..63}
+;   u2    ligne    {0..23}
+DEFWORD "GETCUR",6,,GETCUR
+    .word SYSCONS,FETCH,LIT,FN_GETCUR,VEXEC,EXIT

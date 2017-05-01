@@ -1547,4 +1547,6 @@ Wire Wire Line
 	4850 4150 5200 4150
 Wire Wire Line
 	4950 3450 5200 3450
+Text Notes 7050 6450 0    39   ~ 0
+NOTE:  Le standard NTSC défini un seuil de noir qui correspond au\n BACKPORCH et FRONTPORCH. Il semble que les moniteurs LCD acceptent le\n signal NTSC sans l'ajout de ce signal. le signal BLKLVL est donc optionnel et\n la broche 12 peut-être libérée et la résistance R14 supprimée.
 $EndSCHEMATC

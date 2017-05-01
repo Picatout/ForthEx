@@ -1,3 +1,13 @@
+2017-04-30
+----------
+Modifiez encore le générateur vidéo pour vérifier s'il est nécessaire d'inclure
+un seuil de noir comme indiqué dans la spécification NTSC. Si ça peut fonctionner
+sans seuil de noir je pourrai libéré la broche 12 du MCU.
+CONCLUSION: Sans fonctionne très bien sans seuil de noir.
+
+Correction bogue dans serial.s (non résolu à ce moment).
+Travail dans vt102.s
+
 2017-04-29
 ----------
 Travail sur __T2Interrupt pour améliorer la synchronisation vidéo.
