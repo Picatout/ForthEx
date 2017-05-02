@@ -1,3 +1,13 @@
+2017-05-01
+----------
+Réécriture de WITHIN dans core.s  et renommé MSEC en MS et réécriture du code
+pour être conforme au standard ANSI.
+Réécriture de USEC
+Réécriture de ?COMPILE, maintenant affiche le mot qui a produit l'exception.
+Réparation bogue dans LEAVE
+Continuer le travail dans vt102.s
+
+
 2017-04-30
 ----------
 Modifiez encore le générateur vidéo pour vérifier s'il est nécessaire d'inclure

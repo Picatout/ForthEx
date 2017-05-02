@@ -84,13 +84,27 @@ CPGDN: ; CTRL_PGDN
 DEFCONST "XON",3,,XON,CTRL_Q 
 DEFCONST "XOFF",4,,XOFF,CTRL_S
  
-
+; Table utilisée par VT-FILTER
+; pour la combinaison CTRL_x où x est une lettre
+; VT102 envoie l'ordre de la lettre dans l'alphabet
+; i.e.  CTRL_a -> 1,  CTRL_b -> 2,..., CTRL_z -> 26    
+SYSDICT
+CTRL_TABLE:
+    .word 0,0,0,0
+    .word 0,0,0,0
+    .word -1,0,0,0  ; VK_BACK
+    .word 0,-1,0,0  ; VK_CR
+    .word 0,0,0,0
+    .word 0,0,-1,0  ; CTRL_V 
+    .word -1,0,0,0  ; CTRL_X
+    .word 0,0,0,0  
+ 
 ; nom: VT-FILTER ( u -- u false | c true )    
 ;   filtre  et retourne un caractère 'c' et 'vrai'
 ;   si u fait partie de l'ensemble reconnu.
 ;   sinon retourne 'u' et 'faux'   
-;   accèpte:
-;      VK_CR, VK_BACK, CTRL_X, CTRL_V {32-126}
+;   accepte:
+;      VK_CR, VK_BACK, CTRL_X, CTRL_V et {32-126}
 ; arguments:
 ;   u    code à vérifier
 ; retourne:
@@ -101,24 +115,13 @@ DEFCONST "XOFF",4,,XOFF,CTRL_S
 ;   c       caractère reconnu.
 ;   true    indicateur booléen.
 DEFWORD "VT-FILTER",9,,VTFILTER
-    .word DUP,LIT,31,GREATER,ZBRANCH,1f-$
-    .word TRUE,EXIT
-1:  .word DUP,CLIT,27,EQUAL,ZBRANCH,6f-$
-    .word DROP,SGETC,TRUE,EXIT 
-6:  .word LIT,CTRL_TABLE,PLUS,CFETCH,TRUE,EXIT    
+    .word DUP,BL,LESS,TBRANCH,2f-$
+    .word DUP,LIT,127,LESS,TBRANCH,1f-$
+    .word FALSE,EXIT
+1:  .word TRUE,EXIT
+2:  .word DUP,CELLS 
+    .word LIT,CTRL_TABLE,PLUS,FETCH,EXIT    
 
-; pour la combinaison CTRL_x où x est une lettre
-; minicom envoie l'ordre de la lettre dans l'alphabet
-; i.e.  CTRL_a -> 1,  CTRL_b -> 2, CTRL_z -> 26    
-CTRL_TABLE:
-    .byte 32,32,32,32
-    .byte 32,32,32,32
-    .byte VK_BACK,32,32,32
-    .byte VK_FF,VK_CR,32,32
-    .byte 32,32,32,32
-    .byte 32,32,VK_SYN,32
-    .byte VK_SYN,32,32,32
-    
 ; nom: VT-KEY? ( -- 0|c)
 ;   vérifie s'il y a un caractère répondant aux 
 ;   critères du filtre disponible dans la file. 
@@ -163,6 +166,8 @@ DEFWORD "VT-EMIT",7,,VTEMIT
     .word DROP,VTCRLF,EXIT
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
     .word DROP,VTDELBACK,EXIT
+2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTDELLN,EXIT
 2:  .word DROP    
     .word EXIT
 

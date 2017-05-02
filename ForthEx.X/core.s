@@ -829,18 +829,17 @@ DEFCODE "UMIN",4,,UMIN ; ( u1 u2 -- min(u1,u2) )
     exch T,W0
 1:  NEXT
     
-    
-DEFCODE "WITHIN",6,,WITHIN ; ( u1 u2 u3 -- f ) u2<=u1<u3
-    clr W0
-    mov [DSP--],W2 ; u2
-    mov [DSP--],W1 ; u1
-    cp W1,W2
-    bra ltu, 1f
-    cp W1,T
-    bra geu, 1f
-    setm W0
-1:  mov W0,T    
-    NEXT
+;   REF: http://lars.nocrew.org/forth2012/core/WITHIN.html    
+;   : WITHIN ( test low high -- flag ) OVER - >R - R> U< ;
+DEFCODE "WITHIN",6,,WITHIN ; ( u1 u2 u3 -- f ) 
+    mov T,W0   
+    DPOP
+    sub W0,T,[RSP++]
+    mov [DSP],W0
+    sub W0,T,[DSP]
+    mov [--RSP],T
+    bra code_ULESS
+
     
 DEFCODE "EVEN",4,,EVEN ; ( n -- f ) vrai si n pair
     setm W0
@@ -1827,7 +1826,7 @@ DEFWORD "<RESOLVE",8,F_IMMED,BACKJUMP ; ( a -- )
     
 ;reserve un espace pour la cible d'un branchement avant qui
 ; sera résolu ultérieurement.    
-DEFWORD ">MARK"5,F_IMMED,MARKSLOT ; ( -- slot )
+DEFWORD ">MARK",5,F_IMMED,MARKSLOT ; ( -- slot )
     .word QCOMPILE,HERE,LIT,0,COMMA,EXIT
     
 ; compile l'adresse cible d'un branchement avant
@@ -1959,7 +1958,7 @@ DEFWORD "?DO",3,F_IMMED,QDO ; ( C: -- a-addr1 0 a-addr2 )
 ;compile LEAVE
 DEFWORD "LEAVE",5,F_IMMED,LEAVE ; (C: -- slot )
     .word QCOMPILE,CFA_COMMA,UNLOOP
-    .word CFA_COMMA,BRANCH,HERE,TOCSTK,EXIT  
+    .word CFA_COMMA,BRANCH,MARKSLOT,TOCSTK,EXIT  
     
     
 ; résout toutes les adresses pour les branchements
@@ -2037,7 +2036,10 @@ DEFWORD "ENDCASE",7,F_IMMED,ENDCASE ; ( case-sys -- )
 ; certains mots ne peuvent-être utilisés
 ; que par le compilateur
 DEFWORD "?COMPILE",8,F_IMMED,QCOMPILE ; ( -- )
-    .word STATE,FETCH,ZEROEQ,QABORT
+    .word STATE,FETCH,ZEROEQ,TBRANCH,1f-$,EXIT
+1:  .word CR,HERE,COUNT,TYPE,SPACE
+2:  .word LIT,-1 
+    .word QABORT
     .byte 17
     .ascii "compile only word"
     .align 2

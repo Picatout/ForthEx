@@ -224,7 +224,7 @@ HEADLESS TICKS_INIT
     mov #(1<<TCKPS0),W0
     mov WREG,T1CON
     ; periode 1 msec
-    mov #(FCY_MHZ*1000/8-1), W0
+    mov #(FCY_MHZ*125-1), W0
     mov W0, PR1
     ; priorité d'interruption 3
     mov #~(7<<T1IP0), W0
@@ -295,25 +295,34 @@ DEFCODE "TICKS",5,,TICKS  ; ( -- n )
 ; délais en microsecondes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFCODE "USEC",4,,USEC
-    mov #TCY_USEC,W0
-    dec T,T
+    mov #70,W0  ; cette valeur est basée sur FCY=70Mhz
     mul.uu T,W0,W0
-    repeat W0
-    nop
+    mov W0,PR5
+    clr TMR5
+    bclr IFS1,#T5IF
+    bset T5CON,#TON
+1:  btss IFS1,#T5IF
+    bra 1b
+    bclr T5CON,#TON
     DPOP
     NEXT
+ 
+; nom: MS  ( u -- )
+;  Boucle d'attente qui dure au moins u millisecondes.
+;  à usec.   
+; arguments:
+;   u    nombre de millisecondes
+; retourne:
+;   rien
+DEFWORD "MS",2,,MS
+    ; si TMR1 > PR1/2 ajoute 1 à u
+    .word LIT,FCY_MHZ*125/2,LIT,TMR1,FETCH,ULESS ; S: u 0|-1
+    .word MINUS
+    .word TICKS,DUP,ROT,PLUS,TWOTOR
+2:  .word TICKS,TWORFETCH,WITHIN,TBRANCH,2b-$
+    .word RDROP,RDROP
+    .word EXIT
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;  délais en millisecondes
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "MSEC",4,,MSEC  ; ( n -- )
-    mov systicks, W0
-    add W0,T,W0
-1:    
-    cp systicks
-    bra neq, 1b
-    DPOP
-    NEXT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; générnateur pseudo-hasard
