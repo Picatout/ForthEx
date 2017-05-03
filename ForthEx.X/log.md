@@ -1,7 +1,13 @@
+2017-05-03
+----------
+Travail dans block.s
+
 2017-05-02
 ----------
 Travail sur serial.s, abandon de la file en transmission.
 Réécriture de __T2Interrupt dans TVout.s
+
+Débogage POSTPONE
 
 Travail sur vt102.s
 

@@ -345,68 +345,24 @@ DEFTABLE "XRAM",4,,XRAM
     .word _SPIRAM ; RAM SPI externe
     .word RLOAD   ; lecture
     .word RSTORE  ; écriture
-    .word RLOAD   ; IMG>
-    .word RSTORE  ; >IMG
-    
-; descripteur port sériel    
-DEFTABLE "SERIAL",6,,SERIAL
-    .word _SERIAL ; port série
-    .word VTKEY  ;
-    .word SPUTC  ;
-    .word SGETC  ; lecture canonique du port sériel
     
 ; descripteur EEPROM SPI    
 DEFTABLE "EEPROM",6,,EEPROM
     .word _SPIEEPROM ; mémoire EEPROM externe
     .word EEREAD
     .word EEWRITE
-    .word EEREAD     ;IMG>
-    .word RAMTOEE    ;>IMG
-;    .word EEMOUNT    ; monte le système de fichier EEFS
-;    .word EEUMOUNT   ; démonte le système de fichier EEFS
     
 ; descripteur carte Secure Digital    
 DEFTABLE "SDCARD",6,,SDCARD
     .word _SDCARD ; carte mémoire SD
     .word SDCREAD
     .word SDCWRITE
-    .word SDCTOIMG  ; IMG>
-    .word IMGTOSDC  ; >IMG
     
 ; acceseurs de champs    
 DEFCONST "DEVID",5,,DEVID,0    
 ; opérations    
 DEFCONST "FN_READ",7,,FN_READ,1
 DEFCONST "FN_WRITE",8,,FN_WRITE,2
-DEFCONST "FN_IMG>",7,,FN_IMGFROM,3
-DEFCONST "FN_>IMG",7,,FN_TOIMG,4    
-DEFCONST "MOUNT",5,,FN_MOUNT,5
-DEFCONST "UMOUNT",6,,FN_UMOUNT,6
 
-; execute une commande pour un périphérique
-; les opcodes ainsi que les paramètres d'entrées
-; et les résultats en sortie dépendandent de
-; l'opération effectuée ainsi que du périphérique.
-; arguments:
-;    i*x    arguments en entrée spécifique au opcode et au devid
-;    opcode code de l'opération à effectuer
-;    devid  identifiant du périphérique
-; retourne:
-;    j*x   dépend du opcode et du devid    
-DEFWORD "DEVIO",5,,DEVIO ; ( i*x opcode devid -- j*x )
-    .word SWAP,CELLS,PLUS,FETCH,EXECUTE,EXIT
-    
-    
-; lecture d'un écran
-; arguments
-;    u1   adresse RAM
-;    u2   no. de bloc
-;    u3   no. de périphéque
-; sortie:
-;    n2   nombre de lignes
-DEFWORD "LOAD",4,,LOAD ; ( u1 u2 u3 -- n2 )  
-    .word FN_READ,SWAP,TBLFETCH
-    
-    .word EXIT
 
     

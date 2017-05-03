@@ -19,14 +19,14 @@
 
 ; NOM: block.s
 ; DATE: 2017-04-24
-; DESCRIPTION: implémentation des mots de gestion de de fichiers par blocs tel
+; DESCRIPTION: implémentation des mots de gestion de fichiers par blocs tel
 ;   que définis ici: http://lars.nocrew.org/forth2012/block.html
 ;           ou  ici: http://lars.nocrew.org/dpans/dpans7.htm#7.6.1    
 ; NOTES:
 ;  1) Les blocs sont de 1024 octets par tradition car à l'époque où
-;     Charles Moore a développer ce système il l'utilisait pour stocker.
+;     Charles Moore a développé ce système il l'utilisait pour stocker
 ;     les écrans du moniteur sous forme de texte source. Le moniteur qu'il
-;     utilisait affichait 24 lignes de 64 caractères donc 1024 caractères.
+;     utilisait affichait 16 lignes de 64 caractères donc 1024 caractères.
 ;     Son éditeur de texte fonctionnait par pages écran.
 ;    
 ;  2) La numérotation des blocs de stockage commence à 1.     
@@ -132,40 +132,50 @@ HEADLESS QUPDATE, HWORD ; ( n -- f )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; vocabulaire de base
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
-; 7.6.1.0790 BLK
-; variable qui contient le no de bloc  
-; actuellement interprété ou 0
+
+; nom: BLK    
+;   ref: 7.6.1.0790 BLK
+;   variable qui contient le no de bloc  
+;   actuellement interprété ou 0
+; arguments:
+;   aucun
+; retourne:
+;   a-addr|0  a-addr est l'adresse de la cellule contenant le no. de bloc.    
 DEFCODE "BLK",3,,BLK ; ( -- a-addr|0)
     DPUSH
     mov #_blk,T
     NEXT
 
-; converti un numéro de bloc en adresse 32 bits.
+; nom: BLOCK>ADR ( n -- ud )   
+;   convertiE un numéro de bloc en adresse 32 bits. Qui correspond
+;   à la position sur le média de stockage.    
 ; arguments:
 ;    n   numéro de bloc
 ; retourne:
 ;    ud  adresse 32 bits sur le périphérique de stockage    
-DEFWORD "BLOCK>ADDR",10,,BLOCKTOADDR ; ( n -- ud )
+DEFWORD "BLOCK>ADR",9,,BLOCKTOADR ; ( n -- ud )
     .word LIT,BLOCK_SIZE,UMSTAR,EXIT
     
-; lecture d'un bloc de l'EEPROM dans un buffer
+; nom: BUF>EE  ( a-addr n -- )  
+;   Écriture d'un buffer dans d'un bloc de l'EEPROM.
 ; arguments:
 ;    a-addr    adresse du buffer
 ;    n    numéro du bloc sur le périphérique de stockage
 ;  retourne:
 ;    rien    
 DEFWORD "BUF>EE",6,,BUFTOEE ; ( a-addr n -- )
-    .word LIT,BLOCK_SIZE,SWAP,BLOCKTOADDR,RAMTOEE
+    .word LIT,BLOCK_SIZE,SWAP,BLOCKTOADR,RAMTOEE
     .word EXIT
     
-; écriture d'un bloc dans un buffer à partir de l'EEPROM
+; nom: EE>BUF ( a-addr n -- )
+; Lecture d'un bloc dans un buffer à partir de l'EEPROM
 ; arguments:
 ;    a-addr    adresse du buffer
 ;    n    numéro du bloc sur le périphérique de stockage
 ;  retourne:
 ;    rien    
 DEFWORD "EE>BUF",6,,EETOBUF ; ( a-addr n -- )
-    .word LIT,BLOCK_SIZE,SWAP,BLOCKTOADDR,EEREAD,EXIT
+    .word LIT,BLOCK_SIZE,SWAP,BLOCKTOADR,EEREAD,EXIT
     
 ; sauvegarde du buffer sur stockage
 ; remise à zéro de UPDATE_CNTR    
