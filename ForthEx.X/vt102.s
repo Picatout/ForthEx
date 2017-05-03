@@ -93,7 +93,7 @@ CTRL_TABLE:
     .word 0,0,0,0
     .word 0,0,0,0
     .word -1,0,0,0  ; VK_BACK
-    .word 0,-1,0,0  ; VK_CR
+    .word -1,-1,0,0  ; CTRL_L,VK_CR
     .word 0,0,0,0
     .word 0,0,-1,0  ; CTRL_V 
     .word -1,0,0,0  ; CTRL_X
@@ -168,6 +168,8 @@ DEFWORD "VT-EMIT",7,,VTEMIT
     .word DROP,VTDELBACK,EXIT
 2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
     .word DROP,VTDELLN,EXIT
+2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
+    .WORD SPUTC,EXIT
 2:  .word DROP    
     .word EXIT
 

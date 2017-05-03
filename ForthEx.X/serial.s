@@ -32,32 +32,32 @@
 .section .serial.bss bss
 ;.global tx_wait, tx_tail,tx_queue,rx_head,rx_queue,rx_in    
 rx_queue: .space QUEUE_SIZE
-tx_queue: .space QUEUE_SIZE
-tx_wait:  .space 2 ; nombre de caractères dans tx_queue 
-tx_head:  .space 1
-tx_tail:  .space 1
+;tx_queue: .space QUEUE_SIZE
+;tx_wait:  .space 2 ; nombre de caractères dans tx_queue 
+;tx_head:  .space 1
+;tx_tail:  .space 1
+ser_flags: .space 2
 rx_in:	  .space 2 ; nombre de caractère dans rx_queue
 rx_head:  .space 1
 rx_tail:  .space 1
-ser_flags: .space 2
  
  
 .text
 
 ; vide les files
 empty_queues:
-    push.d W0
-    mov #tx_wait,W1
-    repeat #7
-    clr.b [W1++]
-    pop.d W0
+    push W0
+    mov #ser_flags,W0
+    repeat #2
+    clr [W0++]
+    pop W0
     return
     
 ; activation port sériel
 serial_enable:
     call empty_queues
-    bclr SER_TX_IFS, #SER_TX_IF
-    bset SER_TX_IEC, #SER_TX_IE
+;    bclr SER_TX_IFS, #SER_TX_IF
+;    bset SER_TX_IEC, #SER_TX_IE
     bclr SER_RX_IFS, #SER_RX_IF
     bset SER_RX_IEC, #SER_RX_IE
     clr.b SER_TXREG
@@ -67,7 +67,7 @@ serial_enable:
 
 ; désactivation port sériel    
 serial_disable:
-    bclr SER_TX_IEC,#SER_TX_IE
+;    bclr SER_TX_IEC,#SER_TX_IE
     bclr SER_RX_IEC,#SER_RX_IE
     bclr SER_STA,#UTXEN
     bclr SER_LAT,#SER_TX_OUT
@@ -91,7 +91,7 @@ __U1RXInterrupt:
     bra nz, 2f
     bclr ser_flags,#F_TXSTOP ; XON reçu du terminal
     bra 9f
-2:  cp.b T,#A_ETX
+2:  cp.b T,#CTRL_C
     bra nz, 3f
     mov #USER_ABORT,W0
     mov W0, fwarm
@@ -121,28 +121,28 @@ __U1RXInterrupt:
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
  ; interruption transmission sérielle  
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-.global __U1TXInterrupt
-__U1TXInterrupt:
-    btsc ser_flags,#F_TXSTOP
-    retfie 
-    bclr SER_TX_IFS, #SER_TX_IF
-    push.d W0
-    cp0 tx_wait
-    bra z, 2f
-    mov.b tx_head,WREG
-    ze W0,W0
-    mov #tx_queue, W1
-    add W0,W1,W1
-    mov.b [W1],W0
-    mov.b WREG, SER_TXREG
-    clr.b [W1]
-    dec tx_wait
-    inc.b tx_head
-    mov #(QUEUE_SIZE-1), W0
-    and.b tx_head
-2:    
-    pop.d W0
-    retfie
+;.global __U1TXInterrupt
+;__U1TXInterrupt:
+;    btsc ser_flags,#F_TXSTOP
+;    retfie 
+;    bclr SER_TX_IFS, #SER_TX_IF
+;    push.d W0
+;    cp0 tx_wait
+;    bra z, 2f
+;    mov.b tx_head,WREG
+;    ze W0,W0
+;    mov #tx_queue, W1
+;    add W0,W1,W1
+;    mov.b [W1],W0
+;    mov.b WREG, SER_TXREG
+;    clr.b [W1]
+;    dec tx_wait
+;    inc.b tx_head
+;    mov #(QUEUE_SIZE-1), W0
+;    and.b tx_head
+;2:    
+;    pop.d W0
+;    retfie
     
 ;;;;;;;;;;;;;;;;;;;;;;
 ; mots système FORTH
@@ -172,10 +172,10 @@ HEADLESS SERIAL_INIT,CODE ; ( -- )
     ; activation  8 bits, 1 stop, pas de paritée
     bset SER_MODE, #UARTEN
     ;priorisation interruption
-    mov #~(7<<SER_TX_IPbit), W0
-    and SER_TX_IPC
-    mov #(3<<SER_TX_IPbit), W0
-    ior SER_TX_IPC
+;    mov #~(7<<SER_TX_IPbit), W0
+;    and SER_TX_IPC
+;    mov #(3<<SER_TX_IPbit), W0
+;    ior SER_TX_IPC
     mov #~(7<<SER_RX_IPbit), W0
     and SER_RX_IPC
     mov #(3<<SER_RX_IPbit), W0
@@ -223,6 +223,8 @@ DEFCODE "BAUD",4,,BAUD   ; ( u -- )
 ; argument:
 ;    c  caractère à transmettre.
 DEFCODE "SPUTC",5,,SPUTC ; ( c -- )
+1:  btsc ser_flags,#F_TXSTOP
+    bra 1b
 1:  btsc SER_STA,#UTXBF
     bra 1b
     ze T,T
@@ -252,16 +254,14 @@ DEFCODE "SPUTC",5,,SPUTC ; ( c -- )
  
 ; attend un careactère du port sériel    
 DEFCODE "SGETC",5,,SGETC  ; ( -- c )
-    DPUSH
 1:    
-    cp0 rx_in
-    bra nz, 2f
+    btss ser_flags,#F_RXDAT
     bra 1b
-2:
     mov.b rx_head, WREG
     ze W0,W0
     mov #rx_queue, W1
     add W0,W1,W1
+    DPUSH
     mov.b [W1], T
     ze T,T
     dec rx_in
@@ -291,7 +291,7 @@ DEFCODE "SREADY?",7,,SREADYQ
     DPUSH
     clr T
     btss ser_flags,#F_TXSTOP
-    com T,T
+    setm T
     NEXT
     
 ; nom: SGETC? ( -- f )
@@ -304,9 +304,7 @@ DEFCODE "SREADY?",7,,SREADYQ
 DEFCODE "SGETC?",6,,SGETCQ
     DPUSH
     clr T
-    mov.b rx_head,WREG
-    cp.b rx_tail
-    bra z,9f
+    btsc ser_flags, #F_RXDAT
     setm T
 9:  NEXT
     

@@ -71,49 +71,8 @@ __T2Interrupt:
     bclr VIDEO_SPISTAT, #SPIEN
     push W0
     inc line_count
-    bra z, PreEqual
-    mov #6, W0
-    cp line_count
-    bra z, Vsync
-    mov #12, W0
-    cp line_count
-    bra z, PostEqual
-    mov #17,W0
-    cp line_count
-    bra z, EvenFieldFL
-    mov #18, W0
-    cp line_count
-    bra z, OddFieldFL
-.ifdef BLACKLEVEL
-    mov #29,W0
-    cp line_count
-    bra z, BackPorchEnable
-.endif    
-    mov #TOPLINE, W0
-    cp line_count
-    bra z, EnableVideo
-    mov #TOPLINE+YRES, W0
-    cp line_count
-    bra z, DisableVideo
-    mov #FIELD_LINES,W0
-    cp0.b even
-    bra z, OddField
-EvenField:    
-    dec W0,W0
-    cp line_count
-    bra nz, T2isr_exit
-    bra FieldEnd
-OddField:    
-    cp line_count
-    bra nz, T2isr_exit
-    mov #HALFLINE, W0
-    mov W0, SYNC_OCRS
-    mov W0, SYNC_PER
-FieldEnd:    
-    com.b even
-    setm line_count
-    bra T2isr_exit
-PreEqual: ; line_count==0 6 impulsion de pré-égalisation
+    bra nz, 2f
+PreEqual: ; line_count==0..5, impulsions de pré-égalisation
 .ifdef BLACKLEVEL
     bclr OC4IEC,#OC4IE
 .endif    
@@ -123,14 +82,23 @@ PreEqual: ; line_count==0 6 impulsion de pré-égalisation
     mov W0, SYNC_OCRS
     mov W0, SYNC_PER
     bra T2isr_exit
-Vsync: ; line_count==6 , 6 impulsion vertical sync
+2:  mov #6, W0
+    cp line_count
+    bra nz, 2f
+Vsync: ; line_count==6..11, impulsions vertical sync
     mov #(HALFLINE-HSYNC), W0
     mov W0, SYNC_OCR
     bra T2isr_exit
-PostEqual: ; line_count==12 , 6 impulsion de post-égalisation.
+2:  mov #12, W0
+    cp line_count
+    bra nz, 2f
+PostEqual: ; line_count==12..17/18 ,impulsions de post-égalisation.
     mov #SERATION, W0
     mov W0, SYNC_OCR
     bra T2isr_exit
+2:  mov #17,W0
+    cp line_count
+    bra nz, 2f
 EvenFieldFL: ; champ pair première ligne complète
     cp0.b even
     bra z, T2isr_exit
@@ -138,6 +106,9 @@ EvenFieldFL: ; champ pair première ligne complète
     mov W0,SYNC_OCRS
     mov W0,SYNC_PER
     bra T2isr_exit
+2:  mov #18, W0
+    cp line_count
+    bra nz, 2f
 OddFieldFL: ; champ impair première ligne complète.
     mov #HSYNC, W0
     mov W0, SYNC_OCR
@@ -145,20 +116,47 @@ OddFieldFL: ; champ impair première ligne complète.
     mov W0, SYNC_OCRS
     mov W0, SYNC_PER
     bra T2isr_exit
-EnableVideo: ; line_count==TOPLINE  activation interruption video
-    cp0.b video_on
-    bra z, 1b
-    bclr VIDEO_IFS, #VIDEO_IF
-    bset VIDEO_IEC, #VIDEO_IE
-    bra T2isr_exit
-DisableVideo: ; line_count==TOPLINE+VIDEDO désactivaion int. video
-    bclr VIDEO_IEC, #VIDEO_IE
-    bra T2isr_exit
-.ifdef BLACKLEVEL    
+.ifdef BLACKLEVEL
+2:  mov #29,W0
+    cp line_count
+    bra nz, 2f
 BackPorchEnable:  
     bclr OC4IFS,#OC4IF
     bset OC4IEC,#OC4IE
+    bra T2isr_exit
 .endif    
+2:  mov #TOPLINE, W0
+    cp line_count
+    bra nz, 2f
+EnableVideo: ; line_count==TOPLINE,  activation interruption video
+    cp0.b video_on
+    bra z, T2isr_exit
+    bclr VIDEO_IFS, #VIDEO_IF
+    bset VIDEO_IEC, #VIDEO_IE
+    bra T2isr_exit
+2:  mov #TOPLINE+YRES, W0
+    cp line_count
+    bra nz, 2f
+DisableVideo: ; line_count==TOPLINE+YRES, désactivaion int. video
+    bclr VIDEO_IEC, #VIDEO_IE
+    bra T2isr_exit
+2:  mov #FIELD_LINES,W0
+    cp0.b even
+    bra z, OddField
+EvenField:    ; fin du champ pair
+    dec W0,W0
+    cp line_count
+    bra nz, T2isr_exit
+    bra FieldEnd
+OddField:  ; fin du champ impair, se termine par une demi-ligne.  
+    cp line_count
+    bra nz, T2isr_exit
+    mov #HALFLINE, W0
+    mov W0, SYNC_OCRS
+    mov W0, SYNC_PER
+FieldEnd:  ; réinitialisation du compteur de ligne et inversion parité champ. 
+    com.b even
+    setm line_count
 T2isr_exit:
     pop W0
     retfie

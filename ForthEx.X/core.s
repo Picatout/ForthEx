@@ -1570,6 +1570,8 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word DELBACK,ONEMINUS,BRANCH,1b-$
 3:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,4f-$
     .word DROP,DELLINE,DROP,DUP,BRANCH,1b-$
+4:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,4f-$
+    .word EMIT,DROP,DUP,BRANCH,1b-$
 4:  .word DUP,LIT,CTRL_V,EQUAL,ZBRANCH,5f-$
     .word DROP,DELLINE,PASTE,FETCH,COUNT,TYPE
     .word DROP,DUP,GETCLIP,PLUS,BRANCH,1b-$
@@ -1679,8 +1681,8 @@ HEADLESS REPL,HWORD
     
 ; boucle de l'interpréteur    
 DEFWORD "QUIT",4,,QUIT ; ( -- )
-    .word R0,RPSTORE
     .word LIT,0,STATE,STORE
+    .word R0,RPSTORE
     .word REPL
     
 ; commentaire limité par ')'
@@ -1848,28 +1850,27 @@ DEFWORD "]",1,F_IMMED,RBRACKET ; ( -- )
 9:  .word EXIT
 
 ;compile le mot suivant dans le flux
-DEFWORD "[COMPILE]",9,F_IMMED,BRCOMPILE ; ( <cccc> -- )
-  .word QCOMPILE,TICK,COMMA,EXIT
+;DEFWORD "[COMPILE]",9,F_IMMED,BRCOMPILE ; ( <cccc> -- )
+;  .word QCOMPILE,TICK,COMMA,EXIT
   
 ;compile un cfa fourni en literal
 DEFWORD "CFA,",6,F_IMMED,CFA_COMMA  ; ( -- )
   .word RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
 
 ; avorte si le nom n'est pas trouvé dans le dictionnaire  
-DEFWORD "?WORD",5,,QWORD ; ( c-addr -- cfa 1 | cfa -1 )
-   .word BL,WORD,UPPER,FIND,QDUP,ZEROEQ,ZBRANCH,2f-$
-   .word COUNT,TYPE,LIT,'?',EMIT,ABORT
-2: .word EXIT   
+DEFWORD "?WORD",5,,QWORD ; ( -- c-addr 0 | cfa 1 | cfa -1 )
+   .word BL,WORD,UPPER,FIND,QDUP,ZBRANCH,2f-$,EXIT
+2: .word COUNT,TYPE,LIT,'?',EMIT,ABORT
   
 ;diffère la compilation du mot qui suis dans le flux
 DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
     .word QCOMPILE ,QWORD
-    .word ZEROGT,3f-$
+    .word ZEROGT,TBRANCH,3f-$
   ; mot non immmédiat
-    .word LIT,LIT,COMMA,BRANCH,9f-$
+    .word CFA_COMMA,LIT,COMMA,CFA_COMMA,COMMA,EXIT
   ; mot immédiat  
 3:  .word COMMA    
-9:  .word EXIT    
+    .word EXIT    
   
 DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
     .word STATE,FETCH,ZBRANCH,9f-$

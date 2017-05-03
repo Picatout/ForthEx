@@ -1,3 +1,10 @@
+2017-05-02
+----------
+Travail sur serial.s, abandon de la file en transmission.
+Réécriture de __T2Interrupt dans TVout.s
+
+Travail sur vt102.s
+
 2017-05-01
 ----------
 Réécriture de WITHIN dans core.s  et renommé MSEC en MS et réécriture du code

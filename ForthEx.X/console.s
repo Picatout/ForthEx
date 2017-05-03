@@ -127,7 +127,7 @@ DEFWORD "REMOTE",6,,REMOTE
 ; retourne:
 ;   rien.   
 DEFWORD "CONSOLE",7,,CONSOLE
-    .word SYSCONS,STORE,EXIT
+    .word SYSCONS,STORE,LIT,CTRL_L,EMIT,EXIT
     
     
 ; nom: KEY  ( -- c )  
