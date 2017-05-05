@@ -1,3 +1,7 @@
+2017-05-04
+----------
+modification à DEFER,DEFER!,DEFER@,IS et ajouté ACTION-OF
+
 2017-05-03
 ----------
 Travail dans block.s

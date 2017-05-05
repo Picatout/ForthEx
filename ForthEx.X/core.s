@@ -2168,29 +2168,36 @@ HEADLESS NOINIT,HWORD
     .align 2
     .word NEWLINE,ABORT
     
+HEADLESS DEFEREXEC,HWORD
+     .word FETCH,EXECUTE,EXIT
+     
 ; création d'un mot la définition de la sémantique d'exécution
 ; est différée.
 ; Utilise à sémantique par défaut (NOINIT)
 DEFWORD "DEFER",5,,DEFER ; ccccc ( -- )
-    .word HEADER,CFA_COMMA,ENTER,CFA_COMMA,NOINIT
-    .word CFA_COMMA,EXIT,REVEAL,EXIT
+    .word CREATE,CFA_COMMA,NOINIT
+    .word RT_DOES,DEFEREXEC,EXIT
 
 ; initialise la sémantique d'exécution d'un mot définit avec DEFER 
 ;  xt1  CFA de la sémantique que le mot doit exécuté
 ;  xt2  CFA du mot diféré.    
 DEFWORD "DEFER!",6,,DEFERSTORE ;  ( xt1 xt2 -- )
-    .word CELLPLUS,STORE,EXIT
+    .word TOBODY,STORE,EXIT
 
 ; empile le xt interprété par un mot défini avec DEFER
 ; xt1 CFA du mot diféré
 ; xt2 CFA de la sémantique d'exécution de ce mot.    
 DEFWORD "DEFER@",6,,DEFERFETCH ; ( xt1 -- xt2 )
-    .word CELLPLUS,FETCH,EXIT
+    .word TOBODY,FETCH,EXIT
  
 ; initilalise la sémantique d'exécution d'un mot définit avec DEFER
 ; le nom du mot diféré est fourni en texte    
 DEFWORD "IS",2,,IS  ; ( xt1 cccc -- )
-    .word QWORD,DROP,CELLPLUS,STORE,EXIT
+    .word TICK,TOBODY,STORE,EXIT
+    
+    
+DEFWORD "ACTION-OF",9,,ACTIONOF ; ( ccc -- xt2 )
+    .word TICK,TOBODY,FETCH,EXIT
     
     
 ; imprime le commentaire délimité par )
