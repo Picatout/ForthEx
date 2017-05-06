@@ -1215,9 +1215,15 @@ DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
     RESET_EDS
     NEXT
 
-    
-; initialise un bloc mémoire RAM de dimension u avec
-; le caractère c.    
+; nom: FILL ( c-addr u c -- )    
+;   Initialise un bloc mémoire RAM de dimension u avec
+;   le caractère c.
+; arguments:
+;   c-addr   adresse début zone.
+;   u        nombre de caractères à remplir
+;   c        caractère de remplissage    
+; retourne:
+;       
 DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
     SET_EDS
     mov T,W0 ; c
