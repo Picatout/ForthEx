@@ -673,6 +673,16 @@ DEFCODE "+!",2,,PLUSSTORE  ; ( n addr  -- ) [addr]=[addr]+n
     mov W0, [T]
     DPOP
     NEXT
+
+; addition de 2 entiers double    
+DEFCODE "D+",2,,DPLUS ; ( d1 d2 -- d3 )
+    mov T,W1
+    DPOP
+    mov T,W0
+    DPOP
+    add W0,[DSP],[DSP]
+    addc W1,T,T
+    NEXT
     
 DEFCODE "M+",2,,MPLUS  ; ( d1 n --  d2 ) simple + double
     mov [DSP-2], W0 ; d1 faible

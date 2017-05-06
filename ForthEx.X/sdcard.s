@@ -28,7 +28,9 @@
 sdc_status: .space 2 ; indicateurs booléens carte SD
 sdc_size: .space 4 ; nombre de secteurs de 512 octets
 sdc_R: .space 4; réponse de la carte 
-
+sdc_first: .space 4  ; adresse du premier bloc sur la carte SD.
+ 
+ 
 INTR
 ;la broche SDC_DETECT
 ; a changée d'état
@@ -413,6 +415,32 @@ DEFWORD "SDC>IMG",7,,SDCTOIMG ; ( u1 u2 ud1 -- )
     .align 2
     .word NEWLINE,ABORT
     
+
+; nom: SDFIRST ; ( -- u )
+;    variable contenant l'adresse du premeir bloc utilisé sur la carte SD
+; arguments:
+;
+; retourne:
+;    u    pointeur de la variable
+DEFCODE "SDFIRST",7,,SDFIRST
+    DPUSH
+    mov #sdc_first,T
+    NEXT
     
-
-
+    
+; nom: SDBLK>ADR  ( u -- ud )
+;   Convertie un numéro de bloc de la carte SD en adresse absolue.
+; arguments:
+;   u    numéro du bloc {1..65535}
+; retourne:
+;   ud   adresse absolue de 32 bits sur la carte SD.
+DEFWORD "SDBLK>ADR",9,,SDBLKTOADR
+    .word ONEMINUS,LIT,BLOCK_SIZE,MSTAR,SDFIRST,TWOFETCH,DPLUS,EXIT
+    
+; descripteur carte Secure Digital    
+DEFTABLE "SDCARD",6,,SDCARD
+    .word _SDCARD 
+    .word SDCREAD
+    .word SDCWRITE
+    .word SDBLKTOADR
+    

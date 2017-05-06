@@ -1,3 +1,8 @@
+2017-05-05
+----------
+Travail sur blocks.s
+Modifications dans store.s et sdcard.s
+
 2017-05-04
 ----------
 modification à DEFER,DEFER!,DEFER@,IS et ajouté ACTION-OF

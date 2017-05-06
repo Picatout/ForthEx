@@ -111,18 +111,30 @@ spi_send_address: ; ( ud -- )
     return
  
     
-;;;;;;;;;;;;;;;
-;  Forth words
-;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; transfert un bloc d'octets de la RAM du MCU vers la RAM SPI
+;   interface SPI RAM
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+; nom: XBLK>ADR ; ( u -- ud )
+;   Convertie un numéro de bloc XRAM en adresse XRAM.    
+; arguments:
+;   u    entier non signé, numéro du bloc, {1..6535}
+; retourne:
+;   ud   entier double non signé, adresse début bloc dans XRAM
+DEFWORD "XBLK>ADR",8,,XBLKTOADR
+    .word ONEMINUS,LIT,BLOCK_SIZE,MSTAR,EXIT
+    
+    
+; nom: XWRITE ( u1 n+ ud1 -- )
+;   Transfert un bloc d'octets de la RAM du MCU vers la RAM SPI
 ; arguments: 
 ;    u1  adresse bloc RAM
 ;    n+  nombre d'octets
-;    ud1  adresse SPIRAM
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RSTORE",6,,RSTORE ; ( u1 n+ ud1 -- )
+;    ud1  adresse SPIRAM 
+; retourne    
+;   rien
+DEFCODE "XWRITE",6,,XWRITE ; ( u1 n+ ud1 -- )
     SET_EDS
     _enable_sram
     mov #RWRITE,W0
@@ -145,14 +157,15 @@ DEFCODE "RSTORE",6,,RSTORE ; ( u1 n+ ud1 -- )
     NEXT
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; transfert un bloc d'octets de la RAM SPI vers la RAM du MCU
+; nom: XREAD  ( u1 n+ ud1 -- )
+;   Transfert un bloc d'octets de la RAM SPI vers la RAM du MCU
 ; arguments: 
 ;    u1  adresse bloc RAM
 ;    n+  nombre d'octets
 ;    ud1  adresse SPIRAM
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCODE "RLOAD",5,,RLOAD ; ( u1 n+ ud1 -- )
+; retourne:    
+;   rien
+DEFCODE "XREAD",5,,XREAD ; ( u1 n+ ud1 -- )
     _enable_sram
     mov #RREAD, W0
     spi_write
@@ -172,7 +185,6 @@ DEFCODE "RLOAD",5,,RLOAD ; ( u1 n+ ud1 -- )
     _disable_sram
     NEXT
   
-    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   INTERFACE EEPROM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -201,9 +213,18 @@ DEFCODE "?WIP",4,,QWIP ; ( -- f )
 DEFWORD "WWIP",4,,WWIP ; ( -- )
 1: .word QWIP,TBRANCH,1b-$,EXIT
     
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; enregistrement d'une plage RAM dans l'EEPROM
+
+; nom: EEBLK>ADR  ( u -- ud )
+;   Convertie un numéro de bloc en adresse EEPROM
+; arguments:
+;   u	    entier simple non signé, numéro du block {1..65535}
+; retourne:
+;   ud      entier double non signé, adresse début bloc dans l'EEPROM
+DEFWORD "EEBLK>ADR",9,,EEBLKTOADR
+    .word ONEMINUS,LIT,BLOCK_SIZE,MSTAR,EXIT
+ 
+; nom: EEWRITE ( u1 n+ ud1 -- )
+;   Enregistrement d'une plage RAM dans l'EEPROM
 ; IMPORTANT:
 ;     la mémoire EEPROM est divisée en
 ;     rangées de 256 octets. Lorsque le pointeur
@@ -213,11 +234,12 @@ DEFWORD "WWIP",4,,WWIP ; ( -- )
 ;     octets peuvent-être écris avant l'écrasement
 ;     des premiers octets. 
 ; arguments: 
-;    'r-addr'  entier simple, adresse 16 bits début RAM
-;    'size'  entier simple, nombre d'octets à enregistrer 
-;    'ee-addr'  entier double, adresse 24 bits destination EEPROM
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "EEWRITE",7,,EEWRITE  ;( r-addr size ee-addr -- )
+;    u1	  entier simple, adresse 16 bits début RAM
+;    n+  entier simple positif, nombre d'octets à enregistrer {1..256} 
+;    ud2  entier double, adresse 24 bits destination EEPROM
+; retourne: 
+;   rien
+DEFCODE "RAM>EE",6,,RAMTOEE  
     SET_EDS
     ; on s'assure qu'il n'y a pas une écrire en cours
     call wait_wip0 
@@ -245,14 +267,15 @@ DEFCODE "EEWRITE",7,,EEWRITE  ;( r-addr size ee-addr -- )
     RESET_EDS
     NEXT
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; lecture d'une plage EEPROM vers la mémoire RAM
+; nom: EEREAD   ( u1 n+ ud -- )
+;   Lecture d'une plage EEPROM vers la mémoire RAM
 ; arguments:
-;    'r-addr'  entier simple, adresse 16 bits début RAM
-;    'size'  entier simple, nombre d'octets à lire 
-;    'ee-addr'  entier double, adresse 24 bits destination EEPROM
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DEFCODE "EEREAD",6,,EEREAD   ; ( r-addr size ud -- )
+;    u1	    entier simple, adresse 16 bits début RAM
+;    n+	    entier simple, nombre d'octets à lire 
+;    ud     entier double, adresse destination EEPROM
+; retourne:
+;   rien    
+DEFCODE "EEREAD",6,,EEREAD   
      ; on s'assure qu'il n'y a pas d'écriture en cours
     call wait_wip0
     ;envoie de la commande et de l'adresse EEPROM
@@ -274,14 +297,18 @@ DEFCODE "EEREAD",6,,EEREAD   ; ( r-addr size ud -- )
     _disable_eeprom
     NEXT
     
+; l'EEPROM peut-être effacée par page,secteur ou au complet.    
 DEFCONST "EPAGE",5,,EPAGE,EPE ;efface page
 DEFCONST "ESECTOR",7,,ESECTOR,ESE ; efface secteur
 DEFCONST "EALL",4,,EALL,ECE    
     
-; efface page/secteur/complètement l'EEPROM
+; nom: EERASE ( eall | N {EPAGE|ESECTOR} -- )    
+;   Efface unepage, 1 secteur ou l'EEPROM au complet.
 ; arguments:
 ;   'n' numéro de page {0..511} ou de secteur {0..3}
-;   'op' opération: EPAGE|ESECTOR|EALL    
+;   'op' opération: EPAGE|ESECTOR|EALL
+; retourne:
+;   rien    
 DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
     call wait_wip0
     _enable_eeprom
@@ -314,55 +341,55 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
 9:  _disable_eeprom
     NEXT
 
-; écriture d'une plage RAM dans l'EEPROM externe 
-; l'écriture se fait par segment de 256 octets.    
+; nom: EEWRITE  ( u1 ud -- )    
+;   Écriture d'un bloc RAM dans l'EEPROM externe.
+;   L'écriture se fait par segment de 256 octets. 
+;   Un bloc compte 1024 octets.    
 ; arguments:
-;   'r-addr' entier simple, adresse RAM début
-;   'size' entier simple, nombre d'octets à écrire, multiple de 256
-;   'e-addr'  entier double, adresse EEPROM début alignée % 256    
-DEFWORD "RAM>EE",6,,RAMTOEE ; ( r-addr size e-addr -- )    
-    .word ROT,LIT,0,DODO
-1:  .word TWOTOR,LIT,256,TWODUP,TWORFETCH,EEWRITE ; S: r-addr 256 R: e-addr
+;   u1	    entier simple, adresse RAM début
+;   ud      adresse absolue dans l'EEPROM
+; retourne:
+;   rien    
+DEFWORD "EEWRITE",7,,EEWRITE 
+    .word LIT,4,LIT,0,DODO  ; S: u1 ud
+1:  .word TWOTOR,LIT,256,TWODUP,TWORFETCH,RAMTOEE ; S: u1 256 R: ud
     .word PLUS,TWORFROM,LIT,256,MPLUS,LIT,256,DOPLOOP,1b-$
     .word TWODROP,DROP,EXIT
 
-    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
-; descripteurs de périphérique ;
+; descripteurs de périphériques 
+; pour les opérations sur blocs    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; il s'agit d'une structure de données
 ; contenants les pointeurs de fonctions
 ; des périphériques    
 ;  champs:
 ;   identifiant
-;   XT lecture
-;   XT écriture
-;   XT autre fonction
-;   ...
+;   CFA lecture
+;   CFA écriture
+;   CFA load
+
+
+; acceseurs de champs    
+DEFCONST "DEVID",5,,DEVID,0    
+; opérations    
+DEFCONST "FN_READ",7,,FN_READ,1   ; chargement d'un bloc dans un buffer
+DEFCONST "FN_WRITE",8,,FN_WRITE,2 ; écriture d'un buffer dans un bloc device
+DEFCONST "FN_BLK>ADR",10,,FN_BLKTOADR,4 ; convertion no. bloc à adresse absolue.
     
 ; descripteur SPIRAM    
 DEFTABLE "XRAM",4,,XRAM
     .word _SPIRAM ; RAM SPI externe
-    .word RLOAD   ; lecture
-    .word RSTORE  ; écriture
+    .word XREAD   ; store -> buffer
+    .word XWRITE  ; buffer -> store
+    .word XBLKTOADR
     
 ; descripteur EEPROM SPI    
 DEFTABLE "EEPROM",6,,EEPROM
     .word _SPIEEPROM ; mémoire EEPROM externe
-    .word EEREAD
+    .word EEREAD    
     .word EEWRITE
-    
-; descripteur carte Secure Digital    
-DEFTABLE "SDCARD",6,,SDCARD
-    .word _SDCARD ; carte mémoire SD
-    .word SDCREAD
-    .word SDCWRITE
-    
-; acceseurs de champs    
-DEFCONST "DEVID",5,,DEVID,0    
-; opérations    
-DEFCONST "FN_READ",7,,FN_READ,1
-DEFCONST "FN_WRITE",8,,FN_WRITE,2
-
+    .word EEBLKTOADR
 
     
