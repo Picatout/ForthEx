@@ -416,10 +416,26 @@ DEFWORD "FLUSH",5,,FLUSH
     .word SAVEBUFFERS,EMPTYBUFFERS,EXIT
     
 ; nom: LIST ( n+ -- )
-;   
-    
+;   Affiche le contenu du bloc à l'écran.
+; arguments:
+;   n+  numéro du bloc
+; retourne:
+;       
+DEFWORD "LIST",4,,LIST
+    .word DUP,SCR,STORE,LIT,CTRL_L,EMIT ; efface affichage
+    .word BLOCK,LIT,BLOCK_SIZE,LIT,0,DODO
+1:  .word DUP,ECFETCH,QDUP,TBRANCH,2f-$
+    .word UNLOOP,BRANCH,9f-$
+2:  .word EMIT
+    ; si remote console alors si colon==CPL alors NEWLINE 
+    .word SYSCONS,FETCH,LIT,SERCONS,EQUAL,ZBRANCH,2f-$
+    .word GETCUR,DROP,LIT,CPL,EQUAL,ZBRANCH,2f-$
+    .word NEWLINE
+2:  .word ONEPLUS,DOLOOP,1b-$
+9:  .word DROP,EXIT
+
+  
 ; 7.6.2.2125 REFILL
 ; 7.6.2.2280 THRU
 ; 7.6.2.2535 \ extension de la sémentique des commentaires voir core.s
  
-

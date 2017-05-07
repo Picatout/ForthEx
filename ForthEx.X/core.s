@@ -1510,7 +1510,16 @@ DEFWORD "WORD",4,,WORD ; ( c -- c-addr )
     .word HERE,TOCOUNTED,HERE
     .word EXIT
     
-
+; nom: PARSE-NAME  / cccc  ( -- c-addr u ) 
+;   recherche le prochain mot dans le flux d'entrée
+; arguments:
+;   aucun
+; retourne:
+;   c-addr  addresse premier caractère.
+;   u    longueur de la chaîne.
+DEFWORD "PARSE-NAME",9,,PARSENAME
+    .word BL,WORD,COUNT,EXIT
+    
 ; recherche un mot dans le dictionnaire
 ; ne retourne pas les mots cachés (attribut: F_HIDDEN)    
 ; retourne: c-addr 0 si adresse non trouvée
@@ -2218,7 +2227,7 @@ DEFWORD "ACTION-OF",9,,ACTIONOF ; ( ccc -- xt2 )
     
 ; imprime le commentaire délimité par )
 DEFWORD ".(",2,F_IMMED,DOTPAREN ; ccccc    
-    .word LIT,')',WORD,COUNT,TYPE,EXIT
+    .word LIT,')',PARSE,TYPE,EXIT
     
 ; envoie 2 élément de S au sommet de R
 ; de sorte qu'il soient dans le même ordre
