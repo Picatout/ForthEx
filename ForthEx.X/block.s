@@ -435,7 +435,21 @@ DEFWORD "LIST",4,,LIST
 9:  .word DROP,EXIT
 
   
-; 7.6.2.2125 REFILL
+; nom: REFILL  ( -- f )
+;   **comportement non standard**  
+;   Si la variable BLK est à zéro retourne faux.
+;   Sinon incrémente BLK et si cette nouvelle valeur est valide
+;   charge ce bloc pour évaluation et retourne vrai, sinon
+;   remet BLK à zéro et retourne faux.
+DEFWORD "REFILL",6,,REFILL
+    .word BLK,FETCH,DUP,ZBRANCH,9f-$
+    .word BLK,LIT,1,OVER,FETCH,PLUS,DUP,ROT,STORE
+    .word DUP,LIT,FN_BOUND,BLKDEV,FETCH,VEXEC
+    .word DUP,ZBRANCH,8f-$
+    .word DROP,BLOCK,TRUE,EXIT
+8:  .word DUP,BLK,STORE    
+9:  .word EXIT    
+  
 ; 7.6.2.2280 THRU
 ; 7.6.2.2535 \ extension de la sémentique des commentaires voir core.s
  

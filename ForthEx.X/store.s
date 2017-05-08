@@ -356,7 +356,35 @@ DEFWORD "EEWRITE",7,,EEWRITE
     .word PLUS,TWORFROM,LIT,256,MPLUS,LIT,256,DOPLOOP,1b-$
     .word TWODROP,DROP,EXIT
 
-
+; constante nombre de blocs dans la SPIRAM    
+DEFCONST "XBLKCOUNT",9,,XBLKCOUNT,128    
+    
+; nom: XBOUND  ( n+ -- f )
+;   Vérifie si le numéro de bloc est dans les limites
+; arguments:
+;   n+   numéro du bloc à vérifier. {1..128}
+; retourne:
+;   f   indicateur booléen.
+DEFWORD "XBOUND",6,,XBOUND
+    .word DUP,ZBRANCH,9f-$
+    .word XBLKCOUNT,UGREATER,NOT
+9:  .word EXIT
+   
+;constante nombre de blocs dans l'EEPROM  
+DEFCONST "EEBLKCOUNT",10,,EEBLKCOUNT,128
+  
+; nom: EEBOUND  ( n+ -- f )
+;   Vérifie si le numéro de bloc est dans les limites
+; arguments:
+;   n+   numéro du bloc à vérifier. {1..128}
+; retourne:
+;   f   indicateur booléen.
+DEFWORD "EEBOUND",7,,EEBOUND
+    .word DUP,ZBRANCH,9f-$
+    .word EEBLKCOUNT,UGREATER,NOT
+9:  .word EXIT
+   
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
 ; descripteurs de périphériques 
 ; pour les opérations sur blocs    
@@ -376,7 +404,8 @@ DEFCONST "DEVID",5,,DEVID,0
 ; opérations    
 DEFCONST "FN_READ",7,,FN_READ,1   ; chargement d'un bloc dans un buffer
 DEFCONST "FN_WRITE",8,,FN_WRITE,2 ; écriture d'un buffer dans un bloc device
-DEFCONST "FN_BLK>ADR",10,,FN_BLKTOADR,4 ; convertion no. bloc à adresse absolue.
+DEFCONST "FN_BLK>ADR",10,,FN_BLKTOADR,3 ; convertion no. bloc à adresse absolue.
+DEFCONST "FN_BOUND",8,,FN_BOUND,4 ; vérifie si le no. de block est dans les limites
     
 ; descripteur SPIRAM    
 DEFTABLE "XRAM",4,,XRAM
@@ -384,6 +413,7 @@ DEFTABLE "XRAM",4,,XRAM
     .word XREAD   ; store -> buffer
     .word XWRITE  ; buffer -> store
     .word XBLKTOADR
+    .word XBOUND
     
 ; descripteur EEPROM SPI    
 DEFTABLE "EEPROM",6,,EEPROM
@@ -391,5 +421,5 @@ DEFTABLE "EEPROM",6,,EEPROM
     .word EEREAD    
     .word EEWRITE
     .word EEBLKTOADR
-
+    .word EEBOUND
     

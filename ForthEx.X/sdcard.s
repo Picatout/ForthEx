@@ -427,6 +427,17 @@ DEFCODE "SDFIRST",7,,SDFIRST
     mov #sdc_first,T
     NEXT
     
+; constantes nombre maximal de blocs utilisés sur la carte SD
+DEFCONST "SDBLKCOUNT",10,,SDBLKCOUNT,65535
+
+; nom: SDBOUND  ( n+ -- f)
+;   Vérifie si le numéro de bloc est dans les limites
+; arguments:
+;   n+   numéro du bloc à vérifier. {1..65535}
+; retourne:
+;   f   indicateur booléen.
+DEFWORD "SDBOUND",7,,SDBOUND
+    .word ZEROEQ,NOT,EXIT
     
 ; nom: SDBLK>ADR  ( u -- ud )
 ;   Convertie un numéro de bloc de la carte SD en adresse absolue.
@@ -443,4 +454,4 @@ DEFTABLE "SDCARD",6,,SDCARD
     .word SDCREAD
     .word SDCWRITE
     .word SDBLKTOADR
-    
+    .word SDBOUND

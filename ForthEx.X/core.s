@@ -684,6 +684,17 @@ DEFCODE "D+",2,,DPLUS ; ( d1 d2 -- d3 )
     addc W1,T,T
     NEXT
     
+; soustractions de 2 entiers double 
+DEFCODE "D-",2,,DMINUS ; ( d1 d2 -- d3 )
+    mov T,W1
+    DPOP
+    mov T,W0
+    DPOP
+    mov [DSP],W2
+    sub W2,W0,[DSP]
+    subb T,W1,T
+    NEXT
+    
 DEFCODE "M+",2,,MPLUS  ; ( d1 n --  d2 ) simple + double
     mov [DSP-2], W0 ; d1 faible
     add W0,T, W0 ; d2 faible
@@ -1193,28 +1204,6 @@ DEFWORD "[CHAR]",6,F_IMMED,COMPILECHAR ; cccc
     .word QCOMPILE
     .word CHAR,CFA_COMMA,LIT,COMMA,EXIT
     
-    
-; recherche du caractère 'c' dans le bloc
-; mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
-; retourne la position de 'c' et
-; le nombre de caractères qui suit dans le bloc
-; le buffer doit-être en RAM, pas d'accès à la PSV    
-DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
-    SET_EDS
-    mov T, W0   ; c
-    DPOP        ; T=U
-    mov [DSP],W1 ; W1=c-addr
-    cp0 T
-    bra z, 4f
-1:  cp.b W0,[W1]
-    bra z, 4f
-    inc W1,W1
-    dec T,T
-    bra nz, 1b
-4:  mov W1,[DSP]
-    RESET_EDS
-    NEXT
-
 ; nom: FILL ( c-addr u c -- )    
 ;   Initialise un bloc mémoire RAM de dimension u avec
 ;   le caractère c.
@@ -1463,8 +1452,46 @@ DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
     bra 1b
 3:  NEXT
 
-;avance au delà de 'c'
-DEFCODE "SKIP",4,,SKIP ; ( addr u c -- addr' u' )
+; nom: SCAN    
+;   Recherche du caractère 'c' dans le bloc
+;   mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
+;   retourne la position de 'c' et
+;   le nombre de caractères restant dans le bloc
+; arguments:
+;   c-addr  adresse début zone RAM
+;   u       longueur de la zone en octets.    
+;   c       caractère recherché.
+; retourne:
+;   c-addr'  adresse du premier 'c' trouvé dans cette zone
+;   u'       longueur de la zone restante à partir de c-addr'    
+DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
+    SET_EDS
+    mov T, W0   ; c
+    DPOP        ; T=u
+    mov [DSP],W1 ; W1=c-addr
+    cp0 T 
+    bra z, 4f ; aucun caractère restant dans le buffer.
+1:  cp.b W0,[W1]
+    bra z, 4f
+    inc W1,W1
+    dec T,T
+    bra nz, 1b
+4:  mov W1,[DSP]
+    RESET_EDS
+    NEXT
+
+; nom: SKIP    
+;   avance au delà de 'c'. Retourne l'adresse du premier caractère
+;   différent de 'c' et la longueur restante de la zone.
+; arguments:
+;   c-addr    adresse début de la zone
+;   u         longueur de la zone
+;   c         caractère à sauter.
+; retourne:
+;   c-addr'   adresse premier caractère <> 'c'
+;   u'        longueur de la zone restante à partir c-addr'    
+DEFCODE "SKIP",4,,SKIP ; ( c-addr u c -- c-addr' u' )
+    SET_EDS
     mov T, W0 ; c
     DPOP ; T=u
     mov [DSP],W1 ; addr
@@ -1476,40 +1503,76 @@ DEFCODE "SKIP",4,,SKIP ; ( addr u c -- addr' u' )
     dec T,T
     bra nz, 2b
 8:  mov W1,[DSP]
+    RESET_EDS
     NEXT
   
-; avance ajuste >IN
-DEFWORD "ADR>IN",7,,ADRTOIN ; ( adr' -- )
+; nom: ADR>IN    
+;   Ajuste la variable  >IN à partir de la position laissée
+;   par le dernier PARSE
+; arguments:
+;   c-addr  adresse du pointeur après le dernier PARSE
+; retourne:
+;    
+DEFWORD "ADR>IN",7,,ADRTOIN ; ( c-addr -- )
     .word TSOURCE,ROT,ROT,MINUS,MIN,LIT,0,MAX
     .word TOIN,STORE,EXIT
-    
-;avance a de n caractères     
-DEFWORD "/STRING",7,,SLASHSTRING ; ( a u n -- a+n u-n )
+
+; nom: /STRING    
+;   Avance c-addr de n caractères et réduit u d'autant.
+; arguments:
+;   c-addr   adresse initiale
+;   u        longueur de la zone
+;   n        nombre de caractères à avancer.
+; retourne:
+;   c-addr'    c-addr+n
+;   u'         u-n    
+DEFWORD "/STRING",7,,SLASHSTRING ; ( c-addr u n -- c-addr' u' )
     .word ROT,OVER,PLUS,ROT,ROT,MINUS,EXIT
 
-; saute touts les caractère 'c'
-; ensuite accumule les caractère jusqu'au
-; prochain 'c'    
-DEFWORD "PARSE",5,,PARSE ; c -- c-addr n
-        .word TSOURCE,TOIN,FETCH,SLASHSTRING ; c src' u'
-        .word OVER,TOR,ROT,SCAN  ; src' u'
-        .word OVER,SWAP,ZBRANCH, parse1-$ 
-        .word ONEPLUS  ; char+
-parse1: .word ADRTOIN ; adr'
-        .word RFROM,TUCK,MINUS,EXIT 
+; nom: PARSE   ( c -- c-addr u )    
+;   Accumule les caractères jusqu'au
+;   prochain 'c'. Met à jour la variable >IN
+; arguments: 
+;   c    caractère délimiteur
+; retourne:
+;   c-addr   adresse du premier caractère de la chaîne
+;   u        longueur de la chaîne.
+DEFWORD "PARSE",5,,PARSE ; c -- c-addr u
+    .word TSOURCE,TOIN,FETCH,SLASHSTRING ; c src' u'
+    .word OVER,TOR,ROT,SCAN  ; src' u'
+    .word OVER,SWAP,ZBRANCH, 1f-$ 
+    .word ONEPLUS  ; char+
+1:  .word ADRTOIN ; adr'
+    .word RFROM,TUCK,MINUS,EXIT     
     
+; nom: >COUNTED    
+;   copie une chaîne dont l'adresse et la longueur sont fournies
+;   en arguments vers une chaîne comptée dont l'adresse est fournie.
+; arguments:    
+;   src addresse chaîne à copiée
+;   n longueur de la chaîne
+;   dest adresse destination
+; retourne:
+;    
+DEFWORD ">COUNTED",8,,TOCOUNTED ; ( src n dest -- )
+    .word TWODUP,CSTORE,ONEPLUS,SWAP,MOVE,EXIT
+
     
-; localise le prochain mot délimité par 'c'
-; la variable TOIN indique la position courante
-; le mot trouvé est copié à la position DP
-; met à jour >IN
+; nom: WORD    
+;   localise le prochain mot délimité par 'c'
+;   la variable TOIN indique la position courante
+;   le mot trouvé est copié à la position DP
+; arguments:
+;   c   caractère délimiteur
+; retourne:    
+;   c-addr    adresse chaîne comptée.    
 DEFWORD "WORD",4,,WORD ; ( c -- c-addr )
     .word DUP,TSOURCE,TOIN,FETCH,SLASHSTRING ; c c c-addr' u'
     .word ROT,SKIP ; c c-addr' u'
     .word DROP,ADRTOIN,PARSE
     .word HERE,TOCOUNTED,HERE
     .word EXIT
-    
+        
 ; nom: PARSE-NAME  / cccc  ( -- c-addr u ) 
 ;   recherche le prochain mot dans le flux d'entrée
 ; arguments:
@@ -1517,9 +1580,9 @@ DEFWORD "WORD",4,,WORD ; ( c -- c-addr )
 ; retourne:
 ;   c-addr  addresse premier caractère.
 ;   u    longueur de la chaîne.
-DEFWORD "PARSE-NAME",9,,PARSENAME
-    .word BL,WORD,COUNT,EXIT
-    
+;DEFWORD "PARSE-NAME",9,,PARSENAME
+;    .word BL,WORD,EXIT
+
 ; recherche un mot dans le dictionnaire
 ; ne retourne pas les mots cachés (attribut: F_HIDDEN)    
 ; retourne: c-addr 0 si adresse non trouvée
@@ -1622,18 +1685,14 @@ DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )
    .word S0,FETCH,SPSTORE
    .word NEWLINE,QUIT
 
-; copie chaîne comptée de src vers dest
-; src addresse chaîne à copiée
-; n longueur de la chaîne
-; dest adresse destination   
-DEFWORD ">COUNTED",8,,TOCOUNTED ; ( src n dest -- )
-    .word TWODUP,CSTORE,ONEPLUS,SWAP,MOVE,EXIT
-
 ; interprète la chaîne indiquée par c-addr u   
 ; facteur commun entre QUIT et EVALUATE    
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
         .word SRCSTORE,LIT,0,TOIN,STORE
 1:      .word BL,WORD,DUP,CFETCH,ZBRANCH,9f-$
+      ; test
+;        .word CR,COUNT,TYPE,BRANCH,1b-$
+      ;;;;;
         .word UPPER,FIND,QDUP,ZBRANCH,4f-$
         .word ONEPLUS,STATE,FETCH,ZEROEQ,OR
         .word ZBRANCH,2f-$
@@ -1716,7 +1775,9 @@ DEFWORD "(",1,F_IMMED,LPAREN ; parse ccccc)
 
 ; commentaire jusqu'à la fin de la ligne
 DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
-    .word TSOURCE,PLUS,ADRTOIN,EXIT
+    .word BLK,FETCH,ZBRANCH,2f-$
+    .word CLIT,VK_CR,PARSE,TWODROP,EXIT
+2:  .word TSOURCE,PLUS,ADRTOIN,EXIT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   compilateur

@@ -1,8 +1,12 @@
+2017-05-07
+----------
+Travail sur block.s
+
 2017-05-06
 ----------
 Travail sur block.s
 
-A faire: relire PARSE, PARSE-NAME,INTERPET,EVALUATE,QUIT
+A faire: revoir PARSE, PARSE-NAME,INTERPET,EVALUATE,QUIT
 
 2017-05-05
 ----------
