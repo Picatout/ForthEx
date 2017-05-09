@@ -166,8 +166,8 @@ HEADLESS SERIAL_INIT,CODE ; ( -- )
     and SER_RX_RPINR
     mov #(SER_RX_INP<<SER_RX_PPSbit), W0
     ior SER_RX_RPINR
-    ; baud rate 57600
-    mov #(FCY/(16*57600)-1), W0
+    ; baud rate 115200
+    mov #(FCY/16/115200), W0
     mov W0, SER_BRG
     ; activation  8 bits, 1 stop, pas de paritée
     bset SER_MODE, #UARTEN
@@ -194,27 +194,26 @@ DEFCODE "SERENBL",7,,SERENBL ; ( f -- )
     bra 9f
 1:  call serial_disable
 9:  NEXT
+
+; valeur constantes pour les différent BAUD.    
+DEFCONST "B2400",5,,B2400,(FCY/16/2400)
+DEFCONST "B4800",5,,B4800,(FCY/16/4800)-1
+DEFCONST "B9600",5,,B9600,(FCY/16/9600)
+DEFCONST "B19200",6,,B19200,(FCY/16/19200)
+DEFCONST "B38400",6,,B38400,(FCY/16/38400)
+DEFCONST "B57600",6,,B57600,(FCY/16/57600)
+DEFCONST "B115200",7,,B115200,(FCY/16/115200)
     
 ; ajuste la vitesse du port sériel et l'active.
 ; argument:
-;   u   baud rate maximum: 57600
+;   u   Une des constantes pré-difinies çi-haut.
 ; sortie:
 ;   port actif.    
 DEFCODE "BAUD",4,,BAUD   ; ( u -- )
     call serial_disable
-    mov #FCY&0xffff,W0
-    mov #FCY>>16,W1
-    mov #4,W2 ; FCY/16
-1:  lsr W1,W1
-    rrc W0,W0
-    dec W2,W2
-    bra nz, 1b
-    repeat #17  ; W1:W0/T
-    div.ud W0,T
-    dec W0,W0
-    mov W0, SER_BRG
-    call serial_enable
+    mov T, SER_BRG
     DPOP
+    call serial_enable
     NEXT
 
 

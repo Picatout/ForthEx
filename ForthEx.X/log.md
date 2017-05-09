@@ -1,3 +1,11 @@
+2017-05-09
+----------
+Modifié BAUD dans serial.s, et ajouté des constantes pour les différentes vitesses
+supporté. Le mot BAUD maintenant prend comme argument l'une de ces constantes.
+La vitesse par défaut est passé à 115200 BAUD.
+
+Travail dans vt102.s
+
 2017-05-08
 ----------
 Ajout de PARSE-NAME.

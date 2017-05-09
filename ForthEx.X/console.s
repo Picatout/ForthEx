@@ -108,7 +108,7 @@ DEFTABLE "SERCONS",7,,SERCONS
 ; retourne:
 ;   a-addr  adresse de la table LCONSOLE    
 DEFWORD "LOCAL",5,,LOCAL 
-    .word CLS,LCCONS,EXIT
+    .word LCPAGE,LCCONS,EXIT
 
 ; nom: REMOTE ( -- a-addr )
 ;  empile le vecteur de la table LREMOTE
@@ -117,7 +117,9 @@ DEFWORD "LOCAL",5,,LOCAL
 ; retourne:
 ;   a-addr  adresse de la table LREMOTE    
 DEFWORD "REMOTE",6,,REMOTE
-    .word TRUE,SERENBL,LIT,CTRL_X,SPUTC
+    .word TRUE,SERENBL
+    .word LIT,4,LIT,0,DODO
+1:  .word LIT,65,SPUTC,DOLOOP,1b-$
     .word LIT,CTRL_L,SPUTC,SERCONS,EXIT
     
 ; nom: CONSOLE ( a-addr --  )

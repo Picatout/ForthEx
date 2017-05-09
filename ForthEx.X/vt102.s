@@ -169,11 +169,111 @@ DEFWORD "VT-EMIT",7,,VTEMIT
 2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
     .word DROP,VTDELLN,EXIT
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
-    .WORD SPUTC,EXIT
+    .word SPUTC,EXIT
+2:  .word DUP,LIT,VK_UP,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTUP,EXIT
+2:  .word DUP,LIT,VK_DOWN,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTDOWN,EXIT
+2:  .word DUP,LIT,VK_LEFT,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTLEFT,EXIT
+2:  .word DUP,LIT,VK_RIGHT,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTRIGHT,EXIT
+2:  .word DUP,LIT,VK_HOME,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTHOME,EXIT
+2:  .word DUP,LIT,VK_END,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTEND,EXIT
 2:  .word DROP    
     .word EXIT
 
-   
+; nom: VT-TYPE  ( c-addr u -- )
+;   Affiche sur  la remote console une chaîne comptée.    
+; arguments:
+;   c-addr     adresse du premier caractère
+;   u          longueur de la chaîne.
+; retourne:
+; 
+DEFWORD "VT-TYPE",7,,VTTYPE
+    .word LIT,0, DODO
+1:  .word DUP,ECFETCH,SPUTC,ONEPLUS,DOLOOP,1b-$
+    .word DROP,EXIT
+    
+; nom: VT-SNDARG  ( n -- )
+;   convertie un entier en chaîne avant de l'envoyé au port sériel.
+; arguments:
+;   n	entier à envoyer.
+; retourne:  
+;
+DEFWORD "VT-SNDARG",9,,VTSNDARG
+    .word LIT,0,STR,VTTYPE,EXIT
+    
+    
+; nom: ESC[ ( -- )
+;   Envoie la séquence ESC [  i.e. 27 91
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "ESC[",4,,ESCRBRAC
+    .word CLIT,27,SPUTC,CLIT,'[',SPUTC,EXIT
+    
+; nom: VT-UP ( -- )
+;   Envoie la séquence ANSI ESC[ A
+; arguments:
+;   aucun
+; retourne:
+;    
+DEFWORD "VT-UP",5,,VTUP
+    .word ESCRBRAC,LIT,'A',SPUTC,EXIT
+    
+; nom: VT-DOWN ( -- )
+;   Envoie la séquence ANSI ESC[ B
+; arguments:
+;   aucun
+; retourne:
+;    
+DEFWORD "VT-DOWN",7,,VTDOWN
+    .word ESCRBRAC,LIT,'B',SPUTC,EXIT
+
+; nom: VT-RIGHT ( -- )
+;   Envoie la séquence ANSI ESC[ C
+; arguments:
+;   aucun
+; retourne:
+;    
+DEFWORD "VT-RIGHT",8,,VTRIGHT
+    .word ESCRBRAC,LIT,'C',SPUTC,EXIT
+    
+; nom: VT-LEFT ( -- )
+;   Envoie la séquence ANSI ESC[ D
+; arguments:
+;   aucun
+; retourne:
+;    
+DEFWORD "VT-LEFT",7,,VTLEFT
+    .word ESCRBRAC,LIT,'D',SPUTC,EXIT
+    
+; nom: VT-HOME ( -- )
+;   Envoie le curseur au début de la ligne.
+; arguments:
+;   aucun
+; retourne:
+;    
+DEFWORD "VT-HOME",7,,VTHOME
+    .word VTGETCUR,DUP,ZEROLT,ZBRANCH,2f-$,DROP,EXIT
+2:  .word SWAP,DROP,LIT,1,SWAP
+    .word VTATXY,EXIT
+    
+; nom: VT-END ( -- )
+;   Envoie le curseur à la fin de la ligne
+; arguments:
+;   aucun
+; retourne:
+;    
+DEFWORD "VT-END",6,,VTEND
+    .word VTGETCUR,DUP,ZEROLT,ZBRANCH,2f-$,DROP,EXIT
+2:  .word SWAP,DROP,LIT,CPL-1,SWAP
+    .word VTATXY,EXIT
+    
 ; nom: AT-XY ( u1 u2 -- )
 ;   Positionne le curseur de la console.
 ; arguments:
@@ -182,7 +282,10 @@ DEFWORD "VT-EMIT",7,,VTEMIT
 ;  retourne:
 ;    rien
 DEFWORD "VT-AT-XY",8,,VTATXY
-    
+    .word ESCRBRAC,VTSNDARG
+    .word LIT,';',SPUTC
+    .word VTSNDARG
+    .word LIT,'H',SPUTC
     .word EXIT
 
 ; nom: PAGE ( -- )
@@ -238,6 +341,7 @@ DEFWORD "VT-GETP",7,,VTGETP
 2:  .word DROP,RDROP,FALSE,EXIT    
 8:  .word DROP,RDROP,TRUE,EXIT  
     
+  
 ; nom: ESCSEQ?  ( -- f )
 ;   attend une séquence ESC [
 ; arguemnts:
