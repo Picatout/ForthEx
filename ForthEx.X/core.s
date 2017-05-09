@@ -1424,15 +1424,15 @@ DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
   
 ;imprime la liste des mots du dictionnaire
 DEFWORD "WORDS",5,,WORDS ; ( -- )
-    .word LIT,0,NEWLINE,LATEST
+    .word LIT,0,CR,LATEST
 1:  .word FETCH,QDUP,ZBRANCH,8f-$
     .word DUP,CFETCH,LENMASK,AND  ; n NFA LEN
     .word GETCUR,DROP
 5:  .word PLUS,LIT,64,ULESS,TBRANCH,3f-$ ; n NFA
-    .word NEWLINE
+    .word CR
 3:  .word TOR,ONEPLUS,RFETCH,COUNT,TYPE,SPACE
     .word RFROM,TWOMINUS,BRANCH,1b-$
-8:  .word NEWLINE,DOT,EXIT
+8:  .word CR,DOT,EXIT
     
 ; convertie la chaîne comptée en majuscules
 DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
@@ -1471,7 +1471,8 @@ DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
     mov [DSP],W1 ; W1=c-addr
     cp0 T 
     bra z, 4f ; aucun caractère restant dans le buffer.
-1:  cp.b W0,[W1]
+1:  bra ltu, 4f
+    cp.b W0,[W1]
     bra z, 4f
     inc W1,W1
     dec T,T
@@ -1482,7 +1483,7 @@ DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
 
 ; nom: SKIP    
 ;   avance au delà de 'c'. Retourne l'adresse du premier caractère
-;   différent de 'c' et la longueur restante de la zone.
+;   différent de 'c' et la longueur restante de la zone.    
 ; arguments:
 ;   c-addr    adresse début de la zone
 ;   u         longueur de la zone
@@ -1532,6 +1533,7 @@ DEFWORD "/STRING",7,,SLASHSTRING ; ( c-addr u n -- c-addr' u' )
 ; nom: PARSE   ( c -- c-addr u )    
 ;   Accumule les caractères jusqu'au
 ;   prochain 'c'. Met à jour la variable >IN
+;   PARSE filtre les caractères suivants:
 ; arguments: 
 ;   c    caractère délimiteur
 ; retourne:
@@ -1557,6 +1559,60 @@ DEFWORD "PARSE",5,,PARSE ; c -- c-addr u
 DEFWORD ">COUNTED",8,,TOCOUNTED ; ( src n dest -- )
     .word TWODUP,CSTORE,ONEPLUS,SWAP,MOVE,EXIT
 
+; nom: PARSE-NAME  / cccc  ( -- c-addr u ) 
+;   Recherche le prochain mot dans le flux d'entrée
+;   Tout caractère < 32 est considéré comme un espace
+; arguments:
+;   aucun
+; retourne:
+;   c-addr  addresse premier caractère.
+;   u    longueur de la chaîne.
+DEFCODE "PARSE-NAME",10,,PARSENAME
+    mov _TICKSOURCE,W1
+    mov _CNTSOURCE,W2
+    mov _TOIN,W0
+    add W0,W1,W1  ;pointeur
+    DPUSH
+    mov W1,T
+    sub W2,W0,W2  ;longueur buffer
+    cp0 W2
+    bra nz, 1f 
+    DPUSH
+    clr T
+    NEXT
+1: ;saute les espaces
+    mov #32,W0
+1:  cp.b W0,[W1]    
+    bra ltu, 4f
+    inc W1,W1
+    dec W2,W2
+    bra z,6f
+    bra 1b
+4:  ; début du mot
+    mov W1,T 
+5:  inc W1,W1
+    dec W2,W2
+    bra z, 8f ; fin du buffer
+    cp.b W0,[W1]
+    bra ltu,5b
+    bra 8f
+6:  ; fin du buffer avant premier caractère.
+    mov W1,T
+    DPUSH
+    clr T
+7:  mov _TICKSOURCE,W0
+    sub W1,W0,W0
+    mov WREG,_TOIN
+    NEXT
+8:  ; fin du mot
+    DPUSH
+    sub W1,[DSP],T
+    cp0 W2
+    mov T,W2
+    bra z, 9f
+    inc W2,W2
+9:  add W2,[DSP],W1
+    bra 7b
     
 ; nom: WORD    
 ;   localise le prochain mot délimité par 'c'
@@ -1573,16 +1629,6 @@ DEFWORD "WORD",4,,WORD ; ( c -- c-addr )
     .word HERE,TOCOUNTED,HERE
     .word EXIT
         
-; nom: PARSE-NAME  / cccc  ( -- c-addr u ) 
-;   recherche le prochain mot dans le flux d'entrée
-; arguments:
-;   aucun
-; retourne:
-;   c-addr  addresse premier caractère.
-;   u    longueur de la chaîne.
-;DEFWORD "PARSE-NAME",9,,PARSENAME
-;    .word BL,WORD,EXIT
-
 ; recherche un mot dans le dictionnaire
 ; ne retourne pas les mots cachés (attribut: F_HIDDEN)    
 ; retourne: c-addr 0 si adresse non trouvée
@@ -1639,34 +1685,41 @@ not_found:
 2:  NEXT
 
   
- 
-; lecture d'une ligne de texte au clavier
-; chaîne terminée par touche 'ENTER'
-; cette touche est remplacée par un espace (ASCII 32 )
-; et est compté dans la longueur de la chaîne.    
+; nom: ACCEPT ( c-addr +n1 -- +n2 ) 
+;   Lecture d'une ligne de texte à partir de la console.
+;   La chaîne terminée par touche la touche 'ENTER'.
+;   Les touches de contrôles suivantes sont reconnues:
+;   - VK_CR   termine la saisie
+;   - CTRL_X  efface la ligne et place le curseur à gauche
+;   - VK_BACK recule le curseur d'une position et efface le caractère.
+;   - CTRL_L  efface l'écran au complet et plac le curseur dans le coin
+;             supérieur gauche.
+;   - CTRL_V  Réaffiche la dernière ligne saisie
+;   - Les autres touches de contrôles sont ignorées. 
 ; arguments:
-;   c-addr addresse du buffer
-;   +n1 longueur du buffer
+;   c-addr   addresse du buffer
+;   +n1      longueur du buffer
 ; retourne:
-;   +n2 longueur de la chaîne lue    
+;   +n2      longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
-1:  .word KEY,DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
-    .word DROP,BL,OVER,CSTORE,SWAP,MINUS,ONEPLUS,RDROP,EXIT
-2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,3f-$
+1:  .word KEY,DUP,LIT,31,UGREATER,ZBRANCH,2f-$
+    .word OVER,RFETCH,EQUAL,TBRANCH,3f-$
+    .word DUP,EMIT,OVER,CSTORE,ONEPLUS,BRANCH,1b-$
+3:  .word DROP,BRANCH,1b-$
+2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
+    .word DROP,SWAP,MINUS,RDROP,EXIT
+2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
     .word DROP,TWODUP,EQUAL,TBRANCH,1b-$
     .word DELBACK,ONEMINUS,BRANCH,1b-$
-3:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,4f-$
+2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
     .word DROP,DELLINE,DROP,DUP,BRANCH,1b-$
-4:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,4f-$
+2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
     .word EMIT,DROP,DUP,BRANCH,1b-$
-4:  .word DUP,LIT,CTRL_V,EQUAL,ZBRANCH,5f-$
+2:  .word DUP,LIT,CTRL_V,EQUAL,ZBRANCH,2f-$
     .word DROP,DELLINE,PASTE,FETCH,COUNT,TYPE
     .word DROP,DUP,GETCLIP,PLUS,BRANCH,1b-$
-5:  .word OVER,RFETCH,EQUAL,TBRANCH,6f-$
-    .word DUP,EMIT,OVER,CSTORE,ONEPLUS,BRANCH,1b-$
-6:  .word DROP,BRANCH,1b-$
-  
+2:  .word DROP,BRANCH,1b-$  
    
 ; retourne la spécification
 ; de la chaîne comptée dont
@@ -1683,16 +1736,13 @@ DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )
    .word SPACE,CLIT,'?',EMIT
    .word LIT,0,STATE,STORE
    .word S0,FETCH,SPSTORE
-   .word NEWLINE,QUIT
+   .word CR,QUIT
 
 ; interprète la chaîne indiquée par c-addr u   
 ; facteur commun entre QUIT et EVALUATE    
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
         .word SRCSTORE,LIT,0,TOIN,STORE
 1:      .word BL,WORD,DUP,CFETCH,ZBRANCH,9f-$
-      ; test
-;        .word CR,COUNT,TYPE,BRANCH,1b-$
-      ;;;;;
         .word UPPER,FIND,QDUP,ZBRANCH,4f-$
         .word ONEPLUS,STATE,FETCH,ZEROEQ,OR
         .word ZBRANCH,2f-$
@@ -1701,7 +1751,7 @@ DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
 3:      .word BRANCH,1b-$
 4:      .word QNUMBER,ZBRANCH,5f-$
         .word LITERAL,BRANCH,1b-$
-5:      .word COUNT,TYPE,LIT,'?',EMIT,NEWLINE,ABORT
+5:      .word COUNT,TYPE,LIT,'?',EMIT,CR,ABORT
 9:      .word DROP,EXIT
 
 ; interprète la chaîne à l'adrese 'c-addr' et de longueur 'u'
@@ -1716,7 +1766,7 @@ DEFWORD "EVALUATE",8,,EVAL ; ( i*x c-addr u -- j*x )
 ; imprime le prompt et passe à la ligne suivante    
 ;DEFWORD "OK",2,,OK 
 HEADLESS OK,HWORD  ; ( -- )
-    .word GETX,LIT,3,PLUS,LIT,CPL,LESS,TBRANCH,1f-$,NEWLINE    
+    .word GETX,LIT,3,PLUS,LIT,CPL,LESS,TBRANCH,1f-$,CR    
 1:  .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
 ; vide la pile dstack et appel QUIT
@@ -1730,7 +1780,7 @@ DEFWORD "ABORT",5,,ABORT
 HEADLESS QABORT,HWORD  
 ;DEFWORD "?ABORT",6,F_HIDDEN,QABORT ; ( i*x f  -- | i*x) ( R: j*x -- | j*x )
     .word DOSTR,SWAP,ZBRANCH,9f-$
-    .word COUNT,TYPE,NEWLINE,ABORT
+    .word COUNT,TYPE,CR,ABORT
 9:  .word DROP,EXIT
   
 ; compile le runtime de ?ABORT
@@ -1756,11 +1806,11 @@ DEFWORD "GETCLIP",7,,GETCLIP ; ( -- n+ )
 ; boucle lecture/exécution/impression
 HEADLESS REPL,HWORD    
 ;DEFWORD "REPL",4,F_HIDDEN,REPL ; ( -- )
-1:  .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT,DUP,ONEMINUS,CLIP ; ( addr u )
-    .word SPACE,INTERPRET 
+1:  .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT,DUP,CLIP ; ( addr u )
+    .word SPACE,INTERPRET
     .word STATE,FETCH,TBRANCH,2f-$
     .word OK
-2:  .word NEWLINE
+2:  .word CR
     .word BRANCH, 1b-$
     
 ; boucle de l'interpréteur    
@@ -1883,7 +1933,7 @@ DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
     .word BL,WORD,DUP,CFETCH,ZEROEQ,QNAME
     .word UPPER,FIND,ZBRANCH,5f-$
     .word BRANCH,9f-$
-5:  .word COUNT,TYPE,SPACE,LIT,'?',EMIT,NEWLINE,ABORT    
+5:  .word COUNT,TYPE,SPACE,LIT,'?',EMIT,CR,ABORT    
 9:  .word EXIT
 
 ; version immédiate de '
@@ -2221,7 +2271,7 @@ HEADLESS "RT_DOES", HWORD ; ( -- )
 ; ajoute le runtime RT_DOES
 DEFWORD "DOES>",5,F_IMMED,DOESTO  ; ( -- )
     .word CFA_COMMA,RT_DOES,HERE,LIT,2,CELLS,PLUS,COMMA
-    .word EXITCOMMA,COLON_NO_NAME,DROP
+    .word EXITCOMMA,CFA_COMMA,ENTER
     .word EXIT
     
 ; création d'une variable
@@ -2252,7 +2302,7 @@ HEADLESS NOINIT,HWORD
     .byte  26
     .ascii "Uninitialized defered word"
     .align 2
-    .word NEWLINE,ABORT
+    .word CR,ABORT
     
 HEADLESS DEFEREXEC,HWORD
      .word FETCH,EXECUTE,EXIT
@@ -2321,18 +2371,23 @@ DEFWORD "2R@",3,,TWORFETCH ; S: -- x1 x2 R: x1 x2 -- x1 x2
 ;  le débogage.
     
 ; vérifie si DSP est dans les limites    
-DEFWORD "?DSP",4,,QDSP    
-    .word SPFETCH,S0,FETCH,ULESS
-    .word QABORT
-    .byte 17
-    .ascii "S stack underflow"
-    .align 2
-    .word SPFETCH,S0,FETCH,LIT,DSTK_SIZE,TWOMINUS,PLUS,UGREATER
-    .word QABORT
-    .byte  16
-    .ascii "S stack overflow"
-    .align 2
-    .word EXIT
+DEFCODE "?DSP",4,,QDSP
+    mov #pstack,W0
+    cp DSP,W0
+    bra ltu,_underflow
+    add #DSTK_SIZE-CELL_SIZE,W0
+    cp W0,DSP
+    bra ltu,_overflow
+    NEXT
+_underflow:
+    mov #DSTACK_UNDERFLOW,W0
+    mov WREG,fwarm
+    reset
+_overflow:
+    mov #DSTACK_OVERFLOW,W0
+    mov WREG,fwarm
+    reset
+    
     
 ; imprime le contenu de la pile des arguments
 ; sans en affecté le contenu.
@@ -2362,7 +2417,7 @@ DEFWORD "DUMP",4,,DUMP ; ( addr +n -- )
 3:  .word BASE,FETCH,TOR,HEX
     .word SWAP,LIT,0xFFFE,AND,SWAP,LIT,0,DODO
 1:  .word DOI,LIT,15,AND,TBRANCH,2f-$
-    .word NEWLINE,DUP,LIT,4,UDOTR,SPACE
+    .word CR,DUP,LIT,4,UDOTR,SPACE
 2:  .word DUP,ECFETCH,LIT,3,UDOTR,LIT,1,PLUS
     .word DOLOOP,1b-$,DROP
     .word RFROM,BASE,STORE,EXIT
@@ -2378,11 +2433,11 @@ DEFWORD "BREAK",5,,BREAK ; ( ix n -- ix )
     .word DBGEN,FETCH,TBRANCH,1f-$
     .word DROP,EXIT
 1:  .word RPFETCH,RPBREAK,STORE
-    .word NEWLINE,DOTSTR
+    .word CR,DOTSTR
     .byte  13
     .ascii "break point: "
     .align 2
-    .word DOT,NEWLINE,DOTS,NEWLINE,REPL
+    .word DOT,CR,DOTS,CR,REPL
     .word EXIT
 
 ; résume le programme interrompu par BREAK
@@ -2411,11 +2466,11 @@ DEFWORD "RESUME",6,,RESUME ; ( -- )
 ; imprime la liste des mots qui construite une définition
 ; de HAUT-NIVEAU  
 ;DEFWORD "SEELIST",7,F_IMMED,SEELIST ; ( cfa -- )
-;    .word BASE,FETCH,TOR,HEX,NEWLINE
+;    .word BASE,FETCH,TOR,HEX,CR
 ;    .word LIT,2,PLUS ; première adresse du mot 
 ;1:  .word DUP,FETCH,DUP,CFATONFA,QDUP,ZBRANCH,4f-$
 ;    .word COUNT,LENMASK,AND
-;    .word DUP,GETX,PLUS,LIT,CPL,LESS,TBRANCH,2f-$,NEWLINE 
+;    .word DUP,GETX,PLUS,LIT,CPL,LESS,TBRANCH,2f-$,CR 
 ;2:  .word TYPE
 ;3:  .word LIT,',',EMIT,FETCH,LIT,code_EXIT,EQUAL,TBRANCH,6f-$
 ;    .word LIT,2,PLUS,BRANCH,1b-$

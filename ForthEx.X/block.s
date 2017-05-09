@@ -351,13 +351,14 @@ DEFWORD "ASSIGN",6,,ASSIGN
 ; nom: BUFFER  ( n+ -- a-addr )
 ;   Retourne l'adresse d'un bloc de données. Si aucun buffer n'est disponible
 ;   libère celui qui à la plus petite valeur UPDATED.
-;   Contrairement à BLOCK il n'y a pas de lecture du périphérique de stockage.  
+;   Contrairement à BLOCK il n'y a pas de lecture du périphérique de stockage.
+;   le contenu du buffer est mis à zéro.    
 ; arguments:
 ;   n+    numéro du bloc.
 ; retourne:
 ;    a-addr   *data adresse début de la zone de données.
 DEFWORD "BUFFER",6,,BUFFER
-    .word ASSIGN,DATA,EXIT
+    .word ASSIGN,DATA,DUP,LIT,BLOCK_SIZE,LIT,0,FILL,EXIT
   
     
 ; nom: BLOCK  ( n+ -- a-addr )
@@ -378,7 +379,8 @@ DEFWORD "BLOCK",5,,BLOCK
 ; retourne:
 ;    
 DEFWORD "LOAD",4,,LOAD
-    .word BLOCK,LIT,BLOCK_SIZE,EVAL,EXIT
+    .word BLOCK,DUP,LIT,0,SCAN
+    .word SWAP,DROP,EVAL,EXIT
     
 ; nom: SAVE-BUFFERS ( -- )  
 ;   Sauvegarde tous les buffers qui ont été modifiés.
@@ -425,13 +427,8 @@ DEFWORD "LIST",4,,LIST
     .word DUP,SCR,STORE,LIT,CTRL_L,EMIT ; efface affichage
     .word BLOCK,LIT,BLOCK_SIZE,LIT,0,DODO
 1:  .word DUP,ECFETCH,QDUP,TBRANCH,2f-$
-    .word UNLOOP,BRANCH,9f-$
-2:  .word EMIT
-    ; si remote console alors si colon==CPL alors NEWLINE 
-    .word SYSCONS,FETCH,LIT,SERCONS,EQUAL,ZBRANCH,2f-$
-    .word GETCUR,DROP,LIT,CPL,EQUAL,ZBRANCH,2f-$
-    .word NEWLINE
-2:  .word ONEPLUS,DOLOOP,1b-$
+    .word UNLOOP,BRANCH,9f-$ ; premier zéro arrête l'affichage.
+2:  .word LCEMIT,VTEMIT,ONEPLUS,DOLOOP,1b-$
 9:  .word DROP,EXIT
 
   
@@ -450,6 +447,49 @@ DEFWORD "REFILL",6,,REFILL
 8:  .word DUP,BLK,STORE    
 9:  .word EXIT    
   
-; 7.6.2.2280 THRU
-; 7.6.2.2535 \ extension de la sémentique des commentaires voir core.s
- 
+; nom: THRU  ( i*x u1 u2 -- j*x )
+;   Charge les blocs u1 à u2 .
+; arguments:
+;   i*x  État initial de pile.
+;   u1   premier bloc à charger.
+;   u2   dernier bloc à charger.
+; retourne:
+;   j*x  État de la pile après l'interprétation des blocs.
+DEFWORD "THRU",4,,THRU 
+    .word ONEPLUS,SWAP,DODO
+1:  .word DOI,LOAD,DOLOOP,1b-$
+    .word EXIT
+    
+
+; nom: SCR>BLK  ( n+ -- f )
+;   Sauvegarde du frame buffer de l'écran dans un bloc*.
+;   Si l'écran a plus de 1024 caractères seul les 1024 premiers sont sauvegarder.
+;   Les espaces qui termines les lignes sont supprimés et chaque ligne est complétée
+;   par un VK_CR.
+;   * ne fonctionne qu'avec LOCAL CONSOLE. Cependant BLKEDIT utilise le frame buffer
+;     local même lorsque la console est en mode REMOTE, donc BLKEDIT peut sauvegarder
+;     le bloc en édition.    
+; arguments:
+;   n+    numéro du bloc où sera sauvegardé l'écran.
+; retourne:
+;   f     indicateur booléen, si l'écran requière plus d'un bloc retourne faux.
+DEFWORD "SCR>BLK",7,,SCRTOBLK
+    
+    .word EXIT
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;     editeur de bloc
+;     simple.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+; nom: BLKEDIT  ( n+ -- )
+;   Edition d'un bloc contenant du texte.
+; arguments:
+;   n+   numéro du bloc à éditer.
+; retourne:
+;   
+DEFWORD "BLKEDIT",7,,BLKEDIT
+
+    .word EXIT
+    
+    

@@ -394,7 +394,7 @@ DEFWORD "IMG>SDC",7,,IMGTOSDC ; ( u1 u2 ud1 -- )
     .byte  18
     .ascii "SDcard write error"
     .align 2
-    .word NEWLINE,ABORT
+    .word CR,ABORT
     
     
 ; récupération image système à partir de la carte SD.
@@ -413,7 +413,7 @@ DEFWORD "SDC>IMG",7,,SDCTOIMG ; ( u1 u2 ud1 -- )
     .byte  17
     .ascii "SDcard read error"
     .align 2
-    .word NEWLINE,ABORT
+    .word CR,ABORT
     
 
 ; nom: SDFIRST ; ( -- u )

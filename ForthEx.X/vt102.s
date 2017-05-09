@@ -157,7 +157,7 @@ DEFWORD "VT-KEY",6,,VTKEY
 DEFWORD "VT-EMIT",7,,VTEMIT
     .word DUP,BL,LESS,TBRANCH,2f-$
     .word DUP,LIT,127,LESS,ZBRANCH,2f-$
-    .word SPUTC,EXIT
+    .word VTPUTC,EXIT
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
     .word SPUTC,EXIT
 2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
@@ -213,7 +213,8 @@ DEFWORD "VT-DELLN",8,,VTDELLN ; ( -- )
     .word LIT,'K',SPUTC,LIT,13,SPUTC,EXIT
 
 ; nom: DSR  ( -- )
-;  envoie la séquence de contrôle VT102 DSR: ESC [ 6 n    
+;  envoie la séquence de contrôle VT102 DSR: ESC [ 6 n 
+;  rapporte la position du curseur.    
 ; arguments:
 ;   aucun
 ; retourne
@@ -278,3 +279,15 @@ DEFWORD "VT-GETCUR",9,,VTGETCUR ; ( -- u1 u2 | -1 -1 )
 DEFWORD "VT-CRLF",7,,VTCRLF
    .word LIT,CTRL_M,SPUTC,LIT,CTRL_J,SPUTC,EXIT
    
+; nom: VT-PUTC
+;   Affiche un caractère au terminal et fait un renvoie à la ligne
+;   si la position du curseur == CPL
+; argument:
+;   c   caractère à afficher.
+; retourne:
+;  
+DEFWORD "VT-PUTC",7,,VTPUTC
+   .word SPUTC,VTGETCUR,DROP,LIT,CPL,EQUAL,ZBRANCH,9f-$
+   .word VTCRLF
+9: .word EXIT
+ 

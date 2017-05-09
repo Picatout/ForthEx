@@ -53,7 +53,14 @@ _stack_reset:
 _unknown_reset:
 .byte  22
 .ascii "unknowned event reset."
-     
+_dstack_err_underflow:
+.byte 23
+.ascii "pstack underflow reset."    
+_dstack_err_overflow:
+.byte 22
+.ascii "pstack overflow reset."
+    
+    
 .section .heap.bss bss address (EDS_BASE)
 .global _heap
 _heap: .space RAM_END-EDS_BASE-VIDEO_BUFF_SIZE
@@ -171,18 +178,22 @@ _warm:
     .word HARDWARE_INIT,VARS_INIT
     .word SYSCONS,STORE
     .word LATEST,STORE,DP,STORE
-    .word DUP,LIT,USER_ABORT,EQUAL,ZBRANCH,1f-$
+    .word DUP,LIT,USER_ABORT,EQUAL,ZBRANCH,2f-$
     .word DROP,LIT,_user_aborted,BRANCH,8f-$
-1:  .word DUP,LIT,MATH_EXCEPTION,EQUAL,ZBRANCH,2f-$
+2:  .word DUP,LIT,MATH_EXCEPTION,EQUAL,ZBRANCH,2f-$
     .word DROP,LIT,_math_error,BRANCH,8f-$
-2:  .word DUP,LIT,STACK_EXCEPTION,EQUAL,ZBRANCH,3f-$
+2:  .word DUP,LIT,STACK_EXCEPTION,EQUAL,ZBRANCH,2f-$
     .word DROP,LIT,_stack_reset,BRANCH,8f-$
-3:  .word DROP,LIT,_unknown_reset    
-8:  .word COUNT,TYPE,NEWLINE,QUIT
+    .word DUP,LIT,DSTACK_UNDERFLOW,EQUAL,ZBRANCH,2f-$
+    .word DROP,LIT,_dstack_err_underflow,BRANCH,8f-$
+2:  .word DUP,LIT,DSTACK_OVERFLOW,EQUAL,ZBRANCH,2f-$
+    .word DROP,LIT,_dstack_err_overflow,BRANCH,8f-$
+2:  .word DROP,LIT,_unknown_reset    
+8:  .word COUNT,TYPE,CR,QUIT
   
 _cold:
     .word CLR_RAM,VARS_INIT,HARDWARE_INIT
-    .word VERSION,COUNT,TYPE,NEWLINE
+    .word VERSION,COUNT,TYPE,CR
     .word IMGLOAD; autochargement d'une image  RAM 
     .word QAUTORUN
     .byte 7

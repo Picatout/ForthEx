@@ -425,7 +425,7 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
 .endif    
     mov.b #4,W0 ; largeur tabulation
     mov.b _htab
-    bra code_CLS
+    bra code_LCPAGE
     
 ; nom: VIDEO  ( f -- ) \ T=on F=off 
 ;   active/désactive sortie vidéo
@@ -456,13 +456,13 @@ DEFCODE "CURENBL",7,,CURENBL
     call cursor_disable
     NEXT
     
-; nom: CLS  ( -- )
+; nom: LC-PAGE  ( -- )
 ;   vide l'écran.
 ; arguments:    
 ;   aucun
 ; retourne:    
 ;   rien
-DEFCODE "CLS",3,,CLS
+DEFCODE "LC-PAGE",7,,LCPAGE
     cursor_incr_sema
     mov #0x2020,W0
     mov #_video_buffer, W1
@@ -823,14 +823,14 @@ DEFCODE "PUTC",4,,PUTC
 9:  cursor_decr_sema
     NEXT
     
-; nom: CR ( -- )
+; nom: LC-CR ( -- )
 ; Envoie le curseur au début de la ligne suivante défile l'écran
 ; vers le haut si nécessaire.    
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
-DEFCODE "CR",2,,CR 
+DEFCODE "LC-CR",5,,LCCR 
     cursor_incr_sema
     cursor_sync
     clr.b xpos
@@ -975,7 +975,7 @@ DEFWORD "LC-EMIT",7,,LCEMIT ; ( c -- )
     .word PUTC,EXIT
     ; déplacement du curseur
 2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
-    .word DROP,CR,EXIT
+    .word DROP,LCCR,EXIT
 2:  .word DUP,LIT,VK_TAB,EQUAL,ZBRANCH,2f-$
     .word DROP,NEXTCOLON,EXIT
 2:  .word DUP,LIT,VK_LEFT,EQUAL,ZBRANCH,2f-$

@@ -1,3 +1,11 @@
+2017-05-08
+----------
+Ajout de PARSE-NAME.
+Fichier vt102.s  ajout de VT-PUTC et modification de VT-EMIT
+Réécriture de ACCEPT dans core.s
+ajouté CLS dans console.s et renommé CLS dans TVout.s -> VT-PAGE
+renommé NEWLINE -> CR dans console.s et renommé CR -> LC-CR dans TVout.s
+
 2017-05-07
 ----------
 Travail sur block.s

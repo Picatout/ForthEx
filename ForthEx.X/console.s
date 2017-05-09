@@ -84,7 +84,7 @@ DEFTABLE "LC-CONS",7,,LCCONS
     .word LCEMIT   ; TVout.s
     .word LCEMITQ  ; TVout.s
     .word CURPOS   ; TVout.s
-    .word CLS      ; TVout.s
+    .word LCPAGE   ; TVout.s
     .word LCFILTER ; keyboard.s
     .word LCGETCUR ; TVout.s
     
@@ -108,7 +108,7 @@ DEFTABLE "SERCONS",7,,SERCONS
 ; retourne:
 ;   a-addr  adresse de la table LCONSOLE    
 DEFWORD "LOCAL",5,,LOCAL 
-    .word LCCONS,EXIT
+    .word CLS,LCCONS,EXIT
 
 ; nom: REMOTE ( -- a-addr )
 ;  empile le vecteur de la table LREMOTE
@@ -117,7 +117,8 @@ DEFWORD "LOCAL",5,,LOCAL
 ; retourne:
 ;   a-addr  adresse de la table LREMOTE    
 DEFWORD "REMOTE",6,,REMOTE
-    .word SERCONS,EXIT
+    .word TRUE,SERENBL,LIT,CTRL_X,SPUTC
+    .word LIT,CTRL_L,SPUTC,SERCONS,EXIT
     
 ; nom: CONSOLE ( a-addr --  )
 ;  détermine la console active. Cette information
@@ -127,7 +128,7 @@ DEFWORD "REMOTE",6,,REMOTE
 ; retourne:
 ;   rien.   
 DEFWORD "CONSOLE",7,,CONSOLE
-    .word SYSCONS,STORE,LIT,CTRL_L,EMIT,EXIT
+    .word SYSCONS,STORE,EXIT
     
     
 ; nom: KEY  ( -- c )  
@@ -290,8 +291,13 @@ DEFWORD "DELLINE",7,,DELLINE ; ( -- )
     .word LIT,CTRL_X,EMIT,EXIT
     
 ; envoie une commande nouvelle ligne à la console
-DEFWORD "NEWLINE",7,,NEWLINE ; ( -- )
+DEFWORD "CR",2,,CR ; ( -- )
     .word LIT,VK_CR,EMIT,EXIT
+    
+; efface l'écran.    
+DEFWORD "CLS",3,,CLS 
+    .word SYSCONS,FETCH,LIT,FN_PAGE,VEXEC,EXIT
+    
     
 ; nom: GETCUR  ( -- u1 u2 )
 ;   retourne la position du curseur texte.
