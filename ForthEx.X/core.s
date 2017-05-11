@@ -1231,15 +1231,20 @@ DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
 ; par des zéro
 ; u1 longueur initiale de la chaîne
 ; u2 longueur finale de la chaîne    
-DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )     
-    mov [DSP],W0
-    add W0,T,W0
-    mov #33,W1
-1:  dec W0,W0
-    cp.b W1,[W0]
-    bra gtu, 1f
-    inc W0,W0
-    sub W0,[DSP],T
+DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )
+    SET_EDS
+    cp0 T
+    mov [DSP],W1
+    add W1,T,W1
+    mov #33,W0
+1:  cp0 T
+    bra z,9f
+    dec T,T
+    dec W1,W1
+    cp.b W0,[W1]
+    bra gtu, 1b
+2:  inc T,T
+9:  RESET_EDS
     NEXT
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1514,7 +1519,7 @@ DEFCODE "SKIP",4,,SKIP ; ( c-addr u c -- c-addr' u' )
 ;   c-addr  adresse du pointeur après le dernier PARSE
 ; retourne:
 ;    
-DEFWORD "ADR>IN",7,,ADRTOIN ; ( c-addr -- )
+DEFWORD "ADR>IN",6,,ADRTOIN ; ( c-addr -- )
     .word TSOURCE,ROT,ROT,MINUS,MIN,LIT,0,MAX
     .word TOIN,STORE,EXIT
 
@@ -1974,24 +1979,20 @@ DEFWORD ">MARK",5,F_IMMED,MARKSLOT ; ( -- slot )
 DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
     .word QCOMPILE,DUP,HERE,SWAP,MINUS,SWAP,STORE,EXIT
     
+;compile un cfa fourni en literal
+DEFWORD "CFA,",4,F_IMMED,CFA_COMMA  ; ( -- )
+  .word QCOMPILE,RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
+
 
 ; passe en mode interprétation
 DEFWORD "[",1,F_IMMED,LBRACKET ; ( -- )
     .word LIT,0,STATE,STORE
-9:  .word EXIT
+    .word EXIT
   
 ; passe en mode compilation
 DEFWORD "]",1,F_IMMED,RBRACKET ; ( -- )
     .word LIT,-1,STATE,STORE
-9:  .word EXIT
-
-;compile le mot suivant dans le flux
-;DEFWORD "[COMPILE]",9,F_IMMED,BRCOMPILE ; ( <cccc> -- )
-;  .word QCOMPILE,TICK,COMMA,EXIT
-  
-;compile un cfa fourni en literal
-DEFWORD "CFA,",6,F_IMMED,CFA_COMMA  ; ( -- )
-  .word RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
+    .word EXIT
 
 ; avorte si le nom n'est pas trouvé dans le dictionnaire  
 DEFWORD "?WORD",5,,QWORD ; ( -- c-addr 0 | cfa 1 | cfa -1 )

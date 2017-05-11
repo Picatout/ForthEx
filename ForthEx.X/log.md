@@ -1,3 +1,8 @@
+2017-05-10
+----------
+déboguer block.s
+Correction bogue -TRAILING
+
 2017-05-09
 ----------
 Modifié BAUD dans serial.s, et ajouté des constantes pour les différentes vitesses
