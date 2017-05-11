@@ -338,7 +338,7 @@ DEFWORD "IMGSAVE",7,,IMGSAVE ; ( -- )
 9:  .word EXIT 
 
 ; charge une image système RAM à partir de la mémoire flash du MCU.
-DEFWORD "IMGLOAD",4,,IMGLOAD ; ( -- )
+DEFWORD "IMGLOAD",7,,IMGLOAD ; ( -- )
     .word QIMG,NOT,QABORT
     .byte 24
     .ascii "No boot image available."

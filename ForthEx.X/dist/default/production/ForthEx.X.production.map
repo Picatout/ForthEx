@@ -15,9 +15,9 @@ Command:
   -L/opt/microchip/xc16/v1.26/bin/bin/../../support/dsPIC30F/gld \
   -L/opt/microchip/xc16/v1.26/bin/bin/../../support/dsPIC33E/gld \
   -L/opt/microchip/xc16/v1.26/bin/bin/../../support/dsPIC33F/gld \
-  build/default/production/font.o \
   build/default/production/mcu_config_bits.o \
   build/default/production/forthex.o \
+  build/default/production/font.o \
   --no-local-stack \
   --defsym=__MPLAB_BUILD=1 \
   -Tp24EP512GP202.gld.00 \
@@ -3043,9 +3043,9 @@ aivt             0x000000           0xffffffff
 
 Script de l'éditeurs de liens and table de projection mémoire
 
-LOAD build/default/production/font.o
 LOAD build/default/production/mcu_config_bits.o
 LOAD build/default/production/forthex.o
+LOAD build/default/production/font.o
                     0x0001                  __MPLAB_BUILD = 0x1
 LOAD p24EP512GP202
 LOAD /opt/microchip/xc16/v1.26/bin/bin/../../lib/libfx-elf.a
@@ -4263,9 +4263,9 @@ __FUID3
 
 .debug_line       0x000000        0xab2
  *(.debug_line)
- .debug_line      0x000000         0x1a build/default/production/font.o
- .debug_line      0x00001a         0x1a build/default/production/mcu_config_bits.o
- .debug_line      0x000034        0xa7e build/default/production/forthex.o
+ .debug_line      0x000000         0x1a build/default/production/mcu_config_bits.o
+ .debug_line      0x00001a        0xa7e build/default/production/forthex.o
+ .debug_line      0x000a98         0x1a build/default/production/font.o
 
 .debug_frame
  *(.debug_frame)

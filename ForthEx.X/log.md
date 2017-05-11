@@ -1,3 +1,11 @@
+2017-05-11
+----------
+Écriture de l'outil count.c  pour vérifier que dans tous les fichiers *.s 
+le compte des mots du dictionnaire correspond bien la longueur de la chaîne.
+Plusieurs erreurs ont été détectées et corrigées.
+
+Renommé TVout.S et font.S en tvout.s et font.s
+
 2017-05-10
 ----------
 déboguer block.s

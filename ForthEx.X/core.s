@@ -596,8 +596,8 @@ DEFCODE "CSTK>",5,,CSTKFROM ; ( -- x  C: x -- )
 ;;;;;;;;;;;;;;;;
 
 DEFCONST "MSB",3,,MSB,0x8000 ; bit le plus significatif (1<<15).
-DEFCONST "MAX-INT"7,,MAXINT,0x7FFF ; 32767
-DEFCONST "MIN-INT"7,,MININT,0x8000 ; -32768
+DEFCONST "MAX-INT",7,,MAXINT,0x7FFF ; 32767
+DEFCONST "MIN-INT",7,,MININT,0x8000 ; -32768
 
     
 DEFWORD "HEX",3,,HEX ; ( -- )
@@ -1260,7 +1260,7 @@ DEFUSER "TIB",3,,TIB       ; tampon de saisie clavier
 DEFUSER "PASTE",5,,PASTE   ; copie de TIB     
 DEFUSER ">IN",3,,TOIN     ; pointeur position début dernier mot retourné par WORD
 DEFUSER "HP",2,,HP       ; HOLD pointer
-DEFUSER "'SOURCE",6,,TICKSOURCE ; tampon source pour l'évaluation
+DEFUSER "'SOURCE",7,,TICKSOURCE ; tampon source pour l'évaluation
 DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
 DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
 DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
@@ -1469,7 +1469,7 @@ DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
 ; retourne:
 ;   c-addr'  adresse du premier 'c' trouvé dans cette zone
 ;   u'       longueur de la zone restante à partir de c-addr'    
-DEFCODE "SCAN"4,,SCAN ; ( c-addr u c -- c-addr' u' )
+DEFCODE "SCAN",4,,SCAN ; ( c-addr u c -- c-addr' u' )
     SET_EDS
     mov T, W0   ; c
     DPOP        ; T=u
@@ -2350,7 +2350,7 @@ DEFWORD "2>R",3,,TWOTOR ;  S: x1 x2 --  R: -- x1 x2
 ; envoie 2 éléments de R vers de sorte
 ; qu'ils soient dans le même ordre
 ; >>> ne pas utiliser en mode interprétation    
-DEFWORD "2R>"3,,TWORFROM ; S: -- x1 x2  R: x1 x2 --
+DEFWORD "2R>",3,,TWORFROM ; S: -- x1 x2  R: x1 x2 --
     .word RFROM,RFROM,RFROM,SWAP,ROT,TOR,EXIT
     
 ; copie 2 éléments de R vers S en consversant l'ordre    

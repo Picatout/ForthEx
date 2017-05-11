@@ -20,7 +20,7 @@
     
 .include "hardware.inc"
 .include "core.s" 
-.include "TVout.S"
+.include "tvout.s"
 .include "serial.s"
 .include "sound.s"
 .include "store.s"
