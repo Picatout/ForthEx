@@ -96,23 +96,29 @@ void outputArgLine(char *line,FILE *out){
 }
 
 void addEntry(char* line, FILE *in, FILE *out){
-	char *space;
+	char *ref;
 	int i;
 	
 	// nom:
 	formatNameLine(line,out);
 	// description
-	while ((fgets(line,255,in))&&(*line==';')&&!strchr(line,':')){
+	while ((fgets(line,255,in))&&(*line==';')&&!strstr(line,"arguments:")){
 		line++;
 		replaceAngleBrackets(line);
-		fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",html);
+		ref=strstr(line,"REF:");
+		if (ref){
+			ref+=4;
+			fprintf(out,"<div style=\"margin-left:5%%;\">REF: <a href=\"%s\">%s</a></div>\n",ref,ref);
+		}else{
+			fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",html);
+		}
 	}
 	fputs("</p>\n",out);
 		if (strstr(line,"arguments:")){
 		// arguments:
 		line++;
 		fprintf(out,"<div style=\"margin-left:5%%;\"><b>%s</b></div>\n",line);
-		while ((fgets(line,255,in))&&(*line==';')&&!strchr(line,':')){
+		while ((fgets(line,255,in))&&(*line==';')&&!strstr(line,"retourne:")){
 			outputArgLine(line,out);
 		}
     }

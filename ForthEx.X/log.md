@@ -1,3 +1,19 @@
+2017-05-14
+----------
+
+Améliorer les commentaires dans les fichiers sources.
+
+2017-05-13
+----------
+
+Améliorer les commentaires dans les fichiers sources.
+
+2017-05-11
+----------
+
+Commencé l'écriture de l'outil docgen.c
+
+
 2017-05-11
 ----------
 Écriture de l'outil count.c  pour vérifier que dans tous les fichiers *.s 
