@@ -1943,18 +1943,31 @@ move_dn:
 ;  et chaînes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 
-; retourne l'espace occupée
-; par n caractères en unité adresse
+; nom: CHARS   ( n1 -- n2 )    
+;   Retourne l'espace occupée par n caractères en octets.
+; arguments:
+;   n1  Nombre de caractères
+; retourne:
+;   n2  Espace requis pour n1 caractères.    
 DEFWORD "CHARS",5,,CHARS ; ( n1 -- n2 )
-9:  .word EXIT
+9:  .word LIT,CHAR_SIZE,STAR,EXIT
    
-; incrémente l'adresse d'un caractère
+; nom: CHAR+   ( c-addr -- c-addr' )  
+;   Incrémente l'adresse de l'espace occupé par un caractère.
+; arguments:
+;   c-addr   adresse alignée sur caractère.
+; retourne:
+;   c-addr'  adresse alignée sur caractère suivant.  
 DEFWORD "CHAR+",5,,CHARPLUS ; ( addr -- addr' )  
-    .word ONEPLUS,EXIT
-    
-; recherche le prochain mot séparé
-; par un espace dans le flux d'entré.    
-; et empile le premier caractère de ce mot
+    .word LIT,CHAR_SIZE,PLUS,EXIT
+  
+; nom: CHAR   ( cccc -- c )    
+;   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
+;   A la suite de cette opération la variable >IN pointe après le mot.    
+; arguments:
+;    cccc   chaîne de caractère dans le flux d'entré.
+; retourne:
+;    c      Le premier caractère du mot.    
 DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
     .word BL,WORD,DUP,CFETCH,ZEROEQ
     .word QABORT
@@ -1963,7 +1976,14 @@ DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
     .align 2
     .word ONEPLUS,CFETCH,EXIT
 
-; version compilateur de CHAR  
+; nom: [CHAR]   ( ccccc -- )    
+;   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
+;   Après cette opération la variable >IN pointe après le mot trouvé.
+;   Ce mot ne peut-être utilisé qu'à l'intérieur d'une définition. i.e. STATE=1    
+; arguments:
+;   cccccc  chaîne de caractère dans le flux d'entré.    
+; retourne:
+;   rien   Le caractère es compilé dans la définition.    
 DEFWORD "[CHAR]",6,F_IMMED,COMPILECHAR ; cccc 
     .word QCOMPILE
     .word CHAR,CFA_COMMA,LIT,COMMA,EXIT
@@ -1973,10 +1993,10 @@ DEFWORD "[CHAR]",6,F_IMMED,COMPILECHAR ; cccc
 ;   le caractère c.
 ; arguments:
 ;   c-addr   adresse début zone.
-;   u        nombre de caractères à remplir
-;   c        caractère de remplissage    
+;   u        nombre de caractères à remplir.
+;   c        caractère de remplissage.    
 ; retourne:
-;       
+;   rien    
 DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
     SET_EDS
     mov T,W0 ; c
@@ -1991,10 +2011,13 @@ DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
 1:  RESET_EDS
     NEXT
     
-; remplace tous les caractères <=32 à la fin d'une chaîne
-; par des zéro
-; u1 longueur initiale de la chaîne
-; u2 longueur finale de la chaîne    
+; nom: -TRAILING  ( c-addr u1 -- c-addr u2 )    
+;   Remplace tous les caractères <=32 à la fin d'une chaîne par des zéro.
+; arguments:
+;   c-addr  adresse du début de la châine.    
+;   u1 longueur initiale de la chaîne.
+; retourne:    
+;   u2 longueur finale de la chaîne.    
 DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )
     SET_EDS
     cp0 T
@@ -2014,43 +2037,276 @@ DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  variables système
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+; nom: STATE  ( -- a-addr )
+;   Variable système qui indique si le système est en mode interprétation ou compilation.
+;   STATE=0 -> interprétation,  STATE=1 -> compilation.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "STATE",5,,STATE   ; état compile=1/interprète=0
+
+; nom: DP ( -- a-addr )
+;   Variable système qui contient la position du pointeur de donnée dans le dictionnaire.
+;   Lorsqu'une nouvelle définition est créée ou que de l'espace est réservé avec ALLOT ce
+;   pointeur avant à la première position libre.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "DP",2,,DP         ; pointeur fin dictionnaire
+
+; nom: BASE  ( -- a-addr )
+;   Variable système qui contient la valeur de la base numérique active.
+;   Le contenu de cette variable est modifié par les mots HEX et DECIMAL.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "BASE",4,,BASE     ; base numérique
+
+; nom: SYSLATEST  ( -- a-addr )
+;   Variable système qui contient le NFA du dernier mot défini dans le dictionnaire
+;   système en mémoire FLASH.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "SYSLATEST",9,,SYSLATEST ; tête du dictionnaire en FLASH    
+; nom: LATEST  ( -- a-addr )
+;   Variable système qui contient le NFA du derner mot défini par l'utilisateur.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
+
+; nom: PAD ( -- a-addr )
+;   Variable système qui contient l'adresse d'un tampon utilisé pour le travail
+;   sur des chaînes de caractère. Ce tampon est utilisé entre autre pour la conversion
+;   des entiers en chaêine de caractères pour l'affichage.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "PAD",3,,PAD       ; tampon de travail
+
+; nom: TIB ( -- a-addr )
+;   Variable système contenant l'adresse du tampon de saisie des chaînes à partir
+;   du clavier. Ce tampon est utilisé par l'interpréteur/compilateur en mode interactif.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "TIB",3,,TIB       ; tampon de saisie clavier
-DEFUSER "PASTE",5,,PASTE   ; copie de TIB     
-DEFUSER ">IN",3,,TOIN     ; pointeur position début dernier mot retourné par WORD
+; nom: PASTE  ( -- a-addr )
+;   Variable système qui contient l'adresse d'un tampon qui contient une copie
+;   de la dernière chaîne interprétée en mode interactif. Permet de rappeller cette
+;   chaîne à l'écran par la commande CTRL_V.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "PASTE",5,,PASTE   ; copie de TIB
+    
+; nom: >IN   ( -- a-addr )
+;   Variable système indique la position ou est rendue l'analyseur lexical dans
+;   le traitement de la chaîne d'entrée. Cette variable est utilisée par l'interpréteur/compilateur.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER ">IN",3,,TOIN     ; pointeur position après le dernier mot retourné par WORD
+    
+; NOM: HP   ( -- a-addr )
+;   Variable système contenant la position du pointeur de conversion de nombres en chaîne.
+;   Cette variable est utilisée lors de la conversion d'entiers en chaîne de caractères.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "HP",2,,HP       ; HOLD pointer
+    
+; nom: 'SOURCE	( -- a-addr )
+;   Variable système qui contient le pointeur du début du tampon utilisé par
+;   l'interpréteur/compilateur.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "'SOURCE",7,,TICKSOURCE ; tampon source pour l'évaluation
+    
+; nom: #SOURCE  ( -- a-addr )
+;   Variable système contenant la grandeur du tampon source.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
+
+; nom: RPBREAK   ( -- a-addr )
+;   Variable système utilisé par le mot BREAK pour sauvegarder la position
+;   de RSP pour la réentrée.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
+    
+; nom: DBGEN  ( -- a-addr)
+;   Variable système qui contient un indicateur Booléen d'activation/désactivation des breakpoints.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
 DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
-DEFUSER "SYSCONS",7,,SYSCONS ; entrée standard
+    
+; nom: SYSCONS   ( -- a-addr )
+;   Variable système qui indique le périphérique actuel utilisé par la console.
+;   La console peut fonctionné en mode LOCAL ou REMOTE.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "SYSCONS",7,,SYSCONS 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes système
-;;;;;;;;;;;;;;;;;;;;;;;;;;    
-DEFCONST "VERSION",7,,VERSION,psvoffset(_version)        ; adresse chaîne version
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; nom: VERSION   ( -- c-addr )
+;   Constante système, Adresse de la chaîne compté qui contient l'information de version firmware.
+;   Utilisation: VERSION COUNT TYPE
+; arguments:
+;   aucun
+; retourne:
+;   c-addr  Adresse de la chaîne constante en mémoire FLASH.    
+DEFCONST "VERSION",7,,VERSION,psvoffset(_version)
+    
+; nom: R0  ( -- a-addr )
+;   Constante système, retourne l'adresse de la base de la pile des retours.       
+; arguments:
+;   aucun
+; retourne:
+;   a-addr   Adresse de la base de la pile des retours.    
 DEFCONST "R0",2,,R0,rstack   ; base pile retour
+    
+; nom: S0   ( -- a-addr )
+;   Constante système qui retourne l'adresse de la base de la piles des arguments.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr   Adresse de la base de la pile des arguments.    
 DEFCONST "S0",2,,S0,pstack   ; base pile arguments   
-DEFCONST "RAMEND",6,,RAMEND,RAM_END          ;  fin mémoire RAM
+    
+; nom: RAMEND  ( -- a-addr )
+;   Constante système qui retourne l'adresse après la fin de la mémoire RAM.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse fin de la RAM+1    
+DEFCONST "RAMEND",6,,RAMEND,RAM_END
+    
+; nom: IMMED  ( -- n )
+;   Constante système qui retourne le bit F_IMMEDIATE. Ce bit inscrit dans le
+;   premier octet du champ NFA et indique si le mot est immmédiat.
+; arguments:
+;   aucun
+; retourne:
+;   n     F_IMMED bit indicateur mot immédiat.    
 DEFCONST "IMMED",5,,IMMED,F_IMMED       ; drapeau mot immédiat
+    
+; nom: HIDDEN   ( -- n )
+;   Constante système qui retourne le bit F_HIDDEN. Ce bit est inscrit dans le 
+;   premier octet du champ NFA et indique si le mot est caché à la recherche par FIND.
+; arguments:
+;   rien
+; retourne:
+;   n	F_HIDDEN bit indicateur de mot caché.       
 DEFCONST "HIDDEN",6,,HIDDEN,F_HIDDEN    ; drapeau mot caché
+    
+; nom: NMARK  ( -- n )
+;   Constante système qui retourne le bit F_MARK. Ce bit est inscrit dans le
+;   premier octet du champ NFA et sert la localisé ce champ. Ce bit est utilisé
+;   par le mot CFA>NFA.    
 DEFCONST "NMARK",5,,NMARK,F_MARK     ; drapeau marqueur utilisé par CFA>NFA
-DEFCONST "LENMASK",7,,LENMASK,LEN_MASK ; masque longueur nom   
+    
+; nom: LENMASK   ( -- n )
+;   Constante système retourne le masque pour la longueur du nom dans les entêtes
+;   du dictionnaire. Ce masque sert à éliminer les bits F_NMARK,F_HIDDEN et F_IMMED
+;   pour ne conserver que les bits qui indique la longueur du nom.
+; arguments:
+;   aucun
+; retourne:
+;   n   masque LEN_MASK    
+DEFCONST "LENMASK",7,,LENMASK,LEN_MASK ; masque longueur nom
+
+; nom: BL  ( -- n )
+;   Constante système qui retourne la valeur ASCII 32 (espace).
+; arguments:
+;   aucun
+; retourne:
+;   n    valeur ASCII 32  qui représente l'espace.    
 DEFCONST "BL",2,,BL,32                       ; caractère espace
+
+; nom: TIBSIZE   ( -- n )
+;   Constante système qui retourne la longueur du TIB (Transaction Input Buffer)
+; arguments:
+;   aucun
+; retourne:
+;   n    longueur du tampon TIB.    
 DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
+    
+; nom: PADSIZE   ( -- n )
+;   Constante système qui retourne la longueur du tampon PAD.
+; arguments:
+;   aucun
+; retourne:
+;   n    longueur du tampon PAD.    
 DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
+
+; nom: ULIMIT   ( -- a-addr )
+;   Constante système qui retourne l'adresse limite+1 de la mémoire réservré
+;   au données du dictionnaire utilisateur.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse fin dictionnaire+1    
 DEFCONST "ULIMIT",6,,ULIMIT,EDS_BASE        ; limite espace dictionnaire
-DEFCONST "DOCOL",5,,DOCOL,psvoffset(ENTER)  ; pointeur vers ENTER
+
+; nom: TRUE  ( -- f )
+;   Constante système qui retourne la valeur Booléenne VRAI.
+; arguments:
+;   rien
+; retourne:
+;   f      indicateur Booléen VRAI = -1    
 DEFCONST "TRUE",4,,TRUE,-1 ; valeur booléenne vrai
+    
+; nom: FALSE  ( -- f )
+;   Constante système qui retourne la valeur Booléenne FAUX.
+; arguments:
+;   rien
+; retourne:
+;   f      indicateur Booléen FAUX = 0    
 DEFCONST "FALSE",5,,FALSE,0 ; valeur booléenne faux
+    
+; nom: DP0    ( -- a-addr )
+;   Constante système qui retourne l'adresse du début de l'espace de données utilisateur.
+; arguments:
+;   rien
+; retourne:
+;   a-addr   Adresse du début espace utilisateur en mémoire RAM.    
 DEFCONST "DP0",3,,DP0,DATA_BASE ; début espace utilisateur
     
-; addresse buffer pour l'évaluateur    
+; nom: SOURCE  ( -- c-addr u ) 
+;   Ce mot retourne l'adresse et la longueur du tampon qui est la source de
+;   l'évaluation par l'interpréteur/compilateur.    
+; arguments:
+;   rien
+; retourne:
+;   c-addr  Adresse début du tampon.
+;   u       longueur du tampon.    
 DEFCODE "'SOURCE",7,,TSOURCE ; ( -- c-addr u ) 
     DPUSH
     mov _TICKSOURCE,T
@@ -2058,7 +2314,11 @@ DEFCODE "'SOURCE",7,,TSOURCE ; ( -- c-addr u )
     mov _CNTSOURCE,T
     NEXT
 
-; sauvegarde les valeur de source    
+; nom: SOURCE!   ( c-addr u -- )    
+;   sauvegarde les valeur de la SOURCE.
+; arguments:
+;   c-addr   Adresse du début du tampon qui doit-être évalué.
+;   u        Longueur du tampon.    
 DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
     mov T,_CNTSOURCE
     DPOP
@@ -2094,10 +2354,18 @@ DEFWORD "DECIMAL?",8,,DECIMALQ
 DEFWORD ">BASE10",7,,TOBASE10
     .word LIT,'0',MINUS,LIT,10,ROT,STAR
     .word PLUS,EXIT
-    
-;vérifie si le caractère est un digit
-; si valide retourne la valeur du digit et -1
-; si invalide retourne x 0
+   
+; nom: ?DIGIT  ( c -- x 0 | n -1 )    
+;   Vérifie si le caractère est un digit valide dans la base actuelle.
+;   Si valide retourne la valeur du digit et -1
+;   Si invalide retourne x 0
+; arguments:
+;   c   caractère à convertir dans la base active.
+; retourne:
+;   x    un entier quelconque qui doit-être ignoré.
+;   0    le caractère n'était pas valide, x doit-être ignoré.
+;   n    Le caractère convertie en digit de la base active.
+;   -1   Le caractère était valide et n doit-être conservé.    
 DEFWORD "?DIGIT",6,,QDIGIT ; ( c -- x 0 | n -1 )
     .word DUP,LIT,96,UGREATER,ZBRANCH,1f-$
     .word LIT,32,MINUS ; lettre minuscule? convertie en minuscule
@@ -2108,10 +2376,18 @@ DEFWORD "?DIGIT",6,,QDIGIT ; ( c -- x 0 | n -1 )
 3:  .word LIT,'0',MINUS
     .word DUP,BASE,FETCH,ULESS,EXIT
   
-;vérifie si le caractère qui a mis fin à >NUMBER
-; est {'.'|','}. Si c'est le cas il s'agit d'un
-; nombre double précision. saute le caractère
-; et retourne -1. Dans le cas contraire retourne 0  
+; nom: ?DOUBLE   ( c-addr u -- c-addr' u' f )    
+;   Vérifie si le caractère qui a mis fin à >NUMBER
+;   est {'.'|','}. Si c'est le cas il s'agit d'un
+;   nombre double précision. saute le caractère et retourne -1.
+;   Dans le cas contraire retourne 0.
+; arguments:
+;   c-addr  pointe vers l'adresse du dernier caractère analysé par >NUMBER
+;   u       longueur de la chaîne restante.
+; retourne:
+;   c-addr' acresse incrémenté si le critère {'.'|','} est vrai.
+;   u'      longueur décrémentée si le critère {'.'|','} est vrai.
+;   f       indicateur Booléen indiquant s'il s'agit d'un entier double.    
 DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
     .word OVER,CFETCH,LIT,'.',EQUAL,ZBRANCH,2f-$
 1:  .word LIT,1,SLASHSTRING,LIT,-1,BRANCH,9f-$
@@ -2120,13 +2396,17 @@ DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
 8:  .word LIT,0
 9:  .word EXIT  
   
-;converti la chaîne en nombre
-;en utilisant la valeur de BASE
-;la conversion s'arrête au premier
-;caractère non numérique
-; 'ud1' est initialisé à zéro  
-; <c-addr1 u1> spécifie le début et le nombre
-; de caractères de la chaîne    
+; nom: >NUMBER  (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )   
+;   Converti la chaîne en nombre en utilisant la valeur de BASE.
+;   La conversion s'arrête au premier caractère non numérique.
+; arguments:  
+; 'ud1'	    est initialisé à zéro  
+;  c-addr1 Adrese du début de la chaîne à convertir en entier.
+;  u1      Longueur du tampon à analyser.  
+; retourne:
+;  ud2     Entier double résultant de la conversion.
+;  c-addr2  Adresse pointant après le nombre dans le tampon.
+;  u2      Longueur restante dans le tampon.  
 DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
 1:   .word LIT,0,TOR ; indique si le dernier caractère était un digit
 2:   .word DUP,ZBRANCH,7f-$
@@ -2144,19 +2424,32 @@ DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
 8:   .word DROP
 9:   .word EXIT
    
-;vérifie s'il y a un signe '-'
-; à la première postion de la chaîne spécifiée par <c-addr u>
-; retourne f=1 si '-' sinon f=0    
-; s'il y a un signe avance au delà du signe
+; nom: ?SIGN   ( c-addr u -- c-addr' u' f )   
+;   Vérifie s'il y a un signe '-' à la première postion de la chaîne spécifiée par <c-addr u>
+;   Retourne f=VRAI si '-' sinon f=FAUX.    
+;   S'il y a un signe avance au delà du signe
+; arguments:
+;   c-addr   adresse où débute l'analyse.
+;   u        longueur du tampon à analyser.
+; retourne:
+;   c-addr'  adresse incrément au delà du signe '-' s'il y a lieu.
+;   u'       longueur restante dans le tampon.
+;   f        Indicateur Booléen, VRAI s'il le premier caractère est '-'.   
 DEFWORD "?SIGN",5,,QSIGN ; ( c-addr u -- c-addr' u' f )
     .word OVER,CFETCH,CLIT,'-',EQUAL,TBRANCH,8f-$
     .word LIT,0,BRANCH,9f-$
 8:  .word LIT,1,SLASHSTRING,LIT,1
 9:  .word EXIT
     
-;vérifie s'il y a un modificateur de base
-; modifie la base en conséquence 
-; avance le pointeur c-addr si requis  
+; nom: ?BASE  ( c-addr u1 -- c-addr' u1' )  
+;   Vérifie s'il y a un modificateur de base
+;   Si oui modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
+; arguments:
+;   c-addr  Adresse du début de la chaîne à analyser.
+;   u1      longueur maximale de la chaîne.
+; retourne:
+;   c-addr'  adresse incrémentée au delà du caractère modificateur de BASE.
+;   u'       longueur restante de la chaîne.  
 DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
     .word OVER,CFETCH,CLIT,'$',EQUAL,ZBRANCH,1f-$
     .word LIT,16,BASE,STORE,BRANCH,8f-$
@@ -2167,13 +2460,17 @@ DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
 8:  .word SWAP,ONEPLUS,SWAP,ONEMINUS    
 9:  .word EXIT
 
-; conversion d'une chaîne en nombre
-; c-addr indique le début de la chaîne
-; utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
-; pour entrer un nombre double précision
-; il faut mettre un point à une position quelconque
-; sauf à la première position
-; double ::=  ['-'](digit['.'])* 
+; nom: ?NUMBER   ( c-addr -- c-addr 0 | n -1 )  
+;   Conversion d'une chaîne en nombre
+;    c-addr indique le début de la chaîne
+;   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
+;   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
+;   à une position quelconque de la chaîne saisie sauf à la première position.
+; arguments:
+;   c-addr   adresse de la chaîne à analyser.
+; retourne:
+;   c-addr 0   S'il la conversio échoue retourne l'adresse et l'indicateur FAUX	
+;   n -1    Si la conversion réussie retourne l'entier et l'indicateur VRAI.  
 DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
     .word BASE,FETCH,TOR ; sauvegarde la valeur de BASE 
     .word DUP,LIT,0,DUP,ROT,COUNT,QBASE  ; c-addr 0 0 c-addr' u'
@@ -2190,8 +2487,13 @@ DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
 8:  .word RFROM,BASE,STORE ; restitue la valeur de BASE
     .word EXIT
     
-  
-;imprime la liste des mots du dictionnaire
+; nom: WORDS   ( -- )  
+;   Affiche sur la console la liste des mots du dictionnaire. Les mots dont l'attribut F_HIDDEN
+;   est à 1 ne sont pas affichés.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "WORDS",5,,WORDS ; ( -- )
     .word LIT,0,CR,LATEST
 1:  .word FETCH,QDUP,ZBRANCH,8f-$
@@ -2203,7 +2505,14 @@ DEFWORD "WORDS",5,,WORDS ; ( -- )
     .word RFROM,TWOMINUS,BRANCH,1b-$
 8:  .word CR,DOT,EXIT
     
-; convertie la chaîne comptée en majuscules
+; nom: UPPER   ( c-addr -- c-addr )  
+;   Convertie la chaîne comptée en majuscules. Le vocabulaire de ForthEx est
+;   est insensible à la casse. Les noms sont tous convertis en majuscules avant
+;   d'être ajoutés dans le dictionnaire.  
+; arguments:
+;   c-addr  Adressse du début de la chaîne comptée.
+; retourne:
+;   c-addr  La même adresse.  
 DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
     mov T, W1
     mov.b [W1],W2
@@ -2282,7 +2591,7 @@ DEFCODE "SKIP",4,,SKIP
 ; arguments:
 ;   c-addr  adresse du pointeur après le dernier PARSE
 ; retourne:
-;    
+;   rien
 DEFWORD "ADR>IN",6,,ADRTOIN
     .word TSOURCE,ROT,ROT,MINUS,MIN,LIT,0,MAX
     .word TOIN,STORE,EXIT
@@ -2324,7 +2633,7 @@ DEFWORD "PARSE",5,,PARSE ; c -- c-addr u
 ;   n longueur de la chaîne
 ;   dest adresse destination
 ; retourne:
-;    
+;   rien 
 DEFWORD ">COUNTED",8,,TOCOUNTED 
     .word TWODUP,CSTORE,ONEPLUS,SWAP,MOVE,EXIT
 
@@ -2494,25 +2803,21 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word DROP,DUP,GETCLIP,PLUS,BRANCH,1b-$
 2:  .word DROP,BRANCH,1b-$  
    
-; retourne la spécification
-; de la chaîne comptée dont
-; l'adresse est c-addr1  
+; nom: COUNT  ( c-addr1 -- c-addr2 u )  
+;   Retourne la spécification de la chaîne comptée dont l'adresse est c-addr1.
+; arguments:
+;   c-addr1   Adresse d'une chaîne de caractères débutant par un compteur.
+; retourne:
+;   c-addr2   Adresse du premier caractère de la chaîne.
+;   u      longueur de la chaîne.  
 DEFWORD "COUNT",5,,COUNT ; ( c-addr1 -- c-addr2 u )
    .word DUP,CFETCH,TOR,ONEPLUS,RFROM,LENMASK,AND,EXIT
    
-; imprime 'mot?'
-; signifiant que le mot n'a pas
-; été trouvé dans le dictionnaire.
-; réinitialise DSP et appel QUIT   
-DEFWORD "ERROR",5,,ERROR ;  ( c-addr -- )  
-   .word SPACE,COUNT,TYPE
-   .word SPACE,CLIT,'?',EMIT
-   .word LIT,0,STATE,STORE
-   .word S0,FETCH,SPSTORE
-   .word CR,QUIT
-
-; interprète la chaîne indiquée par c-addr u   
-; facteur commun entre QUIT et EVALUATE    
+; nom: INTERPRET  ( c-addr u -- )   
+;    Évaluation d'un tampon contenant du texte source par l'interpréteur/compilateur.
+; arguments:
+;   c-addr   Adresse du premier caractère du tampon.
+;   u   longueur du tampon.   
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
         .word SRCSTORE,LIT,0,TOIN,STORE
 1:      .word BL,WORD,DUP,CFETCH,ZBRANCH,9f-$
@@ -2527,9 +2832,15 @@ DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
 5:      .word COUNT,TYPE,LIT,'?',EMIT,CR,ABORT
 9:      .word DROP,EXIT
 
-; interprète la chaîne à l'adrese 'c-addr' et de longueur 'u'
-; sauvegarde la valeur de source SUR R: à l'entrée
-; et restaure avant de quitter.      
+; nom: EVALUATE   ( i*x c-addr u -- j*x )      
+;   Évaluation d'un texte source. Le contenu de SOURCE est sauvegardé
+;   et restauré à la fin de cette évaluation.
+; arguments:
+;   i*x    Contenu initial de la pile des arguments avant l'évalulation de la chaîne.
+;   c-addr Adresse du premier caractère de la chaîne à évaluer.
+;   u  Longueur de la chaîne à évaluer.
+; retourne:
+;    j*x   Contenu final de la pile après l'évaluation de la chaîne.      
 DEFWORD "EVALUATE",8,,EVAL ; ( i*x c-addr u -- j*x )
     .word TSOURCE,TOR,TOR ; sauvegarde source
     .word TOIN,FETCH,TOR,INTERPRET
@@ -2542,8 +2853,13 @@ HEADLESS OK,HWORD  ; ( -- )
     .word GETX,LIT,3,PLUS,LIT,CPL,LESS,TBRANCH,1f-$,CR    
 1:  .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
-; vide la pile dstack et appel QUIT
-; si compilation en cours annulle les effets de celle-ci  
+; nom: ABORT ( -- )  
+;   Vide la pile dstack et appel QUIT
+;   Si une compilation est en cours annulle les effets de celle-ci  
+; arguments:
+;   aucun
+; retourne:
+;   rien  ne retourne pas mais branche sur QUIT  
 DEFWORD "ABORT",5,,ABORT
     .word STATE,FETCH,ZBRANCH,1f-$
     .word LATEST,FETCH,NFATOLFA,DUP,FETCH,LATEST,STORE,DP,STORE
@@ -2556,21 +2872,30 @@ HEADLESS QABORT,HWORD
     .word COUNT,TYPE,CR,ABORT
 9:  .word DROP,EXIT
   
-; compile le runtime de ?ABORT
-; a utilisé à l'intérieur d'une définition  
+; nom: ABORT"  ( cccc -- )     
+;   Compile le runtime de ?ABORT
+;   A  utiliser à l'intérieur d'une définition seulement.  
 DEFWORD "ABORT\"",6,F_IMMED,ABORTQUOTE ; (  --  )
     .word CFA_COMMA,QABORT,STRCOMPILE,EXIT
     
-; copie le TIB dans PASTE
-;  le premier caractère dans PASTE est le compte    
-;  arguments:
-;	n+ nombre de caractères    
+; nom: CLIP  ( n+ -- )    
+;   Copie le contenu du tampon TIB dans le tampon PASTE.
+;   Le contenu de PASTE est une chaîne comptée.
+; arguments:
+;	n+ nombre de caractères de la chaîne à copier.
+; retourne:
+;   rien    
 DEFWORD "CLIP",4,,CLIP ; ( n+ -- )
     .word DUP,PASTE,FETCH,STORE
     .word TIB,FETCH,SWAP,PASTE,FETCH,ONEPLUS,SWAP,MOVE,EXIT
 
-; copie PASTE dans TIB
-; retourne le compte.    
+; nom: GETCLIP  ( -- n+ )    
+;   Copie la chaîne qui est dans le tampon PASTE dans le tampon TIB.
+;   Retourne la longueur de la chaîne.
+; arguments:
+;   aucun
+; retourne:
+;   n+ longueur de la châine.    
 DEFWORD "GETCLIP",7,,GETCLIP ; ( -- n+ )
     .word PASTE,FETCH,COUNT,SWAP,OVER 
     .word TIB,FETCH,SWAP,MOVE  
@@ -2585,18 +2910,38 @@ HEADLESS REPL,HWORD
     .word OK
 2:  .word CR
     .word BRANCH, 1b-$
-    
-; boucle de l'interpréteur    
+
+; nom: QUIT   ( -- )    
+;   Boucle de l'interpréteur/compilateur. En dépit de son nom cette boucle
+;   ne quitte jamais. Il s'agit de l'interface avec l'utilisateur. 
+;   A l'entré la pile des retours est vidée et la variable STATE est mise à 0.    
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "QUIT",4,,QUIT ; ( -- )
     .word LIT,0,STATE,STORE
     .word R0,RPSTORE
     .word REPL
     
-; commentaire limité par ')'
+; nom: (    ( ccccccc -- )    
+;   Ce mot introduit un commentaire qui se termine  par ')'.
+;   Il doit y avoir un espace de chaque côté de '(' car c'est un mot forth.
+;   Il s'agit d'un mot immédiat, il s'exécute donc même en mode compilation.    
+; arguments:
+;   aucun   Tous les caractères dans le tampon d'entré sont sauté jusqu'après le '('.
+; retourne:    
+;   rien    
 DEFWORD "(",1,F_IMMED,LPAREN ; parse ccccc)
     .word LIT,')',PARSE,TWODROP,EXIT
 
-; commentaire jusqu'à la fin de la ligne
+; nom: \    ( cccc -- )    
+;   Ce mot introduit un commentaire qui se termine à la fin de la ligne.
+;   Il s'agit d'un mot immédiat, il s'éxécute donc même en mode compilation.
+; arguments:
+;   aucun  Tous les caractères dans le tampon d'entré sont sautés jusqu'à la fin de ligne.
+; retourne:
+;   rien    
 DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
     .word BLK,FETCH,ZBRANCH,2f-$
     .word CLIT,VK_CR,PARSE,TWODROP,EXIT

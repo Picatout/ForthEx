@@ -81,7 +81,8 @@
 .equ IP, W10  ; pointeur d'instruction machine virtuelle
 .equ I, W9    ; compteur de boucle    
 .equ LIMIT,W8 ; limite des boucles
-    
+ 
+.equ CHAR_SIZE,1 ; 1 octet.	    
 .equ CELL_SIZE, 2  ; 2 octets
 .equ DSTK_SIZE, 32*CELL_SIZE  ; dimension pile arguments
 .equ RSTK_SIZE, 64*CELL_SIZE  ; dimension pile des retours

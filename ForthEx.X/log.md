@@ -1,3 +1,8 @@
+2017-05-15
+----------
+
+Travail sur docgen.c et commentaires dans core.s
+
 2017-05-14
 ----------
 
