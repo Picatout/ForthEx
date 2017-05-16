@@ -2331,7 +2331,7 @@ DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
 ;   en nombre
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; nom: "DECIMAL?"  ( c -- f )
+; nom: DECIMAL?  ( c -- f )
 ;   vérifie si c est dans l'ensemble ASCII {'0'..'9'}
 ; arguments:
 ;   c   caractère ASCII à vérifier.
@@ -2954,58 +2954,83 @@ DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
 ; les 3 mots suivants servent à 
 ; passer d'un champ à l'autre dans
 ; l'entête du dictionnaire
-    
-; passage du champ NFA au champ LFA
-; simple puisqu'il est juste avant ce dernier    
+   
+; nom: NFA>LFA  ( a-addr1 -- a-addr2 )  
+;   A partir de l'adresse NFA (Name Field Address) retourne
+;   l'adresse LFA  (Link Field Address).  
+; arguments:
+;   a-addr1   adresse du champ NFA dans l'entête du dictionnaire.
+; retourne:
+;   a-addr2   adresse du champ LFA dans l'entête du dictionnaire.  
 DEFWORD "NFA>LFA",7,,NFATOLFA ; ( nfa -- lfa )
     .word LIT,2,MINUS,EXIT
     
-; passe du champ NFA au champ CFA
-; le CFA est après le nom aligné sur adresse paire.    
+; nom: NFA>CFA  ( a-addr1 -- a-addr2 )    
+;   A partir de l'adresse NFA (Name Field Address) retourne
+;   l'adresse CFA (Code Field Address).    
+; arguments:
+;   a-addr1  Adresse du champ NFA dans l'entête du dictionnaire.
+; retourne:
+;   a-addr2  Adresse du CFA dans l'entête du dictionnaire.    
 DEFWORD "NFA>CFA",7,,NFATOCFA ; ( nfa -- cfa )
     .word DUP,CFETCH,LENMASK,AND,PLUS,ONEPLUS,ALIGNED,EXIT
  
-; passe du champ CFA au champ PFA
+; nom: >BODY  ( a-addr1 -- a-addr2 )    
+;   A partir du CFA (Code Field Address) retourne l'adresse PFA (Parameter Field Address)
+; arguments:
+;   a-addr1   Adresse du CFA dans l'entête du dictionnaire.
+; retourne:
+;   a-addr2   Adresse du PFA (Parameter Field Address).
 DEFWORD ">BODY",5,,TOBODY ; ( cfa -- pfa )
     .word DUP,FETCH,LIT,FETCH_EXEC,EQUAL,ZBRANCH,1f-$
     .word CELLPLUS
 1:  .word CELLPLUS,EXIT;
 
-    
-;passe du champ CFA au champ NFA
-;  Il n'y a pas de lien arrière entre le CFA et le NFA
-;  Le bit F_MARK est utilisé pour marquer l'octet à la position NFA
-;  le CFA étant immédiatement après le nom, il suffit de 
-;  reculer octet par octet jusqu'à atteindre un octet avec le bit F_MARK==1
-;  puisque les caractères du nom sont tous < 128    
+; nom: CFA>NFA   ( a-addr1 -- a-addr2 )    
+;   Passe du champ CFA au champ NFA.
+;   Il n'y a pas de lien arrière entre le CFA et le NFA
+;   Le bit F_MARK (bit 7) est utilisé pour marquer l'octet à la position NFA
+;   Le CFA étant immédiatement après le nom, il suffit de 
+;   reculer octet par octet jusqu'à atteindre un octet avec le bit F_MARK==1
+;   puisque les caractères du nom sont tous < 128.
+; arguments:
+;   a-addr1   Adresse du CFA dans l'entête du dictionnaire.
+; retourne:
+;   a-addr2 Adresse du NFA dans l'entête du dictionnaire.
 DEFWORD "CFA>NFA",7,,CFATONFA ; ( cfa -- nfa|0 )
-    .word DUP,LIT,DATA_BASE,ULESS,ZBRANCH,1f-$ ; si cfa<DATA_BASE ce n'est pas un cfa
-    .word DUP,XOR,BRANCH,9f-$ ; ( cfa -- 0 )
-1:  .word DUP,TOR,LIT,33,TOR ; (cfa -- R: cfa 33 ) recule au maximum de 33 octets
-2:  .word ONEMINUS,DUP,CFETCH,DUP,LIT,F_MARK,AND,TBRANCH,3f-$  ; F_MARK?
-    .word DROP,RFROM,ONEMINUS,DUP,ZBRANCH,7f-$ 
-    .word TOR,BRANCH,2b-$
-3:  .word RDROP,LENMASK,AND   ; branche ici si F_MARK
-    .word OVER,PLUS,ONEPLUS,ALIGNED,RFROM,EQUAL,DUP,ZBRANCH,8f-$ ; aligned(NFA+LEN+1)==CFA ?
-    .word DROP,BRANCH,9f-$ ; oui
-7:  .word RDROP  ; compteur limite à zéro
-8:  .word SWAP,DROP  ;non
+    ; le champ nom a un maximum de 32 caractères.
+    .word LIT,32,LIT,0,DODO  
+2:  .word LIT,CHAR_SIZE,MINUS,DUP,CFETCH,NMARK,ULESS,TBRANCH,3f-$
+    .word UNLOOP,BRANCH,9f-$
+3:  .word DOLOOP,2b-$
 9:  .word EXIT
-  
-; vérifie si le dictionnaire utilisateur
-; est vide  
+
+; nom: ?EMPTY  ( -- f )  
+;   Vérifie si le dictionnaire utilisateur est vide.
+; arguments:
+;   aucun
+; retourne:
+;   f    Indicateur Booléean, retourne VRAI si dictionnaire utilisateur vide.  
 DEFWORD "?EMPTY",6,,QEMPTY ; ( -- f)
     .word DP0,HERE,EQUAL,EXIT 
     
-; met à 1 l'indicateur F_IMMED
-; sur le dernier mot défini.    
+; nom: IMMEDIATE  ( -- )    
+;   Met à 1 l'indicateur F_IMMED dans l'entête du dernier mot défini.    
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "IMMEDIATE",9,,IMMEDIATE ; ( -- )
     .word QEMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,IMMED,OR,SWAP,CSTORE
 9:  .word EXIT
     
-;cache la définition en cours  
-; la variable LAST contient le NFA  
+; nom: HIDE  ( -- )  
+;   Met l'indicateur F_HIDDEN à 1 dans l'entête du dernier mot défini dans le dictionnaire.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "HIDE",4,,HIDE ; ( -- )
     .word QEMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,HIDDEN,OR,SWAP,CSTORE
@@ -3019,34 +3044,59 @@ HEADLESS NAMEMARK,HWORD
     .word LATEST,FETCH,DUP,CFETCH,NMARK,OR,SWAP,CSTORE
 9:  .word EXIT
   
-  
+
+; name: REVEAL  ( -- )
+;   Met à 0 le bit F_HIDDEN dans l'entête du dictionnaire du dernier mot défini.  
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "REVEAL",6,,REVEAL ; ( -- )
     .word QEMPTY,TBRANCH,9f-$
     .word LATEST,FETCH,DUP,CFETCH,HIDDEN,INVERT,AND,SWAP,CSTORE
 9:  .word EXIT
-    
-; allocation/rendition de mémoire dans le dictionnaire
-; si n est négatif n octets seront rendus.
-;  arguements:
-;     n   nombre d'octets
+
+; nom: ALLOT  ( n -- )  
+;   Allocation/rendition de mémoire dans le dictionnaire.
+;   si n est négatif n octets seront rendus.
+;   La variable DP est ajustée en conséquence.  
+; arguements:
+;   n   nombre d'octets
+; retourne:
+;   rien    modifie la valeur de DP.  
 DEFWORD "ALLOT",5,,ALLOT ; ( n -- )
     .word DP,PLUSSTORE,EXIT
 
-; alloue une cellule pour x à la position DP
+; nom: ,   ( x -- )    
+;   Alloue une cellule pour x à la position DP et copie x dans cette cellule.
+;   la Variable DP est incrémentée de la grandeur d'une cellule.
+; arguments:
+;    x   Valeur qui sera sauvegardée dans l'espace de donnée.    
+; retourne:
+;   rien   x est sauvegardé à position de DP et DP est incrémenté.    
 DEFWORD ",",1,,COMMA  ; ( x -- )
     .word HERE,STORE,LIT,CELL_SIZE,ALLOT
     .word EXIT
     
-; alloue le caractère 'c' à la position DP    
+; nom: C,  ( c -- )    
+;   Alloue l'espace nécessaire pour enregistré le caractère c.
+;   Le caractère c est sauvegardé à la position DP et DP est incrémenté.
+; arguments:
+;   c
+; retourne:
+;   rien  c est sauvegardé à la position DP et DP est incrémenté.    
 DEFWORD "C,",2,,CCOMMA ; ( c -- )    
     .word HERE,CSTORE,LIT,1,ALLOT
     .word EXIT
     
     
-    
-; Extrait le mot suivant du flux 
-; d'entrée et le recherche dans le dictionnaire
-; l'opération avorte en cas d'erreur.    
+; nom: '   ( ccccc -- a-addr )    
+;   Extrait le mot suivant du flux d'entrée et le recherche dans le dictionnaire.
+;   Retourne l'adresse du CFA de ce mot.
+; arguments:
+;    cccc   chaîne de caractère dans le flux d'entrée qui représente le mot recherché.
+; retourne:
+;    a-addr  Adresse du CFA (Code Field Address) du mot recherché.    
 DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
     .word BL,WORD,DUP,CFETCH,ZEROEQ,QNAME
     .word UPPER,FIND,ZBRANCH,5f-$
@@ -3054,7 +3104,13 @@ DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
 5:  .word COUNT,TYPE,SPACE,LIT,'?',EMIT,CR,ABORT    
 9:  .word EXIT
 
-; version immédiate de '
+; nom: [']   ( cccc -- )  
+;   Version immédiate de '  à utiliser à l'intérieur d'une définition pour
+;   compiler le CFA d'un mot existant dans le dictionnaire.
+; arguments:
+;   ccccc   Chaîne de caractère dans le flux d'entrée qui représente le mot recherché.
+; retourne:
+;   rien    Le CFA est compilé.  
 DEFWORD "[']",3,F_IMMED,COMPILETICK ; cccc 
     .word QCOMPILE
     .word TICK,CFA_COMMA,LIT,COMMA,EXIT
@@ -3067,52 +3123,84 @@ DEFWORD "[']",3,F_IMMED,COMPILETICK ; cccc
 ;  les sauts sont des relatifs.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;empile la position actuelle de DP
-; cette adresse sera la cible
-; d'un branchement arrière    
-DEFWORD "<MARK",5,F_IMMED,MARKADDR ; ( -- a )
+;   Il s'agit d'un mot immédiat à utiliser à l'intérieur d'une définition    
+;   empile la position actuelle de DP
+;   cette adresse sera la cible
+;   d'un branchement arrière    
+HEADLESS MARKADDR,HWORD    
+;DEFWORD "<MARK",5,F_IMMED,MARKADDR ; ( -- a )
    .word QCOMPILE,HERE, EXIT
 
-;compile l'adresse d'un branchement arrière
+; compile l'adresse d'un branchement arrière
 ; complément de '<MARK'    
 ; le branchement est relatif à la position
 ; actuelle de DP    
-DEFWORD "<RESOLVE",8,F_IMMED,BACKJUMP ; ( a -- )    
+HEADLESS BACKJUMP,HWORD   
+;DEFWORD "<RESOLVE",8,F_IMMED,BACKJUMP ; ( a -- )    
     .word QCOMPILE,HERE,MINUS,COMMA, EXIT
     
 ;reserve un espace pour la cible d'un branchement avant qui
-; sera résolu ultérieurement.    
-DEFWORD ">MARK",5,F_IMMED,MARKSLOT ; ( -- slot )
+; sera résolu ultérieurement. 
+HEADLESS MARKSLOT,HWORD    
+;DEFWORD ">MARK",5,F_IMMED,MARKSLOT ; ( -- slot )
     .word QCOMPILE,HERE,LIT,0,COMMA,EXIT
     
 ; compile l'adresse cible d'un branchement avant
 ; complément de '>MARK'    
 ; l'espace réservé pour la cible est indiquée
 ; au sommet de la pile
-DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
+HEADLESS FOREJUMP,HWORD    
+;DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
     .word QCOMPILE,DUP,HERE,SWAP,MINUS,SWAP,STORE,EXIT
     
 ;compile un cfa fourni en literal
-DEFWORD "CFA,",4,F_IMMED,CFA_COMMA  ; ( -- )
+HEADLESS CFA_COMMA,HWORD    
+;DEFWORD "CFA,",4,F_IMMED,CFA_COMMA  ; ( -- )
   .word QCOMPILE,RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
 
-
-; passe en mode interprétation
+; nom: [  ( -- )
+;   Mot immédiat.  
+;   Passe en mode interprétation en mettant la variable système STATE à zéro.
+; arguments:
+;   aucun
+; retourne:
+;   rien   Modifie la valeur de la variable système STATE.  
 DEFWORD "[",1,F_IMMED,LBRACKET ; ( -- )
     .word LIT,0,STATE,STORE
     .word EXIT
   
-; passe en mode compilation
+; nom: ]  ( -- ) 
+;   Mot immédiat.    
+;   Passe en mode compilation en mettant la variable sytème STATE à -1
+; arguments:
+;   aucun
+; retourne:
+;   rien   Modifie la valeur de la variable système STATE.  
 DEFWORD "]",1,F_IMMED,RBRACKET ; ( -- )
     .word LIT,-1,STATE,STORE
     .word EXIT
 
-; avorte si le nom n'est pas trouvé dans le dictionnaire  
+; nom: ?WORD  ( cccc  -- c-addr 0 | cfa 1 | cfa -1 )    
+;   Analyse le flux d'entré pour en extraire le prochain mot.
+;   Recherche ce mot dans le dictionnaire.    
+;   Avorte si le nom n'est pas trouvé dans le dictionnaire.
+;   Retourne le CFA du nom et un indicateur.
+; arguments:
+;   ccccc    mot extrait du flux d'entrée.
+; retourne:
+;    a-addr 1   le CFA du mot et 1 si c'est mot immédiat.
+;    a-addr -1  le CFA du mot et -1 si le mot n'est pas immédiat.    
 DEFWORD "?WORD",5,,QWORD ; ( -- c-addr 0 | cfa 1 | cfa -1 )
    .word BL,WORD,UPPER,FIND,QDUP,ZBRANCH,2f-$,EXIT
 2: .word COUNT,TYPE,LIT,'?',EMIT,ABORT
   
-;diffère la compilation du mot qui suis dans le flux
+; nom: POSTPONE   ( ccccc -- ) 
+;   Mot immédiat à utiliser dans une définition. 
+;   Diffère la compilation du mot qui suis dans le flux d'entrée.
+; arguments:
+;   ccccc   Mot extrait du flux d'entrée.
+; retourne:
+;   rien     
 DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
     .word QCOMPILE ,QWORD
     .word ZEROGT,TBRANCH,3f-$
@@ -3121,7 +3209,15 @@ DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
   ; mot immédiat  
 3:  .word COMMA    
     .word EXIT    
-  
+
+; nom: LITERAL  ( x -- )
+;   Mot immédiat qui compile la sémantique runtime d'un entier. Il n'a d'effet 
+;   qu'en mode compilation. Dans ce cas la valeur sommet de la pile est compilée
+;   avec la sémantique runtime qui empile un entier.
+; arguments:
+;   x  Valeur au sommet de la pile des arguments. Cette valeur est consommée seulement en mode compilation.
+; retourne:
+;   rien    x reste au sommet de la pile en mode interprétation.    
 DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
     .word STATE,FETCH,ZBRANCH,9f-$
     .word CFA_COMMA,LIT,COMMA
@@ -3162,52 +3258,106 @@ HEADLESS STRCOMPILE, HWORD
 ;DEFWORD "(,\")",4,F_HIDDEN,STRCOMPILE ; ( -- )
     .word SLIT,PLUS,ALIGNED,DP,STORE,EXIT
 
-    
-; interprétation: imprime la chaîne litérale qui suis.    
-; compilation: compile le runtine (S") et la chaîne litérale    
+; nom: S"   ( ccccc -- )  runtime S: c-addr u 
+;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.    
+;   Lecture d'une chaîne litérale dans le flux d'entrée et compilation
+;   de cette chaîne dans l'espace de donnée.    
+;   La sémentique rutime consiste à empiler l'adresse du premier caractère de la
+;   chaîne et la longueur de la chaîne.    
+; arguments:
+;   ccccc   Chaîne terminée par " dans le flux d'entrée.
+; retourne:
+;   rien    
 DEFWORD "S\"",2,F_IMMED,SQUOTE ; ccccc" runtime: ( -- | c-addr u)
     .word QCOMPILE
     .word CFA_COMMA,STRQUOTE,STRCOMPILE,EXIT
     
+; nom: c"   ( ccccc --  )  runtime S:  c-addr
+;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
+;   Lecture d'une chaîne litérale dans le flux d'entrée et compilation de cette
+;   chaîne dans l'espace de donnée.
+;   La sémantique runtime consiste à compiler l'adresse de la chaîne comptée.
+; arguments:
+;   ccccc  Chaîne de caractères terminée par "  dans le flux d'entrée.
+; retourne:
+;   rien    En runtime retourne empile l'adresse du descripteur de la chaîne.    
 DEFWORD "C\"",2,F_IMMED,CQUOTE ; ccccc" runtime ( -- c-addr )
     .word QCOMPILE
     .word CFA_COMMA,RT_CQUOTE,STRCOMPILE,EXIT
     
-    
-; interprétation: imprime la chaîne litérale qui suis
-; compilation: compile le runtime  (.")    
+; nom: ."   ( ccccc -- )
+;   Mot immédiat.    
+;   Interprétation: imprime la chaîne litérale qui suis dans le flux d'entrée.
+;   En compilation: compile la chaîne et la sémantique permet d'imprimer cette
+;   chaîne lors de l'exécution du mot en cour de définition.
+; arguments:
+;   ccccc    Chaîne terminée par "  dans le flux d'entrée.
+; retourne:
+;   rien         
 DEFWORD ".\"",2,F_IMMED,DOTQUOTE ; ( -- )
     .word STATE,FETCH,ZBRANCH,4f-$
     .word CFA_COMMA,DOTSTR,STRCOMPILE,EXIT
 4:  .word SLIT,TYPE,EXIT  
     
+; nom: RECURSE  ( -- )
+;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
+;   Compile un appel récursif du mot en cour de définition.
+; arguments:
+;   aucun
+; retourne:
+;   rien  
 DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
-    .word LATEST,FETCH,NFATOCFA,COMMA,EXIT 
+    .word QCOMPILE,LATEST,FETCH,NFATOCFA,COMMA,EXIT 
 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  mots contrôlant le flux
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; compile xt de (DO)
-; empile l'adresse du début de la boucle sur cstack
-; empile 0 comme garde pour FIXLEAVE   
-DEFWORD "DO",2,F_IMMED,DO ; ( C: -- a 0 ) compile xt de (DO)
+
+; mom: DO  compilation  ( C: -- a 0 ) compile CFA de (DO)
+;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
+;   Ce mot compile la sémantique runtome d'initialisation d'une boucle avec compteur.
+; arguments:
+;    aucun   En runtime consomme 2 entiers la limite et compteur.
+; retourne:
+;    rien    
+DEFWORD "DO",2,F_IMMED,DO 
     .word QCOMPILE,CFA_COMMA,DODO
     .word HERE,TOCSTK,LIT,0,TOCSTK,EXIT
 
-; compile xt de (?DO) ref: 6.2.0620
-; ?DO est semblabe à DO excepté que la 
-; boucle n'est exécutée qui si les paramètres initiaux
-; ne sont pas égaux: start<>limit    
-; empile l'adresse de début de la boucle sur cstack
-; empile 0 comme garde pour FIXLEAVE
-DEFWORD "?DO",3,F_IMMED,QDO ; ( C: -- a-addr1 0 a-addr2 )
+; nom: ?DO runtime ( n1 n2 -- ) compilation ( C: -- a-addr1 0 a-addr2 )
+;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
+;   Compile la sémantique d'exécution d'une boucle ave compteur conditionnelle.
+;   ?DO est semblabe à DO excepté que la 
+;   boucle n'est exécutée qui si les paramètres initiaux
+;   ne sont pas égaux: start<>limit    
+; arguments:
+;   compilation:    
+;   aucun   
+;   runtime: 
+;     n1     limite
+;     n2     valeur initiale du compteur de boucle.
+; retourne:
+;   rien    
+DEFWORD "?DO",3,F_IMMED,QDO 
     .word QCOMPILE,CFA_COMMA,DOQDO
     .word HERE,LIT,2*CELL_SIZE,PLUS,TOCSTK,LIT,0,TOCSTK
     .word CFA_COMMA,BRANCH,HERE,TOCSTK,EXIT
     
-    
-;compile LEAVE
-DEFWORD "LEAVE",5,F_IMMED,LEAVE ; (C: -- slot )
+; nom: LEAVE  runtime ( -- ) compilation  ( C: -- slot )
+;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.
+;   LEAVE est utilisé à l'intérieur des boucles avec compteur pour intérompre
+;   prématurément la boucle.    
+; arugments:
+;   compilation:     
+;   aucun
+;   runtime:
+;   aucun    
+; retourne:
+;   compilation:    
+;   c: slot  empile l'information pour FIXLEAVE sur le contrôle stack    
+;   runtime: 
+;   rien   qui la boucle    
+DEFWORD "LEAVE",5,F_IMMED,LEAVE 
     .word QCOMPILE,CFA_COMMA,UNLOOP
     .word CFA_COMMA,BRANCH,MARKSLOT,TOCSTK,EXIT  
     
@@ -3220,16 +3370,42 @@ HEADLESS FIXLEAVE, HWORD
     .word DUP,HERE,CELLPLUS,SWAP,MINUS,SWAP,STORE
     .word BRANCH,1b-$
 9:  .word CSTKFROM,BACKJUMP,EXIT    
- 
-; compile xt de (LOOP)  
-; résout toutes les adresses de saut.  
+
+; nom: LOOP  runtime ( -- ) compilation (C: a-addr 0 a-addr* -- )
+;   Mot immédiat à n'utiliser qu'a l'intérieur d'une définition.  
+;   Compile la sémantique qui permet de résoudre les adresses de saut.
+;   En runtime consiste à inrémenter la variable I et à vérifier si elle
+;   a atteint la limite et à terminer l'exécuton de la boucle si c'est le cas.  
+; arguments:
+;  compilation:  
+;  C: a-addr*  Les adresses laissé par LEAVE sont résolues.
+;  C: 0        indicateur fin de liste utilisé par FIXLEAVE
+;  C: a-addr   adressse du début de la boucle.
+;  runtime:
+;    rien    contrôle I==LIMIT et quitte si vrai.  
+; retourne:
+;   rien  
 DEFWORD "LOOP",4,F_IMMED,LOOP ; ( -- )
     .word QCOMPILE,CFA_COMMA,DOLOOP,FIXLEAVE,EXIT
     
-; compile execution de +LOOP
-; résout toutes les adressess de saut.    
+; nom: +LOOP   compilation (C: a-addr 0 a-addr* -- )    
+;   Mot immédiat à n'utiliser qu'a l'intérieur d'une définition.  
+;   Compile la sémantique qui permet de résoudre les adresses de saut.
+;   En runtime consiste à inrémenter la variable I de la valeur qui est au
+;   somet de la pile des arguments et à vérifier si elle
+;   a atteint la limite et à terminer l'exécuton de la boucle si c'est le cas.  
+; arguments:
+;  compilation:    
+;  C: a-addr*  Les adresse laissé par LEAVE sont résolue.
+;  C: 0        indicateur fin de liste utilisé par FIXLEAVE
+;  C: a-addr   adressse du début de la boucle.
+;  runtime:
+;    n        ajoute cette valeur à la variable de contrôle de la boucle. Si I passe LIMIT quitte la boucle.    
+; retourne:
+;   rien  
 DEFWORD "+LOOP",5,F_IMMED,PLUSLOOP ; ( -- )
     .word QCOMPILE,CFA_COMMA,DOPLOOP,FIXLEAVE,EXIT
+
     
 ; compile le début d'une boucle    
 DEFWORD "BEGIN",5,F_IMMED,BEGIN ; ( -- a )
