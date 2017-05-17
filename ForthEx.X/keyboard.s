@@ -133,8 +133,8 @@ HEADLESS KBD_RESET  ; ( -- )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
 ; nom: LC-EKEY? ( -- f )
-;  vérifie s'il y a un caractère en attente
-;   dans la file et retourne un indicateur booléen.
+;   Vérifie s'il y a un caractère en attente
+;   dans la file clavier et retourne un indicateur booléen.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -150,12 +150,12 @@ DEFCODE "LC-EKEY?",8,,LCEKEYQ
     
     
 ; nom: LC-EKEY  ( -- u )
-;  Attend jusqu'à réception d'un code du clavier
-;  retourne le premier code reçu.
+;   Attend jusqu'à réception d'un code du clavier
+;   retourne le premier code reçu.
 ; arguments:
-;  aucun
+;   aucun
 ; retourne:
-;   u   caractère non filtré.    
+;    u   caractère non filtré reçu du clavier.
 DEFCODE "LC-EKEY",7,,LCEKEY  
     DPUSH
 1:  mov kbd_tail, W0
@@ -173,20 +173,20 @@ DEFCODE "LC-EKEY",7,,LCEKEY
 
     
 ; nom: LC-FILTER ( u -- u false | c true )    
-;   filtre  et retourne un caractère 'c' et 'vrai'
+;   Filtre  et retourne un caractère 'c' et 'vrai'
 ;   si u fait partie de l'ensemble reconnu.
 ;   sinon retourne 'u' et 'faux'   
-;   accèpte:
+;   accepte:
 ;      VK_CR, VK_BACK, CTRL_X, CTRL_V {32-126}
 ; arguments:
 ;   u    code à vérifier
 ; retourne:
-;   code refusé:    
+;   refusé:    
 ;   u       même code
-;   false   indicateur booléen 
-;   code reconnu:
+;   FALSE   indicateur booléen 
+;   reconnu:
 ;   c       caractère reconnu.
-;   true    indicateur booléen.
+;   TRUE    indicateur booléen.
 DEFCODE "LC-FILTER",9,,LCFILTER
     mov T,W0
     DPUSH
@@ -211,8 +211,8 @@ DEFCODE "LC-FILTER",9,,LCFILTER
 
     
 ; nom: LC-KEY? ( -- 0|c)
-;   vérifie s'il y a un caractère répondant aux 
-;   critères du filtre disponible dans la file. 
+;   Vérifie s'il y a un caractère répondant aux 
+;   critères du filtre disponible dans la file du clavier. 
 ;   S'il y a des caractères non valides les jettes.    
 ; arguments:
 ;   aucun
@@ -226,11 +226,11 @@ DEFWORD "LC-KEY?",7,,LCKEYQ
 9: .word EXIT
     
 ; nom: LC-KEY  ( -- c )
-;   Attend la réception d'un caractère valide du clavier
+;   Attend la réception d'un caractère valide du clavier.
 ; arguments:
 ;   aucun 
 ; retourne:
-;   c   caractère filtré 
+;   c   caractère filtré. 
 DEFWORD "LC-KEY",6,,LCKEY
 1:  .word LCKEYQ,QDUP
     .word ZBRANCH,1b-$

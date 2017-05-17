@@ -3494,7 +3494,11 @@ DEFWORD "ELSE",4,F_IMMED,ELSE ; ( slot1 -- slot2 )
 ;   s'il y a égalité le bloc entre OF et ENDOF est exécuté. Seul le premier test
 ;   qui répond au critère d'égalité est exécuté. Si tous les test échous et qu'il
 ;   y a un bloc d'instruction entre le derner ENDOF et le ENDCASE c'est ce bloc
-;   qui est exécuté.    
+;   qui est exécuté.   
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "CASE",4,F_IMMED,CASE ; ( -- case-sys )
     .word QCOMPILE,LIT,0,EXIT ; marque la fin de la liste des fixup
 
@@ -3623,7 +3627,14 @@ DEFWORD "HEADER",6,,HEADER ; ( -- )
     .word BL,WORD,UPPER,CFETCH,DUP,ZEROEQ,QNAME
     .word ONEPLUS,ALLOT,ALIGN,NAMEMARK,HIDE,EXIT
  
-; efface le mot désignée et tous les suivant
+; nom: FORGET  ( cccc -- )    
+;   Extrait du flux d'entrée le mot suivant et supprime du dictionnaire ce mot
+;   ainsi que tous ceux qui ont été définis après lui.
+;   Les mots système définis en mémoire FLASH ne peuvent-êtr supprimés.
+; arguments:
+;   cccc   Mot suivant dans le flux d'entrée.
+; arguments:
+;   rien    
 DEFWORD "FORGET",6,,FORGET ; cccc
     .word TICK,CFATONFA,NFATOLFA,DUP,LIT,0x8000,UGREATER
     .word QABORT
@@ -3632,17 +3643,31 @@ DEFWORD "FORGET",6,,FORGET ; cccc
     .align 2
     .word DUP,DP,STORE,FETCH,LATEST,STORE,EXIT    
 
-; crée un mot marker qui efface tous les mots qui le suivent
-; lorsqu'il est invoqué.
+; nom: MARKER  ( cccc -- )    
+;   Extrait du flux d'entrée le mot suivant et cré un mot portant ce nom
+;   dans le dictionnaire. Lorsque ce mot est invoqué il se suprime lui-même
+;   ainsi que tous les mots qui ont été définis après lui.    
+; arguments:
+;   cccc   Mot suivant dans le flux d'entrée.
+; arguments:
+;   rien    
 DEFWORD "MARKER",6,,MARKER ; cccc
     .word HEADER,HERE,CFA_COMMA,ENTER,CFA_COMMA,LIT,COMMA
     .word CFA_COMMA,RT_MARKER,EXITCOMMA,REVEAL,EXIT
-    
+
+; partie runtime de MARKER    
 HEADLESS  RT_MARKER,HWORD   
     .word CFATONFA,NFATOLFA,DUP,DP,STORE,FETCH,LATEST,STORE
     .word EXIT
-  
-; crée une nouvelle définition dans le dictionnaire    
+
+; nom: :   ( cccc -- )    
+;   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans
+;   le dictionnaire qui porte ce nom. Ce mot introduit une définition de haut niveau.
+;   Modifie la variable système STATE pour passer en mode compilation.    
+; arguments:
+;   cccc  Mot suivant dans le flux d'entrée.
+; retourne:
+;   rien    
 DEFWORD ":",1,,COLON ; ( name --  )
     .word HEADER ; ( -- )
     .word RBRACKET,CFA_COMMA,ENTER,EXIT
@@ -3657,50 +3682,96 @@ FETCH_EXEC: ; ( -- pfa )
      mov [T++],WP  ; CFA
      mov [WP++],W0
      goto W0
-    
-;cré une nouvelle entête dans le dictionnaire
-;qui peut-être étendue par DOES>
+
+; nom: CREATE  ( cccc -- )     
+;   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans le dictionnaire
+;   Lorsque ce nouveau mot est exécuté il retourne l'adresse PFA. Cependant la sémantique
+;   du mot peut-être étendue en utilisant le mot DOES>.    
+; exemple:     
+;       / le mot VECTOR sert à créer des tableaux de n éléments.    
+;	: VECTOR  ( n  -- )
+;           CREATE CELLS ALLOT DOES> CELLS PLUS ;     
+;       / utilisation du mot VECTOR pour créer le tableau V1 de 5 éléments.
+;       5 VECTOR V1
+;       / Met la valeur 35 dans l'élément d'indice 2 de V1
+;       35 2 V1 !    
+; arguments:
+;   cccc  Mot suivant dans le flux d'entrée.
+; retourne:
+;   rien    
 DEFWORD "CREATE",6,,CREATE ; ( -- hook )
     .word HEADER,REVEAL
     .word LIT,FETCH_EXEC,COMMA
     .word CFA_COMMA,NOP
     .word EXIT    
   
-    
 ; runtime DOES>    
 HEADLESS "RT_DOES", HWORD ; ( -- )
     .word RFROM,DUP,CELLPLUS,TOR,FETCH,LATEST,FETCH
     .word NFATOCFA,CELLPLUS,STORE
     .word EXIT
     
-; ajoute le runtime RT_DOES
+; nom: DOES>  ( -- )
+;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
+;   Ce mot permet définir l'action d'un mot créé avec CREATE. Surtout utile
+;   pour définir des mots compilants. U mot compilant est un mot qui sert à
+;   créer une classe de mots. Par exemples les mots VARIABLE et CONSTANT sont
+;   des mots compilants.    
+;   Le concept de DOES> est un des plus complexe du langage forth. Un article
+;   sera donc consacré à son utilisation.    
+; arguments:
+;   aucun
+; retourne:
+;   rien  
 DEFWORD "DOES>",5,F_IMMED,DOESTO  ; ( -- )
     .word CFA_COMMA,RT_DOES,HERE,LIT,2,CELLS,PLUS,COMMA
     .word EXITCOMMA,CFA_COMMA,ENTER
     .word EXIT
-    
-; création d'une variable
-DEFWORD "VARIABLE",8,,VARIABLE ; ()
-    .word CREATE,LIT,0,COMMA,EXIT
 
-; création d'une constante
-DEFWORD "CONSTANT",8,,CONSTANT ; ()
-    .word HEADER,REVEAL,LIT,DOCONST,COMMA,COMMA,EXIT
-    
-   
-    
-; termine une définition débutée par ":"
+; nom: ;  ( -- )    
+;   Termine une définition débutée par ":".
+;   Modifie la valeur de la variable STATE pour passer en mode interprétation.
+; arguments:
+;   aucun
+; retourne:
+;   rien  
 DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- ) 
     .word QCOMPILE
     .word EXITCOMMA
     .word REVEAL
     .word LBRACKET,EXIT
     
+    
+; nom: VARIABLE  ( cccc -- )    
+;   Mot compilant qui sert à créer des variables dans le dictionnaire.
+;   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
+;   de la nouvelle variable. Les variables sont initialisées à 0.
+; arguments:
+;   cccc   Prochain mot dans le flux d'entrée. Nom de la variable.
+; retourne:
+;   rien    
+DEFWORD "VARIABLE",8,,VARIABLE ; ()
+    .word CREATE,LIT,0,COMMA,EXIT
+
+; nom: CONSTANT  ( cccc  n -- )    
+;   Mot compilant qui sert à créer des constantes dans le dictionnaire.
+;   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
+;   de la nouvelle constante. La constante  initialisée avec la valeur
+;   qui est au sommet de la pile des arguments au moment de sa création.    
+; arguments:
+;   cccc   Prochain mot dans le flux d'entrée. Nom de la constante.
+;   n      Valeur qui sera assignée à cette constante.    
+; retourne:
+;   rien    
+DEFWORD "CONSTANT",8,,CONSTANT ; ()
+    .word HEADER,REVEAL,LIT,DOCONST,COMMA,COMMA,EXIT
+   
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  mots du core étendu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;RUNTIME COMPILÉE PAR DEFER    
+;action par défaut d'un mot défini avec DEFER   
 HEADLESS NOINIT,HWORD
 ;DEFWORD "(NOINIT)",8,F_HIDDEN,NOINIT ; ( -- )
     .word DOTSTR
@@ -3712,61 +3783,110 @@ HEADLESS NOINIT,HWORD
 HEADLESS DEFEREXEC,HWORD
      .word FETCH,EXECUTE,EXIT
      
-; création d'un mot la définition de la sémantique d'exécution
-; est différée.
-; Utilise à sémantique par défaut (NOINIT)
-DEFWORD "DEFER",5,,DEFER ; ccccc ( -- )
+; nom: DEFER ( cccc -- )     
+;   Mot compilant.
+;   Cré un nouveau mot dont l'action ne sera défini ultérieurement.
+;   Cependant ce mot possède une action par défaut qui consiste à affiché
+;   le message "Uninitialized defered word"     
+; arguments:
+;   cccc  Prochain mot dans le flux d'entrée. Nom du nouveau mot.
+; retourne:
+;   rien     
+DEFWORD "DEFER",5,,DEFER ; cccc ( -- )
     .word CREATE,CFA_COMMA,NOINIT
     .word RT_DOES,DEFEREXEC,EXIT
 
-; initialise la sémantique d'exécution d'un mot définit avec DEFER 
-;  xt1  CFA de la sémantique que le mot doit exécuté
-;  xt2  CFA du mot diféré.    
+; nom: DEFER!  ( a-addr1 a-addr2 -- )     
+;   Initialise une action à  un mot défini avec DEFER.
+;   exemple:
+;   DEFER p2  / le mot p2 est créé mais n'a pas d'action défini.
+;   :noname  dup * ; / ( -- a-addr1 )  un mot sans nom viens d'être créé.
+;   ' p2 DEFER!  / ' p2 retourne le xt de p2 et DEFER! affecte a-addr1 à a-addr2
+;   2 p2  4 ok  / maintenant lorsque p2 est utilisé retourne le carré d'un entier.  
+;    
+; arguments:    
+;  a-addr1  CFA de l'action que le mot doit exécuter.
+;  a-addr2  CFA du mot différé.
+; retourne:
+;   rien    
 DEFWORD "DEFER!",6,,DEFERSTORE ;  ( xt1 xt2 -- )
     .word TOBODY,STORE,EXIT
 
-; empile le xt interprété par un mot défini avec DEFER
-; xt1 CFA du mot diféré
-; xt2 CFA de la sémantique d'exécution de ce mot.    
+; nom: DEFER@  ( a-addr1 -- a-addr2 )    
+;   Empile le CFA interprété par un mot défini avec DEFER dont le CFA est
+;   au sommet de la pile des arguments.    
+; arguments:
+;   a-addr1 CFA du mot différé dont on veut obtenir l'action.
+; retourne:    
+;   a-addr2  CFA de l'action  exécutée par le mot différé.
 DEFWORD "DEFER@",6,,DEFERFETCH ; ( xt1 -- xt2 )
     .word TOBODY,FETCH,EXIT
  
-; initilalise la sémantique d'exécution d'un mot définit avec DEFER
-; le nom du mot diféré est fourni en texte    
-DEFWORD "IS",2,,IS  ; ( xt1 cccc -- )
+; nom: IS    ( cccc a-addr -- )     
+;   Extrait le prochain mot du flux d'entrée. Recherche ce mot dans le dictionnaire.
+;   Ce mot doit-être  un mot créé avec DEFER. Lorsque ce mot est trouvé,    
+;   enregistre a-addr dans son CFA. a-addr est le CFA d'une action. 
+; exemple:
+;     / création d'un mot différé qui peut effectuer différentes opérations arithmétiques.
+;     DEFER  MATH
+;     ' * IS MATH   / maintenant le mot MATH agit comme *
+;     ' + IS MATH   / maintenant le mot MATH agit comme +    
+; arguments:
+;   cccc  Prochain mot dans le flux d'entrée. Correspond au nom d'un mot créé avec DEFER.
+;   a-addr  Sommet de la pile des arguments qui correspond au CFA de l'action à assigné à ce mot.
+; retourne:
+;   rien    
+DEFWORD "IS",2,,IS 
     .word TICK,TOBODY,STORE,EXIT
     
-    
+
+; nom: ACTION-OF   ( cccc -- a-addr )
+;   Extrait le prochain mot du flux d'entrée et le recherche dans le dictionnaire.
+;   Ce mot doit-être un mot créé avec DEFER. Si le mot est trouvé dans le dictinnaire
+;   le CFA de son action est empilé.
+; arguments:
+;   cccc   Prochain mot dans le flux d'entrée. Nom recherché dans le dictionnaire.
+; retourne:
+;   a-addr Adresse du CFA de l'action du mot différé.    
 DEFWORD "ACTION-OF",9,,ACTIONOF ; ( ccc -- xt2 )
     .word TICK,TOBODY,FETCH,EXIT
     
-    
-; imprime le commentaire délimité par )
+; nom: .(   cccc) ( -- )    
+;   Affiche le commentaire délimité par )
+; arguments:
+;   cccc)   Commentaire extrait du flux d'entrée.
+; retourne:
+;   rien    
 DEFWORD ".(",2,F_IMMED,DOTPAREN ; ccccc    
     .word LIT,')',PARSE,TYPE,EXIT
-    
-; envoie 2 élément de S au sommet de R
-; de sorte qu'il soient dans le même ordre
-; >>> ne pas utiliser en mode interprétation    
+ 
+; nom: 2>R   ( S: d --  R: -- d )    
+;   Transfert un entier double de la pile des arguments vers la pile des retours.
+; arguments:
+;    d    Entier double ou 2 entiers simples.
+; retourne:
+;    rien  L'entier double est maintenant sur R:    
 DEFWORD "2>R",3,,TWOTOR ;  S: x1 x2 --  R: -- x1 x2
     .word RFROM,NROT,SWAP,TOR,TOR,TOR,EXIT
-    
-; envoie 2 éléments de R vers de sorte
-; qu'ils soient dans le même ordre
-; >>> ne pas utiliser en mode interprétation    
+
+; nom: 2R>   ( S: -- d  R: d -- )    
+;   Transfert un entier double de la pile des retours vers la pile des arguments.
+; arguments:
+;   R: d   Entier double à transféré.
+; retourne:
+;   d      Entier double ou 2 entiers simple en provenance de R:    
 DEFWORD "2R>",3,,TWORFROM ; S: -- x1 x2  R: x1 x2 --
     .word RFROM,RFROM,RFROM,SWAP,ROT,TOR,EXIT
     
-; copie 2 éléments de R vers S en consversant l'ordre    
-; >>> ne pas utiliser en mode interprétation
-; >>> 2R> doit-être appellé avant la sortie
-; >>> de la routine qui utilise ce mot.    
-; >>> Au préalable 2>R a été appellé dans la même routine.    
+; nom: 2R@   ( S: -- d  R: d -- d )    
+;   Copie un entier double de la pile des retours vers la pile des arguments.
+; arguments:
+;   R: d   Entier double qui sera copié sur S:
+; retourne:
+;   d      Copie d'un entier double en provenance de R:    
 DEFWORD "2R@",3,,TWORFETCH ; S: -- x1 x2 R: x1 x2 -- x1 x2    
     .word RFROM,RFROM,RFETCH,OVER,TOR,ROT,TOR
     .word SWAP,EXIT
-    
-    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;     OUTILS
@@ -3775,7 +3895,14 @@ DEFWORD "2R@",3,,TWORFETCH ; S: -- x1 x2 R: x1 x2 -- x1 x2
 ;  des outils qui facilite
 ;  le débogage.
     
-; vérifie si DSP est dans les limites    
+; nom: ?DSP  ( -- )    
+;   Outil de débogage.    
+;   Vérifie si la variable DSP est dans les limites, réinitialise l'ordinateur
+;   en cas d'erreur et affiche un message.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFCODE "?DSP",4,,QDSP
     mov #pstack,W0
     cp DSP,W0
@@ -3793,30 +3920,47 @@ _overflow:
     mov WREG,fwarm
     reset
     
-    
-; imprime le contenu de la pile des arguments
-; sans en affecté le contenu.
-; FORMAT:  < n >  X1 X2 X3 ... Xn=T
-;  n est le nombre d'éléments
-;  Xn  valeur sur la pile.  
+; nom: .S   ( i*x -- i*x )    
+;   Outil de débogage.    
+;   Affiche le contenu de la pile des arguments sans en modifier le contenu.
+;   La valeur la plus à droit est le sommet de la pile.    
+;   FORMAT:  < n >  X1 X2 X3 ... Xn=T
+;   n est le nombre d'éléments
+;   Xn  valeurs sur la pile.  
+; arguments:
+;   i*x   Liste des valeurs sur la pile des arguments.
+; retourne:
+;   i*x   La pile est dans son état initial.    
 DEFWORD ".S",2,,DOTS  ; ( -- )
     .word DEPTH,CLIT,'<',EMIT,DUP,DOT,CLIT,'>',EMIT,SPACE
 1:  .word QDUP,ZBRANCH,2f-$,DUP,PICK,DOT,ONEMINUS
     .word BRANCH,1b-$  
 2:  .word EXIT
 
-;imprime le contenu de la pile des retours  
+; nom: .RTN    ( R: i*x -- i*x )  
+;   Outil de débogage.  
+;   Affiche le contenu de la pile des retours.
+;   La valeur la plus à droite est le sommet de la pile.  
+;   FORMAT:  R:  X1 X2 ... XN  
+; arguments:
+;   R: i*x  Liste des valeurs sur la pile des retours.
+; retourne:
+;   R: i*x  Le contenu de la pile n'est pas modifié.  
 DEFWORD ".RTN",4,,DOTRTN ; ( -- )
     .word BASE, FETCH,HEX
     .word CLIT,'R',EMIT,CLIT,':',EMIT
     .word RPFETCH,R0,DODO
 1:  .word DOI,FETCH,DOT,LIT,2,DOPLOOP,1b-$
     .word BASE,STORE,EXIT
-  
-;lit et imprime une plage mémoire
-; n nombre de mots à lire
-; addr adresse de départ
-; 8 mots par ligne d'affichage
+ 
+; nom: DUMP   ( c-addr n+ -- )    
+;   Outil de débogage.
+;   Affiche en hexadécimal le contenu d'un région mémoire.
+; arguments:   
+;   c-addr  adresse du premier octet à afficher.
+;   n nombre d'octets à afficher.
+; retourne:
+;   rien    
 DEFWORD "DUMP",4,,DUMP ; ( addr +n -- )
     .word QDUP,TBRANCH,3f-$,EXIT
 3:  .word BASE,FETCH,TOR,HEX
@@ -3827,13 +3971,27 @@ DEFWORD "DUMP",4,,DUMP ; ( addr +n -- )
     .word DOLOOP,1b-$,DROP
     .word RFROM,BASE,STORE,EXIT
 
-; active/désactive les breaks points    
+; nom: DEBUG  ( f -- )    
+;   Outil de débogage.    
+;   Active/désactive les breaks points.
+; arguments:
+;   f   Indicateur Booléen,VRAI active les break points.
+; retourne: 
+;   rien    
 DEFWORD "DEBUG",5,,DEBUG ; ( f -- )
     .word DBGEN,STORE    
     .word EXIT
-    
-; interrompt le programme en cours d'exécution et
-; entre en mode interpréteur
+
+; nom: BREAK ( i*x n -- i*x )     
+;   Outil de débogage.    
+;   Interrompt le programme en cours d'exécution et
+;   entre en mode inter-actif. L'utilisateur peut examiner
+;   les piles, des variables ou faire un DUMP.    
+;   L'application est redémarrée par le mot RESUME.
+; arguments:
+;   n    Identifie le break point par une valeur entière qui est affiché sur la console inter-active.    
+; retourne:
+;   rien    
 DEFWORD "BREAK",5,,BREAK ; ( ix n -- ix )
     .word DBGEN,FETCH,TBRANCH,1f-$
     .word DROP,EXIT
@@ -3845,7 +4003,13 @@ DEFWORD "BREAK",5,,BREAK ; ( ix n -- ix )
     .word DOT,CR,DOTS,CR,REPL
     .word EXIT
 
-; résume le programme interrompu par BREAK
+; nom: RESUME  ( -- )
+;   Outil de débogage.    
+;   Redémarre l'exécution du programme au point d'interruption par le mot BREAK.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "RESUME",6,,RESUME ; ( -- )
     .word DBGEN,FETCH,ZBRANCH,9f-$
     .word RPBREAK,FETCH,QDUP,ZBRANCH,9f-$

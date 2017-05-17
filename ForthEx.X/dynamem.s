@@ -51,10 +51,14 @@ _heap_used: .space 2
 .equ BSIZE, HEAD_SIZE ; champ grandeur  ptr-6
 .equ NLNK, 4  ; champ next  ptr-4
 .equ PLNK, 2  ; champ prev  ptr-2
- 
-; initialiation du gestionnaire
-; libère tous les blocs alloués
-; remise à zéro de la mémoire 
+
+; nom: HEAPINIT  ( -- ) 
+;   Initialiation du gestionnaire, libère tous les blocs alloués.
+;   Remet à zéro la mémoire. 
+; arguments:
+;   aucun
+; retourne:
+;   rien 
 DEFCODE "HEAPINIT",8,, HEAP_INIT ; ( -- )
     mov #EDS_BASE,W0
     repeat  #((HEAP_SIZE/2)-1)
@@ -67,11 +71,21 @@ DEFCODE "HEAPINIT",8,, HEAP_INIT ; ( -- )
     clr W1
     mov W1,_heap_used
     NEXT
-    
-; retourne la grandeur du HEAP
+
+; nom: HEAPSIZE   ( -- n+ )
+;   Constante, retourne la grandeur de la mémoire dynamique en octets.
+; arguments:
+;   aucun
+; retourne:
+;   n+   Grandeur de la mémoire dynamique. 
 DEFCONST "HEAPSIZE",8,,HEAPSIZE,HEAP_SIZE ; ( -- n )
 
-; retourne la grandeur libre
+; nom: HEAPFREE ( -- n )    
+;   Retourne le nombre d'octets libres dans la mémoire dynamique.
+; arguments:
+;   aucun
+; retourne:
+;    n    Octets libres.    
 DEFCODE "HEAPFREE",8,,HEAPFREE ; ( -- n )
     DPUSH
     mov _free_bytes,T
@@ -82,71 +96,88 @@ HEADLESS FREE_BYTES_STORE
     DPOP
     NEXT
     
-; retourne la variable _heap_free
+; nom: FREELIST   ( -- a-addr )    
+;   Retourne l'adresse de la variable qui contient la tête de liste des blocs libres.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable tête de liste.    
 DEFCODE "FREELIST",8,,FREELIST
     DPUSH
     mov #_heap_free,T
     NEXT
     
-; retourne la variable _heap_used
+; nom: USEDLIST  ( -- a-addr )    
+;   Retourne l'adresse de la variable qui contient la tête de liste des blocs utilisés.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable tête de liste.    
 DEFCODE "USEDLIST",8,,USEDLIST
     DPUSH
     mov #_heap_used,T
     NEXT
     
-    
-; retourne la grandeur d'un bloc
+; nom: BSIZE@   ( a-addr -- n )    
+;   Retourne la grandeur d'un bloc
 ; arguments:
-;   addr  adresse retournée par MALLOC
+;   a-addr  adresse retournée par MALLOC
 ; retourne:
-;   n   octets data    
-DEFWORD "BSIZE@",6,,BSIZEFETCH ; ( addr -- n )
+;   n   Nombre d'octets de données du bloc.    
+DEFWORD "BSIZE@",6,,BSIZEFETCH ; ( a-addr -- n )
     .word LIT,BSIZE,MINUS,EFETCH,EXIT
 
-; assigne le champ block_size
+; nom: BSIZE!   ( n a-addr -- )    
+;   Initialise la grandeur du bloc de donnée.
 ; arguments:
-;    n   valeur à assigner
-;   addr pointeur bloc
+;    n   Nombre d'octets dans le bloc de données.
+;   a-addr pointeur vers la structure bloc.
 DEFWORD "BSIZE!",6,,BSIZESTORE ; ( n addr -- )
     .word LIT,BSIZE,MINUS,STORE,EXIT
     
-    
-; retourne le pointeur sur le prochain bloc
+; nom: NLNK@   ( a-addr1 -- a-addr2 )    
+;   Retourne le pointeur sur le prochain bloc dans la chaîne de blocs.
 ; arguments:
-;    addr1 adresse retournée par MALLOC
+;    addr1 adresse du bloc dans la chaîne.
 ; retourne:
 ;   addr2  adresse du prochain bloc dans la chaîne.
 DEFWORD "NLNK@",5,,NLNKFETCH ; ( addr1 -- addr2 )
     .word LIT,NLNK,MINUS,EFETCH,EXIT
-    
-; retourne le pointeur sur le bloc précédent
+  
+; nom: PLNK@   ( a-addr1 -- a-addr2 )    
+;   Retourne le pointeur sur le bloc précédent dans la chaîne de blocs.
 ; arguments:
-;   addr1   adresse retournée par MALLOC
+;   addr1   adresse du bloc.
 ; retourne:
 ;   addr2  adresse du bloc précédent dans la chaîne.    
 DEFWORD "PLNK@",5,,PLNKFETCH ; ( addr1 -- addr2 )
     .word LIT,PLNK,MINUS,EFETCH,EXIT
     
-; assigne une valeur au champ NLNK
+; nom: NLNK!  ( a-addr1 a-addr2 -- )    
+;   Initialise le champ NLNK de la structure bloc, c'est le pointeur
+;   vers le bloc suivant dans la chaîne.    
 ; arguments:
-;   n    valeur 
-;   addr pointeur bloc
+;   a-addr1  adresse du bloc suivant.    
+;   a-addr2  pointeur sur le bloc dont le champ NLNK doit-être initialisé.
 DEFWORD "NLNK!",5,,NLNKSTORE  ; ( n addr -- )
     .word LIT,NLNK,MINUS,STORE,EXIT
     
-; assigne une valeur au champ PLNK
+; nom: PLNK!   ( a-addr1 a-addr2 -- )    
+;   Initialise le champ PLNK de la structure bloc, c'est le pointeur
+;   vers le bloc précédent dans la chaîne.    
 ; arguments:
-;   n    valeur 
-;   addr pointeur bloc
+;   a-addr1  adresse du bloc précédent.    
+;   a-addr2  pointeur sur le bloc dont le champ PLNK doit-être initialisé.
 DEFWORD "PLNK!",5,,PLNKSTORE  ; ( n addr -- )
     .word LIT,PLNK,MINUS,STORE,EXIT
     
-; retire un bloc de la liste auquel il apartient.
+; nom: UNLINK   ( a-addr1 a-addr2 -- a-addr1 )    
+;   Retire un bloc de la liste auquel il apartient.
 ; arguments:
-;   addr   pointeur du bloc
-;   list   liste d'apartenance du bloc  
+;   a-addr1  pointeur du bloc à retirer.
+;   a-addr2  Adresse de la variable qui contient tête de liste auquel appartient ce bloc.  
 ; retourne:
-;   addr   pointeur du bloc avec NLNK et PLNK à 0
+;   a-addr1   pointeur du bloc avec NLNK et PLNK à 0
 DEFWORD "UNLINK",6,,UNLINK ; ( addr list -- addr )
     .word OVER,DUP,PLNKFETCH,LIT,0,ROT,PLNKSTORE,TOR ; S: addr list R: plnk
     .word OVER,DUP,NLNKFETCH,LIT,0,ROT,NLNKSTORE ; S: addr list nlnk R: plnk
@@ -160,10 +191,11 @@ DEFWORD "UNLINK",6,,UNLINK ; ( addr list -- addr )
 6:  .word TWODROP
     .word EXIT
     
-; insère un bloc orphelin au début d'une liste
+; nom: PREPEND  ( a-addr1 a-addr2 -- )    
+;   Insère un bloc orphelin au début d'une liste
 ; arguments:
-;    addr1  pointeur du bloc à insérer
-;    list   variable contenant le pointeur de tête de la liste.
+;    a-addr1  pointeur du bloc à insérer
+;    a-addr2  Adresse de la variable contenant le pointeur de tête de la liste.
 ; retourne:
 ;    rien
 DEFWORD "PREPEND",7,,PREPEND ; ( addr1 list -- )
@@ -172,18 +204,23 @@ DEFWORD "PREPEND",7,,PREPEND ; ( addr1 list -- )
 2:  .word OVER,NLNKSTORE,SWAP,STORE
     .word EXIT
     
-;vérifie si n < addr->bsize
+; nom: ?FIT  ( n a-addr1 -- f )    
+;   vérifie si le bloc désigné par a-addr1 est assez grand pour contenir n octets de données.
 ; arguments:
-;    addr   pointeur bloc
+;    n     nombre d'octets requis.    
+;    a-addr   pointeur bloc
 ; retourne:
 ;    f   indicateur booléen
 DEFWORD "?FIT",4,,QFIT ;  ( n addr1 -- f )    
     .word BSIZEFETCH,ONEPLUS,ULESS,EXIT
 
-; retourne le pointeur du plus petit bloc
+; nom: SMALLBLK   ( a-addr1 a-addr2 -- a-addr )    
+;   Compare la grandeur de 2 blocs et retourne le pointeur du plus petit des deux.
 ; arguments:
-;   addr1   pointeur bloc 1
-;   addr2    pointeur bloc 2
+;   a-addr1   pointeur bloc 1
+;   a-addr2   pointeur bloc 2
+; retourne:
+;   a-addr    pointeur sur le plus petit des 2 blocs.    
 DEFWORD "SMALLBLK",8,,SMALLBLK ; ( addr1 addr2 -- addr )
     .word QDUP,ZBRANCH,9f-$
     .word TOR,DUP,ZBRANCH,2f-$,DUP,BSIZEFETCH ; S: addr1 size1 R: addr2
@@ -193,13 +230,14 @@ DEFWORD "SMALLBLK",8,,SMALLBLK ; ( addr1 addr2 -- addr )
 9:  .word EXIT
   
   
-; retourne le plus petit bloc de liste
-; qui peut contenir 'n' octets.    
+; nom: SMALLEST   ( n a-addr -- a-addr1 | 0 )  
+;   Recherche dans une liste de blocs le plus petit qui est assez grand pour contenir n octets.
+;   Si aucun ne peut contenir ce nombre d'octets, retourne 0.  
 ; arguments:
-;    n      taille requise
-;    list   liste dans laquelle s'effectue la recherche    
+;    n       taille requise
+;    a-addr  Adresse de la variable contenant la tête de liste.
 ; retourne:
-;    addr|0    pointeur sur le bloc|0.
+;    a-addr1 | 0    pointeur sur le bloc ou 0 si aucun ne fait l'affaire.
 DEFWORD "SMALLEST",8,,SMALLEST ; ( n list -- addr|0 )
     .word FETCH,LIT,0,TOR ; S: n addr1 R: 0
     ; début boucle
@@ -210,12 +248,13 @@ DEFWORD "SMALLEST",8,,SMALLEST ; ( n list -- addr|0 )
 8:  .word DROP,RFROM
 9:  .word EXIT
   
-;enlève l'excédent du bloc en créant un nouveau bloc libre.
+; nom: CUT  ( n a-addr1 -- a-addr2 )  
+;   Ampute  l'excédent d'un bloc et cré un nouveau bloc libre avec l'excédent.
 ; arguments:
 ;    n    octets requis
-;    addr pointeur bloc à réduire
+;    a-addr1 pointeur bloc à réduire.
 ; retourne:
-;    addr pointeur du bloc de taille ajusté.
+;    a-addr2  pointeur du bloc de taille ajusté.
 DEFWORD "CUT",3,,CUT ; ( n addr -- addr )
     .word DUP,TOR,BSIZEFETCH,OVER,MINUS ; S: n diff R: addr
     .word DUP,LIT,HEAD_SIZE,GREATER,ZBRANCH,8f-$ ; S: n diff R: addr
@@ -226,14 +265,14 @@ DEFWORD "CUT",3,,CUT ; ( n addr -- addr )
     .word RFROM,EXIT
 8:  .word TWODROP,RFROM,EXIT    
   
-; allocation d'un bloc de mémoire
-; recherche d'un bloc libre dont la taille est le plus
-; proche possible de n.
-; retourne un pointeur sur le data.
+; nom: MALLOC  ( n -- a-addr | 0 )  
+;   Allocation d'un bloc de mémoire dynamique.
+;   Retourne un pointeur sur le premier octet de données de ce bloc.
+;   Si aucun bloc n'est disponible retourne 0.  
 ;  arguments:
 ;     n    grandeur requise
-;  retourne
-;     addr|0   
+;  retourne:
+;     a-addr | 0  Adresse du premier octet de donnée du bloc, ou 0 si non disponible.  
 DEFWORD "MALLOC",6,,MALLOC ; ( n -- addr|0 )
     .word ALIGNED ; n doit-êter pair.
     .word DUP,FREELIST,SMALLEST ; S: n addr|0
@@ -244,24 +283,26 @@ DEFWORD "MALLOC",6,,MALLOC ; ( n -- addr|0 )
     .word DUP,USEDLIST,PREPEND
 9:  .word EXIT
   
-; vérifie si le bloc et membre de la liste
+; nom: ?>LIST   ( a-addr1 a-addr2 -- a-addr | 0 )  
+;   Vérifie si le bloc à l'adresse a-addr1 est membre de la liste désignée par a-addr2
 ; arguments:
-;   addr  adresse du pointer à vérifier
-;   list  liste à rechercher  
+;   a-addr1  adresse du bloc à vérifier
+;   a-addr2  Variable contenant le pointeur de la tête de la liste.  
 ;  retourne:
-;   addr|0   retourne addr si membre sinon retourne 0
+;   a-addr | 0   Adresse du bloc ou 0 si le bloc n'est pas membre de cette liste.
 DEFWORD "?>LIST",6,,QINLIST ; ( addr list -- addr|0 )
     .word FETCH
 1:  .word DUP,ZBRANCH,8f-$
     .word TWODUP,EQUAL,TBRANCH,8f-$
     .word NLNKFETCH,BRANCH,1b-$    
 8:  .word SWAP,DROP,EXIT
-  
-;libération d'un bloc mémoire
-; 1) sortir le bloc de la liste des alloués.
-; 2) insérer le bloc au début de la liste des libres.  
+ 
+; nom: FREE  ( a-addr -- )  
+;   Libération d'un bloc mémoire dynamique. Le bloc libéré est ajouté à la liste des blocs libres.
 ; arguments:
-;   addr pointeur retourné par MALLOC    
+;   a-addr pointeur sur le bloc à libérer.
+; retourne:
+;   rien  
 DEFWORD "FREE",4,,FREE ; ( addr -- )
     .word DUP,LIT,EDS_BASE+HEAD_SIZE,ULESS,ZBRANCH,2f-$
 1:  .word DUP,UDOT,SPACE,QABORT

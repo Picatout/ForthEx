@@ -133,12 +133,16 @@ void addEntry(char* line, FILE *in, FILE *out){
 	fputs("<hr>\n",out);
 }
 
+static int wc,fc;
+
 void generateDoc(FILE *in, FILE *out){
 	char line[256];
-	
+    
+    fc++;	
 	while (fgets(line,255,in)){
 		if (strstr(line,"; nom:")){
 			addEntry(line,in,out);
+			wc++;
 		}
 	}
 }//generateDoc()
@@ -170,11 +174,14 @@ void parseFiles(){
   d = opendir(path);
   if (d)
   {
+	fc=0;
     while ((dir = readdir(d)) != NULL)
     {
 	  if (strstr(dir->d_name,ext)){
+		wc=0;
 		strcpy(fileName,path);
 		strcat(fileName,dir->d_name);
+		printf("Analysing %s, ",fileName);
 		fi=fopen(fileName,"r");
 		strcpy(fileName,dir->d_name);
 		dot=strstr(fileName,ext);
@@ -183,9 +190,11 @@ void parseFiles(){
         generateDoc(fi,fo);
         closeHtml(fo);
         fclose(fi);
+        printf(" found %d definitions\n",wc);
       }//if...
     }//while...
     closedir(d);
+    printf("%d files analysed\n",fc);
   }//if...		
 
 }//parseFiles()

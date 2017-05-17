@@ -1,6 +1,12 @@
+2017-05-17
+----------
+Documentation dans core.s
+Documentation dans store.s
+
 2017-05-16
 ----------
 Réécriture du mot CFA>NFA
+Documentation.
 
 2017-05-15
 ----------
