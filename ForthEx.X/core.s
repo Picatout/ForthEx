@@ -3129,7 +3129,7 @@ DEFWORD "[']",3,F_IMMED,COMPILETICK ; cccc
 ;   d'un branchement arrière    
 HEADLESS MARKADDR,HWORD    
 ;DEFWORD "<MARK",5,F_IMMED,MARKADDR ; ( -- a )
-   .word QCOMPILE,HERE, EXIT
+   .word HERE, EXIT
 
 ; compile l'adresse d'un branchement arrière
 ; complément de '<MARK'    
@@ -3137,13 +3137,13 @@ HEADLESS MARKADDR,HWORD
 ; actuelle de DP    
 HEADLESS BACKJUMP,HWORD   
 ;DEFWORD "<RESOLVE",8,F_IMMED,BACKJUMP ; ( a -- )    
-    .word QCOMPILE,HERE,MINUS,COMMA, EXIT
+    .word HERE,MINUS,COMMA, EXIT
     
 ;reserve un espace pour la cible d'un branchement avant qui
 ; sera résolu ultérieurement. 
 HEADLESS MARKSLOT,HWORD    
 ;DEFWORD ">MARK",5,F_IMMED,MARKSLOT ; ( -- slot )
-    .word QCOMPILE,HERE,LIT,0,COMMA,EXIT
+    .word HERE,LIT,0,COMMA,EXIT
     
 ; compile l'adresse cible d'un branchement avant
 ; complément de '>MARK'    
@@ -3151,12 +3151,12 @@ HEADLESS MARKSLOT,HWORD
 ; au sommet de la pile
 HEADLESS FOREJUMP,HWORD    
 ;DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
-    .word QCOMPILE,DUP,HERE,SWAP,MINUS,SWAP,STORE,EXIT
+    .word DUP,HERE,SWAP,MINUS,SWAP,STORE,EXIT
     
 ;compile un cfa fourni en literal
 HEADLESS CFA_COMMA,HWORD    
 ;DEFWORD "CFA,",4,F_IMMED,CFA_COMMA  ; ( -- )
-  .word QCOMPILE,RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
+  .word RFROM,DUP,FETCH,COMMA,CELLPLUS,TOR,EXIT
 
 ; nom: [  ( -- )
 ;   Mot immédiat.  
@@ -3272,7 +3272,7 @@ DEFWORD "S\"",2,F_IMMED,SQUOTE ; ccccc" runtime: ( -- | c-addr u)
     .word QCOMPILE
     .word CFA_COMMA,STRQUOTE,STRCOMPILE,EXIT
     
-; nom: c"   ( ccccc --  )  runtime S:  c-addr
+; nom: C"   ( ccccc --  )  runtime S:  c-addr
 ;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
 ;   Lecture d'une chaîne litérale dans le flux d'entrée et compilation de cette
 ;   chaîne dans l'espace de donnée.
@@ -3313,27 +3313,26 @@ DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
 ;  mots contrôlant le flux
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; mom: DO  compilation  ( C: -- a 0 ) compile CFA de (DO)
+; nom: DO  ( n1 n2 -- )
 ;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
-;   Ce mot compile la sémantique runtome d'initialisation d'une boucle avec compteur.
+;   Débute une boucle avec compteur. Le valeur du compteur de boucle est incrémentée
+;   à la fin de la boucle et comparée avec la limite. La boucle se termine lorsque
+;   le compteur atteind ou dépasse la limite. La boucle s'exécute au moins 1 fois.    
 ; arguments:
-;    aucun   En runtime consomme 2 entiers la limite et compteur.
+;    n1   Valeur limite du compteur de boucle.
+;    n2   Valeur initiale du compteur de boucle.
 ; retourne:
 ;    rien    
 DEFWORD "DO",2,F_IMMED,DO 
     .word QCOMPILE,CFA_COMMA,DODO
     .word HERE,TOCSTK,LIT,0,TOCSTK,EXIT
 
-; nom: ?DO runtime ( n1 n2 -- ) compilation ( C: -- a-addr1 0 a-addr2 )
+; nom: ?DO runtime ( n1 n2 -- )
 ;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
-;   Compile la sémantique d'exécution d'une boucle ave compteur conditionnelle.
-;   ?DO est semblabe à DO excepté que la 
-;   boucle n'est exécutée qui si les paramètres initiaux
-;   ne sont pas égaux: start<>limit    
+;   Débute une boucle avec compteur. Cependant contrairement à DO la boucle
+;   Ne sera pas excétée si n2==n1. Le compteur de boucle est incrémenté à la fin
+;   de la boucle et le contrôle de limite est affectué après l'incrémentation.    
 ; arguments:
-;   compilation:    
-;   aucun   
-;   runtime: 
 ;     n1     limite
 ;     n2     valeur initiale du compteur de boucle.
 ; retourne:
@@ -3343,20 +3342,14 @@ DEFWORD "?DO",3,F_IMMED,QDO
     .word HERE,LIT,2*CELL_SIZE,PLUS,TOCSTK,LIT,0,TOCSTK
     .word CFA_COMMA,BRANCH,HERE,TOCSTK,EXIT
     
-; nom: LEAVE  runtime ( -- ) compilation  ( C: -- slot )
+; nom: LEAVE  runtime ( -- )
 ;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.
-;   LEAVE est utilisé à l'intérieur des boucles avec compteur pour intérompre
+;   LEAVE est utilisé à l'intérieur des boucles avec compteur pour interrompre
 ;   prématurément la boucle.    
-; arugments:
-;   compilation:     
+; arguments:
 ;   aucun
-;   runtime:
-;   aucun    
 ; retourne:
-;   compilation:    
-;   c: slot  empile l'information pour FIXLEAVE sur le contrôle stack    
-;   runtime: 
-;   rien   qui la boucle    
+;   rien
 DEFWORD "LEAVE",5,F_IMMED,LEAVE 
     .word QCOMPILE,CFA_COMMA,UNLOOP
     .word CFA_COMMA,BRANCH,MARKSLOT,TOCSTK,EXIT  
@@ -3371,86 +3364,177 @@ HEADLESS FIXLEAVE, HWORD
     .word BRANCH,1b-$
 9:  .word CSTKFROM,BACKJUMP,EXIT    
 
-; nom: LOOP  runtime ( -- ) compilation (C: a-addr 0 a-addr* -- )
+; nom: LOOP  ( -- )
 ;   Mot immédiat à n'utiliser qu'a l'intérieur d'une définition.  
-;   Compile la sémantique qui permet de résoudre les adresses de saut.
-;   En runtime consiste à inrémenter la variable I et à vérifier si elle
-;   a atteint la limite et à terminer l'exécuton de la boucle si c'est le cas.  
+;   Dernière instruction d'une boucle avec compteur.
+;   Le compteur est incrémenté et ensuite comparé à la valeur limite.
+;   En cas d'égalité le boucle est terminée.
 ; arguments:
-;  compilation:  
-;  C: a-addr*  Les adresses laissé par LEAVE sont résolues.
-;  C: 0        indicateur fin de liste utilisé par FIXLEAVE
-;  C: a-addr   adressse du début de la boucle.
-;  runtime:
-;    rien    contrôle I==LIMIT et quitte si vrai.  
+;    rien    
 ; retourne:
 ;   rien  
 DEFWORD "LOOP",4,F_IMMED,LOOP ; ( -- )
     .word QCOMPILE,CFA_COMMA,DOLOOP,FIXLEAVE,EXIT
     
-; nom: +LOOP   compilation (C: a-addr 0 a-addr* -- )    
+; nom: +LOOP   ( n -- )
 ;   Mot immédiat à n'utiliser qu'a l'intérieur d'une définition.  
-;   Compile la sémantique qui permet de résoudre les adresses de saut.
-;   En runtime consiste à inrémenter la variable I de la valeur qui est au
-;   somet de la pile des arguments et à vérifier si elle
-;   a atteint la limite et à terminer l'exécuton de la boucle si c'est le cas.  
+;   Dernière instruction de la boucle. La valeur n est ajoutée au compteur.
+;   Ensuite cette valeur est comparée à la limite et termine la boucle si 
+;   la limite est atteinte ou dépassée.    
 ; arguments:
-;  compilation:    
-;  C: a-addr*  Les adresse laissé par LEAVE sont résolue.
-;  C: 0        indicateur fin de liste utilisé par FIXLEAVE
-;  C: a-addr   adressse du début de la boucle.
-;  runtime:
-;    n        ajoute cette valeur à la variable de contrôle de la boucle. Si I passe LIMIT quitte la boucle.    
+;    n   Ajoute cette valeur à la variable de contrôle de la boucle. Si I passe LIMIT quitte la boucle.    
 ; retourne:
 ;   rien  
 DEFWORD "+LOOP",5,F_IMMED,PLUSLOOP ; ( -- )
     .word QCOMPILE,CFA_COMMA,DOPLOOP,FIXLEAVE,EXIT
 
-    
-; compile le début d'une boucle    
+; nom: BEGIN  ( -- )
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   Débute une boucle qui se termine par AGAIN, REPEAT ou UNTIL 
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "BEGIN",5,F_IMMED,BEGIN ; ( -- a )
     .word QCOMPILE, MARKADDR, EXIT
 
-; compile une boucle infinie    
+; nom: AGAIN   ( -- )
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   Effectue un branchement inconditionnel au début de la boucle.
+;   Une boucle créée avec BEGIN ... AGAIN ne peut-être interrompue que
+;   par ABORT ou ABORT".    
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "AGAIN",5,F_IMMED,AGAIN ; ( a -- )
     .word QCOMPILE,CFA_COMMA,BRANCH,BACKJUMP,EXIT
-    
+
+; nom: UNTIL  compilation ( n -- )
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   Compile la fin d'une boucle conditionnelle. Termine la boucle si n est VRAI.
+; arguments:
+;   n  Valeur qui contrôle la boucle. La boucle est terminée si n<>0.
+; retourne:
+;   rien    
 DEFWORD "UNTIL",5,F_IMMED,UNTIL ; ( a -- )
     .word QCOMPILE,CFA_COMMA,ZBRANCH,BACKJUMP,EXIT
 
-DEFWORD "IF",2,F_IMMED,IIF ; ( -- slot )
-    .word QCOMPILE,CFA_COMMA,ZBRANCH,MARKSLOT,EXIT
-
-DEFWORD "THEN",4,F_IMMED,THEN ; ( slot -- )
-    .word QCOMPILE,FOREJUMP,EXIT
-    
-DEFWORD "ELSE",4,F_IMMED,ELSE ; ( slot1 -- slot2 )     
-    .word QCOMPILE,CFA_COMMA,BRANCH,MARKSLOT,SWAP,THEN,EXIT
-
-; compile un branchement avant    
-DEFWORD "WHILE",5,F_IMMED,WHILE ;  ( a -- slot a)   
-    .word QCOMPILE,CFA_COMMA,ZBRANCH,MARKSLOT,SWAP,EXIT
-    
-; compile un branchement arrière et
-; résout le branchement avant du WHILE    
+; nom: REPEAT  ( -- )    
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   S'Utilise avec une structure de boucle BEGIN ... WHILE ... REPEAT
+;   Comme AGAIN effectue un branchement inconditionnel au début de la boucle.
+;   Cependant au moins un WHILE doit-être présent à l'intérieur de la boucle
+;   car c'est le WHILE qui contrôle la sortie de boucle.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "REPEAT",6,F_IMMED,REPEAT ; ( slot a -- )
     .word QCOMPILE,CFA_COMMA,BRANCH,BACKJUMP,FOREJUMP,EXIT
 
-;marque le début d'une structure CASE ENDCASE
+; nom: WHILE  ( n -- )    
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   Utilisé à l'intérieur d'une boucle BEGIN ... REPEAT, contrôle la sortie
+;   de boucle. Tant que la valeur n au sommet de la pile est VRAI l'exécution
+;   de la boucle se répète au complet lorsque REPEAT est atteint.
+; arguments:
+;   n   Contrôle la sortie de boucle. Si n==0 il y a sortie de boucle.
+; retourne:
+;   rien    
+DEFWORD "WHILE",5,F_IMMED,WHILE ;  ( a -- slot a)   
+    .word QCOMPILE,CFA_COMMA,ZBRANCH,MARKSLOT,SWAP,EXIT
+    
+; nom: IF  ( n -- )
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   Exécution du code qui suit le IF si et seulement is n<>0.
+; arguments:
+;   n   Valeur consommée par IF, si n<>0 les instructions après entre IF et ELSE ou THEN sont exécutées.
+; retourne:
+;   rien    
+DEFWORD "IF",2,F_IMMED,IIF ; ( n --  )
+    .word QCOMPILE,CFA_COMMA,ZBRANCH,MARKSLOT,EXIT
+
+; nom: THEN  ( -- )
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   Termine le bloc d'instruction qui débute après un IF ou un ELSE.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFWORD "THEN",4,F_IMMED,THEN ; ( slot -- )
+    .word QCOMPILE,FOREJUMP,EXIT
+    
+; nom: ELSE  ( -- )
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   Termine le bloc d'instruction qui débute après un IF.
+;   Les instructions entre le ELSE et le THEN qui suit sont excéutée si la valeur n contrôlée
+;   par le IF est FAUSSE.    
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFWORD "ELSE",4,F_IMMED,ELSE ; ( slot1 -- slot2 )     
+    .word QCOMPILE,CFA_COMMA,BRANCH,MARKSLOT,SWAP,THEN,EXIT
+
+; nom: CASE  ( -- )
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   Branchement conditionnel multiple par comparaison de la valeur au sommet  
+;   de la pile des arguments avec d'autres valeurs de test. 
+;   exemple:
+;     : x
+;     CASE 
+;     1  OF ... ENDOF
+;     2  OF ... ENDOF
+;     ... ( instructions par défaut ce bloc est optionnel.)
+;     ENDCASE
+;     3 x     
+;   Dans cette exemple on définit le mot x et ensuite on l'exécute en lui passant la 
+;   valeur 3 en arguments. Chaque valeur qui précède un OF est comparée avec 3 et 
+;   s'il y a égalité le bloc entre OF et ENDOF est exécuté. Seul le premier test
+;   qui répond au critère d'égalité est exécuté. Si tous les test échous et qu'il
+;   y a un bloc d'instruction entre le derner ENDOF et le ENDCASE c'est ce bloc
+;   qui est exécuté.    
 DEFWORD "CASE",4,F_IMMED,CASE ; ( -- case-sys )
     .word QCOMPILE,LIT,0,EXIT ; marque la fin de la liste des fixup
 
-;compile la strucutre d'un OF    
-DEFWORD "OF",2,F_IMMED,OF ; ( -- slot )    
+; nom: OF  ( x1 x2  -- |x1 )
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   S'utilise à l'intérieur d'une structure CASE ... ENDCASE    
+;   Vérifie si x1==x2 En cas d'égalité les 2 valeurs sont consommée et 
+;   le bloc d'instruction qui suis le OF jusqu'au ENDOF est exécuté.    
+;   Si la condition d'égalité n'est pas vérifiée la valeur x1 est conservée
+;   et l'exécution se poursuis après le prochain ENDOF.    
+; arguments:
+;   x1   Valeur de contrôle du case.
+;   x2   Valeur de test du OF ... ENDOF    
+; retourne:
+;   |x1  x1 n'est pas consommé si la condition d'égalité n'est pas rencontrée.      
+DEFWORD "OF",2,F_IMMED,OF ; ( x1 x2 -- |x1 )    
     .word QCOMPILE,CFA_COMMA,OVER,CFA_COMMA,EQUAL,CFA_COMMA,ZBRANCH
     .word MARKSLOT,EXIT
-    
-;compile la structure d'un ENDOF
+ 
+; nom: ENDOF  ( -- )   
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   S'utilise à l'intérieur d'une structure  CASE ... ENDCASE    
+;   Termine un bloc d'instruction introduit par le mot OF
+;   ENDOF branche après le ENDCASE    
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "ENDOF",5,F_IMMED,ENDOF ; ( slot 1 -- slot2 )
     .word QCOMPILE,CFA_COMMA,BRANCH,MARKSLOT,SWAP,FOREJUMP,EXIT
     
-;résoue les sauts de chaque ENDOF
-; et compile un DROP
+; nom: ENDCASE ( x -- )    
+;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+;   S'utilise pour terminer une structure CASE ... ENDCASE.
+;   ENDCASE n'est exécuté que si aucun bloc OF ... ENDOF n'a été exécuté.
+;   Dans ce cas la valeur de contrôle qui est restée sur la pile est jeté.    
+; arguments:
+;   x   Valeur de contrôle qui est restée sur la pile.
+; retourne:
+;   rien    
 DEFWORD "ENDCASE",7,F_IMMED,ENDCASE ; ( case-sys -- )    
     .word QCOMPILE
 1:  .word QDUP,ZBRANCH,8f-$
@@ -3462,6 +3546,16 @@ DEFWORD "ENDCASE",7,F_IMMED,ENDCASE ; ( case-sys -- )
 
 ; certains mots ne peuvent-être utilisés
 ; que par le compilateur
+  
+; nom: ?COMPILE  ( -- )
+;   Mot immédiat.
+;   Vérifie la valeur de la variable système STATE et si cette valeur est 0.
+;   appelle ABORT" avec le message "compile only word". Ce mot débute la définition
+;   de tous les mots qui ne doivent-être utilisés qu'en mode compilation.  
+; arguments:
+;   aucun
+; retourne:
+;   rien  
 DEFWORD "?COMPILE",8,F_IMMED,QCOMPILE ; ( -- )
     .word STATE,FETCH,ZEROEQ,TBRANCH,1f-$,EXIT
 1:  .word CR,HERE,COUNT,TYPE,SPACE
@@ -3471,8 +3565,13 @@ DEFWORD "?COMPILE",8,F_IMMED,QCOMPILE ; ( -- )
     .ascii "compile only word"
     .align 2
     .word EXIT
-
-; Si f==0 affiche message "name missing" et appelle ABORT    
+    
+; nom: ?NAME  ( f -- )    
+;   Si f==0 appelle ABORT" avec le message "name missing" 
+; arguments:
+;    f   Indicateur Booléen, si VRAI ABORT" name missing"
+; retourne:
+;   rien    
 DEFWORD "?NAME",5,,QNAME ; ( i*x f -- | i*x )
     .word QABORT
     .byte 12
@@ -3480,28 +3579,44 @@ DEFWORD "?NAME",5,,QNAME ; ( i*x f -- | i*x )
     .align 2
     .word EXIT
 
-; insère le lien vers le NFA du mot dont
-; CFA est au sommet de S à la fin de la chaîne
-; de liens du dictionnaire.
-; si xt1 n'a pas de nom dans le dictionnaire
-; le résultat est imprévisible.    
-;DEFWORD "LINK",4,F_IMMED,LINK ; ( S: xt1 -- )
-;    ; met le NFA qui est dans LATEST dans le NFA de xt1
-;    .word CFATONFA,DUP,LATEST,FETCH,OVER,NFATOLFA,STORE
-;    ; met le NFA de xt1 dans LATEST
-;    .word LATEST,STORE,EXIT 
-
-; cré une définition sans nom dans le dictionnaire
-; et laisse son CFA (xt) sur la pile S
-; met STATE en mode compilation    
+; nom: :NONAME  ( -- a-addr )
+;   Cré une définition sans nom dans l'espace de donnée.
+;   et laisse son CFA sur la pile des arguments.
+;   Met la variable STATE en mode compilation.
+;   Le CFA de cette définition peut par exemple est assigné
+;   à un mot créé avec DEFER.
+;   exemple:
+;   DEFER  p2 
+;   :noname  DUP * ;
+;   ' p2 DEFER! / maintenant p2 utilise le code de défini par :noname.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  CFA de la nouvelle définition.
 DEFWORD ":NONAME",7,,COLON_NO_NAME ; ( S: -- xt )
     .word HERE,CFA_COMMA,ENTER,RBRACKET,EXIT
-    
-DEFWORD "EXIT,",5,F_IMMED,EXITCOMMA ; ( -- )
-    .word CFA_COMMA,EXIT,EXIT
+ 
+HEADLESS EXITCOMMA,HWORD    
+;DEFWORD "EXIT,",5,F_IMMED,EXITCOMMA ; ( -- )
+    .word  QCOMPILE,CFA_COMMA,EXIT,EXIT
 
-; ajoute un nouveau nom dans le dictionnaire
-; à la sortie HERE retourne l'adresse du CFA    
+; name: HEADER ( cccc -- )    
+;   Cré une nouvelle entête dans le dictionnaire avec le nom qui suis dans le flux d'entrée.
+;   Après l'exécution de ce mot HERE retourne l'adresse du CFA de ce mot.
+;   Lorsque ce mot est exécuté il empile l'adresse du PFA. Sa sémantique d'exécution
+;   peut-être augmenté avec le mot DOES>. 
+;   exemple:
+;       / le mot VECTOR sert à créer des tableaux de n éléments.    
+;	: VECTOR  ( n  -- )
+;           CREATE CELLS ALLOT DOES> CELLS PLUS ;     
+;       / utilisation du mot VECTOR pour créer le tableau V1 de 5 éléments.
+;       5 VECTOR V1
+;       / Met la valeur 35 dans l'élément d'indice 2 de V1
+;       35 2 V1 !    
+; arguments:
+;    cccc  Chaîne de caractère dans le flux d'entrée qui représente ne nom du mot créé.
+; retourne:
+;   rien    
 DEFWORD "HEADER",6,,HEADER ; ( -- )
     .word LATEST,DUP,FETCH,COMMA,HERE
     .word SWAP,STORE
