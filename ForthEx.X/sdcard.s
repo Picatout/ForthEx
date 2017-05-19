@@ -168,10 +168,13 @@ wait_response:
     bra 3b
     
     
-;;;;;;;;;;;;;;;;;;;;;;;;;    
-;initialisation carte SD 
-;ref: http://elm-chan.org/docs/mmc/pic/sdinit.png    
-;;;;;;;;;;;;;;;;;;;;;;;;;    
+; nom: SDCINIT ( -- f )
+;   Initialisation carte SD 
+;   REF: http://elm-chan.org/docs/mmc/pic/sdinit.png    
+; arguments:
+;   aucun
+; retourne:
+;    f   Indicateur Booléen de succès.    
 DEFCODE "SDCINIT",7,,SDCINIT ; ( -- f )
     clr sdc_status
     btsc SDC_PORT,#SDC_DETECT
@@ -271,22 +274,41 @@ succeed:
     call set_spi_clock
     NEXT
  
-; retourne sdc_status    
+; nom: ?SDC  ( -- u )    
+;   Retourne retourne un entier non signé contenant les indicateurs booléen suivants
+;   - F_SDC_IN  bit 0, à 1 s'il y a une carte dans la fente.
+;   - F_SDC_OK  bit 1, à 1 si une carte est insérée et initialisée.
+;   - F_SDC_V2  bit 2, à 1 s'il s'agit de carte version 2.
+;   - F_SDC_HC  bit 3, à 1 s'il s'agit d'une carte haute capacitée.
+;   - F_SDC_TO  bit 4, à 1 si la dernière commande a expirée avant d'aboutir.
+;   - F_SDC_WE  bit 5, à 1 s'il s'est produit une erreur d'écriture.
+;   - F_SDC_RE  bit 6, à 1 s'il s'est produit une erreur de lecture.
+;   - F_SDC_IE  bit 7, à 1 s'il s'est prdouit une erreur d'initialisation.
+;   - F_BAD_CARD bit 8, à 1 s'il n'y a pas de réponse de la carte.
+;   - F_BLK_ADDR bit 9, à 1 s'il s'agit d'une carte adressable par bloc.
+; arguments:
+;   aucun
+; retourne:
+;   u  État de la carte.    
 DEFCODE "?SDC",4,,QSDC ; ( -- u )
     DPUSH
     mov sdc_status,T
     NEXT
 
-; la carte SD est-elle prête?    
+; nom: ?SDCOK  ( -- f )    
+;   Retourne un indicateur Booléen indiquant si la carte SD est prête.
+; argments:
+;   aucun
+; retourne:
+;   f   Indicateur Booléen.    
 DEFWORD "?SDCOK",6,,QSDCOK ; ( -- f )
     .word QSDC,LIT,1,LIT,F_SDC_OK,LSHIFT,AND,EXIT
     
-    
-; lecture d'un secteur de la carte
-; bloc de 512 octets    
+; nom: SDCREAD  ( c-addr ud -- f )    
+;   Lecture d'un secteur de la carte SD, bloc de 512 octets    
 ;  arguments:
 ;   addr   adresse du tampon RAM
-;   ud   numéro du secteur à lire 
+;   ud     numéro du secteur carte SD à lire. 
 ;  retourne:
 ;   f  indicateur booléen échec/succcès    
 DEFCODE "SDCREAD",7,,SDCREAD ; ( addr ud -- f )
@@ -318,11 +340,13 @@ read_failed:
     call sdc_deselect
     NEXT
     
-    
-; écriture d'un secteur de la carte
+; nom: SDCWRITE   ( addr ud -- )   
+;   Écriture d'un secteur de 512 octest sur la carte SD.
 ; arguments:
-;   addr   adresse RAM
-;   ud  numéro du secteur carte SD    
+;   addr   adresse RAM des données à écrire.
+;   ud	   numéro du secteur la carte SD où doit se faire l'écriture.
+; retourne:
+;   rien    
 DEFCODE "SDCWRITE",8,,SDCWRITE ; ( addr ud -- )
     SET_EDS
     _enable_sdc
@@ -361,22 +385,22 @@ write_failed:
     RESET_EDS
     NEXT
 
-; ajuste le compteur et le pointeur pour
-; le secteur suivant
+; nom: NSECTOR ( u1 u2 -- u3 u4 )    
+;   Ajuste le compteur et le pointeur pour le secteur suivant.
 ; arguments:
 ;    u1  adresse RAM
 ;    u2  nombre d'octets à lire ou écrire
 ; sortie:
 ;    u3  adresse RAM incrémentée de BLOCK_SIZE
-;    u4  nombre d'octets décrémentés de BLOCK_SIZE
-;        MAX(0,u4') 
-;    ajuste le no. de secteur qui est sur R: IP ud    
+;    u4  nombre d'octets décrémentés de BLOCK_SIZE, MAX(0,u4') 
+;    R:ud  ajuste le no. de secteur qui est sur la pile des retours.
 DEFWORD "NSECTOR",7,,NSECTOR ; ( u1 u2 -- u3 u4 )
     .word LIT,BLOCK_SIZE,MINUS,LIT,0,MAX ; u1 u4
     .word SWAP,LIT,BLOCK_SIZE,PLUS,SWAP  ; u3 u4
     .word RFROM,TWORFROM,LIT,1,MPLUS ; u3 u4 IP ud1+1
     .word TWOTOR,TOR ; u3 u4 R: ud1+1 IP
     .word EXIT
+    
     
 ; sauvegarde image système sur la carte SD
 ; arugments:
@@ -419,7 +443,7 @@ DEFWORD "SDC>IMG",7,,SDCTOIMG ; ( u1 u2 ud1 -- )
 ; nom: SDFIRST ; ( -- u )
 ;    variable contenant l'adresse du premeir bloc utilisé sur la carte SD
 ; arguments:
-;
+;   aucun
 ; retourne:
 ;    u    pointeur de la variable
 DEFCODE "SDFIRST",7,,SDFIRST
@@ -427,7 +451,12 @@ DEFCODE "SDFIRST",7,,SDFIRST
     mov #sdc_first,T
     NEXT
     
-; constantes nombre maximal de blocs utilisés sur la carte SD
+; nom: SDBLKCOUNT  ( -- u )    
+;   Constante, nombre maximal de blocs utilisés sur la carte SD
+; arguments:
+;   aucun
+; retourne:
+;   u   nombre de blocs disponibles.    
 DEFCONST "SDBLKCOUNT",10,,SDBLKCOUNT,65535
 
 ; nom: SDBOUND  ( n+ -- f)

@@ -1,3 +1,8 @@
+2017-05-19
+----------
+Travail dans strings.s
+Travail dans sdcard.s
+
 2017-05-18
 ----------
 Documentation dans keyboard.s

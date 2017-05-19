@@ -180,14 +180,6 @@ code_EXIT :		;code
     RPOP IP
     NEXT
 
-; nom: NOP ( -- )
-;   mot vide, ne fait rien.
-; arguments:
-;   aucun
-; retourne:
-;   rien    
-DEFWORD "NOP",3,,NOP 
-    .word EXIT
 
 ; nom: CALL  ( i*x ud -- j*x )
 ;    Appel d'une routine écrite en code machine et résident en mémoire flash.
@@ -2914,6 +2906,10 @@ FETCH_EXEC: ; ( -- pfa )
      mov [WP++],W0
      goto W0
 
+;   mot vide, ne fait rien.
+HEADLESS NOP,HWORD 
+    .word EXIT
+     
 ; nom: CREATE  ( cccc -- )     
 ;   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans le dictionnaire
 ;   Lorsque ce nouveau mot est exécuté il retourne l'adresse PFA. Cependant la sémantique

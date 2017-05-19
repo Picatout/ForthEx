@@ -10,7 +10,7 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse du début de la châine.    
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse du début de la chaîne.    
 </div>
 <div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; longueur initiale de la chaîne.
 </div>
@@ -26,9 +26,9 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse initiale
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse du premier caractère de la chaîne.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        longueur de la zone
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        longueur de la chaîne.
 </div>
 <div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;        nombre de caractères à avancer.
 </div>
@@ -43,7 +43,7 @@
 <b>CMOVE</b>  ( c-addr1 c-addr2 u -- )    
 <div style="margin-left:5%;">   Copie un bloc d'octets RAM.  
 </div>
-<div style="margin-left:5%;">   Débute la opie à l'adresse la plus basse.
+<div style="margin-left:5%;">   Débute la copie à partir de l'adresse du début du bloc en adresse croissante.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -63,7 +63,7 @@
 <b>CMOVE&gt;</b>  ( c-addr1 c-addr2 u -- )    
 <div style="margin-left:5%;">   Copie un bloc d'octets RAM  
 </div>
-<div style="margin-left:5%;">   La copie débute à l'adresse la plus haute.    
+<div style="margin-left:5%;">   La copie débute à la fin du bloc en adresses décroissantes.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -81,34 +81,36 @@
 <hr>
 <p id="EC@+">
 <b>EC@+</b>   ( c-addr -- c-addr' c )   
-<div style="margin-left:5%;">   Retourne le caractère à l'adresse et avance l'adresse d'un caractère
+<div style="margin-left:5%;">   Retourne le caractère à l'adresse pointée par c-addr et avance le pointeur au caractère suivant.
 </div>
-<div style="margin-left:5%;">   à utiliser si addr pointe vers mémoire EDS    
+<div style="margin-left:5%;">   À utiliser si c-addr pointe vers la mémoire RAM et EDS.    
 </div>
 </p>
 <div style="margin-left:5%;"><b>  arguments:
 </b></div>
-<div style="margin-left:5%;"><i>	c-addr</i>&nbsp;&nbsp;  adresse où se trouve le caractère recherché.
+<div style="margin-left:5%;"><i>	c-addr</i>&nbsp;&nbsp;  Pointeur sur la chaîne de caractères.
 </div>
 <div style="margin-left:5%;"><b>  retourne:
 </b></div>
-<div style="margin-left:5%;"><i>addr+1</i>&nbsp;&nbsp;   adresse avancée d'un caractère
+<div style="margin-left:5%;"><i>addr+1</i>&nbsp;&nbsp;   Pointeur avancée d'un caractère
 </div>
 <div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;        caractère obtenu    
 </div>
 <hr>
 <p id="C@+">
 <b>C@+</b>   ( c-addr -- c-addr' c )    
-<div style="margin-left:5%;">   Retourne le caractère à l'adresse c-addr et avance le pointeur au caractère suivant.
+<div style="margin-left:5%;">   Retourne le caractère à l'adresse pointée par c-addr et avance le pointeur au caractère suivant.
+</div>
+<div style="margin-left:5%;">   À utiliser si c-addr pointe la mémoire ou FLASH.
 </div>
 </p>
 <div style="margin-left:5%;"><b>  arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  pointeur sur le caractère.
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  pointeur sur la chaîne de caractères.
 </div>
 <div style="margin-left:5%;"><b>  retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;   adresse avancée d'un caractère
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;   Pointeur avancée d'un caractère
 </div>
 <div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;       caractère obtenu    
 </div>
@@ -129,18 +131,22 @@
 <div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
 </div>
 <hr>
-<p id="STR=">
-<b>STR=</b>    ( c-addr1 c-addr2 -- f )    
-<div style="margin-left:5%;">   Comparaison de 2 chaînes comptée. Retourne VRAI si égales sinon FAUX.
+<p id="S=">
+<b>S=</b>    ( c-addr1 u1 c-addr2 u2 -- f )    
+<div style="margin-left:5%;">   Comparaison de 2 chaînes. Retourne VRAI si égales sinon FAUX.
 </div>
 <div style="margin-left:5%;">   Les 2 chaînes doivent-être en mémoire RAM.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;   descripteur chaîne 1
+<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne 1
 </div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;   descriptieur chaîne 2
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;        longueur de la chaîne 1    
+</div>
+<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne 2
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;        longueur de la chaîne 2    
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -149,7 +155,7 @@
 <hr>
 <p id="BLANK">
 <b>BLANK</b>  ( c-addr u -- )
-<div style="margin-left:5%;">   Si u est plus grand que zéro met 7 caractères espace (BL) à partir de l'adresse c-addr
+<div style="margin-left:5%;">   Si u est plus grand que zéro met u caractères espace (BL) à partir de l'adresse c-addr
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -194,6 +200,62 @@
 </div>
 <div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;       longueur de la chaîne 2.
 </div>
+<hr>
+<p id="SEARCH">
+<b>SEARCH</b>  ( c-addr1 u1 c-addr2 u2 -- c-addr3 u3 f )
+<div style="margin-left:5%;">   Recherche la chaîne 2 dans la chaîne 1. Si f est vrai c'est que la chaîne 2
+</div>
+<div style="margin-left:5%;">   est sous-chaîne de la chaîne 1, alors c-addr3 u3 indique la position et le 
+</div>
+<div style="margin-left:5%;">   nombre de caractères restants. En cas d'échec c-addr3==c-addr1 et u3==u1.
+</div>
+<div style="margin-left:5%;">   exemple:
+</div>
+<div style="margin-left:5%;">     : s1 s" A la claire fontaine."
+</div>
+<div style="margin-left:5%;">     : s2 s" claire"
+</div>
+<div style="margin-left:5%;">     s1 s2 SEARCH   /  c-addr3=c-addr1+5 u3=16  f=VRAI  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;  Adresse du premier carcactère de la chaîne cible.
+</div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;       Longueur de la chaîne cible.
+</div>
+<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse du premier caractère de la sous-chaîne recherchée.
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;       Longueur de la sous-chaîne recherchée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr3</i>&nbsp;&nbsp;  si f est VRAI  Adresse du premier caractère de la sous-chaîne, sinon = c-addr1
+</div>
+<div style="margin-left:5%;"><i>u3</i>&nbsp;&nbsp;       si f est VRAI nombre de caractère restant dans la chaîne à partir de c-addr3
+</div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;        Indicateur Booléen succès/échec.  
+</div>
+<hr>
+<p id="SLITERAL">
+<b>SLITERAL</b> ( c-addr u -- )
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Compile une chaîne litérale dont le descripteur est sur la pile des arguments.
+</div>
+<div style="margin-left:5%;">   A l'exécution le descripteur est empilée.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse du premier caractère de la chaîne.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
 <hr>
 
 </body>

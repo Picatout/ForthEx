@@ -24,7 +24,7 @@
 ; nom: -TRAILING  ( c-addr u1 -- c-addr u2 )    
 ;   Remplace tous les caractères <=32 à la fin d'une chaîne par des zéro.
 ; arguments:
-;   c-addr  adresse du début de la châine.    
+;   c-addr  adresse du début de la chaîne.    
 ;   u1 longueur initiale de la chaîne.
 ; retourne:    
 ;   u2 longueur finale de la chaîne.    
@@ -47,8 +47,8 @@ DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )
 ; nom: /STRING  ( c-addr u n -- c-addr' u' )   
 ;   Avance c-addr de n caractères et réduit u d'autant.
 ; arguments:
-;   c-addr   adresse initiale
-;   u        longueur de la zone
+;   c-addr   adresse du premier caractère de la chaîne.
+;   u        longueur de la chaîne.
 ;   n        nombre de caractères à avancer.
 ; retourne:
 ;   c-addr'    c-addr+n
@@ -59,7 +59,7 @@ DEFWORD "/STRING",7,,SLASHSTRING
     
 ; nom: CMOVE  ( c-addr1 c-addr2 u -- )    
 ;   Copie un bloc d'octets RAM.  
-;   Débute la opie à l'adresse la plus basse.
+;   Débute la copie à partir de l'adresse du début du bloc en adresse croissante.
 ; arguments:
 ;   c-addr1  source
 ;   c-addr2  destination
@@ -84,7 +84,7 @@ move_up:
 
 ; nom: CMOVE>  ( c-addr1 c-addr2 u -- )    
 ;   Copie un bloc d'octets RAM  
-;   La copie débute à l'adresse la plus haute.    
+;   La copie débute à la fin du bloc en adresses décroissantes.    
 ; arguments:
 ;   c-addr1  source
 ;   c-addr2  destination
@@ -111,22 +111,23 @@ move_dn:
     
     
 ; nom: EC@+   ( c-addr -- c-addr' c )   
-;   Retourne le caractère à l'adresse et avance l'adresse d'un caractère
-;   à utiliser si addr pointe vers mémoire EDS    
+;   Retourne le caractère à l'adresse pointée par c-addr et avance le pointeur au caractère suivant.
+;   À utiliser si c-addr pointe vers la mémoire RAM et EDS.    
 ;  arguments:
-;	c-addr  adresse où se trouve le caractère recherché.
+;	c-addr  Pointeur sur la chaîne de caractères.
 ;  retourne:
-;     addr+1   adresse avancée d'un caractère
+;     addr+1   Pointeur avancée d'un caractère
 ;     c        caractère obtenu    
 DEFWORD "EC@+",5,,ECFETCHPLUS
     .word DUP,ECFETCH,TOR,CHARPLUS,RFROM,EXIT
     
 ; nom: C@+   ( c-addr -- c-addr' c )    
-;   Retourne le caractère à l'adresse c-addr et avance le pointeur au caractère suivant.
+;   Retourne le caractère à l'adresse pointée par c-addr et avance le pointeur au caractère suivant.
+;   À utiliser si c-addr pointe la mémoire ou FLASH.
 ;  arguments:
-;   c-addr  pointeur sur le caractère.
+;   c-addr  pointeur sur la chaîne de caractères.
 ;  retourne:
-;   c-addr'   adresse avancée d'un caractère
+;   c-addr'   Pointeur avancée d'un caractère
 ;     c       caractère obtenu    
 DEFWORD "C@+",4,,CFETCHPLUS
     .word DUP,CFETCH,TOR,CHARPLUS,RFROM,EXIT
@@ -140,34 +141,35 @@ DEFWORD "C@+",4,,CFETCHPLUS
 ;   rien    
 DEFWORD "CSTR>RAM",8,,CSTRTORAM 
     .word TOR, DUP,CFETCH,ONEPLUS,RFROM,NROT ; s: c-addr2 c-addr1 n
-    .word LIT,0,DODO ; s: addr2 addr1
+    .word FALSE,DODO ; s: addr2 addr1
 2:  .word CFETCHPLUS,SWAP,TOR,OVER,CSTORE,CHARPLUS,RFROM
     .word DOLOOP,2b-$
     .word TWODROP,EXIT
     
-; nom: STR=    ( c-addr1 c-addr2 -- f )    
-;   Comparaison de 2 chaînes comptée. Retourne VRAI si égales sinon FAUX.
+; nom: S=    ( c-addr1 u1 c-addr2 u2 -- f )    
+;   Comparaison de 2 chaînes. Retourne VRAI si égales sinon FAUX.
 ;   Les 2 chaînes doivent-être en mémoire RAM.
 ; arguments:
-;   c-addr1   descripteur chaîne 1
-;   c-addr2   descriptieur chaîne 2
+;   c-addr1   Adresse du premier caractère de la chaîne 1
+;   u1        longueur de la chaîne 1    
+;   c-addr2   Adresse du premier caractère de la chaîne 2
+;   u2        longueur de la chaîne 2    
 ; retourne:
 ;   f	  Indicateur Booléen d'égalité.    
-DEFWORD "STR=",4,,STREQUAL ; ( addr1 addr2 -- f )
-    .word TOR,ECFETCH,RFROM,ECFETCH
+DEFWORD "S=",2,,SEQUAL ; ( c-addr1 u1 c-addr2 u2 -- f )
     .word ROT,OVER,EQUAL,ZBRANCH,6f-$
-    .word LIT,0,DODO
+    .word FALSE,DODO
 2:  .word TOR,ECFETCHPLUS,RFROM,ECFETCHPLUS
     .word ROT,EQUAL,ZBRANCH,4f-$
     .word DOLOOP,2b-$ 
-    .word TWODROP,LIT,-1,EXIT
+    .word TWODROP,TRUE,EXIT
 4:  .word UNLOOP,BRANCH,8f-$
 6:  .word DROP
-8:  .word TWODROP,LIT,0    
+8:  .word TWODROP,FALSE  
 9:  .word EXIT
 
 ; nom: BLANK  ( c-addr u -- )
-;   Si u est plus grand que zéro met 7 caractères espace (BL) à partir de l'adresse c-addr
+;   Si u est plus grand que zéro met u caractères espace (BL) à partir de l'adresse c-addr
 ; arguments:
 ;   c-addr  Adresse début RAM
 ;   u       nombre d'espaces à déposer dans cette région.
@@ -201,14 +203,14 @@ DEFCODE "BLANK",5,,BLANK
 ;   c-addr2  Adresse du premier caractère de la chaîne 2.
 ;   u2       longueur de la chaîne 2.
 DEFWORD "COMPARE",7,,COMPARE
-    .word ROT,TWODUP,TWOTOR,UMIN,LIT,0,DODO ; s: c-addr1 c-addr2 r: u2 u1
+    .word ROT,TWODUP,TWOTOR,UMIN,FALSE,DODO ; s: c-addr1 c-addr2 r: u2 u1
 1:  .word TOR,ECFETCHPLUS,RFROM,ECFETCHPLUS,ROT,TWODUP,EQUAL,ZBRANCH,8f-$
     .word TWODROP,DOLOOP,1b-$
     .word TWODROP,TWORFROM ; S: u2 u1
-    .word TWODUP,EQUAL,ZBRANCH,2f-$,TWODROP,LIT,0,EXIT
+    .word TWODUP,EQUAL,ZBRANCH,2f-$,TWODROP,FALSE,EXIT
 2:  .word UGREATER,ZBRANCH,4f-$,TRUE,EXIT
 4:  .word LIT,1,EXIT
-8:  .word RDROP,RDROP,TWOSWAP,TWODROP,ULESS,ZBRANCH,9f-$,LIT,-1,EXIT
+8:  .word RDROP,RDROP,TWOSWAP,TWODROP,ULESS,ZBRANCH,9f-$,TRUE,EXIT
 9:  .word LIT,1,EXIT
   
 
@@ -216,14 +218,34 @@ DEFWORD "COMPARE",7,,COMPARE
 ;   Recherche la chaîne 2 dans la chaîne 1. Si f est vrai c'est que la chaîne 2
 ;   est sous-chaîne de la chaîne 1, alors c-addr3 u3 indique la position et le 
 ;   nombre de caractères restants. En cas d'échec c-addr3==c-addr1 et u3==u1.
+;   exemple:
+;     : s1 s" A la claire fontaine."
+;     : s2 s" claire"
+;     s1 s2 SEARCH   /  c-addr3=c-addr1+5 u3=16  f=VRAI  
 ; arguments:
 ;   c-addr1  Adresse du premier carcactère de la chaîne cible.
 ;   u1       Longueur de la chaîne cible.
 ;   c-addr2  Adresse du premier caractère de la sous-chaîne recherchée.
 ;   u2       Longueur de la sous-chaîne recherchée.
-DEFWORD "SEARCH",6,,SEARCH 
-    .word TWODROP,LIT,0,EXIT
+; retourne:
+;   c-addr3  si f est VRAI  Adresse du premier caractère de la sous-chaîne, sinon = c-addr1
+;   u3       si f est VRAI nombre de caractère restant dans la chaîne à partir de c-addr3
+;   f        Indicateur Booléen succès/échec.  
+DEFWORD "SEARCH",6,,SEARCH ; ( c-addr1 u1 c-addr2 u2 -- c-addr3 u3 f )
+    ; si s2 plus long que s1 retourne faux.
+    .word TWOTOR,TWODUP,TWORFROM ; s: c-addr1 u1 c-addr3 u1 c-addr2 u2
+    .word ROT,OVER,MINUS,DUP,ZEROLT,ZBRANCH,2f-$
+    ; s1 trop court pour contenir s2
+    .word TWODROP,TWODROP,FALSE,EXIT ; s: c-addr1 u1 0
+2:  .word ONEPLUS,FALSE,DODO ; s: c-addr1 u1 c-addr3 c-addr2 u2
+4:  .word TWOTOR,DUP,RFETCH,TWORFETCH,SEQUAL ; s: c-addr1 u1 c-addr3 f r: c-addr2 u2 
+    .word ZBRANCH,6f-$
+    ; sous-chaîne trouvée. s: c-addr1 u1 c-addr3 r: c-addr2 u2
+    .word RDROP,RDROP,UNLOOP,DUP,TOR,ROT,MINUS,MINUS,RFROM,SWAP,TRUE,EXIT ; c-addr3 u3 -1
+6:  .word CHARPLUS,TWORFROM,DOLOOP,4b-$,TWODROP,DROP,FALSE  ; s: c-addr1 u1 0  
+    .word EXIT
 
+    
 ; nom: SLITERAL ( c-addr u -- )
 ;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
 ;   Compile une chaîne litérale dont le descripteur est sur la pile des arguments.
