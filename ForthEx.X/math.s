@@ -1,0 +1,721 @@
+;****************************************************************************
+; Copyright 2015,2016,2017 Jacques Deschênes
+; This file is part of ForthEx.
+;
+;     ForthEx is free software: you can redistribute it and/or modify
+;     it under the terms of the GNU General Public License as published by
+;     the Free Software Foundation, either version 3 of the License, or
+;     (at your option) any later version.
+;
+;     ForthEx is distributed in the hope that it will be useful,
+;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;     GNU General Public License for more details.
+;
+;     You should have received a copy of the GNU General Public License
+;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
+;
+;****************************************************************************
+; NOM: math.s
+; DATE: 2017-05-18
+; DESCRIPTION:  Retiré les opérations arithmétiques de core.s pour les transférer ici.
+    
+
+; nom:  MSB  ( -- u )
+;   Constante retournant la valeur du bit le plus significatif d'un entier.
+; arguments:
+;   aucun
+; retourne:
+;   u   Valeur de l'entier dont seul le bit le plus significatif est à 1.    
+DEFCONST "MSB",3,,MSB,0x8000
+
+; nom: MAX-INT  ( -- n )
+;   Constante retourant la valeur du plus grand entier signé.
+; arguments:
+;   aucun
+; retourne:
+;   n    Valeur du plus grand entier signé.
+DEFCONST "MAX-INT",7,,MAXINT,0x7FFF ; 32767
+ 
+; nom: MIN-INT  ( -- n )
+;   Constante retournant le plus petit entier signé.
+; arguments:
+;   aucun
+; retourne:
+;   n   Plus petit entier signé.    
+DEFCONST "MIN-INT",7,,MININT,0x8000 ; -32768
+
+; nom: HEX  ( -- )
+;   Initialise la variable système BASE avec la valeur 16. Après l'exécution
+;   de ce mot, l'interpréteur condisère que les chaînes converties en nombre
+;   sont en base 16 et les nombres à imprimés sont aussi convertis dans cette base.
+; arguments:
+;   Aucun
+; retourne:
+;   rien    
+DEFWORD "HEX",3,,HEX ; ( -- )
+    .word LIT,16,BASE,STORE,EXIT
+    
+; nom: DECIMAL ( -- )
+;   Initialise la variable système BASE avec la valeur 10. Après l'exécution
+;   de ce mot, l'interpréteur condisère que les chaînes converties en nombre
+;   sont en base 10 et les nombres à imprimés sont aussi convertis dans cette base.
+; arguments:
+;   Aucun
+; retourne:
+;   rien    
+DEFWORD "DECIMAL",7,,DECIMAL ; ( -- )
+    .word LIT,10,BASE,STORE,EXIT
+    
+; nom: +  ( x1 x1 -- x3 )  x3=x1+x2
+;   Additionne les 2 entiers au sommet de la pile des arguments.
+; arguments:
+;   x1  premier entier.
+;   x2  deuxième entier.
+; retourne:
+;   x3   somme de x1 et x2  
+DEFCODE "+",1,,PLUS
+    add T, [DSP--], T
+    NEXT
+ 
+; nom: -  ( x1 x2 -- x3 )  x3 = x1-x2
+;   Soustrait l'entier x2 de l'entier x1.
+; arguments;
+;   x1    premier entier.
+;   x2    deuxième entier au sommet de la pile.
+; retourne:
+;   x3    valeur obtenu en soustrayant x2 de x1.    
+DEFCODE "-",1,,MINUS 
+    mov [DSP--],W0
+    sub W0,T,T
+    NEXT
+    
+; nom: 1+  ( x1 -- x2 )  x2=x1+1
+;   Incrémente de 1 la valeur au sommet de la pile.
+; arguments:
+;   x1   Valeur au sommet de la pile des arguments.
+; retourne:
+;   x2   x1 incrémenté de 1.
+DEFCODE "1+",2,,ONEPLUS ; ( n -- n+1 )
+    add #1, T
+    NEXT
+
+    
+; nom: 2+  ( x1 -- x2 )  x2=x1+2
+;   Incrémente de 2 la valeur au sommet de la pile.
+; arguments:
+;   x1   Valeur au sommet de la pile des arguments.
+; retourne:
+;   x2   x1 incrémenté de 2.
+DEFCODE "2+",2,,TWOPLUS
+    add #2, T
+    NEXT
+    
+; nom: 1-  ( x1 -- x2 )  x2=x1-1
+;   décrémente de 1 la valeur au sommet de la pile.
+; arguments:
+;   x1   Valeur au sommet de la pile des arguments.
+; retourne:
+;   x2   x1 décrémenté de 1.
+DEFCODE "1-",2,,ONEMINUS
+    sub #1, T
+    NEXT
+    
+; nom: 2-  ( x1 -- x2 )  x2=x1-2
+;   décrémente de 1 la valeur au sommet de la pile.
+; arguments:
+;   x1   Valeur au sommet de la pile des arguments.
+; retourne:
+;   x2   x1 décrémenté de 2.
+DEFCODE "2-",2,,TWOMINUS
+    sub #2, T
+    NEXT
+    
+; nom: 2*  ( x1 -- x2 )   x2 = 2*x1
+;   Multiplie par 2 la valeur au sommet de la pile des arguments.
+; arguments:
+;   x1
+; retourne:
+;   x2    x1 multiplié par 2.    
+DEFCODE "2*",2,,TWOSTAR
+    add T,T, T
+    NEXT
+    
+; nom: 2/  ( x1 -- x2 ) x2=x1/2
+;   Divise par 2 la valeur au sommet de la pile des arguments.
+; arguments:
+;   x1
+; retourne:
+;   x2     x2 divisé par 2.    
+DEFCODE "2/",2,,TWOSLASH
+    asr T,T
+    NEXT
+    
+; nom: LSHIFT  ( x1 u -- x2 )  x2=x1<<u
+;   Décale vers la gauche de u bits le nombre x1. Ce qui équivaut à 
+;   une multipliation par 2^u.    
+; arguments:
+;   x1   Nombre qui sera décalé vers la gauche.
+;   u    Nombre de bits de décalage.
+; retourne:
+;   x2   x2=x1<<u    
+DEFCODE "LSHIFT",6,,LSHIFT
+    mov T, W0
+    DPOP
+    cp0 W0
+    bra z,9f
+    mov #16,W1
+    cp W0,W1
+    bra leu, 1f
+    mov W1,W0
+1:  dec W0,W0
+    repeat W0
+    sl T,T
+9:  NEXT
+    
+; nom: RSHIFT ( x1 u -- x2 ) x2 = x1>>u
+;   décalage vers la droite de u bits de la valeur x1.
+; arguments:
+;   x1   Nombre qui sera décalé.
+;   u    Nombre de bits de décalage.
+; retourne:
+;    x2   x2=x1>>u    
+DEFCODE "RSHIFT",6,,RSHIFT ; ( x1 u -- x2 ) x2=x1>>u
+    mov T,W0
+    DPOP
+    cp0 W0
+    bra z, 9f
+    mov #16,W1
+    cp W0,W1
+    bra leu, 1f
+    mov W1,W0    
+1:  dec W0,W0
+    repeat W0
+    lsr T,T
+9:  NEXT
+    
+; nom: +!  ( n a-addr -- )  *a-addr = *a-addr+n
+;   Additionne un entier à la valeur d'une variable.
+; arguments;
+;    n   entier à ajouter à la valeur de la variable.
+;    a-addr   adresse de la variable.
+; retourne:
+;    rien    
+DEFCODE "+!",2,,PLUSSTORE
+    mov [T], W0
+    add W0, [DSP--],W0
+    mov W0, [T]
+    DPOP
+    NEXT
+
+; nom: D+  ( d1 d2 -- d3 )   d3=d1+d2    
+;   addition de 2 entiers double.
+; arguments:
+;   d1  premier entier double.
+;   d2  deuxième enteier double.
+; retourne:
+;   d3  somme de d1 et d2    
+DEFCODE "D+",2,,DPLUS ; ( d1 d2 -- d3 )
+    mov T,W1
+    DPOP
+    mov T,W0
+    DPOP
+    add W0,[DSP],[DSP]
+    addc W1,T,T
+    NEXT
+ 
+; nom: D-  ( d1 d2 -- d3 )  d3 = d1-d2    
+;   soustractions de 2 entiers doubles.
+; arguments:
+;   d1  premier entier double.
+;   d2  deuxième entier double.
+; retourne:
+;   d3  Entier double résultant de la soustration d1-d2.    
+DEFCODE "D-",2,,DMINUS ; ( d1 d2 -- d3 )
+    mov T,W1
+    DPOP
+    mov T,W0
+    DPOP
+    mov [DSP],W2
+    sub W2,W0,[DSP]
+    subb T,W1,T
+    NEXT
+    
+; nom: M+  ( d1 n -- d2 ) d2 = d1+n
+;   addition d'un entier simple à un entier double.
+; arguments:
+;   d1  Entier double.
+;   n   Entier simple.
+; retourne:
+;   d2  Entier double résultant de d1+n    
+DEFCODE "M+",2,,MPLUS
+    mov [DSP-2], W0 ; d1 faible
+    add W0,T, W0 ; d2 faible
+    DPOP    ; T= d1 fort
+    addc #0, T
+    mov W0,[DSP]
+    NEXT
+ 
+; nom: *  ( n1 n2 -- n3 )  n3=n1*n2
+;   Multiplication signée de 2 entiers simple.
+; arguments:
+;   n1   premier entier.
+;   n2   deuxième entier.
+; retourne:
+;   n3   Produit des 2 entiers.    
+DEFCODE "*",1,,STAR ; ( n1 n2 -- n1*n2) 
+    mul.ss T,[DSP--],W0
+    mov W0,T
+    NEXT
+
+; nom: M*   ( n1 n2 -- d )  d=n1*n2    
+;   Produit de 2 entiers simples, conserve l'entier double.
+; arguments:
+;   n1  Premier entier simple.
+;   n2  Deuxième entier simple.
+; retourne:
+;   d  Entier double résultant du produit de n1*n2.    
+DEFCODE "M*",2,,MSTAR ; ( n1 n2 -- d )
+    mul.ss T,[DSP],W0
+    mov W0,[DSP]
+    mov W1,T
+    NEXT
+
+; nom: UM*  ( u1 u2 -- ud )   ud=u1*u2    
+;   Muttiplication non signée de 2 entiers simple résultant en un entier double.
+; arguments:
+;   u1  premier entier simple non signé.
+;   u2  deuxième entier simple non signé.
+; retourne:
+;   ud  Entier double non signé.    
+DEFCODE "UM*",3,,UMSTAR ; ( u1 u2 -- ud )
+    mul.uu T,[DSP],W0
+    mov W1,T
+    mov W0,[DSP]
+    NEXT
+   
+; nom: UD*  ( ud1 u2 -- ud3 )  ud3=ud1*u2    
+;   Multiplication non signée d'un entier double par un entier simple.
+; arguments:
+;   ud1  entier double non signé.    
+;    u2  Entier simple non signé.
+; retourne:    
+;   ud3  Entier double non signé résultant du produit de ud1 u2.  
+DEFCODE "UD*",3,,UDSTAR ; ( ud1 u2 -- ud3 )
+    mul.uu T,[DSP],W0
+    mov W0,[DSP]
+    mov T,W0
+    DPOP
+    mul.uu W0,[DSP],W0
+    add W1,T,T
+    mov W0,[DSP]
+    NEXT
+
+; nom: /  ( n1 n2 -- n3 )  n3=n1/n2
+;   Division entière signée sur nombres simple.
+; arguments:
+;   n1  numérateur 
+;   n2  dénominateur
+; retourne:
+;   n3  quotient entier.    
+DEFCODE "/",1,,DIVIDE
+    mov [DSP--],W0
+    repeat #17
+    div.s W0,T
+    mov W0,T
+    NEXT
+
+; nom: MOD  ( n1 n2 -- n3 )  n3=n1%n2    
+;    Division entière de 2 entiers simple où seul le restant est conservé.
+; arguments:
+;    n1  numérateur
+;    n2  dénominateur
+; retourne:
+;    n3   reste de la division.    
+DEFCODE "MOD",3,,MOD 
+   mov [DSP--],W0
+   repeat #17
+   div.s W0,T
+1: mov W1,T
+   NEXT
+   
+; nom: */  ( n1 n2 n3 -- n4 ) n4=(n1*n2)/n3   
+;   Une multiplication de n1 par n2 est suivit d'une division du résultat par n3.
+;   Le produit de n1 et n2 est conservé comme entier double avant la division.
+; arguments:
+;    n1 Premier entier simple.
+;    n2 Deuxième entier simple.
+;    n3 Troisième entier simple.
+; retourne:
+;    n4  Entier simple résultant de la division du double n1*n2 par n3.   
+DEFCODE "*/",2,,STARSLASH
+    mov [DSP--],W0
+    mov [DSP--],W1
+    mul.ss W0,W1,W0
+    repeat #17
+    div.sd W0,T
+    mov W0,T
+    NEXT
+
+; nom: */MOD ( n1 n2 n3 -- n4 n5 )
+;   Une multiplication de n1 par n2 est suivit d'une division par n3 le quotient
+;   et le reste sont conservés. Le résultat intermédiaire de la multipllication
+;   est un entier double.
+; arguments:
+;   n1  premier entier simple.
+;   n2  deuxième entier simple.
+;   n3  troisième entier simple.
+; retourne:
+;   n4  reste de la division de (n1*n2)/n3
+;   n5  quotient dela division de (n1*n2)/n3    
+DEFCODE "*/MOD",5,,STARSLASHMOD
+    mov [DSP--],W0
+    mov [DSP--],W1
+    mul.ss W0,W1,W0
+    repeat #17
+    div.sd W0,T
+1:  mov W1,[++DSP]
+    mov W0,T
+    NEXT
+    
+; nom: /MOD  ( n1 n2 -- n3 n4 ) 
+;   Division signée de n1 par n2 , le reste et le quotient sont conservés.    
+; arguments:
+;   n1  numérateur
+;   n2  dénominateur
+; retourne:
+;   n3  reste
+;   n4  quotient    
+DEFCODE "/MOD",4,,SLASHMOD ; ( n1 n2 -- r q )
+    mov [DSP],W0
+    repeat #17
+    div.s W0,T
+1:  mov W0,T     ; quotient
+    mov W1,[DSP] ; reste
+    NEXT
+
+; nom: UM/MOD  ( ud u1 -- u2 u2 )    
+;   Division d'un entier double non signé
+;   par un entier simple non signé
+;   résulant en un quotient et reste simple
+; arguments:    
+;   ud   numérateur entier double non signé.    
+;   u1    dénominateur entier simple non signé.
+; retourne:    
+;   u2 reste
+;   u3 quotient    
+DEFCODE "UM/MOD",6,,UMSLASHMOD 
+    mov [DSP--],W1
+    mov [DSP--],W0
+    repeat #17
+    div.ud W0,T
+    mov W0,T
+    mov W1,[++DSP]
+    NEXT
+    
+; nom: UD/MOD  ( ud1 u1 -- u2 ud2 )    
+;   Division d'un entier double non signé
+;   par un entier simple non signé résultant
+;   en un quotient double et un reste simple
+; arguments:
+;   ud1   numérateur entier double non signé.
+;    u1   dénominateur entier simple non signé.
+; résultat:
+;   u2	reste entier simple
+;   ud2 quotient entier double    
+DEFCODE "UD/MOD",6,,UDSLASHMOD
+    clr W1
+    mov [DSP],W0
+    repeat #17
+    div.ud W0,T
+    mov W0,W4  ; partie forte du quotient
+    mov [DSP-2],W0 
+    repeat #17
+    div.ud W0,T
+    mov W1,[DSP-2] ;reste entier simple
+    mov W0,[DSP]  ; partie faible du quotient
+    mov W4,T  ; partie forte du quotient
+    NEXT
+    
+; nom: MAX  ( n1 n2 -- n ) n=max(n1,n2) 
+;   Retourne le plus grand des 2 entier signés.
+; arguments:
+;   n1 premier entier
+;   n2 deuxième entier
+; retourne:
+;   n  le plus grand des 2 entiers signés.    
+DEFCODE "MAX",3,,MAX 
+    mov [DSP--],W0
+    cp T,W0
+    bra ge, 1f
+    exch T,W0
+1:  NEXT    
+    
+    
+; nom: MIN  ( n1 n2 -- n ) n=min(n1,n2) 
+;   Retourne le plus petit des 2 entiers signés.
+; arguments:
+;   n1 premier entier
+;   n2 deuxième entier
+; retourne:
+;   n  le plus petit des 2 entiers signés.    
+DEFCODE "MIN",3,,MIN
+    mov [DSP--],W0
+    cp W0,T
+    bra ge, 1f
+    exch T,W0
+1:  NEXT
+    
+; nom: UMAX  ( u1 u2 -- u ) u=max(u1,u2) 
+;   Retourne le plus grand des 2 entiers non signés.
+; arguments:
+;   u1 premier entier non signé.
+;   u2 deuxième entier non signé
+; retourne:
+;   u  le plus grand des 2 entiers non signés.    
+DEFCODE "UMAX",4,,UMAX
+    mov [DSP--],W0
+    cp T,W0
+    bra geu,1f
+    exch W0,T
+1:  NEXT
+    
+; nom: UMIN  ( u1 u2 -- u ) u=min(u1,u2) 
+;   Retourne le plus petit des 2 entiers non signés.
+; arguments:
+;   u1 premier entier non signé.
+;   u2 deuxième entier non signé
+; retourne:
+;   u  le plus petit des 2 entiers non signés.    
+DEFCODE "UMIN",4,,UMIN
+    mov [DSP--],W0
+    cp W0,T
+    bra geu, 1f
+    exch T,W0
+1:  NEXT
+    
+; nom: WITHIN  ( n1|u1 n2|u2 n3|u3 -- f ) 
+;   Vérifie si l'entier n2|u2<=n1|u1<n3|u3.
+;   La vérification doit fonctionner aussi bien avec les entiers
+;   signés et non signés.    
+; arguments:
+;   n1|u1   Entier à vérifier,signé ou non.
+;   n2|u2   Limite inférieure,signé ou non.
+;   n3|u3   Limite supérieure, signé ou non. 
+; retourne:
+;   f    Indicateur booléen vrai si condition n2|u2<=n1|u1<n3|u3.    
+DEFCODE "WITHIN",6,,WITHIN  
+    mov T,W0   
+    DPOP
+    sub W0,T,[RSP++]
+    mov [DSP],W0
+    sub W0,T,[DSP]
+    mov [--RSP],T
+    bra code_ULESS
+
+; nom: EVEN  ( n -- f )
+;   Retourne un indicateur booléen vrai si l'entier est pair.
+; arguments:
+;   n   Entier à vérifier.
+; retourne:
+;   f   indicateur booléen, vrai si entier pair.    
+DEFCODE "EVEN",4,,EVEN ; ( n -- f ) vrai si n pair
+    setm W0
+    btsc T,#0
+    clr W0
+    mov W0,T
+    NEXT
+    
+; nom: ODD  ( n -- f )
+;   Retourne un indicateur booléen vrai si l'entier est impair.
+; arguments:
+;   n   Entier à vérifier.
+; retourne:
+;   f   indicateur booléen, vrai si entier impair.    
+DEFCODE "ODD",3,,ODD
+    setm W0
+    btss T,#0
+    clr W0
+    mov W0,T
+    NEXT
+
+; nom: ABS  ( n -- n|-n ) 
+;   Retourne la valeur absolue d'un entier simple.
+; arguments:
+;   n    Entier simple signé.
+; retourne:
+;  n|-n  Retourne la valeur absolue de n.    
+DEFCODE "ABS",3,,ABS
+    btsc T,#15
+    neg T,T
+    NEXT
+
+; nom: DABS ( d -- d|-d )    
+;   Retourne la valeur absolue d'un entier double.
+; arguments:
+;    d   Entier double signé.
+; retourne:
+;    d|-d  Valeur absolue de d.    
+DEFCODE "DABS",4,,DABS 
+    btss T,#15
+    bra 9f
+    mov [DSP],W0
+    com T,T
+    com W0,W0
+    add #1,W0
+    addc #0,T
+    mov W0,[DSP]
+9:  NEXT    
+
+; nom: S>D   ( n -- d )    
+;   convertie entier simple en entier double. Après l'exécution de ce mot
+;   la pile contient 1 élément de plus.    
+; arguments:
+;   n    entier simple signé.
+; retourne:
+;   d    entier double signé.    
+DEFCODE "S>D",3,,STOD ; ( n -- d ) 
+    DPUSH
+    clr W0
+    btsc T,#15
+    com W0,W0
+    mov W0,T
+    NEXT
+
+; nom: ?NEGATE  ( n1 n2 -- n3 )
+;   Inverse n1 si n2 est négatif. Après l'exécution la pile compte
+;   1 élément de moins.    
+; arguments:
+;   n1   entier simple signé.
+;   n2   entier simple signé.
+; retourne:
+;   n3   n2<0?-n1:n1    
+DEFCODE "?NEGATE",7,,QNEGATE
+    mov T,W0
+    DPOP
+    btsc W0,#15
+    neg T,T
+    NEXT    
+
+; nom: SM/REM    ( d1 n1 -- n2 n3 )    
+;   Division symétrique entier double par simple arrondie vers zéro.
+;   REF: http://lars.nocrew.org/forth2012/core/SMDivREM.html    
+;   Adapté de camel Forth pour MSP430.
+; arguments:
+;    d1   Entier double signé, numérateur.
+;    n1   Entier simple signé, dénominateur.
+; retourne:    
+;    n2   Reste de la division.
+;    n3   Quotient de la division.    
+DEFWORD "SM/REM",6,,SMSLASHREM ; ( d1 n1 -- n2 n3 )
+    .word TWODUP,XOR,TOR,OVER,TOR
+    .word ABS,TOR,DABS,RFROM,UMSLASHMOD
+    .word SWAP,RFROM,QNEGATE,SWAP,RFROM,QNEGATE
+    .word EXIT
+
+; nom: FM/MOD  ( d1 n1 -- n2 n3 )    
+;   Division double/simple arrondie au plus petit.
+;   REF: http://lars.nocrew.org/forth2012/core/FMDivMOD.html
+;   Adapté de camel Forth pour MSP430.    
+DEFWORD "FM/MOD",6,,FMSLASHMOD ; ( d1 n1 -- n2 n3 )    
+    .word DUP,TOR,TWODUP,XOR,TOR,TOR
+    .word DABS,RFETCH,ABS,UMSLASHMOD
+    .word SWAP,RFROM,QNEGATE,SWAP,RFROM,ZEROLT,ZBRANCH,9f-$
+    .word NEGATE,OVER,ZBRANCH,9f-$
+    .word RFETCH,ROT,MINUS,SWAP,ONEMINUS
+9:  .word RDROP,EXIT
+
+; nom: EVAR+  ( a-addr -- )  
+;   Incrémente une variable résidante en mémoire EDS.
+; arguments:
+;   a-addr   adresse de la variable.
+; retourne:
+;   rien     La pile décrois d'un élément.  
+DEFWORD "EVAR+",5,,EVARPLUS 
+    .word DUP,EFETCH,ONEPLUS,SWAP,STORE,EXIT
+    
+; nom: EVAR- ( a-addr -- )    
+;   Décrémente une variable résidante en mémoire EDS.
+; arguments:    
+;    a-addr   adresse de la variable.
+; retourne:
+;    rien    La pile décrois d'un élément.    
+DEFWORD "EVAR-",5,,EVARMINUS ; ( addr -- )
+    .word DUP,EFETCH,ONEMINUS,SWAP,STORE,EXIT
+    
+    
+; nom: UDREL  ( ud1 ud2 -- n )    
+;   Compare 2 nombres double non signés et retourne un indicateur de relation.
+;   n = 1 si ud1>ud2
+;   n = 0 si ud1==ud2
+;   n = -1 si ud1<ud2
+; arguments:
+;   ud1   Premier entier double non signé.
+;   ud2   Deuxième entier double non signé.
+; retourne:
+;    n    résultat de la comparaison.    
+DEFCODE "UDREL",5,,UDREL ; ( ud1 ud2 -- n )
+    mov T,W1
+    DPOP
+    mov T,W0
+    DPOP
+    mov T, W3
+    DPOP
+    mov T, W2
+    clr T
+    sub W2,W0,W0
+    subb W3,W1,W1
+    bra ltu, 8f
+    ior W0,W1,W2
+    bra z, 9f
+    inc T,T
+    bra 9f
+8:  setm T    
+9:  NEXT
+    
+    
+; nom: NEGATE  ( n1 -- n2 )
+;   Inverse arithmétique de n1. Complément de 2.
+; arguments:
+;   n1   Entier à inversé.
+; retourne:
+;   n2   n2=-n1    
+DEFCODE "NEGATE",6,,NEGATE ; ( n - n ) complément à 2
+    neg T, T
+    NEXT
+    
+; nom: DNEGATE ( d1 -- d2 )
+;   Inverse arithmétique d'un entier double. Complément de 2.
+; arguments:
+;    d1   Entier double à inversé.
+; retourne:
+;    d2   d2=-d1    
+DEFCODE "DNEGATE",7,,DNEGATE ; ( d -- n )
+    com T,T
+    com [DSP],[DSP]
+    mov #1,W0
+    add W0,[DSP],[DSP]
+    addc #0,T
+    NEXT
+    
+; nom: INVERT  ( n1 -- n2 )
+;   Inversion des bits, complément de 1.
+; arguments:
+;   n1   opérande.
+; retourne:
+;   n2   inverse bit à bit de n1.    
+DEFCODE "INVERT",6,,INVERT ; ( n -- n ) inversion des bits
+    com T, T
+    NEXT
+    
+; nom: DINVERT   ( d1 -- d2 ))
+;   Invesion bit à bit d'un entier double. Complément de 1.
+; arguments:
+;   d1   opérande.
+; retourne:
+;   d2   Inverse bit à bit de d1.    
+DEFCODE "DINVERT",7,,DINVERT
+    com T,T
+    com [DSP],[DSP]
+    NEXT
+    

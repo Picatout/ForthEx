@@ -183,9 +183,13 @@ HEADLESS SERIAL_INIT,CODE ; ( -- )
     call serial_enable
     NEXT
 
-; activation/désactivation port série
-;  argument:
-;     f TRUE activation FALSE désactivation    
+; nom: SERENBL  ( f -- )    
+;   activation/désactivation du port sériel. Le port est activé si 'f' est VRAI
+;   sinon il est désactivé.    
+; arguments:
+;     f TRUE activation, FALSE désactivation    
+; retourne:
+;     rien    
 DEFCODE "SERENBL",7,,SERENBL ; ( f -- )
     cp0 T
     DPOP
@@ -195,7 +199,20 @@ DEFCODE "SERENBL",7,,SERENBL ; ( f -- )
 1:  call serial_disable
 9:  NEXT
 
-; valeur constantes pour les différent BAUD.    
+; nom: Bxxxxx  ( -- n )  
+;   Plusieurs constantes sont définies pour l'ajustement de la vitesse de transfert
+;   du port sériel. Les constantes suivantes sont disponibles.
+;   B2400 -> 2400 BAUD
+;   B4800 -> 4800 BAUD
+;   B9600 -> 9600 BAUD
+;   B19200 -> 19200 BAUD
+;   B38400 -> 38400 BAUD
+;   B57600 -> 57600 BAUD
+;   B115200 -> 115200 BAUD 
+; arguments:
+;   aucun
+; retourne:
+;   n   Une constante qui sert à programmer le registre qui contrôle la vitesse du port.    
 DEFCONST "B2400",5,,B2400,(FCY/16/2400)
 DEFCONST "B4800",5,,B4800,(FCY/16/4800)-1
 DEFCONST "B9600",5,,B9600,(FCY/16/9600)
@@ -204,11 +221,14 @@ DEFCONST "B38400",6,,B38400,(FCY/16/38400)
 DEFCONST "B57600",6,,B57600,(FCY/16/57600)
 DEFCONST "B115200",7,,B115200,(FCY/16/115200)
     
-; ajuste la vitesse du port sériel et l'active.
-; argument:
-;   u   Une des constantes pré-difinies çi-haut.
-; sortie:
-;   port actif.    
+; nom: BAUD  ( u -- )     
+;   Ajuste la vitesse du port sériel et l'active.
+; exemple:  
+;   B57600 BAUD / le port est activé à la vitesse de 57600 BAUD.    
+; arguments:
+;   u   Une des constantes pré-difinies dont le nom commence par B.
+; retourne:
+;   rien   Le port est activé.
 DEFCODE "BAUD",4,,BAUD   ; ( u -- )
     call serial_disable
     mov T, SER_BRG
@@ -216,11 +236,13 @@ DEFCODE "BAUD",4,,BAUD   ; ( u -- )
     call serial_enable
     NEXT
 
-
-; transmission d'un caractère par
-; le port sériel.
-; argument:
+; nom: SPUTC   ( c -- )
+;   Transmission d'un caractère via le port sériel. Au démarrage le port est
+;   activé à la vitesse de 115200 BAUD, 8 bits, 1 stop, pas de parité.    
+; arguments:
 ;    c  caractère à transmettre.
+; retourne:
+;   rien    
 DEFCODE "SPUTC",5,,SPUTC ; ( c -- )
 1:  btsc ser_flags,#F_TXSTOP
     bra 1b
@@ -251,7 +273,12 @@ DEFCODE "SPUTC",5,,SPUTC ; ( c -- )
 ;     bset SER_TX_IEC,#SER_TX_IE
 ;     NEXT
  
-; attend un careactère du port sériel    
+; nom: SGETC  ( -- c )
+;   Attend un careactère du port sériel. Cette attente n'expire jamais.
+; arguments:
+;   aucun
+; retourne:
+;   c   Caractère reçu du port sériel.    
 DEFCODE "SGETC",5,,SGETC  ; ( -- c )
 1:    
     btss ser_flags,#F_RXDAT
@@ -295,11 +322,11 @@ DEFCODE "SREADY?",7,,SREADYQ
     
 ; nom: SGETC? ( -- f )
 ;   Vérifie s'il y a un caractère de disponible dans
-;   la file de réception
+;   la file de réception du port sériel.
 ; arguments:
 ;    aucun    
 ; retourne:
-;   f   indicateur booléen, VRAI si caractère disponible
+;   f   indicateur booléen, VRAI si un caractère est disponible.
 DEFCODE "SGETC?",6,,SGETCQ
     DPUSH
     clr T

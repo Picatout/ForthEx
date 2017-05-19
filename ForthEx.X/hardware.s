@@ -20,6 +20,7 @@
     
 .include "hardware.inc"
 .include "core.s" 
+.include "math.s"    
 .include "tvout.s"
 .include "serial.s"
 .include "sound.s"
@@ -31,7 +32,8 @@
 .include "sdcard.s"
 .include "strings.s"    
 .include "dynamem.s"
-.include "block.s"    
+.include "block.s" 
+.include "tools.s"    
 ;.include "eefile.s"    
 ;.include "ed.s"    
     
@@ -296,7 +298,14 @@ HEADLESS VARS_INIT
 ; mots dans le dictionnaire
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
-; empile le compteur systicks    
+; nom: TICKS  ( -- n )    
+;   Le système contient un compteur qui est incrémenté à toute les millisecondes.
+;   Il s'agit d'un compteur 16 bits, le compteur boucle à zéro à toute les 65,5 secondes.    
+;   TICKS retourne la valeur de ce compteur.  
+; arguments:
+;   aucun
+; retourne:
+;   n	    Valeur du compteur système systicks.    
 DEFCODE "TICKS",5,,TICKS  ; ( -- n )
     DPUSH
     mov systicks, T
@@ -305,6 +314,13 @@ DEFCODE "TICKS",5,,TICKS  ; ( -- n )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; délais en microsecondes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; nom: USEC   ( u -- ) 
+;   Pause en microsecondes. A cause des interruptions cette valeur ne peut-être
+;   garantie. La valeur u passée en argument est une valeur minimale.
+; arguments:
+;   u   durée de la pause en microsecondes.
+; retourne:
+;   rien    
 DEFCODE "USEC",4,,USEC
     mov #70,W0  ; cette valeur est basée sur FCY=70Mhz
     mul.uu T,W0,W0
@@ -319,10 +335,10 @@ DEFCODE "USEC",4,,USEC
     NEXT
  
 ; nom: MS  ( u -- )
-;  Boucle d'attente qui dure au moins u millisecondes.
-;  à usec.   
+;   Boucle d'attente qui dure au moins u millisecondes. Cette boucle utitise
+;   le compteur systicks. L'erreur sur la durée est de ± 1msec.    
 ; arguments:
-;   u    nombre de millisecondes
+;   u    Durée en millisecondes.
 ; retourne:
 ;   rien
 DEFWORD "MS",2,,MS
@@ -335,12 +351,16 @@ DEFWORD "MS",2,,MS
     .word EXIT
     
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; générnateur pseudo-hasard
-; basé sur une LFSR
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .equ TAPSH, 0x8020
 .equ TAPSL, 0x0002    
+; nom: LFSR  ( -- n )
+;   Générnateur pseudo-hasard basé sur un Linear Feedback Shift Register de 32 bits.
+;   Ce générateur doit-être initialisé avec SRAND avant utilisation sinon 
+;   la valeur retournée est toujours 0.
+; arguments:
+;   aucun
+; retourne:
+;   n    Un entier de 16 bits.    
 DEFCODE "LFSR",4,,LFSR  ; ( -- )
     lsr seed+2 
     rrc seed
@@ -353,16 +373,25 @@ DEFCODE "LFSR",4,,LFSR  ; ( -- )
     DPUSH
     mov seed, T
     NEXT
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; générateur pseudo hazard
-; génère un nombre de 16 bits
-;  si seed impaire incrémente
-;  ensuite Sn=(Sn-1)*3/2
-;  on ne garde que le bit
-;  le moins significatif
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; nom: RAND   ( -- n )    
+;   Générateur pseudo-hasard qui génère un entier de 16 bits. Utilise la variable 
+;   Ce générateur doit-être initialisé avec SRAND avant utilisation sinon 
+;   la valeur retournée est toujours 0.
+;   algorithme:
+;    rand=0
+;    count=0
+;    a) rand<<1
+;    b) si impair(seed) alors seed++
+;    c) seed=seed*3/2
+;    d) rand |= seed&1
+;    e) ++count==16?termine:goto a    
+; arguments:
+;   aucun
+; retourne:    
+;   n   Entier de 16 bits.
 DEFCODE "RAND",4,,RAND   ; ( -- n)
+    DPUSH
     clr W2
     mov #16,W4 ; compteur boucle
 1:
@@ -384,18 +413,18 @@ DEFCODE "RAND",4,,RAND   ; ( -- n)
     lsr seed+2,
     rrc seed
     lsr seed, WREG
-    rrc W3,W3
+    rrc T,T
     dec W4,W4
     bra nz, 2b
-    DPUSH
-    mov W3,T
     NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-;initialisation variable seed
-; seed=systicks/3
-; seed+2=systicks%3    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+; nom: SRAND ( -- )    
+;   Initialisation du registre des générateurs pseudo-aléatoire LFSR et RAND.
+;   Cette initialisation doit-être faite avant le premier appel de LFSR ou RAND.
+; arguments:
+;   aucun
+; retourne:
+;   rien    Modifie seulement un registre 'seed' interne au système.      
 DEFCODE "SRAND",5,,SRAND  ; ( -- )
     mov systicks,W0
     mov #3,W2
@@ -404,14 +433,24 @@ DEFCODE "SRAND",5,,SRAND  ; ( -- )
     mov W1, seed+2
     NEXT
    
-
-; efface la mémoire programme utilisateur    
+; nom: CLEAR  ( -- )
+;   Efface la mémoire de données utilisateur. Tous les mot définis par l'utilisateur
+;   sont supprimés du dictionnaire.  La valeur de DP est réiniialisé à DP0.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "CLEAR",5,,CLEAR ; ( -- )
     .word DP0,DP,STORE
     .word SYSLATEST,FETCH,LATEST,STORE
     .word EXIT
     
-; retourne la quantité de RAM disponible    
+; nom: UNUSED ( -- n )    
+;   Retourne la quantité de RAM de données disponible.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "UNUSED",6,,UNUSED    
     .word ULIMIT,HERE,MINUS,EXIT
     
@@ -422,146 +461,146 @@ DEFWORD "UNUSED",6,,UNUSED
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; activation désactivation périphérique CRC    
-DEFCODE "CRCENBL",7,,CRCENBL  ; ( f -- )    
-    bclr CRCCON1,#CRCEN
-    cp0 T
-    bra z, 8f
-    bset CRCCON1,#CRCEN
-8:  DPOP
-    NEXT
+;DEFCODE "CRCENBL",7,,CRCENBL  ; ( f -- )    
+;    bclr CRCCON1,#CRCEN
+;    cp0 T
+;    bra z, 8f
+;    bset CRCCON1,#CRCEN
+;8:  DPOP
+;    NEXT
 
 ; vérifie l'état du CRC FIFO
 ; retourne:
 ;       0 plein
 ;       1 vide
 ;       2 ni plein ni vide    
-DEFCODE "?CRCFIFO",8,,QCRCFIFO ; ( -- n )
-    DPUSH
-    clr T
-    btsc CRCCON1,#CRCFUL
-    bra 9f
-    mov #1,T
-    btss CRCCON1,#CRCMPT
-    inc T,T
-9:  NEXT
+;DEFCODE "?CRCFIFO",8,,QCRCFIFO ; ( -- n )
+;    DPUSH
+;    clr T
+;    btsc CRCCON1,#CRCFUL
+;    bra 9f
+;    mov #1,T
+;    btss CRCCON1,#CRCMPT
+;    inc T,T
+;9:  NEXT
     
 
 ; sélection de l'orde des bits de données
 ;  argument:
 ;      FALSE  bit le plus significatif en premier
 ;      TRUE   bit le moins significatif en premier (Little Endian)
-DEFCODE "CRCLE",5,,CRCLE ; ( f -- )
-    bclr CRCCON1,#LENDIAN
-    cp0 T
-    bra z, 9f
-    bset CRCCON1,#LENDIAN
-9:  DPOP
-    NEXT
+;DEFCODE "CRCLE",5,,CRCLE ; ( f -- )
+;    bclr CRCCON1,#LENDIAN
+;    cp0 T
+;    bra z, 9f
+;    bset CRCCON1,#LENDIAN
+;9:  DPOP
+;    NEXT
     
     
     
 ;démarrage du CRC shift register     
-DEFCODE "CRCSTART",8,,CRCSTART ; ( -- )
-    bclr IFS4,#CRCIF
-    bset CRCCON1,#CRCGO
-    NEXT
+;DEFCODE "CRCSTART",8,,CRCSTART ; ( -- )
+;    bclr IFS4,#CRCIF
+;    bset CRCCON1,#CRCGO
+;    NEXT
     
 ; longueur du data  (data width)
 ; argument:
 ;   'n' nombre de bits  {1..32}  
-DEFCODE "CRCDW",5,,CRCDW ; ( n -- )    
-    dec T,T
-    ze T,T
-    swap T
-    mov CRCCON2,W0
-    ze W0,W0
-    ior W0,T,W0
-    mov W0,CRCCON2
-    DPOP
-    NEXT
+;DEFCODE "CRCDW",5,,CRCDW ; ( n -- )    
+;    dec T,T
+;    ze T,T
+;    swap T
+;    mov CRCCON2,W0
+;    ze W0,W0
+;    ior W0,T,W0
+;    mov W0,CRCCON2
+;    DPOP
+;    NEXT
     
 ; longeur du polynome (polynomial length)
 ; argument:
 ;    'n' nombre de bits  {1..32]
-DEFCODE "CRCPL",5,,CRCPL ; ( n -- )
-    dec T,T
-    ze T,T
-    mov 0xFF00,W0
-    and CRCCON2,WREG
-    ior T,W0,W0
-    mov W0,CRCCON2
-    DPOP
-    NEXT
+;DEFCODE "CRCPL",5,,CRCPL ; ( n -- )
+;    dec T,T
+;    ze T,T
+;    mov 0xFF00,W0
+;    and CRCCON2,WREG
+;    ior T,W0,W0
+;    mov W0,CRCCON2
+;    DPOP
+;    NEXT
     
 ; détermine le polynome utilisé
 ;  argument:
 ;   ud  entier double non signée    
-DEFCODE "CRCPOLY",7,,CRCPOLY ; ( ud -- )
-    mov T,CRCXORH
-    DPOP
-    mov T,CRCXORL
-    DPOP
-    NEXT
+;DEFCODE "CRCPOLY",7,,CRCPOLY ; ( ud -- )
+;    mov T,CRCXORH
+;    DPOP
+;    mov T,CRCXORL
+;    DPOP
+;    NEXT
 
 ; lecture d'un CRC < 32 bits
-DEFCODE "CRC@",4,,CRCFETCH ; ( -- u )
-    DPUSH
-    mov CRCWDATL,T
-    NEXT
+;DEFCODE "CRC@",4,,CRCFETCH ; ( -- u )
+;    DPUSH
+;    mov CRCWDATL,T
+;    NEXT
     
 ; lecture du CRC-32 bits
-DEFCODE "CRCD@",5,,CRCDFETCH ; ( -- ud )
-    DPUSH
-    mov CRCWDATL,T
-    DPUSH
-    mov CRCWDATH,T
-    NEXT
+;DEFCODE "CRCD@",5,,CRCDFETCH ; ( -- ud )
+;    DPUSH
+;    mov CRCWDATL,T
+;    DPUSH
+;    mov CRCWDATH,T
+;    NEXT
     
     
 ; initialize CRCWDAT à zéro
 ; et reset bit interruption    
-DEFCODE "CRC0",4,,CRC0 ; ( -- )
-    bclr CRCCON1,#CRCGO
-    clr CRCWDATL
-    clr CRCWDATH
-    bclr IFS4,#CRCIF
-    NEXT
+;DEFCODE "CRC0",4,,CRC0 ; ( -- )
+;    bclr CRCCON1,#CRCGO
+;    clr CRCWDATL
+;    clr CRCWDATH
+;    bclr IFS4,#CRCIF
+;    NEXT
 
 ; envoie un datum de 8 bits au CRC
-DEFCODE "CRCC!",5,,CRCCSTORE ; ( c -- )
-1:  btsc CRCCON1,#CRCFUL
-    bra 1b
-    mov T,W0
-    mov.b WREG,CRCDATL
-    DPOP
-    NEXT
+;DEFCODE "CRCC!",5,,CRCCSTORE ; ( c -- )
+;1:  btsc CRCCON1,#CRCFUL
+;    bra 1b
+;    mov T,W0
+;    mov.b WREG,CRCDATL
+;    DPOP
+;    NEXT
     
 ; envoie un datum de 16 bits au CRC    
-DEFCODE "CRC!",4,,CRCSTORE ; ( n -- )
-1:  btsc CRCCON1,#CRCFUL
-    bra 1b
-    mov T,CRCDATL
-    DPOP
-    NEXT
+;DEFCODE "CRC!",4,,CRCSTORE ; ( n -- )
+;1:  btsc CRCCON1,#CRCFUL
+;    bra 1b
+;    mov T,CRCDATL
+;    DPOP
+;    NEXT
     
 ; envoie un datum de 32 bits au CRC    
-DEFCODE "CRCD!",5,,CRCDSTORE, ; ( d -- )
-1:  btsc CRCCON1,#CRCFUL
-    bra 1b
-    mov T,W0
-    DPOP
-    mov T,CRCDATL
-    mov W0,CRCDATH
-    DPOP
-    NEXT
+;DEFCODE "CRCD!",5,,CRCDSTORE, ; ( d -- )
+;1:  btsc CRCCON1,#CRCFUL
+;    bra 1b
+;    mov T,W0
+;    DPOP
+;    mov T,CRCDATL
+;    mov W0,CRCDATH
+;    DPOP
+;    NEXT
     
 ; vérifie que l'opération CRC est complétée
-DEFCODE "CRCDONE",7,,CRCDONE ; ( -- f )
-    DPUSH
-    clr T
-    btsc IFS4,#CRCIF
-    setm T
-9:  NEXT
+;DEFCODE "CRCDONE",7,,CRCDONE ; ( -- f )
+;    DPUSH
+;    clr T
+;    btsc IFS4,#CRCIF
+;    setm T
+;9:  NEXT
     
     
 ; configure le CRC pour les blocs data des cartes SD
@@ -569,32 +608,32 @@ DEFCODE "CRCDONE",7,,CRCDONE ; ( -- f )
 ; polynome:  x^16+x^12+x^5+1
 ; data width : 8
 ; poly length : 16
-DEFWORD "CRC16",5,,CRC16 ; ( -- )
-    ; mise à zéro du checksum
-    ; et du bit d'interruption
-    .word CRC0
-    ; activation du périphérique
-    .word TRUE,CRCENBL
-    ; data 8 bits
-    .word LIT,8,CRCDW
-    ; polynome 16 bits
-    .word LIT,16,CRCPL
-    ; polynome: CRC16-CCITT x^16+x^12+x^5+1
-    .word LIT,0x1021,LIT,0,CRCPOLY
-    ; big indian
-    .word FALSE,CRCLE
-    .word CRCSTART
-    .word EXIT
+;DEFWORD "CRC16",5,,CRC16 ; ( -- )
+;    ; mise à zéro du checksum
+;    ; et du bit d'interruption
+;    .word CRC0
+;    ; activation du périphérique
+;    .word TRUE,CRCENBL
+;    ; data 8 bits
+;    .word LIT,8,CRCDW
+;    ; polynome 16 bits
+;    .word LIT,16,CRCPL
+;    ; polynome: CRC16-CCITT x^16+x^12+x^5+1
+;    .word LIT,0x1021,LIT,0,CRCPOLY
+;    ; big indian
+;    .word FALSE,CRCLE
+;    .word CRCSTART
+;    .word EXIT
     
     
- DEFWORD "CRC7",4,,CRC7 ; ( -- )   
-   .word CRC0
-   .word TRUE,CRCENBL
-   .word LIT,6,CRCDW
-   .word LIT,6,CRCPL
-   .word LIT,0x88,LIT,0,CRCPOLY
-   .word FALSE,CRCLE
-   .word CRCSTART
-   .word EXIT
+; DEFWORD "CRC7",4,,CRC7 ; ( -- )   
+;   .word CRC0
+;   .word TRUE,CRCENBL
+;   .word LIT,6,CRCDW
+;   .word LIT,6,CRCPL
+;   .word LIT,0x88,LIT,0,CRCPOLY
+;   .word FALSE,CRCLE
+;   .word CRCSTART
+;   .word EXIT
    
   

@@ -56,6 +56,13 @@ HEADLESS SOUND_INIT,CODE
  ; mots Forth
  ;;;;;;;;;;;;;;;;;;
  
+; nom: TONE   ( u1 u2 -- )
+;   Génère une tonalité de fréquence u2 et de durée u1.	
+; arguments:
+;   u1   durée en millisecondes.
+;   u2   fréquence en hertz.
+; retourne:
+;   rien 
  DEFCODE "TONE",4,,TONE  ; ( duration Nfr -- )
 1:  cp0 tone_len
     bra nz, 1b

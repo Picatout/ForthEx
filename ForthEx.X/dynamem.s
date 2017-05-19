@@ -101,7 +101,7 @@ HEADLESS FREE_BYTES_STORE
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr  Adresse de la variable tête de liste.    
+;   a-addr  Adresse de la variable contenant le pointeur tête de la liste des blocs libres.    
 DEFCODE "FREELIST",8,,FREELIST
     DPUSH
     mov #_heap_free,T
@@ -112,14 +112,14 @@ DEFCODE "FREELIST",8,,FREELIST
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr  Adresse de la variable tête de liste.    
+;   a-addr  Adresse de la variable contenant le pointeur tête de liste des blocs utilisés.    
 DEFCODE "USEDLIST",8,,USEDLIST
     DPUSH
     mov #_heap_used,T
     NEXT
     
 ; nom: BSIZE@   ( a-addr -- n )    
-;   Retourne la grandeur d'un bloc
+;   Retourne la grandeur d'un bloc de données en octets.
 ; arguments:
 ;   a-addr  adresse retournée par MALLOC
 ; retourne:
@@ -138,18 +138,18 @@ DEFWORD "BSIZE!",6,,BSIZESTORE ; ( n addr -- )
 ; nom: NLNK@   ( a-addr1 -- a-addr2 )    
 ;   Retourne le pointeur sur le prochain bloc dans la chaîne de blocs.
 ; arguments:
-;    addr1 adresse du bloc dans la chaîne.
+;   a-addr1 adresse d'un bloc dans la chaîne.
 ; retourne:
-;   addr2  adresse du prochain bloc dans la chaîne.
+;   a-addr2  adresse du prochain bloc dans la chaîne.
 DEFWORD "NLNK@",5,,NLNKFETCH ; ( addr1 -- addr2 )
     .word LIT,NLNK,MINUS,EFETCH,EXIT
   
 ; nom: PLNK@   ( a-addr1 -- a-addr2 )    
 ;   Retourne le pointeur sur le bloc précédent dans la chaîne de blocs.
 ; arguments:
-;   addr1   adresse du bloc.
+;   a-addr1   adresse d'un bloc dans la chaîne.
 ; retourne:
-;   addr2  adresse du bloc précédent dans la chaîne.    
+;   a-addr2  adresse du bloc précédent dans la chaîne.    
 DEFWORD "PLNK@",5,,PLNKFETCH ; ( addr1 -- addr2 )
     .word LIT,PLNK,MINUS,EFETCH,EXIT
     
@@ -208,7 +208,7 @@ DEFWORD "PREPEND",7,,PREPEND ; ( addr1 list -- )
 ;   vérifie si le bloc désigné par a-addr1 est assez grand pour contenir n octets de données.
 ; arguments:
 ;    n     nombre d'octets requis.    
-;    a-addr   pointeur bloc
+;    a-addr1   pointeur sur le bloc à vérifier.
 ; retourne:
 ;    f   indicateur booléen
 DEFWORD "?FIT",4,,QFIT ;  ( n addr1 -- f )    
@@ -217,8 +217,8 @@ DEFWORD "?FIT",4,,QFIT ;  ( n addr1 -- f )
 ; nom: SMALLBLK   ( a-addr1 a-addr2 -- a-addr )    
 ;   Compare la grandeur de 2 blocs et retourne le pointeur du plus petit des deux.
 ; arguments:
-;   a-addr1   pointeur bloc 1
-;   a-addr2   pointeur bloc 2
+;   a-addr1   pointeur sur le premier bloc.
+;   a-addr2   pointeur sur le deuxième bloc.
 ; retourne:
 ;   a-addr    pointeur sur le plus petit des 2 blocs.    
 DEFWORD "SMALLBLK",8,,SMALLBLK ; ( addr1 addr2 -- addr )
@@ -235,9 +235,9 @@ DEFWORD "SMALLBLK",8,,SMALLBLK ; ( addr1 addr2 -- addr )
 ;   Si aucun ne peut contenir ce nombre d'octets, retourne 0.  
 ; arguments:
 ;    n       taille requise
-;    a-addr  Adresse de la variable contenant la tête de liste.
+;    a-addr  Adresse de la variable contenant le pointeur sur la tête de liste.
 ; retourne:
-;    a-addr1 | 0    pointeur sur le bloc ou 0 si aucun ne fait l'affaire.
+;    a-addr1 | 0    pointeur sur le bloc ou 0 si aucun n'est assez grand.
 DEFWORD "SMALLEST",8,,SMALLEST ; ( n list -- addr|0 )
     .word FETCH,LIT,0,TOR ; S: n addr1 R: 0
     ; début boucle
@@ -287,7 +287,7 @@ DEFWORD "MALLOC",6,,MALLOC ; ( n -- addr|0 )
 ;   Vérifie si le bloc à l'adresse a-addr1 est membre de la liste désignée par a-addr2
 ; arguments:
 ;   a-addr1  adresse du bloc à vérifier
-;   a-addr2  Variable contenant le pointeur de la tête de la liste.  
+;   a-addr2  Variable contenant le pointeur de tête de la liste.  
 ;  retourne:
 ;   a-addr | 0   Adresse du bloc ou 0 si le bloc n'est pas membre de cette liste.
 DEFWORD "?>LIST",6,,QINLIST ; ( addr list -- addr|0 )

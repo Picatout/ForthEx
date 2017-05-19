@@ -1,3 +1,15 @@
+2017-05-18
+----------
+Documentation dans keyboard.s
+Documentation dans dynamem.s
+Documentation dans serial.s
+Documentation dans hardware.s
+Documentation dans flash.s
+Documentation dans sound.s
+Ajouts de mots dans strings.s
+création de math.s et déplacement de mots de core.s vers math.s
+création de tools.s et déplacement de mots de core.s vers tools.s
+
 2017-05-17
 ----------
 Documentation dans core.s

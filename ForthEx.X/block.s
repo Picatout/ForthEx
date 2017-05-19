@@ -136,7 +136,7 @@ DEFWORD "DATA",4,,DATA
     .word LIT,DATA_ADDR,SWAP,TBLFETCH,EXIT
     
     
-; nom: BLOCK_INIT ( -- )    
+; nom BLOCK_INIT ( -- )    
 ;   initialisation de l'unité BLOCK 
 ; arguments:
 ;   aucun
@@ -258,7 +258,7 @@ DEFWORD "BLK>ADR",7,,BLKTOADR
 ;   u1    champ DATA
 ;   u2    champ BLOCK_NBR    
 ;   u3    champ DEVICE
-;   a-addr    *BUFFER
+;   a-addr    adresse de la structure BUFFER
 DEFWORD "FIELDS",6,,FIELDS
     .word TOR
     ; @ adresse du data
@@ -275,7 +275,7 @@ DEFWORD "FIELDS",6,,FIELDS
 ; paramètre:
 ;    a-addr   *BUFFER structure buffer
 ; retourne:    
-;
+;   rien
 DEFWORD "UPDATE",6,,UPDATE
     ; incrémente _update_cntr
     .word LIT,1,LIT,_update_cntr,PLUSSTORE
@@ -290,7 +290,7 @@ DEFWORD "UPDATE",6,,UPDATE
 ; arguments:
 ;   a-addr     *BUFFER  adresse de la structure
 ; retourne:
-;    
+;   rien    
 DEFWORD "NOUPDATE",8,,NOUPDATE
     .word LIT,0,LIT,UPDATED,ROT,TBLSTORE,EXIT
     
@@ -300,7 +300,7 @@ DEFWORD "NOUPDATE",8,,NOUPDATE
 ; arguments:
 ;   a-addr   *BUFFER
 ; retourne:
-;    
+;   rien 
 DEFWORD "DATA>",5,,DATAOUT 
     ; ne sauvegarder que si nécessaire
     .word DUP,UPDATEDFETCH,TBRANCH,2f-$,DROP,EXIT
@@ -320,7 +320,7 @@ DEFWORD "DATA>",5,,DATAOUT
 ; arguments:
 ;   a-addr    *BUFFER
 ; retourne:
-;     
+;   rien  
 DEFWORD ">DATA",5,,TODATA
     .word FIELDS,TOR,DUP,TOR ; S: data block_nbr device r: a-addr device
     ; conversion BLK>ADR
@@ -337,7 +337,7 @@ DEFWORD ">DATA",5,,TODATA
 ; arguments:
 ;   n+  numéro du bloc requis.    
 ; retourne:
-;   a-addr   *BUFFER  Pointeur sur la structure BUFFER
+;   a-addr   Pointeur sur la structure BUFFER
 DEFWORD "ASSIGN",6,,ASSIGN
     ; est-ce que le bloc est déjà dans un buffer?
     .word DUP,BLKDEVFETCH,BUFFEREDQ,QDUP,ZBRANCH,4f-$
@@ -366,7 +366,7 @@ DEFWORD "ASSIGN",6,,ASSIGN
 ; arguments:
 ;   n+    numéro du bloc.
 ; retourne:
-;    a-addr   *data adresse début de la zone de données.
+;    a-addr   adresse début de la zone de données.
 DEFWORD "BUFFER",6,,BUFFER
     .word ASSIGN,DATA,DUP,LIT,BLOCK_SIZE,LIT,0,FILL,EXIT
   
@@ -377,7 +377,7 @@ DEFWORD "BUFFER",6,,BUFFER
 ; arguments:
 ;    n+   no. du bloc requis.
 ; retourne:    
-;   a-addr  *data Pointeur vers les données du bloc.    
+;   a-addr  Adresse du début de la zone de données.    
 DEFWORD "BLOCK",5,,BLOCK 
     .word ASSIGN,DUP,TODATA
     .word DATA,EXIT
@@ -387,7 +387,7 @@ DEFWORD "BLOCK",5,,BLOCK
 ; arguments:
 ;   n+   numéro du bloc à évaluer.
 ; retourne:
-;    
+;    rien
 DEFWORD "LOAD",4,,LOAD
     .word BLOCK,DUP,LIT,0,SCAN
     .word SWAP,DROP,EVAL,EXIT
@@ -395,21 +395,21 @@ DEFWORD "LOAD",4,,LOAD
 ; nom: SAVE-BUFFERS ( -- )  
 ;   Sauvegarde tous les buffers qui ont été modifiés.
 ; arguments:
-;
+;   aucun
 ; retourne:
-;  
+;    rien
 DEFWORD "SAVE-BUFFERS",12,,SAVEBUFFERS
     .word LIT,MAX_BUFFERS,LIT,0,DODO
 1:  .word DOI,STRUCADR,DATAOUT
 4:  .word DOLOOP,1b-$    
     .word EXIT
    
-; nom: EMPTY-BUFFERS
-;   Désassigne tous les BUFFERs sans sauvegarder
+; nom: EMPTY-BUFFERS  ( -- )
+;   Libère tous les BUFFERs sans sauvegarder.
 ; arguments:
 ;   aucun
 ; retourne:
-;    
+;   rien 
 DEFWORD "EMPTY-BUFFERS",13,,EMPTYBUFFERS
     .word LIT,MAX_BUFFERS,LIT,0,DODO
 1:  .word DOI,STRUCADR,CELLPLUS
@@ -419,11 +419,11 @@ DEFWORD "EMPTY-BUFFERS",13,,EMPTYBUFFERS
     .word EXIT
     
 ; nom: FLUSH ( -- )
-;   Sauvegarde tous les BUFFER et désassigne
+;   Sauvegarde tous les BUFFER et et les libères.
 ; arguments:
 ;   aucun
 ; retourne:
-;    
+;   rien 
 DEFWORD "FLUSH",5,,FLUSH
     .word SAVEBUFFERS,EMPTYBUFFERS,EXIT
     
@@ -432,7 +432,7 @@ DEFWORD "FLUSH",5,,FLUSH
 ; arguments:
 ;   n+  numéro du bloc
 ; retourne:
-;       
+;   rien    
 DEFWORD "LIST",4,,LIST
     .word DUP,SCR,STORE,CLS
     .word BLOCK,LIT,BLOCK_SIZE,LIT,0,DODO
@@ -458,11 +458,11 @@ DEFWORD "REFILL",6,,REFILL
 9:  .word EXIT    
   
 ; nom: THRU  ( i*x u1 u2 -- j*x )
-;   Charge les blocs u1 à u2 .
+;   Interprétation des blocs u1 à u2 .
 ; arguments:
 ;   i*x  État initial de pile.
-;   u1   premier bloc à charger.
-;   u2   dernier bloc à charger.
+;   u1   premier bloc à interpréter.
+;   u2   dernier bloc à interpréter.
 ; retourne:
 ;   j*x  État de la pile après l'interprétation des blocs.
 DEFWORD "THRU",4,,THRU 
@@ -542,7 +542,7 @@ DEFWORD "SCR>BLK",7,,SCRTOBLK
 ; arguments:
 ;   n+   numéro du bloc à éditer.
 ; retourne:
-;   
+;   rien
 DEFWORD "BLKEDIT",7,,BLKEDIT
 
     .word EXIT

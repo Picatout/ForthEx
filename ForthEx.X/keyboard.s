@@ -155,7 +155,7 @@ DEFCODE "LC-EKEY?",8,,LCEKEYQ
 ; arguments:
 ;   aucun
 ; retourne:
-;    u   caractère non filtré reçu du clavier.
+;    u   code  VK_xxx non filtré reçu du clavier.
 DEFCODE "LC-EKEY",7,,LCEKEY  
     DPUSH
 1:  mov kbd_tail, W0
@@ -172,7 +172,7 @@ DEFCODE "LC-EKEY",7,,LCEKEY
     NEXT
 
     
-; nom: LC-FILTER ( u -- u false | c true )    
+; nom: LC-FILTER ( u -- u FALSE | c TRUE )    
 ;   Filtre  et retourne un caractère 'c' et 'vrai'
 ;   si u fait partie de l'ensemble reconnu.
 ;   sinon retourne 'u' et 'faux'   
@@ -183,10 +183,10 @@ DEFCODE "LC-EKEY",7,,LCEKEY
 ; retourne:
 ;   refusé:    
 ;   u       même code
-;   FALSE   indicateur booléen 
+;   FALSE   indicateur booléen, valeur 0 
 ;   reconnu:
 ;   c       caractère reconnu.
-;   TRUE    indicateur booléen.
+;   TRUE    indicateur booléen, valeur -1
 DEFCODE "LC-FILTER",9,,LCFILTER
     mov T,W0
     DPUSH
@@ -212,7 +212,7 @@ DEFCODE "LC-FILTER",9,,LCFILTER
     
 ; nom: LC-KEY? ( -- 0|c)
 ;   Vérifie s'il y a un caractère répondant aux 
-;   critères du filtre disponible dans la file du clavier. 
+;   critères du filtre LC-FILTER disponible dans la file du clavier. 
 ;   S'il y a des caractères non valides les jettes.    
 ; arguments:
 ;   aucun
@@ -226,7 +226,7 @@ DEFWORD "LC-KEY?",7,,LCKEYQ
 9: .word EXIT
     
 ; nom: LC-KEY  ( -- c )
-;   Attend la réception d'un caractère valide du clavier.
+;   Attend la réception d'un caractère valide pour LC-FILTER du clavier.
 ; arguments:
 ;   aucun 
 ; retourne:

@@ -18,6 +18,9 @@
 #include <ctype.h>
 
 static char* path="ForthEx.X/";
+static char* docPath="documentation/html/";
+static char* htmlExt=".html";
+
 static char* ext=".s";
 static char html[1024];
 
@@ -148,12 +151,9 @@ void generateDoc(FILE *in, FILE *out){
 }//generateDoc()
 
 FILE* createHeader(const char *name,FILE *out){
-	static char* html=".html";
-	char line[256];
+	char htmlName[256];
 	
-	strcpy(line,name);
-	strcat(line,html);
-	out=fopen(line,"w");
+	out=fopen(name,"w");
 	fputs("<DOCTYPE! html>\n",out);
 	fputs("<html lang=\"fr-CA\">\n",out);
 	fputs("<head>\n",out);
@@ -167,7 +167,9 @@ void closeHtml(FILE* out){
 }
 	
 void parseFiles(){
-  char fileName[256],*dot;	
+  char fileName[256],*dot;
+  char htmlName[256];
+  
   FILE *fi,*fo;	
   DIR           *d;
   struct dirent *dir;
@@ -185,12 +187,17 @@ void parseFiles(){
 		fi=fopen(fileName,"r");
 		strcpy(fileName,dir->d_name);
 		dot=strstr(fileName,ext);
-		*dot=0;  
-		fo=createHeader(fileName,fo);  	
+		*dot=0;
+		strcpy(htmlName,docPath);
+		strcat(htmlName,fileName);
+		strcat(htmlName,htmlExt);
+		fo=createHeader(htmlName,fo);
+		fprintf(fo,"<h1>%s</h1>",fileName);  	
         generateDoc(fi,fo);
         closeHtml(fo);
         fclose(fi);
         printf(" found %d definitions\n",wc);
+        if (!wc) remove(htmlName);
       }//if...
     }//while...
     closedir(d);
