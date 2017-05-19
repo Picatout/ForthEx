@@ -1,0 +1,495 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body>
+<h1>tvout</h1><p id="VIDEO">
+<b>VIDEO</b>  ( f -- ) \ T=on F=off 
+<div style="margin-left:5%;">   active/désactive sortie vidéo
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; indicateur booléen VRAI active la sortie vidéo, FAUX la désactive 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="CURENBL">
+<b>CURENBL</b>   ( f -- ) \ T=active, F=désactive
+<div style="margin-left:5%;">  active ou désactive le curseur texte
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen,VRAI active le curseur, FAUX le désactive.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="LC-PAGE">
+<b>LC-PAGE</b>  ( -- )
+<div style="margin-left:5%;">   vide l'écran.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="SCRLUP">
+<b>SCRLUP</b>  ( -- )
+<div style="margin-left:5%;">   glisse affichage vers le
+</div>
+<div style="margin-left:5%;">   haut d'une ligne texte
+</div>
+<div style="margin-left:5%;">   dernière ligne effacée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="SCRLDN">
+<b>SCRLDN</b>  ( -- )
+<div style="margin-left:5%;">   glisse affichage vers le
+</div>
+<div style="margin-left:5%;">   bas d'une ligne texte
+</div>
+<div style="margin-left:5%;">   première ligne effacée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="GETX">
+<b>GETX</b> ( -- u )
+<div style="margin-left:5%;">   retourne la colonne du curseur texte.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    colonne du curseur    
+</div>
+<hr>
+<p id="GETY">
+<b>GETY</b>  ( -- u )
+<div style="margin-left:5%;">   retourne la ligne du curseur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    ligne du curseur    
+</div>
+<hr>
+<p id="SETX
+">
+<b>SETX
+</b> <div style="margin-left:5%;">  Positionne le curseur texte à la colonne u.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   colonne.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="SETX
+">
+<b>SETX
+</b> r_sema
+<div style="margin-left:5%;">  Positionne le curseur texte à la ligne u.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   ligne
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="CURADR">
+<b>CURADR</b>  ( -- c-addr )
+<div style="margin-left:5%;">  Retourne l'adresse dans le buffer d'écran correspondant
+</div>
+<div style="margin-left:5%;">  à la position actuelle du curseur
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><i>retourne
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   addresse buffer du curseur    
+</div>
+<hr>
+<p id="CURPOS">
+<b>CURPOS</b>  ( u1 u2 -- )
+<div style="margin-left:5%;">  positionne le curseur texte à la colonne u1 et la ligne u2
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    colonne
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    ligne
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="LC-GETCUR">
+<b>LC-GETCUR</b>  ( -- u1 u2 )
+<div style="margin-left:5%;">   retourne la position du curseur texte.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    colonne  {0..63}
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    ligne    {0..23}
+</div>
+<hr>
+<p id="SCRCHAR">
+<b>SCRCHAR</b>  ( -- c )    
+<div style="margin-left:5%;">   retourne le caractère à la position du curseur
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère à la position du curseur.    
+</div>
+<hr>
+<p id="CHR&gt;SCR">
+<b>CHR&gt;SCR</b>  ( x y c -- )    
+<div style="margin-left:5%;">   Met le caractère c la position x,y de l'écran.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp; colonne
+</div>
+<div style="margin-left:5%;"><i>y</i>&nbsp;&nbsp; ligne
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; caractère    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="INVLN">
+<b>INVLN</b>  ( n f -- )    
+<div style="margin-left:5%;"> inverse ligne écran
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   no. de ligne {0..23}
+</div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   TRUE -&gt; inverse vidéo, FALSE -&gt; vidéo normal
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="LC-LEFT">
+<b>LC-LEFT</b>  ( -- )
+<div style="margin-left:5%;">   Déplace le curseur 1 caractère vers la gauche.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="LC-RIGHT">
+<b>LC-RIGHT</b>  ( -- )
+<div style="margin-left:5%;">   Déplace le curseur 1 caractère vers la droite.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="LC-HOME">
+<b>LC-HOME</b>  ( -- )
+<div style="margin-left:5%;">   Déplace le curseur au début de la ligne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="LC-END">
+<b>LC-END</b>  ( -- )
+<div style="margin-left:5%;">   Déplace le curseur après le dernier caractère de la ligne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="LC-UP">
+<b>LC-UP</b>   ( -- )
+<div style="margin-left:5%;">  déplace le curseur d'une ligne vers le haut.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="LC-DOWN">
+<b>LC-DOWN</b>   ( -- )
+<div style="margin-left:5%;">  déplace le curseur d'une ligne vers le bas.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="TGLCHAR">
+<b>TGLCHAR</b>  ( -- )
+<div style="margin-left:5%;">   inverse le bit #7 du caractère à la position du curseur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="PUTC">
+<b>PUTC</b>  ( c -- )
+<div style="margin-left:5%;">   Affiche le caractère à la position du curseur et avance
+</div>
+<div style="margin-left:5%;">   le curseur vers la droite. Si le curseur est en fin de ligne
+</div>
+<div style="margin-left:5%;">   passe au début de la ligne suivante sauf si c'est la dernière ligne
+</div>
+<div style="margin-left:5%;">   de l'affichage.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère à afficher
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="LC-CR">
+<b>LC-CR</b> ( -- )
+<div style="margin-left:5%;"> Envoie le curseur au début de la ligne suivante défile l'écran
+</div>
+<div style="margin-left:5%;"> vers le haut si nécessaire.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="NEXT-COLON">
+<b>NEXT-COLON</b>  ( -- )    
+<div style="margin-left:5%;">   avance le curseur à la prochaine tabulation    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; 
+</div>
+<hr>
+<p id="LC-DEL">
+<b>LC-DEL</b> ( -- )
+<div style="margin-left:5%;">  Supprime le caractère à la position du curseur
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="LC-INSRT">
+<b>LC-INSRT</b> ( -- )
+<div style="margin-left:5%;">    Insère un espace à la position du curseur si la ligne.
+</div>
+<div style="margin-left:5%;">    2 conditions pour refuser l'insertion:  
+</div>
+<div style="margin-left:5%;">       1) le curseur est après le dernier caractère de la ligne.
+</div>
+<div style="margin-left:5%;">       2) la ligne est pleine.
+</div>
+<div style="margin-left:5%;">  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="BACKDEL">
+<b>BACKDEL</b> ( -- )
+<div style="margin-left:5%;">  efface le carctère à gauche du curseur
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="CLRLN">
+<b>CLRLN</b> ( -- )
+<div style="margin-left:5%;">  efface toute la ligne sur laquelle se trouve le curseur
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="LC-BEL">
+<b>LC-BEL</b> ( -- )
+<div style="margin-left:5%;">  fait entendre un beep.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="LC-EMIT?">
+<b>LC-EMIT?</b>  ( -- f )
+<div style="margin-left:5%;">  retourne toujrours VRAI
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   VRAI  
+</div>
+<hr>
+<p id="LC-PAGE">
+<b>LC-PAGE</b> ( -- )
+<div style="margin-left:5%;">  Efface l'écran du terminal
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+
+</body>
+</html>

@@ -1,0 +1,156 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body>
+<h1>hardware</h1><p id="TICKS">
+<b>TICKS</b>  ( -- n )    
+<div style="margin-left:5%;">   Le système contient un compteur qui est incrémenté à toute les millisecondes.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'un compteur 16 bits, le compteur boucle à zéro à toute les 65,5 secondes.    
+</div>
+<div style="margin-left:5%;">   TICKS retourne la valeur de ce compteur.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n	</i>&nbsp;&nbsp;    Valeur du compteur système systicks.    
+</div>
+<hr>
+<p id="USEC">
+<b>USEC</b>   ( u -- ) 
+<div style="margin-left:5%;">   Pause en microsecondes. A cause des interruptions cette valeur ne peut-être
+</div>
+<div style="margin-left:5%;">   garantie. La valeur u passée en argument est une valeur minimale.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   durée de la pause en microsecondes.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="MS">
+<b>MS</b>  ( u -- )
+<div style="margin-left:5%;">   Boucle d'attente qui dure au moins u millisecondes. Cette boucle utitise
+</div>
+<div style="margin-left:5%;">   le compteur systicks. L'erreur sur la durée est de ± 1msec.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Durée en millisecondes.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="LFSR">
+<b>LFSR</b>  ( -- n )
+<div style="margin-left:5%;">   Générnateur pseudo-hasard basé sur un Linear Feedback Shift Register de 32 bits.
+</div>
+<div style="margin-left:5%;">   Ce générateur doit-être initialisé avec SRAND avant utilisation sinon 
+</div>
+<div style="margin-left:5%;">   la valeur retournée est toujours 0.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Un entier de 16 bits.    
+</div>
+<hr>
+<p id="RAND">
+<b>RAND</b>   ( -- n )    
+<div style="margin-left:5%;">   Générateur pseudo-hasard qui génère un entier de 16 bits. Utilise la variable 
+</div>
+<div style="margin-left:5%;">   Ce générateur doit-être initialisé avec SRAND avant utilisation sinon 
+</div>
+<div style="margin-left:5%;">   la valeur retournée est toujours 0.
+</div>
+<div style="margin-left:5%;">   algorithme:
+</div>
+<div style="margin-left:5%;">    rand=0
+</div>
+<div style="margin-left:5%;">    count=0
+</div>
+<div style="margin-left:5%;">    a) rand&lt;&lt;1
+</div>
+<div style="margin-left:5%;">    b) si impair(seed) alors seed++
+</div>
+<div style="margin-left:5%;">    c) seed=seed*3/2
+</div>
+<div style="margin-left:5%;">    d) rand |= seed&1
+</div>
+<div style="margin-left:5%;">    e) ++count==16?termine:goto a    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Entier de 16 bits.
+</div>
+<hr>
+<p id="SRAND">
+<b>SRAND</b> ( -- )    
+<div style="margin-left:5%;">   Initialisation du registre des générateurs pseudo-aléatoire LFSR et RAND.
+</div>
+<div style="margin-left:5%;">   Cette initialisation doit-être faite avant le premier appel de LFSR ou RAND.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    Modifie seulement un registre 'seed' interne au système.      
+</div>
+<hr>
+<p id="CLEAR">
+<b>CLEAR</b>  ( -- )
+<div style="margin-left:5%;">   Efface la mémoire de données utilisateur. Tous les mot définis par l'utilisateur
+</div>
+<div style="margin-left:5%;">   sont supprimés du dictionnaire.  La valeur de DP est réiniialisé à DP0.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="UNUSED">
+<b>UNUSED</b> ( -- n )    
+<div style="margin-left:5%;">   Retourne la quantité de RAM de données disponible.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+
+</body>
+</html>

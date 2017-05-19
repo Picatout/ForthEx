@@ -1,0 +1,378 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body>
+<h1>flash</h1><p id="MFLASH">
+<b>MFLASH</b>   ( -- a-addr ) 
+<div style="margin-left:5%;">   Retourne l'adresse du descripteur mémoire FLASH MCU
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp; 
+</div>
+<hr>
+<p id="FBUFFER">
+<b>FBUFFER</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Réservation d'un bloc de mémoire dynamique pour écriture d'une page flash MCU.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   adresse du premier octet de donnée du buffer.
+</div>
+<hr>
+<p id="TBL@L">
+<b>TBL@L</b>  (  ud1 -- n )    
+<div style="margin-left:5%;">   Lecture d'un mot dans la mémoire flash low word (adresse paire).
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  adrese dans la mémmoire flash du MCU.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    valeur lue à l'adresse ud1.    
+</div>
+<hr>
+<p id="TBL@H">
+<b>TBL@H</b>   ( ud1 -- n )    
+<div style="margin-left:5%;">    Lecture d'un mot dans la mémoire flash high word (adresse impaire).
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   adresse du premier octet de donnée du buffer.
+</div>
+<hr>
+<p id="I@">
+<b>I@</b>   ( ud -- u1 u2 u3 )    
+<div style="margin-left:5%;">   lit 1 instruction de la mémoire flash du MCU. L'instrucion est séparé en
+</div>
+<div style="margin-left:5%;">   3 octets.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  adresse 24 bits mémoire flash
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  bits 16:23 
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;  bits 8:15
+</div>
+<div style="margin-left:5%;"><i>u3</i>&nbsp;&nbsp;  bits 0:7    
+</div>
+<hr>
+<p id="FADDR">
+<b>FADDR</b>   ( ud -- )    
+<div style="margin-left:5%;">   Initialise le pointeur d'addresse 24 bits pour la programmationd de la mémoire FLASH du MCU.
+</div>
+<div style="margin-left:5%;">   Les addresse FLASH ont 24 bits.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Entier double représentant l'adresse en mémoire FLASH MCU.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="FNEXT">
+<b>FNEXT</b>   ( -- )
+<div style="margin-left:5%;">   Incrémente le pointeur pour la programmation du prochain mot en mémoire FLASH MCU.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="WRITE_LATCH">
+<b>WRITE_LATCH</b>  ( c-addr -- )    
+<div style="margin-left:5%;">   Écriture de 6 octets dans les tampons utilisés pour la programmation de la mémoire flash.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse du premier octet en mémoire RAM à copié dans les tampons flash.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="FLASH_OP	">
+<b>FLASH_OP	</b> ( n -- )    
+<div style="margin-left:5%;">   Séquence d'écriture dans la mémoire flash du MCU.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Constante identifiant le type d'opération flash à effectuer.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="?FLIMITS">
+<b>?FLIMITS</b>   ( ud -- ud f )    
+<div style="margin-left:5%;">   Vérifie si l'adresse 24 bits représsentée par ud est dans la plage
+</div>
+<div style="margin-left:5%;">   IMG_FLASH_ADDR &lt;= addr &lt; FLASH_END et retourne un indicateur booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   adresse 24 bits à contrôler.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   adresse contrôlée.
+</div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;    indicateur Booléen.    
+</div>
+<hr>
+<p id="ROW&gt;FADR">
+<b>ROW&gt;FADR</b>  ( u -- ud )
+<div style="margin-left:5%;">   La plus petite plage de mémoire flash qui peut-être effacée est appellée ligne.    
+</div>
+<div style="margin-left:5%;">   Convertie un numéro de ligne en adresse FLASH 24 bits.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Numéro de ligne.
+</div>
+<div style="margin-left:5%;"><i>arguments:
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Adresse 24 bits de la ligne.    
+</div>
+<hr>
+<p id="FERASE">
+<b>FERASE</b>   ( u -- )    
+<div style="margin-left:5%;">   Efface une ligne de mémoire FLASH MCU
+</div>
+<div style="margin-left:5%;">   Une correspond à 1024 instructions ou 2048 adresses.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:      
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  numéro de la ligne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="&gt;FLASH">
+<b>&gt;FLASH</b>  ( addr ud -- )
+<div style="margin-left:5%;">   La programmation du PIC24EP512GP202 se fait par 6 octets. On doit écrire
+</div>
+<div style="margin-left:5%;">   C'est 6 octets ( 2 instructions machine) doivent-être écris dans des registres
+</div>
+<div style="margin-left:5%;">   spéciaux (latches) avant d'effectuer la programmation.  
+</div>
+<div style="margin-left:5%;">   Écriture de 6 octets dans les tampons FLASH MCU
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments: 
+</b></div>
+<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp; adresse RAM du premier octet de donnée.
+</div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  adresse mémoire flash  24 bits
+</div>
+<hr>
+<p id="RAM&gt;FLASH">
+<b>RAM&gt;FLASH</b>  ( addr n ud -- )    
+<div style="margin-left:5%;">   Écris en mémoire flash un bloc de données en RAM.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp;  Adresse début données en RAM.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     Nombre d'octets à écrire.
+</div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;    addresse 24 bits en mémoire FLASH.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="FLASH&gt;RAM">
+<b>FLASH&gt;RAM</b>  ( addr n ud -- )  
+<div style="margin-left:5%;">  Lecture d'un bloc FLASH dans un tamp en mémoire RAM.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:  
+</b></div>
+<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp;  Adresse 16 bits début RAM.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     Nombre d'octets à lire.
+</div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   adresse début bloc FLASH.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="Constantes">
+<b>Constantes</b> liées au chargeur système  
+<div style="margin-left:5%;">   IMGHEAD  adresse de la structure BOOT_HEADER
+</div>
+<div style="margin-left:5%;">   MAGIC    champ signature au début de l'entête  0x55AA
+</div>
+<div style="margin-left:5%;">   IMGROW   champ numéro premier ligne flash où débute l'image.
+</div>
+</p>
+<hr>
+<p id="BOOT_HEADER">
+<b>BOOT_HEADER</b>   ( -- n addr )
+<div style="margin-left:5%;">   Il s'agit d'une structure maintenue en mémoire RAM et possédant les champs suivants:
+</div>
+<div style="margin-left:5%;">   SIGN   signature
+</div>
+<div style="margin-left:5%;">   LATEST valeur de la variable système LATEST à sauvegarder avec l'image.
+</div>
+<div style="margin-left:5%;">   DP     valeur de la variable système DP à sauvegarder avec l'image.
+</div>
+<div style="margin-left:5%;">   SIZE   grandeur de l'image.  
+</div>
+<div style="margin-left:5%;">   Pour chaque champ il y a un facilitateur d'accès qui retourne l'index du champ
+</div>
+<div style="margin-left:5%;">   et l'adresse de la structure.  
+</div>
+<div style="margin-left:5%;">   IMGSIGN   renvoie l'index du champ signature.
+</div>
+<div style="margin-left:5%;">   IMGLATST  renvoie l'index du champ LATEST
+</div>
+<div style="margin-left:5%;">   IMGDP     renvoie l'index du champ DP
+</div>
+<div style="margin-left:5%;">   IMGSIZE   renvoie l'index du champ SIZE  
+</div>
+</p>
+<hr>
+<p id="IMGADDR">
+<b>IMGADDR</b>  ( -- ud )  
+<div style="margin-left:5%;">   Retourne la position en mémoire flash de l'image système.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   adresse 24 bits  
+</div>
+<hr>
+<p id="?IMG">
+<b>?IMG</b>  ( -- f )    
+<div style="margin-left:5%;">   Vérifie s'il y a une image disponible en mémoire flash et retourne 
+</div>
+<div style="margin-left:5%;">   indicateur Booléen vrai|faux.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp;    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>indicateur</i>&nbsp;&nbsp; booléen vrai|faux
+</div>
+<hr>
+<p id="?SIZE">
+<b>?SIZE</b>   ( -- n )    
+<div style="margin-left:5%;">  Retourne la taille d'une image à partir de l'information dans la strucutre BOOT_HEADER.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp;    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  taille en octets    
+</div>
+<hr>
+<p id="ERASEROWS">
+<b>ERASEROWS</b>   ( -- )   
+<div style="margin-left:5%;">   Efface les lignes mémoire flash du MCU qui seront utilisées
+</div>
+<div style="margin-left:5%;">   pour la sauvegarde de l'image système en RAM.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>audun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="IMGSAVE">
+<b>IMGSAVE</b>   ( -- )    
+<div style="margin-left:5%;">   Sauvegarde une image de la RAM dans la mémoire flash du MCU
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="IMGLOAD">
+<b>IMGLOAD</b>  ( -- )  
+<div style="margin-left:5%;">    Charge une image système RAM à partir de la mémoire flash du MCU.
+</div>
+<div style="margin-left:5%;">    Au démarrage de l'ordinateur IMGLOAD est appellé et s'il y a une image
+</div>
+<div style="margin-left:5%;">    système en mémoire flash celle-ci est chargée en mémoire RAM.
+</div>
+<div style="margin-left:5%;">    S'il n'y a pas d'image disponible le message "No boot image available."
+</div>
+<div style="margin-left:5%;">    est affiché à l'écran.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+
+</body>
+</html>

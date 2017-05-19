@@ -1,0 +1,132 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body>
+<h1>serial</h1><p id="SERENBL">
+<b>SERENBL</b>  ( f -- )    
+<div style="margin-left:5%;">   activation/désactivation du port sériel. Le port est activé si 'f' est VRAI
+</div>
+<div style="margin-left:5%;">   sinon il est désactivé.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; TRUE activation, FALSE désactivation    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="Bxxxxx">
+<b>Bxxxxx</b>  ( -- n )  
+<div style="margin-left:5%;">   Plusieurs constantes sont définies pour l'ajustement de la vitesse de transfert
+</div>
+<div style="margin-left:5%;">   du port sériel. Les constantes suivantes sont disponibles.
+</div>
+<div style="margin-left:5%;">   B2400 -&gt; 2400 BAUD
+</div>
+<div style="margin-left:5%;">   B4800 -&gt; 4800 BAUD
+</div>
+<div style="margin-left:5%;">   B9600 -&gt; 9600 BAUD
+</div>
+<div style="margin-left:5%;">   B19200 -&gt; 19200 BAUD
+</div>
+<div style="margin-left:5%;">   B38400 -&gt; 38400 BAUD
+</div>
+<div style="margin-left:5%;">   B57600 -&gt; 57600 BAUD
+</div>
+<div style="margin-left:5%;">   B115200 -&gt; 115200 BAUD 
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Une constante qui sert à programmer le registre qui contrôle la vitesse du port.    
+</div>
+<hr>
+<p id="BAUD">
+<b>BAUD</b>  ( u -- )     
+<div style="margin-left:5%;">   Ajuste la vitesse du port sériel et l'active.
+</div>
+<div style="margin-left:5%;"> exemple:  
+</div>
+<div style="margin-left:5%;">   B57600 BAUD / le port est activé à la vitesse de 57600 BAUD.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   Une des constantes pré-difinies dont le nom commence par B.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   Le port est activé.
+</div>
+<hr>
+<p id="SPUTC">
+<b>SPUTC</b>   ( c -- )
+<div style="margin-left:5%;">   Transmission d'un caractère via le port sériel. Au démarrage le port est
+</div>
+<div style="margin-left:5%;">   activé à la vitesse de 115200 BAUD, 8 bits, 1 stop, pas de parité.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  caractère à transmettre.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="SGETC">
+<b>SGETC</b>  ( -- c )
+<div style="margin-left:5%;">   Attend un careactère du port sériel. Cette attente n'expire jamais.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   Caractère reçu du port sériel.    
+</div>
+<hr>
+<p id="SREADY?">
+<b>SREADY?</b> ( -- f )
+<div style="margin-left:5%;">  vérifie si le terminal est prêt à recevoir
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;      indicateur booléen, vrai si terminal prêt à recevoir.
+</div>
+<hr>
+<p id="SGETC?">
+<b>SGETC?</b> ( -- f )
+<div style="margin-left:5%;">   Vérifie s'il y a un caractère de disponible dans
+</div>
+<div style="margin-left:5%;">   la file de réception du port sériel.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp;    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen, VRAI si un caractère est disponible.
+</div>
+<hr>
+
+</body>
+</html>

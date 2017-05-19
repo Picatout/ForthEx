@@ -1,0 +1,3388 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body>
+<h1>core</h1><p id="NOP">
+<b>NOP</b> ( -- )
+<div style="margin-left:5%;">   mot vide, ne fait rien.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="CALL">
+<b>CALL</b>  ( i*x ud -- j*x )
+<div style="margin-left:5%;">    Appel d'une routine écrite en code machine et résident en mémoire flash.
+</div>
+<div style="margin-left:5%;">    La routine doit se terminée par une instruction machine RETURN.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;    Arguments consommés par la routine, dépend de celle-ci.
+</div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;     adresse de la routine.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;    Valeurs laissées sur la pile par la routine, dépend de celle-ci.   
+</div>
+<hr>
+<p id="I">
+<b>I</b>  ( -- n )    
+<div style="margin-left:5%;">   Empile compteur de boucle.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   valeur actuelle de I    
+</div>
+<hr>
+<p id="L">
+<b>L</b>  ( -- n )    
+<div style="margin-left:5%;">   Empile la limite de boucle.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   valeur de LIMIT.    
+</div>
+<hr>
+<p id="J">
+<b>J</b>  ( -- n )    
+<div style="margin-left:5%;">   Empile le compteur de la boucle qui englobe la boucle actuelle.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   valeur actuelle de J
+</div>
+<hr>
+<p id="UNLOOP">
+<b>UNLOOP</b> ( R: n1 n2 -- )
+<div style="margin-left:5%;">   Restaure les valeurs des variables I et LIMIT tels qu'elles étaient
+</div>
+<div style="margin-left:5%;">   avant l'exécution du dernier DO ou ?DO.
+</div>
+<div style="margin-left:5%;">   Après exécution  LIMIT=n1, I=n2
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien.</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="IP@">
+<b>IP@</b>  ( -- n )  
+<div style="margin-left:5%;">   empile la valeur de la variable IP.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     valeur de IP    
+</div>
+<hr>
+<p id="REBOOT">
+<b>REBOOT</b> ( -- )
+<div style="margin-left:5%;">   Redémarre le système avec le même effet qu'une mise sous tension
+</div>
+<div style="margin-left:5%;">   en exécutant l'instruction machine RESET.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="EXECUTE">
+<b>EXECUTE</b>  ( i*x CFA -- j*x )
+<div style="margin-left:5%;">   Exécute le mot dont le Code Field Address est au sommet de la pile.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;    Liste des arguments consommés par ce mot.
+</div>
+<div style="margin-left:5%;"><i>CFA</i>&nbsp;&nbsp;    Pointeur qui contient l'adresse du mot à exécuter.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;    Liste de valeur dépendant du mot exécuté.    
+</div>
+<hr>
+<p id="@XT">
+<b>@XT</b>  ( i*x a-addr -- j*x )
+<div style="margin-left:5%;">   Exécution vectorisée. 
+</div>
+<div style="margin-left:5%;">   Lit le contenu d'une variable qui contient le point d'entrée d'une routine
+</div>
+<div style="margin-left:5%;">   et exécute cette routine.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;  arguments attendus par la fonction qui sera exécutée.    
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   vers le code à exécuter.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;  dépend de la fonction exécutée.    
+</div>
+<hr>
+<p id="VECEXEC">
+<b>VECEXEC</b> ( i*x a-addr n -- j*x )
+<div style="margin-left:5%;">   Excécute la fonction n dans une table de pointeur de fonctions.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;   arguments requis par la fonction à exécuter.
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  adresse de la table de vecteurs.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     numéro du vecteur à exécuter.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;   valeurs retournées par la fonction exécutée.    
+</div>
+<hr>
+<p id="@">
+<b>@</b>   ( a-addr -- n )
+<div style="margin-left:5%;">   Empile la valeur d'une variable dont l'adresse est au sommet de la pile.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  adresse de la variable.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n	valeur</i>&nbsp;&nbsp; de la variable.    
+</div>
+<hr>
+<p id="C@">
+<b>C@</b>  ( c-addr -- c )
+<div style="margin-left:5%;">   Empile la valeur d'une variable caractère dont l'adresse est au sommet de la pile.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse de la variable.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère contenu dans la variable.    
+</div>
+<hr>
+<p id="E@">
+<b>E@</b>  ( a-addr -- n )    
+<div style="margin-left:5%;">   Empile la valeur d'une variable qui est dans la RAM EDS (Extended Data Space).
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  adresse de la variable
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n	valeur</i>&nbsp;&nbsp; de la variable.    
+</div>
+<hr>
+<p id="EC@">
+<b>EC@</b>  ( c-addr -- c )    
+<div style="margin-left:5%;">   Empile le caractère contenu dans une variable qui est dans la RAM EDS.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse de la variable dans l'espace EDS.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c	caractère</i>&nbsp;&nbsp; contenu dans la variable.    
+</div>
+<hr>
+<p id="2@">
+<b>2@</b>  ( a-addr -- d )    
+<div style="margin-left:5%;">   Empile la valeur d'une variable de type entier double.
+</div>
+<div style="margin-left:5%;">   Cette variable peut-être dans la mémoire EDS.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   adresse de la variable
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;   entier double, valeur de cette variable.    
+</div>
+<hr>
+<p id="TBL@">
+<b>TBL@</b>  ( n a-addr -- n )    
+<div style="margin-left:5%;">   Empile l'élément n d'un vecteur. Les valeurs d'indice débute à zéro.
+</div>
+<div style="margin-left:5%;">   Si a-addr est &gt;= 0x8000 il s'agit d'un vecteur en mémoire flash.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  indice
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  adresse du vecteur.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Valeur de l'élément n du vecteur.    
+</div>
+<hr>
+<p id="TBL!">
+<b>TBL!</b>  ( n1 n2 a-addr -- )    
+<div style="margin-left:5%;">   Sauvegarde une valeur dans l'élément d'un vecteur.
+</div>
+<div style="margin-left:5%;">   a-addr[n2] = n1.
+</div>
+<div style="margin-left:5%;">   Ce vecteur peut-être situé en mémoire EDS.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  valeur à affecté à l'élément
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  indice de l'élément
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  adresse de la table
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="!">
+<b>!</b>  ( n a-addr -- )    
+<div style="margin-left:5%;">   Sauvegarde d'un entier dans une variable.
+</div>
+<div style="margin-left:5%;">   La variable peut-être en mémoire EDS.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    valeur à sauvegarder
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; adresse de la variable.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="C!">
+<b>C!</b>  ( c c-addr -- )    
+<div style="margin-left:5%;">   Sauvegarde un caractère dans une variable. Cette variable peut-être
+</div>
+<div style="margin-left:5%;">   en mémoire EDS.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   valeur à sauvegarder.
+</div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse de la variable.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="2!">
+<b>2!</b>   ( d a-addr -- )    
+<div style="margin-left:5%;">   Sauvegarde d'un entier double. La variable peut-être en mémoire EDS.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;   entier double
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  adresse de la variable.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="DUP">
+<b>DUP</b> ( x1 -- x1 x2 )
+<div style="margin-left:5%;">   Clone la valeur au sommet de la pile.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;    valeur au sommet de  la pile    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;    valeur originale    
+</div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;    copie de la valeur originalement au sommet de la pile     
+</div>
+<hr>
+<p id="2DUP">
+<b>2DUP</b>   ( d1 -- d1 d2 )
+<div style="margin-left:5%;">   Clone l'entier double qui est au sommet de la pile.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>d1</i>&nbsp;&nbsp;      entier double.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>d1</i>&nbsp;&nbsp;      valeur originale.
+</div>
+<div style="margin-left:5%;"><i>d2</i>&nbsp;&nbsp;      copie de d1.
+</div>
+<hr>
+<p id="?DUP">
+<b>?DUP</b>  ( x1 -- 0 | x1 x2 )    
+<div style="margin-left:5%;">    Clone la valeur au sommet de la pile si cette valeur
+</div>
+<div style="margin-left:5%;">    est différente de zéro.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;   valeur au sommet de la pile.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;   valeur originale
+</div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;   Copie de x1 si x1&lt;&gt;0    
+</div>
+<hr>
+<p id="DROP">
+<b>DROP</b> ( x -- )
+<div style="margin-left:5%;">   Jette la valeur au sommet de la pile.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;    valeur au sommet de la pile.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;     La pile contient 1 élément de moins.    
+</div>
+<hr>
+<p id="2DROP">
+<b>2DROP</b> ( x1 x2 -- )
+<div style="margin-left:5%;">   Jette les 2 valeurs au sommet de la pile.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;  Valeur sous le sommet.
+</div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;  Valeur au sommet de la pile.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; La pile contient 2 élémnents de moins.    
+</div>
+<hr>
+<p id="RDROP">
+<b>RDROP</b>  ( R: x -- )
+<div style="margin-left:5%;">   Jette la valeur au sommet de la pile des retours.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;     valeur au sommet de la pile des retours.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; La pile des retours contient 1 élément de moins.    
+</div>
+<hr>
+<p id="SWAP">
+<b>SWAP</b>  ( x1 x2 -- x2 x1 )
+<div style="margin-left:5%;">   Inverse l'ordre des 2 éléments au sommet de la pile.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;   deuxième élément de la pile.
+</div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;   élément au sommet de la pile.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;   La valeur qui était au sommet est maintenant en second.
+</div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;   La valeur qui était en seconde est maintenant au sommet.    
+</div>
+<hr>
+<p id="2SWAP">
+<b>2SWAP</b>  ( d1 d2 -- d2 d1 )
+<div style="margin-left:5%;"> notation alternative: ( n1 n2 n3 n4 -- n3 n4 n1 n2 )    
+</div>
+<div style="margin-left:5%;">   Inverse l'ordre de 2 entiers doubles au sommet de la pile.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>d1</i>&nbsp;&nbsp;   Second entier doublde de la pile.
+</div>
+<div style="margin-left:5%;"><i>d2</i>&nbsp;&nbsp;   Entier double au sommet.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>d2</i>&nbsp;&nbsp;   Le sommet est maintenant en second.
+</div>
+<div style="margin-left:5%;"><i>d1</i>&nbsp;&nbsp;   Le second est maintenant au sommet.    
+</div>
+<hr>
+<p id="ROT">
+<b>ROT</b> ( n1 n2 n3 -- n2 n3 n1 )
+<div style="margin-left:5%;">   Rotation des 3 éléments du sommet de sorte que le 3ième se retrouve au sommet.
+</div>
+<div style="margin-left:5%;"> argments:
+</div>
+<div style="margin-left:5%;">   n1  Élément en 3ième position de la pile.
+</div>
+<div style="margin-left:5%;">   n2  Élément en 2ième position de la pile.
+</div>
+<div style="margin-left:5%;">   n3  Élément a sommet de la pile 
+</div>
+<div style="margin-left:5%;"> retourne:
+</div>
+<div style="margin-left:5%;">   n2  Le second est maintenant en 3ième position.
+</div>
+<div style="margin-left:5%;">   n3  Le sommet est maintenant en 2ième position.
+</div>
+<div style="margin-left:5%;">   n1  Le 3ième est maintenant au sommet.    
+</div>
+</p>
+<hr>
+<p id="-ROT">
+<b>-ROT</b> ( n1 n2 n3 -- n3 n1 n2 )
+<div style="margin-left:5%;">   Rotation inverse des 3 éléments du sommet de la pile.
+</div>
+<div style="margin-left:5%;">   Le sommet est envoyé en 3ième position.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;   3ième élément de la pile.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;   2ième élément de la pile.
+</div>
+<div style="margin-left:5%;"><i>n3</i>&nbsp;&nbsp;   1ier élément de la pile.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n3</i>&nbsp;&nbsp;   Le sommet est maintenant en 3ième position.
+</div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;   Le 3ième est maintenant en 2ième position.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;   Le second élément est maintenant au somment.    
+</div>
+<hr>
+<p id="OVER">
+<b>OVER</b>  ( n1 n2 -- n1 n2 n1 )
+<div style="margin-left:5%;">   Une copie du seconde élément de la pile est créé au sommet de celle-ci.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp; Second élément de la pile.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp; Sommet de la pile.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;   Le second est maintenant le 3ième.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;   Le sommet est maintenant le 2ième.
+</div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;   Une copie du second se retrouve maintenant au somment.    
+</div>
+<hr>
+<p id="2OVER">
+<b>2OVER</b>  ( d1 d2 -- d1 d2 d1 )
+<div style="margin-left:5%;">   Si on considère qu'il y a 2 entiers doubles au sommet de la pile, une
+</div>
+<div style="margin-left:5%;">   copie du second est créé au sommet. La pile s'allonge donc de 2 cellules.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>d1</i>&nbsp;&nbsp;   Entier double en seconde position.
+</div>
+<div style="margin-left:5%;"><i>d2</i>&nbsp;&nbsp;   Entier double au somment.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>d1</i>&nbsp;&nbsp;   L'entier double qui était en second est maintenant en 3ième position.
+</div>
+<div style="margin-left:5%;"><i>d2</i>&nbsp;&nbsp;   L'entier double qui était au sommet est maintenant en 2ième position.
+</div>
+<div style="margin-left:5%;"><i>d1</i>&nbsp;&nbsp;   Une copie du 2ième entier double est maintenant au somment.    
+</div>
+<hr>
+<p id="NIP">
+<b>NIP</b> ( x1 x2 -- x2 )
+<div style="margin-left:5%;">   Jette le second élément de la pile.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;   Valeur en second sur la pile.
+</div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;   Valeur au sommet de la pile.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;   La valeur au sommet n'a pas changée mais le 2ième élément est disparue.
+</div>
+<div style="margin-left:5%;"><i>La</i>&nbsp;&nbsp; pile a donc diminuée d'un élément.    
+</div>
+<hr>
+<p id="&gt;R">
+<b>&gt;R</b>  (  x --  R: -- x )
+<div style="margin-left:5%;">   Transfert le sommet de la pile des arguments au sommet de la pile des retours.
+</div>
+<div style="margin-left:5%;">   Après cette opération la pile des arguments a raccourcie d'un élément et la
+</div>
+<div style="margin-left:5%;">   pile des retours a rallongée d'un élément.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   Valeur au sommet de la pile des arguments.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   La valeur x est maintenant au sommet de la pile des retours.  
+</div>
+<hr>
+<p id="R&gt;">
+<b>R&gt;</b>  ( -- x  R: x -- )     
+<div style="margin-left:5%;">   Transfert d'un élément de la pile des retours vers la pile des arguments.
+</div>
+<div style="margin-left:5%;">   Après cette opération la pile des retours a raccourcie de 1 élément et la
+</div>
+<div style="margin-left:5%;">   pile des arguments a rallongée d'un élément.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   Valeur au somment de R
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   valeur qui était au somment de R est maintenant ajoutée au sommet de S.    
+</div>
+<hr>
+<p id="R@">
+<b>R@</b>  ( -- x R: x -- x )
+<div style="margin-left:5%;">    La valeur au sommet de la pile des retours est copiée au sommet de la pile
+</div>
+<div style="margin-left:5%;">    des arguments. Le contenu de la pile des retours n'est pas modifié. Le contenu
+</div>
+<div style="margin-left:5%;">    de la pile des arguments a 1 élément supplémentaire.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   Valeur au somment de R
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;    Valeur ajoutée à la pile des arguments, copie du sommet de R.    
+</div>
+<hr>
+<p id="SP@">
+<b>SP@</b>  ( -- n )
+<div style="margin-left:5%;">   Empile la valeur du pointeur de la pile des
+</div>
+<div style="margin-left:5%;">   arguments.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   valeur de la variable SP.    
+</div>
+<hr>
+<p id="SP!">
+<b>SP!</b> ( n -- )
+<div style="margin-left:5%;">   Initialise le pointeur de la pile des arguments avec la valeur
+</div>
+<div style="margin-left:5%;">   au sommet de la pile des arguments.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Valeur d'initialisation de SP.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="RP@">
+<b>RP@</b>  ( -- n )
+<div style="margin-left:5%;">   Empile la valeur du pointeur de la pile des retours.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   valeur du pointeur de la pile des retours.    
+</div>
+<hr>
+<p id="RP!">
+<b>RP!</b> ( n -- )
+<div style="margin-left:5%;">   Initialiste le pointeur de la pile des retours avec la valeur
+</div>
+<div style="margin-left:5%;">   qui est au sommet de la pile des arguments.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   valeur d'initialistaion de RP.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="TUCK">
+<b>TUCK</b>  ( x1 x2 -- x2 x1 x2 )
+<div style="margin-left:5%;">   Insère une copie de la valeur au sommet de la pile des arguments en 
+</div>
+<div style="margin-left:5%;">   Sous la valeur en 2ième position. Après cette opération la pile contient
+</div>
+<div style="margin-left:5%;">   1 élément de plus.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;  Second éléméent de la pile.
+</div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;  Élément au sommet de la pile.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;  copie du sommet de la pile.
+</div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;  2ieme élément de la pile demeure inchangé.
+</div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;  Sommet de la pile demeure inchangé.    
+</div>
+<hr>
+<p id="DEPTH">
+<b>DEPTH</b>  ( -- n )    
+<div style="margin-left:5%;">   Retourne le nombre d'éléments sur la pile des arguments. Le nombre d'éléments
+</div>
+<div style="margin-left:5%;">   renvoyé est exclu ce nouvel élément.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Nombre d'éléments qu'il y avait sur la pile avant cette opération.    
+</div>
+<hr>
+<p id="PICK">
+<b>PICK</b>  ( i*x n --  i*x x )
+<div style="margin-left:5%;">   insère le nième élément de la pile au sommet
+</div>
+<div style="margin-left:5%;">   l'argument n est retiré de la pile avant le comptage.
+</div>
+<div style="margin-left:5%;">   Si n==0 équivaut à DUP 
+</div>
+<div style="margin-left:5%;">   Si n==1 équivaut à OVER
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;   Liste des éléments présent sur la pile.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     position de l'élément recherché, 0 étant le sommet. n est retiré
+</div>
+<div style="margin-left:5%;"><i>de</i>&nbsp;&nbsp; la pile avant le comptage.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;   Liste originale des éléments.
+</div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;     copie de l'élément en position n.    
+</div>
+<hr>
+<p id="&gt;CSTK">
+<b>&gt;CSTK</b>  ( x --   C: -- x )    
+<div style="margin-left:5%;">   Tranfert du sommet de la pile des arguments 
+</div>
+<div style="margin-left:5%;">   vers la pile de contrôle. Après cette opération la pile 
+</div>
+<div style="margin-left:5%;">   des arguments à perdue un élément et la pile de contrôle en a
+</div>
+<div style="margin-left:5%;">   gagné un.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   Valeur au sommet de la pile des arguments.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>C:</i>&nbsp;&nbsp; x    Le sommet de  la pile de contrôle contient x.    
+</div>
+<hr>
+<p id="CSTK&gt;">
+<b>CSTK&gt;</b>  ( -- x C: x -- )
+<div style="margin-left:5%;">   Transfert du sommet de la pile de contrôle
+</div>
+<div style="margin-left:5%;">   vers la pile des arguments. Après cette opération la pile de contrôle
+</div>
+<div style="margin-left:5%;">   contient un élément de moins et la pile des arguments un élément de plus.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>C:</i>&nbsp;&nbsp; x   Valeur au sommet de la pile de contrôle.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;    Valeur ajoutée au sommet de la pile des arguments.    
+</div>
+<hr>
+<p id="AND">
+<b>AND</b>  ( n1 n2 -- n3 )
+<div style="margin-left:5%;">   Opération Booléenne bit à bit ET.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n3</i>&nbsp;&nbsp;  Résultat de l'opération.    
+</div>
+<hr>
+<p id="OR">
+<b>OR</b>  ( n1 n2 -- n3 )
+<div style="margin-left:5%;">   Opération Booléenne bit à bit OU inclusif.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n3</i>&nbsp;&nbsp;  Résultat de l'opération.    
+</div>
+<hr>
+<p id="XOR">
+<b>XOR</b>  ( n1 n2 -- n3 )
+<div style="margin-left:5%;">   Opération Booléenne bit à bit OU exclusif.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n3</i>&nbsp;&nbsp;  Résultat de l'opération.    
+</div>
+<hr>
+<p id="NOT">
+<b>NOT</b>  ( n1 -- n2 )
+<div style="margin-left:5%;">   Opération Booléenne de négation. VRAI devient FAUX et vice-versa.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Résultat de l'opération.    
+</div>
+<hr>
+<p id="0=">
+<b>0=</b>  ( n -- f )
+<div style="margin-left:5%;">   Vérifie si n est égal à zéro. Retourne un indicateur Booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Entier à vérifier. Est remplacé par l'indicateur Booléen.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   Indicateur Booléen VRAI|FAUX    
+</div>
+<hr>
+<p id="0&lt;&gt;">
+<b>0&lt;&gt;</b>  ( n -- f )    
+<div style="margin-left:5%;">   Vérifie si n est différent de zéro. Retourne un indicateur Booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen VRAI|FAUX    
+</div>
+<hr>
+<p id="0&lt;">
+<b>0&lt;</b>  ( n -- f )    
+<div style="margin-left:5%;">   Vérifie si n est plus petit que zéro. Retourne un indicateur Booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen VRAI|FAUX    
+</div>
+<hr>
+<p id="0&gt;">
+<b>0&gt;</b>  ( n -- f )    
+<div style="margin-left:5%;">   Vérifie si n est plus grand que zéro. Retourne un indicateur Booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen VRAI|FAUX    
+</div>
+<hr>
+<p id="=">
+<b>=</b>  ( n1 n2 -- f )
+<div style="margin-left:5%;">   Vérifie l'égalité des 2 entiers. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen VRAI|FAUX, vrai si égaux.    
+</div>
+<hr>
+<p id="&lt;&gt;">
+<b>&lt;&gt;</b>  ( n1 n2 -- f )
+<div style="margin-left:5%;">   Vérifie si les 2 entiers sont différents. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen VRAI|FAUX, vrai si différent.    
+</div>
+<hr>
+<p id="&lt;">
+<b>&lt;</b>  ( n1 n2 -- f )
+<div style="margin-left:5%;">   Vérifie si n1 &lt; n2. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'une comparaison sur nombre signés.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen VRAI|FAUX, vrai si n1 &lt; n2.    
+</div>
+<hr>
+<p id="&gt;">
+<b>&gt;</b> ( n1 n2 -- f )
+<div style="margin-left:5%;">   Vérifie si n1 &gt; n2. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'une comparaison sur nombre signés.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen VRAI|FAUX, vrai si n1 &gt; n2.    
+</div>
+<hr>
+<p id="U&lt;">
+<b>U&lt;</b>  ( u1 u2 -- f )
+<div style="margin-left:5%;">   Vérifie si u1 &lt; u2. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'une comparaison sur nombre non signés.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen VRAI|FAUX, vrai si u1 &lt; u2.    
+</div>
+<hr>
+<p id="U&gt;">
+<b>U&gt;</b>  ( u1 u2 -- f )
+<div style="margin-left:5%;">   Vérifie si u1 &gt; u2. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'une comparaison sur nombre non signés.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen VRAI|FAUX, vrai si u1 &gt; u2.    
+</div>
+<hr>
+<p id="CELL">
+<b>CELL</b>   ( -- u )    
+<div style="margin-left:5%;">   Empile la taille en octets d'une cellule. Une cellule est le nom donné à un
+</div>
+<div style="margin-left:5%;">   élément de la pile.    
+</div>
+</p>
+<hr>
+<p id="CELL+">
+<b>CELL+</b>  ( a-addr -- a-addr' )    
+<div style="margin-left:5%;">   Incrémente l'adresse au sommet de la pile de la taille d'une cellule.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr'</i>&nbsp;&nbsp;  adresse incrémentée.    
+</div>
+<hr>
+<p id="CELLS">
+<b>CELLS</b>  ( n1 -- n2 )    
+<div style="margin-left:5%;">    Convertie l'entier n1 en la taille occupée par n1 cellules.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;   Nombre de cellules.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;   Espace occupé par n1 cellules.   
+</div>
+<hr>
+<p id="ALIGN">
+<b>ALIGN</b>  ( -- )    
+<div style="margin-left:5%;">   Si la variable système DP  (Data Pointer) pointe sur une adresse impaire, 
+</div>
+<div style="margin-left:5%;">   aligne DP sur l'adresse paire supérieure.
+</div>
+<div style="margin-left:5%;">   Met 0 dans l'octet sauté.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="ALIGNED">
+<b>ALIGNED</b>  ( addr -- a-addr )  
+<div style="margin-left:5%;">   Si l'adrsse au sommet de la pile est impaire, aligne cette adresse sur la valeur paire supérieure.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp;  adresse à vérifier.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; adresse alignée.  
+</div>
+<hr>
+<p id="&gt;CHAR">
+<b>&gt;CHAR</b>  ( n -- c )    
+<div style="margin-left:5%;">   Vérifie que n est dans l'intervalle ASCII 32..126, sinon remplace c par '_'  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Entier à convertir en caractère.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;    Valeur ASCII entre 32 et 126    
+</div>
+<hr>
+<p id="HERE">
+<b>HERE</b>   ( -- addr )    
+<div style="margin-left:5%;">   Empile la valeur de la variable système DP (Data Pointer).
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="MOVE">
+<b>MOVE</b>  ( c-addr1 c-addr2 u -- )    
+<div style="margin-left:5%;">   Copie un bloc mémoire RAM en évitant la propagation.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;  source
+</div>
+<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  destination
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;      compte en octets.   
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="CHARS">
+<b>CHARS</b>   ( n1 -- n2 )    
+<div style="margin-left:5%;">   Retourne l'espace occupée par n caractères en octets.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Nombre de caractères
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Espace requis pour n1 caractères.    
+</div>
+<hr>
+<p id="CHAR+">
+<b>CHAR+</b>   ( c-addr -- c-addr' )  
+<div style="margin-left:5%;">   Incrémente l'adresse de l'espace occupé par un caractère.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse alignée sur caractère.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;  adresse alignée sur caractère suivant.  
+</div>
+<hr>
+<p id="CHAR">
+<b>CHAR</b>   ( cccc -- c )    
+<div style="margin-left:5%;">   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
+</div>
+<div style="margin-left:5%;">   A la suite de cette opération la variable &gt;IN pointe après le mot.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   chaîne de caractère dans le flux d'entré.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;      Le premier caractère du mot.    
+</div>
+<hr>
+<p id="[CHAR]">
+<b>[CHAR]</b>   ( ccccc -- )    
+<div style="margin-left:5%;">   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
+</div>
+<div style="margin-left:5%;">   Après cette opération la variable &gt;IN pointe après le mot trouvé.
+</div>
+<div style="margin-left:5%;">   Ce mot ne peut-être utilisé qu'à l'intérieur d'une définition. i.e. STATE=1    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccccc</i>&nbsp;&nbsp;  chaîne de caractère dans le flux d'entré.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   Le caractère es compilé dans la définition.    
+</div>
+<hr>
+<p id="FILL">
+<b>FILL</b> ( c-addr u c -- )    
+<div style="margin-left:5%;">   Initialise un bloc mémoire RAM de dimension u avec
+</div>
+<div style="margin-left:5%;">   le caractère c.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse début zone.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        nombre de caractères à remplir.
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;        caractère de remplissage.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="STATE">
+<b>STATE</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui indique si le système est en mode interprétation ou compilation.
+</div>
+<div style="margin-left:5%;">   STATE=0 -&gt; interprétation,  STATE=1 -&gt; compilation.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="DP">
+<b>DP</b> ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui contient la position du pointeur de donnée dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Lorsqu'une nouvelle définition est créée ou que de l'espace est réservé avec ALLOT ce
+</div>
+<div style="margin-left:5%;">   pointeur avant à la première position libre.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="BASE">
+<b>BASE</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui contient la valeur de la base numérique active.
+</div>
+<div style="margin-left:5%;">   Le contenu de cette variable est modifié par les mots HEX et DECIMAL.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="SYSLATEST">
+<b>SYSLATEST</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui contient le NFA du dernier mot défini dans le dictionnaire
+</div>
+<div style="margin-left:5%;">   système en mémoire FLASH.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="LATEST">
+<b>LATEST</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui contient le NFA du derner mot défini par l'utilisateur.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="PAD">
+<b>PAD</b> ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui contient l'adresse d'un tampon utilisé pour le travail
+</div>
+<div style="margin-left:5%;">   sur des chaînes de caractère. Ce tampon est utilisé entre autre pour la conversion
+</div>
+<div style="margin-left:5%;">   des entiers en chaêine de caractères pour l'affichage.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="TIB">
+<b>TIB</b> ( -- a-addr )
+<div style="margin-left:5%;">   Variable système contenant l'adresse du tampon de saisie des chaînes à partir
+</div>
+<div style="margin-left:5%;">   du clavier. Ce tampon est utilisé par l'interpréteur/compilateur en mode interactif.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="PASTE">
+<b>PASTE</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui contient l'adresse d'un tampon qui contient une copie
+</div>
+<div style="margin-left:5%;">   de la dernière chaîne interprétée en mode interactif. Permet de rappeller cette
+</div>
+<div style="margin-left:5%;">   chaîne à l'écran par la commande CTRL_V.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="&gt;IN">
+<b>&gt;IN</b>   ( -- a-addr )
+<div style="margin-left:5%;">   Variable système indique la position ou est rendue l'analyseur lexical dans
+</div>
+<div style="margin-left:5%;">   le traitement de la chaîne d'entrée. Cette variable est utilisée par l'interpréteur/compilateur.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="'SOURCE	(">
+<b>'SOURCE	(</b> -- a-addr )
+<div style="margin-left:5%;">   Variable système qui contient le pointeur du début du tampon utilisé par
+</div>
+<div style="margin-left:5%;">   l'interpréteur/compilateur.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="#SOURCE">
+<b>#SOURCE</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Variable système contenant la grandeur du tampon source.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="RPBREAK">
+<b>RPBREAK</b>   ( -- a-addr )
+<div style="margin-left:5%;">   Variable système utilisé par le mot BREAK pour sauvegarder la position
+</div>
+<div style="margin-left:5%;">   de RSP pour la réentrée.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="DBGEN">
+<b>DBGEN</b>  ( -- a-addr)
+<div style="margin-left:5%;">   Variable système qui contient un indicateur Booléen d'activation/désactivation des breakpoints.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="SYSCONS">
+<b>SYSCONS</b>   ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui indique le périphérique actuel utilisé par la console.
+</div>
+<div style="margin-left:5%;">   La console peut fonctionné en mode LOCAL ou REMOTE.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<hr>
+<p id="VERSION">
+<b>VERSION</b>   ( -- c-addr )
+<div style="margin-left:5%;">   Constante système, Adresse de la chaîne compté qui contient l'information de version firmware.
+</div>
+<div style="margin-left:5%;">   Utilisation: VERSION COUNT TYPE
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse de la chaîne constante en mémoire FLASH.    
+</div>
+<hr>
+<p id="R0">
+<b>R0</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Constante système, retourne l'adresse de la base de la pile des retours.       
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse de la base de la pile des retours.    
+</div>
+<hr>
+<p id="S0">
+<b>S0</b>   ( -- a-addr )
+<div style="margin-left:5%;">   Constante système qui retourne l'adresse de la base de la piles des arguments.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse de la base de la pile des arguments.    
+</div>
+<hr>
+<p id="RAMEND">
+<b>RAMEND</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Constante système qui retourne l'adresse après la fin de la mémoire RAM.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse fin de la RAM+1    
+</div>
+<hr>
+<p id="IMMED">
+<b>IMMED</b>  ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne le bit F_IMMEDIATE. Ce bit inscrit dans le
+</div>
+<div style="margin-left:5%;">   premier octet du champ NFA et indique si le mot est immmédiat.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     F_IMMED bit indicateur mot immédiat.    
+</div>
+<hr>
+<p id="HIDDEN">
+<b>HIDDEN</b>   ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne le bit F_HIDDEN. Ce bit est inscrit dans le 
+</div>
+<div style="margin-left:5%;">   premier octet du champ NFA et indique si le mot est caché à la recherche par FIND.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n	F_HIDDEN</i>&nbsp;&nbsp; bit indicateur de mot caché.       
+</div>
+<hr>
+<p id="NMARK">
+<b>NMARK</b>  ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne le bit F_MARK. Ce bit est inscrit dans le
+</div>
+<div style="margin-left:5%;">   premier octet du champ NFA et sert la localisé ce champ. Ce bit est utilisé
+</div>
+<div style="margin-left:5%;">   par le mot CFA&gt;NFA.    
+</div>
+</p>
+<hr>
+<p id="LENMASK">
+<b>LENMASK</b>   ( -- n )
+<div style="margin-left:5%;">   Constante système retourne le masque pour la longueur du nom dans les entêtes
+</div>
+<div style="margin-left:5%;">   du dictionnaire. Ce masque sert à éliminer les bits F_NMARK,F_HIDDEN et F_IMMED
+</div>
+<div style="margin-left:5%;">   pour ne conserver que les bits qui indique la longueur du nom.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   masque LEN_MASK    
+</div>
+<hr>
+<p id="BL">
+<b>BL</b>  ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne la valeur ASCII 32 (espace).
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    valeur ASCII 32  qui représente l'espace.    
+</div>
+<hr>
+<p id="TIBSIZE">
+<b>TIBSIZE</b>   ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne la longueur du TIB (Transaction Input Buffer)
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    longueur du tampon TIB.    
+</div>
+<hr>
+<p id="PADSIZE">
+<b>PADSIZE</b>   ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne la longueur du tampon PAD.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    longueur du tampon PAD.    
+</div>
+<hr>
+<p id="ULIMIT">
+<b>ULIMIT</b>   ( -- a-addr )
+<div style="margin-left:5%;">   Constante système qui retourne l'adresse limite+1 de la mémoire réservré
+</div>
+<div style="margin-left:5%;">   au données du dictionnaire utilisateur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse fin dictionnaire+1    
+</div>
+<hr>
+<p id="TRUE">
+<b>TRUE</b>  ( -- f )
+<div style="margin-left:5%;">   Constante système qui retourne la valeur Booléenne VRAI.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;      indicateur Booléen VRAI = -1    
+</div>
+<hr>
+<p id="FALSE">
+<b>FALSE</b>  ( -- f )
+<div style="margin-left:5%;">   Constante système qui retourne la valeur Booléenne FAUX.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;      indicateur Booléen FAUX = 0    
+</div>
+<hr>
+<p id="DP0">
+<b>DP0</b>    ( -- a-addr )
+<div style="margin-left:5%;">   Constante système qui retourne l'adresse du début de l'espace de données utilisateur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse du début espace utilisateur en mémoire RAM.    
+</div>
+<hr>
+<p id="SOURCE">
+<b>SOURCE</b>  ( -- c-addr u ) 
+<div style="margin-left:5%;">   Ce mot retourne l'adresse et la longueur du tampon qui est la source de
+</div>
+<div style="margin-left:5%;">   l'évaluation par l'interpréteur/compilateur.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse début du tampon.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       longueur du tampon.    
+</div>
+<hr>
+<p id="SOURCE!">
+<b>SOURCE!</b>   ( c-addr u -- )    
+<div style="margin-left:5%;">   sauvegarde les valeur de la SOURCE.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse du début du tampon qui doit-être évalué.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        Longueur du tampon.    
+</div>
+<hr>
+<p id="DECIMAL?">
+<b>DECIMAL?</b>  ( c -- f )
+<div style="margin-left:5%;">   vérifie si c est dans l'ensemble ASCII {'0'..'9'}
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère ASCII à vérifier.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen.
+</div>
+<hr>
+<p id="&gt;BASE10">
+<b>&gt;BASE10</b>  ( u1 c -- u2 )
+<div style="margin-left:5%;">   étape de conversion d'une chaîne de caractère en 
+</div>
+<div style="margin-left:5%;">   entier décimal.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  entier résultant de la conversion d'une chaîne en décimal
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  caractère ASCII  dans l'intervalle {'0'..'9'}
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="?DIGIT">
+<b>?DIGIT</b>  ( c -- x 0 | n -1 )    
+<div style="margin-left:5%;">   Vérifie si le caractère est un digit valide dans la base actuelle.
+</div>
+<div style="margin-left:5%;">   Si valide retourne la valeur du digit et -1
+</div>
+<div style="margin-left:5%;">   Si invalide retourne x 0
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère à convertir dans la base active.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;    un entier quelconque qui doit-être ignoré.
+</div>
+<div style="margin-left:5%;"><i>0</i>&nbsp;&nbsp;    le caractère n'était pas valide, x doit-être ignoré.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Le caractère convertie en digit de la base active.
+</div>
+<div style="margin-left:5%;"><i>-1</i>&nbsp;&nbsp;   Le caractère était valide et n doit-être conservé.    
+</div>
+<hr>
+<p id="?DOUBLE">
+<b>?DOUBLE</b>   ( c-addr u -- c-addr' u' f )    
+<div style="margin-left:5%;">   Vérifie si le caractère qui a mis fin à &gt;NUMBER
+</div>
+<div style="margin-left:5%;">   est {'.'|','}. Si c'est le cas il s'agit d'un
+</div>
+<div style="margin-left:5%;">   nombre double précision. saute le caractère et retourne -1.
+</div>
+<div style="margin-left:5%;">   Dans le cas contraire retourne 0.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  pointe vers l'adresse du dernier caractère analysé par &gt;NUMBER
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       longueur de la chaîne restante.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp; acresse incrémenté si le critère {'.'|','} est vrai.
+</div>
+<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;      longueur décrémentée si le critère {'.'|','} est vrai.
+</div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;       indicateur Booléen indiquant s'il s'agit d'un entier double.    
+</div>
+<hr>
+<p id="&gt;NUMBER">
+<b>&gt;NUMBER</b>  (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )   
+<div style="margin-left:5%;">   Converti la chaîne en nombre en utilisant la valeur de BASE.
+</div>
+<div style="margin-left:5%;">   La conversion s'arrête au premier caractère non numérique.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:  
+</b></div>
+<div style="margin-left:5%;"><i>'ud1'	</i>&nbsp;&nbsp;    est initialisé à zéro  
+</div>
+<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp; Adrese du début de la chaîne à convertir en entier.
+</div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;      Longueur du tampon à analyser.  
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp;     Entier double résultant de la conversion.
+</div>
+<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse pointant après le nombre dans le tampon.
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;      Longueur restante dans le tampon.  
+</div>
+<hr>
+<p id="?SIGN">
+<b>?SIGN</b>   ( c-addr u -- c-addr' u' f )   
+<div style="margin-left:5%;">   Vérifie s'il y a un signe '-' à la première postion de la chaîne spécifiée par &lt;c-addr u&gt;
+</div>
+<div style="margin-left:5%;">   Retourne f=VRAI si '-' sinon f=FAUX.    
+</div>
+<div style="margin-left:5%;">   S'il y a un signe avance au delà du signe
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse où débute l'analyse.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        longueur du tampon à analyser.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;  adresse incrément au delà du signe '-' s'il y a lieu.
+</div>
+<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;       longueur restante dans le tampon.
+</div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;        Indicateur Booléen, VRAI s'il le premier caractère est '-'.   
+</div>
+<hr>
+<p id="?BASE">
+<b>?BASE</b>  ( c-addr u1 -- c-addr' u1' )  
+<div style="margin-left:5%;">   Vérifie s'il y a un modificateur de base
+</div>
+<div style="margin-left:5%;">   Si oui modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse du début de la chaîne à analyser.
+</div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;      longueur maximale de la chaîne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;  adresse incrémentée au delà du caractère modificateur de BASE.
+</div>
+<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;       longueur restante de la chaîne.  
+</div>
+<hr>
+<p id="?NUMBER">
+<b>?NUMBER</b>   ( c-addr -- c-addr 0 | n -1 )  
+<div style="margin-left:5%;">   Conversion d'une chaîne en nombre
+</div>
+<div style="margin-left:5%;">    c-addr indique le début de la chaîne
+</div>
+<div style="margin-left:5%;">   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
+</div>
+<div style="margin-left:5%;">   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
+</div>
+<div style="margin-left:5%;">   à une position quelconque de la chaîne saisie sauf à la première position.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse de la chaîne à analyser.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; 0   S'il la conversio échoue retourne l'adresse et l'indicateur FAUX	
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; -1    Si la conversion réussie retourne l'entier et l'indicateur VRAI.  
+</div>
+<hr>
+<p id="WORDS">
+<b>WORDS</b>   ( -- )  
+<div style="margin-left:5%;">   Affiche sur la console la liste des mots du dictionnaire. Les mots dont l'attribut F_HIDDEN
+</div>
+<div style="margin-left:5%;">   est à 1 ne sont pas affichés.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="UPPER">
+<b>UPPER</b>   ( c-addr -- c-addr )  
+<div style="margin-left:5%;">   Convertie la chaîne comptée en majuscules. Le vocabulaire de ForthEx est
+</div>
+<div style="margin-left:5%;">   est insensible à la casse. Les noms sont tous convertis en majuscules avant
+</div>
+<div style="margin-left:5%;">   d'être ajoutés dans le dictionnaire.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adressse du début de la chaîne comptée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  La même adresse.  
+</div>
+<hr>
+<p id="SCAN">
+<b>SCAN</b> ( c-addr u c -- c-addr' u' )  
+<div style="margin-left:5%;">   Recherche du caractère 'c' dans le bloc
+</div>
+<div style="margin-left:5%;">   mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
+</div>
+<div style="margin-left:5%;">   retourne la position de 'c' et
+</div>
+<div style="margin-left:5%;">   le nombre de caractères restant dans le bloc
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse début zone RAM
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       longueur de la zone en octets.    
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;       caractère recherché.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;  adresse du premier 'c' trouvé dans cette zone
+</div>
+<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;       longueur de la zone restante à partir de c-addr'    
+</div>
+<hr>
+<p id="SKIP">
+<b>SKIP</b> ( c-addr u c -- c-addr' u' )  
+<div style="margin-left:5%;">   avance au delà de 'c'. Retourne l'adresse du premier caractère
+</div>
+<div style="margin-left:5%;">   différent de 'c' et la longueur restante de la zone.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;    adresse début de la zone
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;         longueur de la zone
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;         caractère à sauter.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;   adresse premier caractère &lt;&gt; 'c'
+</div>
+<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;        longueur de la zone restante à partir c-addr'    
+</div>
+<hr>
+<p id="ADR&gt;IN">
+<b>ADR&gt;IN</b>  ( c-addr -- ) 
+<div style="margin-left:5%;">   Ajuste la variable  &gt;IN à partir de la position laissée
+</div>
+<div style="margin-left:5%;">   par le dernier PARSE
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse du pointeur après le dernier PARSE
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="PARSE">
+<b>PARSE</b>   ( c -- c-addr u )    
+<div style="margin-left:5%;">   Accumule les caractères jusqu'au
+</div>
+<div style="margin-left:5%;">   prochain 'c'. Met à jour la variable &gt;IN
+</div>
+<div style="margin-left:5%;">   PARSE filtre les caractères suivants:
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments: 
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;    caractère délimiteur
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse du premier caractère de la chaîne
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        longueur de la chaîne.
+</div>
+<hr>
+<p id="&gt;COUNTED">
+<b>&gt;COUNTED</b> ( src n dest -- )   
+<div style="margin-left:5%;">   copie une chaîne dont l'adresse et la longueur sont fournies
+</div>
+<div style="margin-left:5%;">   en arguments vers une chaîne comptée dont l'adresse est fournie.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>src</i>&nbsp;&nbsp; addresse chaîne à copiée
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; longueur de la chaîne
+</div>
+<div style="margin-left:5%;"><i>dest</i>&nbsp;&nbsp; adresse destination
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; 
+</div>
+<hr>
+<p id="PARSE-NAME">
+<b>PARSE-NAME</b>    ( ccccc -- c-addr u ) 
+<div style="margin-left:5%;">   Recherche le prochain mot dans le flux d'entrée
+</div>
+<div style="margin-left:5%;">   Tout caractère &lt; 32 est considéré comme un espace
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;    chaîne de caractères dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  addresse premier caractère.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    longueur de la chaîne.
+</div>
+<hr>
+<p id="WORD">
+<b>WORD</b>  ( c -- c-addr )  
+<div style="margin-left:5%;">   localise le prochain mot délimité par 'c'
+</div>
+<div style="margin-left:5%;">   la variable TOIN indique la position courante
+</div>
+<div style="margin-left:5%;">   le mot trouvé est copié à la position DP
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère délimiteur
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;    adresse chaîne comptée.    
+</div>
+<hr>
+<p id="FIND">
+<b>FIND</b>  ( c-addr -- c-addr 0 | cfa 1 | cfa -1 )   
+<div style="margin-left:5%;">   Recherche un mot dans le dictionnaire
+</div>
+<div style="margin-left:5%;">   ne retourne pas les mots cachés (attribut: F_HIDDEN).
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse de la chaîne comptée à rechercher.
+</div>
+<div style="margin-left:5%;"><b> retourne: 
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; 0 si adresse non trouvée
+</div>
+<div style="margin-left:5%;"><i>xt</i>&nbsp;&nbsp; 1 trouvé mot immédiat
+</div>
+<div style="margin-left:5%;"><i>xt</i>&nbsp;&nbsp; -1 trouvé mot non-immédiat
+</div>
+<hr>
+<p id="ACCEPT">
+<b>ACCEPT</b> ( c-addr +n1 -- +n2 ) 
+<div style="margin-left:5%;">   Lecture d'une ligne de texte à partir de la console.
+</div>
+<div style="margin-left:5%;">   La chaîne terminée par touche la touche 'ENTER'.
+</div>
+<div style="margin-left:5%;">   Les touches de contrôles suivantes sont reconnues:
+</div>
+<div style="margin-left:5%;">   - VK_CR   termine la saisie
+</div>
+<div style="margin-left:5%;">   - CTRL_X  efface la ligne et place le curseur à gauche
+</div>
+<div style="margin-left:5%;">   - VK_BACK recule le curseur d'une position et efface le caractère.
+</div>
+<div style="margin-left:5%;">   - CTRL_L  efface l'écran au complet et plac le curseur dans le coin
+</div>
+<div style="margin-left:5%;">             supérieur gauche.
+</div>
+<div style="margin-left:5%;">   - CTRL_V  Réaffiche la dernière ligne saisie
+</div>
+<div style="margin-left:5%;">   - Les autres touches de contrôles sont ignorées. 
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   addresse du buffer
+</div>
+<div style="margin-left:5%;"><i>+n1</i>&nbsp;&nbsp;      longueur du buffer
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>+n2</i>&nbsp;&nbsp;      longueur de la chaîne lue    
+</div>
+<hr>
+<p id="COUNT">
+<b>COUNT</b>  ( c-addr1 -- c-addr2 u )  
+<div style="margin-left:5%;">   Retourne la spécification de la chaîne comptée dont l'adresse est c-addr1.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;   Adresse d'une chaîne de caractères débutant par un compteur.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;      longueur de la chaîne.  
+</div>
+<hr>
+<p id="INTERPRET">
+<b>INTERPRET</b>  ( c-addr u -- )   
+<div style="margin-left:5%;">    Évaluation d'un tampon contenant du texte source par l'interpréteur/compilateur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse du premier caractère du tampon.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   longueur du tampon.   
+</div>
+<hr>
+<p id="EVALUATE">
+<b>EVALUATE</b>   ( i*x c-addr u -- j*x )      
+<div style="margin-left:5%;">   Évaluation d'un texte source. Le contenu de SOURCE est sauvegardé
+</div>
+<div style="margin-left:5%;">   et restauré à la fin de cette évaluation.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;    Contenu initial de la pile des arguments avant l'évalulation de la chaîne.
+</div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractère de la chaîne à évaluer.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Longueur de la chaîne à évaluer.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;   Contenu final de la pile après l'évaluation de la chaîne.      
+</div>
+<hr>
+<p id="ABORT">
+<b>ABORT</b> ( -- )  
+<div style="margin-left:5%;">   Vide la pile dstack et appel QUIT
+</div>
+<div style="margin-left:5%;">   Si une compilation est en cours annulle les effets de celle-ci  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  ne retourne pas mais branche sur QUIT  
+</div>
+<hr>
+<p id="ABORT"">
+<b>ABORT"</b>  ( cccc -- )     
+<div style="margin-left:5%;">   Compile le runtime de ?ABORT
+</div>
+<div style="margin-left:5%;">   A  utiliser à l'intérieur d'une définition seulement.  
+</div>
+</p>
+<hr>
+<p id="CLIP">
+<b>CLIP</b>  ( n+ -- )    
+<div style="margin-left:5%;">   Copie le contenu du tampon TIB dans le tampon PASTE.
+</div>
+<div style="margin-left:5%;">   Le contenu de PASTE est une chaîne comptée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>	n+</i>&nbsp;&nbsp; nombre de caractères de la chaîne à copier.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="GETCLIP">
+<b>GETCLIP</b>  ( -- n+ )    
+<div style="margin-left:5%;">   Copie la chaîne qui est dans le tampon PASTE dans le tampon TIB.
+</div>
+<div style="margin-left:5%;">   Retourne la longueur de la chaîne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; longueur de la châine.    
+</div>
+<hr>
+<p id="QUIT">
+<b>QUIT</b>   ( -- )    
+<div style="margin-left:5%;">   Boucle de l'interpréteur/compilateur. En dépit de son nom cette boucle
+</div>
+<div style="margin-left:5%;">   ne quitte jamais. Il s'agit de l'interface avec l'utilisateur. 
+</div>
+<div style="margin-left:5%;">   A l'entré la pile des retours est vidée et la variable STATE est mise à 0.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="(">
+<b>(</b>    ( ccccccc -- )    
+<div style="margin-left:5%;">   Ce mot introduit un commentaire qui se termine  par ')'.
+</div>
+<div style="margin-left:5%;">   Il doit y avoir un espace de chaque côté de '(' car c'est un mot forth.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'un mot immédiat, il s'exécute donc même en mode compilation.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp;   Tous les caractères dans le tampon d'entré sont sauté jusqu'après le '('.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="\">
+<b>\</b>    ( cccc -- )    
+<div style="margin-left:5%;">   Ce mot introduit un commentaire qui se termine à la fin de la ligne.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'un mot immédiat, il s'éxécute donc même en mode compilation.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp;  Tous les caractères dans le tampon d'entré sont sautés jusqu'à la fin de ligne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="NFA&gt;LFA">
+<b>NFA&gt;LFA</b>  ( a-addr1 -- a-addr2 )  
+<div style="margin-left:5%;">   A partir de l'adresse NFA (Name Field Address) retourne
+</div>
+<div style="margin-left:5%;">   l'adresse LFA  (Link Field Address).  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;   adresse du champ NFA dans l'entête du dictionnaire.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;   adresse du champ LFA dans l'entête du dictionnaire.  
+</div>
+<hr>
+<p id="NFA&gt;CFA">
+<b>NFA&gt;CFA</b>  ( a-addr1 -- a-addr2 )    
+<div style="margin-left:5%;">   A partir de l'adresse NFA (Name Field Address) retourne
+</div>
+<div style="margin-left:5%;">   l'adresse CFA (Code Field Address).    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;  Adresse du champ NFA dans l'entête du dictionnaire.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;  Adresse du CFA dans l'entête du dictionnaire.    
+</div>
+<hr>
+<p id="&gt;BODY">
+<b>&gt;BODY</b>  ( a-addr1 -- a-addr2 )    
+<div style="margin-left:5%;">   A partir du CFA (Code Field Address) retourne l'adresse PFA (Parameter Field Address)
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;   Adresse du CFA dans l'entête du dictionnaire.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;   Adresse du PFA (Parameter Field Address).
+</div>
+<hr>
+<p id="CFA&gt;NFA">
+<b>CFA&gt;NFA</b>   ( a-addr1 -- a-addr2 )    
+<div style="margin-left:5%;">   Passe du champ CFA au champ NFA.
+</div>
+<div style="margin-left:5%;">   Il n'y a pas de lien arrière entre le CFA et le NFA
+</div>
+<div style="margin-left:5%;">   Le bit F_MARK (bit 7) est utilisé pour marquer l'octet à la position NFA
+</div>
+<div style="margin-left:5%;">   Le CFA étant immédiatement après le nom, il suffit de 
+</div>
+<div style="margin-left:5%;">   reculer octet par octet jusqu'à atteindre un octet avec le bit F_MARK==1
+</div>
+<div style="margin-left:5%;">   puisque les caractères du nom sont tous &lt; 128.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;   Adresse du CFA dans l'entête du dictionnaire.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp; Adresse du NFA dans l'entête du dictionnaire.
+</div>
+<hr>
+<p id="?EMPTY">
+<b>?EMPTY</b>  ( -- f )  
+<div style="margin-left:5%;">   Vérifie si le dictionnaire utilisateur est vide.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;    Indicateur Booléean, retourne VRAI si dictionnaire utilisateur vide.  
+</div>
+<hr>
+<p id="IMMEDIATE">
+<b>IMMEDIATE</b>  ( -- )    
+<div style="margin-left:5%;">   Met à 1 l'indicateur F_IMMED dans l'entête du dernier mot défini.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="HIDE">
+<b>HIDE</b>  ( -- )  
+<div style="margin-left:5%;">   Met l'indicateur F_HIDDEN à 1 dans l'entête du dernier mot défini dans le dictionnaire.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="ALLOT">
+<b>ALLOT</b>  ( n -- )  
+<div style="margin-left:5%;">   Allocation/rendition de mémoire dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   si n est négatif n octets seront rendus.
+</div>
+<div style="margin-left:5%;">   La variable DP est ajustée en conséquence.  
+</div>
+<div style="margin-left:5%;"> arguements:
+</div>
+<div style="margin-left:5%;">   n   nombre d'octets
+</div>
+<div style="margin-left:5%;"> retourne:
+</div>
+<div style="margin-left:5%;">   rien    modifie la valeur de DP.  
+</div>
+</p>
+<hr>
+<p id=",">
+<b>,</b>   ( x -- )    
+<div style="margin-left:5%;">   Alloue une cellule pour x à la position DP et copie x dans cette cellule.
+</div>
+<div style="margin-left:5%;">   la Variable DP est incrémentée de la grandeur d'une cellule.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   Valeur qui sera sauvegardée dans l'espace de donnée.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   x est sauvegardé à position de DP et DP est incrémenté.    
+</div>
+<hr>
+<p id="C,">
+<b>C,</b>  ( c -- )    
+<div style="margin-left:5%;">   Alloue l'espace nécessaire pour enregistré le caractère c.
+</div>
+<div style="margin-left:5%;">   Le caractère c est sauvegardé à la position DP et DP est incrémenté.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  c est sauvegardé à la position DP et DP est incrémenté.    
+</div>
+<hr>
+<p id="'">
+<b>'</b>   ( ccccc -- a-addr )    
+<div style="margin-left:5%;">   Extrait le mot suivant du flux d'entrée et le recherche dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Retourne l'adresse du CFA de ce mot.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   chaîne de caractère dans le flux d'entrée qui représente le mot recherché.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse du CFA (Code Field Address) du mot recherché.    
+</div>
+<hr>
+<p id="[']">
+<b>[']</b>   ( cccc -- )  
+<div style="margin-left:5%;">   Version immédiate de '  à utiliser à l'intérieur d'une définition pour
+</div>
+<div style="margin-left:5%;">   compiler le CFA d'un mot existant dans le dictionnaire.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;   Chaîne de caractère dans le flux d'entrée qui représente le mot recherché.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    Le CFA est compilé.  
+</div>
+<hr>
+<p id="[">
+<b>[</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat.  
+</div>
+<div style="margin-left:5%;">   Passe en mode interprétation en mettant la variable système STATE à zéro.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   Modifie la valeur de la variable système STATE.  
+</div>
+<hr>
+<p id="]">
+<b>]</b>  ( -- ) 
+<div style="margin-left:5%;">   Mot immédiat.    
+</div>
+<div style="margin-left:5%;">   Passe en mode compilation en mettant la variable sytème STATE à -1
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   Modifie la valeur de la variable système STATE.  
+</div>
+<hr>
+<p id="?WORD">
+<b>?WORD</b>  ( cccc  -- c-addr 0 | cfa 1 | cfa -1 )    
+<div style="margin-left:5%;">   Analyse le flux d'entré pour en extraire le prochain mot.
+</div>
+<div style="margin-left:5%;">   Recherche ce mot dans le dictionnaire.    
+</div>
+<div style="margin-left:5%;">   Avorte si le nom n'est pas trouvé dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Retourne le CFA du nom et un indicateur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;    mot extrait du flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; 1   le CFA du mot et 1 si c'est mot immédiat.
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; -1  le CFA du mot et -1 si le mot n'est pas immédiat.    
+</div>
+<hr>
+<p id="POSTPONE">
+<b>POSTPONE</b>   ( ccccc -- ) 
+<div style="margin-left:5%;">   Mot immédiat à utiliser dans une définition. 
+</div>
+<div style="margin-left:5%;">   Diffère la compilation du mot qui suis dans le flux d'entrée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;   Mot extrait du flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;     
+</div>
+<hr>
+<p id="LITERAL">
+<b>LITERAL</b>  ( x -- )
+<div style="margin-left:5%;">   Mot immédiat qui compile la sémantique runtime d'un entier. Il n'a d'effet 
+</div>
+<div style="margin-left:5%;">   qu'en mode compilation. Dans ce cas la valeur sommet de la pile est compilée
+</div>
+<div style="margin-left:5%;">   avec la sémantique runtime qui empile un entier.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;  Valeur au sommet de la pile des arguments. Cette valeur est consommée seulement en mode compilation.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    x reste au sommet de la pile en mode interprétation.    
+</div>
+<hr>
+<p id="S"">
+<b>S"</b>   ( ccccc -- )  runtime S: c-addr u 
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.    
+</div>
+<div style="margin-left:5%;">   Lecture d'une chaîne litérale dans le flux d'entrée et compilation
+</div>
+<div style="margin-left:5%;">   de cette chaîne dans l'espace de donnée.    
+</div>
+<div style="margin-left:5%;">   La sémentique rutime consiste à empiler l'adresse du premier caractère de la
+</div>
+<div style="margin-left:5%;">   chaîne et la longueur de la chaîne.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;   Chaîne terminée par " dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="C"">
+<b>C"</b>   ( ccccc --  )  runtime S:  c-addr
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Lecture d'une chaîne litérale dans le flux d'entrée et compilation de cette
+</div>
+<div style="margin-left:5%;">   chaîne dans l'espace de donnée.
+</div>
+<div style="margin-left:5%;">   La sémantique runtime consiste à compiler l'adresse de la chaîne comptée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;  Chaîne de caractères terminée par "  dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    En runtime retourne empile l'adresse du descripteur de la chaîne.    
+</div>
+<hr>
+<p id="."">
+<b>."</b>   ( ccccc -- )
+<div style="margin-left:5%;">   Mot immédiat.    
+</div>
+<div style="margin-left:5%;">   Interprétation: imprime la chaîne litérale qui suis dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;">   En compilation: compile la chaîne et la sémantique permet d'imprimer cette
+</div>
+<div style="margin-left:5%;">   chaîne lors de l'exécution du mot en cour de définition.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;    Chaîne terminée par "  dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;         
+</div>
+<hr>
+<p id="RECURSE">
+<b>RECURSE</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Compile un appel récursif du mot en cour de définition.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="DO">
+<b>DO</b>  ( n1 n2 -- )
+<div style="margin-left:5%;">   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
+</div>
+<div style="margin-left:5%;">   Débute une boucle avec compteur. Le valeur du compteur de boucle est incrémentée
+</div>
+<div style="margin-left:5%;">   à la fin de la boucle et comparée avec la limite. La boucle se termine lorsque
+</div>
+<div style="margin-left:5%;">   le compteur atteind ou dépasse la limite. La boucle s'exécute au moins 1 fois.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;   Valeur limite du compteur de boucle.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;   Valeur initiale du compteur de boucle.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="?DO">
+<b>?DO</b> runtime ( n1 n2 -- )
+<div style="margin-left:5%;">   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
+</div>
+<div style="margin-left:5%;">   Débute une boucle avec compteur. Cependant contrairement à DO la boucle
+</div>
+<div style="margin-left:5%;">   Ne sera pas excétée si n2==n1. Le compteur de boucle est incrémenté à la fin
+</div>
+<div style="margin-left:5%;">   de la boucle et le contrôle de limite est affectué après l'incrémentation.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;     limite
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;     valeur initiale du compteur de boucle.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="LEAVE">
+<b>LEAVE</b>  runtime ( -- )
+<div style="margin-left:5%;">   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   LEAVE est utilisé à l'intérieur des boucles avec compteur pour interrompre
+</div>
+<div style="margin-left:5%;">   prématurément la boucle.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="LOOP">
+<b>LOOP</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'a l'intérieur d'une définition.  
+</div>
+<div style="margin-left:5%;">   Dernière instruction d'une boucle avec compteur.
+</div>
+<div style="margin-left:5%;">   Le compteur est incrémenté et ensuite comparé à la valeur limite.
+</div>
+<div style="margin-left:5%;">   En cas d'égalité le boucle est terminée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="+LOOP">
+<b>+LOOP</b>   ( n -- )
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'a l'intérieur d'une définition.  
+</div>
+<div style="margin-left:5%;">   Dernière instruction de la boucle. La valeur n est ajoutée au compteur.
+</div>
+<div style="margin-left:5%;">   Ensuite cette valeur est comparée à la limite et termine la boucle si 
+</div>
+<div style="margin-left:5%;">   la limite est atteinte ou dépassée.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Ajoute cette valeur à la variable de contrôle de la boucle. Si I passe LIMIT quitte la boucle.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="BEGIN">
+<b>BEGIN</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Débute une boucle qui se termine par AGAIN, REPEAT ou UNTIL 
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="AGAIN">
+<b>AGAIN</b>   ( -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Effectue un branchement inconditionnel au début de la boucle.
+</div>
+<div style="margin-left:5%;">   Une boucle créée avec BEGIN ... AGAIN ne peut-être interrompue que
+</div>
+<div style="margin-left:5%;">   par ABORT ou ABORT".    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="UNTIL">
+<b>UNTIL</b>  compilation ( n -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Compile la fin d'une boucle conditionnelle. Termine la boucle si n est VRAI.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Valeur qui contrôle la boucle. La boucle est terminée si n&lt;&gt;0.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="REPEAT">
+<b>REPEAT</b>  ( -- )    
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   S'Utilise avec une structure de boucle BEGIN ... WHILE ... REPEAT
+</div>
+<div style="margin-left:5%;">   Comme AGAIN effectue un branchement inconditionnel au début de la boucle.
+</div>
+<div style="margin-left:5%;">   Cependant au moins un WHILE doit-être présent à l'intérieur de la boucle
+</div>
+<div style="margin-left:5%;">   car c'est le WHILE qui contrôle la sortie de boucle.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="WHILE">
+<b>WHILE</b>  ( n -- )    
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Utilisé à l'intérieur d'une boucle BEGIN ... REPEAT, contrôle la sortie
+</div>
+<div style="margin-left:5%;">   de boucle. Tant que la valeur n au sommet de la pile est VRAI l'exécution
+</div>
+<div style="margin-left:5%;">   de la boucle se répète au complet lorsque REPEAT est atteint.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Contrôle la sortie de boucle. Si n==0 il y a sortie de boucle.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="IF">
+<b>IF</b>  ( n -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Exécution du code qui suit le IF si et seulement is n&lt;&gt;0.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Valeur consommée par IF, si n&lt;&gt;0 les instructions après entre IF et ELSE ou THEN sont exécutées.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="THEN">
+<b>THEN</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Termine le bloc d'instruction qui débute après un IF ou un ELSE.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="ELSE">
+<b>ELSE</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Termine le bloc d'instruction qui débute après un IF.
+</div>
+<div style="margin-left:5%;">   Les instructions entre le ELSE et le THEN qui suit sont excéutée si la valeur n contrôlée
+</div>
+<div style="margin-left:5%;">   par le IF est FAUSSE.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="CASE">
+<b>CASE</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Branchement conditionnel multiple par comparaison de la valeur au sommet  
+</div>
+<div style="margin-left:5%;">   de la pile des arguments avec d'autres valeurs de test. 
+</div>
+<div style="margin-left:5%;">   exemple:
+</div>
+<div style="margin-left:5%;">     : x
+</div>
+<div style="margin-left:5%;">     CASE 
+</div>
+<div style="margin-left:5%;">     1  OF ... ENDOF
+</div>
+<div style="margin-left:5%;">     2  OF ... ENDOF
+</div>
+<div style="margin-left:5%;">     ... ( instructions par défaut ce bloc est optionnel.)
+</div>
+<div style="margin-left:5%;">     ENDCASE
+</div>
+<div style="margin-left:5%;">     3 x     
+</div>
+<div style="margin-left:5%;">   Dans cette exemple on définit le mot x et ensuite on l'exécute en lui passant la 
+</div>
+<div style="margin-left:5%;">   valeur 3 en arguments. Chaque valeur qui précède un OF est comparée avec 3 et 
+</div>
+<div style="margin-left:5%;">   s'il y a égalité le bloc entre OF et ENDOF est exécuté. Seul le premier test
+</div>
+<div style="margin-left:5%;">   qui répond au critère d'égalité est exécuté. Si tous les test échous et qu'il
+</div>
+<div style="margin-left:5%;">   y a un bloc d'instruction entre le derner ENDOF et le ENDCASE c'est ce bloc
+</div>
+<div style="margin-left:5%;">   qui est exécuté.   
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="OF">
+<b>OF</b>  ( x1 x2  -- |x1 )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   S'utilise à l'intérieur d'une structure CASE ... ENDCASE    
+</div>
+<div style="margin-left:5%;">   Vérifie si x1==x2 En cas d'égalité les 2 valeurs sont consommée et 
+</div>
+<div style="margin-left:5%;">   le bloc d'instruction qui suis le OF jusqu'au ENDOF est exécuté.    
+</div>
+<div style="margin-left:5%;">   Si la condition d'égalité n'est pas vérifiée la valeur x1 est conservée
+</div>
+<div style="margin-left:5%;">   et l'exécution se poursuis après le prochain ENDOF.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;   Valeur de contrôle du case.
+</div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;   Valeur de test du OF ... ENDOF    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>|x1</i>&nbsp;&nbsp;  x1 n'est pas consommé si la condition d'égalité n'est pas rencontrée.      
+</div>
+<hr>
+<p id="ENDOF">
+<b>ENDOF</b>  ( -- )   
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   S'utilise à l'intérieur d'une structure  CASE ... ENDCASE    
+</div>
+<div style="margin-left:5%;">   Termine un bloc d'instruction introduit par le mot OF
+</div>
+<div style="margin-left:5%;">   ENDOF branche après le ENDCASE    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="ENDCASE">
+<b>ENDCASE</b> ( x -- )    
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   S'utilise pour terminer une structure CASE ... ENDCASE.
+</div>
+<div style="margin-left:5%;">   ENDCASE n'est exécuté que si aucun bloc OF ... ENDOF n'a été exécuté.
+</div>
+<div style="margin-left:5%;">   Dans ce cas la valeur de contrôle qui est restée sur la pile est jeté.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   Valeur de contrôle qui est restée sur la pile.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="?COMPILE">
+<b>?COMPILE</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat.
+</div>
+<div style="margin-left:5%;">   Vérifie la valeur de la variable système STATE et si cette valeur est 0.
+</div>
+<div style="margin-left:5%;">   appelle ABORT" avec le message "compile only word". Ce mot débute la définition
+</div>
+<div style="margin-left:5%;">   de tous les mots qui ne doivent-être utilisés qu'en mode compilation.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="?NAME">
+<b>?NAME</b>  ( f -- )    
+<div style="margin-left:5%;">   Si f==0 appelle ABORT" avec le message "name missing" 
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   Indicateur Booléen, si VRAI ABORT" name missing"
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id=":NONAME">
+<b>:NONAME</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Cré une définition sans nom dans l'espace de donnée.
+</div>
+<div style="margin-left:5%;">   et laisse son CFA sur la pile des arguments.
+</div>
+<div style="margin-left:5%;">   Met la variable STATE en mode compilation.
+</div>
+<div style="margin-left:5%;">   Le CFA de cette définition peut par exemple est assigné
+</div>
+<div style="margin-left:5%;">   à un mot créé avec DEFER.
+</div>
+<div style="margin-left:5%;">   exemple:
+</div>
+<div style="margin-left:5%;">   DEFER  p2 
+</div>
+<div style="margin-left:5%;">   :noname  DUP * ;
+</div>
+<div style="margin-left:5%;">   ' p2 DEFER! / maintenant p2 utilise le code de défini par :noname.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  CFA de la nouvelle définition.
+</div>
+<hr>
+<p id="FORGET">
+<b>FORGET</b>  ( cccc -- )    
+<div style="margin-left:5%;">   Extrait du flux d'entrée le mot suivant et supprime du dictionnaire ce mot
+</div>
+<div style="margin-left:5%;">   ainsi que tous ceux qui ont été définis après lui.
+</div>
+<div style="margin-left:5%;">   Les mots système définis en mémoire FLASH ne peuvent-êtr supprimés.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   Mot suivant dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><i>arguments:
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="MARKER">
+<b>MARKER</b>  ( cccc -- )    
+<div style="margin-left:5%;">   Extrait du flux d'entrée le mot suivant et cré un mot portant ce nom
+</div>
+<div style="margin-left:5%;">   dans le dictionnaire. Lorsque ce mot est invoqué il se suprime lui-même
+</div>
+<div style="margin-left:5%;">   ainsi que tous les mots qui ont été définis après lui.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   Mot suivant dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><i>arguments:
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id=":">
+<b>:</b>   ( cccc -- )    
+<div style="margin-left:5%;">   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans
+</div>
+<div style="margin-left:5%;">   le dictionnaire qui porte ce nom. Ce mot introduit une définition de haut niveau.
+</div>
+<div style="margin-left:5%;">   Modifie la variable système STATE pour passer en mode compilation.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Mot suivant dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="CREATE">
+<b>CREATE</b>  ( cccc -- )     
+<div style="margin-left:5%;">   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans le dictionnaire
+</div>
+<div style="margin-left:5%;">   Lorsque ce nouveau mot est exécuté il retourne l'adresse PFA. Cependant la sémantique
+</div>
+<div style="margin-left:5%;">   du mot peut-être étendue en utilisant le mot DOES&gt;.    
+</div>
+<div style="margin-left:5%;"> exemple:     
+</div>
+<div style="margin-left:5%;">       / le mot VECTOR sert à créer des tableaux de n éléments.    
+</div>
+<div style="margin-left:5%;">	: VECTOR  ( n  -- )
+</div>
+<div style="margin-left:5%;">           CREATE CELLS ALLOT DOES&gt; CELLS PLUS ;     
+</div>
+<div style="margin-left:5%;">       / utilisation du mot VECTOR pour créer le tableau V1 de 5 éléments.
+</div>
+<div style="margin-left:5%;">       5 VECTOR V1
+</div>
+<div style="margin-left:5%;">       / Met la valeur 35 dans l'élément d'indice 2 de V1
+</div>
+<div style="margin-left:5%;">       35 2 V1 !    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Mot suivant dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="DOES&gt;">
+<b>DOES&gt;</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
+</div>
+<div style="margin-left:5%;">   Ce mot permet définir l'action d'un mot créé avec CREATE. Surtout utile
+</div>
+<div style="margin-left:5%;">   pour définir des mots compilants. U mot compilant est un mot qui sert à
+</div>
+<div style="margin-left:5%;">   créer une classe de mots. Par exemples les mots VARIABLE et CONSTANT sont
+</div>
+<div style="margin-left:5%;">   des mots compilants.    
+</div>
+<div style="margin-left:5%;">   Le concept de DOES&gt; est un des plus complexe du langage forth. Un article
+</div>
+<div style="margin-left:5%;">   sera donc consacré à son utilisation.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id=";">
+<b>;</b>  ( -- )    
+<div style="margin-left:5%;">   Termine une définition débutée par ":".
+</div>
+<div style="margin-left:5%;">   Modifie la valeur de la variable STATE pour passer en mode interprétation.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="VARIABLE">
+<b>VARIABLE</b>  ( cccc -- )    
+<div style="margin-left:5%;">   Mot compilant qui sert à créer des variables dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
+</div>
+<div style="margin-left:5%;">   de la nouvelle variable. Les variables sont initialisées à 0.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le flux d'entrée. Nom de la variable.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="CONSTANT">
+<b>CONSTANT</b>  ( cccc  n -- )    
+<div style="margin-left:5%;">   Mot compilant qui sert à créer des constantes dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
+</div>
+<div style="margin-left:5%;">   de la nouvelle constante. La constante  initialisée avec la valeur
+</div>
+<div style="margin-left:5%;">   qui est au sommet de la pile des arguments au moment de sa création.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le flux d'entrée. Nom de la constante.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;      Valeur qui sera assignée à cette constante.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="DEFER">
+<b>DEFER</b> ( cccc -- )     
+<div style="margin-left:5%;">   Mot compilant.
+</div>
+<div style="margin-left:5%;">   Cré un nouveau mot dont l'action ne sera défini ultérieurement.
+</div>
+<div style="margin-left:5%;">   Cependant ce mot possède une action par défaut qui consiste à affiché
+</div>
+<div style="margin-left:5%;">   le message "Uninitialized defered word"     
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Prochain mot dans le flux d'entrée. Nom du nouveau mot.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;     
+</div>
+<hr>
+<p id="DEFER!">
+<b>DEFER!</b>  ( a-addr1 a-addr2 -- )     
+<div style="margin-left:5%;">   Initialise une action à  un mot défini avec DEFER.
+</div>
+<div style="margin-left:5%;">   exemple:
+</div>
+<div style="margin-left:5%;">   DEFER p2  / le mot p2 est créé mais n'a pas d'action défini.
+</div>
+<div style="margin-left:5%;">   :noname  dup * ; / ( -- a-addr1 )  un mot sans nom viens d'être créé.
+</div>
+<div style="margin-left:5%;">   ' p2 DEFER!  / ' p2 retourne le xt de p2 et DEFER! affecte a-addr1 à a-addr2
+</div>
+<div style="margin-left:5%;">   2 p2  4 ok  / maintenant lorsque p2 est utilisé retourne le carré d'un entier.  
+</div>
+<div style="margin-left:5%;">    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;  CFA de l'action que le mot doit exécuter.
+</div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;  CFA du mot différé.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="DEFER@">
+<b>DEFER@</b>  ( a-addr1 -- a-addr2 )    
+<div style="margin-left:5%;">   Empile le CFA interprété par un mot défini avec DEFER dont le CFA est
+</div>
+<div style="margin-left:5%;">   au sommet de la pile des arguments.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp; CFA du mot différé dont on veut obtenir l'action.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;  CFA de l'action  exécutée par le mot différé.
+</div>
+<hr>
+<p id="IS">
+<b>IS</b>    ( cccc a-addr -- )     
+<div style="margin-left:5%;">   Extrait le prochain mot du flux d'entrée. Recherche ce mot dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Ce mot doit-être  un mot créé avec DEFER. Lorsque ce mot est trouvé,    
+</div>
+<div style="margin-left:5%;">   enregistre a-addr dans son CFA. a-addr est le CFA d'une action. 
+</div>
+<div style="margin-left:5%;"> exemple:
+</div>
+<div style="margin-left:5%;">     / création d'un mot différé qui peut effectuer différentes opérations arithmétiques.
+</div>
+<div style="margin-left:5%;">     DEFER  MATH
+</div>
+<div style="margin-left:5%;">     ' * IS MATH   / maintenant le mot MATH agit comme *
+</div>
+<div style="margin-left:5%;">     ' + IS MATH   / maintenant le mot MATH agit comme +    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Prochain mot dans le flux d'entrée. Correspond au nom d'un mot créé avec DEFER.
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Sommet de la pile des arguments qui correspond au CFA de l'action à assigné à ce mot.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="ACTION-OF">
+<b>ACTION-OF</b>   ( cccc -- a-addr )
+<div style="margin-left:5%;">   Extrait le prochain mot du flux d'entrée et le recherche dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Ce mot doit-être un mot créé avec DEFER. Si le mot est trouvé dans le dictinnaire
+</div>
+<div style="margin-left:5%;">   le CFA de son action est empilé.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le flux d'entrée. Nom recherché dans le dictionnaire.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse du CFA de l'action du mot différé.    
+</div>
+<hr>
+<p id=".(">
+<b>.(</b>   cccc) ( -- )    
+<div style="margin-left:5%;">   Affiche le commentaire délimité par )
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc)</i>&nbsp;&nbsp;   Commentaire extrait du flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="2&gt;R">
+<b>2&gt;R</b>   ( S: d --  R: -- d )    
+<div style="margin-left:5%;">   Transfert un entier double de la pile des arguments vers la pile des retours.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;    Entier double ou 2 entiers simples.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  L'entier double est maintenant sur R:    
+</div>
+<hr>
+<p id="2R&gt;">
+<b>2R&gt;</b>   ( S: -- d  R: d -- )    
+<div style="margin-left:5%;">   Transfert un entier double de la pile des retours vers la pile des arguments.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>R:</i>&nbsp;&nbsp; d   Entier double à transféré.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;      Entier double ou 2 entiers simple en provenance de R:    
+</div>
+<hr>
+<p id="2R@">
+<b>2R@</b>   ( S: -- d  R: d -- d )    
+<div style="margin-left:5%;">   Copie un entier double de la pile des retours vers la pile des arguments.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>R:</i>&nbsp;&nbsp; d   Entier double qui sera copié sur S:
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;      Copie d'un entier double en provenance de R:    
+</div>
+<hr>
+
+</body>
+</html>

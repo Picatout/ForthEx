@@ -1,0 +1,106 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body>
+<h1>keyboard</h1><p id="LC-EKEY?">
+<b>LC-EKEY?</b> ( -- f )
+<div style="margin-left:5%;">   Vérifie s'il y a un caractère en attente
+</div>
+<div style="margin-left:5%;">   dans la file clavier et retourne un indicateur booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur vrai|faux
+</div>
+<hr>
+<p id="LC-EKEY">
+<b>LC-EKEY</b>  ( -- u )
+<div style="margin-left:5%;">   Attend jusqu'à réception d'un code du clavier
+</div>
+<div style="margin-left:5%;">   retourne le premier code reçu.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   code  VK_xxx non filtré reçu du clavier.
+</div>
+<hr>
+<p id="LC-FILTER">
+<b>LC-FILTER</b> ( u -- u FALSE | c TRUE )    
+<div style="margin-left:5%;">   Filtre  et retourne un caractère 'c' et 'vrai'
+</div>
+<div style="margin-left:5%;">   si u fait partie de l'ensemble reconnu.
+</div>
+<div style="margin-left:5%;">   sinon retourne 'u' et 'faux'   
+</div>
+<div style="margin-left:5%;">   accepte:
+</div>
+<div style="margin-left:5%;">      VK_CR, VK_BACK, CTRL_X, CTRL_V {32-126}
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    code à vérifier
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>refusé:</i>&nbsp;&nbsp;    
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       même code
+</div>
+<div style="margin-left:5%;"><i>FALSE</i>&nbsp;&nbsp;   indicateur booléen, valeur 0 
+</div>
+<div style="margin-left:5%;"><i>reconnu:
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;       caractère reconnu.
+</div>
+<div style="margin-left:5%;"><i>TRUE</i>&nbsp;&nbsp;    indicateur booléen, valeur -1
+</div>
+<hr>
+<p id="LC-KEY?">
+<b>LC-KEY?</b> ( -- 0|c)
+<div style="margin-left:5%;">   Vérifie s'il y a un caractère répondant aux 
+</div>
+<div style="margin-left:5%;">   critères du filtre LC-FILTER disponible dans la file du clavier. 
+</div>
+<div style="margin-left:5%;">   S'il y a des caractères non valides les jettes.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>0</i>&nbsp;&nbsp;   aucun caractère disponible
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   le premier caractère valide de la file.    
+</div>
+<hr>
+<p id="LC-KEY">
+<b>LC-KEY</b>  ( -- c )
+<div style="margin-left:5%;">   Attend la réception d'un caractère valide pour LC-FILTER du clavier.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp; 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère filtré. 
+</div>
+<hr>
+
+</body>
+</html>
