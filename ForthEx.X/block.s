@@ -272,7 +272,7 @@ DEFWORD "FIELDS",6,,FIELDS
 ; nom: UPDATE  ( a-addr -- )
 ;    Met à jour le compteur UPDATED avec la valeur
 ;    incrémentée de _update_cntr
-; paramètre:
+; arguments:
 ;    a-addr   *BUFFER structure buffer
 ; retourne:    
 ;   rien
@@ -448,6 +448,10 @@ DEFWORD "LIST",4,,LIST
 ;   Sinon incrémente BLK et si cette nouvelle valeur est valide
 ;   charge ce bloc pour évaluation et retourne vrai, sinon
 ;   remet BLK à zéro et retourne faux.
+; arguments:
+;   aucun
+; retourne:
+;   f    retourne faux si la variable BLK=0 ou s'il n'y a plus de bock valide.  
 DEFWORD "REFILL",6,,REFILL
     .word BLK,FETCH,DUP,ZBRANCH,9f-$
     .word BLK,LIT,1,OVER,FETCH,PLUS,DUP,ROT,STORE

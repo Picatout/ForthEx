@@ -102,7 +102,8 @@ DEFTABLE "SERCONS",7,,SERCONS
     .word VTGETCUR ; vt102.s
     
 ; nom: LOCAL ( -- a-addr )
-;  empile le vecteur de la table LCONSOLE
+;   Empile le vecteur de la table LCONSOLE qui sert d'argument pour CONSOLE.
+;   Efface l'écran local.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -111,7 +112,8 @@ DEFWORD "LOCAL",5,,LOCAL
     .word LCPAGE,LCCONS,EXIT
 
 ; nom: REMOTE ( -- a-addr )
-;  empile le vecteur de la table LREMOTE
+;   Empile le vecteur de la table LREMOTE qui sert d'argument pour CONSOLE.
+;   Envoie une commande au terminal VT102 pour effacer l'écran.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -123,12 +125,12 @@ DEFWORD "REMOTE",6,,REMOTE
     .word LIT,CTRL_L,SPUTC,SERCONS,EXIT
     
 ; nom: CONSOLE ( a-addr --  )
-;  détermine la console active. Cette information
-;  est enregistrée dans la variable système SYSCONS    
+;   Détermine la console active. 
+;   Cette information est enregistrée dans la variable système SYSCONS    
 ; arguments:
-;   a-addr   adresse de la table des fonctions de la nouvelle console
+;   a-addr   adresse de la table des fonctions de la nouvelle console.
 ; retourne:
-;   rien.   
+;   rien   
 DEFWORD "CONSOLE",7,,CONSOLE
     .word SYSCONS,STORE,EXIT
     
@@ -169,8 +171,8 @@ DEFWORD "EKEY",4,,EKEY
     .word SYSCONS,FETCH,LIT,FN_EKEY,VEXEC,EXIT
 
 ; nom: EKEY? ( -- f )
-;   Vérifie s'il y a un caractère dans la file de réception.
-;   retourne un booléen indiquant l'état.
+;   Vérifie s'il y a un caractère dans la file de réception de la console.
+;   Retourne un booléen indiquant l'état.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -180,9 +182,9 @@ DEFWORD "EKEY?",5,,EKEYQ
     
     
 ; nom: EMIT ( c -- )
-;  transmet un caractère à la console.
-; argument:
-;    c   caractère à transmettre
+;  transmet un caractère à la console. Les caractères sont filtrés.
+; arguments:
+;    c   caractère à transmettre.
 ; retourne:
 ;    rien    
 DEFWORD "EMIT",4,,EMIT 
@@ -190,7 +192,7 @@ DEFWORD "EMIT",4,,EMIT
     
     
 ; nom: EMIT? ( -- f )
-;  vérifie si le terminal est prêt à recevoir
+;  Vérifie si le terminal est prêt à recevoir. La console locale retourne toujours VRAI.
 ; arguments:
 ;    aucun
 ; retourne:
@@ -200,7 +202,9 @@ DEFWORD "EMIT?",5,,EMITQ
     
     
 ; nom: AT-XY ( u1 u2 -- )
-;   Positionne le curseur de la console.
+;   Positionne le curseur de la console aux coordonnées {u1,u2}.
+;   Pour la console locale la numérotation commence à zéro mais pour le
+;   terminal VT102 la numérotation commence à 1.    
 ; arguments:
 ;   u1   colonne 
 ;   u2   ligne
@@ -210,7 +214,7 @@ DEFWORD "AT-XY",5,,ATXY
     .word SYSCONS,FETCH,LIT,FN_ATXY,VEXEC,EXIT
     
 ; nom: PAGE ( -- )
-;  Efface l'écran du terminal
+;   Efface l'écran de la console.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -219,56 +223,56 @@ DEFWORD "PAGE",4,,PAGE
     .word SYSCONS,FETCH,LIT,FN_PAGE,VEXEC,EXIT
     
 ; nom: EKEY>CHAR ( u -- u false | char true )
-;   converti un code reçu de la console en caractère affichable.
-;   Si le code est valide.
+;   convertie un code reçu de la console en caractère affichable.
+;   Si le code est valide. Le code u doit répondre au critères du filtre.
 ; arguments:
 ;   u  code reçu de la console
 ; retourne:
-;    u FALSE  si le code n'est pas dans l'ensemble {32..126}
-;    c TRUE   si le code est dans l'ensemble {32..126}
+;    u FALSE  si le code n'est pas dans l'ensemble {32..126} VK_CR, VK_BACK
+;    c TRUE   si le code est dans l'ensemble reconnu par le filtre.
 DEFWORD "EKEY>CHAR",9,,EKEYTOCHAR
     .word SYSCONS,FETCH,LIT,FN_EKEYTOCHAR,VEXEC,EXIT
     
 
 ; nom: SPACE ( -- )
-; imprime un espace
+;   Imprime un espace sur la console.
 ; arguments:
 ;   aucun
 ; retourne:
 ;    rien
-;;;;;;;;;;;;;;;;;;;;;;
-DEFWORD "SPACE",5,,SPACE ; ( -- )
+DEFWORD "SPACE",5,,SPACE
     .word LIT,VK_SPACE,EMIT,EXIT
 
-
-; nom: SPACES
-; imprime n espaces
+; nom: SPACES ( n -- )
+;   Imprime n espaces sur la console.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "SPACES",6,,SPACES ; ( n -- )
+DEFWORD "SPACES",6,,SPACES
     .word DUP,LIT,0,GREATER,TBRANCH,1f-$
     .word DROP,EXIT
 1:  .word LIT,0,DODO
 2:  .word SPACE,DOLOOP,2b-$
     .word EXIT
-
-; nom: CLEARLN
-;  efface la ligne sur laquelle le curseur est situé.
-; arguments:     
+  
+; nom: CLEARLN 
+;   Efface la ligne sur laquelle le curseur est situé.
+;   Place le curseur au début de la ligne.
+; arguments:
 ;   aucun
 ; retourne:
 ;    rien
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEFWORD "CLEARLN",7,,CLEARLN   ; ( -- )
     .word LIT,CTRL_X,EMIT,EXIT
     
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-; imprime une chaîne de
-; caractère à l'écran
-;;;;;;;;;;;;;;;;;;;;;;;;;;
+; nom:  TYPE ( c-addr n+ -- )
+;  Imprime une chaîne à l'écran de la console active.
+; arguments:
+;   c-addr  adresse du premier caractère de la chaîne.
+;   n+   Longueur de la chaîne. 
+; retourne:
+;   rien    
 DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
     .word DUP,TBRANCH,1f-$
     .word TWODROP, EXIT
@@ -277,26 +281,49 @@ DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
     .word DOLOOP,2b-$
     .word DROP, EXIT     
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; efface le caractère
-; sous le curseur
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; nom: DELETE  ( -- )
+;   Supprime le caractère à la position du cureur.
+; arguments:
+;   rien
+; retourne:
+;   rien    
 DEFWORD "DELETE",6,,DELETE  ; ( -- )
     .word LIT,VK_DELETE,EMIT,EXIT
    
-; supprime le dernier caractère reçu    
+; nom: DELBACK  ( -- )
+;   Supprime le caractère à gauche du curseur et recule le curseur d'une position.
+; arguments:
+;   rien
+; retourne:
+;   rien    
 DEFWORD "DELBACK",7,,DELBACK ; ( -- )
     .word LIT,VK_BACK,EMIT,EXIT
 
-; supprime la ligne en cours de saisie.
+; nom: DELLINE  ( -- )    
+;   Supprime la ligne sur laquelle le curseur est positionné.
+;   Renvoie le curseur en début de ligne.    
+; arguments:
+;   rien
+; retourne:
+;   rien    
 DEFWORD "DELLINE",7,,DELLINE ; ( -- )
     .word LIT,CTRL_X,EMIT,EXIT
-    
-; envoie une commande nouvelle ligne à la console
+ 
+; nom: CR ( -- )    
+;   Renvoie le curseur au début de la ligne suivante.
+; arguments:
+;   rien
+; retourne:
+;   rien    
 DEFWORD "CR",2,,CR ; ( -- )
     .word LIT,VK_CR,EMIT,EXIT
-    
-; efface l'écran.    
+
+; nom: CLS  ( -- )    
+;   Efface l'écran de la console.
+; arguments:
+;   rien
+; retourne:
+;   rien    
 DEFWORD "CLS",3,,CLS 
     .word SYSCONS,FETCH,LIT,FN_PAGE,VEXEC,EXIT
     
@@ -306,7 +333,7 @@ DEFWORD "CLS",3,,CLS
 ; arguments:
 ;   aucun
 ; retourne:
-;   u1    colonne  {0..63}
-;   u2    ligne    {0..23}
+;   u1    colonne  locale {0..63} remote {1..64}
+;   u2    ligne    locale {0..23} remote {1..24}
 DEFWORD "GETCUR",6,,GETCUR
     .word SYSCONS,FETCH,LIT,FN_GETCUR,VEXEC,EXIT

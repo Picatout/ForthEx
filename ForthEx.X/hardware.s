@@ -311,9 +311,6 @@ DEFCODE "TICKS",5,,TICKS  ; ( -- n )
     mov systicks, T
     NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; délais en microsecondes
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; nom: USEC   ( u -- ) 
 ;   Pause en microsecondes. A cause des interruptions cette valeur ne peut-être
 ;   garantie. La valeur u passée en argument est une valeur minimale.

@@ -5,7 +5,9 @@
 <body>
 <h1>console</h1><p id="LOCAL">
 <b>LOCAL</b> ( -- a-addr )
-<div style="margin-left:5%;">  empile le vecteur de la table LCONSOLE
+<div style="margin-left:5%;">   Empile le vecteur de la table LCONSOLE qui sert d'argument pour CONSOLE.
+</div>
+<div style="margin-left:5%;">   Efface l'écran local.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -19,7 +21,9 @@
 <hr>
 <p id="REMOTE">
 <b>REMOTE</b> ( -- a-addr )
-<div style="margin-left:5%;">  empile le vecteur de la table LREMOTE
+<div style="margin-left:5%;">   Empile le vecteur de la table LREMOTE qui sert d'argument pour CONSOLE.
+</div>
+<div style="margin-left:5%;">   Envoie une commande au terminal VT102 pour effacer l'écran.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -33,18 +37,18 @@
 <hr>
 <p id="CONSOLE">
 <b>CONSOLE</b> ( a-addr --  )
-<div style="margin-left:5%;">  détermine la console active. Cette information
+<div style="margin-left:5%;">   Détermine la console active. 
 </div>
-<div style="margin-left:5%;">  est enregistrée dans la variable système SYSCONS    
+<div style="margin-left:5%;">   Cette information est enregistrée dans la variable système SYSCONS    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   adresse de la table des fonctions de la nouvelle console
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   adresse de la table des fonctions de la nouvelle console.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien.</i>&nbsp;&nbsp;   
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   
 </div>
 <hr>
 <p id="KEY">
@@ -107,9 +111,9 @@
 <hr>
 <p id="EKEY?">
 <b>EKEY?</b> ( -- f )
-<div style="margin-left:5%;">   Vérifie s'il y a un caractère dans la file de réception.
+<div style="margin-left:5%;">   Vérifie s'il y a un caractère dans la file de réception de la console.
 </div>
-<div style="margin-left:5%;">   retourne un booléen indiquant l'état.
+<div style="margin-left:5%;">   Retourne un booléen indiquant l'état.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -123,21 +127,21 @@
 <hr>
 <p id="EMIT">
 <b>EMIT</b> ( c -- )
-<div style="margin-left:5%;">  transmet un caractère à la console.
-</div>
-<div style="margin-left:5%;"> argument:
-</div>
-<div style="margin-left:5%;">    c   caractère à transmettre
-</div>
-<div style="margin-left:5%;"> retourne:
-</div>
-<div style="margin-left:5%;">    rien    
+<div style="margin-left:5%;">  transmet un caractère à la console. Les caractères sont filtrés.
 </div>
 </p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère à transmettre.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
 <hr>
 <p id="EMIT?">
 <b>EMIT?</b> ( -- f )
-<div style="margin-left:5%;">  vérifie si le terminal est prêt à recevoir
+<div style="margin-left:5%;">  Vérifie si le terminal est prêt à recevoir. La console locale retourne toujours VRAI.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -151,7 +155,11 @@
 <hr>
 <p id="AT-XY">
 <b>AT-XY</b> ( u1 u2 -- )
-<div style="margin-left:5%;">   Positionne le curseur de la console.
+<div style="margin-left:5%;">   Positionne le curseur de la console aux coordonnées {u1,u2}.
+</div>
+<div style="margin-left:5%;">   Pour la console locale la numérotation commence à zéro mais pour le
+</div>
+<div style="margin-left:5%;">   terminal VT102 la numérotation commence à 1.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -167,7 +175,7 @@
 <hr>
 <p id="PAGE">
 <b>PAGE</b> ( -- )
-<div style="margin-left:5%;">  Efface l'écran du terminal
+<div style="margin-left:5%;">   Efface l'écran de la console.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -181,9 +189,9 @@
 <hr>
 <p id="EKEY&gt;CHAR">
 <b>EKEY&gt;CHAR</b> ( u -- u false | char true )
-<div style="margin-left:5%;">   converti un code reçu de la console en caractère affichable.
+<div style="margin-left:5%;">   convertie un code reçu de la console en caractère affichable.
 </div>
-<div style="margin-left:5%;">   Si le code est valide.
+<div style="margin-left:5%;">   Si le code est valide. Le code u doit répondre au critères du filtre.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -192,32 +200,14 @@
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp; FALSE  si le code n'est pas dans l'ensemble {32..126}
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp; FALSE  si le code n'est pas dans l'ensemble {32..126} VK_CR, VK_BACK
 </div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; TRUE   si le code est dans l'ensemble {32..126}
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; TRUE   si le code est dans l'ensemble reconnu par le filtre.
 </div>
 <hr>
 <p id="SPACE">
 <b>SPACE</b> ( -- )
-<div style="margin-left:5%;"> imprime un espace
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><i>;;;;;;;;;;;;;;;;;;;;;
-</i>&nbsp;&nbsp;</div>
-<hr>
-<p id="SPACES
-">
-<b>SPACES
-</b> K_SPACE,EMIT,EXIT
-<div style="margin-left:5%;"> imprime n espaces
+<div style="margin-left:5%;">   Imprime un espace sur la console.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -229,14 +219,12 @@
 <div style="margin-left:5%;"><i>rien
 </i>&nbsp;&nbsp;</div>
 <hr>
-<p id="CLEARLN
-">
-<b>CLEARLN
-</b> DOLOOP,2b-$
-<div style="margin-left:5%;">  efface la ligne sur laquelle le curseur est situé.
+<p id="SPACES">
+<b>SPACES</b> ( n -- )
+<div style="margin-left:5%;">   Imprime n espaces sur la console.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:     
+<div style="margin-left:5%;"><b> arguments:
 </b></div>
 <div style="margin-left:5%;"><i>aucun
 </i>&nbsp;&nbsp;</div>
@@ -244,8 +232,110 @@
 </b></div>
 <div style="margin-left:5%;"><i>rien
 </i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><i>;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+<hr>
+<p id="CLEARLN">
+<b>CLEARLN</b> 
+<div style="margin-left:5%;">   Efface la ligne sur laquelle le curseur est situé.
+</div>
+<div style="margin-left:5%;">   Place le curseur au début de la ligne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
 </i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="TYPE">
+<b>TYPE</b> ( c-addr n+ -- )
+<div style="margin-left:5%;">  Imprime une chaîne à l'écran de la console active.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse du premier caractère de la chaîne.
+</div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   Longueur de la chaîne. 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="DELETE">
+<b>DELETE</b>  ( -- )
+<div style="margin-left:5%;">   Supprime le caractère à la position du cureur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="DELBACK">
+<b>DELBACK</b>  ( -- )
+<div style="margin-left:5%;">   Supprime le caractère à gauche du curseur et recule le curseur d'une position.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="DELLINE">
+<b>DELLINE</b>  ( -- )    
+<div style="margin-left:5%;">   Supprime la ligne sur laquelle le curseur est positionné.
+</div>
+<div style="margin-left:5%;">   Renvoie le curseur en début de ligne.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="CR">
+<b>CR</b> ( -- )    
+<div style="margin-left:5%;">   Renvoie le curseur au début de la ligne suivante.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="CLS">
+<b>CLS</b>  ( -- )    
+<div style="margin-left:5%;">   Efface l'écran de la console.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
 <hr>
 <p id="GETCUR">
 <b>GETCUR</b>  ( -- u1 u2 )
@@ -258,9 +348,9 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    colonne  {0..63}
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    colonne  locale {0..63} remote {1..64}
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    ligne    {0..23}
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    ligne    locale {0..23} remote {1..24}
 </div>
 <hr>
 

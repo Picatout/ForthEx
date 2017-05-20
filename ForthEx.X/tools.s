@@ -18,7 +18,7 @@
 ;****************************************************************************
 ; NOM: tools.s
 ; DATE: 2017-05-18
-; DESCRPTION: Outils d'aide au débogage.
+; DESCRIPTION: Outils d'aide au débogage.
 ;    Retiré du fichier core.s pour les mettres ici.
     
 ; nom: ?DSP  ( -- )    
@@ -141,8 +141,6 @@ DEFWORD "RESUME",6,,RESUME ; ( -- )
     .word RPBREAK,FETCH,QDUP,ZBRANCH,9f-$
     .word RPSTORE,LIT,0,RPBREAK,STORE
 9:  .word EXIT
-    
-    
     
 ; affice le code source d'un mot qui est
 ; dans le dictionnaire

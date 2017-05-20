@@ -80,8 +80,24 @@ CPGUP: ; CTRL_PGUP
 CPGDN: ; CTRL_PGDN
  .byte 27,91,54,59,53,126
  
-; caractères de contrôle de flux.
+; nom: XON  ( -- c ) 
+;   Constante, retourne le caractère ASCII DC1
+;   Ce caractère est utilisé dans le contrôle de flux logicel pour signifier
+;   que le terminal est prêt à rececoir.
+; arguments:
+;   aucun
+; retourne:
+;   c   Caractère ASCII DC1 valeur 17   
 DEFCONST "XON",3,,XON,CTRL_Q 
+ 
+; nom: XOFF  ( -- c ) 
+;   Constante, retourne le caractère ASCII DC3
+;   Ce caractère est utilisé dans le contrôle de flux logicel pour signifier
+;   que le terminal n'est pas prêt à rececoir.
+; arguments:
+;   aucun
+; retourne:
+;   c   Caractère ASCII DC3 valeur 19   
 DEFCONST "XOFF",4,,XOFF,CTRL_S
  
 ; Table utilisée par VT-FILTER
@@ -100,18 +116,17 @@ CTRL_TABLE:
     .word 0,0,0,0  
  
 ; nom: VT-FILTER ( u -- u false | c true )    
-;   filtre  et retourne un caractère 'c' et 'vrai'
-;   si u fait partie de l'ensemble reconnu.
+;   Filtre u et retourne un caractère 'c' et 'vrai' si u fait partie de l'ensemble reconnu.
 ;   sinon retourne 'u' et 'faux'   
 ;   accepte:
 ;      VK_CR, VK_BACK, CTRL_X, CTRL_V et {32-126}
 ; arguments:
-;   u    code à vérifier
+;   u    Le code qui doit-être filtré.
 ; retourne:
-;   code refusé:    
+;   - refusé:    
 ;   u       même code
 ;   false   indicateur booléen 
-;   code reconnu:
+;   - reconnu:
 ;   c       caractère reconnu.
 ;   true    indicateur booléen.
 DEFWORD "VT-FILTER",9,,VTFILTER
@@ -138,7 +153,7 @@ DEFWORD "VT-KEY?",7,,VTKEYQ
 9: .word EXIT
     
 ; nom: VT-KEY  ( -- c )
-;   Attend la réception d'un caractère valide du clavier
+;   Attend la réception d'un caractère valide du terminal VT102.
 ; arguments:
 ;   aucun 
 ; retourne:
@@ -149,7 +164,8 @@ DEFWORD "VT-KEY",6,,VTKEY
     .word EXIT 
 
 ; nom: VT-EMIT ( c -- )
-;  transmet un caractère à la console.
+;  transmet un caractère à la console VT102.
+;  VT-EMIT filtre c rejette les caractères non reconnus.    
 ; arguments:
 ;    c   caractère à transmettre
 ; retourne:
@@ -186,29 +202,30 @@ DEFWORD "VT-EMIT",7,,VTEMIT
     .word EXIT
 
 ; nom: VT-TYPE  ( c-addr u -- )
-;   Affiche sur  la remote console une chaîne comptée.    
+;   Transmet au terminal VT102 une chaîne de caractère. 
+;   VT-TYPE utilise SPUTC, les caractères de la chaîne ne sont pas filtrés.    
 ; arguments:
 ;   c-addr     adresse du premier caractère
 ;   u          longueur de la chaîne.
 ; retourne:
-; 
+;   rien
 DEFWORD "VT-TYPE",7,,VTTYPE
     .word LIT,0, DODO
 1:  .word DUP,ECFETCH,SPUTC,ONEPLUS,DOLOOP,1b-$
     .word DROP,EXIT
     
 ; nom: VT-SNDARG  ( n -- )
-;   convertie un entier en chaîne avant de l'envoyé au port sériel.
+;   convertie un entier en chaîne avant de l'envoyer au terminal VT102.
 ; arguments:
 ;   n	entier à envoyer.
 ; retourne:  
-;
+;   rien
 DEFWORD "VT-SNDARG",9,,VTSNDARG
     .word LIT,0,STR,VTTYPE,EXIT
     
     
 ; nom: ESC[ ( -- )
-;   Envoie la séquence ESC [  i.e. 27 91
+;   Envoie la séquence 'ESC['  i.e. 27 91  au terminal VT102
 ; arguments:
 ;   aucun
 ; retourne:
@@ -217,68 +234,73 @@ DEFWORD "ESC[",4,,ESCRBRAC
     .word CLIT,27,SPUTC,CLIT,'[',SPUTC,EXIT
     
 ; nom: VT-UP ( -- )
-;   Envoie la séquence ANSI ESC[ A
+;   Envoie la séquence ANSI 'ESC[A'  au terminal VT102.
+;   Cette séquence déplace le curseur à la ligne précédente de l'affichage.    
 ; arguments:
 ;   aucun
 ; retourne:
-;    
+;   rien
 DEFWORD "VT-UP",5,,VTUP
     .word ESCRBRAC,LIT,'A',SPUTC,EXIT
     
 ; nom: VT-DOWN ( -- )
-;   Envoie la séquence ANSI ESC[ B
+;   Envoie la séquence ANSI 'ESC[B' au terminal VT102.
+;   Cette séquence déplace le curseur sur la ligne suivante de l'affichage.    
 ; arguments:
 ;   aucun
 ; retourne:
-;    
+;    rien
 DEFWORD "VT-DOWN",7,,VTDOWN
     .word ESCRBRAC,LIT,'B',SPUTC,EXIT
 
 ; nom: VT-RIGHT ( -- )
-;   Envoie la séquence ANSI ESC[ C
+;   Envoie la séquence ANSI 'ESC[C'  au terminal VT102.
+;   Cete séquence déplace le curseur d'un caractère vers la droite.    
 ; arguments:
 ;   aucun
 ; retourne:
-;    
+;    rien
 DEFWORD "VT-RIGHT",8,,VTRIGHT
     .word ESCRBRAC,LIT,'C',SPUTC,EXIT
     
 ; nom: VT-LEFT ( -- )
-;   Envoie la séquence ANSI ESC[ D
+;   Envoie la séquence ANSI 'ESC[D'  au terminal VT102.
+;   Cette séquence déplace le curseur d'un caractère vers la gauche.    
 ; arguments:
 ;   aucun
 ; retourne:
-;    
+;    rien
 DEFWORD "VT-LEFT",7,,VTLEFT
     .word ESCRBRAC,LIT,'D',SPUTC,EXIT
     
 ; nom: VT-HOME ( -- )
-;   Envoie le curseur au début de la ligne.
+;   Envoie une séquence de contrôle au terminal VT102 pour déplacer le curseur en début de ligne.    
 ; arguments:
 ;   aucun
 ; retourne:
-;    
+;    rien
 DEFWORD "VT-HOME",7,,VTHOME
     .word VTGETCUR,DUP,ZEROLT,ZBRANCH,2f-$,DROP,EXIT
 2:  .word SWAP,DROP,LIT,1,SWAP
     .word VTATXY,EXIT
     
 ; nom: VT-END ( -- )
-;   Envoie le curseur à la fin de la ligne
+;   Envoie une séquence de contrôle au terminal VT102 pour déplacer le curseur à la fin de la ligne.
 ; arguments:
 ;   aucun
 ; retourne:
-;    
+;    rien
 DEFWORD "VT-END",6,,VTEND
     .word VTGETCUR,DUP,ZEROLT,ZBRANCH,2f-$,DROP,EXIT
 2:  .word SWAP,DROP,LIT,CPL-1,SWAP
     .word VTATXY,EXIT
     
-; nom: AT-XY ( u1 u2 -- )
-;   Positionne le curseur de la console.
+; nom: VT-AT-XY ( u1 u2 -- )
+;   Envoie une séquence de contrôle au terminal VT102 pour positionner le curseur    
+;   aux coordonnées {u1,u2}
 ; arguments:
-;   u1   colonne 
-;   u2   ligne
+;   u1   numéro de colonne {1..64}
+;   u2   numéro de ligne   {1..24}
 ;  retourne:
 ;    rien
 DEFWORD "VT-AT-XY",8,,VTATXY
@@ -288,8 +310,8 @@ DEFWORD "VT-AT-XY",8,,VTATXY
     .word LIT,'H',SPUTC
     .word EXIT
 
-; nom: PAGE ( -- )
-;  Efface l'écran du terminal
+; nom: VT-PAGE ( -- )
+;  Envoie une commande au terminal VT102 pour effacer l'écran.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -299,35 +321,47 @@ DEFWORD "VT-PAGE",7,,VTPAGE
     .word EXIT
     
   
-;DEFWORD "VT-CRLF",7,,VTCRLF ; ( -- )
-;    .word LIT,13,SPUTC
-;    .word LIT,10,SPUTC
-;    .word EXIT
-   
+; nom: VT-DELBACK  ( -- )
+;   Envoie une commande au terminal VT102 pour effacer le caractère à gauche du curseur.
+;   Le curseur est déplacé à la position du caractère supprimé.
+; arguments:
+;   aucun
+; retourne:
+;   rien
 DEFWORD "VT-DELBACK",10,,VTDELBACK ; ( -- )
     .word LIT,VK_BACK,SPUTC
     .word BL,SPUTC,LIT,VK_BACK,SPUTC
     .word EXIT
 
-; code VT100 pour suprimer la ligne courante.    
+; nom: VT-DELLN   ( -- )    
+;   Envoie une commande au terminal VT102 pour supprimer la ligne sur laquelle
+;   se trouve le curseur. Le curseur est déplacé au début de la ligne.    
+; arguments:
+;   aucun
+; retourne:
+;   rien
 DEFWORD "VT-DELLN",8,,VTDELLN ; ( -- )
     .word LIT,27,SPUTC,LIT,'[',SPUTC
     .word LIT,'2',SPUTC
     .word LIT,'K',SPUTC,LIT,13,SPUTC,EXIT
 
-; nom: DSR  ( -- )
-;  envoie la séquence de contrôle VT102 DSR: ESC [ 6 n 
-;  rapporte la position du curseur.    
+; nom: VT-DSR  ( -- )
+;   envoie la séquence de contrôle ANSI 'ESC[6n' au terminal VT102.
+;   Le terminal répond à cette commande en envoyant la la position du curseur. 
+;   VT-DSR est utilisé par VT-GETCUR
 ; arguments:
 ;   aucun
-; retourne
+; retourne:
 ;   rien    
-DEFWORD "DSR",3,,DSR ; ( -- )
+DEFWORD "VT-DSR",6,,VTDSR ; ( -- )
     .word LIT,27,SPUTC,LIT,'[',SPUTC,LIT,'6',SPUTC
     .word LIT,'n',SPUTC,EXIT
 
 ; nom: VT-GETP  ( c -- n f )
-;   lecture d'une valeur numérique terminée par le caractère c    
+;   Réception d'un paramètre numérique envoyé par le terminal.    
+;   La valeur numérique est terminée par le caractère c.
+;   VT-GETP est utilisé par les commandes qui attendent une réponse du terminal
+;   en sachant que la réponse contient des valeur numériques.    
 ; arguments:
 ;   c caractère délimitant la chaîne numérique.
 ; retourne:
@@ -343,11 +377,11 @@ DEFWORD "VT-GETP",7,,VTGETP
     
   
 ; nom: ESCSEQ?  ( -- f )
-;   attend une séquence ESC [
-; arguemnts:
+;   Attend une séquence d'échappement  'ESC[' du terminal.
+; arguments:
 ;   aucun
 ; retourne:
-;   f  indicateur booléen, FAUX si séquence reçu n'est pas ESC [  
+;   f  indicateur booléen, FAUX si la séquence reçu n'est pas ESC[  
 DEFWORD "ESCSEQ?",7,,ESCSEQQ  ; ( -- f )
     .word SGETC,LIT,27,EQUAL,ZBRANCH,9b-$
     .word SGETC,LIT,'[',EQUAL,ZBRANCH,9b-$
@@ -355,16 +389,17 @@ DEFWORD "ESCSEQ?",7,,ESCSEQQ  ; ( -- f )
 9:  .word FALSE,EXIT
 
   
-; nom: LC-GETCUR  ( -- u1 u2 | -1 -1 )
-;   retourne la position du curseur texte.
+; nom: VT-GETCUR  ( -- u1 u2 | -1 -1 )
+;   Envoie une requête de position du curseur au terminal VT102 et fait la lecture de la réponse.
+;   Contrairement à la console locale le terminal VT102 numérote les colonnes et ligne à partir de 1.  
 ; arguments:
 ;   aucun
 ; retourne:
-;   u1    colonne  {0..63}
-;   u2    ligne    {0..23}
+;   u1    colonne  {1..64}
+;   u2    ligne    {1..24}
 ;   en cas d'erreur reoturne -1 -1  
 DEFWORD "VT-GETCUR",9,,VTGETCUR ; ( -- u1 u2 | -1 -1 )
-    .word DSR ; requête position du curseur
+    .word VTDSR ; requête position du curseur
     ; attend la réponse
     .word ESCSEQQ,ZBRANCH,8f-$
     .word LIT,';',VTGETP,TBRANCH,2f-$
@@ -375,7 +410,8 @@ DEFWORD "VT-GETCUR",9,,VTGETCUR ; ( -- u1 u2 | -1 -1 )
 8:  .word LIT,-1,DUP,EXIT    
    
 ; nom: VT-CRLF 
-;   Envoie la séquence CRTL_M CTRL_J  i.e. ASCII 13,10
+;   Envoie la séquence 'CRTL_M CTRL_J'  (i.e. ASCII 13 10)  au terminal VT102.
+;   Le terminal répond en déplacant le curseur au début de la ligne suivante.  
 ; arguments:
 ;   aucun
 ; retourne:
@@ -384,14 +420,14 @@ DEFWORD "VT-CRLF",7,,VTCRLF
    .word LIT,CTRL_M,SPUTC,LIT,CTRL_J,SPUTC,EXIT
    
 ; nom: VT-PUTC
-;   Affiche un caractère au terminal et fait un renvoie à la ligne
-;   si la position du curseur == CPL
-; argument:
-;   c   caractère à afficher.
+;   Envoie un caractère au terminal VT102. Les caractères ne sont pas filtrés.
+;   Si la colonne du curseur après l'affichage du caractère est à 65 force un VT-CRLF.   
+; arguments:
+;   c   caractère à envoyer au terminal.
 ; retourne:
-;  
+;   rien
 DEFWORD "VT-PUTC",7,,VTPUTC
-   .word SPUTC,VTGETCUR,DROP,LIT,CPL,EQUAL,ZBRANCH,9f-$
+   .word SPUTC,VTGETCUR,DROP,LIT,CPL+1,EQUAL,ZBRANCH,9f-$
    .word VTCRLF
 9: .word EXIT
  

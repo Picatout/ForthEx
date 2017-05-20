@@ -2,6 +2,9 @@
 ----------
 Travail dans strings.s
 Travail dans sdcard.s
+Travail dans console.s
+Travail dans vt102.s
+Travail dans block.s
 
 2017-05-18
 ----------
