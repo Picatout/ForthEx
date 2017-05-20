@@ -17,9 +17,9 @@
 ;
 ;****************************************************************************
 
-;Nom: sound.s
-;Description: routines sortie tonalités audio.
-;Date: 2015-10-16
+;NOM: sound.s
+;DATE: 2015-10-16
+;DESCRIPTION: routines sortie tonalités audio.
     
 .include "sound.inc"
 
@@ -52,10 +52,6 @@ HEADLESS SOUND_INIT,CODE
    ; return
     NEXT
     
-;;;;;;;;;;;;;;;;;;
- ; mots Forth
- ;;;;;;;;;;;;;;;;;;
- 
 ; nom: TONE   ( u1 u2 -- )
 ;   Génère une tonalité de fréquence u2 et de durée u1.	
 ; arguments:

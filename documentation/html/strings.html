@@ -257,6 +257,320 @@
 <div style="margin-left:5%;"><i>rien
 </i>&nbsp;&nbsp;</div>
 <hr>
+<p id="DIGIT">
+<b>DIGIT</b>  ( u -- c )    
+<div style="margin-left:5%;">   Convertion d'un chiffre en caractère ASCII selon la valeur de BASE.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Un entier entre 0..BASE-1 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  Représentation ASCII de cet entier qui représente 1 seul digit dans la base active.    
+</div>
+<hr>
+<p id="EXTRACT">
+<b>EXTRACT</b>  ( ud u -- ud2 c )    
+<div style="margin-left:5%;">   Extrait le chiffre le moins significatif de ud et le convertie en caractère
+</div>
+<div style="margin-left:5%;">   en accord avec la valeur de la base u. 
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp; Entier double non signé qui est le  nombre à convertir en chaîne ASCII.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Entier simple non signé représente la valeur de la base numérique.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp; Entier double qui est le quotient de ud/u, c'est la partie du nombre qui reste à convertir.
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   Caractère ASCII qui représente le digit résultant de ud%u (modulo de ud par u ).    
+</div>
+<hr>
+<p id="&lt;#">
+<b>&lt;#</b>   ( -- )    
+<div style="margin-left:5%;">   Initalise le début de la conversion d'un entier en chaîne ASCII.
+</div>
+<div style="margin-left:5%;">   La valeur de la variable HP est modifiée pour pointé à la fin du PAD.
+</div>
+<div style="margin-left:5%;">   Lors de la conversion les caractères sont ajoutés de la droite vers la gauche dans le PAD.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   
+</div>
+<hr>
+<p id="HOLD">
+<b>HOLD</b> ( c -- )    
+<div style="margin-left:5%;">   Met le caractère dans c dans le PAD et recule HP de 1 caractère.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  Caractère à insérer dans la chaîne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="#">
+<b>#</b>  ( ud1 -- ud2 )    
+<div style="margin-left:5%;">   Convertion du digit le moins significatif de ud1 en ASCII et l'ajoute à la chaîne
+</div>
+<div style="margin-left:5%;">   dans PAD.  Retourne le restant de ud1.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  Entier double non signé à convertir.
+</div>
+<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp;  Entier double non signé restant, i.e. ud1/base    
+</div>
+<hr>
+<p id="#S">
+<b>#S</b>  ( ud1 -- ud2 )     
+<div style="margin-left:5%;">   Convertie tous les digits d'un entier double en chaîne ASCII.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp; Entier double non signé à convertir en chaîne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp; Entier double de valeur nulle qui reste après la conversion.    
+</div>
+<hr>
+<p id="SIGN">
+<b>SIGN</b>  ( n -- )  
+<div style="margin-left:5%;">   Ajoute le signe au début de la chaîne numérique dans le PAD.
+</div>
+<div style="margin-left:5%;">   Si n est  négatif alors on ajoute un signe '-' au début de la chaîne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Entier qui représente le signe du nombre qui a été convertie.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="#&gt;">
+<b>#&gt;</b>  ( ud -- addr u )  
+<div style="margin-left:5%;">   Termine la conversion d'un entier en chaîne ASCII en ajoutant la longueur
+</div>
+<div style="margin-left:5%;">   au début de la chaîne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   n'est pas utilisé c'est le relicat du mot #S. Cette valeur est simplement jetée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse du premier caractère de la chaîne numérique.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne.  
+</div>
+<hr>
+<p id="STR">
+<b>STR</b> ( d -- c-addr u )  
+<div style="margin-left:5%;">   Convertion d'un entier double en chaîne ASCII, utilise le tampon PAD pour 
+</div>
+<div style="margin-left:5%;">   développer la chaîne ASCII. La variable HP est aussi utilisée dans cette procédure.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;   Entier double à convertir en chaîne ASCII.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse premier caractère de la chaîne.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Longueur de la chaîne.  
+</div>
+<hr>
+<p id="COLFILL">
+<b>COLFILL</b> ( n1+ n2+ -- )  
+<div style="margin-left:5%;">   Ajoute les espaces nécessaires au début de la colonne pour que le nombre
+</div>
+<div style="margin-left:5%;">   soit aligné à droite d'une colonne de largeur fixe.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1+</i>&nbsp;&nbsp; Largeur de la colonne
+</div>
+<div style="margin-left:5%;"><i>n2+</i>&nbsp;&nbsp; Longueur de la chaîne numérique.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id=".R">
+<b>.R</b>  ( n n+ -- )  
+<div style="margin-left:5%;">   Affiche un nombre dans un colonne de largeur fixe aligné à droite.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Nombre à afficher.
+</div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Largeur de la colonne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="U.R">
+<b>U.R</b>  ( u +n -- )    
+<div style="margin-left:5%;">   Affiche un entier non signé dans une colonne de largeur fixe aligné à droite.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u	</i>&nbsp;&nbsp; Entier simple non signé à afficher.    
+</div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   Largeur de la colonne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="U.">
+<b>U.</b>  ( u -- )  
+<div style="margin-left:5%;">   Affiche un entier simple non signé en format libre.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Entier à afficher.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id=".">
+<b>.</b>  ( n -- )  
+<div style="margin-left:5%;">   Affiche un entier simple en format libre.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Entier à afficher.  
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="?">
+<b>?</b>  ( addr -- )  
+<div style="margin-left:5%;">   Affiche l'entier simple à l'adresse donnée. On s'assure de l'alignement sur
+</div>
+<div style="margin-left:5%;">   une adresse paire.  Si 'addr' est impaire l'adresse paire précédente est utilisée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp;  Adresse dont le contenu sera affiché.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="C?">
+<b>C?</b>  ( c-addr )  
+<div style="margin-left:5%;">   Lit et affiche l'octet à l'adresse c-addr.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse dont le contenu sera affiché.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="UD.">
+<b>UD.</b>  ( ud -- )    
+<div style="margin-left:5%;">   Affiche un entier double non signé en format libre.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  Entier double non signé.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="D.">
+<b>D.</b>   ( d -- )    
+<div style="margin-left:5%;">   Affiche un entier double en format libre.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;   Entier double à afficher.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="D.R">
+<b>D.R</b>  ( d n+ -- )    
+<div style="margin-left:5%;">   Affiche un entier double dans une colonne de largeur fixe alignée à droite.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;  Entier double à afficher.
+</div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Largeur de la colonne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="UD.R">
+<b>UD.R</b>  ( ud n+ -- )
+<div style="margin-left:5%;">   Affiche un entier double non signé dans une colonne de largeur fixe alignée à droite.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp; Entier double non signé à afficher.
+</div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Largeur de la colonne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
 
 </body>
 </html>

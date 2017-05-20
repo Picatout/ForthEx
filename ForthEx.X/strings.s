@@ -258,4 +258,220 @@ DEFWORD "SEARCH",6,,SEARCH ; ( c-addr1 u1 c-addr2 u2 -- c-addr3 u3 f )
 DEFWORD "SLITERAL",8,F_IMMED,SLITERAL
     .word QCOMPILE,SWAP,CFA_COMMA,LIT,COMMA,CFA_COMMA,LIT,COMMA,EXIT
     
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; routines pour la conversion
+; d'un entier en chaîne
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; nom: DIGIT  ( u -- c )    
+;   Convertion d'un chiffre en caractère ASCII selon la valeur de BASE.
+; arguments:
+;   u  Un entier entre 0..BASE-1 
+; retourne:
+;   c  Représentation ASCII de cet entier qui représente 1 seul digit dans la base active.    
+DEFWORD "DIGIT",5,,DIGIT ; ( u -- c )
+    .word LIT,9,OVER,LESS,LIT,7,AND,PLUS,LIT,48,PLUS
+    .word EXIT
+
+; nom: EXTRACT  ( ud u -- ud2 c )    
+;   Extrait le chiffre le moins significatif de ud et le convertie en caractère
+;   en accord avec la valeur de la base u. 
+; arguments:
+;   ud Entier double non signé qui est le  nombre à convertir en chaîne ASCII.
+;   u  Entier simple non signé représente la valeur de la base numérique.
+; retourne:
+;   ud2 Entier double qui est le quotient de ud/u, c'est la partie du nombre qui reste à convertir.
+;   c   Caractère ASCII qui représente le digit résultant de ud%u (modulo de ud par u ).    
+DEFWORD "EXTRACT",7,,EXTRACT ; ( ud u -- ud2 c )     
+    .word UDSLASHMOD,ROT,DIGIT,EXIT
+    
+; nom: <#   ( -- )    
+;   Initalise le début de la conversion d'un entier en chaîne ASCII.
+;   La valeur de la variable HP est modifiée pour pointé à la fin du PAD.
+;   Lors de la conversion les caractères sont ajoutés de la droite vers la gauche dans le PAD.
+; arguments:
+;   aucun
+; retourne:
+;    rien   
+DEFWORD "<#",2,,LTSHARP ; ( -- )
+    .word PAD,FETCH,PADSIZE,PLUS,HP,STORE
+    .word EXIT
+ 
+; nom: HOLD ( c -- )    
+;   Met le caractère dans c dans le PAD et recule HP de 1 caractère.
+; arguments:
+;   c  Caractère à insérer dans la chaîne.
+; retourne:
+;   rien    
+DEFWORD "HOLD",4,,HOLD ; ( c -- )
+    .word LIT,-1,HP,PLUSSTORE
+    .word HP,FETCH,CSTORE
+    .word EXIT
+
+; nom: #  ( ud1 -- ud2 )    
+;   Convertion du digit le moins significatif de ud1 en ASCII et l'ajoute à la chaîne
+;   dans PAD.  Retourne le restant de ud1.    
+; arguments:
+;     ud1  Entier double non signé à convertir.
+;     ud2  Entier double non signé restant, i.e. ud1/base    
+DEFWORD "#",1,,SHARP ; ( ud1 -- ud2 )
+    .word BASE,FETCH,EXTRACT,HOLD,EXIT
+
+; nom: #S  ( ud1 -- ud2 )     
+;   Convertie tous les digits d'un entier double en chaîne ASCII.
+; arguments:
+;   ud1 Entier double non signé à convertir en chaîne.
+; retourne:
+;   ud2 Entier double de valeur nulle qui reste après la conversion.    
+DEFWORD "#S",2,,SHARPS ; ( ud1 -- ud2==0 )
+1:  .word SHARP,TWODUP,OR,TBRANCH,1b-$,EXIT
+  
+; nom: SIGN  ( n -- )  
+;   Ajoute le signe au début de la chaîne numérique dans le PAD.
+;   Si n est  négatif alors on ajoute un signe '-' au début de la chaîne.
+; arguments:
+;   n Entier qui représente le signe du nombre qui a été convertie.
+; retourne:
+;   rien  
+DEFWORD "SIGN",4,,SIGN ; ( n -- )
+    .word ZEROLT,ZBRANCH,1f-$
+    .word CLIT,'-',HOLD
+1:  .word EXIT
+  
+; nom: #>  ( ud -- addr u )  
+;   Termine la conversion d'un entier en chaîne ASCII en ajoutant la longueur
+;   au début de la chaîne.
+; arguments:
+;    ud   n'est pas utilisé c'est le relicat du mot #S. Cette valeur est simplement jetée.
+; retourne:
+;   c-addr  Adresse du premier caractère de la chaîne numérique.
+;   u       Longueur de la chaîne.  
+DEFWORD "#>",2,,SHARPGT ; ( d -- c-addr u )
+  .word TWODROP,HP,FETCH,PAD,FETCH,PADSIZE,PLUS,OVER,MINUS, EXIT
+  
+; nom: STR ( d -- c-addr u )  
+;   Convertion d'un entier double en chaîne ASCII, utilise le tampon PAD pour 
+;   développer la chaîne ASCII. La variable HP est aussi utilisée dans cette procédure.  
+; arguments:
+;   d   Entier double à convertir en chaîne ASCII.
+; retourne:
+;   c-addr   Adresse premier caractère de la chaîne.
+;   u  Longueur de la chaîne.  
+DEFWORD "STR",3,,STR ; ( d -- addr u )
+  .word DUP,TOR,DABS,LTSHARP,SHARPS,RFROM,SIGN,SHARPGT,EXIT
+
+; nom: COLFILL ( n1+ n2+ -- )  
+;   Ajoute les espaces nécessaires au début de la colonne pour que le nombre
+;   soit aligné à droite d'une colonne de largeur fixe.
+; arguments:
+;   n1+ Largeur de la colonne
+;   n2+ Longueur de la chaîne numérique.
+; retourne:
+;   rien  
+DEFWORD "COLFILL",7,,COLFILL ; ( n1+ n2+ -- )
+    .word MINUS,DUP,ZEROGT,TBRANCH,1f-$
+    .word DROP,BRANCH,8f-$
+1:  .word SPACES
+8:  .word EXIT
+  
+; nom: .R  ( n n+ -- )  
+;   Affiche un nombre dans un colonne de largeur fixe aligné à droite.
+; arguments:
+;   n  Nombre à afficher.
+;   n+ Largeur de la colonne.
+; retourne:
+;   rien  
+DEFWORD ".R",2,,DOTR  ; ( n +n -- ) +n est la largeur de la colonne
+    .word TOR,STOD,RFROM,DDOTR,EXIT
+    
+; nom: U.R  ( u +n -- )    
+;   Affiche un entier non signé dans une colonne de largeur fixe aligné à droite.
+; arguments:
+;   u	 Entier simple non signé à afficher.    
+;   n+   Largeur de la colonne.
+; retourne:
+;   rien    
+DEFWORD "U.R",3,,UDOTR ; ( u +n -- )
+  .word TOR,LIT,0,RFROM,UDDOTR,EXIT
+  
+; nom: U.  ( u -- )  
+;   Affiche un entier simple non signé en format libre.
+; arguments:
+;   u  Entier à afficher.
+; retourne:
+;   rien  
+DEFWORD "U.",2,,UDOT ; ( n -- )
+udot:  .word LIT,0,UDDOT,EXIT
+  
+; nom: .  ( n -- )  
+;   Affiche un entier simple en format libre.
+; arguments:
+;   n Entier à afficher.  
+; retourne:
+;   rien  
+DEFWORD ".",1,,DOT ; ( n -- )
+  .word BASE,FETCH,LIT,10,EQUAL,ZBRANCH,udot-$,STOD,DDOT,EXIT
+
+; nom: ?  ( addr -- )  
+;   Affiche l'entier simple à l'adresse donnée. On s'assure de l'alignement sur
+;   une adresse paire.  Si 'addr' est impaire l'adresse paire précédente est utilisée.
+; arguments:
+;   addr  Adresse dont le contenu sera affiché.
+; retourne:
+;   rien  
+DEFWORD "?",1,,QUESTION ; ( addr -- )
+  .word LIT,0xFFFE,AND,FETCH,DOT,EXIT
+
+; nom: C?  ( c-addr )  
+;   Lit et affiche l'octet à l'adresse c-addr.
+; arguments:
+;   c-addr  Adresse dont le contenu sera affiché.
+; retourne:
+;   rien  
+DEFWORD "C?",2,,CQUESTION ; ( c-addr -- )    
+    .word CFETCH,DOT,EXIT
+  
+; nom: UD.  ( ud -- )    
+;   Affiche un entier double non signé en format libre.
+; arguments:
+;   ud  Entier double non signé.
+; retourne:
+;   rien    
+DEFWORD "UD.",3,,UDDOT ; ( ud -- )    
+_uddot:
+    .word LTSHARP,SHARPS,SHARPGT,SPACE,TYPE
+    .word EXIT
+    
+; nom: D.   ( d -- )    
+;   Affiche un entier double en format libre.
+; arguments:
+;    d   Entier double à afficher.
+; retourne:
+;   rien    
+DEFWORD "D.",2,,DDOT ; ( d -- )
+    .word BASE,FETCH,LIT,10,EQUAL,ZBRANCH,_uddot-$
+    .word STR,SPACE,TYPE
+    .word EXIT
+
+; nom: D.R  ( d n+ -- )    
+;   Affiche un entier double dans une colonne de largeur fixe alignée à droite.
+; arguments:
+;   d  Entier double à afficher.
+;   n+ Largeur de la colonne.
+; retourne:
+;   rien    
+DEFWORD "D.R",3,,DDOTR ; ( d n+ -- )
+    .word TOR,STR,RFROM,OVER,COLFILL,TYPE,EXIT
+
+; nom: UD.R  ( ud n+ -- )
+;   Affiche un entier double non signé dans une colonne de largeur fixe alignée à droite.
+; arguments:
+;   ud Entier double non signé à afficher.
+;   n+ Largeur de la colonne.
+; retourne:
+;   rien    
+DEFWORD "UD.R",4,,UDDOTR ; ( ud n+ -- )
+    .word TOR,LTSHARP,SHARPS,SHARPGT,RFROM,OVER
+    .word COLFILL,TYPE,EXIT
+
     

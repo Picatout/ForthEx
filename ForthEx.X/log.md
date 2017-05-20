@@ -1,3 +1,9 @@
+2017-05-20
+----------
+Travail dans tvout.s
+Travaile dans strings.s
+Travail dans block.s
+
 2017-05-19
 ----------
 Travail dans strings.s

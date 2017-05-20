@@ -3,14 +3,46 @@
 <head>
 </head>
 <body>
-<h1>tvout</h1><p id="VIDEO">
-<b>VIDEO</b>  ( f -- ) \ T=on F=off 
-<div style="margin-left:5%;">   active/désactive sortie vidéo
+<h1>tvout</h1><p id="SCRBUF">
+<b>SCRBUF</b>  ( -- a-addr )    
+<div style="margin-left:5%;">   Constante, adresse du buffer vidéo.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; indicateur booléen VRAI active la sortie vidéo, FAUX la désactive 
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse du buffer vidéo. 
+</div>
+<hr>
+<p id="HTAB">
+<b>HTAB</b>   ( -- a-addr )   
+<div style="margin-left:5%;">   Variable retourne l'adresse de la variable contenant la largeur des tabulations.
+</div>
+<div style="margin-left:5%;">   Au démarrage cette valeur est fixée à 4 caractères.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse de la variable HTAB.    
+</div>
+<hr>
+<p id="VIDEO">
+<b>VIDEO</b>  ( f -- )
+<div style="margin-left:5%;">   Active/désactive la sortie vidéo. La synchronisation demeure active
+</div>
+<div style="margin-left:5%;">   mais les pixels vidéo ne sont plus envoyés au moniteur.   
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur booléen  \ T=on F=off .
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -18,13 +50,15 @@
 </div>
 <hr>
 <p id="CURENBL">
-<b>CURENBL</b>   ( f -- ) \ T=active, F=désactive
-<div style="margin-left:5%;">  active ou désactive le curseur texte
+<b>CURENBL</b>   ( f -- )
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Active ou désactive le curseur texte.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen,VRAI active le curseur, FAUX le désactive.
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen, T=activ, F=inactif.
 </div>
 <div style="margin-left:5%;"><b> retourne:    
 </b></div>
@@ -33,7 +67,9 @@
 <hr>
 <p id="LC-PAGE">
 <b>LC-PAGE</b>  ( -- )
-<div style="margin-left:5%;">   vide l'écran.
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Vide l'écran.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:    
@@ -47,11 +83,9 @@
 <hr>
 <p id="SCRLUP">
 <b>SCRLUP</b>  ( -- )
-<div style="margin-left:5%;">   glisse affichage vers le
+<div style="margin-left:5%;">   Console locale.    
 </div>
-<div style="margin-left:5%;">   haut d'une ligne texte
-</div>
-<div style="margin-left:5%;">   dernière ligne effacée.
+<div style="margin-left:5%;">   Glisse l'affichage vers le haut d'une ligne texte et efface la dernière ligne.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -65,11 +99,9 @@
 <hr>
 <p id="SCRLDN">
 <b>SCRLDN</b>  ( -- )
-<div style="margin-left:5%;">   glisse affichage vers le
+<div style="margin-left:5%;">   Console locale.    
 </div>
-<div style="margin-left:5%;">   bas d'une ligne texte
-</div>
-<div style="margin-left:5%;">   première ligne effacée.
+<div style="margin-left:5%;">   Glisse l'affichage vers le bas d'une ligne texte et efface la première ligne.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -83,7 +115,9 @@
 <hr>
 <p id="GETX">
 <b>GETX</b> ( -- u )
-<div style="margin-left:5%;">   retourne la colonne du curseur texte.
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Retourne la colonne du curseur texte.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -92,12 +126,14 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:    
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    colonne du curseur    
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    colonne du curseur {0..63}   
 </div>
 <hr>
 <p id="GETY">
 <b>GETY</b>  ( -- u )
-<div style="margin-left:5%;">   retourne la ligne du curseur.
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Retourne la ligne du curseur.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -106,34 +142,35 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:    
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    ligne du curseur    
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    ligne du curseur {0..23}
 </div>
 <hr>
-<p id="SETX
-">
-<b>SETX
-</b> <div style="margin-left:5%;">  Positionne le curseur texte à la colonne u.
+<p id="SETX">
+<b>SETX</b>   ( u -- )
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Positionne le curseur texte à la colonne u.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   colonne.
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   colonne {0..63}
 </div>
 <div style="margin-left:5%;"><b> retourne:    
 </b></div>
 <div style="margin-left:5%;"><i>rien
 </i>&nbsp;&nbsp;</div>
 <hr>
-<p id="SETX
-">
-<b>SETX
-</b> r_sema
-<div style="margin-left:5%;">  Positionne le curseur texte à la ligne u.
+<p id="SETX">
+<b>SETX</b>  ( u -- )
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Positionne le curseur texte à la ligne u.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   ligne
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   ligne {0..23}
 </div>
 <div style="margin-left:5%;"><b> retourne:    
 </b></div>
@@ -142,30 +179,34 @@
 <hr>
 <p id="CURADR">
 <b>CURADR</b>  ( -- c-addr )
-<div style="margin-left:5%;">  Retourne l'adresse dans le buffer d'écran correspondant
+<div style="margin-left:5%;">   Console locale.    
 </div>
-<div style="margin-left:5%;">  à la position actuelle du curseur
+<div style="margin-left:5%;">   Retourne l'adresse dans le buffer d'écran correspondant
+</div>
+<div style="margin-left:5%;">   à la position actuelle du curseur.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
 <div style="margin-left:5%;"><i>aucun
 </i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><i>retourne
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   addresse buffer du curseur    
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   addresse buffer correspondant à la position du curseur texte.
 </div>
 <hr>
 <p id="CURPOS">
 <b>CURPOS</b>  ( u1 u2 -- )
-<div style="margin-left:5%;">  positionne le curseur texte à la colonne u1 et la ligne u2
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Positionne le curseur texte à la colonne u1 et la ligne u2.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    colonne
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    colonne {0..63}
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    ligne
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    ligne {0..23}
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -174,7 +215,9 @@
 <hr>
 <p id="LC-GETCUR">
 <b>LC-GETCUR</b>  ( -- u1 u2 )
-<div style="margin-left:5%;">   retourne la position du curseur texte.
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Retourne la position du curseur texte.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -190,7 +233,9 @@
 <hr>
 <p id="SCRCHAR">
 <b>SCRCHAR</b>  ( -- c )    
-<div style="margin-left:5%;">   retourne le caractère à la position du curseur
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Retourne le caractère à la position du curseur.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -203,17 +248,19 @@
 </div>
 <hr>
 <p id="CHR&gt;SCR">
-<b>CHR&gt;SCR</b>  ( x y c -- )    
-<div style="margin-left:5%;">   Met le caractère c la position x,y de l'écran.
+<b>CHR&gt;SCR</b>  ( u1 u2 c -- )    
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Met le caractère c la position {u1,u2} de l'écran.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp; colonne
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; Colonne {0..63}
 </div>
-<div style="margin-left:5%;"><i>y</i>&nbsp;&nbsp; ligne
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp; Ligne {0..23}
 </div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; caractère    
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; Caractère    
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -222,14 +269,16 @@
 <hr>
 <p id="INVLN">
 <b>INVLN</b>  ( n f -- )    
-<div style="margin-left:5%;"> inverse ligne écran
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Inverse vidéo de la ligne n. L'inverse vidéo signifie que les caractères sont affiché noir/blanc.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   no. de ligne {0..23}
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Ligne {0..23}
 </div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   TRUE -&gt; inverse vidéo, FALSE -&gt; vidéo normal
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   T=inverse, F=vidéo normal
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -238,6 +287,8 @@
 <hr>
 <p id="LC-LEFT">
 <b>LC-LEFT</b>  ( -- )
+<div style="margin-left:5%;">   Console locale.    
+</div>
 <div style="margin-left:5%;">   Déplace le curseur 1 caractère vers la gauche.
 </div>
 </p>
@@ -252,6 +303,8 @@
 <hr>
 <p id="LC-RIGHT">
 <b>LC-RIGHT</b>  ( -- )
+<div style="margin-left:5%;">   Console locale.    
+</div>
 <div style="margin-left:5%;">   Déplace le curseur 1 caractère vers la droite.
 </div>
 </p>
@@ -266,6 +319,8 @@
 <hr>
 <p id="LC-HOME">
 <b>LC-HOME</b>  ( -- )
+<div style="margin-left:5%;">   Console locale.    
+</div>
 <div style="margin-left:5%;">   Déplace le curseur au début de la ligne.
 </div>
 </p>
@@ -280,6 +335,8 @@
 <hr>
 <p id="LC-END">
 <b>LC-END</b>  ( -- )
+<div style="margin-left:5%;">   Console locale.    
+</div>
 <div style="margin-left:5%;">   Déplace le curseur après le dernier caractère de la ligne.
 </div>
 </p>
@@ -294,7 +351,9 @@
 <hr>
 <p id="LC-UP">
 <b>LC-UP</b>   ( -- )
-<div style="margin-left:5%;">  déplace le curseur d'une ligne vers le haut.
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Déplace le curseur d'une ligne vers le haut.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -308,7 +367,9 @@
 <hr>
 <p id="LC-DOWN">
 <b>LC-DOWN</b>   ( -- )
-<div style="margin-left:5%;">  déplace le curseur d'une ligne vers le bas.
+<div style="margin-left:5%;">  Console locale.    
+</div>
+<div style="margin-left:5%;">  Déplace le curseur d'une ligne vers le bas.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -322,7 +383,13 @@
 <hr>
 <p id="TGLCHAR">
 <b>TGLCHAR</b>  ( -- )
-<div style="margin-left:5%;">   inverse le bit #7 du caractère à la position du curseur.
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Inverse le bit #7 du caractère à la position du curseur.
+</div>
+<div style="margin-left:5%;">   Le bit #7 du caractère est utilisé comme indicateur d'inversion vidéo.
+</div>
+<div style="margin-left:5%;">   Lorsque ce bit est à 1 le caractère et affiché en noir sur fond blanc.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -336,18 +403,20 @@
 <hr>
 <p id="PUTC">
 <b>PUTC</b>  ( c -- )
+<div style="margin-left:5%;">   Console locale.    
+</div>
 <div style="margin-left:5%;">   Affiche le caractère à la position du curseur et avance
 </div>
 <div style="margin-left:5%;">   le curseur vers la droite. Si le curseur est en fin de ligne
 </div>
-<div style="margin-left:5%;">   passe au début de la ligne suivante sauf si c'est la dernière ligne
+<div style="margin-left:5%;">   passe au début de la ligne suivante. Produit un défilement vers le haut
 </div>
-<div style="margin-left:5%;">   de l'affichage.    
+<div style="margin-left:5%;">   si nécessaire.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère à afficher
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   Caractère à afficher.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -356,9 +425,11 @@
 <hr>
 <p id="LC-CR">
 <b>LC-CR</b> ( -- )
-<div style="margin-left:5%;"> Envoie le curseur au début de la ligne suivante défile l'écran
+<div style="margin-left:5%;">   Console locale.    
 </div>
-<div style="margin-left:5%;"> vers le haut si nécessaire.    
+<div style="margin-left:5%;">   Envoie le curseur au début de la ligne suivante défile l'écran
+</div>
+<div style="margin-left:5%;">   vers le haut si nécessaire.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -372,7 +443,9 @@
 <hr>
 <p id="NEXT-COLON">
 <b>NEXT-COLON</b>  ( -- )    
-<div style="margin-left:5%;">   avance le curseur à la prochaine tabulation    
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Avance le curseur à la prochaine tabulation.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -386,7 +459,9 @@
 <hr>
 <p id="LC-DEL">
 <b>LC-DEL</b> ( -- )
-<div style="margin-left:5%;">  Supprime le caractère à la position du curseur
+<div style="margin-left:5%;">   Console locale.  
+</div>
+<div style="margin-left:5%;">   Supprime le caractère à la position du curseur.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -400,15 +475,15 @@
 <hr>
 <p id="LC-INSRT">
 <b>LC-INSRT</b> ( -- )
-<div style="margin-left:5%;">    Insère un espace à la position du curseur si la ligne.
+<div style="margin-left:5%;">   Console locale.  
 </div>
-<div style="margin-left:5%;">    2 conditions pour refuser l'insertion:  
+<div style="margin-left:5%;">   Insère un espace à la position du curseur.
+</div>
+<div style="margin-left:5%;">   Il y a 2 conditions pour refuser l'insertion:  
 </div>
 <div style="margin-left:5%;">       1) le curseur est après le dernier caractère de la ligne.
 </div>
 <div style="margin-left:5%;">       2) la ligne est pleine.
-</div>
-<div style="margin-left:5%;">  
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -422,7 +497,9 @@
 <hr>
 <p id="BACKDEL">
 <b>BACKDEL</b> ( -- )
-<div style="margin-left:5%;">  efface le carctère à gauche du curseur
+<div style="margin-left:5%;">   Console locale.  
+</div>
+<div style="margin-left:5%;">   Efface le carctère à gauche du curseur.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -436,7 +513,9 @@
 <hr>
 <p id="CLRLN">
 <b>CLRLN</b> ( -- )
-<div style="margin-left:5%;">  efface toute la ligne sur laquelle se trouve le curseur
+<div style="margin-left:5%;">   Console locale.  
+</div>
+<div style="margin-left:5%;">   Efface toute la ligne sur laquelle se trouve le curseur.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -450,7 +529,9 @@
 <hr>
 <p id="LC-BEL">
 <b>LC-BEL</b> ( -- )
-<div style="margin-left:5%;">  fait entendre un beep.
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Fait entendre un beep.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -462,9 +543,65 @@
 <div style="margin-left:5%;"><i>rien
 </i>&nbsp;&nbsp;</div>
 <hr>
+<p id="LC-EMIT">
+<b>LC-EMIT</b> ( c -- )
+<div style="margin-left:5%;">   Console locale.    
+</div>
+<div style="margin-left:5%;">   Imprime un caractère à l'écran ou accepte un caractère de contrôle.
+</div>
+<div style="margin-left:5%;">   Liste des contrôles reconnus:
+</div>
+<div style="margin-left:5%;">   - Déplacement du curseur   
+</div>
+<div style="margin-left:5%;">     VK_CR   retour de chariot et ligne suivante.
+</div>
+<div style="margin-left:5%;">     VK_TAB  avance à la colonne de tabulation suivante.
+</div>
+<div style="margin-left:5%;">     VK_LEFT déplace le curseur à gauche d'un caractère
+</div>
+<div style="margin-left:5%;">     VL_RIGHT déplace le curseur à droite d'un caractère.    
+</div>
+<div style="margin-left:5%;">     VK_HOME déplace le curseur au début de la ligne.
+</div>
+<div style="margin-left:5%;">     VK_END  déplace le curseur à la fin de la ligne.
+</div>
+<div style="margin-left:5%;">     VK_UP   déplace le curseur 1 ligne vers le haut.
+</div>
+<div style="margin-left:5%;">     VK_DOWN déplace le curseur 1 ligne vers le bas.
+</div>
+<div style="margin-left:5%;">   - modification de l'affichage
+</div>
+<div style="margin-left:5%;">     VK_BACK déplace le curseur à gauche d'un caractère et efface le caractère.    
+</div>
+<div style="margin-left:5%;">     CTRL_X  efface la ligne sur laquelle le curseur est.
+</div>
+<div style="margin-left:5%;">     VK_DELETE efface le caractère à la position du curseur.    
+</div>
+<div style="margin-left:5%;">     CTRL_L  efface l'écran au complet
+</div>
+<div style="margin-left:5%;">     VK_INSERT  insère un espace
+</div>
+<div style="margin-left:5%;">  - autres fonctions    
+</div>
+<div style="margin-left:5%;">    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  Caractère à émettre.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
 <p id="LC-EMIT?">
 <b>LC-EMIT?</b>  ( -- f )
-<div style="margin-left:5%;">  retourne toujrours VRAI
+<div style="margin-left:5%;">   Console locale.
+</div>
+<div style="margin-left:5%;">   Vérifie si la console est prête à recevoir des caractères.  
+</div>
+<div style="margin-left:5%;">   Retourne toujrours VRAI.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -475,20 +612,6 @@
 </b></div>
 <div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   VRAI  
 </div>
-<hr>
-<p id="LC-PAGE">
-<b>LC-PAGE</b> ( -- )
-<div style="margin-left:5%;">  Efface l'écran du terminal
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
 <hr>
 
 </body>
