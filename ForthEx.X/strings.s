@@ -19,8 +19,11 @@
 
 ; NOM: strings.s
 ; DATE: 2017-04-16
-; DESCRIPTION: manipulation des chaînes de caractères.
-  
+; DESCRIPTION: 
+;    Manipulation des chaînes de caractères.
+;    ForthEx utilise les caractères ASCII.
+;    REF: http://www.asciitable.com/
+    
 ; nom: -TRAILING  ( c-addr u1 -- c-addr u2 )    
 ;   Remplace tous les caractères <=32 à la fin d'une chaîne par des zéro.
 ; arguments:
@@ -57,6 +60,86 @@ DEFWORD "/STRING",7,,SLASHSTRING
     .word ROT,OVER,PLUS,ROT,ROT,MINUS,EXIT
 
     
+; nom: UPPER   ( c-addr -- c-addr )  
+;   Convertie la chaîne comptée en majuscules. Le vocabulaire de ForthEx est
+;   est insensible à la casse. Les noms sont tous convertis en majuscules avant
+;   d'être ajoutés dans le dictionnaire.  
+; arguments:
+;   c-addr  Adressse du début de la chaîne comptée.
+; retourne:
+;   c-addr  La même adresse.  
+DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
+    mov T, W1
+    mov.b [W1],W2
+1:  cp0.b W2
+    bra z, 3f
+    inc W1,W1
+    mov.b [W1],W0
+    dec.b W2,W2
+    cp.b W0, #'a'
+    bra ltu, 1b
+    cp.b W0,#'z'
+    bra gtu, 1b
+    sub.b #32,W0
+    mov.b W0,[W1]
+    bra 1b
+3:  NEXT
+
+; nom: SCAN ( c-addr u c -- c-addr' u' )  
+;   Recherche du caractère 'c' dans le bloc
+;   mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
+;   retourne la position de 'c' et
+;   le nombre de caractères restant dans le bloc
+; arguments:
+;   c-addr  adresse début zone RAM
+;   u       longueur de la zone en octets.    
+;   c       caractère recherché.
+; retourne:
+;   c-addr'  adresse du premier 'c' trouvé dans cette zone
+;   u'       longueur de la zone restante à partir de c-addr'    
+DEFCODE "SCAN",4,,SCAN 
+    SET_EDS
+    mov T, W0   ; c
+    DPOP        ; T=u
+    mov [DSP],W1 ; W1=c-addr
+    cp0 T 
+    bra z, 4f ; aucun caractère restant dans le buffer.
+1:  bra ltu, 4f
+    cp.b W0,[W1]
+    bra z, 4f
+    inc W1,W1
+    dec T,T
+    bra nz, 1b
+4:  mov W1,[DSP]
+    RESET_EDS
+    NEXT
+
+; nom: SKIP ( c-addr u c -- c-addr' u' )  
+;   avance au delà de 'c'. Retourne l'adresse du premier caractère
+;   différent de 'c' et la longueur restante de la zone.    
+; arguments:
+;   c-addr    adresse début de la zone
+;   u         longueur de la zone
+;   c         caractère à sauter.
+; retourne:
+;   c-addr'   adresse premier caractère <> 'c'
+;   u'        longueur de la zone restante à partir c-addr'    
+DEFCODE "SKIP",4,,SKIP 
+    SET_EDS
+    mov T, W0 ; c
+    DPOP ; T=u
+    mov [DSP],W1 ; addr
+    cp0 T
+    bra z, 8f
+2:  cp.b W0,[W1]
+    bra nz, 8f
+    inc W1,W1
+    dec T,T
+    bra nz, 2b
+8:  mov W1,[DSP]
+    RESET_EDS
+    NEXT
+  
 ; nom: CMOVE  ( c-addr1 c-addr2 u -- )    
 ;   Copie un bloc d'octets RAM.  
 ;   Débute la copie à partir de l'adresse du début du bloc en adresse croissante.
@@ -258,11 +341,10 @@ DEFWORD "SEARCH",6,,SEARCH ; ( c-addr1 u1 c-addr2 u2 -- c-addr3 u3 f )
 DEFWORD "SLITERAL",8,F_IMMED,SLITERAL
     .word QCOMPILE,SWAP,CFA_COMMA,LIT,COMMA,CFA_COMMA,LIT,COMMA,EXIT
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; routines pour la conversion
-; d'un entier en chaîne
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; DESCRIPTION:
+;   Mots utilisés dans la conversion d'entiers en chaînes de caractères.
 
+    
 ; nom: DIGIT  ( u -- c )    
 ;   Convertion d'un chiffre en caractère ASCII selon la valeur de BASE.
 ; arguments:
@@ -474,4 +556,164 @@ DEFWORD "UD.R",4,,UDDOTR ; ( ud n+ -- )
     .word TOR,LTSHARP,SHARPS,SHARPGT,RFROM,OVER
     .word COLFILL,TYPE,EXIT
 
+; DESCRIPTION:
+;   Mots utilisés dans la conversion d'une chaîne de caractères en entier.
+
+
+; nom: DECIMAL?  ( c -- f )
+;   vérifie si c est dans l'ensemble ASCII {'0'..'9'}
+; arguments:
+;   c   caractère ASCII à vérifier.
+; retourne:
+;   f   indicateur booléen.
+DEFWORD "DECIMAL?",8,,DECIMALQ
+    .word DUP,LIT,'0',LESS,ZBRANCH,2f-$
+    .word DROP,FALSE,EXIT
+2:  .word LIT,'9',GREATER,INVERT,EXIT
+  
+    
+; nom: >BASE10  ( u1 c -- u2 )
+;   étape de conversion d'une chaîne de caractère en 
+;   entier décimal.
+; arguments:
+;   u1  entier résultant de la conversion d'une chaîne en décimal
+;   c  caractère ASCII  dans l'intervalle {'0'..'9'}
+; retourne:
+;   u2    
+DEFWORD ">BASE10",7,,TOBASE10
+    .word LIT,'0',MINUS,LIT,10,ROT,STAR
+    .word PLUS,EXIT
+   
+; nom: ?DIGIT  ( c -- x 0 | n -1 )    
+;   Vérifie si le caractère est un digit valide dans la base actuelle.
+;   Si valide retourne la valeur du digit et -1
+;   Si invalide retourne x 0
+; arguments:
+;   c   caractère à convertir dans la base active.
+; retourne:
+;   x    un entier quelconque qui doit-être ignoré.
+;   0    le caractère n'était pas valide, x doit-être ignoré.
+;   n    Le caractère convertie en digit de la base active.
+;   -1   Le caractère était valide et n doit-être conservé.    
+DEFWORD "?DIGIT",6,,QDIGIT ; ( c -- x 0 | n -1 )
+    .word DUP,LIT,96,UGREATER,ZBRANCH,1f-$
+    .word LIT,32,MINUS ; lettre minuscule? convertie en minuscule
+1:  .word DUP,LIT,'9',UGREATER,ZBRANCH,3f-$
+    .word DUP,LIT,'A',ULESS,ZBRANCH,2f-$
+    .word LIT,0,EXIT ; pas un digit
+2:  .word LIT,7,MINUS    
+3:  .word LIT,'0',MINUS
+    .word DUP,BASE,FETCH,ULESS,EXIT
+  
+; nom: ?DOUBLE   ( c-addr u -- c-addr' u' f )    
+;   Vérifie si le caractère qui a mis fin à >NUMBER
+;   est {'.'|','}. Si c'est le cas il s'agit d'un
+;   nombre double précision. saute le caractère et retourne -1.
+;   Dans le cas contraire retourne 0.
+; arguments:
+;   c-addr  pointe vers l'adresse du dernier caractère analysé par >NUMBER
+;   u       longueur de la chaîne restante.
+; retourne:
+;   c-addr' acresse incrémenté si le critère {'.'|','} est vrai.
+;   u'      longueur décrémentée si le critère {'.'|','} est vrai.
+;   f       indicateur Booléen indiquant s'il s'agit d'un entier double.    
+DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
+    .word OVER,CFETCH,LIT,'.',EQUAL,ZBRANCH,2f-$
+1:  .word LIT,1,SLASHSTRING,LIT,-1,BRANCH,9f-$
+2:  .word OVER,CFETCH,LIT,',',EQUAL,ZBRANCH,8f-$
+    .word BRANCH,1b-$
+8:  .word LIT,0
+9:  .word EXIT  
+  
+; nom: >NUMBER  (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )   
+;   Converti la chaîne en nombre en utilisant la valeur de BASE.
+;   La conversion s'arrête au premier caractère non numérique.
+; arguments:  
+; 'ud1'	    est initialisé à zéro  
+;  c-addr1 Adrese du début de la chaîne à convertir en entier.
+;  u1      Longueur du tampon à analyser.  
+; retourne:
+;  ud2     Entier double résultant de la conversion.
+;  c-addr2  Adresse pointant après le nombre dans le tampon.
+;  u2      Longueur restante dans le tampon.  
+DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
+1:   .word LIT,0,TOR ; indique si le dernier caractère était un digit
+2:   .word DUP,ZBRANCH,7f-$
+     .word OVER,CFETCH,QDIGIT  ; ud1 c-addr u1 n|x f
+     .word TBRANCH,4f-$
+     .word RFROM,ZBRANCH,8f-$
+     .word DROP,QDOUBLE,ZBRANCH,9f-$
+     .word RFROM,RFROM,LIT,2,OR,TOR,TOR ; on change le flag du signe pour ajouter le flag double
+     .word BRANCH,1b-$
+4:   .word RDROP,LIT,-1,TOR ; dernier caractère était un digit
+     .word TOR,TWOSWAP,BASE,FETCH,UDSTAR
+     .word RFROM,MPLUS,TWOSWAP
+     .word LIT,1,SLASHSTRING,BRANCH,2b-$
+7:   .word RFROM
+8:   .word DROP
+9:   .word EXIT
+   
+; nom: ?SIGN   ( c-addr u -- c-addr' u' f )   
+;   Vérifie s'il y a un signe '-' à la première postion de la chaîne spécifiée par <c-addr u>
+;   Retourne f=VRAI si '-' sinon f=FAUX.    
+;   S'il y a un signe avance au delà du signe
+; arguments:
+;   c-addr   adresse où débute l'analyse.
+;   u        longueur du tampon à analyser.
+; retourne:
+;   c-addr'  adresse incrément au delà du signe '-' s'il y a lieu.
+;   u'       longueur restante dans le tampon.
+;   f        Indicateur Booléen, VRAI s'il le premier caractère est '-'.   
+DEFWORD "?SIGN",5,,QSIGN ; ( c-addr u -- c-addr' u' f )
+    .word OVER,CFETCH,CLIT,'-',EQUAL,TBRANCH,8f-$
+    .word LIT,0,BRANCH,9f-$
+8:  .word LIT,1,SLASHSTRING,LIT,1
+9:  .word EXIT
+    
+; nom: ?BASE  ( c-addr u1 -- c-addr' u1' )  
+;   Vérifie s'il y a un modificateur de base
+;   Si oui modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
+; arguments:
+;   c-addr  Adresse du début de la chaîne à analyser.
+;   u1      longueur maximale de la chaîne.
+; retourne:
+;   c-addr'  adresse incrémentée au delà du caractère modificateur de BASE.
+;   u'       longueur restante de la chaîne.  
+DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
+    .word OVER,CFETCH,CLIT,'$',EQUAL,ZBRANCH,1f-$
+    .word LIT,16,BASE,STORE,BRANCH,8f-$
+1:  .word OVER,CFETCH,CLIT,'#',EQUAL,ZBRANCH,2f-$
+    .word LIT,10,BASE,STORE,BRANCH,8f-$
+2:  .word OVER,CFETCH,CLIT,'%',EQUAL,ZBRANCH,9f-$
+    .word LIT,2,BASE,STORE
+8:  .word SWAP,ONEPLUS,SWAP,ONEMINUS    
+9:  .word EXIT
+
+; nom: ?NUMBER   ( c-addr -- c-addr 0 | n -1 )  
+;   Conversion d'une chaîne en nombre
+;    c-addr indique le début de la chaîne
+;   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
+;   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
+;   à une position quelconque de la chaîne saisie sauf à la première position.
+; arguments:
+;   c-addr   adresse de la chaîne à analyser.
+; retourne:
+;   c-addr 0   S'il la conversio échoue retourne l'adresse et l'indicateur FAUX	
+;   n -1    Si la conversion réussie retourne l'entier et l'indicateur VRAI.  
+DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
+    .word BASE,FETCH,TOR ; sauvegarde la valeur de BASE 
+    .word DUP,LIT,0,DUP,ROT,COUNT,QBASE  ; c-addr 0 0 c-addr' u'
+    .word QSIGN,TOR  ; c-addr 0 0 c-addr' u' R: signFlag
+4:  .word TONUMBER ; c-addr n1 n2 c-addr' u'
+    .word ZBRANCH,1f-$ 
+    .word RFROM,TWODROP,TWODROP,LIT,0,BRANCH,8f-$
+1:  .word DROP,ROT,DROP
+    .word RFETCH,ODD,ZBRANCH,2f-$
+    .word DNEGATE
+2:  .word RFROM,LIT,2,AND,TBRANCH,3f-$
+    .word DROP
+3:  .word LIT,-1
+8:  .word RFROM,BASE,STORE ; restitue la valeur de BASE
+    .word EXIT
+    
     

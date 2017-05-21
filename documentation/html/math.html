@@ -3,7 +3,9 @@
 <head>
 </head>
 <body>
-<h1>math</h1><p id="MSB">
+<h1>math</h1><h2>Description</h2><div style="margin-left:5%;">  Retiré les opérations arithmétiques de core.s pour les transférer ici.
+</div>
+<hr style:"border-width:2px;"><p id="MSB">
 <b>MSB</b>  ( -- u )
 <div style="margin-left:5%;">   Constante retournant la valeur du bit le plus significatif d'un entier.
 </div>
@@ -811,6 +813,244 @@
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
 <div style="margin-left:5%;"><i>d2</i>&nbsp;&nbsp;   Inverse bit à bit de d1.    
+</div>
+<hr>
+<p id="AND">
+<b>AND</b>  ( n1 n2 -- n3 )
+<div style="margin-left:5%;">   Opération Booléenne bit à bit ET.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n3</i>&nbsp;&nbsp;  Résultat de l'opération.    
+</div>
+<hr>
+<p id="OR">
+<b>OR</b>  ( n1 n2 -- n3 )
+<div style="margin-left:5%;">   Opération Booléenne bit à bit OU inclusif.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n3</i>&nbsp;&nbsp;  Résultat de l'opération.    
+</div>
+<hr>
+<p id="XOR">
+<b>XOR</b>  ( n1 n2 -- n3 )
+<div style="margin-left:5%;">   Opération Booléenne bit à bit OU exclusif.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n3</i>&nbsp;&nbsp;  Résultat de l'opération.    
+</div>
+<hr>
+<p id="NOT">
+<b>NOT</b>  ( n1 -- n2 )
+<div style="margin-left:5%;">   Opération Booléenne de négation.
+</div>
+<div style="margin-left:5%;">   Si n1==0  n2=-1.
+</div>
+<div style="margin-left:5%;">   Si n1&lt;&gt;0  n2=0.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Résultat de l'opération.    
+</div>
+<hr>
+<p id="0=">
+<b>0=</b>  ( n -- f )
+<div style="margin-left:5%;">   Vérifie si n est égal à zéro. Retourne un indicateur Booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Entier à vérifier. Est remplacé par l'indicateur Booléen.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   Indicateur Booléen, T si n==0    
+</div>
+<hr>
+<p id="0&lt;&gt;">
+<b>0&lt;&gt;</b>  ( n -- f )    
+<div style="margin-left:5%;">   Vérifie si n est différent de zéro. Retourne un indicateur Booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen, T si n&lt;&gt;0   
+</div>
+<hr>
+<p id="0&lt;">
+<b>0&lt;</b>  ( n -- f )    
+<div style="margin-left:5%;">   Vérifie si n est plus petit que zéro. Retourne un indicateur Booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen, T si n&lt;0.    
+</div>
+<hr>
+<p id="0&gt;">
+<b>0&gt;</b>  ( n -- f )    
+<div style="margin-left:5%;">   Vérifie si n est plus grand que zéro. Retourne un indicateur Booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen, T si n&gt;0.    
+</div>
+<hr>
+<p id="=">
+<b>=</b>  ( n1 n2 -- f )
+<div style="margin-left:5%;">   Vérifie l'égalité des 2 entiers. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen, T si n1==n2.
+</div>
+<hr>
+<p id="&lt;&gt;">
+<b>&lt;&gt;</b>  ( n1 n2 -- f )
+<div style="margin-left:5%;">   Vérifie si les 2 entiers sont différents. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen, T si n1&lt;&gt;n2.
+</div>
+<hr>
+<p id="&lt;">
+<b>&lt;</b>  ( n1 n2 -- f )
+<div style="margin-left:5%;">   Vérifie si n1 &lt; n2. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'une comparaison sur nombre signés.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen, T si n1 &lt; n2.    
+</div>
+<hr>
+<p id="&gt;">
+<b>&gt;</b> ( n1 n2 -- f )
+<div style="margin-left:5%;">   Vérifie si n1 &gt; n2. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'une comparaison sur nombre signés.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen, T si n1 &gt; n2.    
+</div>
+<hr>
+<p id="U&lt;">
+<b>U&lt;</b>  ( u1 u2 -- f )
+<div style="margin-left:5%;">   Vérifie si u1 &lt; u2. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'une comparaison sur nombre non signés.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen, T si u1 &lt; u2.    
+</div>
+<hr>
+<p id="U&gt;">
+<b>U&gt;</b>  ( u1 u2 -- f )
+<div style="margin-left:5%;">   Vérifie si u1 &gt; u2. Retourne un indicateur Booléen.
+</div>
+<div style="margin-left:5%;">   Les deux entiers sont consommés et remplacé par l'indicateur.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'une comparaison sur nombre non signés.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Première opérande.
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;  Deuxième opérande.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur Booléen, T si u1 &gt; u2.    
 </div>
 <hr>
 

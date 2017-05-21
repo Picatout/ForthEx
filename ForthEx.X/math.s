@@ -719,3 +719,219 @@ DEFCODE "DINVERT",7,,DINVERT
     com [DSP],[DSP]
     NEXT
     
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+; opérations logiques bit à bit
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+; nom: AND  ( n1 n2 -- n3 )
+;   Opération Booléenne bit à bit ET.
+; arguments:
+;   n1  Première opérande.
+;   n2  Deuxième opérande.
+; retourne:
+;   n3  Résultat de l'opération.    
+DEFCODE "AND",3,,AND 
+    and T,[DSP--],T
+    NEXT
+    
+; nom: OR  ( n1 n2 -- n3 )
+;   Opération Booléenne bit à bit OU inclusif.
+; arguments:
+;   n1  Première opérande.
+;   n2  Deuxième opérande.
+; retourne:
+;   n3  Résultat de l'opération.    
+DEFCODE "OR",2,,OR
+    ior T,[DSP--],T
+    NEXT
+    
+; nom: XOR  ( n1 n2 -- n3 )
+;   Opération Booléenne bit à bit OU exclusif.
+; arguments:
+;   n1  Première opérande.
+;   n2  Deuxième opérande.
+; retourne:
+;   n3  Résultat de l'opération.    
+DEFCODE "XOR",3,,XOR
+    xor T,[DSP--],T
+    NEXT
+    
+; nom: NOT  ( n1 -- n2 )
+;   Opération Booléenne de négation.
+;   Si n1==0  n2=-1.
+;   Si n1<>0  n2=0.    
+; arguments:
+;   n1  opérande.
+; retourne:
+;   n2  Résultat de l'opération.    
+DEFCODE "NOT",3,,NOT ; ( f -- f)
+    cp0 T
+    bra nz, 1f
+    setm T
+    bra 9f
+1:  clr T
+9:  NEXT
+    
+;;;;;;;;;;;;;;;
+; comparaisons
+;;;;;;;;;;;;;;;
+    
+; nom: 0=  ( n -- f )
+;   Vérifie si n est égal à zéro. Retourne un indicateur Booléen.
+; arguments:
+;    n   Entier à vérifier. Est remplacé par l'indicateur Booléen.
+; retourne:
+;    f   Indicateur Booléen, T si n==0    
+DEFCODE "0=",2,,ZEROEQ  ; ( n -- f )  f=  n==0
+    sub #1,T
+    subb T,T,T
+    NEXT
+
+; nom: 0<>  ( n -- f )    
+;   Vérifie si n est différent de zéro. Retourne un indicateur Booléen.
+; arguments:
+;    n  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
+; retourne:
+;    f  Indicateur Booléen, T si n<>0   
+DEFCODE "0<>",3,,ZERODIFF ; ( n -- f ) 
+    clr W0
+    cp0 T
+    bra z, 9f
+    com W0,W0
+9:  mov W0,T
+    NEXT
+    
+    
+; nom: 0<  ( n -- f )    
+;   Vérifie si n est plus petit que zéro. Retourne un indicateur Booléen.
+; arguments:
+;    n  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
+; retourne:
+;    f  Indicateur Booléen, T si n<0.    
+DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
+    add T,T,T
+    subb T,T,T
+    com T,T
+    NEXT
+
+; nom: 0>  ( n -- f )    
+;   Vérifie si n est plus grand que zéro. Retourne un indicateur Booléen.
+; arguments:
+;    n  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
+; retourne:
+;    f  Indicateur Booléen, T si n>0.    
+DEFCODE "0>",2,,ZEROGT ; ( n -- f ) f= n>0
+    clr W0
+    cp0 T
+    bra le, 8f
+    setm W0
+8:  mov W0,T    
+    NEXT
+
+; nom: =  ( n1 n2 -- f )
+;   Vérifie l'égalité des 2 entiers. Retourne un indicateur Booléen.
+;   Les deux entiers sont consommés et remplacé par l'indicateur.
+; arguments:
+;   n1  Première opérande.
+;   n2  Deuxième opérande.
+; retourne:    
+;    f  Indicateur Booléen, T si n1==n2.
+DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
+    clr W0
+    cp T, [DSP--]
+    bra nz, 1f
+    setm W0
+ 1: 
+    mov W0,T
+    NEXT
+
+; nom: <>  ( n1 n2 -- f )
+;   Vérifie si les 2 entiers sont différents. Retourne un indicateur Booléen.
+;   Les deux entiers sont consommés et remplacé par l'indicateur.
+; arguments:
+;   n1  Première opérande.
+;   n2  Deuxième opérande.
+; retourne:    
+;    f  Indicateur Booléen, T si n1<>n2.
+DEFCODE "<>",2,,NOTEQ ; ( n1 n2 -- f ) f = n1<>n2
+    clr W0
+    cp T, [DSP--]
+    bra z, 1f
+    com W0,W0
+1:  
+    mov W0, T
+    NEXT
+    
+; nom: <  ( n1 n2 -- f )
+;   Vérifie si n1 < n2. Retourne un indicateur Booléen.
+;   Les deux entiers sont consommés et remplacé par l'indicateur.
+;   Il s'agit d'une comparaison sur nombre signés.    
+; arguments:
+;   n1  Première opérande.
+;   n2  Deuxième opérande.
+; retourne:    
+;    f  Indicateur Booléen, T si n1 < n2.    
+ DEFCODE "<",1,,LESS  ; ( n1 n2 -- f) f= n1<n2
+    setm W0
+    cp T,[DSP--]
+    bra gt, 1f
+    com W0,W0
+1:
+    mov W0, T
+    NEXT
+    
+; nom: > ( n1 n2 -- f )
+;   Vérifie si n1 > n2. Retourne un indicateur Booléen.
+;   Les deux entiers sont consommés et remplacé par l'indicateur.
+;   Il s'agit d'une comparaison sur nombre signés.    
+; arguments:
+;   n1  Première opérande.
+;   n2  Deuxième opérande.
+; retourne:    
+;    f  Indicateur Booléen, T si n1 > n2.    
+DEFCODE ">",1,,GREATER  ; ( n1 n2 -- f ) f= n1>n2
+    setm W0
+    cp T,[DSP--]
+    bra lt, 1f
+    com W0,W0
+1:
+    mov W0, T
+    NEXT
+    
+; nom: U<  ( u1 u2 -- f )
+;   Vérifie si u1 < u2. Retourne un indicateur Booléen.
+;   Les deux entiers sont consommés et remplacé par l'indicateur.
+;   Il s'agit d'une comparaison sur nombre non signés.    
+; arguments:
+;   u1  Première opérande.
+;   u2  Deuxième opérande.
+; retourne:    
+;    f  Indicateur Booléen, T si u1 < u2.    
+DEFCODE "U<",2,,ULESS  ; (u1 u2 -- f) f= u1<u2
+    clr W0
+    cp T,[DSP--]
+    bra leu, 1f
+    com W0,W0
+1:
+    mov W0, T
+    NEXT
+    
+; nom: U>  ( u1 u2 -- f )
+;   Vérifie si u1 > u2. Retourne un indicateur Booléen.
+;   Les deux entiers sont consommés et remplacé par l'indicateur.
+;   Il s'agit d'une comparaison sur nombre non signés.    
+; arguments:
+;   u1  Première opérande.
+;   u2  Deuxième opérande.
+; retourne:    
+;    f  Indicateur Booléen, T si u1 > u2.    
+DEFCODE "U>",2,,UGREATER ; ( u1 u2 -- f) f=u1>u2
+    clr W0
+    cp T,[DSP--]
+    bra geu, 1f
+    com W0,W0
+1:
+    mov W0,T
+    NEXT
+
+

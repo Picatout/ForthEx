@@ -19,11 +19,12 @@
 ;
 ; NOM: console.s
 ; DATE: 2017-04-27
-; DESCRIPTION: fonction associé à la console.
+; DESCRIPTION: 
+;    Fonctions associées à la console.
 ;    Système de console basé sur des tables de vecteurs pour chaque
 ;    type de terminal. les tables contiennent le XT de chaque fonction.
 ;    Les fonctions sont celles définies dans le standard DPANS-94
-;    ref: http://lars.nocrew.org/dpans/dpans10.htm#10.6.1
+;    REF: http://lars.nocrew.org/dpans/dpans10.htm#10.6.1
 ;
 ;    Il a 2 terminaux, la console LOCAL constituée du clavier et du moniteur
 ;    branché à l'ordinateur ForthEx et la REMOTE qui utilise le port sériel RS-232

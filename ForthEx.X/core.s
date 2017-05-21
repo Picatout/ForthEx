@@ -16,16 +16,18 @@
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
-;NOM: core.s
-;Description: base pour le système Forth
-;Date: 2015-10-03
-;REF: http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt
-;   http://www.bradrodriguez.com/papers/
-;   msp430 camelForth source code: http://www.camelforth.com/download.php?view.25
-;   ANS FORTH 94: http://www.greenarraychips.com/home/documents/dpans94.pdf
-;   http://sinclairql.speccy.org/archivo/docs/books/Threaded_interpretive_languages.pdf    
-;   http://www.exemark.com/FORTH/eForthOverviewv5.pdf
-;   http://forthfiles.net/ting/sysguidefig.pdf    
+    
+; NOM: core.s
+; DATE: 2015-10-03
+; DESCRIPTION: 
+;    Vocabulaire de base du système ForthEx.
+; REF: http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt
+; REF: http://www.bradrodriguez.com/papers/
+; REF: http://www.camelforth.com/download.php?view.25
+; REF: http://www.greenarraychips.com/home/documents/dpans94.pdf
+; REF: http://sinclairql.speccy.org/archivo/docs/books/Threaded_interpretive_languages.pdf    
+; REF: http://www.exemark.com/FORTH/eForthOverviewv5.pdf
+; REF: http://forthfiles.net/ting/sysguidefig.pdf    
     
     
 .global pstack, rstack,cstack,user,tib,pad
@@ -163,40 +165,10 @@ DOCONST:
 ;   premier mot du dictionnaire il est cependant caché
 ;   à l'utilisateur. 
 ;   Le CFA de ce mot est compilé pour terminer une définition de haut-niveau.    
-    .section .sysdict psv
-    .align 2
-    .global name_EXIT
-name_EXIT :
-    .word 0     ; LFA
-0:  .byte 4|F_MARK|F_HIDDEN ; NFA
-    .ascii "EXIT"
-    .align 2
-    .global EXIT
-EXIT:
-    .word code_EXIT	; CFA
-    FORTH_CODE
-    .global code_EXIT
-code_EXIT :		;code
+HEADLESS EXIT,CODE
     RPOP IP
     NEXT
 
-
-; nom: CALL  ( i*x ud -- j*x )
-;    Appel d'une routine écrite en code machine et résident en mémoire flash.
-;    La routine doit se terminée par une instruction machine RETURN.
-; arguments:
-;     i*x    Arguments consommés par la routine, dépend de celle-ci.
-;     ud     adresse de la routine.
-; retourne:
-;     j*x    Valeurs laissées sur la pile par la routine, dépend de celle-ci.   
-DEFCODE "CALL",4,,CALL 
-    mov T, W1
-    DPOP
-    mov T, W0
-    DPOP
-    call.l W0
-    NEXT
-    
 ; run time    
 ;   Empile un entier litéral. CFA compilé par LITERAL.
 HEADLESS LIT  ; ( -- x )  
@@ -298,1127 +270,13 @@ HEADLESS DOPLOOP
 2:  add IP,[IP],IP
     NEXT
 
-; nom:  I  ( -- n )    
-;   Empile compteur de boucle.
-; arguments:
-;   aucun
-; retourne:
-;   n   valeur actuelle de I    
-DEFCODE "I",1,,DOI  ; ( -- n )
-    DPUSH
-    mov I, T
-    NEXT
+; marqueur fin du dictionnaire.    
+    SYSDICT
+   .word 0 
+0: .word 0    
 
-; nom: L  ( -- n )    
-;   Empile la limite de boucle.    
-; arguments:
-;   aucun
-; retourne:
-;   n   valeur de LIMIT.    
-DEFCODE "L",1,,DOL ; ( -- n )
-    DPUSH
-    mov LIMIT,T
-    NEXT
-    
-; nom: J  ( -- n )    
-;   Empile le compteur de la boucle qui englobe la boucle actuelle.
-; arguments:
-;   aucun
-; retourne:
-;   n   valeur actuelle de J
-DEFCODE "J",1,,DOJ  ; ( -- n ) R: limitJ indexJ
-    DPUSH
-    mov [RSP-2],T
-    NEXT
-  
-; nom: UNLOOP ( R: n1 n2 -- )
-;   Restaure les valeurs des variables I et LIMIT tels qu'elles étaient
-;   avant l'exécution du dernier DO ou ?DO.
-;   Après exécution  LIMIT=n1, I=n2
-; arguments:
-;   aucun
-; retourne:
-;   rien.    
-DEFCODE "UNLOOP",6,,UNLOOP
-    RPOP I
-    RPOP LIMIT
-    NEXT
-    
-; nom: IP@  ( -- n )  
-;   empile la valeur de la variable IP.
-; arguments:
-;   aucun
-; retourne:
-;   n     valeur de IP    
-DEFCODE "IP@",3,,IPFETCH  ; ( -- n )
-    DPUSH
-    mov IP,T
-    NEXT
-    
-; nom: REBOOT ( -- )
-;   Redémarre le système avec le même effet qu'une mise sous tension
-;   en exécutant l'instruction machine RESET.    
-; arguments:
-;   aucun
-; retourne:
-;   rien    
-DEFCODE "REBOOT",6,,REBOOT
-    reset
-    
-; nom: EXECUTE  ( i*x CFA -- j*x )
-;   Exécute le mot dont le Code Field Address est au sommet de la pile.
-; arguments:
-;   i*x    Liste des arguments consommés par ce mot.
-;   CFA    Pointeur qui contient l'adresse du mot à exécuter.
-; retourne:
-;   j*x    Liste de valeur dépendant du mot exécuté.    
-DEFCODE "EXECUTE",7,,EXECUTE
-exec:
-    mov T, WP ; CFA
-    DPOP
-    mov [WP++],W0  ; code address, WP=PFA
-    goto W0
-
-; nom: @XT  ( i*x a-addr -- j*x )
-;   Exécution vectorisée. 
-;   Lit le contenu d'une variable qui contient le point d'entrée d'une routine
-;   et exécute cette routine.
-; arguments:
-;    i*x  arguments attendus par la fonction qui sera exécutée.    
-;    a-addr   vers le code à exécuter.
-; retourne:
-;    j*x  dépend de la fonction exécutée.    
-DEFCODE "@EXEC",5,,FETCHEXEC
-    mov [T],T
-    bra exec
-
-; nom: VECEXEC ( i*x a-addr n -- j*x )
-;   Excécute la fonction n dans une table de pointeur de fonctions.
-; arguments:
-;    i*x   arguments requis par la fonction à exécuter.
-;    a-addr  adresse de la table de vecteurs.
-;    n     numéro du vecteur à exécuter.
-; retourne:
-;    j*x   valeurs retournées par la fonction exécutée.    
-DEFCODE "VEXEC",5,,VEXEC
-    mul.uu T,#CELL_SIZE,W0
-    DPOP
-    add W0,T,T
-    mov [T],T
-    bra exec
-    
-; nom: @   ( a-addr -- n )
-;   Empile la valeur d'une variable dont l'adresse est au sommet de la pile.
-; arguments:
-;   a-addr  adresse de la variable.
-; retourne:
-;   n	valeur de la variable.    
-DEFCODE "@",1,,FETCH 
-    mov [T],T
-    NEXT
-
-; nom: C@  ( c-addr -- c )
-;   Empile la valeur d'une variable caractère dont l'adresse est au sommet de la pile.
-; arguments:
-;   c-addr  adresse de la variable.
-; retourne:
-;   c   caractère contenu dans la variable.    
-DEFCODE "C@",2,,CFETCH 
-    mov.b [T],T
-    ze T,T
-    NEXT
-    
-; nom: E@  ( a-addr -- n )    
-;   Empile la valeur d'une variable qui est dans la RAM EDS (Extended Data Space).
-; arguments:
-;   a-addr  adresse de la variable
-; retourne:
-;   n	valeur de la variable.    
-DEFCODE "E@",2,,EFETCH ; ( addr -- n )
-    SET_EDS
-    mov [T],T
-    RESET_EDS
-    NEXT
-    
-; nom: EC@  ( c-addr -- c )    
-;   Empile le caractère contenu dans une variable qui est dans la RAM EDS.
-; arguments:
-;   c-addr   adresse de la variable dans l'espace EDS.
-; retourne:
-;   c	caractère contenu dans la variable.    
-DEFCODE "EC@",3,,ECFETCH 
-    SET_EDS
-    mov.b [T],T
-    ze T,T
-    RESET_EDS
-    NEXT
-    
-; nom: 2@  ( a-addr -- d )    
-;   Empile la valeur d'une variable de type entier double.
-;   Cette variable peut-être dans la mémoire EDS.    
-; arguments:
-;   a-addr   adresse de la variable
-; retourne:
-;   d   entier double, valeur de cette variable.    
-DEFCODE "2@",2,,TWOFETCH 
-    SET_EDS
-    mov [T],W0 
-    add #CELL_SIZE,T
-    mov [T],T
-    mov W0,[++DSP]
-    RESET_EDS
-    NEXT
-    
-; nom: TBL@  ( n a-addr -- n )    
-;   Empile l'élément n d'un vecteur. Les valeurs d'indice débute à zéro.
-;   Si a-addr est >= 0x8000 il s'agit d'un vecteur en mémoire flash.    
-; arguments:
-;   n  indice
-;   a-addr  adresse du vecteur.
-; retourne:
-;   n    Valeur de l'élément n du vecteur.    
-DEFCODE "TBL@",4,,TBLFETCH
-    mov [DSP--],W0
-    mov #CELL_SIZE,W1
-    mul.uu W1,W0,W0
-    add T,W0,W0
-    mov [W0],T
-    NEXT
-
-; nom: TBL!  ( n1 n2 a-addr -- )    
-;   Sauvegarde une valeur dans l'élément d'un vecteur.
-;   a-addr[n2] = n1.
-;   Ce vecteur peut-être situé en mémoire EDS.    
-; arguments:
-;   n1  valeur à affecté à l'élément
-;   n2  indice de l'élément
-;   a-addr  adresse de la table
-; retourne:
-;    
-DEFCODE "TBL!",4,,TBLSTORE ; ( n1 n2 addr -- )    
-    mov [DSP--],W0
-    mov #CELL_SIZE,W1
-    mul.uu W0,W1,W0
-    add T,W0,W0
-    DPOP 
-    mov T,[W0]
-    DPOP
-    NEXT
-    
-; nom: !  ( n a-addr -- )    
-;   Sauvegarde d'un entier dans une variable.
-;   La variable peut-être en mémoire EDS.    
-; arguments:
-;   n    valeur à sauvegarder
-;   a-addr adresse de la variable.    
-; retourne:
-;   rien    
-DEFCODE "!",1,,STORE 
-    mov [DSP--],[T]
-    DPOP
-    NEXT
-
-; nom: C!  ( c c-addr -- )    
-;   Sauvegarde un caractère dans une variable. Cette variable peut-être
-;   en mémoire EDS.
-; arguments:
-;   c   valeur à sauvegarder.
-;   c-addr  adresse de la variable.
-; retourne:
-;    rien    
-DEFCODE "C!",2,,CSTORE
-    mov [DSP--],W0
-    mov.b W0,[T]
-    DPOP
-    NEXT
-
-; nom: 2!   ( d a-addr -- )    
-;   Sauvegarde d'un entier double. La variable peut-être en mémoire EDS.
-; arguments:
-;   d   entier double
-;   a-addr  adresse de la variable.
-; retourne:
-;   rien    
-DEFCODE "2!",2,,TWOSTORE
-    mov [DSP--],[++T]
-    mov [DSP--],[--T]
-    mov [DSP],T
-    NEXT
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-; mots manipulant les arguments sur la pile
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-
-; nom: DUP ( x1 -- x1 x2 )
-;   Clone la valeur au sommet de la pile.
-; arguments:
-;    x1    valeur au sommet de  la pile    
-; retourne:
-;    x1    valeur originale    
-;    x2    copie de la valeur originalement au sommet de la pile     
-DEFCODE "DUP",3,,DUP ; ( n -- n n )
-    DPUSH
-    NEXT
-
-; nom: 2DUP   ( d1 -- d1 d2 )
-;   Clone l'entier double qui est au sommet de la pile.
-; arguments:
-;   d1      entier double.
-; retourne:
-;   d1      valeur originale.
-;   d2      copie de d1.
-DEFCODE "2DUP",4,,TWODUP 
-    mov [DSP],W0
-    DPUSH
-    mov W0,[++DSP]
-    NEXT
-    
-; nom: ?DUP  ( x1 -- 0 | x1 x2 )    
-;    Clone la valeur au sommet de la pile si cette valeur
-;    est différente de zéro.
-; arguments:
-;    x1   valeur au sommet de la pile.
-; retourne:
-;    x1   valeur originale
-;    x2   Copie de x1 si x1<>0    
-DEFCODE "?DUP",4,,QDUP 
-    cp0 T
-    bra z, 1f
-    DPUSH
-1:  NEXT
-    
-; nom: DROP ( x -- )
-;   Jette la valeur au sommet de la pile.
-; arguments:
-;    x    valeur au sommet de la pile.
-; retourne:
-;    rien     La pile contient 1 élément de moins.    
-DEFCODE "DROP",4,,DROP
-    DPOP
-    NEXT
-
-; nom: 2DROP ( x1 x2 -- )
-;   Jette les 2 valeurs au sommet de la pile.    
-; arguments:
-;   x1  Valeur sous le sommet.
-;   x2  Valeur au sommet de la pile.
-; retourne:
-;   rien La pile contient 2 élémnents de moins.    
-DEFCODE "2DROP",5,,TWODROP
-    DPOP
-    DPOP
-    NEXT
-    
-; nom: RDROP  ( R: x -- )
-;   Jette la valeur au sommet de la pile des retours.
-; arguments:
-;    x     valeur au sommet de la pile des retours.
-; retourne:
-;   rien La pile des retours contient 1 élément de moins.    
-DEFCODE "RDROP",5,,RDROP ; ( R: n -- )
-    sub #CELL_SIZE,RSP
-    NEXT
-    
-; nom: SWAP  ( x1 x2 -- x2 x1 )
-;   Inverse l'ordre des 2 éléments au sommet de la pile.
-; arguments:
-;   x1   deuxième élément de la pile.
-;   x2   élément au sommet de la pile.
-; retourne:
-;   x2   La valeur qui était au sommet est maintenant en second.
-;   x1   La valeur qui était en seconde est maintenant au sommet.    
-DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
-    mov [DSP],W0
-    exch W0,T
-    mov W0,[DSP]
-    NEXT
-
-; nom: 2SWAP  ( d1 d2 -- d2 d1 )
-; notation alternative: ( n1 n2 n3 n4 -- n3 n4 n1 n2 )    
-;   Inverse l'ordre de 2 entiers doubles au sommet de la pile.
-; arguments:
-;   d1   Second entier doublde de la pile.
-;   d2   Entier double au sommet.
-; retourne:
-;   d2   Le sommet est maintenant en second.
-;   d1   Le second est maintenant au sommet.    
-DEFCODE "2SWAP",5,,TWOSWAP 
-    mov [DSP-2],W0
-    mov T,[DSP-2]
-    mov W0, T
-    mov [DSP-4],W0
-    mov [DSP],W1
-    mov W1, [DSP-4]
-    mov W0, [DSP]
-    NEXT
-    
-; nom: ROT ( n1 n2 n3 -- n2 n3 n1 )
-;   Rotation des 3 éléments du sommet de sorte que le 3ième se retrouve au sommet.
-; argments:
-;   n1  Élément en 3ième position de la pile.
-;   n2  Élément en 2ième position de la pile.
-;   n3  Élément a sommet de la pile 
-; retourne:
-;   n2  Le second est maintenant en 3ième position.
-;   n3  Le sommet est maintenant en 2ième position.
-;   n1  Le 3ième est maintenant au sommet.    
-DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
-    mov [DSP], W0 ; n1
-    exch T,W0   ; W0=n3, T=n2
-    mov W0, [DSP]  ; n3
-    mov [DSP-2],W0 ; n1
-    exch W0,T ; T=n1, W0=n2
-    mov W0,[DSP-2] 
-    NEXT
-
-; nom: -ROT ( n1 n2 n3 -- n3 n1 n2 )
-;   Rotation inverse des 3 éléments du sommet de la pile.
-;   Le sommet est envoyé en 3ième position.
-; arguments:
-;   n1   3ième élément de la pile.
-;   n2   2ième élément de la pile.
-;   n3   1ier élément de la pile.
-; retourne:
-;   n3   Le sommet est maintenant en 3ième position.
-;   n1   Le 3ième est maintenant en 2ième position.
-;   n2   Le second élément est maintenant au somment.    
-DEFCODE "-ROT",4,,NROT ; ( n1 n2 n3 -- n3 n1 n2 )
-    mov T, W0    
-    mov [DSP],T
-    mov [DSP-2],W1
-    mov W1,[DSP]
-    mov W0,[DSP-2]
-    NEXT
-    
-; nom: OVER  ( n1 n2 -- n1 n2 n1 )
-;   Une copie du seconde élément de la pile est créé au sommet de celle-ci.
-; arguments:
-;   n1 Second élément de la pile.
-;   n2 Sommet de la pile.
-; retourne:
-;   n1   Le second est maintenant le 3ième.
-;   n2   Le sommet est maintenant le 2ième.
-;   n1   Une copie du second se retrouve maintenant au somment.    
-DEFCODE "OVER",4,,OVER  ; ( n1 n2 -- n1 n2 n1 )
-    DPUSH
-    mov [DSP-2],T
-    NEXT
-
-; nom: 2OVER  ( d1 d2 -- d1 d2 d1 )
-;   Si on considère qu'il y a 2 entiers doubles au sommet de la pile, une
-;   copie du second est créé au sommet. La pile s'allonge donc de 2 cellules.
-; arguments:
-;   d1   Entier double en seconde position.
-;   d2   Entier double au somment.
-; retourne:
-;   d1   L'entier double qui était en second est maintenant en 3ième position.
-;   d2   L'entier double qui était au sommet est maintenant en 2ième position.
-;   d1   Une copie du 2ième entier double est maintenant au somment.    
-DEFCODE "2OVER",5,,TWOOVER ; ( x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2 )
-    DPUSH
-    mov [DSP-4],T
-    mov [DSP-6],W0
-    mov W0,[++DSP]
-    NEXT
-    
-; nom: NIP ( x1 x2 -- x2 )
-;   Jette le second élément de la pile.
-; arguments:
-;   x1   Valeur en second sur la pile.
-;   x2   Valeur au sommet de la pile.
-; retourne:
-;   x2   La valeur au sommet n'a pas changée mais le 2ième élément est disparue.
-;        La pile a donc diminuée d'un élément.    
-DEFCODE "NIP",3,,NIP   ; ( n1 n2 -- n2 )
-    dec2 DSP,DSP
-    NEXT
-    
-; nom: >R  (  x --  R: -- x )
-;   Transfert le sommet de la pile des arguments au sommet de la pile des retours.
-;   Après cette opération la pile des arguments a raccourcie d'un élément et la
-;   pile des retours a rallongée d'un élément.    
-; arguments:
-;   x   Valeur au sommet de la pile des arguments.
-; retourne:
-;   x   La valeur x est maintenant au sommet de la pile des retours.  
-    
-DEFCODE ">R",2,,TOR  
-    RPUSH T
-    DPOP
-    NEXT
-    
-; nom: R>  ( -- x  R: x -- )     
-;   Transfert d'un élément de la pile des retours vers la pile des arguments.
-;   Après cette opération la pile des retours a raccourcie de 1 élément et la
-;   pile des arguments a rallongée d'un élément.
-; arguments:
-;   x   Valeur au somment de R
-; retourne:
-;   x   valeur qui était au somment de R est maintenant ajoutée au sommet de S.    
-DEFCODE "R>",2,,RFROM  
-    DPUSH
-    RPOP T
-    NEXT
-
-; nom: R@  ( -- x R: x -- x )
-;    La valeur au sommet de la pile des retours est copiée au sommet de la pile
-;    des arguments. Le contenu de la pile des retours n'est pas modifié. Le contenu
-;    de la pile des arguments a 1 élément supplémentaire.
-; arguments:
-;    x   Valeur au somment de R
-; retourne:
-;    x    Valeur ajoutée à la pile des arguments, copie du sommet de R.    
-DEFCODE "R@",2,,RFETCH 
-    DPUSH
-    mov [RSP-2], T
-    NEXT
-
-; nom: SP@  ( -- n )
-;   Empile la valeur du pointeur de la pile des
-;   arguments.
-; arguments:
-;   aucun
-; retourne:
-;   n   valeur de la variable SP.    
-DEFCODE "SP@",3,,SPFETCH ; ( -- n )
-    mov DSP,W0
-    DPUSH
-    mov W0, T
-    NEXT
-    
-; nom: SP! ( n -- )
-;   Initialise le pointeur de la pile des arguments avec la valeur
-;   au sommet de la pile des arguments.
-; arguments:
-;   n  Valeur d'initialisation de SP.
-; retourne:
-;   rien    
-DEFCODE "SP!",3,,SPSTORE  ; ( n -- )
-    mov T, DSP
-    NEXT
-    
-; nom: RP@  ( -- n )
-;   Empile la valeur du pointeur de la pile des retours.
-; arguments:
-;   aucun
-; retourne:
-;   n   valeur du pointeur de la pile des retours.    
-DEFCODE "RP@",3,,RPFETCH  ; ( -- n )
-    DPUSH
-    mov RSP, T
-    NEXT
-    
-; nom: RP! ( n -- )
-;   Initialiste le pointeur de la pile des retours avec la valeur
-;   qui est au sommet de la pile des arguments.
-; arguments:
-;   n   valeur d'initialistaion de RP.
-; retourne:
-;   rien    
-DEFCODE "RP!",3,,RPSTORE  ; ( n -- )
-    mov T, RSP
-    DPOP
-    NEXT
-    
-; nom: TUCK  ( x1 x2 -- x2 x1 x2 )
-;   Insère une copie de la valeur au sommet de la pile des arguments en 
-;   Sous la valeur en 2ième position. Après cette opération la pile contient
-;   1 élément de plus.
-; arguments:
-;   x1  Second éléméent de la pile.
-;   x2  Élément au sommet de la pile.
-; retourne:
-;   x2  copie du sommet de la pile.
-;   x1  2ieme élément de la pile demeure inchangé.
-;   x2  Sommet de la pile demeure inchangé.    
-DEFCODE "TUCK",4,,TUCK 
-    mov [DSP],W0 ; n1
-    mov T,[DSP]  ; n2 n2 
-    mov W0,[++DSP] ; n2 n1 n2
-    NEXT
-
-; nom: DEPTH  ( -- n )    
-;   Retourne le nombre d'éléments sur la pile des arguments. Le nombre d'éléments
-;   renvoyé est exclu ce nouvel élément.
-; arguments:
-;   aucun
-; retourne:
-;   n   Nombre d'éléments qu'il y avait sur la pile avant cette opération.    
-DEFCODE "DEPTH",5,,DEPTH ; ( -- +n1 )
-    mov #pstack,W0
-    sub DSP,W0,W0
-    DPUSH
-    lsr W0,T
-    NEXT
-
-; nom: PICK  ( i*x n --  i*x x )
-;   insère le nième élément de la pile au sommet
-;   l'argument n est retiré de la pile avant le comptage.
-;   Si n==0 équivaut à DUP 
-;   Si n==1 équivaut à OVER
-; arguments:
-;   i*x   Liste des éléments présent sur la pile.
-;   n     position de l'élément recherché, 0 étant le sommet. n est retiré
-;         de la pile avant le comptage.
-; retourne:
-;   i*x   Liste originale des éléments.
-;   x     copie de l'élément en position n.    
-DEFCODE "PICK",4,,PICK
-    mov DSP,W0
-    sl T,T
-    sub W0,T,W0
-    mov [W0],T
-    NEXT
-    
-; nom: >CSTK  ( x --   C: -- x )    
-;   Tranfert du sommet de la pile des arguments 
-;   vers la pile de contrôle. Après cette opération la pile 
-;   des arguments à perdue un élément et la pile de contrôle en a
-;   gagné un.    
-; arguments:
-;   x   Valeur au sommet de la pile des arguments.
-; retourne:
-;   C: x    Le sommet de  la pile de contrôle contient x.    
-DEFCODE ">CSTK",5,,TOCSTK 
-    mov csp,W0
-    mov T,[W0++]
-    mov W0,csp
-    DPOP
-    NEXT
-
-; nom: CSTK>  ( -- x C: x -- )
-;   Transfert du sommet de la pile de contrôle
-;   vers la pile des arguments. Après cette opération la pile de contrôle
-;   contient un élément de moins et la pile des arguments un élément de plus.
-; arguments:
-;    C: x   Valeur au sommet de la pile de contrôle.
-; retourne:
-;    x    Valeur ajoutée au sommet de la pile des arguments.    
-DEFCODE "CSTK>",5,,CSTKFROM 
-    DPUSH
-    mov csp,W0
-    mov [--W0],T
-    mov W0,csp
-    NEXT
-    
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-; opérations logiques bit à bit
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    
-; nom: AND  ( n1 n2 -- n3 )
-;   Opération Booléenne bit à bit ET.
-; arguments:
-;   n1  Première opérande.
-;   n2  Deuxième opérande.
-; retourne:
-;   n3  Résultat de l'opération.    
-DEFCODE "AND",3,,AND 
-    and T,[DSP--],T
-    NEXT
-    
-; nom: OR  ( n1 n2 -- n3 )
-;   Opération Booléenne bit à bit OU inclusif.
-; arguments:
-;   n1  Première opérande.
-;   n2  Deuxième opérande.
-; retourne:
-;   n3  Résultat de l'opération.    
-DEFCODE "OR",2,,OR
-    ior T,[DSP--],T
-    NEXT
-    
-; nom: XOR  ( n1 n2 -- n3 )
-;   Opération Booléenne bit à bit OU exclusif.
-; arguments:
-;   n1  Première opérande.
-;   n2  Deuxième opérande.
-; retourne:
-;   n3  Résultat de l'opération.    
-DEFCODE "XOR",3,,XOR
-    xor T,[DSP--],T
-    NEXT
-    
-; nom: NOT  ( n1 -- n2 )
-;   Opération Booléenne de négation. VRAI devient FAUX et vice-versa.
-; arguments:
-;   n1  opérande.
-; retourne:
-;   n2  Résultat de l'opération.    
-DEFCODE "NOT",3,,NOT ; ( f -- f)
-    cp0 T
-    bra nz, 1f
-    setm T
-    bra 9f
-1:  clr T
-9:  NEXT
-    
-;;;;;;;;;;;;;;;
-; comparaisons
-;;;;;;;;;;;;;;;
-    
-; nom: 0=  ( n -- f )
-;   Vérifie si n est égal à zéro. Retourne un indicateur Booléen.
-; arguments:
-;    n   Entier à vérifier. Est remplacé par l'indicateur Booléen.
-; retourne:
-;    f   Indicateur Booléen VRAI|FAUX    
-DEFCODE "0=",2,,ZEROEQ  ; ( n -- f )  f=  n==0
-    sub #1,T
-    subb T,T,T
-    NEXT
-
-; nom: 0<>  ( n -- f )    
-;   Vérifie si n est différent de zéro. Retourne un indicateur Booléen.
-; arguments:
-;    n  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
-; retourne:
-;    f  Indicateur Booléen VRAI|FAUX    
-DEFCODE "0<>",3,,ZERODIFF ; ( n -- f ) 
-    clr W0
-    cp0 T
-    bra z, 9f
-    com W0,W0
-9:  mov W0,T
-    NEXT
-    
-    
-; nom: 0<  ( n -- f )    
-;   Vérifie si n est plus petit que zéro. Retourne un indicateur Booléen.
-; arguments:
-;    n  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
-; retourne:
-;    f  Indicateur Booléen VRAI|FAUX    
-DEFCODE "0<",2,,ZEROLT ; ( n -- f ) f= n<0
-    add T,T,T
-    subb T,T,T
-    com T,T
-    NEXT
-
-; nom: 0>  ( n -- f )    
-;   Vérifie si n est plus grand que zéro. Retourne un indicateur Booléen.
-; arguments:
-;    n  Entier à vérifier. Est remplacé par l'indicateur Booléen. 
-; retourne:
-;    f  Indicateur Booléen VRAI|FAUX    
-DEFCODE "0>",2,,ZEROGT ; ( n -- f ) f= n>0
-    clr W0
-    cp0 T
-    bra le, 8f
-    setm W0
-8:  mov W0,T    
-    NEXT
-
-; nom: =  ( n1 n2 -- f )
-;   Vérifie l'égalité des 2 entiers. Retourne un indicateur Booléen.
-;   Les deux entiers sont consommés et remplacé par l'indicateur.
-; arguments:
-;   n1  Première opérande.
-;   n2  Deuxième opérande.
-; retourne:    
-;    f  Indicateur Booléen VRAI|FAUX, vrai si égaux.    
-DEFCODE "=",1,,EQUAL  ; ( n1 n2 -- f ) f= n1==n2
-    clr W0
-    cp T, [DSP--]
-    bra nz, 1f
-    setm W0
- 1: 
-    mov W0,T
-    NEXT
-
-; nom: <>  ( n1 n2 -- f )
-;   Vérifie si les 2 entiers sont différents. Retourne un indicateur Booléen.
-;   Les deux entiers sont consommés et remplacé par l'indicateur.
-; arguments:
-;   n1  Première opérande.
-;   n2  Deuxième opérande.
-; retourne:    
-;    f  Indicateur Booléen VRAI|FAUX, vrai si différent.    
-DEFCODE "<>",2,,NOTEQ ; ( n1 n2 -- f ) f = n1<>n2
-    clr W0
-    cp T, [DSP--]
-    bra z, 1f
-    com W0,W0
-1:  
-    mov W0, T
-    NEXT
-    
-; nom: <  ( n1 n2 -- f )
-;   Vérifie si n1 < n2. Retourne un indicateur Booléen.
-;   Les deux entiers sont consommés et remplacé par l'indicateur.
-;   Il s'agit d'une comparaison sur nombre signés.    
-; arguments:
-;   n1  Première opérande.
-;   n2  Deuxième opérande.
-; retourne:    
-;    f  Indicateur Booléen VRAI|FAUX, vrai si n1 < n2.    
- DEFCODE "<",1,,LESS  ; ( n1 n2 -- f) f= n1<n2
-    setm W0
-    cp T,[DSP--]
-    bra gt, 1f
-    com W0,W0
-1:
-    mov W0, T
-    NEXT
-    
-; nom: > ( n1 n2 -- f )
-;   Vérifie si n1 > n2. Retourne un indicateur Booléen.
-;   Les deux entiers sont consommés et remplacé par l'indicateur.
-;   Il s'agit d'une comparaison sur nombre signés.    
-; arguments:
-;   n1  Première opérande.
-;   n2  Deuxième opérande.
-; retourne:    
-;    f  Indicateur Booléen VRAI|FAUX, vrai si n1 > n2.    
-DEFCODE ">",1,,GREATER  ; ( n1 n2 -- f ) f= n1>n2
-    setm W0
-    cp T,[DSP--]
-    bra lt, 1f
-    com W0,W0
-1:
-    mov W0, T
-    NEXT
-    
-; nom: U<  ( u1 u2 -- f )
-;   Vérifie si u1 < u2. Retourne un indicateur Booléen.
-;   Les deux entiers sont consommés et remplacé par l'indicateur.
-;   Il s'agit d'une comparaison sur nombre non signés.    
-; arguments:
-;   u1  Première opérande.
-;   u2  Deuxième opérande.
-; retourne:    
-;    f  Indicateur Booléen VRAI|FAUX, vrai si u1 < u2.    
-DEFCODE "U<",2,,ULESS  ; (u1 u2 -- f) f= u1<u2
-    clr W0
-    cp T,[DSP--]
-    bra leu, 1f
-    com W0,W0
-1:
-    mov W0, T
-    NEXT
-    
-; nom: U>  ( u1 u2 -- f )
-;   Vérifie si u1 > u2. Retourne un indicateur Booléen.
-;   Les deux entiers sont consommés et remplacé par l'indicateur.
-;   Il s'agit d'une comparaison sur nombre non signés.    
-; arguments:
-;   u1  Première opérande.
-;   u2  Deuxième opérande.
-; retourne:    
-;    f  Indicateur Booléen VRAI|FAUX, vrai si u1 > u2.    
-DEFCODE "U>",2,,UGREATER ; ( u1 u2 -- f) f=u1>u2
-    clr W0
-    cp T,[DSP--]
-    bra geu, 1f
-    com W0,W0
-1:
-    mov W0,T
-    NEXT
-
-; nom: CELL   ( -- u )    
-;   Empile la taille en octets d'une cellule. Une cellule est le nom donné à un
-;   élément de la pile.    
-DEFCODE "CELL",4,,CELL ; ( -- CELL_SIZE )
-    DPUSH
-    mov #CELL_SIZE, T
-    NEXT
-
-; nom: CELL+  ( a-addr -- a-addr' )    
-;   Incrémente l'adresse au sommet de la pile de la taille d'une cellule.
-; arguments:
-;   a-addr   Adresse 
-; retourne:
-;   a-addr'  adresse incrémentée.    
-DEFCODE "CELL+",5,,CELLPLUS ; ( addr -- addr+CELL_SIZE )
-    add #CELL_SIZE, T
-    NEXT
-
-; nom: CELLS  ( n1 -- n2 )    
-;    Convertie l'entier n1 en la taille occupée par n1 cellules.
-; arguments:
-;    n1   Nombre de cellules.
-; retourne:
-;    n2   Espace occupé par n1 cellules.   
-DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
-    mul.uu T,#CELL_SIZE,W0
-    mov W0,T
-    NEXT
-
-; nom: ALIGN  ( -- )    
-;   Si la variable système DP  (Data Pointer) pointe sur une adresse impaire, 
-;   aligne DP sur l'adresse paire supérieure.
-;   Met 0 dans l'octet sauté.    
-; arguments:
-;   aucun
-; retourne:
-;   rien    
-DEFWORD "ALIGN",5,,ALIGN ; ( -- )
-    .word HERE,ODD,ZBRANCH,9f-$
-    .word LIT,0,HERE,CSTORE,LIT,1,ALLOT
-9:  .word EXIT    
- 
-; nom: ALIGNED  ( addr -- a-addr )  
-;   Si l'adrsse au sommet de la pile est impaire, aligne cette adresse sur la valeur paire supérieure.
-; arguments:
-;   addr  adresse à vérifier.
-; retourne:
-;   a-addr adresse alignée.  
-DEFCODE "ALIGNED",7,,ALIGNED ; ( addr -- a-addr )
-    btsc T,#0
-    inc T,T
-    NEXT
-
-; nom: >CHAR  ( n -- c )    
-;   Vérifie que n est dans l'intervalle ASCII 32..126, sinon remplace c par '_'  
-; arguments:
-;   n   Entier à convertir en caractère.
-; retourne:
-;   c    Valeur ASCII entre 32 et 126    
-DEFCODE ">CHAR",5,,TOCHAR 
-    mov #126,W0
-    cp W0,T
-    bra gtu,1f
-    cp T,#32
-    bra geu, 2f
-1:  mov #'_',T
-2:  NEXT
- 
-; nom: HERE   ( -- addr )    
-;   Empile la valeur de la variable système DP (Data Pointer).
-; arguments:
-;   aucun
-; retourne:
-;   rien    
-DEFWORD "HERE",4,,HERE
-    .word DP,FETCH,EXIT
-
-; nom: MOVE  ( c-addr1 c-addr2 u -- )    
-;   Copie un bloc mémoire RAM en évitant la propagation.
-; arguments:
-;   c-addr1  source
-;   c-addr2  destination
-;   u      compte en octets.   
-; retourne:
-;   rien    
-DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
-    mov [DSP-2],W0 ; source
-    cp W0,[DSP]    
-    bra ltu, move_dn ; source < dest
-    bra move_up      ; source > dest
-  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;  manipulation de caractères
-;  et chaînes
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-
-; nom: CHARS   ( n1 -- n2 )    
-;   Retourne l'espace occupée par n caractères en octets.
-; arguments:
-;   n1  Nombre de caractères
-; retourne:
-;   n2  Espace requis pour n1 caractères.    
-DEFWORD "CHARS",5,,CHARS ; ( n1 -- n2 )
-9:  .word LIT,CHAR_SIZE,STAR,EXIT
-   
-; nom: CHAR+   ( c-addr -- c-addr' )  
-;   Incrémente l'adresse de l'espace occupé par un caractère.
-; arguments:
-;   c-addr   adresse alignée sur caractère.
-; retourne:
-;   c-addr'  adresse alignée sur caractère suivant.  
-DEFWORD "CHAR+",5,,CHARPLUS ; ( addr -- addr' )  
-    .word LIT,CHAR_SIZE,PLUS,EXIT
-  
-; nom: CHAR   ( cccc -- c )    
-;   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
-;   A la suite de cette opération la variable >IN pointe après le mot.    
-; arguments:
-;    cccc   chaîne de caractère dans le flux d'entré.
-; retourne:
-;    c      Le premier caractère du mot.    
-DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
-    .word BL,WORD,DUP,CFETCH,ZEROEQ
-    .word QABORT
-    .byte 16
-    .ascii "missing caracter"
-    .align 2
-    .word ONEPLUS,CFETCH,EXIT
-
-; nom: [CHAR]   ( ccccc -- )    
-;   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
-;   Après cette opération la variable >IN pointe après le mot trouvé.
-;   Ce mot ne peut-être utilisé qu'à l'intérieur d'une définition. i.e. STATE=1    
-; arguments:
-;   cccccc  chaîne de caractère dans le flux d'entré.    
-; retourne:
-;   rien   Le caractère es compilé dans la définition.    
-DEFWORD "[CHAR]",6,F_IMMED,COMPILECHAR ; cccc 
-    .word QCOMPILE
-    .word CHAR,CFA_COMMA,LIT,COMMA,EXIT
-    
-; nom: FILL ( c-addr u c -- )    
-;   Initialise un bloc mémoire RAM de dimension u avec
-;   le caractère c.
-; arguments:
-;   c-addr   adresse début zone.
-;   u        nombre de caractères à remplir.
-;   c        caractère de remplissage.    
-; retourne:
-;   rien    
-DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
-    SET_EDS
-    mov T,W0 ; c
-    mov [DSP--],W1 ; u
-    mov [DSP--],W2 ; c-addr
-    DPOP
-    cp0 W1
-    bra z, 1f
-    dec W1,W1
-    repeat W1
-    mov.b W0,[W2++]
-1:  RESET_EDS
-    NEXT
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;  variables système
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    
-; nom: STATE  ( -- a-addr )
-;   Variable système qui indique si le système est en mode interprétation ou compilation.
-;   STATE=0 -> interprétation,  STATE=1 -> compilation.
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "STATE",5,,STATE   ; état compile=1/interprète=0
-
-; nom: DP ( -- a-addr )
-;   Variable système qui contient la position du pointeur de donnée dans le dictionnaire.
-;   Lorsqu'une nouvelle définition est créée ou que de l'espace est réservé avec ALLOT ce
-;   pointeur avant à la première position libre.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "DP",2,,DP         ; pointeur fin dictionnaire
-
-; nom: BASE  ( -- a-addr )
-;   Variable système qui contient la valeur de la base numérique active.
-;   Le contenu de cette variable est modifié par les mots HEX et DECIMAL.
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "BASE",4,,BASE     ; base numérique
-
-; nom: SYSLATEST  ( -- a-addr )
-;   Variable système qui contient le NFA du dernier mot défini dans le dictionnaire
-;   système en mémoire FLASH.
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "SYSLATEST",9,,SYSLATEST ; tête du dictionnaire en FLASH    
-; nom: LATEST  ( -- a-addr )
-;   Variable système qui contient le NFA du derner mot défini par l'utilisateur.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
-
-; nom: PAD ( -- a-addr )
-;   Variable système qui contient l'adresse d'un tampon utilisé pour le travail
-;   sur des chaînes de caractère. Ce tampon est utilisé entre autre pour la conversion
-;   des entiers en chaêine de caractères pour l'affichage.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "PAD",3,,PAD       ; tampon de travail
-
-; nom: TIB ( -- a-addr )
-;   Variable système contenant l'adresse du tampon de saisie des chaînes à partir
-;   du clavier. Ce tampon est utilisé par l'interpréteur/compilateur en mode interactif.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "TIB",3,,TIB       ; tampon de saisie clavier
-; nom: PASTE  ( -- a-addr )
-;   Variable système qui contient l'adresse d'un tampon qui contient une copie
-;   de la dernière chaîne interprétée en mode interactif. Permet de rappeller cette
-;   chaîne à l'écran par la commande CTRL_V.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "PASTE",5,,PASTE   ; copie de TIB
-    
-; nom: >IN   ( -- a-addr )
-;   Variable système indique la position ou est rendue l'analyseur lexical dans
-;   le traitement de la chaîne d'entrée. Cette variable est utilisée par l'interpréteur/compilateur.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER ">IN",3,,TOIN     ; pointeur position après le dernier mot retourné par WORD
-    
-; NOM: HP   ( -- a-addr )
-;   Variable système contenant la position du pointeur de conversion de nombres en chaîne.
-;   Cette variable est utilisée lors de la conversion d'entiers en chaîne de caractères.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "HP",2,,HP       ; HOLD pointer
-    
-; nom: 'SOURCE	( -- a-addr )
-;   Variable système qui contient le pointeur du début du tampon utilisé par
-;   l'interpréteur/compilateur.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "'SOURCE",7,,TICKSOURCE ; tampon source pour l'évaluation
-    
-; nom: #SOURCE  ( -- a-addr )
-;   Variable système contenant la grandeur du tampon source.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
-
-; nom: RPBREAK   ( -- a-addr )
-;   Variable système utilisé par le mot BREAK pour sauvegarder la position
-;   de RSP pour la réentrée.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
-    
-; nom: DBGEN  ( -- a-addr)
-;   Variable système qui contient un indicateur Booléen d'activation/désactivation des breakpoints.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
-    
-; nom: SYSCONS   ( -- a-addr )
-;   Variable système qui indique le périphérique actuel utilisé par la console.
-;   La console peut fonctionné en mode LOCAL ou REMOTE.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "SYSCONS",7,,SYSCONS 
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-; constantes système
-;;;;;;;;;;;;;;;;;;;;;;;;;;
+; DESCRIPTION:
+; Cette section décris les différentes constantes utilisées par le système ForthEx.
 
 ; nom: VERSION   ( -- c-addr )
 ;   Constante système, Adresse de la chaîne compté qui contient l'information de version firmware.
@@ -1543,6 +401,917 @@ DEFCONST "FALSE",5,,FALSE,0 ; valeur booléenne faux
 ; retourne:
 ;   a-addr   Adresse du début espace utilisateur en mémoire RAM.    
 DEFCONST "DP0",3,,DP0,DATA_BASE ; début espace utilisateur
+   
+; nom: CELL   ( -- u )    
+;   Constante système qui retourne la taille d'une cellule. 
+;   Une cellule est le nom donné à un élément de la pile. 
+;   Pour forthEx sur PIC24EP les entiers sont de 16 bits donc
+;   la pile utilise des cellules de 2 octets.    
+; arguments:
+;   aucun
+; retourne:
+;   u   Grandeur d'une cellule.    
+DEFCONST "CELL",4,,CELL,CELL_SIZE
+ 
+; DESCRIPTION:
+;  Cette section décris les différentes variables utilisées par le système.
+    
+; nom: STATE  ( -- a-addr )
+;   Variable système qui indique si le système est en mode interprétation ou compilation.
+;   STATE=0 -> interprétation,  STATE=-1 -> compilation.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "STATE",5,,STATE 
+
+; nom: DP ( -- a-addr )
+;   Variable système qui contient la position du pointeur de donnée dans l'esapce utilisateur.
+;   Lorsqu'une nouvelle définition est créée ou que de l'espace est réservé avec ALLOT ce
+;   pointeur avance à la première position libre.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "DP",2,,DP 
+
+; nom: BASE  ( -- a-addr )
+;   Variable système qui contient la valeur de la base numérique active.
+;   Le contenu de cette variable est modifié par les mots HEX et DECIMAL.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "BASE",4,,BASE     ; base numérique
+
+; nom: SYSLATEST  ( -- a-addr )
+;   Variable système qui contient le NFA du dernier mot défini dans le dictionnaire
+;   système en mémoire FLASH.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "SYSLATEST",9,,SYSLATEST ; tête du dictionnaire en FLASH
+    
+; nom: LATEST  ( -- a-addr )
+;   Variable système qui contient le NFA du dernier mot défini par l'utilisateur.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
+
+; nom: PAD ( -- a-addr )
+;   Variable système qui contient l'adresse d'un tampon utilisé pour le travail
+;   sur des chaînes de caractère. Ce tampon est utilisé entre autre pour la conversion
+;   des entiers en chaêine de caractères pour l'affichage.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "PAD",3,,PAD       ; tampon de travail
+
+; nom: TIB ( -- a-addr )
+;   Variable système contenant l'adresse du tampon de saisie des chaînes à partir
+;   du clavier. Ce tampon est utilisé par l'interpréteur/compilateur en mode interactif.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "TIB",3,,TIB       ; tampon de saisie clavier
+; nom: PASTE  ( -- a-addr )
+;   Variable système qui contient l'adresse d'un tampon qui contient une copie
+;   de la dernière chaîne interprétée en mode interactif. Permet de rappeller cette
+;   chaîne à l'écran par la commande CTRL_V.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "PASTE",5,,PASTE   ; copie de TIB
+    
+; nom: >IN   ( -- a-addr )
+;   Variable système indique la position ou est rendue l'analyseur lexical dans
+;   le traitement de la chaîne d'entrée. Cette variable est utilisée par l'interpréteur/compilateur.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER ">IN",3,,TOIN     ; pointeur position après le dernier mot retourné par WORD
+    
+; NOM: HP   ( -- a-addr )
+;   Variable système contenant la position du pointeur de conversion de nombres en chaîne.
+;   Cette variable est utilisée lors de la conversion d'entiers en chaîne de caractères.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "HP",2,,HP       ; HOLD pointer
+    
+; nom: 'SOURCE	( -- a-addr )
+;   Variable système qui contient le pointeur du début du tampon utilisé par
+;   l'interpréteur/compilateur.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "'SOURCE",7,,TICKSOURCE ; tampon source pour l'évaluation
+    
+; nom: #SOURCE  ( -- a-addr )
+;   Variable système contenant la grandeur du tampon source.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
+
+; nom: RPBREAK   ( -- a-addr )
+;   Variable système utilisé par le mot BREAK pour sauvegarder la position
+;   de RSP pour la réentrée.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
+    
+; nom: DBGEN  ( -- a-addr)
+;   Variable système qui contient un indicateur Booléen d'activation/désactivation des breakpoints.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
+    
+; nom: SYSCONS   ( -- a-addr )
+;   Variable système qui indique le périphérique actuel utilisé par la console.
+;   La console peut fonctionné en mode LOCAL ou REMOTE.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "SYSCONS",7,,SYSCONS 
+    
+ 
+; DESCRIPTION:
+;  La machine Virtuelle ForthEx utilise 3 piles.
+;  La pile des arguments sert a passer des arguments d'une fonction à une autre
+;  ainsi qu'à retourner les valeurs des fonctions.
+;  La pile des retours sert principalement a conserver la valeur du pointeur
+;  d'instruction lors de l'appel de mots de haut-niveau afin de retourner au point
+;  initial. Mais elle sert aussi à conserver des valeurs temporaires.
+;  La 3ième pile est utilisée seulement par le compilateur pour conserver des adresses
+;  de sauts qui doivent-être résolues avant de terminer la compilation.
+;  Les mots suivants servent à manipuler le contenu des 3 piles.
+
+; nom: DUP ( x1 -- x1 x2 )
+;   Clone la valeur au sommet de la pile.
+; arguments:
+;    x1    Valeur au sommet de  la pile des arguments.    
+; retourne:
+;    x1    Valeur originale.
+;    x2    Copie de x1.
+DEFCODE "DUP",3,,DUP ; ( n -- n n )
+    DPUSH
+    NEXT
+
+; nom: 2DUP   ( d1 -- d1 d2 )
+;   Clone l'entier double qui est au sommet de la pile.
+; arguments:
+;   d1      Entier double.
+; retourne:
+;   d1      Valeur originale.
+;   d2      Copie de d1.
+DEFCODE "2DUP",4,,TWODUP 
+    mov [DSP],W0
+    DPUSH
+    mov W0,[++DSP]
+    NEXT
+    
+; nom: ?DUP  ( x1 -- 0 | x1 x2 )    
+;    Clone la valeur au sommet de la pile si cette valeur est différente de zéro.
+; arguments:
+;    x1   Valeur au sommet de la pile.
+; retourne:
+;    x1   Valeur originale.
+;    x2   Copie de x1 si x1<>0.    
+DEFCODE "?DUP",4,,QDUP 
+    cp0 T
+    bra z, 1f
+    DPUSH
+1:  NEXT
+    
+; nom: DROP ( x -- )
+;   Jette la valeur au sommet de la pile.
+; arguments:
+;    x    Valeur au sommet de la pile.
+; retourne:
+;    rien     La pile contient 1 élément de moins.    
+DEFCODE "DROP",4,,DROP
+    DPOP
+    NEXT
+
+; nom: 2DROP ( x1 x2 -- )
+;   Jette les 2 valeurs au sommet de la pile.    
+; arguments:
+;   x1  Valeur sous le sommet.
+;   x2  Valeur au sommet de la pile.
+; retourne:
+;   rien La pile contient 2 éléments de moins.    
+DEFCODE "2DROP",5,,TWODROP
+    DPOP
+    DPOP
+    NEXT
+    
+; nom: RDROP  ( R: x -- )
+;   Jette la valeur au sommet de la pile des retours.
+; arguments:
+;    x  Valeur au sommet de la pile des retours.
+; retourne:
+;   rien La pile des retours contient 1 élément de moins.    
+DEFCODE "RDROP",5,,RDROP ; ( R: n -- )
+    sub #CELL_SIZE,RSP
+    NEXT
+    
+; nom: SWAP  ( x1 x2 -- x2 x1 )
+;   Inverse l'ordre des 2 éléments au sommet de la pile des arguments.
+; arguments:
+;   x1   Deuxième élément de la pile.
+;   x2   Élément au sommet de la pile.
+; retourne:
+;   x2   La valeur qui était au sommet est maintenant en second.
+;   x1   La valeur qui était en second est maintenant au sommet.    
+DEFCODE "SWAP",4,,SWAP ; ( n1 n2 -- n2 n1)
+    mov [DSP],W0
+    exch W0,T
+    mov W0,[DSP]
+    NEXT
+
+; nom: 2SWAP  ( d1 d2 -- d2 d1 )
+;   Notation alternative: ( n1 n2 n3 n4 -- n3 n4 n1 n2 )    
+;   Inverse l'ordre de 2 entiers doubles au sommet de la pile.
+; arguments:
+;   d1   Second entier double de la pile des arguments.
+;   d2   Entier double au sommet.
+; retourne:
+;   d2   Le sommet est maintenant en second.
+;   d1   Le second est maintenant au sommet.    
+DEFCODE "2SWAP",5,,TWOSWAP 
+    mov [DSP-2],W0
+    mov T,[DSP-2]
+    mov W0, T
+    mov [DSP-4],W0
+    mov [DSP],W1
+    mov W1, [DSP-4]
+    mov W0, [DSP]
+    NEXT
+    
+; nom: ROT ( n1 n2 n3 -- n2 n3 n1 )
+;   Rotation des 3 éléments du sommet de sorte que le 3ième se retrouve au sommet.
+; arguments:
+;   n1  Élément en 3ième position de la pile.
+;   n2  Élément en 2ième position de la pile.
+;   n3  Élément a sommet de la pile.
+; retourne:
+;   n2  Le second est maintenant en 3ième position.
+;   n3  Le sommet est maintenant en 2ième position.
+;   n1  Le 3ième est maintenant au sommet.    
+DEFCODE "ROT",3,,ROT  ; ( n1 n2 n3 -- n2 n3 n1 )
+    mov [DSP], W0 ; n1
+    exch T,W0   ; W0=n3, T=n2
+    mov W0, [DSP]  ; n3
+    mov [DSP-2],W0 ; n1
+    exch W0,T ; T=n1, W0=n2
+    mov W0,[DSP-2] 
+    NEXT
+
+; nom: -ROT ( n1 n2 n3 -- n3 n1 n2 )
+;   Rotation inverse des 3 éléments du sommet de la pile.
+;   Le sommet est envoyé en 3ième position.
+; arguments:
+;   n1   3ième élément de la pile.
+;   n2   2ième élément de la pile.
+;   n3   1ier élément de la pile.
+; retourne:
+;   n3   Le sommet est maintenant en 3ième position.
+;   n1   Le 3ième est maintenant en 2ième position.
+;   n2   Le second élément est maintenant au sommet.    
+DEFCODE "-ROT",4,,NROT ; ( n1 n2 n3 -- n3 n1 n2 )
+    mov T, W0    
+    mov [DSP],T
+    mov [DSP-2],W1
+    mov W1,[DSP]
+    mov W0,[DSP-2]
+    NEXT
+    
+; nom: OVER  ( n1 n2 -- n1 n2 n1 )
+;   Copie du second élément de la pile par dessus le sommet de celle-ci.
+; arguments:
+;   n1 Second élément de la pile.
+;   n2 Sommet de la pile.
+; retourne:
+;   n1   Le second est maintenant le 3ième.
+;   n2   Le sommet est maintenant le 2ième.
+;   n1   Une copie du second se retrouve maintenant au somment.    
+DEFCODE "OVER",4,,OVER  ; ( n1 n2 -- n1 n2 n1 )
+    DPUSH
+    mov [DSP-2],T
+    NEXT
+
+; nom: 2OVER  ( d1 d2 -- d1 d2 d1 )
+;   Si on considère qu'il y a 2 entiers doubles au sommet de la pile, une
+;   copie du second est créé au sommet. La pile s'allonge donc de 2 cellules.
+; arguments:
+;   d1   Entier double en seconde position.
+;   d2   Entier double au somment.
+; retourne:
+;   d1   L'entier double qui était en second est maintenant en 3ième position.
+;   d2   L'entier double qui était au sommet est maintenant en 2ième position.
+;   d1   Une copie du 2ième entier double est maintenant au somment.    
+DEFCODE "2OVER",5,,TWOOVER ; ( x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2 )
+    DPUSH
+    mov [DSP-4],T
+    mov [DSP-6],W0
+    mov W0,[++DSP]
+    NEXT
+    
+; nom: NIP ( x1 x2 -- x2 )
+;   Jette le second élément de la pile.
+; arguments:
+;   x1   Valeur en second sur la pile.
+;   x2   Valeur au sommet de la pile.
+; retourne:
+;   x2   La valeur au sommet n'a pas changée mais le 2ième élément est disparue.
+DEFCODE "NIP",3,,NIP   ; ( n1 n2 -- n2 )
+    dec2 DSP,DSP
+    NEXT
+
+; nom: TUCK  ( x1 x2 -- x2 x1 x2 )
+;   Insère une copie de la valeur au sommet de la pile des arguments
+;   Sous la valeur en 2ième position. Après cette opération la pile contient
+;   1 élément de plus.
+; arguments:
+;   x1  Second éléméent de la pile.
+;   x2  Élément au sommet de la pile.
+; retourne:
+;   x2  copie du sommet de la pile.
+;   x1  2ieme élément de la pile demeure inchangé.
+;   x2  Sommet de la pile demeure inchangé.    
+DEFCODE "TUCK",4,,TUCK 
+    mov [DSP],W0 ; n1
+    mov T,[DSP]  ; n2 n2 
+    mov W0,[++DSP] ; n2 n1 n2
+    NEXT
+
+    
+; nom: >R  (  x --  R: -- x )
+;   Transfert le sommet de la pile des arguments au sommet de la pile des retours.
+;   Après cette opération la pile des arguments a raccourcie d'un élément et la
+;   pile des retours a rallongée d'un élément.    
+; arguments:
+;   x   Valeur au sommet de la pile des arguments.
+; retourne:
+;   rien   La valeur x est maintenant au sommet de la pile des retours.  
+DEFCODE ">R",2,,TOR  
+    RPUSH T
+    DPOP
+    NEXT
+    
+; nom: R>  ( -- x  R: x -- )     
+;   Transfert d'un élément de la pile des retours vers la pile des arguments.
+;   Après cette opération la pile des retours a raccourcie de 1 élément et la
+;   pile des arguments a rallongée d'un élément.
+; arguments:
+;   x   Valeur au somment des retours.
+; retourne:
+;   x   valeur qui était au somment de R: est maintenant ajoutée au sommet de S:.    
+DEFCODE "R>",2,,RFROM  
+    DPUSH
+    RPOP T
+    NEXT
+
+; nom: IP@  ( -- n )  
+;   Retourne la valeur du pointeur d'instruction de la machine virtuelle forth.
+; arguments:
+;   aucun
+; retourne:
+;   n     Valeur de IP.    
+DEFCODE "IP@",3,,IPFETCH  ; ( -- n )
+    DPUSH
+    mov IP,T
+    NEXT
+
+; nom: DEPTH  ( -- n )    
+;   Retourne le nombre d'éléments sur la pile des arguments. Le nombre d'éléments
+;   renvoyé  exclu ce nouvel élément.
+; arguments:
+;   aucun
+; retourne:
+;   n   Nombre d'éléments qu'il y avait sur la pile avant cette opération.    
+DEFCODE "DEPTH",5,,DEPTH ; ( -- +n1 )
+    mov #pstack,W0
+    sub DSP,W0,W0
+    DPUSH
+    lsr W0,T
+    NEXT
+
+; nom: PICK  ( i*x n --  i*x x )
+;   Insère le nième élément de la pile au sommet
+;   l'argument n est retiré de la pile avant le comptage.
+;   Si n==0 équivaut à DUP 
+;   Si n==1 équivaut à OVER
+; arguments:
+;   i*x   Liste des éléments présent sur la pile.
+;   n     position de l'élément recherché, 0 étant le sommet.
+; retourne:
+;   i*x   Liste originale des éléments.
+;   x     copie de l'élément en position n.    
+DEFCODE "PICK",4,,PICK
+    mov DSP,W0
+    sl T,T
+    sub W0,T,W0
+    mov [W0],T
+    NEXT
+    
+    
+; nom: R@  ( -- x R: x -- x )
+;    La valeur au sommet de la pile des retours est copiée au sommet de la pile
+;    des arguments. Le contenu de la pile des retours n'est pas modifié. Le contenu
+;    de la pile des arguments a 1 élément supplémentaire.
+; arguments:
+;    x   Valeur au somment de R
+; retourne:
+;    x    Valeur ajoutée à la pile des arguments, copie du sommet de R.    
+DEFCODE "R@",2,,RFETCH 
+    DPUSH
+    mov [RSP-2], T
+    NEXT
+
+; nom: SP@  ( -- n )
+;   Retourne la valeur du pointeur de la pile des arguments.
+; arguments:
+;   aucun
+; retourne:
+;   n   Valeur du pointeur SP.    
+DEFCODE "SP@",3,,SPFETCH ; ( -- n )
+    mov DSP,W0
+    DPUSH
+    mov W0, T
+    NEXT
+    
+; nom: SP! ( n -- )
+;   Initialise le pointeur de la pile des arguments avec la valeur
+;   au sommet de la pile des arguments.
+; arguments:
+;   n  Valeur d'initialisation de SP.
+; retourne:
+;   rien    
+DEFCODE "SP!",3,,SPSTORE  ; ( n -- )
+    mov T, DSP
+    NEXT
+    
+; nom: RP@  ( -- n )
+;   Retourne la valeur du pointeur de la pile des retours.
+; arguments:
+;   aucun
+; retourne:
+;   n   Valeur du pointeur de la pile des retours.    
+DEFCODE "RP@",3,,RPFETCH  ; ( -- n )
+    DPUSH
+    mov RSP, T
+    NEXT
+    
+; nom: RP! ( n -- )
+;   Initialiste le pointeur de la pile des retours avec la valeur
+;   qui est au sommet de la pile des arguments.
+; arguments:
+;   n   Valeur d'initialistaion de RP.
+; retourne:
+;   rien    
+DEFCODE "RP!",3,,RPSTORE  ; ( n -- )
+    mov T, RSP
+    DPOP
+    NEXT
+    
+; nom: >CSTK  ( x --   C: -- x )
+;   Utiliser par le compilateur.    
+;   Tranfert du sommet de la pile des arguments 
+;   vers la pile de contrôle. Après cette opération la pile 
+;   des arguments à perdue un élément et la pile de contrôle en a
+;   gagné un.    
+; arguments:
+;   x   Valeur au sommet de la pile des arguments.
+; retourne:
+;   rien    Le sommet de  la pile de contrôle contient x.    
+DEFCODE ">CSTK",5,,TOCSTK 
+    mov csp,W0
+    mov T,[W0++]
+    mov W0,csp
+    DPOP
+    NEXT
+
+; nom: CSTK>  ( -- x C: x -- )
+;   Utilisé par le compilateur.    
+;   Transfert du sommet de la pile de contrôle
+;   vers la pile des arguments. Après cette opération la pile de contrôle
+;   contient un élément de moins et la pile des arguments un élément de plus.
+; arguments:
+;    x   Valeur au sommet de la pile de contrôle.
+; retourne:
+;    x    Valeur ajoutée au sommet de la pile des arguments.    
+DEFCODE "CSTK>",5,,CSTKFROM 
+    DPUSH
+    mov csp,W0
+    mov [--W0],T
+    mov W0,csp
+    NEXT
+    
+; nom: @   ( a-addr -- n )
+;   Retourne l'entier qui se trouve à l'adresse qui est au sommet de la pile des arguments.
+;   Cette adresse doit-être alignée sur une adresse paire.    
+;   Les adresses > 32767 accèdent la mémoire FLASH dans l'interval {0..32766}.    
+; arguments:
+;   a-addr  Adresse de la variable.
+; retourne:
+;   n	Entier contenu à cette adresse.
+DEFCODE "@",1,,FETCH 
+    mov [T],T
+    NEXT
+
+; nom: C@  ( c-addr -- c )
+;   Retourne l'octet contenu à l'adresse caractère qui est au sommet de la pile.
+;   Les adresses > 32767 accèdent la mémoire FLASH dans l'interval {0..32767}.    
+; arguments:
+;   c-addr  Adresse alignée sur un octet.
+; retourne:
+;   c   Caractère contenu à cette adresse.    
+DEFCODE "C@",2,,CFETCH 
+    mov.b [T],T
+    ze T,T
+    NEXT
+    
+; nom: 2@  ( a-addr -- d )    
+;   Retourne la valeur de type entier double qui est à l'adresse a-addr.
+;   Cette adresse doit-être alignée sur une valeur paire.    
+;   Les adresses > 32767 accès la mémoire EDS.    
+; arguments:
+;   a-addr   Adresse de la variable
+; retourne:
+;   d   Entier double, valeur de cette variable.    
+DEFCODE "2@",2,,TWOFETCH 
+    SET_EDS
+    mov [T],W0 
+    add #CELL_SIZE,T
+    mov [T],T
+    mov W0,[++DSP]
+    RESET_EDS
+    NEXT
+    
+; nom: TBL@  ( n a-addr -- n )    
+;   Retourne l'élément n d'un vecteur. Les valeurs d'indice débute à zéro.
+;   L'adresse de la table doit-être alignée sur une adresse paire.
+;   Les adresses > 32767 sont en mémoire FLASH.    
+; arguments:
+;   n  Indice dans le vecteur.
+;   a-addr  Adresse du vecteur.
+; retourne:
+;   n    Valeur de l'élément n du vecteur.    
+DEFCODE "TBL@",4,,TBLFETCH
+    mov [DSP--],W0
+    mov #CELL_SIZE,W1
+    mul.uu W1,W0,W0
+    add T,W0,W0
+    mov [W0],T
+    NEXT
+
+    
+; nom: TBL!  ( n1 n2 a-addr -- )    
+;   Sauvegarde l'entier n1 dans l'élément d'indice n2 du vecteur dont d'adresse a-addr.
+;   L'adresse de table doit-être alignée sur un nombre pair.    
+;   a-addr[n2] = n1.
+;   Les adresses > 32767 accès la mémoire EDS.    
+; arguments:
+;   n1  Valeur à affecté à l'élément.
+;   n2  Indice de l'élément.
+;   a-addr  Adresse de la table.
+; retourne:
+;    rien
+DEFCODE "TBL!",4,,TBLSTORE ; ( n1 n2 addr -- )    
+    mov [DSP--],W0
+    mov #CELL_SIZE,W1
+    mul.uu W0,W1,W0
+    add T,W0,W0
+    DPOP 
+    mov T,[W0]
+    DPOP
+    NEXT
+    
+; nom: !  ( n a-addr -- )    
+;   Sauvegarde d'un entier dans une variable.
+;   Accès RAM et EDS.    
+; arguments:
+;   n    Valeur à sauvegarder
+;   a-addr Adresse de la variable.    
+; retourne:
+;   rien    
+DEFCODE "!",1,,STORE 
+    mov [DSP--],[T]
+    DPOP
+    NEXT
+
+; nom: C!  ( c c-addr -- )    
+;   Sauvegarde un caractère dans une variable.
+;   Accès RAM et EDS.
+; arguments:
+;   c   Valeur à sauvegarder.
+;   c-addr  Adresse de la variable.
+; retourne:
+;    rien    
+DEFCODE "C!",2,,CSTORE
+    mov [DSP--],W0
+    mov.b W0,[T]
+    DPOP
+    NEXT
+
+; nom: 2!   ( d a-addr -- )    
+;   Sauvegarde d'un entier double.
+;   Accès RAM et EDS    
+; arguments:
+;   d   entier double
+;   a-addr  adresse de la variable.
+; retourne:
+;   rien    
+DEFCODE "2!",2,,TWOSTORE
+    mov [DSP--],[++T]
+    mov [DSP--],[--T]
+    mov [DSP],T
+    NEXT
+    
+
+; nom: CELL+  ( addr -- addr' )    
+;   Incrémente l'adresse au sommet de la pile de la taille d'une cellule.
+; arguments:
+;   addr   Adresse. 
+; retourne:
+;   addr'  Adresse incrémentée de la taille d'une cellule.    
+DEFCODE "CELL+",5,,CELLPLUS ; ( addr -- addr+CELL_SIZE )
+    add #CELL_SIZE, T
+    NEXT
+
+; nom: CELLS  ( n1 -- n2 )    
+;    Convertie l'entier n1 en la taille occupée par n1 cellules.
+;    n2=n1*CELL_SIZE    
+; arguments:
+;    n1   Nombre de cellules.
+; retourne:
+;    n2   Espace occupé par n1 cellules.   
+DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
+    mul.uu T,#CELL_SIZE,W0
+    mov W0,T
+    NEXT
+
+    
+; nom:  I  ( -- n )    
+;   Retourne le compteur de boucle I.
+; arguments:
+;   aucun
+; retourne:
+;   n   Valeur actuelle de I.
+DEFCODE "I",1,,DOI  ; ( -- n )
+    DPUSH
+    mov I, T
+    NEXT
+
+; nom: L  ( -- n )    
+;   Retourne la limite de boucle LIMIT.    
+; arguments:
+;   aucun
+; retourne:
+;   n   Valeur de LIMIT.    
+DEFCODE "L",1,,DOL ; ( -- n )
+    DPUSH
+    mov LIMIT,T
+    NEXT
+    
+; nom: J  ( -- n )    
+;   Retourne le compteur de la boucle qui englobe la boucle actuelle.
+; arguments:
+;   aucun
+; retourne:
+;   n   Valeur actuelle de J.
+DEFCODE "J",1,,DOJ  ; ( -- n ) R: limitJ indexJ
+    DPUSH
+    mov [RSP-2],T
+    NEXT
+  
+; nom: UNLOOP ( R: n1 n2 -- )
+;   Restore les valeurs des variables I et LIMIT tels qu'elles étaient
+;   avant l'exécution du dernier DO ou ?DO.
+;   Après exécution  LIMIT=n1, I=n2
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFCODE "UNLOOP",6,,UNLOOP
+    RPOP I
+    RPOP LIMIT
+    NEXT
+    
+; nom: EXECUTE  ( i*x a-addr -- j*x )
+;   Exécute le mot dont le Code Field Address est au sommet de la pile.
+; arguments:
+;   i*x    Liste des arguments consommés par ce mot.
+;   a-addr CFA du mot à exécuter.
+; retourne:
+;   j*x   Valeurs retournées l'exécution du mot.
+DEFCODE "EXECUTE",7,,EXECUTE
+exec:
+    mov T, WP ; CFA
+    DPOP
+    mov [WP++],W0  ; code address, WP=PFA
+    goto W0
+
+; nom: @XT  ( i*x a-addr -- j*x )
+;   Exécution vectorisée. 
+;   Lit le contenu d'une adresse qui contient le CFA d'un mot et exécute ce mot.
+;   : @XT  @ EXECUTE ;    
+; arguments:
+;    i*x   Arguments attendus par la fonction qui sera exécutée.    
+;    a-addr Adresse qui contient le CFA du code à exécuter. Accès RAM + FLASH
+; retourne:
+;    j*x  Valeurs laissées par le mot exécuté.    
+DEFCODE "@EXEC",5,,FETCHEXEC
+    mov [T],T
+    bra exec
+
+; nom: VEXEC ( i*x a-addr n -- j*x )
+;   Excécute la fonction n dans une table contenant des CFA.
+;   : VEXEC CELLS + @ EXECUTE ;    
+; arguments:
+;    i*x   Arguments requis par la fonction à exécuter.
+;    a-addr  Adresse de la table des CFA.
+;    n     Index de l'élément dans la table.
+; retourne:
+;    j*x   Valeurs retournées par la fonction exécutée.    
+DEFCODE "VEXEC",5,,VEXEC
+    mul.uu T,#CELL_SIZE,W0
+    DPOP
+    add W0,T,T
+    mov [T],T
+    bra exec
+
+; nom: CALL  ( i*x ud -- j*x )
+;    Appel d'une routine écrite en code machine et résident en mémoire flash.
+;    La routine doit se terminée par une instruction machine RETURN.
+;    Utilise l'instruction machine CALL.L spécifique aux PIC24E et dsPIC33E. 
+; arguments:
+;     i*x    Arguments consommés par la routine, dépend de celle-ci.
+;     ud     adresse 24 bits de la routine.
+; retourne:
+;     j*x    Valeurs laissées sur la pile par la routine, dépend de celle-ci.   
+DEFCODE "CALL",4,,CALL 
+    mov T, W1
+    DPOP
+    mov T, W0
+    DPOP
+    call.l W0
+    NEXT
+    
+; nom: ALIGN  ( -- )    
+;   Si la variable système DP  (Data Pointer) pointe sur une adresse impaire, 
+;   aligne DP sur l'adresse paire supérieure.
+;   Met 0 dans l'octet sauté.    
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFWORD "ALIGN",5,,ALIGN ; ( -- )
+    .word HERE,ODD,ZBRANCH,9f-$
+    .word LIT,0,HERE,CSTORE,LIT,1,ALLOT
+9:  .word EXIT    
+ 
+; nom: ALIGNED  ( addr -- a-addr )  
+;   Si l'adrsse au sommet de la pile est impaire, aligne cette adresse sur la valeur paire supérieure.
+; arguments:
+;   addr  Adresse à vérifier.
+; retourne:
+;   a-addr Adresse alignée.  
+DEFCODE "ALIGNED",7,,ALIGNED ; ( addr -- a-addr )
+    btsc T,#0
+    inc T,T
+    NEXT
+
+; nom: HERE   ( -- addr )    
+;   Retourne la valeur de la variable système DP (Data Pointer).
+; arguments:
+;   aucun
+; retourne:
+;   addr   Valeur de la variable DP.    
+DEFWORD "HERE",4,,HERE
+    .word DP,FETCH,EXIT
+
+; nom: MOVE  ( c-addr1 c-addr2 u -- )    
+;   Copie un bloc mémoire RAM en évitant la propagation. La propagation se
+;   produit lorsque les 2 région se superposent et qu'un octet copié est recopié
+;   parce qu'il a écrasé l'octet original dans la région source.     
+; arguments:
+;   c-addr1  Adresse de la source.
+;   c-addr2  Adresse de la destination.
+;   u      Nombre d'octets à copier.   
+; retourne:
+;   rien    
+DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
+    mov [DSP-2],W0 ; source
+    cp W0,[DSP]    
+    bra ltu, move_dn ; source < dest
+    bra move_up      ; source > dest
+  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  manipulation de caractères
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+; nom: >CHAR  ( n -- c )    
+;   Vérifie que n est dans l'intervalle ASCII 32..126, sinon remplace c par '_'  
+; arguments:
+;   n   Entier à convertir en caractère.
+; retourne:
+;   c    Valeur ASCII entre 32 et 126    
+DEFCODE ">CHAR",5,,TOCHAR 
+    mov #126,W0
+    cp W0,T
+    bra gtu,1f
+    cp T,#32
+    bra geu, 2f
+1:  mov #'_',T
+2:  NEXT
+ 
+; nom: CHARS   ( n1 -- n2 )    
+;   Retourne l'espace occupée par n caractères en octets.
+;   Puisque ForthEx utilise les caractères ASCII et que ceux-ci occupe 1 seul octet
+;   n1==n2.    
+; arguments:
+;   n1  Nombre de caractères
+; retourne:
+;   n2  Espace requis pour n1 caractères.    
+DEFWORD "CHARS",5,,CHARS ; ( n1 -- n2 )
+9:  .word LIT,CHAR_SIZE,STAR,EXIT
+   
+; nom: CHAR+   ( c-addr -- c-addr' )  
+;   Incrémente l'adresse de l'espace occupé par un caractère.
+; arguments:
+;   c-addr   adresse alignée sur caractère.
+; retourne:
+;   c-addr'  adresse alignée sur caractère suivant.  
+DEFWORD "CHAR+",5,,CHARPLUS ; ( addr -- addr' )  
+    .word LIT,CHAR_SIZE,PLUS,EXIT
+  
+; nom: CHAR   ( cccc -- c )    
+;   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
+;   A la suite de cette opération la variable >IN pointe après le mot.    
+; arguments:
+;    cccc   chaîne de caractère dans le flux d'entré.
+; retourne:
+;    c      Le premier caractère du mot extrait du flux d'entrée.
+DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
+    .word BL,WORD,DUP,CFETCH,ZEROEQ
+    .word QABORT
+    .byte 16
+    .ascii "missing caracter"
+    .align 2
+    .word ONEPLUS,CFETCH,EXIT
+
+; nom: [CHAR]   ( ccccc -- )
+;   Mot à n'utiliser qu'à l'intérieur d'une définition.    
+;   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
+;   Après cette opération la variable >IN pointe après le mot trouvé.
+; arguments:
+;   cccc  Chaîne de caractère dans le flux d'entré.    
+; retourne:
+;   rien   Le caractère es compilé dans la définition.    
+DEFWORD "[CHAR]",6,F_IMMED,COMPILECHAR ; cccc 
+    .word QCOMPILE
+    .word CHAR,CFA_COMMA,LIT,COMMA,EXIT
+    
+; nom: FILL ( c-addr u c -- )    
+;   Initialise un bloc mémoire RAM de dimension u avec le caractère c.
+;   Accès RAM et EDS.    
+; arguments:
+;   c-addr   Adresse du début de la zone RAM.
+;   u        Nombre de caractères à remplir.
+;   c        Caractère de remplissage.    
+; retourne:
+;   rien    
+DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
+;    SET_EDS
+    mov T,W0 ; c
+    mov [DSP--],W1 ; u
+    mov [DSP--],W2 ; c-addr
+    DPOP
+    cp0 W1
+    bra z, 1f
+    dec W1,W1
+    repeat W1
+    mov.b W0,[W2++]
+;1:  RESET_EDS
+1:  NEXT
     
 ; nom: SOURCE  ( -- c-addr u ) 
 ;   Ce mot retourne l'adresse et la longueur du tampon qui est la source de
@@ -1571,167 +1340,6 @@ DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
     DPOP
     NEXT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;   conversion d'une chaîne
-;   en nombre
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; nom: DECIMAL?  ( c -- f )
-;   vérifie si c est dans l'ensemble ASCII {'0'..'9'}
-; arguments:
-;   c   caractère ASCII à vérifier.
-; retourne:
-;   f   indicateur booléen.
-DEFWORD "DECIMAL?",8,,DECIMALQ
-    .word DUP,LIT,'0',LESS,ZBRANCH,2f-$
-    .word DROP,FALSE,EXIT
-2:  .word LIT,'9',GREATER,INVERT,EXIT
-  
-    
-; nom: >BASE10  ( u1 c -- u2 )
-;   étape de conversion d'une chaîne de caractère en 
-;   entier décimal.
-; arguments:
-;   u1  entier résultant de la conversion d'une chaîne en décimal
-;   c  caractère ASCII  dans l'intervalle {'0'..'9'}
-; retourne:
-;   u2    
-DEFWORD ">BASE10",7,,TOBASE10
-    .word LIT,'0',MINUS,LIT,10,ROT,STAR
-    .word PLUS,EXIT
-   
-; nom: ?DIGIT  ( c -- x 0 | n -1 )    
-;   Vérifie si le caractère est un digit valide dans la base actuelle.
-;   Si valide retourne la valeur du digit et -1
-;   Si invalide retourne x 0
-; arguments:
-;   c   caractère à convertir dans la base active.
-; retourne:
-;   x    un entier quelconque qui doit-être ignoré.
-;   0    le caractère n'était pas valide, x doit-être ignoré.
-;   n    Le caractère convertie en digit de la base active.
-;   -1   Le caractère était valide et n doit-être conservé.    
-DEFWORD "?DIGIT",6,,QDIGIT ; ( c -- x 0 | n -1 )
-    .word DUP,LIT,96,UGREATER,ZBRANCH,1f-$
-    .word LIT,32,MINUS ; lettre minuscule? convertie en minuscule
-1:  .word DUP,LIT,'9',UGREATER,ZBRANCH,3f-$
-    .word DUP,LIT,'A',ULESS,ZBRANCH,2f-$
-    .word LIT,0,EXIT ; pas un digit
-2:  .word LIT,7,MINUS    
-3:  .word LIT,'0',MINUS
-    .word DUP,BASE,FETCH,ULESS,EXIT
-  
-; nom: ?DOUBLE   ( c-addr u -- c-addr' u' f )    
-;   Vérifie si le caractère qui a mis fin à >NUMBER
-;   est {'.'|','}. Si c'est le cas il s'agit d'un
-;   nombre double précision. saute le caractère et retourne -1.
-;   Dans le cas contraire retourne 0.
-; arguments:
-;   c-addr  pointe vers l'adresse du dernier caractère analysé par >NUMBER
-;   u       longueur de la chaîne restante.
-; retourne:
-;   c-addr' acresse incrémenté si le critère {'.'|','} est vrai.
-;   u'      longueur décrémentée si le critère {'.'|','} est vrai.
-;   f       indicateur Booléen indiquant s'il s'agit d'un entier double.    
-DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
-    .word OVER,CFETCH,LIT,'.',EQUAL,ZBRANCH,2f-$
-1:  .word LIT,1,SLASHSTRING,LIT,-1,BRANCH,9f-$
-2:  .word OVER,CFETCH,LIT,',',EQUAL,ZBRANCH,8f-$
-    .word BRANCH,1b-$
-8:  .word LIT,0
-9:  .word EXIT  
-  
-; nom: >NUMBER  (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )   
-;   Converti la chaîne en nombre en utilisant la valeur de BASE.
-;   La conversion s'arrête au premier caractère non numérique.
-; arguments:  
-; 'ud1'	    est initialisé à zéro  
-;  c-addr1 Adrese du début de la chaîne à convertir en entier.
-;  u1      Longueur du tampon à analyser.  
-; retourne:
-;  ud2     Entier double résultant de la conversion.
-;  c-addr2  Adresse pointant après le nombre dans le tampon.
-;  u2      Longueur restante dans le tampon.  
-DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
-1:   .word LIT,0,TOR ; indique si le dernier caractère était un digit
-2:   .word DUP,ZBRANCH,7f-$
-     .word OVER,CFETCH,QDIGIT  ; ud1 c-addr u1 n|x f
-     .word TBRANCH,4f-$
-     .word RFROM,ZBRANCH,8f-$
-     .word DROP,QDOUBLE,ZBRANCH,9f-$
-     .word RFROM,RFROM,LIT,2,OR,TOR,TOR ; on change le flag du signe pour ajouter le flag double
-     .word BRANCH,1b-$
-4:   .word RDROP,LIT,-1,TOR ; dernier caractère était un digit
-     .word TOR,TWOSWAP,BASE,FETCH,UDSTAR
-     .word RFROM,MPLUS,TWOSWAP
-     .word LIT,1,SLASHSTRING,BRANCH,2b-$
-7:   .word RFROM
-8:   .word DROP
-9:   .word EXIT
-   
-; nom: ?SIGN   ( c-addr u -- c-addr' u' f )   
-;   Vérifie s'il y a un signe '-' à la première postion de la chaîne spécifiée par <c-addr u>
-;   Retourne f=VRAI si '-' sinon f=FAUX.    
-;   S'il y a un signe avance au delà du signe
-; arguments:
-;   c-addr   adresse où débute l'analyse.
-;   u        longueur du tampon à analyser.
-; retourne:
-;   c-addr'  adresse incrément au delà du signe '-' s'il y a lieu.
-;   u'       longueur restante dans le tampon.
-;   f        Indicateur Booléen, VRAI s'il le premier caractère est '-'.   
-DEFWORD "?SIGN",5,,QSIGN ; ( c-addr u -- c-addr' u' f )
-    .word OVER,CFETCH,CLIT,'-',EQUAL,TBRANCH,8f-$
-    .word LIT,0,BRANCH,9f-$
-8:  .word LIT,1,SLASHSTRING,LIT,1
-9:  .word EXIT
-    
-; nom: ?BASE  ( c-addr u1 -- c-addr' u1' )  
-;   Vérifie s'il y a un modificateur de base
-;   Si oui modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
-; arguments:
-;   c-addr  Adresse du début de la chaîne à analyser.
-;   u1      longueur maximale de la chaîne.
-; retourne:
-;   c-addr'  adresse incrémentée au delà du caractère modificateur de BASE.
-;   u'       longueur restante de la chaîne.  
-DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
-    .word OVER,CFETCH,CLIT,'$',EQUAL,ZBRANCH,1f-$
-    .word LIT,16,BASE,STORE,BRANCH,8f-$
-1:  .word OVER,CFETCH,CLIT,'#',EQUAL,ZBRANCH,2f-$
-    .word LIT,10,BASE,STORE,BRANCH,8f-$
-2:  .word OVER,CFETCH,CLIT,'%',EQUAL,ZBRANCH,9f-$
-    .word LIT,2,BASE,STORE
-8:  .word SWAP,ONEPLUS,SWAP,ONEMINUS    
-9:  .word EXIT
-
-; nom: ?NUMBER   ( c-addr -- c-addr 0 | n -1 )  
-;   Conversion d'une chaîne en nombre
-;    c-addr indique le début de la chaîne
-;   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
-;   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
-;   à une position quelconque de la chaîne saisie sauf à la première position.
-; arguments:
-;   c-addr   adresse de la chaîne à analyser.
-; retourne:
-;   c-addr 0   S'il la conversio échoue retourne l'adresse et l'indicateur FAUX	
-;   n -1    Si la conversion réussie retourne l'entier et l'indicateur VRAI.  
-DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
-    .word BASE,FETCH,TOR ; sauvegarde la valeur de BASE 
-    .word DUP,LIT,0,DUP,ROT,COUNT,QBASE  ; c-addr 0 0 c-addr' u'
-    .word QSIGN,TOR  ; c-addr 0 0 c-addr' u' R: signFlag
-4:  .word TONUMBER ; c-addr n1 n2 c-addr' u'
-    .word ZBRANCH,1f-$ 
-    .word RFROM,TWODROP,TWODROP,LIT,0,BRANCH,8f-$
-1:  .word DROP,ROT,DROP
-    .word RFETCH,ODD,ZBRANCH,2f-$
-    .word DNEGATE
-2:  .word RFROM,LIT,2,AND,TBRANCH,3f-$
-    .word DROP
-3:  .word LIT,-1
-8:  .word RFROM,BASE,STORE ; restitue la valeur de BASE
-    .word EXIT
-    
 ; nom: WORDS   ( -- )  
 ;   Affiche sur la console la liste des mots du dictionnaire. Les mots dont l'attribut F_HIDDEN
 ;   est à 1 ne sont pas affichés.
@@ -1750,86 +1358,6 @@ DEFWORD "WORDS",5,,WORDS ; ( -- )
     .word RFROM,TWOMINUS,BRANCH,1b-$
 8:  .word CR,DOT,EXIT
     
-; nom: UPPER   ( c-addr -- c-addr )  
-;   Convertie la chaîne comptée en majuscules. Le vocabulaire de ForthEx est
-;   est insensible à la casse. Les noms sont tous convertis en majuscules avant
-;   d'être ajoutés dans le dictionnaire.  
-; arguments:
-;   c-addr  Adressse du début de la chaîne comptée.
-; retourne:
-;   c-addr  La même adresse.  
-DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
-    mov T, W1
-    mov.b [W1],W2
-1:  cp0.b W2
-    bra z, 3f
-    inc W1,W1
-    mov.b [W1],W0
-    dec.b W2,W2
-    cp.b W0, #'a'
-    bra ltu, 1b
-    cp.b W0,#'z'
-    bra gtu, 1b
-    sub.b #32,W0
-    mov.b W0,[W1]
-    bra 1b
-3:  NEXT
-
-; nom: SCAN ( c-addr u c -- c-addr' u' )  
-;   Recherche du caractère 'c' dans le bloc
-;   mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
-;   retourne la position de 'c' et
-;   le nombre de caractères restant dans le bloc
-; arguments:
-;   c-addr  adresse début zone RAM
-;   u       longueur de la zone en octets.    
-;   c       caractère recherché.
-; retourne:
-;   c-addr'  adresse du premier 'c' trouvé dans cette zone
-;   u'       longueur de la zone restante à partir de c-addr'    
-DEFCODE "SCAN",4,,SCAN 
-    SET_EDS
-    mov T, W0   ; c
-    DPOP        ; T=u
-    mov [DSP],W1 ; W1=c-addr
-    cp0 T 
-    bra z, 4f ; aucun caractère restant dans le buffer.
-1:  bra ltu, 4f
-    cp.b W0,[W1]
-    bra z, 4f
-    inc W1,W1
-    dec T,T
-    bra nz, 1b
-4:  mov W1,[DSP]
-    RESET_EDS
-    NEXT
-
-; nom: SKIP ( c-addr u c -- c-addr' u' )  
-;   avance au delà de 'c'. Retourne l'adresse du premier caractère
-;   différent de 'c' et la longueur restante de la zone.    
-; arguments:
-;   c-addr    adresse début de la zone
-;   u         longueur de la zone
-;   c         caractère à sauter.
-; retourne:
-;   c-addr'   adresse premier caractère <> 'c'
-;   u'        longueur de la zone restante à partir c-addr'    
-DEFCODE "SKIP",4,,SKIP 
-    SET_EDS
-    mov T, W0 ; c
-    DPOP ; T=u
-    mov [DSP],W1 ; addr
-    cp0 T
-    bra z, 8f
-2:  cp.b W0,[W1]
-    bra nz, 8f
-    inc W1,W1
-    dec T,T
-    bra nz, 2b
-8:  mov W1,[DSP]
-    RESET_EDS
-    NEXT
-  
 ; nom: ADR>IN  ( c-addr -- ) 
 ;   Ajuste la variable  >IN à partir de la position laissée
 ;   par le dernier PARSE

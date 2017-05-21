@@ -3,7 +3,16 @@
 <head>
 </head>
 <body>
-<h1>strings</h1><p id="-TRAILING">
+<h1>strings</h1><h2>Description</h2><div style="margin-left:5%;"> 
+</div>
+<div style="margin-left:5%;">    Manipulation des chaînes de caractères.
+</div>
+<div style="margin-left:5%;">    ForthEx utilise les caractères ASCII.
+</div>
+<div style="margin-left:5%;">REF: <a href=" http://www.asciitable.com/
+"> http://www.asciitable.com/
+</a></div>
+<hr style:"border-width:2px;"><p id="-TRAILING">
 <b>-TRAILING</b>  ( c-addr u1 -- c-addr u2 )    
 <div style="margin-left:5%;">   Remplace tous les caractères &lt;=32 à la fin d'une chaîne par des zéro.
 </div>
@@ -37,6 +46,72 @@
 <div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;    c-addr+n
 </div>
 <div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;         u-n    
+</div>
+<hr>
+<p id="UPPER">
+<b>UPPER</b>   ( c-addr -- c-addr )  
+<div style="margin-left:5%;">   Convertie la chaîne comptée en majuscules. Le vocabulaire de ForthEx est
+</div>
+<div style="margin-left:5%;">   est insensible à la casse. Les noms sont tous convertis en majuscules avant
+</div>
+<div style="margin-left:5%;">   d'être ajoutés dans le dictionnaire.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adressse du début de la chaîne comptée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  La même adresse.  
+</div>
+<hr>
+<p id="SCAN">
+<b>SCAN</b> ( c-addr u c -- c-addr' u' )  
+<div style="margin-left:5%;">   Recherche du caractère 'c' dans le bloc
+</div>
+<div style="margin-left:5%;">   mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
+</div>
+<div style="margin-left:5%;">   retourne la position de 'c' et
+</div>
+<div style="margin-left:5%;">   le nombre de caractères restant dans le bloc
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse début zone RAM
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       longueur de la zone en octets.    
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;       caractère recherché.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;  adresse du premier 'c' trouvé dans cette zone
+</div>
+<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;       longueur de la zone restante à partir de c-addr'    
+</div>
+<hr>
+<p id="SKIP">
+<b>SKIP</b> ( c-addr u c -- c-addr' u' )  
+<div style="margin-left:5%;">   avance au delà de 'c'. Retourne l'adresse du premier caractère
+</div>
+<div style="margin-left:5%;">   différent de 'c' et la longueur restante de la zone.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;    adresse début de la zone
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;         longueur de la zone
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;         caractère à sauter.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;   adresse premier caractère &lt;&gt; 'c'
+</div>
+<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;        longueur de la zone restante à partir c-addr'    
 </div>
 <hr>
 <p id="CMOVE">
@@ -257,7 +332,11 @@
 <div style="margin-left:5%;"><i>rien
 </i>&nbsp;&nbsp;</div>
 <hr>
-<p id="DIGIT">
+<h2>Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">   Mots utilisés dans la conversion d'entiers en chaînes de caractères.
+</div>
+<hr style:"border-width:2px;"><p id="DIGIT">
 <b>DIGIT</b>  ( u -- c )    
 <div style="margin-left:5%;">   Convertion d'un chiffre en caractère ASCII selon la valeur de BASE.
 </div>
@@ -569,6 +648,184 @@
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
 <div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<h2>Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">   Mots utilisés dans la conversion d'une chaîne de caractères en entier.
+</div>
+<hr style:"border-width:2px;"><p id="DECIMAL?">
+<b>DECIMAL?</b>  ( c -- f )
+<div style="margin-left:5%;">   vérifie si c est dans l'ensemble ASCII {'0'..'9'}
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère ASCII à vérifier.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen.
+</div>
+<hr>
+<p id="&gt;BASE10">
+<b>&gt;BASE10</b>  ( u1 c -- u2 )
+<div style="margin-left:5%;">   étape de conversion d'une chaîne de caractère en 
+</div>
+<div style="margin-left:5%;">   entier décimal.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  entier résultant de la conversion d'une chaîne en décimal
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  caractère ASCII  dans l'intervalle {'0'..'9'}
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="?DIGIT">
+<b>?DIGIT</b>  ( c -- x 0 | n -1 )    
+<div style="margin-left:5%;">   Vérifie si le caractère est un digit valide dans la base actuelle.
+</div>
+<div style="margin-left:5%;">   Si valide retourne la valeur du digit et -1
+</div>
+<div style="margin-left:5%;">   Si invalide retourne x 0
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère à convertir dans la base active.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;    un entier quelconque qui doit-être ignoré.
+</div>
+<div style="margin-left:5%;"><i>0</i>&nbsp;&nbsp;    le caractère n'était pas valide, x doit-être ignoré.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Le caractère convertie en digit de la base active.
+</div>
+<div style="margin-left:5%;"><i>-1</i>&nbsp;&nbsp;   Le caractère était valide et n doit-être conservé.    
+</div>
+<hr>
+<p id="?DOUBLE">
+<b>?DOUBLE</b>   ( c-addr u -- c-addr' u' f )    
+<div style="margin-left:5%;">   Vérifie si le caractère qui a mis fin à &gt;NUMBER
+</div>
+<div style="margin-left:5%;">   est {'.'|','}. Si c'est le cas il s'agit d'un
+</div>
+<div style="margin-left:5%;">   nombre double précision. saute le caractère et retourne -1.
+</div>
+<div style="margin-left:5%;">   Dans le cas contraire retourne 0.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  pointe vers l'adresse du dernier caractère analysé par &gt;NUMBER
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       longueur de la chaîne restante.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp; acresse incrémenté si le critère {'.'|','} est vrai.
+</div>
+<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;      longueur décrémentée si le critère {'.'|','} est vrai.
+</div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;       indicateur Booléen indiquant s'il s'agit d'un entier double.    
+</div>
+<hr>
+<p id="&gt;NUMBER">
+<b>&gt;NUMBER</b>  (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )   
+<div style="margin-left:5%;">   Converti la chaîne en nombre en utilisant la valeur de BASE.
+</div>
+<div style="margin-left:5%;">   La conversion s'arrête au premier caractère non numérique.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:  
+</b></div>
+<div style="margin-left:5%;"><i>'ud1'	</i>&nbsp;&nbsp;    est initialisé à zéro  
+</div>
+<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp; Adrese du début de la chaîne à convertir en entier.
+</div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;      Longueur du tampon à analyser.  
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp;     Entier double résultant de la conversion.
+</div>
+<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse pointant après le nombre dans le tampon.
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;      Longueur restante dans le tampon.  
+</div>
+<hr>
+<p id="?SIGN">
+<b>?SIGN</b>   ( c-addr u -- c-addr' u' f )   
+<div style="margin-left:5%;">   Vérifie s'il y a un signe '-' à la première postion de la chaîne spécifiée par &lt;c-addr u&gt;
+</div>
+<div style="margin-left:5%;">   Retourne f=VRAI si '-' sinon f=FAUX.    
+</div>
+<div style="margin-left:5%;">   S'il y a un signe avance au delà du signe
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse où débute l'analyse.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        longueur du tampon à analyser.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;  adresse incrément au delà du signe '-' s'il y a lieu.
+</div>
+<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;       longueur restante dans le tampon.
+</div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;        Indicateur Booléen, VRAI s'il le premier caractère est '-'.   
+</div>
+<hr>
+<p id="?BASE">
+<b>?BASE</b>  ( c-addr u1 -- c-addr' u1' )  
+<div style="margin-left:5%;">   Vérifie s'il y a un modificateur de base
+</div>
+<div style="margin-left:5%;">   Si oui modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse du début de la chaîne à analyser.
+</div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;      longueur maximale de la chaîne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;  adresse incrémentée au delà du caractère modificateur de BASE.
+</div>
+<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;       longueur restante de la chaîne.  
+</div>
+<hr>
+<p id="?NUMBER">
+<b>?NUMBER</b>   ( c-addr -- c-addr 0 | n -1 )  
+<div style="margin-left:5%;">   Conversion d'une chaîne en nombre
+</div>
+<div style="margin-left:5%;">    c-addr indique le début de la chaîne
+</div>
+<div style="margin-left:5%;">   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
+</div>
+<div style="margin-left:5%;">   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
+</div>
+<div style="margin-left:5%;">   à une position quelconque de la chaîne saisie sauf à la première position.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse de la chaîne à analyser.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; 0   S'il la conversio échoue retourne l'adresse et l'indicateur FAUX	
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; -1    Si la conversion réussie retourne l'entier et l'indicateur VRAI.  
 </div>
 <hr>
 

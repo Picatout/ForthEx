@@ -19,9 +19,10 @@
 
 ; NOM: block.s
 ; DATE: 2017-04-24
-; DESCRIPTION: implémentation des mots de gestion de fichiers par blocs tel
-;   que définis ici: http://lars.nocrew.org/forth2012/block.html
-;           ou  ici: http://lars.nocrew.org/dpans/dpans7.htm#7.6.1    
+; DESCRIPTION: 
+;   Implémentation des mots de gestion de fichiers par blocs.
+;   REF: http://lars.nocrew.org/forth2012/block.html
+;   REF: http://lars.nocrew.org/dpans/dpans7.htm#7.6.1    
 ; NOTES:
 ;  1) Les blocs sont de 1024 octets par tradition car à l'époque où
 ;     Charles Moore a développé ce système il l'utilisait pour stocker

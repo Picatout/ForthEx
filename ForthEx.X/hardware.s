@@ -19,7 +19,8 @@
 ; hardware setup
     
 .include "hardware.inc"
-.include "core.s" 
+.include "core.s"
+.include "eds.s"    
 .include "math.s"    
 .include "tvout.s"
 .include "serial.s"
@@ -294,9 +295,19 @@ HEADLESS VARS_INIT
     NEXT
 
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; mots dans le dictionnaire
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; DESCRIPTION:
+;    Les mots suivants sont étroitement liés à la configuration matérielle.
+ 
+; nom: REBOOT ( -- )
+;   Redémarre le système avec le même effet qu'une mise sous tension
+;   en exécutant l'instruction machine RESET.    
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFCODE "REBOOT",6,,REBOOT
+    reset
+    
     
 ; nom: TICKS  ( -- n )    
 ;   Le système contient un compteur qui est incrémenté à toute les millisecondes.

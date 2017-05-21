@@ -1,8 +1,14 @@
+2017-05-21
+----------
+Travail dans core.s
+
 2017-05-20
 ----------
 Travail dans tvout.s
 Travaile dans strings.s
 Travail dans block.s
+
+Transfert des opérateurs booléen et des comparateur dans math.s
 
 2017-05-19
 ----------

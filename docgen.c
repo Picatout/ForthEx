@@ -98,6 +98,19 @@ void outputArgLine(char *line,FILE *out){
     fprintf(out,"%s</div>\n",html);
 }
 
+// if line containt "REF:" output an hyperlink.
+int refLine(char *line,FILE *out){
+	char *ref;
+	ref=strstr(line,"REF:");
+	if (ref){
+		ref+=4;
+		fprintf(out,"<div style=\"margin-left:5%%;\">REF: <a href=\"%s\">%s</a></div>\n",ref,ref);
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
 void addEntry(char* line, FILE *in, FILE *out){
 	char *ref;
 	int i;
@@ -109,10 +122,7 @@ void addEntry(char* line, FILE *in, FILE *out){
 		line++;
 		replaceAngleBrackets(line);
 		ref=strstr(line,"REF:");
-		if (ref){
-			ref+=4;
-			fprintf(out,"<div style=\"margin-left:5%%;\">REF: <a href=\"%s\">%s</a></div>\n",ref,ref);
-		}else{
+		if (!refLine(line,out)){
 			fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",html);
 		}
 	}
@@ -136,13 +146,35 @@ void addEntry(char* line, FILE *in, FILE *out){
 	fputs("<hr>\n",out);
 }
 
+void addDescription(char *line,FILE* in, FILE* out){
+	char *colon;
+	fputs("<h2>Description</h2>",out);
+	replaceAngleBrackets(line);
+	colon=strchr(line,':');
+	colon++;
+	fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",colon);
+	line=strchr(line,':');
+	while (fgets(line,255,in) && (*line==';')) {
+		line++;
+		replaceAngleBrackets(line);
+		if (!refLine(line,out)){
+			fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",line);
+		}
+	}
+	fputs("<hr style:\"border-width:2px;\">",out);
+}
+
 static int wc,fc;
 
 void generateDoc(FILE *in, FILE *out){
 	char line[256];
+    char *desc;
     
     fc++;	
 	while (fgets(line,255,in)){
+		if ((desc=strstr(line,"; DESCRIPTION:"))){
+			addDescription(line,in,out);
+		}else
 		if (strstr(line,"; nom:")){
 			addEntry(line,in,out);
 			wc++;
