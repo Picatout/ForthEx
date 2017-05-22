@@ -20,9 +20,97 @@
 ; NOM: strings.s
 ; DATE: 2017-04-16
 ; DESCRIPTION: 
-;    Manipulation des chaînes de caractères.
+;    Manipulation des chaînes et des caractères.
 ;    ForthEx utilise les caractères ASCII.
 ;    REF: http://www.asciitable.com/
+   
+; DESCRIPTIONS:
+;  Mot qui manipules les caractères caractères.
+
+
+; nom: >CHAR  ( n -- c )    
+;   Vérifie que n est dans l'intervalle ASCII 32..126, sinon remplace c par '_'  
+; arguments:
+;   n   Entier à convertir en caractère.
+; retourne:
+;   c    Valeur ASCII entre 32 et 126    
+DEFCODE ">CHAR",5,,TOCHAR 
+    mov #126,W0
+    cp W0,T
+    bra gtu,1f
+    cp T,#32
+    bra geu, 2f
+1:  mov #'_',T
+2:  NEXT
+ 
+; nom: CHARS   ( n1 -- n2 )    
+;   Retourne l'espace occupée par n caractères en octets.
+;   Puisque ForthEx utilise les caractères ASCII et que ceux-ci occupe 1 seul octet
+;   n1==n2.    
+; arguments:
+;   n1  Nombre de caractères
+; retourne:
+;   n2  Espace requis pour n1 caractères.    
+DEFWORD "CHARS",5,,CHARS ; ( n1 -- n2 )
+9:  .word LIT,CHAR_SIZE,STAR,EXIT
+   
+; nom: CHAR+   ( c-addr -- c-addr' )  
+;   Incrémente l'adresse de l'espace occupé par un caractère.
+; arguments:
+;   c-addr   adresse alignée sur caractère.
+; retourne:
+;   c-addr'  adresse alignée sur caractère suivant.  
+DEFWORD "CHAR+",5,,CHARPLUS ; ( addr -- addr' )  
+    .word LIT,CHAR_SIZE,PLUS,EXIT
+  
+; nom: CHAR   ( cccc -- c )    
+;   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
+;   A la suite de cette opération la variable >IN pointe après le mot.    
+; arguments:
+;    cccc   chaîne de caractère dans le flux d'entré.
+; retourne:
+;    c      Le premier caractère du mot extrait du flux d'entrée.
+DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
+    .word BL,WORD,DUP,CFETCH,ZEROEQ
+    .word QABORT
+    .byte 16
+    .ascii "missing caracter"
+    .align 2
+    .word ONEPLUS,CFETCH,EXIT
+
+; nom: [CHAR]   ( ccccc -- )
+;   Mot à n'utiliser qu'à l'intérieur d'une définition.    
+;   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
+;   Après cette opération la variable >IN pointe après le mot trouvé.
+; arguments:
+;   cccc  Chaîne de caractère dans le flux d'entré.    
+; retourne:
+;   rien   Le caractère es compilé dans la définition.    
+DEFWORD "[CHAR]",6,F_IMMED,COMPILECHAR ; cccc 
+    .word QCOMPILE
+    .word CHAR,CFA_COMMA,LIT,COMMA,EXIT
+    
+; nom: FILL ( c-addr u c -- )    
+;   Initialise un bloc mémoire RAM de dimension u avec le caractère c.
+;   Si c-addr > 32767 la mémoire réside en EDS.    
+; arguments:
+;   c-addr   Adresse du début de la zone RAM.
+;   u        Nombre de caractères à remplir.
+;   c        Caractère de remplissage.    
+; retourne:
+;   rien    
+DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
+    mov T,W0 ; c
+    mov [DSP--],W1 ; u
+    mov [DSP--],W2 ; c-addr
+    DPOP
+    cp0 W1
+    bra z, 1f
+    dec W1,W1
+    repeat W1
+    mov.b W0,[W2++]
+1:  NEXT
+    
     
 ; nom: -TRAILING  ( c-addr u1 -- c-addr u2 )    
 ;   Remplace tous les caractères <=32 à la fin d'une chaîne par des zéro.
@@ -140,6 +228,23 @@ DEFCODE "SKIP",4,,SKIP
     RESET_EDS
     NEXT
   
+; nom: MOVE  ( c-addr1 c-addr2 u -- )    
+;   Copie un bloc mémoire RAM en évitant la propagation. La propagation se
+;   produit lorsque les 2 région se superposent et qu'un octet copié est recopié
+;   parce qu'il a écrasé l'octet original dans la région source.     
+; arguments:
+;   c-addr1  Adresse de la source.
+;   c-addr2  Adresse de la destination.
+;   u      Nombre d'octets à copier.   
+; retourne:
+;   rien    
+DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
+    mov [DSP-2],W0 ; source
+    cp W0,[DSP]    
+    bra ltu, move_dn ; source < dest
+    bra move_up      ; source > dest
+  
+    
 ; nom: CMOVE  ( c-addr1 c-addr2 u -- )    
 ;   Copie un bloc d'octets RAM.  
 ;   Débute la copie à partir de l'adresse du début du bloc en adresse croissante.
@@ -340,6 +445,46 @@ DEFWORD "SEARCH",6,,SEARCH ; ( c-addr1 u1 c-addr2 u2 -- c-addr3 u3 f )
 ;    rien
 DEFWORD "SLITERAL",8,F_IMMED,SLITERAL
     .word QCOMPILE,SWAP,CFA_COMMA,LIT,COMMA,CFA_COMMA,LIT,COMMA,EXIT
+    
+; DESCRIPTION:
+;   Commentaires.
+
+; nom: (    ( cccc -- )    
+;   Ce mot introduit un commentaire qui se termine  par ')'.
+;   Tous les caractères dans le tampon d'entrée sont sautés jusqu'après le ')'.    
+;   Il doit y avoir un espace de chaque côté de '(' car c'est un mot forth.
+;   Il s'agit d'un mot immédiat, il s'exécute donc même en mode compilation.    
+; arguments:
+;   aucun  
+; retourne:    
+;   rien    
+DEFWORD "(",1,F_IMMED,LPAREN ; parse ccccc)
+    .word LIT,')',PARSE,TWODROP,EXIT
+
+; nom: \    ( cccc -- )    
+;   Ce mot introduit un commentaire qui se termine à la fin de la ligne.
+;   Tous les caractères dans le tampon d'entré sont sautés jusqu'à la fin de ligne.    
+;   Il s'agit d'un mot immédiat, il s'éxécute donc même en mode compilation.
+; arguments:
+;   aucun  
+; retourne:
+;   rien    
+DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
+    .word BLK,FETCH,ZBRANCH,2f-$
+    .word CLIT,VK_CR,PARSE,TWODROP,EXIT
+2:  .word TSOURCE,PLUS,ADRTOIN,EXIT
+
+; nom: .(   cccc) ( -- )    
+;   Affiche le texte délimité par ).
+;   Extrait tous les caractères du flux d'entrée jusqu'après le caractère ')'.
+;   Le délimiteur ')' n'est pas imprimé.    
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFWORD ".(",2,F_IMMED,DOTPAREN ; ccccc    
+    .word LIT,')',PARSE,TYPE,EXIT
+ 
     
 ; DESCRIPTION:
 ;   Mots utilisés dans la conversion d'entiers en chaînes de caractères.

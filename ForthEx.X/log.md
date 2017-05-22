@@ -1,6 +1,9 @@
 2017-05-21
 ----------
 Travail dans core.s
+Réorganisation du code.
+Ajout du fichier interpret.s
+
 
 2017-05-20
 ----------

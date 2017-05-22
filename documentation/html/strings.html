@@ -5,14 +5,114 @@
 <body>
 <h1>strings</h1><h2>Description</h2><div style="margin-left:5%;"> 
 </div>
-<div style="margin-left:5%;">    Manipulation des chaînes de caractères.
+<div style="margin-left:5%;">    Manipulation des chaînes et des caractères.
 </div>
 <div style="margin-left:5%;">    ForthEx utilise les caractères ASCII.
 </div>
 <div style="margin-left:5%;">REF: <a href=" http://www.asciitable.com/
 "> http://www.asciitable.com/
 </a></div>
-<hr style:"border-width:2px;"><p id="-TRAILING">
+<hr style="border-width:4px;"><p id="&gt;CHAR">
+<b>&gt;CHAR</b>  ( n -- c )    
+<div style="margin-left:5%;">   Vérifie que n est dans l'intervalle ASCII 32..126, sinon remplace c par '_'  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Entier à convertir en caractère.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;    Valeur ASCII entre 32 et 126    
+</div>
+<hr>
+<p id="CHARS">
+<b>CHARS</b>   ( n1 -- n2 )    
+<div style="margin-left:5%;">   Retourne l'espace occupée par n caractères en octets.
+</div>
+<div style="margin-left:5%;">   Puisque ForthEx utilise les caractères ASCII et que ceux-ci occupe 1 seul octet
+</div>
+<div style="margin-left:5%;">   n1==n2.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Nombre de caractères
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Espace requis pour n1 caractères.    
+</div>
+<hr>
+<p id="CHAR+">
+<b>CHAR+</b>   ( c-addr -- c-addr' )  
+<div style="margin-left:5%;">   Incrémente l'adresse de l'espace occupé par un caractère.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse alignée sur caractère.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;  adresse alignée sur caractère suivant.  
+</div>
+<hr>
+<p id="CHAR">
+<b>CHAR</b>   ( cccc -- c )    
+<div style="margin-left:5%;">   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
+</div>
+<div style="margin-left:5%;">   A la suite de cette opération la variable &gt;IN pointe après le mot.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   chaîne de caractère dans le flux d'entré.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;      Le premier caractère du mot extrait du flux d'entrée.
+</div>
+<hr>
+<p id="[CHAR]">
+<b>[CHAR]</b>   ( ccccc -- )
+<div style="margin-left:5%;">   Mot à n'utiliser qu'à l'intérieur d'une définition.    
+</div>
+<div style="margin-left:5%;">   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
+</div>
+<div style="margin-left:5%;">   Après cette opération la variable &gt;IN pointe après le mot trouvé.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Chaîne de caractère dans le flux d'entré.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   Le caractère es compilé dans la définition.    
+</div>
+<hr>
+<p id="FILL">
+<b>FILL</b> ( c-addr u c -- )    
+<div style="margin-left:5%;">   Initialise un bloc mémoire RAM de dimension u avec le caractère c.
+</div>
+<div style="margin-left:5%;">   Si c-addr &gt; 32767 la mémoire réside en EDS.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse du début de la zone RAM.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        Nombre de caractères à remplir.
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;        Caractère de remplissage.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="-TRAILING">
 <b>-TRAILING</b>  ( c-addr u1 -- c-addr u2 )    
 <div style="margin-left:5%;">   Remplace tous les caractères &lt;=32 à la fin d'une chaîne par des zéro.
 </div>
@@ -112,6 +212,28 @@
 <div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;   adresse premier caractère &lt;&gt; 'c'
 </div>
 <div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;        longueur de la zone restante à partir c-addr'    
+</div>
+<hr>
+<p id="MOVE">
+<b>MOVE</b>  ( c-addr1 c-addr2 u -- )    
+<div style="margin-left:5%;">   Copie un bloc mémoire RAM en évitant la propagation. La propagation se
+</div>
+<div style="margin-left:5%;">   produit lorsque les 2 région se superposent et qu'un octet copié est recopié
+</div>
+<div style="margin-left:5%;">   parce qu'il a écrasé l'octet original dans la région source.     
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;  Adresse de la source.
+</div>
+<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse de la destination.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;      Nombre d'octets à copier.   
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
 </div>
 <hr>
 <p id="CMOVE">
@@ -334,9 +456,69 @@
 <hr>
 <h2>Description</h2><div style="margin-left:5%;">
 </div>
+<div style="margin-left:5%;">   Commentaires.
+</div>
+<hr style="border-width:4px;"><p id="(">
+<b>(</b>    ( cccc -- )    
+<div style="margin-left:5%;">   Ce mot introduit un commentaire qui se termine  par ')'.
+</div>
+<div style="margin-left:5%;">   Tous les caractères dans le tampon d'entrée sont sautés jusqu'après le ')'.    
+</div>
+<div style="margin-left:5%;">   Il doit y avoir un espace de chaque côté de '(' car c'est un mot forth.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'un mot immédiat, il s'exécute donc même en mode compilation.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp;  
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="\">
+<b>\</b>    ( cccc -- )    
+<div style="margin-left:5%;">   Ce mot introduit un commentaire qui se termine à la fin de la ligne.
+</div>
+<div style="margin-left:5%;">   Tous les caractères dans le tampon d'entré sont sautés jusqu'à la fin de ligne.    
+</div>
+<div style="margin-left:5%;">   Il s'agit d'un mot immédiat, il s'éxécute donc même en mode compilation.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp;  
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id=".(">
+<b>.(</b>   cccc) ( -- )    
+<div style="margin-left:5%;">   Affiche le texte délimité par ).
+</div>
+<div style="margin-left:5%;">   Extrait tous les caractères du flux d'entrée jusqu'après le caractère ')'.
+</div>
+<div style="margin-left:5%;">   Le délimiteur ')' n'est pas imprimé.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<h2>Description</h2><div style="margin-left:5%;">
+</div>
 <div style="margin-left:5%;">   Mots utilisés dans la conversion d'entiers en chaînes de caractères.
 </div>
-<hr style:"border-width:2px;"><p id="DIGIT">
+<hr style="border-width:4px;"><p id="DIGIT">
 <b>DIGIT</b>  ( u -- c )    
 <div style="margin-left:5%;">   Convertion d'un chiffre en caractère ASCII selon la valeur de BASE.
 </div>
@@ -654,7 +836,7 @@
 </div>
 <div style="margin-left:5%;">   Mots utilisés dans la conversion d'une chaîne de caractères en entier.
 </div>
-<hr style:"border-width:2px;"><p id="DECIMAL?">
+<hr style="border-width:4px;"><p id="DECIMAL?">
 <b>DECIMAL?</b>  ( c -- f )
 <div style="margin-left:5%;">   vérifie si c est dans l'ensemble ASCII {'0'..'9'}
 </div>

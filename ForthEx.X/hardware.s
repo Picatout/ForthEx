@@ -20,6 +20,7 @@
     
 .include "hardware.inc"
 .include "core.s"
+.include "interpret.s"    
 .include "eds.s"    
 .include "math.s"    
 .include "tvout.s"

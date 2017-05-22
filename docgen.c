@@ -161,7 +161,7 @@ void addDescription(char *line,FILE* in, FILE* out){
 			fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",line);
 		}
 	}
-	fputs("<hr style:\"border-width:2px;\">",out);
+	fputs("<hr style=\"border-width:4px;\">",out);
 }
 
 static int wc,fc;
