@@ -257,7 +257,7 @@ DEFWORD "SPACES",6,,SPACES
 2:  .word SPACE,DOLOOP,2b-$
     .word EXIT
   
-; nom: CLEARLN 
+; nom: CLEARLN  ( -- )
 ;   Efface la ligne sur laquelle le curseur est situé.
 ;   Place le curseur au début de la ligne.
 ; arguments:

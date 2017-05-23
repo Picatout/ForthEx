@@ -113,15 +113,17 @@ DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
     
     
 ; nom: -TRAILING  ( c-addr u1 -- c-addr u2 )    
-;   Remplace tous les caractères <=32 à la fin d'une chaîne par des zéro.
+;   Raccourci la chaîne c-addr u1 du nombre d'espace qu'il y a à la fin de celle-ci.
+;   Tous les caractères <=32 sont considérés comme des espaces.    
+;   Si c-addr > 32767 accède la mémoire EDS.    
 ; arguments:
-;   c-addr  adresse du début de la chaîne.    
-;   u1 longueur initiale de la chaîne.
-; retourne:    
+;   c-addr  Adresse du début de la chaîne.    
+;   u1 Longueur initiale de la chaîne.
+; retourne: 
+;   c-addr Adresse du début de la chaîne.     
 ;   u2 longueur finale de la chaîne.    
 DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )
     SET_EDS
-    cp0 T
     mov [DSP],W1
     add W1,T,W1
     mov #33,W0

@@ -567,6 +567,7 @@ DEFCODE "SETX",4,, SETX ; ( u -- )
 DEFCODE "SETY",4,,SETY  ; ( u -- )
     cursor_incr_sema
     cursor_sync
+    dec T,T
     mov #LPS-1,W0
     cp T, W0
     bra gtu, 1f
@@ -576,6 +577,17 @@ DEFCODE "SETY",4,,SETY  ; ( u -- )
     DPOP
     NEXT
 
+; nom: LNADR  ( n -- c-addr )
+;   Console locale.
+;   Retourne l'adresse dans du premier caractère de la ligne dans le tampon vidéo.
+; arguments:
+;   n+	Numéro de la ligne {1..24}
+; retourne:
+;   c-addr  Adresse du premier caractère de cette ligne.
+DEFWORD "LNADR",5,,LNADR 
+    .word ONEMINUS,LIT,CPL,STAR,SCRBUF,PLUS,EXIT
+    
+    
 ; nom: CURADR  ( -- c-addr )
 ;   Console locale.    
 ;   Retourne l'adresse dans le buffer d'écran correspondant

@@ -473,61 +473,25 @@
 <div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;  État de la pile après l'interprétation des blocs.
 </div>
 <hr>
-<p id="ADD-CR">
-<b>ADD-CR</b>  ( c-addr u -- c-addr u' )  
-<div style="margin-left:5%;">   Ajoute un CR à la fin de la ligne incrémente u de 1.
+<p id="SCR-SIZE">
+<b>SCR-SIZE</b> ( -- n )
+<div style="margin-left:5%;">    Calcule la taille que le buffer vidéo occuperait dans un bloc s'il était sauvegardé avec SCR&gt;BLK.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse début chaîne
-</div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        Longueur chaîne
-</div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse début chaîne
-</div>
-<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;       Longueur de la chaîne incrémentée de 1 caractère.    
-</div>
-<hr>
-<p id="&gt;PAD">
-<b>&gt;PAD</b> ( c-addr -- u )    
-<div style="margin-left:5%;">   Copie la chaîne dans PAD, supprime les blancs en fin de ligne.
-</div>
-<div style="margin-left:5%;">   Vérifie que total+u' &lt;= BUFFER_SIZE.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse début ligne dans frame buffer vidéo
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne tronquée qui est dans PAD    
-</div>
-<hr>
-<p id="PAD&gt;BUFFER">
-<b>PAD&gt;BUFFER</b>  ( c-addr u -- c-addr' )    
-<div style="margin-left:5%;">   Copie PAD dans le buffer. 
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Pointeur vers la zone buffer destination.
-</div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne à copier.  
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;   Pointeur incrémenté de u caractères.  
+<div style="margin-left:5%;"><i>n	Taille</i>&nbsp;&nbsp; qui serait occupée par l'écran dans un bloc.    
 </div>
 <hr>
 <p id="SCR&gt;BLK">
 <b>SCR&gt;BLK</b>  ( n+ -- f )
 <div style="margin-left:5%;">   Sauvegarde du frame buffer de l'écran dans un bloc sur périphérique de stockage.
 </div>
-<div style="margin-left:5%;">   Si l'écran a plus de 1024 caractères seul les 1024 premiers sont sauvegarder.
+<div style="margin-left:5%;">   Si le contenu de l'écran n'entre pas dans un bloc, l'opération est abaondonnée et retourne faux.
 </div>
 <div style="margin-left:5%;">   Les espaces qui termines les lignes sont supprimés et chaque ligne est complétée
 </div>
@@ -546,7 +510,7 @@
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;     indicateur booléen, si l'écran requière plus d'un bloc retourne faux.
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;     indicateur booléen, T si sauvegarde réussie, F si trop grand.
 </div>
 <hr>
 

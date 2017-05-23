@@ -48,9 +48,9 @@ DEFWORD "WORDS",5,,WORDS ; ( -- )
 1:  .word FETCH,QDUP,ZBRANCH,8f-$
     .word DUP,CFETCH,LENMASK,AND  ; n NFA LEN
     .word GETCUR,DROP
-5:  .word PLUS,LIT,64,ULESS,TBRANCH,3f-$ ; n NFA
+5:  .word PLUS,LIT,CPL,ULESS,TBRANCH,3f-$ ; n NFA
     .word CR
-3:  .word TOR,ONEPLUS,RFETCH,COUNT,TYPE,SPACE
+3:  .word TOR,ONEPLUS,RFETCH,COUNT,LENMASK,AND,TYPE,SPACE
     .word RFROM,TWOMINUS,BRANCH,1b-$
 8:  .word CR,DOT,EXIT
     
@@ -268,7 +268,7 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
 ;   c-addr2   Adresse du premier caractère de la chaîne.
 ;   u      longueur de la chaîne.  
 DEFWORD "COUNT",5,,COUNT ; ( c-addr1 -- c-addr2 u )
-   .word DUP,CFETCH,TOR,ONEPLUS,RFROM,LENMASK,AND,EXIT
+   .word DUP,CFETCH,TOR,ONEPLUS,RFROM,EXIT
    
 ; nom: INTERPRET  ( c-addr u -- )   
 ;    Évaluation d'un tampon contenant du texte source par l'interpréteur/compilateur.

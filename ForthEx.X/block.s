@@ -482,50 +482,23 @@ DEFWORD "THRU",4,,THRU
 1:  .word DOI,LOAD,DOLOOP,1b-$
     .word EXIT
 
-; nom: ADD-CR  ( c-addr u -- c-addr u' )  
-;   Ajoute un CR à la fin de la ligne incrémente u de 1.
+; nom: SCR-SIZE ( -- n )
+;    Calcule la taille que le buffer vidéo occuperait dans un bloc s'il était sauvegardé avec SCR>BLK.
 ; arguments:
-;   c-addr   Adresse début chaîne
-;   u        Longueur chaîne
+;   aucun
 ; retourne:
-;   c-addr   Adresse début chaîne
-;   u'       Longueur de la chaîne incrémentée de 1 caractère.    
+;   n	Taille qui serait occupée par l'écran dans un bloc.    
+DEFWORD "SCR-SIZE",8,,SCRSIZE ; ( -- n )
+    .word LIT,0,LIT,LPS,OVER,DODO
+1:  .word SCRBUF,DOI,LIT,CPL,DUP,TOR
+    .word STAR,PLUS,RFROM,MINUSTRAILING,SWAP,DROP,ONEPLUS
+    .word PLUS,DOLOOP,1b-$
+    .word EXIT
     
-;HEADLESS ADD_CR,HWORD ;( c-addr u -- c-addr u' )
-DEFWORD "ADD-CR",6,,ADDCR    
-    .word TWODUP,PLUS,CLIT,VK_CR,SWAP,CSTORE,ONEPLUS,EXIT
-   
-; nom: >PAD ( c-addr -- u )    
-;   Copie la chaîne dans PAD, supprime les blancs en fin de ligne.
-;   Vérifie que total+u' <= BUFFER_SIZE.
-; arguments:
-;   c-addr  Adresse début ligne dans frame buffer vidéo
-; retourne:
-;   u       Longueur de la chaîne tronquée qui est dans PAD    
-    
-;HEADLESS TOPAD,HWORD ; ( c-addr -- u  )
-DEFWORD ">PAD",4,,TOPAD    
-    .word PAD,FETCH,LIT,CPL,TWODUP,TWOTOR,CMOVE ; S:  r: pad CPL
-    .word TWORFROM,MINUSTRAILING,ADDCR ; pad u'
-    .word SWAP,DROP,EXIT
-
-; nom: PAD>BUFFER  ( c-addr u -- c-addr' )    
-;   Copie PAD dans le buffer. 
-; arguments:
-;   c-addr  Pointeur vers la zone buffer destination.
-;   u       Longueur de la chaîne à copier.  
-; retourne:
-;   c-addr'   Pointeur incrémenté de u caractères.  
-    
-;HEADLESS PADTOBUFFER,HWORD  
-DEFWORD "PAD>BUFFER",10,,PADTOBUFFER 
-    .word TWODUP ; s: data u data u
-    .word PAD,FETCH,NROT,CMOVE ; s: data u 
-    .word PLUS,EXIT ; s: data+u
     
 ; nom: SCR>BLK  ( n+ -- f )
 ;   Sauvegarde du frame buffer de l'écran dans un bloc sur périphérique de stockage.
-;   Si l'écran a plus de 1024 caractères seul les 1024 premiers sont sauvegarder.
+;   Si le contenu de l'écran n'entre pas dans un bloc, l'opération est abaondonnée et retourne faux.
 ;   Les espaces qui termines les lignes sont supprimés et chaque ligne est complétée
 ;   par un VK_CR.
 ;   * ne fonctionne qu'avec LOCAL CONSOLE. Cependant BLKEDIT utilise le frame buffer
@@ -534,32 +507,18 @@ DEFWORD "PAD>BUFFER",10,,PADTOBUFFER
 ; arguments:
 ;   n+    numéro du bloc où sera sauvegardé l'écran.
 ; retourne:
-;   f     indicateur booléen, si l'écran requière plus d'un bloc retourne faux.
+;   f     indicateur booléen, T si sauvegarde réussie, F si trop grand.
 DEFWORD "SCR>BLK",7,,SCRTOBLK
-    .word DUP,BUFFER,SWAP,BLKDEVFETCH,BUFFEREDQ,UPDATE 
-    .word LIT,0 ; S: data total
-    .word LIT,LPS,LIT,0,DODO
-1:  .word SCRBUF,DOI,LIT,CPL,STAR,PLUS ; S: data total scrline
-    .word TOPAD,DUP,TOR,PLUS,DUP,LIT,BUFFER_SIZE,GREATER,ZBRANCH,2f-$ ; S: data total+u r: u
-    .word TWODROP,RDROP,LIT,0,UNLOOP,EXIT
-2:  .word RFROM,SWAP,TOR,PADTOBUFFER,RFROM  ; S: data+u total+u
-    .word DOLOOP,1b-$
-    .word TWODROP,FLUSH,LIT,-1
+    .word SCRSIZE,LIT,BLOCK_SIZE,UGREATER,ZBRANCH,2f-$
+    ; trop grand
+    .word NOT,EXIT
+2:  .word DUP,BUFFER,SWAP,BLKDEVFETCH,BUFFEREDQ,UPDATE ; s: data
+    .word LIT,LPS,LIT,0,DODO 
+1:  .word TOR,SCRBUF,DOI,LIT,CPL,STAR,PLUS ; S: scrline r: data
+    .word LIT,CPL,MINUSTRAILING,TOR ; S: scrline r: data len
+    .word TWORFETCH,MOVE ; R: data len
+    .word TWORFROM,PLUS,LIT,VK_CR,OVER,CSTORE,ONEPLUS,DOLOOP,1b-$
+    .word DROP,FLUSH,LIT,-1
     .word EXIT
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;     editeur de bloc
-;     simple.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    
-; nom BLKEDIT  ( n+ -- )
-;   Edition d'un bloc contenant du texte.
-; arguments:
-;   n+   numéro du bloc à éditer.
-; retourne:
-;   rien
-DEFWORD "BLKEDIT",7,,BLKEDIT
 
-    .word EXIT
-    
     

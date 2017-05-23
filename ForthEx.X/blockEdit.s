@@ -22,17 +22,44 @@
 ; DESCRIPTION: 
 ;   Éditeur de texte simple qui travail sur un seul écran à la fois et permet
 ;   de sauvegarder le texte de cet écran dans un bloc. Ultérieurement ce
-;   bloc peut-être évaluer avec la commande LOAD.     
+;   bloc peut-être évalué avec la commande LOAD. 
+;   L'idée d'un éditeur de bloc viens de l'origine même du langage. Charles Moore
+;   Travaillait sur un terminal vidéo de 16 lignes de 64 caractères, ce qui fait qu'un
+;   écran occupait 1024 carctères. Il avait donc eu l'idée de sauvegarder le contenu
+;   de la mémoire vidéo sur l'unité de stockage permanent sans modification.
+;   Chaque écran sauvegardé s'appelait un bloc.
+;   Le problème c'est que ForthEx utilise un écran de 24 lignes au lieu de 16 ce qui
+;   fait qu'un bloc serait de 1536 caractères au lieu de 1024. Mais comme le standard
+;   ANS Forth définie toujours les blocs comme étant 1024 caractères je devais trouver
+;   une solution pour sauvegarder les écrans dans des blocs. Entre autre solutions il y a
+;   1) M'écarter du standard et modifier la taille des blocs à 1536 octets.
+;   2) Utiliser 2 blocs standards pour sauvegarder un écran, occasionne une perte d'espace.
+;   3) Compressser le contenu de l'écran pour le faire entrer dans un bloc standard, gain d'espace.
+;   J'ai opté pour la 3ième solution.     
 ;   En principe Lorsqu'on écris du code source les lignes ne sont pas pleines.
 ;   Parfois on laisse même des lignes vides pour rendre le texte plus facile à lire.
 ;   Lors de la sauvegarde dans un bloc les lignes sont tronquées après le dernier caractère
-;   et un carctère de fin de ligne est ajouté. Il y a 24 lignes sur un écran donc
+;   et un caractère de fin de ligne est ajouté. Il y a 24 lignes sur un écran donc
 ;   si la longueur moyenne des lignes est inférieure à (BLOCK_SIZE-24)/24 l'écran peut
 ;   être sauvegardé dans un bloc. L'éditeur calcule constamment le nombre de caractères
-;   dans un écran en édition et rapporte une alerte si ce nombre dépasse BLOCK_SIZE.     
+;   dans un écran en édition et rapporte une alerte si ce nombre dépasse BLOCK_SIZE.
+;   Il est problable que la majorité du temps un écran avec les lignes tronquées après
+;   le dernier caractère répondra à ce critère. Au pire il suffira de raccourcir les commentaires.    
 ; FONCTIONNEMENT:
 ;   Le curseur peut-être déplacé n'importe où sur l'écran et le texte modifié.
+;   Cependant le curseur ne peut sortir des limites de l'écran, il n'y a pas de défilement.    
 ; COMMANDES:
+;   UP_ARROW Déplace le curseur sur la ligne supérieure.
+;   DOWN_ARROW Déplace le curseur sur la ligne suivante.
+;   LEFT_ARROW Déplace le curseur d'un caractère vers la gauche.
+;   RIGHT_ARROW Déplace le curseur d'un caractère vers la droite.    
+;   DELETE  Efface le caractère à la position du curseur.
+;   INSERT Insère un espace à la position du curseur.    
+;   BACKSPACE Efface le caractère à gauche du curseur.
+;   CTRL_X  Efface la ligne sur laquelle le curseur réside.
+;   CTRL_Y  Insère une ligne vide avant celle où se trouve le curseur.
+;   HOME   Va au début de la ligne.
+;   END    Va à la fin de la ligne.    
 ;   CTRL_S  Sauvegarde de l'écran dans le bloc.
 ;   CTRL_N  Efface l'écran pour éditer le bloc suivant.
 ;   CTRL_P  Reviens au bloc précédemment édité.     
@@ -43,7 +70,6 @@
 .section blkedit.bss bss 
 _blknbr: .space 2
 _blkprev: .space 2 
-_edsize: .space 2
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes utilisées par l'éditeur.
@@ -56,7 +82,7 @@ _edsize: .space 2
 ; arguments:
 ;   aucun
 ; retourne:
-;   u  Nombre maximum de caractères que peut contenir l'écran.     
+;   u  Nombre maximum de caractères que peut contenir l'écran. Selon le standard ANS Forth c'est 1024 octets.    
 DEFCONST "MAXCHAR",7,,MAXCHAR,BLOCK_SIZE
     
     
@@ -86,29 +112,15 @@ DEFCODE "BLK-PREV",8,,BLKPREV
      mov _blkprev,T
      NEXT
      
-; nom: ED-SIZE ( -- a-addr )
-;   Variable qui contient le nombres de caractères dans l'écran.
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.
-DEFCODE "ED-SIZE",7,,EDSIZE
-     DPUSH
-     mov _edsize,T
-     NEXT
      
      
-;;;;;;;;;;;;;;;;;;;;;;
-; indicateurs booléens
-;;;;;;;;;;;;;;;;;;;;;;
-     
-; nom: EDINIT  ( -- )
+; EDINIT  ( -- )
 ;   Initialise les variable de l'éditeur BLKED. Appellé par BLKED au démarrage de ce dernier.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien     
-DEFWORD "EDINIT",6,,EDINIT ; ( -- )
+HEADLESS EDINIT,HWORD
     .word LIT,0,DUP,BLKNBR,STORE,BLKPREV,STORE
     .word LCPAGE,VTPAGE,EXIT
  
@@ -127,15 +139,15 @@ HEADLESS KCASE,HWORD
 2:  .word EXIT
   
 ; nom: SAVELINE ( n -- )
-;   Sauvegarde la ligne d'écran n dans le tampon CLIP.
+;   Sauvegarde la ligne d'écran n dans le tampon PAD.
 ; arguments:
 ;   n	numéro de ligne {1..24}
 ; retourne:
 ;   rien  
 DEFWORD "SAVELINE",8,,SAVELINE ; ( n -- )
-    .word LIT,CPL,STAR,SCRBUF,PLUS  ; s: c-addr1
-    .word LIT,CPL,PASTE,FETCH,DUP,NROT,CSTORE ; s: c-addr1 c-addr2 
-    .word LIT,CPL,MOVE,EXIT
+    .word LNADR  ; s: src
+    .word PAD,FETCH,LIT,CPL,OVER,CSTORE ; s: src dest 
+    .word ONEPLUS,LIT,CPL,MOVE,EXIT
     
 ; nom: RESTORELINE  ( n -- )
 ;   Restaure la ligne d'écran à partir du tampon PASTE
@@ -144,10 +156,9 @@ DEFWORD "SAVELINE",8,,SAVELINE ; ( n -- )
 ; retourne:
 ;   rien
 DEFWORD "RESTORELINE",11,,RESTORELINE 
-    .word GETCUR,ROT,DUP,LIT,0,ATXY
-    .word PASTE,FETCH,COUNT,TYPE
-    .word PASTE,FETCH,ONEPLUS
-   
+    .word PAD,FETCH,COUNT,ROT ; s: src len n
+    .word LNADR ; s: src len dest
+    .word SWAP,MOVE
     .word EXIT
     
 ; nom: MSGLINE  ( c-addr u n -- )
@@ -159,11 +170,11 @@ DEFWORD "RESTORELINE",11,,RESTORELINE
 ;   u  Longueur du message, limité à 63 caractères.
 ;   n  numéro de la ligne où doit-être affiché le message.
 DEFWORD "MSGLINE",7,,MSGLINE ; ( c-addr u n -- )
-    .word DUP,SAVELINE
-    .word DUP,LIT,0,SWAP,ATXY,CLEARLN,NROT ; S: n c-addr u
-    .word LIT,CPL-1,AND,TYPE
+    .word FALSE,CURENBL,GETCUR,TWOTOR,DUP,SAVELINE
+    .word DUP,LIT,1,SWAP,ATXY,CLEARLN,NROT ; S: n c-addr u
+    .word LIT,CPL-1,AND,TYPE,DUP,TRUE,INVLN
 1:  .word KEYQ,ZBRANCH,1b-$
-    .word RESTORELINE,EXIT
+    .word RESTORELINE,TWORFROM,ATXY,TRUE,CURENBL,EXIT
   
 ; nom: NEXTBLOCK ( -- )
 ;   Sauvegarde l'écran actuel et charge le bloc suivant pour édition.
@@ -228,17 +239,33 @@ HEADLESS TOEOL,HWORD
 HEADLESS LNUP,HWORD
     .word EXIT
     
-HEADLESS LNDN,HWORD
+;     
+HEADLESS LNDN,HWORD 
+    .word EXIT
+   
+HEADLESS CRLF,HWORD
     .word EXIT
     
-HEADLESS INSCHR,HWORD
-    .word EXIT
+; dépose le caractère dans le buffer vidéo
+; à la position actuelle du curseur.    
+HEADLESS CHRTOBUF,HWORD ; ( c -- )
+    .word CURADR,CSTORE,EXIT
+    
+; Affiche le caractère à la position de l'écran.
+HEADLESS INSCHR,HWORD ; ( c -- )
+    .word DUP,CHRTOBUF,EMIT,EXIT
 
-HEADLESS  CRLF,HWORD  
+HEADLESS TOBIG,HWORD
+    .word STRQUOTE
+    .byte 31
+    .ascii "Screen to big to fit in a bloc."
+    .align 2
     .word EXIT
-
+    
 HEADLESS EDKEY,HWORD
-    .word EXIT
+    .word SCRSIZE,MAXCHAR,GREATER,ZBRANCH,2f-$
+    .word TOBIG,COUNT,LIT,0,MSGLINE
+2:  .word EKEY, EXIT
 
 HEADLESS BACKCHAR,HWORD    
     .word EXIT
@@ -249,6 +276,9 @@ HEADLESS LEFT,HWORD
 HEADLESS RIGHT,HWORD
     .word EXIT
 
+
+HEADLESS TEE,HWORD
+    .word DUP,LCEMIT,VTEMIT,EXIT
     
 ; nom: BLKED  ( n+ -- )  
 ;   Éditeur de bloc texte. Edite 1 bloc à la fois.
