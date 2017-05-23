@@ -25,7 +25,7 @@
 .include "math.s"    
 .include "tvout.s"
 .include "serial.s"
-.include "sound.s"
+;.include "sound.s"
 .include "store.s"
 .include "keyboard.s"
 .include "vt102.s"    
@@ -37,7 +37,7 @@
 .include "block.s" 
 .include "tools.s"    
 ;.include "eefile.s"    
-;.include "ed.s"    
+.include "blockEdit.s"    
     
 ; constantes dans la mémoire flash
 .section .str.const psv       
@@ -463,6 +463,63 @@ DEFWORD "CLEAR",5,,CLEAR ; ( -- )
 DEFWORD "UNUSED",6,,UNUSED    
     .word ULIMIT,HERE,MINUS,EXIT
     
+
+; DESCRIPTION:
+;   Générateur de tonalité
+    
+.include "sound.inc"
+
+.equ FCT, (FCY/64)
+    
+.section .sound.bss bss
+    
+.global tone_len    
+tone_len: .space 2
+    
+;.text
+;.global sound_init 
+;sound_init:
+HEADLESS SOUND_INIT,CODE 
+    ; confuration porte
+    mov #~(1<<AUDIO_OUT), W0
+    and AUDIO_TRIS
+    ; configuration PPS
+    mov #~(0x1f<<AUDIO_PPSbit),W0
+    and AUDIO_RPOR
+    mov #(AUDIO_FN<<AUDIO_PPSbit),W0
+    ior AUDIO_RPOR
+    ; configuration output compare
+    mov #((1<<OCTRIG)|(0xd)),W0 ; trigger on OCxRS compare
+    mov W0,AUDIO_OCCON2
+    mov #((AUDIO_TMR<<OCTSEL0)|(3<<OCM0)), W0  ; toggle mode
+    mov W0, AUDIO_OCCON1
+    mov #(2<<TCKPS0),W0  ; Fct=Fcy/64
+    mov W0, AUDIO_TMRCON
+   ; return
+    NEXT
+    
+; nom: TONE   ( u1 u2 -- )
+;   Génère une tonalité de fréquence u2 et de durée u1.	
+; arguments:
+;   u1   durée en millisecondes.
+;   u2   fréquence en hertz.
+; retourne:
+;   rien 
+ DEFCODE "TONE",4,,TONE  ; ( duration Nfr -- )
+1:  cp0 tone_len
+    bra nz, 1b
+    mov #((FCT/2)&0xffff),W0
+    mov #((FCT/2)>>16),W1
+    repeat #17
+    div.ud W0,T
+    dec W0,W0
+    mov W0, AUDIO_OCRS
+    mov W0, AUDIO_OCR
+    DPOP
+    bset AUDIO_TMRCON, #TON
+    mov T, tone_len
+    DPOP
+    NEXT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; périphérique CRC

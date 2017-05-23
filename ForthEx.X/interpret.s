@@ -343,7 +343,7 @@ DEFWORD "ABORT\"",6,F_IMMED,ABORTQUOTE ; (  --  )
 ; retourne:
 ;   rien    
 DEFWORD "CLIP",4,,CLIP ; ( n+ -- )
-    .word DUP,PASTE,FETCH,STORE
+    .word DUP,PASTE,FETCH,CSTORE
     .word TIB,FETCH,SWAP,PASTE,FETCH,ONEPLUS,SWAP,MOVE,EXIT
 
 ; nom: GETCLIP  ( -- n+ )    

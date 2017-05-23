@@ -318,7 +318,7 @@ DEFCODE "UD*",3,,UDSTAR ; ( ud1 u2 -- ud3 )
 ;   n2  dénominateur
 ; retourne:
 ;   n3  quotient entier.    
-DEFCODE "/",1,,DIVIDE
+DEFCODE "/",1,,SLASH
     mov [DSP--],W0
     repeat #17
     div.s W0,T

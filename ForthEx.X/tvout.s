@@ -341,12 +341,12 @@ scroll_down:
 ;  mots du système FORTH
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; nom: SCRBUF  ( -- a-addr )    
+; nom: SCRBUF  ( -- c-addr )    
 ;   Constante, adresse du buffer vidéo.
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr  Adresse du buffer vidéo. 
+;   c-addr  Adresse du buffer vidéo. 
 DEFCONST "SCRBUF",6,,SCRBUF,_video_buffer
     
 ; nom: HTAB   ( -- a-addr )   
@@ -435,7 +435,7 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     ior OC4IPC
 .endif    
     mov.b #4,W0 ; largeur tabulation
-    mov.b _htab
+    mov.b WREG,_htab
     bra code_LCPAGE
     
 ; nom: VIDEO  ( f -- )
@@ -515,11 +515,11 @@ DEFCODE "SCRLDN",6,,SCRLDN
 ; arguments:
 ;   aucun
 ; retourne:    
-;   u    colonne du curseur {0..63}   
+;   u    colonne du curseur {1..64}   
 DEFCODE "GETX",4,,GETX
     DPUSH
     mov.b xpos, WREG
-    mov W0,T
+    inc.b W0,T
     ze T,T
     NEXT
     
@@ -529,11 +529,11 @@ DEFCODE "GETX",4,,GETX
 ; arguments:
 ;   aucun
 ; retourne:    
-;   u    ligne du curseur {0..23}
+;   u    ligne du curseur {1..24}
 DEFCODE "GETY",4,,GETY
     DPUSH
     mov.b ypos, WREG
-    mov W0,T
+    inc.b W0,T
     ze T,T
     NEXT
     
@@ -541,12 +541,13 @@ DEFCODE "GETY",4,,GETY
 ;   Console locale.    
 ;   Positionne le curseur texte à la colonne u.
 ; arguments:
-;    u   colonne {0..63}
+;    u   colonne {1..64}
 ; retourne:    
 ;    rien
 DEFCODE "SETX",4,, SETX ; ( u -- )
     cursor_incr_sema
     cursor_sync
+    dec T,T
     mov #CPL-1,W0
     cp T, W0
     bra gtu, 1f
@@ -556,11 +557,11 @@ DEFCODE "SETX",4,, SETX ; ( u -- )
     DPOP
     NEXT
 
-; nom: SETX  ( u -- )
+; nom: SETY  ( u -- )
 ;   Console locale.    
 ;   Positionne le curseur texte à la ligne u.
 ; arguments:
-;    u   ligne {0..23}
+;    u   ligne {1..24}
 ; retourne:    
 ;    rien
 DEFCODE "SETY",4,,SETY  ; ( u -- )
@@ -599,8 +600,8 @@ DEFCODE "CURADR",6,,CURADR
 ;   Console locale.    
 ;   Positionne le curseur texte à la colonne u1 et la ligne u2.
 ; arguments:
-;    u1    colonne {0..63}
-;    u2    ligne {0..23}
+;    u1    colonne {1..64}
+;    u2    ligne {1..24}
 ; retourne:
 ;   rien    
 DEFWORD "CURPOS",6,,CURPOS  ; ( u1 u2 -- )
@@ -612,8 +613,8 @@ DEFWORD "CURPOS",6,,CURPOS  ; ( u1 u2 -- )
 ; arguments:
 ;   aucun
 ; retourne:
-;   u1    colonne  {0..63}
-;   u2    ligne    {0..23}
+;   u1    colonne  {1..64}
+;   u2    ligne    {1..24}
 DEFWORD "LC-GETCUR",9,,LCGETCUR
     .word GETX,GETY,EXIT
     
@@ -647,8 +648,8 @@ DEFCODE "SCRCHAR",7,,SCRCHAR ; ( -- c )
 ;   Console locale.    
 ;   Met le caractère c la position {u1,u2} de l'écran.
 ; arguments:
-;   u1 Colonne {0..63}
-;   u2 Ligne {0..23}
+;   u1 Colonne {1..64}
+;   u2 Ligne {1..24}
 ;   c Caractère    
 ; retourne:
 ;   rien    
@@ -656,11 +657,11 @@ DEFCODE "CHR>SCR",7,,CHRTOSCR
     cursor_incr_sema
     cursor_sync
     mov [DSP--],W0
-    ze W0,W0
+    dec W0,W0
     mov #CPL,W1
     mul.uu W0,W1,W0
     mov [DSP--],W1
-    ze W1,W1
+    dec W1,W1
     add W0,W1,W0
     mov #_video_buffer,W1
     add W1,W0,W0
@@ -673,7 +674,7 @@ DEFCODE "CHR>SCR",7,,CHRTOSCR
 ;   Console locale.    
 ;   Inverse vidéo de la ligne n. L'inverse vidéo signifie que les caractères sont affiché noir/blanc.
 ; arguments:
-;   n   Ligne {0..23}
+;   n   Ligne {1..24}
 ;   f   T=inverse, F=vidéo normal
 ; retourne:
 ;   rien    
@@ -681,7 +682,7 @@ DEFCODE "INVLN",5,,INVLN
     SET_EDS
     mov #CPL,W0
     mov [DSP--],W1
-    ze W1,W1
+    dec W1,W1
     mul.uu W0,W1,W0
     mov #_video_buffer,W1
     add W1,W0,W0
@@ -758,16 +759,15 @@ DEFCODE "LC-HOME",7,,LCHOME
 ;   rien
 DEFWORD "LC-END",6,,LCEND
     .word FALSE,CURENBL
-    .word CURADR,LIT,63,DUP,INVERT,ROT,AND ; S: 63 _video_buffer+cpl*ypos
-1:  .word TWODUP,PLUS,ECFETCH,BL,EQUAL,ZBRANCH,4f-$ ; S: 63 c-addr
-    .word SWAP,ONEMINUS,DUP,ZBRANCH,2f-$
-    .word SWAP,BRANCH,1b-$
-2:  .word SETX,DROP,BRANCH,8f-$
-4:  .word DROP,SETX,LCRIGHT
-8:  .word TRUE,CURENBL  
+    .word CURADR,LIT,CPL-1,DUP,INVERT,ROT,AND,SWAP ; S: c-addr CPL-1
+1:  .word TWODUP,PLUS,ECFETCH,BL,EQUAL,ZBRANCH,2f-$    
+    .word DUP,ZEROEQ,TBRANCH,4f-$
+    .word ONEMINUS,BRANCH,1b-$
+2:  .word DUP,LIT,CPL-1,NOTEQ,MINUS 
+4:  .word ONEPLUS,SETX
+    .word DROP,TRUE,CURENBL  
     .word EXIT
-    
-    
+  
 ; nom: LC-UP   ( -- )
 ;   Console locale.    
 ;   Déplace le curseur d'une ligne vers le haut.
@@ -886,11 +886,11 @@ DEFCODE "LC-CR",5,,LCCR
 ;   rien 
 DEFWORD "NEXT-COLON",10,,NEXTCOLON
     .word FALSE,CURENBL
-    .word HTAB,CFETCH,TBRANCH,2f-$,LIT,4,HTAB,CSTORE
-2:  .word GETX,DUP,LIT,CPL-4,LESS,TBRANCH,2f-$
+;    .word HTAB,CFETCH,TBRANCH,2f-$,LIT,4,HTAB,CSTORE
+2:  .word GETX,DUP,LIT,CPL,HTAB,CFETCH,MINUS,LESS,TBRANCH,2f-$
     .word DROP,BRANCH,9f-$
-2:  .word HTAB,CFETCH,PLUS
-    .word HTAB,CFETCH,ONEMINUS,INVERT,AND,SETX    
+2:  .word ONEMINUS,HTAB,CFETCH,DUP,TOR,SLASH,ONEPLUS,RFROM,STAR
+    .word ONEPLUS,SETX    
 9:  .word TRUE,CURENBL,EXIT
     
 ; nom: LC-DEL ( -- )

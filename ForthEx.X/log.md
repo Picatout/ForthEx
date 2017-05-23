@@ -1,9 +1,18 @@
+2017-05-22
+----------
+Modifié le système de coordonnées de l'écran local pour l'uniformiser avec VT102,
+c'est à dire que la numérotation des lignes colonnes commence à 1 au lieu de 0.
+Le code qui était dans sound.s a été transféré dans hardware.s, il n'y avait qu'une seule définition.
+
+Travail sur l'éditeur d'écran, fichier blockEdit.s
+
+
 2017-05-21
 ----------
 Travail dans core.s
 Réorganisation du code.
 Ajout du fichier interpret.s
-
+Ajout du fichier eds.s
 
 2017-05-20
 ----------
