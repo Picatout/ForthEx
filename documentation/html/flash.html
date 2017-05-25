@@ -28,12 +28,14 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   adresse du premier octet de donnée du buffer.
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   adresse du premier octet de donnée du tampon.
 </div>
 <hr>
-<p id="TBL@L">
-<b>TBL@L</b>  (  ud1 -- n )    
+<p id="FTBL@L">
+<b>FTBL@L</b>  (  ud1 -- n )    
 <div style="margin-left:5%;">   Lecture d'un mot dans la mémoire flash low word (adresse paire).
+</div>
+<div style="margin-left:5%;">   Utiliste l'instruction machine 'tblrdl'.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -42,28 +44,30 @@
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    valeur lue à l'adresse ud1.    
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    valeur lue à l'adresse ud1. n représente les bits 15..0 de l'instruction à cette adresse.
 </div>
 <hr>
-<p id="TBL@H">
-<b>TBL@H</b>   ( ud1 -- n )    
+<p id="FTBL@H">
+<b>FTBL@H</b>   ( ud1 -- n )    
 <div style="margin-left:5%;">    Lecture d'un mot dans la mémoire flash high word (adresse impaire).
+</div>
+<div style="margin-left:5%;">    Utilise l'instruction machine 'tblrdh'.     
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   adresse du premier octet de donnée du tampon.
+</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   adresse du premier octet de donnée du buffer.
+<div style="margin-left:5%;"><i>n	valeur</i>&nbsp;&nbsp; lue à l'adresse ud1.  n représente les bits 23..16 de l'instruction à l'adresse a-addr-1.
 </div>
 <hr>
 <p id="I@">
 <b>I@</b>   ( ud -- u1 u2 u3 )    
 <div style="margin-left:5%;">   lit 1 instruction de la mémoire flash du MCU. L'instrucion est séparé en
 </div>
-<div style="margin-left:5%;">   3 octets.    
+<div style="margin-left:5%;">   3 octets. Accès à la mémoire flash en utilisant les instructions 'tblrdl' et 'tblrdh'.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:    
@@ -81,7 +85,7 @@
 <hr>
 <p id="FADDR">
 <b>FADDR</b>   ( ud -- )    
-<div style="margin-left:5%;">   Initialise le pointeur d'addresse 24 bits pour la programmationd de la mémoire FLASH du MCU.
+<div style="margin-left:5%;">   Initialise le pointeur d'addresse 24 bits pour la programmation de la mémoire FLASH du MCU.
 </div>
 <div style="margin-left:5%;">   Les addresse FLASH ont 24 bits.
 </div>
@@ -175,7 +179,11 @@
 <b>FERASE</b>   ( u -- )    
 <div style="margin-left:5%;">   Efface une ligne de mémoire FLASH MCU
 </div>
-<div style="margin-left:5%;">   Une correspond à 1024 instructions ou 2048 adresses.
+<div style="margin-left:5%;">   Une ligne correspond à 1024 instructions.
+</div>
+<div style="margin-left:5%;">   Les instructions étant codées sur 24 bits, 1 ligne correspond à 3072 octets.
+</div>
+<div style="margin-left:5%;">   Le compteur d'instruction du MCU incrémente par 2 et pointe toujours sur une adresse paire.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:      

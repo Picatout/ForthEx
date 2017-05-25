@@ -109,7 +109,7 @@ DEFCODE "PARSE-NAME",10,,PARSENAME
     add W0,W1,W1  ;pointeur
     DPUSH
     mov W1,T
-    sub W2,W0,W2  ;longueur buffer
+    sub W2,W0,W2  ;longueur tampon
     cp0 W2
     bra nz, 1f 
     DPUSH
@@ -127,11 +127,11 @@ DEFCODE "PARSE-NAME",10,,PARSENAME
     mov W1,T 
 5:  inc W1,W1
     dec W2,W2
-    bra z, 8f ; fin du buffer
+    bra z, 8f ; fin du tampon
     cp.b W0,[W1]
     bra ltu,5b
     bra 8f
-6:  ; fin du buffer avant premier caractère.
+6:  ; fin du tampon avant premier caractère.
     mov W1,T
     DPUSH
     clr T
@@ -236,8 +236,8 @@ not_found:
 ;   - CTRL_V  Réaffiche la dernière ligne saisie
 ;   - Les autres touches de contrôles sont ignorées. 
 ; arguments:
-;   c-addr   addresse du buffer
-;   +n1      longueur du buffer
+;   c-addr   addresse du tampon.
+;   +n1      longueur du tampon.
 ; retourne:
 ;   +n2      longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )

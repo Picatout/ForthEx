@@ -1,0 +1,270 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body>
+<h1>blockEdit</h1><h2>Description</h2><div style="margin-left:5%;"> 
+</div>
+<div style="margin-left:5%;">   Éditeur de texte simple qui travail sur un seul écran à la fois et permet
+</div>
+<div style="margin-left:5%;">   de sauvegarder le texte de cet écran dans un bloc. Ultérieurement ce
+</div>
+<div style="margin-left:5%;">   bloc peut-être évalué avec la commande LOAD. 
+</div>
+<div style="margin-left:5%;">   L'idée d'un éditeur de bloc viens de l'origine même du langage. Charles Moore
+</div>
+<div style="margin-left:5%;">   Travaillait sur un terminal vidéo de 16 lignes de 64 caractères, ce qui fait qu'un
+</div>
+<div style="margin-left:5%;">   écran occupait 1024 carctères. Il avait donc eu l'idée de sauvegarder le contenu
+</div>
+<div style="margin-left:5%;">   de la mémoire vidéo sur l'unité de stockage permanent sans modification.
+</div>
+<div style="margin-left:5%;">   Chaque écran sauvegardé s'appelait un bloc.
+</div>
+<div style="margin-left:5%;">   Le problème c'est que ForthEx utilise un écran de 24 lignes au lieu de 16 ce qui
+</div>
+<div style="margin-left:5%;">   fait qu'un bloc serait de 1536 caractères au lieu de 1024. Mais comme le standard
+</div>
+<div style="margin-left:5%;">   ANS Forth définie toujours les blocs comme étant 1024 caractères je devais trouver
+</div>
+<div style="margin-left:5%;">   une solution pour sauvegarder les écrans dans des blocs. Entre autre solutions il y a
+</div>
+<div style="margin-left:5%;">   1) M'écarter du standard et modifier la taille des blocs à 1536 octets.
+</div>
+<div style="margin-left:5%;">   2) Utiliser 2 blocs standards pour sauvegarder un écran, occasionne une perte d'espace.
+</div>
+<div style="margin-left:5%;">   3) Compressser le contenu de l'écran pour le faire entrer dans un bloc standard, gain d'espace.
+</div>
+<div style="margin-left:5%;">   J'ai opté pour la 3ième solution.     
+</div>
+<div style="margin-left:5%;">   En principe Lorsqu'on écris du code source les lignes ne sont pas pleines.
+</div>
+<div style="margin-left:5%;">   Parfois on laisse même des lignes vides pour rendre le texte plus facile à lire.
+</div>
+<div style="margin-left:5%;">   Lors de la sauvegarde dans un bloc les lignes sont tronquées après le dernier caractère
+</div>
+<div style="margin-left:5%;">   et un caractère de fin de ligne est ajouté. Il y a 24 lignes sur un écran donc
+</div>
+<div style="margin-left:5%;">   si la longueur moyenne des lignes est inférieure à (BLOCK_SIZE-24)/24 l'écran peut
+</div>
+<div style="margin-left:5%;">   être sauvegardé dans un bloc. L'éditeur calcule constamment le nombre de caractères
+</div>
+<div style="margin-left:5%;">   dans un écran en édition et rapporte une alerte si ce nombre dépasse BLOCK_SIZE.
+</div>
+<div style="margin-left:5%;">   Il est problable que la majorité du temps un écran avec les lignes tronquées après
+</div>
+<div style="margin-left:5%;">   le dernier caractère répondra à ce critère. Au pire il suffira de raccourcir les commentaires.    
+</div>
+<div style="margin-left:5%;"> FONCTIONNEMENT:
+</div>
+<div style="margin-left:5%;">   Le curseur peut-être déplacé n'importe où sur l'écran et le texte modifié.
+</div>
+<div style="margin-left:5%;">   Cependant le curseur ne peut sortir des limites de l'écran, il n'y a pas de défilement.    
+</div>
+<div style="margin-left:5%;"> COMMANDES:
+</div>
+<div style="margin-left:5%;">   UP_ARROW Déplace le curseur sur la ligne supérieure.
+</div>
+<div style="margin-left:5%;">   DOWN_ARROW Déplace le curseur sur la ligne suivante.
+</div>
+<div style="margin-left:5%;">   LEFT_ARROW Déplace le curseur d'un caractère vers la gauche.
+</div>
+<div style="margin-left:5%;">   RIGHT_ARROW Déplace le curseur d'un caractère vers la droite.    
+</div>
+<div style="margin-left:5%;">   DELETE  Efface le caractère à la position du curseur.
+</div>
+<div style="margin-left:5%;">   INSERT Insère un espace à la position du curseur.    
+</div>
+<div style="margin-left:5%;">   BACKSPACE Efface le caractère à gauche du curseur.
+</div>
+<div style="margin-left:5%;">   CTRL_X  Efface la ligne sur laquelle le curseur réside.
+</div>
+<div style="margin-left:5%;">   CTRL_Y  Insère une ligne vide avant celle où se trouve le curseur.
+</div>
+<div style="margin-left:5%;">   HOME   Va au début de la ligne.
+</div>
+<div style="margin-left:5%;">   END    Va à la fin de la ligne.    
+</div>
+<div style="margin-left:5%;">   CTRL_S  Sauvegarde de l'écran dans le bloc.
+</div>
+<div style="margin-left:5%;">   CTRL_N  Efface l'écran pour éditer le bloc suivant.
+</div>
+<div style="margin-left:5%;">   CTRL_P  Reviens au bloc précédemment édité.     
+</div>
+<div style="margin-left:5%;">   CTRL_I  Édtion d'un bloc quelconque. Demande le numéro du bloc.
+</div>
+<div style="margin-left:5%;">   CTRL_Q  Quitte l'éditeur.
+</div>
+<hr style="border-width:4px;"><p id="MAXCHAR">
+<b>MAXCHAR</b>  ( -- u )
+<div style="margin-left:5%;">   Retourne le nombre maximum de caractères que peut contenir un écran pour être
+</div>
+<div style="margin-left:5%;">   sauvegardé dans un bloc. Cette valeur correspond à la grandeur d'un bloc sur
+</div>
+<div style="margin-left:5%;">   le périphérique de stockage.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Nombre maximum de caractères que peut contenir l'écran. Selon le standard ANS Forth c'est 1024 octets.    
+</div>
+<hr>
+<p id="BLK-NBR">
+<b>BLK-NBR</b>   ( -- a-addr )
+<div style="margin-left:5%;">   Variable qui contient le numéro du bloc en cours d'édition.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.
+</div>
+<hr>
+<p id="BLK-PREV">
+<b>BLK-PREV</b> ( -- a-addr )
+<div style="margin-left:5%;">   Variable qui contient le numéro du bloc précédemment en édition.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.
+</div>
+<hr>
+<p id="SAVELINE">
+<b>SAVELINE</b> ( n -- )
+<div style="margin-left:5%;">   Sauvegarde la ligne d'écran n dans le tampon PAD.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n	numéro</i>&nbsp;&nbsp; de ligne {1..24}
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+<p id="RESTORELINE">
+<b>RESTORELINE</b>  ( n -- )
+<div style="margin-left:5%;">   Restaure la ligne d'écran à partir du tampon PASTE
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n	numéro</i>&nbsp;&nbsp; de la ligne à restaurer {1..24}.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="MSGLINE">
+<b>MSGLINE</b>  ( c-addr u n -- )
+<div style="margin-left:5%;">   Affiche un message à l'écran et attend une touche au clavier pour poursuivre
+</div>
+<div style="margin-left:5%;">   l'exécution. Le message doit tenir sur une seule ligne d'écran. Cette ligne
+</div>
+<div style="margin-left:5%;">   d'écran est sauvegardée et restaurée à la sortie de ce mot.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractère du message.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Longueur du message, limité à 63 caractères.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  numéro de la ligne où doit-être affiché le message.
+</div>
+<hr>
+<p id="NEXTBLOCK">
+<b>NEXTBLOCK</b> ( -- )
+<div style="margin-left:5%;">   Sauvegarde l'écran actuel et charge le bloc suivant pour édition.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="PREVBLOCK">
+<b>PREVBLOCK</b>  ( -- )
+<div style="margin-left:5%;">   Sauvegarde l'écran actuel et charge le bloc précédent pour édition.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="OPENBLOCK">
+<b>OPENBLOCK</b>  ( -- )
+<div style="margin-left:5%;">   Charge un nouveau bloc pour édition. Le numéro du bloc est fourni par l'utilisateur.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<hr>
+<p id="VT-UPDATE">
+<b>VT-UPDATE</b>  ( -- )
+<div style="margin-left:5%;">   l'éditeur doit mettre à jour l'écran de la console VT102 si le système est en REMOTE CONSOLE
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<hr>
+<p id="BLKED">
+<b>BLKED</b>  ( n+ -- )  
+<div style="margin-left:5%;">   Éditeur de bloc texte. Edite 1 bloc à la fois.
+</div>
+<div style="margin-left:5%;">   Le curseur peut-être déplacé à n'importe qu'elle position sur l'écran et 
+</div>
+<div style="margin-left:5%;">   son contenu modifié à volonté avant de le sauvegarder le bloc sur le
+</div>
+<div style="margin-left:5%;">   périphéirque de stockage actif. Ce bloc contenant du texte source peut-être
+</div>
+<div style="margin-left:5%;">   ultérieurement évalué par la commande LOAD ou THRU.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   Le numéro du bloc à éditer.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<hr>
+
+</body>
+</html>

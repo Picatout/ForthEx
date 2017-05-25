@@ -109,7 +109,7 @@ sector_to_address: ;   ( ud1 -- ud2 )
 ;    W1  argb1b2  b15:8->byte1,b7:0->byte2
 ;    W2  argb3b4  b15:7->byte3,b7:0->byte4
 ;    W3  nombre d'octets supplémentaire dans la réponse
-;    W4  pointeur buffer réponse    
+;    W4  pointeur tampon réponse    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 sdc_cmd:
     call sdc_wait_ready

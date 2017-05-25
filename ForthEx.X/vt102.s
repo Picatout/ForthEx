@@ -346,7 +346,7 @@ DEFWORD "VT-DELLN",8,,VTDELLN ; ( -- )
     .word LIT,'K',SPUTC,LIT,13,SPUTC,EXIT
 
 ; nom: VT-DSR  ( -- )
-;   envoie la séquence de contrôle ANSI 'ESC[6n' au terminal VT102.
+;   Envoie la séquence de contrôle ANSI 'ESC[6n' au terminal VT102.
 ;   Le terminal répond à cette commande en envoyant la la position du curseur. 
 ;   VT-DSR est utilisé par VT-GETCUR
 ; arguments:
@@ -431,3 +431,17 @@ DEFWORD "VT-PUTC",7,,VTPUTC
    .word VTCRLF
 9: .word EXIT
  
+; nom: VT-B/W  ( f -- )
+;   Terminal VT102. 
+;   Détermine si les caractères s'affichent noir sur blanc ou l'inverse
+;   Si l'indicateur Booléen 'f' est vrai les caractères s'affichent noir sur blanc.
+;   Sinon ils s'affiche blancs sur noir (valeur par défaut).
+; arguments:
+;   f   Indicateur Booléen, inverse vidéo si vrai.    
+; retourne:
+;   rien    
+DEFWORD "VT-B/W",6,,VTBSLASHW
+    .word ESCRBRAC,ZBRANCH,2f-$
+    .word LIT,'7',SPUTC
+2:  .word LIT,'m',SPUTC,EXIT
+    

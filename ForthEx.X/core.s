@@ -72,7 +72,7 @@ _SYSLATEST: .space 2
 ; NFA dernière entrée dans le dictionnaire utilisateur
  .global _LATEST
 _LATEST: .space 2
-; Terminal input buffer
+; mémoire tampon d'entrée du terminal.
 .global _TIB    
 _TIB: .space 2
 .global _PAD 
@@ -80,7 +80,7 @@ _PAD: .space 2
 .global _PASTE
 _PASTE: .space 2 
  .global _TICKSOURCE
-; adresse et longueur du buffer d'évaluation
+; adresse et longueur de la mémoire tampon d'évaluation
 _TICKSOURCE: .space 2
 ; identifiant de la source: 0->interactif, -1, fichier
  .global _CNTSOURCE

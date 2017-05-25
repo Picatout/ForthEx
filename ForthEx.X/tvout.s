@@ -32,10 +32,17 @@
     
 .section .tvout.bss bss
 
-.global video_on, xpos,ypos    
+.global xpos,ypos    
 line_count: .space 2
 even: .space 1
-video_on: .space 1
+
+; indicateurs booléens dans la variable video_flags 
+.equ F_VIDEO_OFF,0 ; sortie vidéo désactivée.
+.equ F_INVERT,7  ; inverse vidéo, caractères noir/blanc.
+ 
+video_flags: .space 1
+; video_on: .space 1
+ 
 .align 2 
 xpos: .space 1
 ypos: .space 1
@@ -129,7 +136,8 @@ BackPorchEnable:
     cp line_count
     bra nz, 2f
 EnableVideo: ; line_count==TOPLINE,  activation interruption video
-    cp0.b video_on
+    btsc.b video_flags,#F_VIDEO_OFF
+;    cp0.b video_on
     bra z, T2isr_exit
     bclr VIDEO_IFS, #VIDEO_IF
     bset VIDEO_IEC, #VIDEO_IE
@@ -342,11 +350,11 @@ scroll_down:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; nom: SCRBUF  ( -- c-addr )    
-;   Constante, adresse du buffer vidéo.
+;   Constante, adresse du tampon vidéo.
 ; arguments:
 ;   aucun
 ; retourne:
-;   c-addr  Adresse du buffer vidéo. 
+;   c-addr  Adresse du tampon vidéo. 
 DEFCONST "SCRBUF",6,,SCRBUF,_video_buffer
     
 ; nom: HTAB   ( -- a-addr )   
@@ -409,7 +417,8 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     ior VIDEO_IPC
     setm line_count
     setm.b even
-    setm.b video_on
+    clr.b video_flags
+    ;setm.b video_on
     ; activation interruption  SYNC_TIMER
     bclr SYNC_IFS, #SYNC_IF
     bset SYNC_IEC, #SYNC_IE
@@ -446,11 +455,32 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
 ; retourne:
 ;   rien    
 DEFCODE "VIDEO",5,,VIDEO   
-    mov T, W0
-    mov.b WREG,video_on
-    DPOP
+    cp0 T
+    bra 2f
+    bset.b video_flags,#F_VIDEO_OFF
+    bra 9f
+2:  bclr.b video_flags,#F_VIDEO_OFF    
+9:  DPOP
     NEXT
 
+; nom: LC-B/W ( f -- ) 
+;   Console locale.    
+;   Détermine si les caractères s'affichent noir sur blanc ou l'inverse
+;   Si l'indicateur Booléen 'f' est vrai les caractères s'affichent noir sur blanc.
+;   Sinon ils s'affiche blancs sur noir (valeur par défaut).
+; arguments:
+;   f   Indicateur Booléen, inverse vidéo si vrai.    
+; retourne:
+;   rien    
+DEFCODE "LC-B/W",6,,LCBSLASHW
+    cp0 T
+    bra z, 2f
+    bset.b video_flags,#F_INVERT
+    bra 9f
+2:  bclr.b video_flags,#F_INVERT
+9:  DPOP
+    NEXT
+    
 ; nom: CURENBL   ( f -- )
 ;   Console locale.    
 ;   Active ou désactive le curseur texte.
@@ -590,12 +620,12 @@ DEFWORD "LNADR",5,,LNADR
     
 ; nom: CURADR  ( -- c-addr )
 ;   Console locale.    
-;   Retourne l'adresse dans le buffer d'écran correspondant
+;   Retourne l'adresse dans le tampon d'écran correspondant
 ;   à la position actuelle du curseur.
 ; arguments:
 ;   aucun
 ; retourne:
-;   c-addr   addresse buffer correspondant à la position du curseur texte.
+;   c-addr   addresse tampon correspondant à la position du curseur texte.
 DEFCODE "CURADR",6,,CURADR
     DPUSH
     mov #_video_buffer,T
@@ -677,6 +707,8 @@ DEFCODE "CHR>SCR",7,,CHRTOSCR
     add W0,W1,W0
     mov #_video_buffer,W1
     add W1,W0,W0
+    btsc.b video_flags,#F_INVERT
+    bset T,#7
     mov.b T,[W0]
     DPOP
     cursor_decr_sema
@@ -850,6 +882,8 @@ DEFCODE "PUTC",4,,PUTC
     add W0,W2,W0
     mov #_video_buffer, W1
     add W0,W1,W1
+    btsc.b video_flags,#F_INVERT
+    bset T,#7
     mov.b T, [W1]
     DPOP
     mov #(CPL-1),W0

@@ -193,7 +193,7 @@ DEFCODE "SCAN",4,,SCAN
     DPOP        ; T=u
     mov [DSP],W1 ; W1=c-addr
     cp0 T 
-    bra z, 4f ; aucun caractère restant dans le buffer.
+    bra z, 4f ; aucun caractère restant dans le tampon.
 1:  bra ltu, 4f
     cp.b W0,[W1]
     bra z, 4f

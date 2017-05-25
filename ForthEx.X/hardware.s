@@ -79,7 +79,7 @@ seed: ; PRNG 32 bits
 .space 4
  ; si contient une valeur autre que 0 lance un warm boot       
 fwarm: .space 2  
-; adresse buffer CRC
+; adresse tampon CRC
 crcbuffer: .space 2
 ; nombre d'octets bloc crc
 blksize: .space 2

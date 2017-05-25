@@ -171,10 +171,10 @@ DEFWORD "RESTORELINE",11,,RESTORELINE
 ;   n  numéro de la ligne où doit-être affiché le message.
 DEFWORD "MSGLINE",7,,MSGLINE ; ( c-addr u n -- )
     .word FALSE,CURENBL,GETCUR,TWOTOR,DUP,SAVELINE
-    .word DUP,LIT,1,SWAP,ATXY,CLEARLN,NROT ; S: n c-addr u
+    .word DUP,LIT,1,SWAP,ATXY,TRUE,BSLASHW,CLEARLN,NROT ; S: n c-addr u
     .word LIT,CPL-1,AND,TYPE,DUP,TRUE,INVLN
 1:  .word KEYQ,ZBRANCH,1b-$
-    .word RESTORELINE,TWORFROM,ATXY,TRUE,CURENBL,EXIT
+    .word FALSE,BSLASHW,RESTORELINE,TWORFROM,ATXY,TRUE,CURENBL,EXIT
   
 ; nom: NEXTBLOCK ( -- )
 ;   Sauvegarde l'écran actuel et charge le bloc suivant pour édition.
@@ -246,7 +246,7 @@ HEADLESS LNDN,HWORD
 HEADLESS CRLF,HWORD
     .word EXIT
     
-; dépose le caractère dans le buffer vidéo
+; dépose le caractère dans la mémoire tampon vidéo.
 ; à la position actuelle du curseur.    
 HEADLESS CHRTOBUF,HWORD ; ( c -- )
     .word CURADR,CSTORE,EXIT

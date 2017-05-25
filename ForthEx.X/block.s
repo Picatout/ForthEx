@@ -50,7 +50,7 @@
 .equ DEVICE, 2       ; descripteur de périphérique auquel appartient ce bloc.
 .equ UPDATED, 3      ; compteur de mises à jour, le compteur qui contient
                      ; le plus gros chiffre est celui qui a été mis à jour
-		     ; en dernier. Si 0 le buffer n'a pas été modifié.
+		     ; en dernier. Si 0 la mémoire tampon n'a pas été modifié.
 ; grandeur de la structure BUFFER		     
 .equ BUFFER_STRUCT_SIZE, 8
 
@@ -205,7 +205,7 @@ DEFWORD "NOTUSED",7,,NOTUSED
 9:  .word EXIT
   
 ; nom: OLDEST ( -- a-addr )
-;   Recherche le buffer dont la dernière modification est la plus ancienne.
+;   Recherche la mémoire tampon dont la dernière modification est la plus ancienne.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -483,7 +483,7 @@ DEFWORD "THRU",4,,THRU
     .word EXIT
 
 ; nom: SCR-SIZE ( -- n )
-;    Calcule la taille que le buffer vidéo occuperait dans un bloc s'il était sauvegardé avec SCR>BLK.
+;    Calcule la taille que la mémoire tampon vidéo occuperait dans un bloc s'il était sauvegardé avec SCR>BLK.
 ; arguments:
 ;   aucun
 ; retourne:

@@ -51,7 +51,7 @@
 ;7      PAGE       CLS          VT-PAGE
 ;8      EKEY>CHAR  LC-FILTER    VT-FILTER
 ;9                 LC-GETCUR    VT-GETCUR
-    
+;10     B/W        LC-B/W       VT-B/W    
 ;
 ;  Exemple de définition d'un mot vectorisé.
 ; : KEY  SYSCONS @ FN_KEY VEXEC ;
@@ -75,19 +75,21 @@
 .equ FN_PAGE,7
 .equ FN_EKEYTOCHAR,8
 .equ FN_GETCUR,9    
- 
+.equ FN_BSLASHW,10
+    
 ;table de vecteur pour la console locale
 DEFTABLE "LC-CONS",7,,LCCONS
     .word LCKEY    ; keyboard.s
     .word LCKEYQ   ; keyboard.s
     .word LCEKEY   ; keyboard.s
     .word LCEKEYQ  ; keyboard.s
-    .word LCEMIT   ; TVout.s
-    .word LCEMITQ  ; TVout.s
-    .word CURPOS   ; TVout.s
-    .word LCPAGE   ; TVout.s
+    .word LCEMIT   ; tvout.s
+    .word LCEMITQ  ; tvout.s
+    .word CURPOS   ; tvout.s
+    .word LCPAGE   ; tvout.s
     .word LCFILTER ; keyboard.s
-    .word LCGETCUR ; TVout.s
+    .word LCGETCUR ; tvout.s
+    .word LCBSLASHW   ; tvout.s
     
 ; table des vecteurs pour la console sérielle.    
 DEFTABLE "SERCONS",7,,SERCONS
@@ -101,6 +103,7 @@ DEFTABLE "SERCONS",7,,SERCONS
     .word VTPAGE   ; vt102.s
     .word VTFILTER ; vt102.s
     .word VTGETCUR ; vt102.s
+    .word VTBSLASHW   ; vt102.s
     
 ; nom: LOCAL ( -- a-addr )
 ;   Empile le vecteur de la table LCONSOLE qui sert d'argument pour CONSOLE.
@@ -338,3 +341,15 @@ DEFWORD "CLS",3,,CLS
 ;   u2    ligne    locale {0..23} remote {1..24}
 DEFWORD "GETCUR",6,,GETCUR
     .word SYSCONS,FETCH,LIT,FN_GETCUR,VEXEC,EXIT
+
+; nom: B/W  ( f -- )    
+;   Détermine si les caractères s'affichent noir sur blanc ou l'inverse
+;   Si l'indicateur Booléen 'f' est vrai les caractères s'affichent noir sur blanc.
+;   Sinon ils s'affiche blancs sur noir (valeur par défaut).
+; arguments:
+;   f   Indicateur Booléen, inverse vidéo si vrai.    
+; retourne:
+;   rien    
+DEFWORD "B/W",3,,BSLASHW
+    .word SYSCONS,FETCH,LIT,FN_BSLASHW,VEXEC,EXIT
+    

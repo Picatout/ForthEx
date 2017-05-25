@@ -1,3 +1,12 @@
+2017-05-24
+----------
+Modification dans tvout.s, ajout de LC-B/W.
+Modification dans vt102.s, ajout de VT-B/W.
+Modification dans console.s ajout de B/W et ajout de la fonction FN_B/W dans les
+tables LCCONS et SERCONS.
+
+Travail dans blockEdit.s
+
 2017-05-23
 ----------
 Travail sur BLKED

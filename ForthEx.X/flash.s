@@ -32,7 +32,7 @@
 ;DATE: 2017-03-07
     
 .section .hardware.bss  bss
-; adresse du buffer pour écriture mémoire flash du MCU
+; adresse du tampon pour écriture mémoire flash du MCU
 _mflash_buffer: .space 2 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -48,7 +48,7 @@ _mflash_buffer: .space 2
 ;   aucun 
 DEFTABLE "MFLASH",6,,MFLASH
     .word _MCUFLASH ; mémoire FLASH du MCU    
-    .word TBLFETCHL ;
+    .word FTBLFETCHL ;
     .word TOFLASH
     .word FLASHTORAM
     .word RAMTOFLASH
@@ -58,18 +58,19 @@ DEFTABLE "MFLASH",6,,MFLASH
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr   adresse du premier octet de donnée du buffer.
+;   a-addr   adresse du premier octet de donnée du tampon.
 DEFWORD "FBUFFER",7,,FBUFFER ; ( -- a-addr ) 
     .word LIT,FLASH_PAGE_SIZE,MALLOC,DUP,LIT,_mflash_buffer,STORE
     .word EXIT
  
-; nom: TBL@L  (  ud1 -- n )    
+; nom: FTBL@L  (  ud1 -- n )    
 ;   Lecture d'un mot dans la mémoire flash low word (adresse paire).
+;   Utiliste l'instruction machine 'tblrdl'.    
 ; arguments:
 ;   ud1  adrese dans la mémmoire flash du MCU.
 ; retourne:
-;   n    valeur lue à l'adresse ud1.    
-DEFCODE "TBL@L",5,,TBLFETCHL ; ( ud1 -- n )
+;   n    valeur lue à l'adresse ud1. n représente les bits 15..0 de l'instruction à cette adresse.
+DEFCODE "FTBL@L",6,,FTBLFETCHL ; ( ud1 -- n )
     RPUSH TBLPAG
     mov T,TBLPAG
     DPOP
@@ -77,13 +78,14 @@ DEFCODE "TBL@L",5,,TBLFETCHL ; ( ud1 -- n )
     RPOP TBLPAG
     NEXT
     
-; nom: TBL@H   ( ud1 -- n )    
+; nom: FTBL@H   ( ud1 -- n )    
 ;    Lecture d'un mot dans la mémoire flash high word (adresse impaire).
+;    Utilise l'instruction machine 'tblrdh'.     
 ; arguments:
-;   aucun
+;   a-addr   adresse du premier octet de donnée du tampon.
 ; retourne:
-;   a-addr   adresse du premier octet de donnée du buffer.
-DEFCODE "TBL@H",5,,TBLFETCHH ; ( ud1 -- n )
+;   n	valeur lue à l'adresse ud1.  n représente les bits 23..16 de l'instruction à l'adresse a-addr-1.
+DEFCODE "FTBL@H",6,,FTBLFETCHH ; ( ud1 -- n )
     RPUSH TBLPAG
     mov T,TBLPAG
     DPOP
@@ -93,7 +95,7 @@ DEFCODE "TBL@H",5,,TBLFETCHH ; ( ud1 -- n )
 
 ; nom: I@   ( ud -- u1 u2 u3 )    
 ;   lit 1 instruction de la mémoire flash du MCU. L'instrucion est séparé en
-;   3 octets.    
+;   3 octets. Accès à la mémoire flash en utilisant les instructions 'tblrdl' et 'tblrdh'.
 ; arguments:    
 ;   ud  adresse 24 bits mémoire flash
 ; retourne:
@@ -115,7 +117,7 @@ DEFCODE "I@",2,,IFETCH
     NEXT
  
 ; nom: FADDR   ( ud -- )    
-;   Initialise le pointeur d'addresse 24 bits pour la programmationd de la mémoire FLASH du MCU.
+;   Initialise le pointeur d'addresse 24 bits pour la programmation de la mémoire FLASH du MCU.
 ;   Les addresse FLASH ont 24 bits.
 ; arguments:
 ;   ud   Entier double représentant l'adresse en mémoire FLASH MCU.
@@ -218,7 +220,9 @@ DEFWORD "ROW>FADR",8,,ROWTOFADR
    
 ; nom: FERASE   ( u -- )    
 ;   Efface une ligne de mémoire FLASH MCU
-;   Une correspond à 1024 instructions ou 2048 adresses.
+;   Une ligne correspond à 1024 instructions.
+;   Les instructions étant codées sur 24 bits, 1 ligne correspond à 3072 octets.
+;   Le compteur d'instruction du MCU incrémente par 2 et pointe toujours sur une adresse paire.    
 ; arguments:      
 ;   u  numéro de la ligne.
 ; retourne:
