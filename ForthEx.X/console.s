@@ -95,7 +95,7 @@ DEFTABLE "LC-CONS",7,,LCCONS
 DEFTABLE "SERCONS",7,,SERCONS
     .word VTKEY    ; vt102.s
     .word VTKEYQ   ; vt102.s
-    .word SGETC    ; serial.s
+    .word VTEKEY   ; serial.s
     .word SGETCQ   ; serial.s
     .word VTEMIT   ; vt102.s
     .word SREADYQ  ; serial.s

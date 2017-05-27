@@ -159,6 +159,7 @@ DEFWORD "/STRING",7,,SLASHSTRING
 ; retourne:
 ;   c-addr  La même adresse.  
 DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
+    SET_EDS
     mov T, W1
     mov.b [W1],W2
 1:  cp0.b W2
@@ -173,7 +174,8 @@ DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
     sub.b #32,W0
     mov.b W0,[W1]
     bra 1b
-3:  NEXT
+3:  RESET_EDS
+    NEXT
 
 ; nom: SCAN ( c-addr u c -- c-addr' u' )  
 ;   Recherche du caractère 'c' dans le bloc
@@ -743,15 +745,15 @@ DEFWORD ">BASE10",7,,TOBASE10
 ;   n    Le caractère convertie en digit de la base active.
 ;   -1   Le caractère était valide et n doit-être conservé.    
 DEFWORD "?DIGIT",6,,QDIGIT ; ( c -- x 0 | n -1 )
-    .word DUP,LIT,96,UGREATER,ZBRANCH,1f-$
-    .word LIT,32,MINUS ; lettre minuscule? convertie en minuscule
+    .word DUP,LIT,'a'-1,UGREATER,ZBRANCH,1f-$
+    .word LIT,32,MINUS ; convertie en majuscule.
 1:  .word DUP,LIT,'9',UGREATER,ZBRANCH,3f-$
     .word DUP,LIT,'A',ULESS,ZBRANCH,2f-$
     .word LIT,0,EXIT ; pas un digit
 2:  .word LIT,7,MINUS    
 3:  .word LIT,'0',MINUS
     .word DUP,BASE,FETCH,ULESS,EXIT
-  
+ 
 ; nom: ?DOUBLE   ( c-addr u -- c-addr' u' f )    
 ;   Vérifie si le caractère qui a mis fin à >NUMBER
 ;   est {'.'|','}. Si c'est le cas il s'agit d'un

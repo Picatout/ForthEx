@@ -99,6 +99,62 @@ DEFCONST "XON",3,,XON,CTRL_Q
 ; retourne:
 ;   c   Caractère ASCII DC3 valeur 19   
 DEFCONST "XOFF",4,,XOFF,CTRL_S
+
+SYSDICT 
+ VK_TILDE:
+   .byte 0
+   .byte VK_HOME
+   .byte VK_INSERT
+   .byte VK_DELETE
+   .byte 0
+   .byte VK_PGUP
+   .byte VK_PGDN
+   .byte 0
+   .byte 0
+   .byte 0
+   
+; reçu une séquence ESC[ n  où est une un digit, attend un ~   
+HEADLESS EXPECT_TILDE,HWORD
+    .word SGETC,LIT,'~',EQUAL,ZBRANCH,3f-$
+    .word LIT,VK_TILDE,PLUS,CFETCH,EXIT
+3:  .word DROP,LIT,CTRL_X,SPUTC,LIT,0,EXIT
+  
+; reçu une séquence ESC[ suivit d'une lettre A,B,C,D  
+HEADLESS ARROWS,HWORD ; ( c -- )
+    .word DUP,LIT,'A',EQUAL,ZBRANCH,2f-$
+    .word DROP,LIT,VK_UP,EXIT
+2:  .word DUP,LIT,'B',EQUAL,ZBRANCH,2f-$
+    .word DROP,LIT,VK_DOWN,EXIT
+2:  .word DUP,LIT,'C',EQUAL,ZBRANCH,2f-$
+    .word DROP,LIT,VK_RIGHT,EXIT
+2:  .word DUP,LIT,'D',EQUAL,ZBRANCH,2f-$
+    .word DROP,LIT,VK_LEFT,EXIT
+2:  .word DROP,LIT,0,EXIT      
+
+; après avoir reçu un ESC, reconnais les formes:  ESC[n~, ESC[{A|B|C|D} et ESCOF  
+HEADLESS ESCTOVK,HWORD ; ( -- u )
+    .word SGETC,DUP,LIT,'[',EQUAL,TBRANCH,2f-$
+    .word LIT,'O',EQUAL,ZBRANCH,9f-$
+    .word SGETC,LIT,'F',EQUAL,ZBRANCH,9f-$
+    .word LIT,VK_END,EXIT
+2:  .word DROP,SGETC,DUP,QDIGIT,ZBRANCH,2f-$
+    .word EXPECT_TILDE,EXIT
+2:  .word DROP,ARROWS,EXIT
+9:  .word LIT,0,EXIT
+  
+; nom: VT-EKEY  ( -- u )
+;   Réception d'un code étendue du terminal VT102. Les séquencees ANSI
+;   sont converties en touche virtuelles VK_xx. 
+; arguments:
+;   aucun
+; retourne:
+;   u   Code  reçu du terminal.
+DEFWORD "VT-EKEY",7,,VTEKEY
+    .word BASE,FETCH,TOR,DECIMAL
+1:  .word SGETC,DUP,LIT,27,EQUAL,ZBRANCH,9f-$ 
+    .word DROP,ESCTOVK,QDUP,ZBRANCH,1b-$
+9:  .word RFROM,BASE,STORE,EXIT
+    
  
 ; Table utilisée par VT-FILTER
 ; pour la combinaison CTRL_x où x est une lettre
@@ -148,7 +204,7 @@ DEFWORD "VT-FILTER",9,,VTFILTER
 ;   c   le premier caractère valide de la file.    
 DEFWORD "VT-KEY?",7,,VTKEYQ
 1: .word SGETCQ,DUP,ZBRANCH,9f-$
-   .word DROP,SGETC,VTFILTER,TBRANCH,9f-$
+   .word DROP,VTEKEY,VTFILTER,TBRANCH,9f-$
    .word DROP,BRANCH,1b-$
 9: .word EXIT
     
@@ -163,6 +219,8 @@ DEFWORD "VT-KEY",6,,VTKEY
     .word ZBRANCH,1b-$
     .word EXIT 
 
+    
+    
 ; nom: VT-EMIT ( c -- )
 ;  transmet un caractère à la console VT102.
 ;  VT-EMIT filtre c rejette les caractères non reconnus.    

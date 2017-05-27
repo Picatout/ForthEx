@@ -308,7 +308,7 @@ DEFWORD "DATA>",5,,DATAOUT
     ; ne sauvegarder que si nécessaire
     .word DUP,UPDATEDFETCH,TBRANCH,2f-$,DROP,EXIT
 2:  .word FIELDS ; S: data  no-block device *BUFFER
-    .word TOR,DUP,TOR
+    .word TOR,DUP,TOR  ; s: data no-block device r: *BUFFER device
     ; conversion BLK>ADR
     .word FN_BLKTOADR,VEXEC
     ; écriture
@@ -396,8 +396,8 @@ DEFWORD "BLOCK",5,,BLOCK
 ; retourne:
 ;    j*x  État de la pile des arguments après l'évaluation du bloc n+.
 DEFWORD "LOAD",4,,LOAD
-    .word DUP,BLK,STORE,BLOCK,DUP,LIT,0,SCAN
-    .word SWAP,DROP,EVAL,EXIT
+    .word DUP,BLK,STORE,BLOCK,DUP,LIT,BLOCK_SIZE,LIT,0,SCAN
+    .word DROP,OVER,MINUS,EVAL,EXIT
     
 ; nom: SAVE-BUFFERS ( -- )  
 ;   Sauvegarde tous les buffers qui ont été modifiés.
@@ -408,7 +408,7 @@ DEFWORD "LOAD",4,,LOAD
 DEFWORD "SAVE-BUFFERS",12,,SAVEBUFFERS
     .word LIT,MAX_BUFFERS,LIT,0,DODO
 1:  .word DOI,STRUCADR,DATAOUT
-4:  .word DOLOOP,1b-$    
+    .word DOLOOP,1b-$    
     .word EXIT
    
 ; nom: EMPTY-BUFFERS  ( -- )
@@ -443,7 +443,7 @@ DEFWORD "FLUSH",5,,FLUSH
 ;   rien    
 DEFWORD "LIST",4,,LIST
     .word DUP,SCR,STORE,CLS
-    .word BLOCK,LIT,BLOCK_SIZE,LIT,0,DODO
+    .word BLOCK,LIT,BLOCK_SIZE,LIT,0,DODO ; s: data
 1:  .word DUP,ECFETCH,QDUP,TBRANCH,2f-$
     .word UNLOOP,BRANCH,9f-$ ; premier zéro arrête l'affichage.
 2:  .word EMIT,ONEPLUS,DOLOOP,1b-$
@@ -512,13 +512,14 @@ DEFWORD "SCR>BLK",7,,SCRTOBLK
     .word SCRSIZE,LIT,BLOCK_SIZE,UGREATER,ZBRANCH,2f-$
     ; trop grand
     .word NOT,EXIT
-2:  .word DUP,BUFFER,SWAP,BLKDEVFETCH,BUFFEREDQ,UPDATE ; s: data
+2:  .word FALSE,CURENBL
+    .word DUP,BUFFER,SWAP,BLKDEVFETCH,BUFFEREDQ,UPDATE ; s: data
     .word LIT,LPS,LIT,0,DODO 
-1:  .word TOR,SCRBUF,DOI,LIT,CPL,STAR,PLUS ; S: scrline r: data
+1:  .word TOR,DOI,ONEPLUS,LNADR ; S: scrline r: data
     .word LIT,CPL,MINUSTRAILING,TOR ; S: scrline r: data len
     .word TWORFETCH,MOVE ; R: data len
     .word TWORFROM,PLUS,LIT,VK_CR,OVER,CSTORE,ONEPLUS,DOLOOP,1b-$
-    .word DROP,FLUSH,LIT,-1
-    .word EXIT
+    .word LIT,0,SWAP,ONEMINUS,CSTORE,SAVEBUFFERS,LIT,-1
+    .word TRUE,CURENBL,EXIT
 
     

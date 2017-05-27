@@ -68,8 +68,9 @@
 
      
 .section blkedit.bss bss 
-_blknbr: .space 2
-_blkprev: .space 2 
+_blknbr: .space 2  ; numéro du bloc en cours d'édition
+_blkprev: .space 2 ; numéro du bloc précédemment édité.
+    
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes utilisées par l'éditeur.
@@ -98,7 +99,7 @@ DEFCONST "MAXCHAR",7,,MAXCHAR,BLOCK_SIZE
 ;   a-addr  Adresse de la variable.
 DEFCODE "BLK-NBR",7,,BLKNBR 
      DPUSH
-     mov _blknbr,T
+     mov #_blknbr,T
      NEXT
      
 ; nom: BLK-PREV ( -- a-addr )
@@ -109,20 +110,37 @@ DEFCODE "BLK-NBR",7,,BLKNBR
 ;   a-addr  Adresse de la variable.
 DEFCODE "BLK-PREV",8,,BLKPREV
      DPUSH
-     mov _blkprev,T
+     mov #_blkprev,T
      NEXT
      
      
-     
-; EDINIT  ( -- )
-;   Initialise les variable de l'éditeur BLKED. Appellé par BLKED au démarrage de ce dernier.
+; TEXTEND  ( -- )
+;   Positionne à la fin du texte. Balaie la mémoire tampon de l'écran à partir
+;   de la fin et s'arrête après le premier caractère non blanc.     
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien     
+HEADLESS TEXTEND,HWORD
+     .word SCRBUF,LIT,CPL,LIT,LPS,STAR,DUP,TOR,PLUS
+     .word RFROM,LIT,0,DODO
+1:   .word ONEMINUS,DUP,ECFETCH,BL,UGREATER,ZBRANCH,2f-$
+     .word UNLOOP,BRANCH,9f-$
+2:   .word DOLOOP,1b-$
+9:   .word ONEPLUS,SCRBUF,MINUS,LIT,CPL,SLASHMOD
+     .word ONEPLUS,SWAP,ONEPLUS,SWAP,CURPOS,EXIT
+     
+; EDINIT  ( n+ -- )
+;   Initialise les variable de l'éditeur BLKED. Appellé par BLKED au démarrage de ce dernier.
+; arguments:
+;   n+    Numéro du bloc à éditer
+; retourne:
+;   rien     
 HEADLESS EDINIT,HWORD
-    .word LIT,0,DUP,BLKNBR,STORE,BLKPREV,STORE
-    .word LCPAGE,VTPAGE,EXIT
+    .word LIT,0,BLKPREV,STORE
+    .word LCPAGE,VTPAGE
+    .word DUP,BLKNBR,STORE,LIST
+    .word TEXTEND,EXIT
  
     
 ;  KCASE  ( c n -- c f )    
@@ -225,22 +243,30 @@ DEFWORD "VT-UPDATE",9,,VTUPDATE
     .word EXIT   
     
 HEADLESS DELLN,HWORD
+    .word DELLINE
     .word EXIT
 
 HEADLESS INSLN,HWORD
     .word EXIT
     
 HEADLESS DELCHR,HWORD
+    .word LIT,DELETE,EMIT
     .word EXIT
     
 HEADLESS TOEOL,HWORD
+    .word LIT,VK_END,EMIT
     .word EXIT
+   
+HEADLESS TOSOL,HWORD
+    .word LIT,VK_HOME,EMIT,EXIT
     
 HEADLESS LNUP,HWORD
+    .word LIT,VK_UP,EMIT
     .word EXIT
     
 ;     
-HEADLESS LNDN,HWORD 
+HEADLESS LNDN,HWORD
+    .word LIT,VK_DOWN,EMIT
     .word EXIT
    
 HEADLESS CRLF,HWORD
@@ -253,7 +279,11 @@ HEADLESS CHRTOBUF,HWORD ; ( c -- )
     
 ; Affiche le caractère à la position de l'écran.
 HEADLESS INSCHR,HWORD ; ( c -- )
-    .word DUP,CHRTOBUF,EMIT,EXIT
+    .word LCGETCUR,LIT,LPS,EQUAL,ZBRANCH,8f-$
+    .word LIT,CPL,EQUAL,ZBRANCH,9f-$
+    .word CHRTOBUF,EXIT
+8:  .word DROP
+9:  .word LCEMIT,EXIT
 
 HEADLESS TOBIG,HWORD
     .word STRQUOTE
@@ -264,21 +294,38 @@ HEADLESS TOBIG,HWORD
     
 HEADLESS EDKEY,HWORD
     .word SCRSIZE,MAXCHAR,GREATER,ZBRANCH,2f-$
-    .word TOBIG,COUNT,LIT,0,MSGLINE
-2:  .word EKEY, EXIT
+    .word TOBIG,LIT,1,MSGLINE
+2:  .word LCEKEY, EXIT
 
-HEADLESS BACKCHAR,HWORD    
+HEADLESS BACKCHAR,HWORD 
+    .word DELBACK
     .word EXIT
 
 HEADLESS LEFT,HWORD
+    .word LIT,VK_LEFT,EMIT
     .word EXIT
 
 HEADLESS RIGHT,HWORD
+    .word LIT,VK_RIGHT,EMIT
     .word EXIT
 
 
-HEADLESS TEE,HWORD
-    .word DUP,LCEMIT,VTEMIT,EXIT
+ 
+DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )   
+;HEADLESS SAVESCREEN,HWORD
+    .word BLKNBR,FETCH,SCRTOBLK
+    .word TBRANCH,8f-$
+    .word STRQUOTE
+    .byte 22
+    .ascii "Failed to save screen."
+    .align 2
+    .word BRANCH,9f-$
+8:  .word STRQUOTE
+    .byte 13
+    .ascii "Screen saved."
+    .align 2
+9:  .word LIT,1,MSGLINE
+    .word EXIT    
     
 ; nom: BLKED  ( n+ -- )  
 ;   Éditeur de bloc texte. Edite 1 bloc à la fois.
@@ -293,15 +340,15 @@ HEADLESS TEE,HWORD
 DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
     .word EDINIT
 1:  .word EDKEY,DUP,LIT,31,GREATER,ZBRANCH,2f-$
-    .word DUP,LIT,127,LESS,ZBRANCH,4f-$
+    .word DUP,LIT,127,ULESS,ZBRANCH,4f-$
     .word INSCHR,BRANCH,1b-$
     ; c<32
 2:  .word LIT,VK_CR,KCASE,ZBRANCH,2f-$,CRLF,BRANCH,1b-$
 2:  .word LIT,VK_BACK,KCASE,ZBRANCH,2f-$,GETX,ZBRANCH,1b-$,BACKCHAR,BRANCH,1b-$
 2:  .word LIT,CTRL_N,KCASE,ZBRANCH,2f-$,NEXTBLOCK,BRANCH,1b-$ 
 2:  .word LIT,CTRL_P,KCASE,ZBRANCH,2f-$,PREVBLOCK,BRANCH,1b-$ 
-2:  .word LIT,CTRL_Q,KCASE,ZBRANCH,2f-$,CLS,ABORT
-2:  .word LIT,CTRL_S,KCASE,ZBRANCH,2f-$,BLKNBR,FETCH,SCRTOBLK,DROP,BRANCH,1b-$
+2:  .word LIT,CTRL_Q,KCASE,ZBRANCH,2f-$,CLS,EXIT
+2:  .word LIT,CTRL_S,KCASE,ZBRANCH,2f-$,SAVESCREEN,BRANCH,1b-$
 2:  .word LIT,CTRL_I,KCASE,ZBRANCH,2f-$,OPENBLOCK,BRANCH,1b-$  
 2:  .word LIT,CTRL_X,KCASE,ZBRANCH,2f-$,DELLN,BRANCH,1b-$
 2:  .word LIT,CTRL_Y,KCASE,ZBRANCH,2f-$,INSLN,BRANCH,1b-$  
@@ -310,7 +357,7 @@ DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
 4:  .word LIT,VK_DELETE,KCASE,ZBRANCH,4f-$,DELCHR,BRANCH,1b-$    
 4:  .word LIT,VK_LEFT,KCASE,ZBRANCH,4f-$,LEFT,BRANCH,1b-$
 4:  .word LIT,VK_RIGHT,KCASE,ZBRANCH,4f-$,RIGHT,BRANCH,1b-$ 
-4:  .word LIT,VK_HOME,KCASE,ZBRANCH,4f-$,LIT,0,SETX,BRANCH,1b-$
+4:  .word LIT,VK_HOME,KCASE,ZBRANCH,4f-$,TOSOL,BRANCH,1b-$
 4:  .word LIT,VK_END,KCASE,ZBRANCH,4f-$,TOEOL,BRANCH,1b-$
 4:  .word LIT,VK_UP,KCASE,ZBRANCH,4f-$,LNUP,BRANCH,1b-$
 4:  .word LIT,VK_DOWN,KCASE,ZBRANCH,4f-$,LNDN,BRANCH,1b-$
