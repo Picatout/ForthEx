@@ -1,3 +1,8 @@
+2017-05-27
+----------
+Corrigé mot LOAD dans block.s
+
+
 2017-05-26
 ----------
 Travail dans vt102.s et blockEdit.s

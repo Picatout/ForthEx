@@ -396,8 +396,11 @@ DEFWORD "BLOCK",5,,BLOCK
 ; retourne:
 ;    j*x  État de la pile des arguments après l'évaluation du bloc n+.
 DEFWORD "LOAD",4,,LOAD
-    .word DUP,BLK,STORE,BLOCK,DUP,LIT,BLOCK_SIZE,LIT,0,SCAN
-    .word DROP,OVER,MINUS,EVAL,EXIT
+    .word DUP,BLK,STORE,BLOCK,DUP,LIT,BLOCK_SIZE,LIT,0,SCAN ; s: c-addr c-addr' u'
+    .word DROP,SWAP,DODO
+1:  .word DOI,DUP,DOL,OVER,MINUS,LIT,VK_CR,SCAN ; s: c-addr c-addr' u'
+    .word DROP,OVER,MINUS,DUP,TOR,EVAL
+    .word RFROM,ONEPLUS,DOPLOOP,1b-$,EXIT
     
 ; nom: SAVE-BUFFERS ( -- )  
 ;   Sauvegarde tous les buffers qui ont été modifiés.

@@ -114,14 +114,15 @@ DEFCODE "BLK-PREV",8,,BLKPREV
      NEXT
      
      
-; TEXTEND  ( -- )
-;   Positionne à la fin du texte. Balaie la mémoire tampon de l'écran à partir
+; nom: TEXTEND  ( -- )
+;   Positionne le curseur à la fin du texte. Balaie la mémoire tampon de l'écran à partir
 ;   de la fin et s'arrête après le premier caractère non blanc.     
 ; arguments:
 ;   aucun
 ; retourne:
-;   rien     
-HEADLESS TEXTEND,HWORD
+;   rien 
+DEFWORD "TEXTEND",7,,TEXTEND     
+;HEADLESS TEXTEND,HWORD
      .word SCRBUF,LIT,CPL,LIT,LPS,STAR,DUP,TOR,PLUS
      .word RFROM,LIT,0,DODO
 1:   .word ONEMINUS,DUP,ECFETCH,BL,UGREATER,ZBRANCH,2f-$
@@ -247,10 +248,22 @@ HEADLESS DELLN,HWORD
     .word EXIT
 
 HEADLESS INSLN,HWORD
+    .word LCGETCUR,TEXTEND,GETY,LIT,LPS,EQUAL,ZBRANCH,2f-$
+    .word CURPOS,EXIT
+2:  .word SWAP,DROP,TOR,RFETCH,LNADR,DUP,LIT,CPL,PLUS
+    .word SCRBUF,LIT,CPL,LIT,LPS,STAR,PLUS,OVER,MINUS
+    .word MOVE,RFROM,SETY,CLRLN
     .word EXIT
     
+; retire la ligne sur laquelle se trouve le curseur    
+HEADLESS RMLN,HWORD
+    .word GETY,LNADR,TOR,RFETCH,LIT,CPL,PLUS
+    .word DUP,SCRBUF,LIT,CPL,LIT,LPS,STAR,PLUS,SWAP,MINUS
+    .word RFROM,SWAP,MOVE
+    .word LIT,1,GETY,LIT,LPS,SETY,CLRLN,CURPOS,EXIT
+    
 HEADLESS DELCHR,HWORD
-    .word LIT,DELETE,EMIT
+    .word DELETE
     .word EXIT
     
 HEADLESS TOEOL,HWORD
@@ -270,7 +283,9 @@ HEADLESS LNDN,HWORD
     .word EXIT
    
 HEADLESS CRLF,HWORD
-    .word EXIT
+    .word GETY,LIT,LPS,EQUAL,TBRANCH,9f-$
+    .word LCCR
+9:  .word EXIT
     
 ; dépose le caractère dans la mémoire tampon vidéo.
 ; à la position actuelle du curseur.    
@@ -309,7 +324,9 @@ HEADLESS RIGHT,HWORD
     .word LIT,VK_RIGHT,EMIT
     .word EXIT
 
-
+HEADLESS PAGEUP,HWORD
+    .word LIT,1,LIT,1,CURPOS,EXIT
+    
  
 DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )   
 ;HEADLESS SAVESCREEN,HWORD
@@ -351,7 +368,8 @@ DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
 2:  .word LIT,CTRL_S,KCASE,ZBRANCH,2f-$,SAVESCREEN,BRANCH,1b-$
 2:  .word LIT,CTRL_I,KCASE,ZBRANCH,2f-$,OPENBLOCK,BRANCH,1b-$  
 2:  .word LIT,CTRL_X,KCASE,ZBRANCH,2f-$,DELLN,BRANCH,1b-$
-2:  .word LIT,CTRL_Y,KCASE,ZBRANCH,2f-$,INSLN,BRANCH,1b-$  
+2:  .word LIT,CTRL_Y,KCASE,ZBRANCH,2f-$,INSLN,BRANCH,1b-$
+2:  .word LIT,CTRL_Z,KCASE,ZBRANCH,2f-$,RMLN,BRANCH,1b-$  
 2:  .word DROP,BRANCH,1b-$
     ; c>=127
 4:  .word LIT,VK_DELETE,KCASE,ZBRANCH,4f-$,DELCHR,BRANCH,1b-$    
@@ -361,7 +379,8 @@ DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
 4:  .word LIT,VK_END,KCASE,ZBRANCH,4f-$,TOEOL,BRANCH,1b-$
 4:  .word LIT,VK_UP,KCASE,ZBRANCH,4f-$,LNUP,BRANCH,1b-$
 4:  .word LIT,VK_DOWN,KCASE,ZBRANCH,4f-$,LNDN,BRANCH,1b-$
-  
+4:  .word LIT,VK_PGDN,KCASE,ZBRANCH,4f-$,TEXTEND,BRANCH,1b-$
+4:  .word LIT,VK_PGUP,KCASE,ZBRANCH,4f-$,PAGEUP,BRANCH,1b-$  
 4:  .word DROP,BRANCH,1b-$
    
     .word EXIT
