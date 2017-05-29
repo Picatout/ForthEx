@@ -49,29 +49,33 @@
 ;   Le curseur peut-être déplacé n'importe où sur l'écran et le texte modifié.
 ;   Cependant le curseur ne peut sortir des limites de l'écran, il n'y a pas de défilement.    
 ; COMMANDES:
-;   UP_ARROW Déplace le curseur sur la ligne supérieure.
-;   DOWN_ARROW Déplace le curseur sur la ligne suivante.
-;   LEFT_ARROW Déplace le curseur d'un caractère vers la gauche.
-;   RIGHT_ARROW Déplace le curseur d'un caractère vers la droite.    
-;   DELETE  Efface le caractère à la position du curseur.
-;   INSERT Insère un espace à la position du curseur.    
-;   BACKSPACE Efface le caractère à gauche du curseur.
-;   CTRL_X  Efface la ligne sur laquelle le curseur réside.
-;   CTRL_Y  Insère une ligne vide avant celle où se trouve le curseur.
+;   Déplacement du curseur:
+;   UP Déplace le curseur sur la ligne supérieure.
+;   DOWN Déplace le curseur sur la ligne suivante.
+;   LEFT Déplace le curseur d'un caractère vers la gauche.
+;   RIGHT Déplace le curseur d'un caractère vers la droite.    
 ;   HOME   Va au début de la ligne.
-;   END    Va à la fin de la ligne.    
+;   END    Va à la fin de la ligne.
+;   PGUP   Déplace le curseur dans le coin supérieur gauche de l'écran.
+;   PGDN   Déplace le curseur à la fin du texte.    
+;   Édition:   
+;   L'éditeur fonctionne en mode écrasement, i.e. le caractère est placé à la 
+;   position du curseur et le curseur est avancé d'une position vers la droite.    
+;   DELETE  Efface le caractère à la position du curseur.
+;   INSERT  Insère un espace à la position du curseur. S'il y a un caractère à la colonne 64 il est perdu.    
+;   BACKSPACE Efface le caractère à gauche du curseur.
+;   CTRL_K Efface à partir du curseur jusqu'à la fin de la ligne    
+;   CTRL_X  Supprime la ligne sur laquelle le curseur réside.
+;   CTRL_Y  Insère une ligne vide avant celle où se trouve le curseur.
+;   Manipulation des blocs:    
+;   CTRL_B  Affiche le numéro du bloc, sa taille ainsi que numéro du bloc précédemment édité.    
 ;   CTRL_S  Sauvegarde de l'écran dans le bloc.
-;   CTRL_N  Efface l'écran pour éditer le bloc suivant.
-;   CTRL_P  Reviens au bloc précédemment édité.     
+;   CTRL_N  Charge le bloc suivant pour édition.
+;   CTRL_P  Charge le bloc précédent pour édition.     
 ;   CTRL_I  Édtion d'un bloc quelconque. Demande le numéro du bloc.
 ;   CTRL_Q  Quitte l'éditeur.
 
      
-.section blkedit.bss bss 
-_blknbr: .space 2  ; numéro du bloc en cours d'édition
-_blkprev: .space 2 ; numéro du bloc précédemment édité.
-    
- 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes utilisées par l'éditeur.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -87,33 +91,6 @@ _blkprev: .space 2 ; numéro du bloc précédemment édité.
 DEFCONST "MAXCHAR",7,,MAXCHAR,BLOCK_SIZE
     
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; variables utilisées par ED
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; nom:  BLK-NBR   ( -- a-addr )
-;   Variable qui contient le numéro du bloc en cours d'édition.
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.
-DEFCODE "BLK-NBR",7,,BLKNBR 
-     DPUSH
-     mov #_blknbr,T
-     NEXT
-     
-; nom: BLK-PREV ( -- a-addr )
-;   Variable qui contient le numéro du bloc précédemment en édition.
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.
-DEFCODE "BLK-PREV",8,,BLKPREV
-     DPUSH
-     mov #_blkprev,T
-     NEXT
-     
-     
 ; nom: TEXTEND  ( -- )
 ;   Positionne le curseur à la fin du texte. Balaie la mémoire tampon de l'écran à partir
 ;   de la fin et s'arrête après le premier caractère non blanc.     
@@ -138,10 +115,7 @@ DEFWORD "TEXTEND",7,,TEXTEND
 ; retourne:
 ;   rien     
 HEADLESS EDINIT,HWORD
-    .word LIT,0,BLKPREV,STORE
-    .word LCPAGE,VTPAGE
-    .word DUP,BLKNBR,STORE,LIST
-    .word TEXTEND,EXIT
+    .word LIST,TEXTEND,EXIT
  
     
 ;  KCASE  ( c n -- c f )    
@@ -202,10 +176,8 @@ DEFWORD "MSGLINE",7,,MSGLINE ; ( c-addr u n -- )
 ; retourne:
 ;   rien
 DEFWORD "NEXTBLOCK",9,,NEXTBLOCK
-    .word BLKNBR,FETCH,DUP,SCRTOBLK,DROP
-    .word DUP,BLKPREV,STORE
-    .word ONEPLUS,DUP,BLKNBR,STORE,LIST
-    .word EXIT
+    .word SCR,FETCH,DUP,SCRTOBLK,DROP
+    .word ONEPLUS,LIST,TEXTEND,EXIT
     
 ; nom: PREVBLOCK  ( -- )
 ;   Sauvegarde l'écran actuel et charge le bloc précédent pour édition.
@@ -214,9 +186,10 @@ DEFWORD "NEXTBLOCK",9,,NEXTBLOCK
 ; retourne:
 ;   rien
 DEFWORD "PREVBLOCK",9,,PREVBLOCK
-    .word BLKNBR,FETCH,SCRTOBLK,DROP
-    .word BLKPREV,FETCH,DUP,BLKNBR,STORE
-    .word LIST,EXIT
+    .word SCR,FETCH,DUP,SCRTOBLK,DROP
+    .word ONEMINUS,QDUP,ZBRANCH,9f-$
+    .word LIST,TEXTEND
+9:  .word EXIT
 
 
 ; nom: OPENBLOCK  ( -- )
@@ -226,62 +199,96 @@ DEFWORD "PREVBLOCK",9,,PREVBLOCK
 ; retourne:
 ;   rien
 DEFWORD "OPENBLOCK",9,,OPENBLOCK
+    .word FALSE,CURENBL,LIT,1,DUP,SAVELINE,GETCUR ; s: 1 col line
+    .word ROT,SETY,CLEARLN ; s: col line
+    .word STRQUOTE
+    .byte 14
+    .ascii "block number? "
+    .align 2
+    .word TYPE,LIT,1,TRUE,INVLN,TRUE,CURENBL
+    .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT,FALSE,CURENBL
+    .word SRCSTORE,LIT,0,TOIN,STORE
+    .word BL,WORD,DUP,CFETCH,ZBRANCH,8f-$
+    .word QNUMBER,ZBRANCH,8f-$
+    .word LIST,TEXTEND,BRANCH,9f-$
+8:  .word LIT,1,RESTORELINE,CURPOS
+9:  .word TRUE,CURENBL,EXIT
     
-    .word EXIT
     
-    
-; nom: VT-UPDATE  ( -- )
+; VT-UPDATE  ( -- )
 ;   l'éditeur doit mettre à jour l'écran de la console VT102 si le système est en REMOTE CONSOLE
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
-DEFWORD "VT-UPDATE",9,,VTUPDATE
-    .word SYSCONS,FETCH,SERCONS,EQUAL,TBRANCH,2f-$,DROP,EXIT
-2:  .word GETCUR,ROT  
-    .word DUP,LIT,0,SWAP,VTATXY
-    .word LIT,CPL,STAR,SCRBUF,PLUS,LIT,CPL,LIT 
-    .word EXIT   
-    
-HEADLESS DELLN,HWORD
-    .word DELLINE
-    .word EXIT
+;DEFWORD "VT-UPDATE",9,,VTUPDATE
+;    .word SYSCONS,FETCH,SERCONS,EQUAL,TBRANCH,2f-$,DROP,EXIT
+;2:  .word GETCUR,ROT  
+;    .word DUP,LIT,0,SWAP,VTATXY
+;    .word LIT,CPL,STAR,SCRBUF,PLUS,LIT,CPL,LIT 
+;    .word EXIT   
+ 
+; Efface du curseur jusqu'à la fin de la ligne    
+HEADLESS DELEOL,HWORD
+    .word FALSE,CURENBL
+    .word LIT,CPL,GETX,DODO
+1:  .word DOI,GETY,BL,CHRTOSCR,DOLOOP,1b-$
+    .word TRUE,CURENBL,EXIT
 
+; Insière une ligne au dessus de celle où se trouve le curseur.
+; Sauf s'il y a du texte sur la dernière ligne de l'éran.    
 HEADLESS INSLN,HWORD
     .word LCGETCUR,TEXTEND,GETY,LIT,LPS,EQUAL,ZBRANCH,2f-$
     .word CURPOS,EXIT
-2:  .word SWAP,DROP,TOR,RFETCH,LNADR,DUP,LIT,CPL,PLUS
+2:  .word FALSE,CURENBL    
+    .word SWAP,DROP,TOR,RFETCH,LNADR,DUP,LIT,CPL,PLUS
     .word SCRBUF,LIT,CPL,LIT,LPS,STAR,PLUS,OVER,MINUS
     .word MOVE,RFROM,SETY,CLRLN
-    .word EXIT
+    .word TRUE,CURENBL,EXIT
     
-; retire la ligne sur laquelle se trouve le curseur    
+; Retire la ligne sur laquelle se trouve le curseur    
 HEADLESS RMLN,HWORD
+    .word FALSE,CURENBL
     .word GETY,LNADR,TOR,RFETCH,LIT,CPL,PLUS
     .word DUP,SCRBUF,LIT,CPL,LIT,LPS,STAR,PLUS,SWAP,MINUS
     .word RFROM,SWAP,MOVE
-    .word LIT,1,GETY,LIT,LPS,SETY,CLRLN,CURPOS,EXIT
-    
+    .word LIT,1,GETY,LIT,LPS,SETY,CLRLN,CURPOS
+    .word TRUE,CURENBL,EXIT
+   
+; Supprime le caractère à la position du curseur.
 HEADLESS DELCHR,HWORD
     .word DELETE
     .word EXIT
     
+; Déplace le texte d'un position vers la droite
+; pour laisser un espace à la position du curseur.
+HEADLESS INSERTBL,HWORD
+    .word FALSE,CURENBL
+    .word CURADR,DUP,ONEPLUS,LIT,CPL,GETX,MINUS,MOVE
+    .word BL,CURADR,CSTORE
+    .word TRUE,CURENBL,EXIT
+    
+; Déplace le curseur à la fin du texte sur cette ligne.    
 HEADLESS TOEOL,HWORD
     .word LIT,VK_END,EMIT
     .word EXIT
    
+; Déplace le curseur au début de la ligne.    
 HEADLESS TOSOL,HWORD
     .word LIT,VK_HOME,EMIT,EXIT
     
+; Déplace le curseur 1 ligne vers le haut.    
 HEADLESS LNUP,HWORD
     .word LIT,VK_UP,EMIT
     .word EXIT
     
-;     
+;Déplace le curseur une ligne vers le bas.     
 HEADLESS LNDN,HWORD
     .word LIT,VK_DOWN,EMIT
     .word EXIT
-   
+
+; Déplace le curseur au début de la ligne suivante
+; sauf s'il est sur la dernière ligne.    
 HEADLESS CRLF,HWORD
     .word GETY,LIT,LPS,EQUAL,TBRANCH,9f-$
     .word LCCR
@@ -293,44 +300,46 @@ HEADLESS CHRTOBUF,HWORD ; ( c -- )
     .word CURADR,CSTORE,EXIT
     
 ; Affiche le caractère à la position de l'écran.
-HEADLESS INSCHR,HWORD ; ( c -- )
+HEADLESS PUTCHR,HWORD ; ( c -- )
     .word LCGETCUR,LIT,LPS,EQUAL,ZBRANCH,8f-$
     .word LIT,CPL,EQUAL,ZBRANCH,9f-$
     .word CHRTOBUF,EXIT
 8:  .word DROP
 9:  .word LCEMIT,EXIT
 
-HEADLESS TOBIG,HWORD
+; attend une touche au clavier.  
+HEADLESS EDKEY,HWORD
+    .word SCRSIZE,MAXCHAR,GREATER,ZBRANCH,2f-$
     .word STRQUOTE
     .byte 31
     .ascii "Screen to big to fit in a bloc."
     .align 2
-    .word EXIT
-    
-HEADLESS EDKEY,HWORD
-    .word SCRSIZE,MAXCHAR,GREATER,ZBRANCH,2f-$
-    .word TOBIG,LIT,1,MSGLINE
+    .word LIT,1,MSGLINE
 2:  .word LCEKEY, EXIT
 
+; efface le caractère avant le curseur.  
 HEADLESS BACKCHAR,HWORD 
-    .word DELBACK
-    .word EXIT
+    .word GETX,ONEMINUS,ZBRANCH,9f-$,DELBACK
+9:  .word EXIT
 
+; Déplace le curseur 1 caractère à gauche.  
 HEADLESS LEFT,HWORD
     .word LIT,VK_LEFT,EMIT
     .word EXIT
 
+; Déplacele curseur 1 caractère à droite.    
 HEADLESS RIGHT,HWORD
     .word LIT,VK_RIGHT,EMIT
     .word EXIT
 
+; Déplace le caractère dans le coin supérieur gauche.    
 HEADLESS PAGEUP,HWORD
     .word LIT,1,LIT,1,CURPOS,EXIT
     
- 
+; sauvegarde l'écran dans le bloc. 
 DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )   
 ;HEADLESS SAVESCREEN,HWORD
-    .word BLKNBR,FETCH,SCRTOBLK
+    .word SCR,FETCH,SCRTOBLK
     .word TBRANCH,8f-$
     .word STRQUOTE
     .byte 22
@@ -343,6 +352,24 @@ DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )
     .align 2
 9:  .word LIT,1,MSGLINE
     .word EXIT    
+    
+; affiche le numéro du bloc et sa taille.    
+HEADLESS BLKINFO,HWORD
+    .word FALSE,CURENBL,GETCUR,SCRSIZE ; S: col line size
+    .word LIT,1,DUP,SAVELINE,DUP,CURPOS,CLEARLN
+    .word STRQUOTE
+    .byte  6
+    .ascii "bloc#:"
+    .align 2
+    .word TYPE,SCR,FETCH,UDOT,LIT,16,SETX
+    .word STRQUOTE
+    .byte 5
+    .ascii "size:"
+    .align 2
+    .word TYPE,UDOT
+    .word LIT,1,DUP,TRUE,INVLN
+    .word LCKEY,DROP,RESTORELINE
+    .word CURPOS,TRUE,CURENBL,EXIT
     
 ; nom: BLKED  ( n+ -- )  
 ;   Éditeur de bloc texte. Edite 1 bloc à la fois.
@@ -358,29 +385,31 @@ DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
     .word EDINIT
 1:  .word EDKEY,DUP,LIT,31,GREATER,ZBRANCH,2f-$
     .word DUP,LIT,127,ULESS,ZBRANCH,4f-$
-    .word INSCHR,BRANCH,1b-$
+    .word PUTCHR,BRANCH,1b-$
     ; c<32
 2:  .word LIT,VK_CR,KCASE,ZBRANCH,2f-$,CRLF,BRANCH,1b-$
-2:  .word LIT,VK_BACK,KCASE,ZBRANCH,2f-$,GETX,ZBRANCH,1b-$,BACKCHAR,BRANCH,1b-$
+2:  .word LIT,VK_BACK,KCASE,ZBRANCH,2f-$,BACKCHAR,BRANCH,1b-$
+2:  .word LIT,CTRL_B,KCASE,ZBRANCH,2f-$,BLKINFO,BRANCH,1b-$  
 2:  .word LIT,CTRL_N,KCASE,ZBRANCH,2f-$,NEXTBLOCK,BRANCH,1b-$ 
 2:  .word LIT,CTRL_P,KCASE,ZBRANCH,2f-$,PREVBLOCK,BRANCH,1b-$ 
 2:  .word LIT,CTRL_Q,KCASE,ZBRANCH,2f-$,CLS,EXIT
 2:  .word LIT,CTRL_S,KCASE,ZBRANCH,2f-$,SAVESCREEN,BRANCH,1b-$
 2:  .word LIT,CTRL_I,KCASE,ZBRANCH,2f-$,OPENBLOCK,BRANCH,1b-$  
-2:  .word LIT,CTRL_X,KCASE,ZBRANCH,2f-$,DELLN,BRANCH,1b-$
+2:  .word LIT,CTRL_K,KCASE,ZBRANCH,2f-$,DELEOL,BRANCH,1b-$
+2:  .word LIT,CTRL_X,KCASE,ZBRANCH,2f-$,RMLN,BRANCH,1b-$  
 2:  .word LIT,CTRL_Y,KCASE,ZBRANCH,2f-$,INSLN,BRANCH,1b-$
-2:  .word LIT,CTRL_Z,KCASE,ZBRANCH,2f-$,RMLN,BRANCH,1b-$  
 2:  .word DROP,BRANCH,1b-$
     ; c>=127
 4:  .word LIT,VK_DELETE,KCASE,ZBRANCH,4f-$,DELCHR,BRANCH,1b-$    
+4:  .word LIT,VK_INSERT,KCASE,ZBRANCH,4f-$,INSERTBL,BRANCH,1b-$  
 4:  .word LIT,VK_LEFT,KCASE,ZBRANCH,4f-$,LEFT,BRANCH,1b-$
 4:  .word LIT,VK_RIGHT,KCASE,ZBRANCH,4f-$,RIGHT,BRANCH,1b-$ 
-4:  .word LIT,VK_HOME,KCASE,ZBRANCH,4f-$,TOSOL,BRANCH,1b-$
-4:  .word LIT,VK_END,KCASE,ZBRANCH,4f-$,TOEOL,BRANCH,1b-$
 4:  .word LIT,VK_UP,KCASE,ZBRANCH,4f-$,LNUP,BRANCH,1b-$
 4:  .word LIT,VK_DOWN,KCASE,ZBRANCH,4f-$,LNDN,BRANCH,1b-$
-4:  .word LIT,VK_PGDN,KCASE,ZBRANCH,4f-$,TEXTEND,BRANCH,1b-$
+4:  .word LIT,VK_HOME,KCASE,ZBRANCH,4f-$,TOSOL,BRANCH,1b-$
+4:  .word LIT,VK_END,KCASE,ZBRANCH,4f-$,TOEOL,BRANCH,1b-$
 4:  .word LIT,VK_PGUP,KCASE,ZBRANCH,4f-$,PAGEUP,BRANCH,1b-$  
+4:  .word LIT,VK_PGDN,KCASE,ZBRANCH,4f-$,TEXTEND,BRANCH,1b-$
 4:  .word DROP,BRANCH,1b-$
    
     .word EXIT

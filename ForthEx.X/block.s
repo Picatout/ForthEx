@@ -351,7 +351,7 @@ DEFWORD "ASSIGN",6,,ASSIGN
     ;   recherche d'un buffer libre
     .word NOTUSED,QDUP,TBRANCH,6f-$
     ; aucun buffer libre S: n+
-    .word OLDEST,DUP,UPDATED,ZBRANCH,6f-$
+    .word OLDEST,DUP,UPDATEDFETCH,ZBRANCH,6f-$
     .word DUP,DATAOUT
     ; trouvé buffer libre S: n+ a-addr
 6:  .word DUP,TOR,LIT,BLOCK_NBR,SWAP,TBLSTORE
@@ -439,7 +439,8 @@ DEFWORD "FLUSH",5,,FLUSH
     
 ; nom: LIST ( n+ -- )
 ;   Affiche le contenu du bloc à l'écran. Si le bloc n'est pas déjà dans un buffer
-;   il est chargé à partir du périphérique désigné par BLKDEV.    
+;   il est chargé à partir du périphérique désigné par BLKDEV. L'affichage s'arrête
+;   sitôt qu'un caractère autre que 32..126|VK_CR est rencontré.    
 ; arguments:
 ;   n+  numéro du bloc
 ; retourne:
@@ -447,9 +448,12 @@ DEFWORD "FLUSH",5,,FLUSH
 DEFWORD "LIST",4,,LIST
     .word DUP,SCR,STORE,CLS
     .word BLOCK,LIT,BLOCK_SIZE,LIT,0,DODO ; s: data
-1:  .word DUP,ECFETCH,QDUP,TBRANCH,2f-$
-    .word UNLOOP,BRANCH,9f-$ ; premier zéro arrête l'affichage.
-2:  .word EMIT,ONEPLUS,DOLOOP,1b-$
+1:  .word DUP,ECFETCH
+    .word DUP,LIT,VK_CR,EQUAL,TBRANCH,3f-$
+    .word DUP,BL,ULESS,TBRANCH,4f-$
+    .word DUP,LIT,126,UGREATER,TBRANCH,4f-$
+3:  .word EMIT,ONEPLUS,DOLOOP,1b-$,BRANCH,9f-$
+4:  .word DROP,UNLOOP 
 9:  .word DROP,EXIT
 
   

@@ -1,7 +1,12 @@
+2017-05-28
+----------
+Continuer travail sur BLKED
+corrigé bogue dans ASSIGN
+
 2017-05-27
 ----------
 Corrigé mot LOAD dans block.s
-
+Travail sur BLKED
 
 2017-05-26
 ----------

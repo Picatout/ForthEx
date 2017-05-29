@@ -443,7 +443,7 @@ DEFCODE "SRAND",5,,SRAND  ; ( -- )
     NEXT
    
 ; nom: CLEAR  ( -- )
-;   Efface la mémoire de données utilisateur. Tous les mot définis par l'utilisateur
+;   Efface la mémoire de données utilisateur. Tous les mots définis par l'utilisateur
 ;   sont supprimés du dictionnaire.  La valeur de DP est réiniialisé à DP0.
 ; arguments:
 ;   aucun
