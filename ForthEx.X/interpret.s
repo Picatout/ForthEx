@@ -25,11 +25,11 @@
 ;    une ligne de texte, à évaluer le texte contenu dans cette ligne.
 ;    S'il n'y a pas d'erreur lors de l'évaluation le message ' OK' est affiché
 ;    et la boucle recommence. En cas d'erreur un message peut-être affiché avant
-;    d'appeler le mot ABORT qui réinitialise à pile des retour et Appelle QUIT à nouveau.
-;    QUIT réinitialise à pile des arguments avant d'entrer dans la boucle de l'interpréteur.
+;    d'appeler le mot ABORT qui réinitialise la pile des retours et Appelle QUIT à nouveau.
+;    QUIT réinitialise la pile des arguments avant d'entrer dans la boucle de l'interpréteur.
 ;    
-;    Certains mots font passé le système en mode compilation qui permet d'ajouter
-;    de nouvelle définitions au dictionnaires.
+;    Certains mots font passer le système en mode compilation qui permet d'ajouter
+;    de nouvelles définitions au dictionnaire.
     
 ; DESCRIPTION:
 ;   Mots utilisés par l'intepréteur de texte.

@@ -17,6 +17,10 @@
 #include <dirent.h>
 #include <ctype.h>
 
+#define INDEX_SIZE 1024
+static char *words[INDEX_SIZE];
+int idx=0;
+
 static char* path="ForthEx.X/";
 static char* docPath="documentation/html/";
 static char* htmlExt=".html";
@@ -70,9 +74,26 @@ void replaceAngleBrackets(char *text){
 	html[j]=0;
 }
 
+void addHorzLine(FILE *fo,int tickness){
+	fprintf(fo,"<hr style=\"border-width:%dpx;\">",tickness);
+}
+
+void addMasterRef(FILE* fo){
+	fprintf(fo,"<div><a href=\"index.html\">index principal</a></div>\n");	
+}
+
+void addIndexRef(FILE* fo){
+	fprintf(fo,"<div><a href=\"#index\">index</a></div>\n");
+}
+
+void addTopRef(FILE* fo){
+	fprintf(fo,"<div><a href=\"#top\">haut</a></div>\n");	
+}
+
 void formatNameLine(char *text,FILE *out){
 	int i,j;
 	char *start;
+	char *toIndex;
     
 	i=scan(text,':',0);
 	i++;
@@ -81,6 +102,11 @@ void formatNameLine(char *text,FILE *out){
 	i=scan(text,' ',i+1);
 	text[i]=0;
 	replaceAngleBrackets(start);
+	if (idx<INDEX_SIZE){
+		toIndex=malloc(strlen(html)+1);
+		strcpy((char*)toIndex,html);
+		words[idx++]=toIndex;
+	}
 	fprintf(out,"<p id=\"%s\">\n",html);
 	fprintf(out,"<b>%s</b> ",html);
 	i++;
@@ -143,12 +169,15 @@ void addEntry(char* line, FILE *in, FILE *out){
 			outputArgLine(line,out);
 		}
     }
-	fputs("<hr>\n",out);
+    addIndexRef(out);
+    addTopRef(out);
+    addMasterRef(out);
+    addHorzLine(out,1);
 }
 
 void addDescription(char *line,FILE* in, FILE* out){
 	char *colon;
-	fputs("<h2>Description</h2>",out);
+	fputs("<h2 id=\"description\">Description</h2>",out);
 	replaceAngleBrackets(line);
 	colon=strchr(line,':');
 	colon++;
@@ -161,7 +190,8 @@ void addDescription(char *line,FILE* in, FILE* out){
 			fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",line);
 		}
 	}
-	fputs("<hr style=\"border-width:4px;\">",out);
+	addMasterRef(out);
+	addHorzLine(out,4);
 }
 
 static int wc,fc;
@@ -182,18 +212,60 @@ void generateDoc(FILE *in, FILE *out){
 	}
 }//generateDoc()
 
+
 FILE* createHeader(const char *name,FILE *out){
 	char htmlName[256];
-	
+
 	out=fopen(name,"w");
 	fputs("<DOCTYPE! html>\n",out);
 	fputs("<html lang=\"fr-CA\">\n",out);
 	fputs("<head>\n",out);
-	fputs("</head>\n<body>\n",out);
+	fputs("</head>\n<body id=\"#top\">\n",out);
 	return out;
 }
 
+// combsort words[] array.
+// REF: https://fr.wikipedia.org/wiki/Tri_%C3%A0_peigne 
+void sortWords(){
+	int skip=idx;
+	int xchg;
+	int i;
+	char *temp;
+	
+	while ((skip>1) || xchg ){
+		skip=skip/1.3;
+		if (skip<1) skip=1;
+		i=0;
+		xchg=0;
+		while (i<(idx-skip)){
+			if (strcmp(words[i],words[i+skip])>0){
+				temp=words[i];
+				words[i]=words[i+skip];
+				words[i+skip]=temp;
+				xchg=-1;
+			}
+			i++;
+		}//while
+	}//while
+}
+
+void createIndex(FILE* out){
+	int i;
+	fputs("<h4 id=\"index\">Index</h4>\n<p>\n<ul>\n",out);
+	sortWords();
+	for (i=0;i<idx;i++){
+		fprintf(out,"<li><a href=\"#%s\">%s</a></li>\n",words[i],words[i]);
+		free(words[i]);
+	}
+	fputs("</ul>\n</p>\n",out);
+	addHorzLine(out,1);
+	addTopRef(out);
+	addMasterRef(out);
+	idx=0;
+}
+
 void closeHtml(FILE* out){
+	createIndex(out);
 	fputs("\n</body>\n</html>\n",out);
 	fclose(out);
 }
@@ -224,7 +296,9 @@ void parseFiles(){
 		strcat(htmlName,fileName);
 		strcat(htmlName,htmlExt);
 		fo=createHeader(htmlName,fo);
-		fprintf(fo,"<h1>%s</h1>",fileName);  	
+		fprintf(fo,"<h1>%s</h1>",fileName); 
+		addIndexRef(fo);
+		addMasterRef(fo);
         generateDoc(fi,fo);
         closeHtml(fo);
         fclose(fi);

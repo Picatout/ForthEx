@@ -41,13 +41,16 @@
 ;   Lors de la sauvegarde dans un bloc les lignes sont tronquées après le dernier caractère
 ;   et un caractère de fin de ligne est ajouté. Il y a 24 lignes sur un écran donc
 ;   si la longueur moyenne des lignes est inférieure à (BLOCK_SIZE-24)/24 l'écran peut
-;   être sauvegardé dans un bloc. L'éditeur calcule constamment le nombre de caractères
-;   dans un écran en édition et rapporte une alerte si ce nombre dépasse BLOCK_SIZE.
+;   être sauvegardé dans un bloc. L'éditeur le mot SCR-SIZE défini dans le fichier block.s
+;   et rapporte une alerte si ce nombre dépasse BLOCK_SIZE.
 ;   Il est problable que la majorité du temps un écran avec les lignes tronquées après
 ;   le dernier caractère répondra à ce critère. Au pire il suffira de raccourcir les commentaires.    
 ; FONCTIONNEMENT:
 ;   Le curseur peut-être déplacé n'importe où sur l'écran et le texte modifié.
-;   Cependant le curseur ne peut sortir des limites de l'écran, il n'y a pas de défilement.    
+;   Cependant le curseur ne peut sortir des limites de l'écran, il n'y a pas de défilement.
+;   L'éditeur fonctionne en mode écrasement, donc si le curseur est déplacé au dessus d'un
+;   caractère il sera remplacé par le caractère tapé à cet endroit. La seule façon d'insérer
+;   un caractère au milieu d'un ligne est d'utiliser la touche INSERT suivie du caractère.     
 ; COMMANDES:
 ;   Déplacement du curseur:
 ;   UP Déplace le curseur sur la ligne supérieure.

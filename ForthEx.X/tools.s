@@ -18,8 +18,8 @@
 ;****************************************************************************
 ; NOM: tools.s
 ; DATE: 2017-05-18
-; DESCRIPTION: Outils d'aide au débogage.
-;    Retiré du fichier core.s pour les mettres ici.
+; DESCRIPTION: 
+;    Outils d'aide au débogage.
     
 ; nom: ?DSP  ( -- )    
 ;   Outil de débogage.    

@@ -384,7 +384,7 @@ DEFCODE "LFSR",4,,LFSR  ; ( -- )
     NEXT
 
 ; nom: RAND   ( -- n )    
-;   Générateur pseudo-hasard qui génère un entier de 16 bits. Utilise la variable 
+;   Générateur pseudo-hasard qui génère un entier de 16 bits. 
 ;   Ce générateur doit-être initialisé avec SRAND avant utilisation sinon 
 ;   la valeur retournée est toujours 0.
 ;   algorithme:
