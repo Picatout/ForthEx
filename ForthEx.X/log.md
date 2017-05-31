@@ -1,3 +1,8 @@
+2017-05-30
+----------
+Travail sur la documentation. Création du fichier presentation.html
+Révision du code dans flash.s
+
 2017-05-29
 ----------
 Travail sur docgen.c

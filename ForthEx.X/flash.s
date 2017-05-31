@@ -17,8 +17,9 @@
 ;
 ;****************************************************************************
 
-;NOM: flash.s
-;DESCRIPTION:
+; NOM: flash.s
+; DATE: 2017-03-07
+; DESCRIPTION:
 ;  Permet l'accès à des données stockées dans la mémoire flash du MCU.
 ;  Pour protéger le système l'écriture n'est autorisée qu'à partir de l'adresse 
 ;  0x8000. Le système au complet doit résidé en déça de cette adresse sauf
@@ -29,7 +30,6 @@
 ; REF:    
 ;  documents de référence Microchip: DS70609D et DS70000613D
 ;    
-;DATE: 2017-03-07
     
 .section .hardware.bss  bss
 ; adresse du tampon pour écriture mémoire flash du MCU
@@ -48,7 +48,7 @@ _mflash_buffer: .space 2
 ;   aucun 
 DEFTABLE "MFLASH",6,,MFLASH
     .word _MCUFLASH ; mémoire FLASH du MCU    
-    .word FTBLFETCHL ;
+    .word FFETCH 
     .word TOFLASH
     .word FLASHTORAM
     .word RAMTOFLASH
@@ -62,34 +62,61 @@ DEFTABLE "MFLASH",6,,MFLASH
 DEFWORD "FBUFFER",7,,FBUFFER ; ( -- a-addr ) 
     .word LIT,FLASH_PAGE_SIZE,MALLOC,DUP,LIT,_mflash_buffer,STORE
     .word EXIT
- 
-; nom: FTBL@L  (  ud1 -- n )    
-;   Lecture d'un mot dans la mémoire flash low word (adresse paire).
-;   Utiliste l'instruction machine 'tblrdl'.    
+
+    
+; nom: F@  (  ud1 -- n )    
+;   Lecture d'un mot de 16 bits dans la mémoire.
+;   Si ud1 est pair utilise l'instruction machine TBLRDL pour retourner les bits 15:0
+;   Si ud1 est impair utilise l'instruction machine TBLRDH pour retourner les bits 23:16    
 ; arguments:
 ;   ud1  adrese dans la mémmoire flash du MCU.
 ; retourne:
-;   n    valeur lue à l'adresse ud1. n représente les bits 15..0 de l'instruction à cette adresse.
-DEFCODE "FTBL@L",6,,FTBLFETCHL ; ( ud1 -- n )
+;   n    valeur lue à l'adresse ud1. Si ud1 est impair les bits 15:8 sont à zéro.
+DEFCODE "F@",2,,FFETCH ; ( ud1 -- n )
     RPUSH TBLPAG
     mov T,TBLPAG
     DPOP
-    tblrdl [T],T
+    btss T,#0
+    bra 2f
+    bclr T,#0
+    tblrdh [T],T
+    bra 9f
+2:  tblrdl [T],T
+9:  RPOP TBLPAG
+    NEXT
+  
+; nom: FC@L ( ud1 -- n )
+;   Lecture d'un octet dans la partie basse de l'instruction. 
+;   Utilise l'instruction machine TBLRDL.B    
+;    Si ud1 est impair  les bits 15:8 sont retournés, sinon les bits 7:0 sont retournés.
+; arguments:
+;   ud1  entier double correspondant à l'adresse en mémoire flash.
+; retourne:
+;   n    si impair(ud1) n=bits{15:8}  sinon n=bits{7:0}
+DEFCODE "FC@L",4,,FCFETCHL 
+    RPUSH TBLPAG
+    mov T,TBLPAG
+    DPOP
+    tblrdl.b [T],T
+    ze T,T
     RPOP TBLPAG
     NEXT
     
-; nom: FTBL@H   ( ud1 -- n )    
-;    Lecture d'un mot dans la mémoire flash high word (adresse impaire).
-;    Utilise l'instruction machine 'tblrdh'.     
+    
+; nom: FC@H   ( ud1 -- n )    
+;    Lecture d'un octet dans la mémoire flash du mot lourd de l'instruction.
+;    Utilise l'instruction machine TBLRDH.B
+;    Si ud1 est impair retourne la valeur 0, sinon retourne les bits 23:16 de l'instruction.    
 ; arguments:
 ;   a-addr   adresse du premier octet de donnée du tampon.
 ; retourne:
 ;   n	valeur lue à l'adresse ud1.  n représente les bits 23..16 de l'instruction à l'adresse a-addr-1.
-DEFCODE "FTBL@H",6,,FTBLFETCHH ; ( ud1 -- n )
+DEFCODE "FC@H",4,,FCFETCHH ; ( ud1 -- n )
     RPUSH TBLPAG
     mov T,TBLPAG
     DPOP
-    tblrdh [T],T
+    tblrdh.b [T],T
+    ze T,T
     RPOP TBLPAG
     NEXT
 
@@ -105,9 +132,8 @@ DEFCODE "FTBL@H",6,,FTBLFETCHH ; ( ud1 -- n )
 DEFCODE "I@",2,,IFETCH 
     RPUSH TBLPAG
     mov T,TBLPAG
-    DPOP
-    mov T, W0
-    tblrdh [W0],[++DSP]
+    mov [DSP], W0
+    tblrdh [W0],[DSP]
     tblrdl.b [W0++],T
     ze T,T
     tblrdl.b [W0],W0
@@ -253,6 +279,8 @@ DEFWORD ">FLASH",6,,TOFLASH ; ( addr ud -- )
   
 ; nom: RAM>FLASH  ( addr n ud -- )    
 ;   Écris en mémoire flash un bloc de données en RAM.
+;   Le bloc de mémoire RAM identifié par addr doit avoir une grandeur multiple de 6. 
+;   Au besoin remplir les octets excédaires avec la valeur 0xFF.    
 ; arguments:    
 ;   addr  Adresse début données en RAM.
 ;   n     Nombre d'octets à écrire.
@@ -268,21 +296,21 @@ DEFWORD "RAM>FLASH",9,,RAMTOFLASH ; ( adr size ud -- )
     .word FNEXT,LIT,6,PLUS,LIT,6,DOPLOOP,2b-$,DROP
 9:  .word EXIT
   
-; nom: FLASH>RAM  ( addr n ud -- )  
-;  Lecture d'un bloc FLASH dans un tamp en mémoire RAM.
+; nom: FLASH>RAM  ( c-addr n ud -- )  
+;  Lecture d'un bloc FLASH dans un tampon en mémoire RAM.
 ; arguments:  
-;   addr  Adresse 16 bits début RAM.
+;   c-addr  Adresse 16 bits début RAM.
 ;   n     Nombre d'octets à lire.
-;   ud   adresse début bloc FLASH.
+;   ud    adresse début bloc FLASH.
 ; retourne:
 ;   rien  
-DEFWORD "FLASH>RAM",9,,FLASHTORAM ; ( adr size ud -- )
+DEFWORD "FLASH>RAM",9,,FLASHTORAM ; ( c-addr size ud -- )
     .word ROT ; S: adr ud size  
     .word LIT,0,DODO ; S: adr ud 
-1:  .word TWODUP,LIT,2,MPLUS,TWOTOR,IFETCH ; S: adr n1 n2 n3 R: ud+2
-    .word NROT,TWOTOR,OVER,CSTORE,ONEPLUS,RFROM,OVER,CSTORE
-    .word ONEPLUS,RFROM,OVER,CSTORE,ONEPLUS
-    .word TWORFROM,LIT,3,DOPLOOP,1b-$
+1:  .word TWODUP,TWOTOR,DOI,LIT,3,MOD,LIT,2,EQUAL,ZBRANCH,2f-$ ; S: adr ud  R: ud
+    .word FCFETCHL,BRANCH,6f-$
+2:  .word FCFETCHH   
+6:  .word OVER,CSTORE,ONEPLUS,TWORFROM,LIT,1,MPLUS,DOLOOP,1b-$
     .word TWODROP,DROP
 9:  .word EXIT  
 

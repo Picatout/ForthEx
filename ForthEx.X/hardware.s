@@ -16,7 +16,10 @@
 ;     along with ForthEx.  If not, see <http://www.gnu.org/licenses/>.
 ;
 ;****************************************************************************
-; hardware setup
+; NOM: hardware.s
+; DESCRIPTION:    
+;  Initialisation du MCU et définitions liés étroitement au fonctionnement du
+;   MCU    
     
 .include "hardware.inc"
 .include "core.s"
@@ -296,9 +299,6 @@ HEADLESS VARS_INIT
     NEXT
 
     
-; DESCRIPTION:
-;    Les mots suivants sont étroitement liés à la configuration matérielle.
- 
 ; nom: REBOOT ( -- )
 ;   Redémarre le système avec le même effet qu'une mise sous tension
 ;   en exécutant l'instruction machine RESET.    
