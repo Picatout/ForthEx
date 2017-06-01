@@ -1,3 +1,9 @@
+2017-06-01
+----------
+Renommé dossier documentation en docs
+réorganisation dossier html
+Travail de documentation dans flash.s
+
 2017-05-31
 ----------
 Correcton bogue dans M+

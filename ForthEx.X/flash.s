@@ -22,13 +22,14 @@
 ; DESCRIPTION:
 ;  Permet l'accès à des données stockées dans la mémoire flash du MCU.
 ;  Pour protéger le système l'écriture n'est autorisée qu'à partir de l'adresse 
-;  0x8000. Le système au complet doit résidé en déça de cette adresse sauf
-;  pour une image du dictionnaire en RAM  qui peut-être sauvegardé dans la FLASH 
-;  à partir de l'adresse 0x8000 avec le mot IMGSAVE. Cette image est 
-;  automatiquement récupérée au démarrage du sytème par le mot IMGLOAD.  
-;
-; REF:    
-;  documents de référence Microchip: DS70609D et DS70000613D
+;  0x8000. Une image de la mémoire RAM utilisateur peut-être sauvegardée dans la
+;  mémoire flash du MCU avec le mot IMGSAVE.    
+;  Cette image est automatiquement récupérée au démarrage du sytème. De plus si
+;  cette image contient une définition appellée AUTORUN celle-ci sera exécutée au
+;  au démarrage de l'ordinateur ou suite à une commande REBOOT.    
+; REF:
+;  Pour plus d'information sur la programmation en runtime de la mémoire flash    
+;  consultez les documents de référence Microchip: DS70609D et DS70000613D
 ;    
     
 .section .hardware.bss  bss
@@ -54,25 +55,29 @@ _mflash_buffer: .space 2
 ;    .word RAMTOFLASH
     
 ; nom: FBUFFER  ( -- a-addr )
-;   Réservation d'un bloc de mémoire dynamique pour écriture d'une page flash MCU.
+;   Réservation d'un bloc de mémoire dynamique pour écriture d'une ligne flash MCU.
+;   Pour modifier une ligne on la lit dans ce tampon et lorsque les modifications sont
+;   complétée, la page est effacée et reprogrammée avec le contenu de ce tampon. 
+;   Ce bloc de mémoire dynamique peut-être libéré après usage en utilisant FREE. 
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr   adresse du premier octet de donnée du tampon.
+;   a-addr   Adresse du premier octet de donnée du tampon.
 DEFWORD "FBUFFER",7,,FBUFFER ; ( -- a-addr ) 
     .word LIT,FLASH_PAGE_SIZE,MALLOC,DUP,LIT,_mflash_buffer,STORE
     .word EXIT
 
     
-; nom: F@  (  ud1 -- n )    
-;   Lecture d'un mot de 16 bits dans la mémoire.
+; nom: F@  (  ud1 -- u )    
+;   Lecture d'un mot de 16 bits dans la mémoire FLASH.
 ;   Si ud1 est pair utilise l'instruction machine TBLRDL pour retourner les bits 15:0
-;   Si ud1 est impair utilise l'instruction machine TBLRDH pour retourner les bits 23:16    
+;   Si ud1 est impair utilise l'instruction machine TBLRDH pour retourner les bits 32:16
+;   les bit 32:24 sont à zéro puisque cet octet n'est pas implémenté dans le MCU.    
 ; arguments:
-;   ud1  adrese dans la mémmoire flash du MCU.
+;   ud1  Adresse dans la mémmoire flash du MCU.
 ; retourne:
-;   n    valeur lue à l'adresse ud1. Si ud1 est impair les bits 15:8 sont à zéro.
-DEFCODE "F@",2,,FFETCH ; ( ud1 -- n )
+;   u    Valeur lue à l'adresse ud1.
+DEFCODE "F@",2,,FFETCH ; ( ud1 -- u )
     RPUSH TBLPAG
     mov T,TBLPAG
     DPOP
@@ -85,14 +90,14 @@ DEFCODE "F@",2,,FFETCH ; ( ud1 -- n )
 9:  RPOP TBLPAG
     NEXT
   
-; nom: FC@L ( ud1 -- n )
+; nom: FC@L ( ud1 -- c )
 ;   Lecture d'un octet dans la partie basse de l'instruction. 
 ;   Utilise l'instruction machine TBLRDL.B    
 ;    Si ud1 est impair  les bits 15:8 sont retournés, sinon les bits 7:0 sont retournés.
 ; arguments:
-;   ud1  entier double correspondant à l'adresse en mémoire flash.
+;   ud1  Entier double correspondant à l'adresse en mémoire flash.
 ; retourne:
-;   n    si impair(ud1) n=bits{15:8}  sinon n=bits{7:0}
+;   c    Si impair(ud1) c=bits{15:8}  sinon c=bits{7:0}
 DEFCODE "FC@L",4,,FCFETCHL 
     RPUSH TBLPAG
     mov T,TBLPAG
@@ -103,14 +108,14 @@ DEFCODE "FC@L",4,,FCFETCHL
     NEXT
     
     
-; nom: FC@H   ( ud1 -- n )    
-;    Lecture d'un octet dans la mémoire flash du mot lourd de l'instruction.
+; nom: FC@H   ( ud1 -- c )    
+;    Lecture d'un octet dans la mémoire flash du mot fort de l'instruction.
 ;    Utilise l'instruction machine TBLRDH.B
 ;    Si ud1 est impair retourne la valeur 0, sinon retourne les bits 23:16 de l'instruction.    
 ; arguments:
-;   a-addr   adresse du premier octet de donnée du tampon.
+;   a-addr Adresse du premier octet de donnée du tampon.
 ; retourne:
-;   n	valeur lue à l'adresse ud1.  n représente les bits 23..16 de l'instruction à l'adresse a-addr-1.
+;   c Valeur lue à l'adresse ud1.  c représente les bits 23..16 de l'instruction à l'adresse a-addr-1.
 DEFCODE "FC@H",4,,FCFETCHH ; ( ud1 -- n )
     RPUSH TBLPAG
     mov T,TBLPAG
@@ -121,14 +126,14 @@ DEFCODE "FC@H",4,,FCFETCHH ; ( ud1 -- n )
     NEXT
 
 ; nom: I@   ( ud -- u1 u2 u3 )    
-;   lit 1 instruction de la mémoire flash du MCU. L'instrucion est séparé en
-;   3 octets. Accès à la mémoire flash en utilisant les instructions 'tblrdl' et 'tblrdh'.
+;   lit 1 instruction de la mémoire FLASH du MCU. L'instrucion est séparée en
+;   3 octets. Accès à la mémoire flash en utilisant les instructions machine TBLRDL et TBLRDH .
 ; arguments:    
-;   ud  adresse 24 bits mémoire flash
+;   ud  Adresse 24 bits mémoire flash
 ; retourne:
-;   u1  bits 16:23 
-;   u2  bits 8:15
-;   u3  bits 0:7    
+;   u1  Bits 16:23 
+;   u2  Bits 8:15
+;   u3  Bits 0:7    
 DEFCODE "I@",2,,IFETCH 
     RPUSH TBLPAG
     mov T,TBLPAG
@@ -142,18 +147,18 @@ DEFCODE "I@",2,,IFETCH
     RPOP TBLPAG
     NEXT
  
-; nom: IC@ ( ud n -- c )
+; nom: IC@ ( ud u -- c )
 ;   Lit 1 octet dans la mémoire flash à l'adresse d'instruction ud et à la position
-;   désignée par n. n est dans l'intervalle {0..2}
-;   0 retourne l'octet le faible, bits 7:0
+;   désignée par u. n est dans l'intervalle {0..2}
+;   0 retourne l'octet faible, bits 7:0
 ;   1 retourne l'octet du milieu, bits 15:8
-;   2 retourne l'octet le fort, bits 23:16
+;   2 retourne l'octet fort, bits 23:16
 ; arguments:
-;   ud   Entier double pair adresse de l'instruction.
-;   n    entier dans l'intervalle {0..2} indiquant quel octet de l'instruction doit-être lu.
+;   ud   Entier double adresse de l'instruction. ud doit-?tre un nombre pair.
+;   u    Entier dans l'intervalle {0..2} indiquant quel octet de l'instruction doit-être lu.
 ; retourne:
-;   c    octet lu dans la mémoire flash.
-DEFCODE "IC@",3,,ICFETCH ; ( ud n -- c )
+;   c    Octet lu dans la mémoire flash.
+DEFCODE "IC@",3,,ICFETCH ; ( ud u -- c )
     mov T, W0
     DPOP
     RPUSH TBLPAG
@@ -172,7 +177,7 @@ DEFCODE "IC@",3,,ICFETCH ; ( ud n -- c )
     
 ; nom: FADDR   ( ud -- )    
 ;   Initialise le pointeur d'addresse 24 bits pour la programmation de la mémoire FLASH du MCU.
-;   Les addresse FLASH ont 24 bits.
+;   Les addresse FLASH ont 24 bits. Il s'agit d'initialiser les registres spéciaux du MCU appellées NVMADRU:NVMADR
 ; arguments:
 ;   ud   Entier double représentant l'adresse en mémoire FLASH MCU.
 ; retourne:
@@ -184,13 +189,15 @@ DEFCODE "FADDR",5,,FADDR ; ( ud -- )
     DPOP
     NEXT
 
-; nom: FNEXT   ( -- )
+; FNEXT   ( -- )
 ;   Incrémente le pointeur pour la programmation du prochain mot en mémoire FLASH MCU.
+;   Il s'agit d'incrémenter les registres spéciaux du MCU  NVMARDU:NVBADR qui ensemble forme un pointeur 24 bits.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
-DEFCODE "FNEXT",5,,FNEXT ; ( -- )
+HEADLESS FNEXT,CODE    
+;DEFCODE "FNEXT",5,,FNEXT ; ( -- )
     mov #4,W0
     add NVMADR
     clr W0
@@ -198,8 +205,11 @@ DEFCODE "FNEXT",5,,FNEXT ; ( -- )
     NEXT
 
 
-; nom: WRITE_LATCH  ( c-addr -- )    
-;   Écriture de 6 octets dans les tampons utilisés pour la programmation de la mémoire flash.    
+; WRITE_LATCH  ( c-addr -- )    
+;   Écriture de 6 octets dans les tampons utilisés pour la programmation de la mémoire flash.
+;   Le MCU PIC24EP512GP202 contient 2 registres de 24 bits pour les données à enregistrés dans
+;   la mémoire flash. Une fois ces 2 registes intialisés avec les données on procède à l'opération
+;   d'écriture proprement dit. Les 'latches' de programmation sont aux adresses 0xFA0000 et 0xFA0002   
 ; arguments:    
 ;   c-addr  Adresse du premier octet en mémoire RAM à copié dans les tampons flash.
 ; retourne:
@@ -226,12 +236,24 @@ HEADLESS "WRITE_LATCH" ; ( addr --  )
 
 ; FLASH_OP	 ( n -- )    
 ;   Séquence d'écriture dans la mémoire flash du MCU.
+;   opérations disponibles:
+;   0  programmation d'un seul registre de configuration.
+;   1  programmation de 2 mots.
+;   2  programmation de tous les latches.
+;   3  efface une page pour le PIC24EP512GP202 il s'agit de 1024 instructions ou 3072 octets.
+;   10 efface toute la mémoire flash auxiliaire ( sans effet sur PIC24EP512GP202).
+;   13 efface toute la mémoire flash
+;   Pour des raisons évidentes les opérations > 3 sont refusées.    
 ; arguments:
 ;   n    Constante identifiant le type d'opération flash à effectuer.
 ; retourne:
 ;   rien    
 HEADLESS "FLASH_OP"  ; ( op -- )
-    mov #(1<<WREN),W0 ; write enable
+    cp T,#4
+    bra ltu,2f
+    DPOP
+    bra 9f
+2:  mov #(1<<WREN),W0 ; write enable
     ior T,W0,W0
     DPOP
     mov W0,NVMCON
@@ -243,18 +265,18 @@ HEADLESS "FLASH_OP"  ; ( op -- )
     bset NVMCON,#WR
     NOP
     NOP
-    btsc NVMCON,#WR
-    bra $-2
-    NEXT
+8:  btsc NVMCON,#WR ; attend la fin de l'opération.
+    bra 8b
+9:  NEXT
   
 ; nom: ?FLIMITS   ( ud -- ud f )    
 ;   Vérifie si l'adresse 24 bits représsentée par ud est dans la plage
-;   IMG_FLASH_ADDR <= addr < FLASH_END et retourne un indicateur booléen.
+;   IMG_FLASH_ADDR <= ud < FLASH_END et retourne un indicateur booléen.
 ; arguments:
-;   ud   adresse 24 bits à contrôler.
+;   ud   Adresse 24 bits à contrôler.
 ; retourne:
-;   ud   adresse contrôlée.
-;   f    indicateur Booléen.    
+;   ud   Adresse contrôlée.
+;   f    Indicateur Booléen.    
 DEFWORD "?FLIMITS",8,,QFLIMITS ; ( addrl addrh -- addrl addrh f )
     .word TWODUP, LIT,IMG_FLASH_ADDR&0xFFFF,LIT,(IMG_FLASH_ADDR>>16)
     .word UDREL,ZEROLT,ZBRANCH,1f-$
@@ -263,8 +285,11 @@ DEFWORD "?FLIMITS",8,,QFLIMITS ; ( addrl addrh -- addrl addrh f )
     .word UDREL,ZEROLT,EXIT
     
 ; nom: ROW>FADR  ( u -- ud )
-;   La plus petite plage de mémoire flash qui peut-être effacée est appellée ligne.    
+;   La plus petite plage de mémoire flash qui peut-être effacée est appellée ligne ou page.    
 ;   Convertie un numéro de ligne en adresse FLASH 24 bits.
+;   Pour le PIC24EP512GP202 une ligne représente 1024 instructions machine
+;   soit 2048 adresses PC ou 3072 octets.
+;   donc ud=2048*u    
 ; arguments:
 ;   u    Numéro de ligne.
 ; arguments:
@@ -276,7 +301,8 @@ DEFWORD "ROW>FADR",8,,ROWTOFADR
 ;   Efface une ligne de mémoire FLASH MCU
 ;   Une ligne correspond à 1024 instructions.
 ;   Les instructions étant codées sur 24 bits, 1 ligne correspond à 3072 octets.
-;   Le compteur d'instruction du MCU incrémente par 2 et pointe toujours sur une adresse paire.    
+;   Le compteur d'instruction du MCU incrémente par 2 et pointe toujours sur une adresse paire. 
+;   Voir ROW>FADR    
 ; arguments:      
 ;   u  numéro de la ligne.
 ; retourne:
@@ -290,23 +316,6 @@ DEFWORD "FERASE",6,,FERASE ; ( u -- )
 8:  .word DOTS,TWODROP
 9:  .word EXIT
   
-; nom: >FLASH  ( addr ud -- )
-;   La programmation du PIC24EP512GP202 se fait par 6 octets. On doit écrire
-;   C'est 6 octets ( 2 instructions machine) doivent-être écris dans des registres
-;   spéciaux (latches) avant d'effectuer la programmation.  
-;   Écriture de 6 octets dans les tampons FLASH MCU
-; arguments: 
-;   addr adresse RAM du premier octet de donnée.
-;    ud  adresse mémoire flash  24 bits
-; retourne:
-;   rien  
-DEFWORD ">FLASH",6,,TOFLASH ; ( addr ud -- )
-    .word QFLIMITS,TBRANCH,1f-$
-    .word TWODROP,DROP,EXIT ; jette les 2 adresses avant de quitter
-1:  .word FADDR  ; S: addr
-    .word WRITE_LATCH,LIT,FOP_WDWRITE,FLASH_OP,EXIT
-    
-  
 ; nom: RAM>FLASH  ( addr n ud -- )    
 ;   Écris en mémoire flash un bloc de données en RAM.
 ;   Le bloc de mémoire RAM identifié par addr doit avoir une grandeur multiple de 6. 
@@ -314,7 +323,7 @@ DEFWORD ">FLASH",6,,TOFLASH ; ( addr ud -- )
 ; arguments:    
 ;   addr  Adresse début données en RAM.
 ;   n     Nombre d'octets à écrire.
-;   ud    addresse 24 bits en mémoire FLASH.
+;   ud    Entier double, addresse 24 bits en mémoire FLASH.
 ; retourne:
 ;   rien    
 DEFWORD "RAM>FLASH",9,,RAMTOFLASH ; ( adr size ud -- )    
@@ -331,7 +340,7 @@ DEFWORD "RAM>FLASH",9,,RAMTOFLASH ; ( adr size ud -- )
 ; arguments:  
 ;   c-addr  Adresse 16 bits début RAM.
 ;   n     Nombre d'octets à lire.
-;   ud    adresse début bloc FLASH.
+;   ud    Entier double, adresse début bloc FLASH.
 ; retourne:
 ;   rien  
 DEFWORD "FLASH>RAM",9,,FLASHTORAM ; ( c-addr size ud -- )
@@ -355,24 +364,39 @@ DEFWORD "FLASH>RAM",9,,FLASHTORAM ; ( c-addr size ud -- )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   
-; IMG>RAM charge en RAM une image système
-; *** format image boot ****
-; 00 signature MAGIC, 2 octets
-; 02 sauvegarde de LATEST, 2 octets
-; 04 sauvegarde de DP, 2 octets  
-; 06 data_size 2 octets
-; 08 données image débute ici.    
-; *************************    
+; nom: IMGHEAD  ( -- a-addr )
+;   Constante système.    
+;   Adresse de la structure d'entête d'image.
+;   Structure BOOT_HEADER    
+;   00 IMGSIGN, 2 octets
+;   02 IMGLATST, 2 octets
+;   04 IMGDP, 2 octets  
+;   06 IMGSIZE 2 octets
+; arguments:
+;   aucun
+; retourne:
+;   a-addr   Adresse de la structure BOOT_HEADER    
+DEFCONST "IMGHEAD",7,,IMGHEAD,BOOT_HEADER
 
-; nom: Constantes liées au chargeur système  
-;   IMGHEAD  adresse de la structure BOOT_HEADER
-;   MAGIC    champ signature au début de l'entête  0x55AA
-;   IMGROW   champ numéro premier ligne flash où débute l'image.
-DEFCONST "IMGHEAD",7,,IMGHEAD,BOOT_HEADER ; entête secteur démarrage
-DEFCONST "MAGIC",5,,MAGIC,0x55AA ; signature
+; nom: MAGIC  ( -- u )
+;   Constante système.
+;   signature pour reconnaître s'il y a une image sauvegardée en mémoire FLASH.
+; arguments:
+;   aucun
+; retourne:
+;   u	Signature 0x55AA
+DEFCONST "MAGIC",5,,MAGIC,0x55AA
+    
+; nom: IMGROW 
+;   Constante système.
+;   Numéro de la ligne (page) où est sauvegardée l'image RAM en mémoire FLASH.
+; arguments:
+;   aucun
+; retourne:
+;   u	Numéro de la ligne
 DEFCONST "IMGROW",6,,IMGROW,FLASH_FIRST_ROW  ; numéro première ligne FLASH IMG  
 
-; nom: BOOT_HEADER   ( -- n addr )
+; BOOT_HEADER   ( -- n addr )
 ;   Il s'agit d'une structure maintenue en mémoire RAM et possédant les champs suivants:
 ;   SIGN   signature
 ;   LATEST valeur de la variable système LATEST à sauvegarder avec l'image.
@@ -384,23 +408,58 @@ DEFCONST "IMGROW",6,,IMGROW,FLASH_FIRST_ROW  ; numéro première ligne FLASH IMG
 ;   IMGLATST  renvoie l'index du champ LATEST
 ;   IMGDP     renvoie l'index du champ DP
 ;   IMGSIZE   renvoie l'index du champ SIZE  
-DEFWORD "IMGSIGN",7,,IMGSIGN  ; ( -- n addr )
+    
+; nom: IMGSIGN  ( -- u a-addr )
+;   Retourne l'indice du champ SIGN et l'adresse de la structure BOOT_HEADER
+;   Permet d'accéder le champ avec TBL@ et TBL!    
+; arguments:
+;   aucun
+; retourne:
+;   u   Indice du champ.
+;   a-addr  Adresse de la structure BOOT_HEADER    
+DEFWORD "IMGSIGN",7,,IMGSIGN  ; ( -- u addr )
     .word LIT,0,IMGHEAD,EXIT
 
-; champ LATEST    
-DEFWORD "IMGLATST",8,,IMGLATST  ; ( -- n addr )
+; nom: IMGLATST  ( -- u a-addr )
+;   Retourne l'indice du champ LATEST et l'adresse de la structure BOOT_HEADER
+;   Permet d'accéder le champ avec TBL@ et TBL!    
+; arguments:
+;   aucun
+; retourne:
+;   u   Indice du champ.
+;   a-addr  Adresse de la structure BOOT_HEADER    
+DEFWORD "IMGLATST",8,,IMGLATST  ; ( -- u addr )
     .word LIT,1,IMGHEAD,EXIT
 
-; champ DP    
-DEFWORD "IMGDP",5,,IMGDP ; ( -- n addr )
+; nom: IMGDP  ( -- u a-addr )
+;   Retourne l'indice du champ DP et l'adresse de la structure BOOT_HEADER
+;   Permet d'accéder le champ avec TBL@ et TBL!    
+; arguments:
+;   aucun
+; retourne:
+;   u   Indice du champ.
+;   a-addr  Adresse de la structure BOOT_HEADER    
+DEFWORD "IMGDP",5,,IMGDP ; ( -- u addr )
     .word LIT,2,IMGHEAD,EXIT
     
-; champ taille    
-DEFWORD "IMGSIZE",7,,IMGSIZE ; ( -- n addr )
+; nom: IMGSIZE  ( -- u a-addr )
+;   Retourne l'indice du champ signature et l'adresse de la structure BOOT_HEADER
+;   Permet d'accéder le champ avec TBL@ et TBL!    
+; arguments:
+;   aucun
+; retourne:
+;   u   Indice du champ.
+;   a-addr  Adresse de la structure BOOT_HEADER    
+DEFWORD "IMGSIZE",7,,IMGSIZE ; ( -- u addr )
     .word LIT,3,IMGHEAD,EXIT
     
-;    
-; initialise l'entête d'image  
+; nom: SETHEADER ( -- )   
+;   initialise la structure BOOT_HEADER avec les informations requises.
+;   Appellé par IMGSAVE
+; arguments:
+;   aucun
+; retourne:
+;   rien    
 DEFWORD "SETHEADER",9,,SETHEADER ; ( -- )
     .word MAGIC,IMGSIGN,TBLSTORE ; signature
     .word HERE,IMGDP,TBLSTORE ; DP
@@ -413,17 +472,17 @@ DEFWORD "SETHEADER",9,,SETHEADER ; ( -- )
 ; arguments:
 ;   aucun
 ; retourne:
-;   ud   adresse 24 bits  
+;   ud   Adresse 24 bits  
 DEFWORD "IMGADDR",7,,IMGADDR ; ( -- ud )
     .word LIT,IMG_FLASH_ADDR,LIT,0,EXIT
     
 ; nom: ?IMG  ( -- f )    
 ;   Vérifie s'il y a une image disponible en mémoire flash et retourne 
-;   indicateur Booléen vrai|faux.
+;   un indicateur Booléen vrai|faux.
 ; arguments:
 ;   aucun    
 ; retourne:
-;     indicateur booléen vrai|faux
+;   f  Indicateur booléen vrai|faux
 DEFWORD "?IMG",4,,QIMG ; (  -- f )
     .word IMGHEAD,LIT,BOOT_HEADER_SIZE,IMGADDR
     .word FLASHTORAM
@@ -432,16 +491,21 @@ DEFWORD "?IMG",4,,QIMG ; (  -- f )
     
 ; nom: ?SIZE   ( -- n )    
 ;  Retourne la taille d'une image à partir de l'information dans la strucutre BOOT_HEADER.
+;  Peut-être appellé après ?IMG si cette fonction retourne vrai.
+;  Peut aussi être appelé après SETHEADER.    
 ; arguments:
 ;   aucun    
 ; retourne:
-;    n  taille en octets    
+;    n  Taille de l'image en octets.    
 DEFWORD "?SIZE",5,,QSIZE ; ( -- n )  
     .word IMGSIZE,TBLFETCH,EXIT
     
 ; nom: ERASEROWS   ( -- )   
 ;   Efface les lignes mémoire flash du MCU qui seront utilisées
-;   pour la sauvegarde de l'image système en RAM.
+;   pour la sauvegarde de l'image système en RAM. À partir de l'information
+;   IMGSIZE contenu dans la structure BOOT_HEADER calcule le nombre de lignes
+;   FLASH requises pour la sauvegarde de l'image et efface ces lignes.    
+;   Appelé par IMGSAVE.    
 ; arguments:
 ;   audun
 ; retourne:
@@ -457,7 +521,11 @@ DEFWORD "ERASEROWS",9,,ERASEROWS ; ( -- )
     .word DROP,EXIT
  
 ; nom: IMGSAVE   ( -- )    
-;   Sauvegarde une image de la RAM dans la mémoire flash du MCU
+;   Sauvegarde une image de la RAM dans la mémoire flash du MCU. La structure
+;   BOOT_HEADER est positionnée juste avant DP0 et l'image sauvegardée débute à
+;   IMGHEAD jusqu'à HERE. Si la taille totale n'est pas un multiple de 6, jusqu'à
+;   5 octets à partir de DP peuvent-être sauvegardés avec l'image. Il n'est pas
+;   indispensable d'initialiser ces octets avec la valeur 0xFF.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -476,7 +544,11 @@ DEFWORD "IMGSAVE",7,,IMGSAVE ; ( -- )
 ;    Au démarrage de l'ordinateur IMGLOAD est appellé et s'il y a une image
 ;    système en mémoire flash celle-ci est chargée en mémoire RAM.
 ;    S'il n'y a pas d'image disponible le message "No boot image available."
-;    est affiché à l'écran.  
+;    est affiché à l'écran.
+;    Si l'image chargée en RAM contient un mot AUTORUN dans son dictionnaire
+;    ce mot est exécuté.
+;    IMGLOAD peut-être appellé manuellement pour restaurer l'état système à l'état
+;    initial au démarrage, dans ce cas AUTORUN n'est pas exécuté.  
 ; arguments:
 ;   aucun
 ; retourne:

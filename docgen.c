@@ -22,7 +22,7 @@ static char *words[INDEX_SIZE];
 int idx=0;
 
 static char* path="ForthEx.X/";
-static char* docPath="documentation/html/";
+static char* docPath="docs/html/";
 static char* htmlExt=".html";
 
 static char* ext=".s";

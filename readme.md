@@ -13,9 +13,9 @@ Caractéristiques
 Schématique
 ===========
 
-![circuit principal](/documentation/forthex_schematic.png)
+![circuit principal](/docs/html/img/forthex_schematic.png)
 
-![interface clavier](/documentation/forthex_schematic_ps2.png)
+![interface clavier](/docs/html/img/forthex_schematic_ps2.png)
 
 [vidéo description matérielle](https://youtu.be/hgAJy2Itfcw)
 
