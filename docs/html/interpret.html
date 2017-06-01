@@ -1,0 +1,1703 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body id="#top">
+<h1>interpret</h1><div><a href="#index">index</a></div>
+<div><a href="index.html">index principal</a></div>
+<h2 id="description">Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">    Il s'agit de l'interface utilisateur. Au démarrage l'ordinateur ForthEx offre
+</div>
+<div style="margin-left:5%;">    cette interface en ligne de commande à l'utilisateur. Le mot QUIT est en fait
+</div>
+<div style="margin-left:5%;">    le point d'entré de cette interface. Une boucle infinie qui consiste à lire
+</div>
+<div style="margin-left:5%;">    une ligne de texte, à évaluer le texte contenu dans cette ligne.
+</div>
+<div style="margin-left:5%;">    S'il n'y a pas d'erreur lors de l'évaluation le message ' OK' est affiché
+</div>
+<div style="margin-left:5%;">    et la boucle recommence. En cas d'erreur un message peut-être affiché avant
+</div>
+<div style="margin-left:5%;">    d'appeler le mot ABORT qui réinitialise la pile des retours et Appelle QUIT à nouveau.
+</div>
+<div style="margin-left:5%;">    QUIT réinitialise la pile des arguments avant d'entrer dans la boucle de l'interpréteur.
+</div>
+<div style="margin-left:5%;">    
+</div>
+<div style="margin-left:5%;">    Certains mots font passer le système en mode compilation qui permet d'ajouter
+</div>
+<div style="margin-left:5%;">    de nouvelles définitions au dictionnaire.
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">   Mots utilisés par l'intepréteur de texte.
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="WORDS">
+<b>WORDS</b>   ( -- )  
+<div style="margin-left:5%;">   Affiche sur la console la liste des mots du dictionnaire. Les mots dont l'attribut F_HIDDEN
+</div>
+<div style="margin-left:5%;">   est à 1 ne sont pas affichés.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ADR&gt;IN">
+<b>ADR&gt;IN</b>  ( c-addr -- ) 
+<div style="margin-left:5%;">   Ajuste la variable  &gt;IN à partir de la position laissée
+</div>
+<div style="margin-left:5%;">   par le dernier PARSE
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse du pointeur après le dernier PARSE
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="PARSE">
+<b>PARSE</b>   ( c -- c-addr u )    
+<div style="margin-left:5%;">   Accumule les caractères jusqu'au
+</div>
+<div style="margin-left:5%;">   prochain 'c'. Met à jour la variable &gt;IN
+</div>
+<div style="margin-left:5%;">   PARSE filtre les caractères suivants:
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments: 
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;    caractère délimiteur
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   adresse du premier caractère de la chaîne
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        longueur de la chaîne.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="&gt;COUNTED">
+<b>&gt;COUNTED</b> ( src n dest -- )   
+<div style="margin-left:5%;">   copie une chaîne dont l'adresse et la longueur sont fournies
+</div>
+<div style="margin-left:5%;">   en arguments vers une chaîne comptée dont l'adresse est fournie.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>src</i>&nbsp;&nbsp; addresse chaîne à copiée
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; longueur de la chaîne
+</div>
+<div style="margin-left:5%;"><i>dest</i>&nbsp;&nbsp; adresse destination
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; 
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="PARSE-NAME">
+<b>PARSE-NAME</b>    ( ccccc -- c-addr u ) 
+<div style="margin-left:5%;">   Recherche le prochain mot dans le flux d'entrée
+</div>
+<div style="margin-left:5%;">   Tout caractère &lt; 32 est considéré comme un espace
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;    chaîne de caractères dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  addresse premier caractère.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    longueur de la chaîne.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="WORD">
+<b>WORD</b>  ( c -- c-addr )  
+<div style="margin-left:5%;">   localise le prochain mot délimité par 'c'
+</div>
+<div style="margin-left:5%;">   la variable TOIN indique la position courante
+</div>
+<div style="margin-left:5%;">   le mot trouvé est copié à la position DP
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère délimiteur
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;    adresse chaîne comptée.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="FIND">
+<b>FIND</b>  ( c-addr -- c-addr 0 | cfa 1 | cfa -1 )   
+<div style="margin-left:5%;">   Recherche un mot dans le dictionnaire
+</div>
+<div style="margin-left:5%;">   ne retourne pas les mots cachés (attribut: F_HIDDEN).
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse de la chaîne comptée à rechercher.
+</div>
+<div style="margin-left:5%;"><b> retourne: 
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; 0 si adresse non trouvée
+</div>
+<div style="margin-left:5%;"><i>xt</i>&nbsp;&nbsp; 1 trouvé mot immédiat
+</div>
+<div style="margin-left:5%;"><i>xt</i>&nbsp;&nbsp; -1 trouvé mot non-immédiat
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ACCEPT">
+<b>ACCEPT</b> ( c-addr +n1 -- +n2 ) 
+<div style="margin-left:5%;">   Lecture d'une ligne de texte à partir de la console.
+</div>
+<div style="margin-left:5%;">   La chaîne terminée par touche la touche 'ENTER'.
+</div>
+<div style="margin-left:5%;">   Les touches de contrôles suivantes sont reconnues:
+</div>
+<div style="margin-left:5%;">   - VK_CR   termine la saisie
+</div>
+<div style="margin-left:5%;">   - CTRL_X  efface la ligne et place le curseur à gauche
+</div>
+<div style="margin-left:5%;">   - VK_BACK recule le curseur d'une position et efface le caractère.
+</div>
+<div style="margin-left:5%;">   - CTRL_L  efface l'écran au complet et plac le curseur dans le coin
+</div>
+<div style="margin-left:5%;">             supérieur gauche.
+</div>
+<div style="margin-left:5%;">   - CTRL_V  Réaffiche la dernière ligne saisie
+</div>
+<div style="margin-left:5%;">   - Les autres touches de contrôles sont ignorées. 
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   addresse du tampon.
+</div>
+<div style="margin-left:5%;"><i>+n1</i>&nbsp;&nbsp;      longueur du tampon.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>+n2</i>&nbsp;&nbsp;      longueur de la chaîne lue    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="COUNT">
+<b>COUNT</b>  ( c-addr1 -- c-addr2 u )  
+<div style="margin-left:5%;">   Retourne la spécification de la chaîne comptée dont l'adresse est c-addr1.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;   Adresse d'une chaîne de caractères débutant par un compteur.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;      longueur de la chaîne.  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="INTERPRET">
+<b>INTERPRET</b>  ( c-addr u -- )   
+<div style="margin-left:5%;">    Évaluation d'un tampon contenant du texte source par l'interpréteur/compilateur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse du premier caractère du tampon.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   longueur du tampon.   
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="EVALUATE">
+<b>EVALUATE</b>   ( i*x c-addr u -- j*x )      
+<div style="margin-left:5%;">   Évaluation d'un texte source. Le contenu de SOURCE est sauvegardé
+</div>
+<div style="margin-left:5%;">   et restauré à la fin de cette évaluation.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;    Contenu initial de la pile des arguments avant l'évalulation de la chaîne.
+</div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractère de la chaîne à évaluer.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Longueur de la chaîne à évaluer.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;   Contenu final de la pile après l'évaluation de la chaîne.      
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ABORT">
+<b>ABORT</b> ( -- )  
+<div style="margin-left:5%;">   Vide la pile dstack et appel QUIT
+</div>
+<div style="margin-left:5%;">   Si une compilation est en cours annulle les effets de celle-ci  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  ne retourne pas mais branche sur QUIT  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ABORT"">
+<b>ABORT"</b>  ( cccc -- )     
+<div style="margin-left:5%;">   Compile le runtime de ?ABORT
+</div>
+<div style="margin-left:5%;">   A  utiliser à l'intérieur d'une définition seulement.  
+</div>
+</p>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="CLIP">
+<b>CLIP</b>  ( n+ -- )    
+<div style="margin-left:5%;">   Copie le contenu du tampon TIB dans le tampon PASTE.
+</div>
+<div style="margin-left:5%;">   Le contenu de PASTE est une chaîne comptée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>	n+</i>&nbsp;&nbsp; nombre de caractères de la chaîne à copier.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="GETCLIP">
+<b>GETCLIP</b>  ( -- n+ )    
+<div style="margin-left:5%;">   Copie la chaîne qui est dans le tampon PASTE dans le tampon TIB.
+</div>
+<div style="margin-left:5%;">   Retourne la longueur de la chaîne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; longueur de la châine.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="QUIT">
+<b>QUIT</b>   ( -- )    
+<div style="margin-left:5%;">   Boucle de l'interpréteur/compilateur. En dépit de son nom cette boucle
+</div>
+<div style="margin-left:5%;">   ne quitte jamais. Il s'agit de l'interface avec l'utilisateur. 
+</div>
+<div style="margin-left:5%;">   A l'entré la pile des retours est vidée et la variable STATE est mise à 0.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">   Mots utilisés par le compilateur.
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="HERE">
+<b>HERE</b>   ( -- addr )    
+<div style="margin-left:5%;">   Retourne la valeur de la variable système DP (Data Pointer).
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp;   Valeur de la variable DP.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ALIGN">
+<b>ALIGN</b>  ( -- )    
+<div style="margin-left:5%;">   Si la variable système DP  (Data Pointer) pointe sur une adresse impaire, 
+</div>
+<div style="margin-left:5%;">   aligne DP sur l'adresse paire supérieure.
+</div>
+<div style="margin-left:5%;">   Met 0 dans l'octet sauté.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ALIGNED">
+<b>ALIGNED</b>  ( addr -- a-addr )  
+<div style="margin-left:5%;">   Si l'adrsse au sommet de la pile est impaire, aligne cette adresse sur la valeur paire supérieure.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp;  Adresse à vérifier.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse alignée.  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SOURCE">
+<b>SOURCE</b>  ( -- c-addr u ) 
+<div style="margin-left:5%;">   Ce mot retourne l'adresse et la longueur du tampon qui est la source de
+</div>
+<div style="margin-left:5%;">   l'évaluation par l'interpréteur/compilateur.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse début du tampon.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       longueur du tampon.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SOURCE!">
+<b>SOURCE!</b>   ( c-addr u -- )    
+<div style="margin-left:5%;">   sauvegarde les valeur de la SOURCE.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse du début du tampon qui doit-être évalué.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        Longueur du tampon.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="NFA&gt;LFA">
+<b>NFA&gt;LFA</b>  ( a-addr1 -- a-addr2 )  
+<div style="margin-left:5%;">   A partir de l'adresse NFA (Name Field Address) retourne
+</div>
+<div style="margin-left:5%;">   l'adresse LFA  (Link Field Address).  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;   adresse du champ NFA dans l'entête du dictionnaire.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;   adresse du champ LFA dans l'entête du dictionnaire.  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="NFA&gt;CFA">
+<b>NFA&gt;CFA</b>  ( a-addr1 -- a-addr2 )    
+<div style="margin-left:5%;">   A partir de l'adresse NFA (Name Field Address) retourne
+</div>
+<div style="margin-left:5%;">   l'adresse CFA (Code Field Address).    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;  Adresse du champ NFA dans l'entête du dictionnaire.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;  Adresse du CFA dans l'entête du dictionnaire.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="&gt;BODY">
+<b>&gt;BODY</b>  ( a-addr1 -- a-addr2 )    
+<div style="margin-left:5%;">   A partir du CFA (Code Field Address) retourne l'adresse PFA (Parameter Field Address)
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;   Adresse du CFA dans l'entête du dictionnaire.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;   Adresse du PFA (Parameter Field Address).
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="CFA&gt;NFA">
+<b>CFA&gt;NFA</b>   ( a-addr1 -- a-addr2 )    
+<div style="margin-left:5%;">   Passe du champ CFA au champ NFA.
+</div>
+<div style="margin-left:5%;">   Il n'y a pas de lien arrière entre le CFA et le NFA
+</div>
+<div style="margin-left:5%;">   Le bit F_MARK (bit 7) est utilisé pour marquer l'octet à la position NFA
+</div>
+<div style="margin-left:5%;">   Le CFA étant immédiatement après le nom, il suffit de 
+</div>
+<div style="margin-left:5%;">   reculer octet par octet jusqu'à atteindre un octet avec le bit F_MARK==1
+</div>
+<div style="margin-left:5%;">   puisque les caractères du nom sont tous &lt; 128.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;   Adresse du CFA dans l'entête du dictionnaire.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp; Adresse du NFA dans l'entête du dictionnaire.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="?EMPTY">
+<b>?EMPTY</b>  ( -- f )  
+<div style="margin-left:5%;">   Vérifie si le dictionnaire utilisateur est vide.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;    Indicateur Booléean, retourne VRAI si dictionnaire utilisateur vide.  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="IMMEDIATE">
+<b>IMMEDIATE</b>  ( -- )    
+<div style="margin-left:5%;">   Met à 1 l'indicateur F_IMMED dans l'entête du dernier mot défini.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="HIDE">
+<b>HIDE</b>  ( -- )  
+<div style="margin-left:5%;">   Met l'indicateur F_HIDDEN à 1 dans l'entête du dernier mot défini dans le dictionnaire.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ALLOT">
+<b>ALLOT</b>  ( n -- )  
+<div style="margin-left:5%;">   Allocation/rendition de mémoire dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   si n est négatif n octets seront rendus.
+</div>
+<div style="margin-left:5%;">   La variable DP est ajustée en conséquence.  
+</div>
+<div style="margin-left:5%;"> arguements:
+</div>
+<div style="margin-left:5%;">   n   nombre d'octets
+</div>
+<div style="margin-left:5%;"> retourne:
+</div>
+<div style="margin-left:5%;">   rien    modifie la valeur de DP.  
+</div>
+</p>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id=",">
+<b>,</b>   ( x -- )    
+<div style="margin-left:5%;">   Alloue une cellule pour x à la position DP et copie x dans cette cellule.
+</div>
+<div style="margin-left:5%;">   la Variable DP est incrémentée de la grandeur d'une cellule.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   Valeur qui sera sauvegardée dans l'espace de donnée.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   x est sauvegardé à position de DP et DP est incrémenté.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="C,">
+<b>C,</b>  ( c -- )    
+<div style="margin-left:5%;">   Alloue l'espace nécessaire pour enregistré le caractère c.
+</div>
+<div style="margin-left:5%;">   Le caractère c est sauvegardé à la position DP et DP est incrémenté.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  c est sauvegardé à la position DP et DP est incrémenté.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="'">
+<b>'</b>   ( ccccc -- a-addr )    
+<div style="margin-left:5%;">   Extrait le mot suivant du flux d'entrée et le recherche dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Retourne l'adresse du CFA de ce mot.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   chaîne de caractère dans le flux d'entrée qui représente le mot recherché.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse du CFA (Code Field Address) du mot recherché.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="[']">
+<b>[']</b>   ( cccc -- )  
+<div style="margin-left:5%;">   Version immédiate de '  à utiliser à l'intérieur d'une définition pour
+</div>
+<div style="margin-left:5%;">   compiler le CFA d'un mot existant dans le dictionnaire.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;   Chaîne de caractère dans le flux d'entrée qui représente le mot recherché.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    Le CFA est compilé.  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="[">
+<b>[</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat.  
+</div>
+<div style="margin-left:5%;">   Passe en mode interprétation en mettant la variable système STATE à zéro.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   Modifie la valeur de la variable système STATE.  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="]">
+<b>]</b>  ( -- ) 
+<div style="margin-left:5%;">   Mot immédiat.    
+</div>
+<div style="margin-left:5%;">   Passe en mode compilation en mettant la variable sytème STATE à -1
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   Modifie la valeur de la variable système STATE.  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="?WORD">
+<b>?WORD</b>  ( cccc  -- c-addr 0 | cfa 1 | cfa -1 )    
+<div style="margin-left:5%;">   Analyse le flux d'entré pour en extraire le prochain mot.
+</div>
+<div style="margin-left:5%;">   Recherche ce mot dans le dictionnaire.    
+</div>
+<div style="margin-left:5%;">   Avorte si le nom n'est pas trouvé dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Retourne le CFA du nom et un indicateur.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;    mot extrait du flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; 1   le CFA du mot et 1 si c'est mot immédiat.
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; -1  le CFA du mot et -1 si le mot n'est pas immédiat.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="POSTPONE">
+<b>POSTPONE</b>   ( ccccc -- ) 
+<div style="margin-left:5%;">   Mot immédiat à utiliser dans une définition. 
+</div>
+<div style="margin-left:5%;">   Diffère la compilation du mot qui suis dans le flux d'entrée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;   Mot extrait du flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;     
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LITERAL">
+<b>LITERAL</b>  ( x -- )
+<div style="margin-left:5%;">   Mot immédiat qui compile la sémantique runtime d'un entier. Il n'a d'effet 
+</div>
+<div style="margin-left:5%;">   qu'en mode compilation. Dans ce cas la valeur sommet de la pile est compilée
+</div>
+<div style="margin-left:5%;">   avec la sémantique runtime qui empile un entier.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;  Valeur au sommet de la pile des arguments. Cette valeur est consommée seulement en mode compilation.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    x reste au sommet de la pile en mode interprétation.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="S"">
+<b>S"</b>   ( ccccc -- )  runtime S: c-addr u 
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.    
+</div>
+<div style="margin-left:5%;">   Lecture d'une chaîne litérale dans le flux d'entrée et compilation
+</div>
+<div style="margin-left:5%;">   de cette chaîne dans l'espace de donnée.    
+</div>
+<div style="margin-left:5%;">   La sémentique rutime consiste à empiler l'adresse du premier caractère de la
+</div>
+<div style="margin-left:5%;">   chaîne et la longueur de la chaîne.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;   Chaîne terminée par " dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="C"">
+<b>C"</b>   ( ccccc --  )  runtime S:  c-addr
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Lecture d'une chaîne litérale dans le flux d'entrée et compilation de cette
+</div>
+<div style="margin-left:5%;">   chaîne dans l'espace de donnée.
+</div>
+<div style="margin-left:5%;">   La sémantique runtime consiste à compiler l'adresse de la chaîne comptée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;  Chaîne de caractères terminée par "  dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    En runtime retourne empile l'adresse du descripteur de la chaîne.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="."">
+<b>."</b>   ( ccccc -- )
+<div style="margin-left:5%;">   Mot immédiat.    
+</div>
+<div style="margin-left:5%;">   Interprétation: imprime la chaîne litérale qui suis dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;">   En compilation: compile la chaîne et la sémantique permet d'imprimer cette
+</div>
+<div style="margin-left:5%;">   chaîne lors de l'exécution du mot en cour de définition.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ccccc</i>&nbsp;&nbsp;    Chaîne terminée par "  dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;         
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="RECURSE">
+<b>RECURSE</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Compile un appel récursif du mot en cour de définition.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="DO">
+<b>DO</b>  ( n1 n2 -- )
+<div style="margin-left:5%;">   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
+</div>
+<div style="margin-left:5%;">   Débute une boucle avec compteur. Le valeur du compteur de boucle est incrémentée
+</div>
+<div style="margin-left:5%;">   à la fin de la boucle et comparée avec la limite. La boucle se termine lorsque
+</div>
+<div style="margin-left:5%;">   le compteur atteind ou dépasse la limite. La boucle s'exécute au moins 1 fois.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;   Valeur limite du compteur de boucle.
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;   Valeur initiale du compteur de boucle.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="?DO">
+<b>?DO</b> runtime ( n1 n2 -- )
+<div style="margin-left:5%;">   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
+</div>
+<div style="margin-left:5%;">   Débute une boucle avec compteur. Cependant contrairement à DO la boucle
+</div>
+<div style="margin-left:5%;">   Ne sera pas excétée si n2==n1. Le compteur de boucle est incrémenté à la fin
+</div>
+<div style="margin-left:5%;">   de la boucle et le contrôle de limite est affectué après l'incrémentation.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;     limite
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;     valeur initiale du compteur de boucle.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LEAVE">
+<b>LEAVE</b>  runtime ( -- )
+<div style="margin-left:5%;">   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   LEAVE est utilisé à l'intérieur des boucles avec compteur pour interrompre
+</div>
+<div style="margin-left:5%;">   prématurément la boucle.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LOOP">
+<b>LOOP</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'a l'intérieur d'une définition.  
+</div>
+<div style="margin-left:5%;">   Dernière instruction d'une boucle avec compteur.
+</div>
+<div style="margin-left:5%;">   Le compteur est incrémenté et ensuite comparé à la valeur limite.
+</div>
+<div style="margin-left:5%;">   En cas d'égalité le boucle est terminée.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="+LOOP">
+<b>+LOOP</b>   ( n -- )
+<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'a l'intérieur d'une définition.  
+</div>
+<div style="margin-left:5%;">   Dernière instruction de la boucle. La valeur n est ajoutée au compteur.
+</div>
+<div style="margin-left:5%;">   Ensuite cette valeur est comparée à la limite et termine la boucle si 
+</div>
+<div style="margin-left:5%;">   la limite est atteinte ou dépassée.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Ajoute cette valeur à la variable de contrôle de la boucle. Si I passe LIMIT quitte la boucle.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="BEGIN">
+<b>BEGIN</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Débute une boucle qui se termine par AGAIN, REPEAT ou UNTIL 
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="AGAIN">
+<b>AGAIN</b>   ( -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Effectue un branchement inconditionnel au début de la boucle.
+</div>
+<div style="margin-left:5%;">   Une boucle créée avec BEGIN ... AGAIN ne peut-être interrompue que
+</div>
+<div style="margin-left:5%;">   par ABORT ou ABORT".    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="UNTIL">
+<b>UNTIL</b>  compilation ( n -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Compile la fin d'une boucle conditionnelle. Termine la boucle si n est VRAI.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Valeur qui contrôle la boucle. La boucle est terminée si n&lt;&gt;0.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="REPEAT">
+<b>REPEAT</b>  ( -- )    
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   S'Utilise avec une structure de boucle BEGIN ... WHILE ... REPEAT
+</div>
+<div style="margin-left:5%;">   Comme AGAIN effectue un branchement inconditionnel au début de la boucle.
+</div>
+<div style="margin-left:5%;">   Cependant au moins un WHILE doit-être présent à l'intérieur de la boucle
+</div>
+<div style="margin-left:5%;">   car c'est le WHILE qui contrôle la sortie de boucle.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="WHILE">
+<b>WHILE</b>  ( n -- )    
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Utilisé à l'intérieur d'une boucle BEGIN ... REPEAT, contrôle la sortie
+</div>
+<div style="margin-left:5%;">   de boucle. Tant que la valeur n au sommet de la pile est VRAI l'exécution
+</div>
+<div style="margin-left:5%;">   de la boucle se répète au complet lorsque REPEAT est atteint.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Contrôle la sortie de boucle. Si n==0 il y a sortie de boucle.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="IF">
+<b>IF</b>  ( n -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Exécution du code qui suit le IF si et seulement is n&lt;&gt;0.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Valeur consommée par IF, si n&lt;&gt;0 les instructions après entre IF et ELSE ou THEN sont exécutées.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="THEN">
+<b>THEN</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Termine le bloc d'instruction qui débute après un IF ou un ELSE.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ELSE">
+<b>ELSE</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Termine le bloc d'instruction qui débute après un IF.
+</div>
+<div style="margin-left:5%;">   Les instructions entre le ELSE et le THEN qui suit sont excéutée si la valeur n contrôlée
+</div>
+<div style="margin-left:5%;">   par le IF est FAUSSE.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="CASE">
+<b>CASE</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   Branchement conditionnel multiple par comparaison de la valeur au sommet  
+</div>
+<div style="margin-left:5%;">   de la pile des arguments avec d'autres valeurs de test. 
+</div>
+<div style="margin-left:5%;">   exemple:
+</div>
+<div style="margin-left:5%;">     : x
+</div>
+<div style="margin-left:5%;">     CASE 
+</div>
+<div style="margin-left:5%;">     1  OF ... ENDOF
+</div>
+<div style="margin-left:5%;">     2  OF ... ENDOF
+</div>
+<div style="margin-left:5%;">     ... ( instructions par défaut ce bloc est optionnel.)
+</div>
+<div style="margin-left:5%;">     ENDCASE
+</div>
+<div style="margin-left:5%;">     3 x     
+</div>
+<div style="margin-left:5%;">   Dans cette exemple on définit le mot x et ensuite on l'exécute en lui passant la 
+</div>
+<div style="margin-left:5%;">   valeur 3 en arguments. Chaque valeur qui précède un OF est comparée avec 3 et 
+</div>
+<div style="margin-left:5%;">   s'il y a égalité le bloc entre OF et ENDOF est exécuté. Seul le premier test
+</div>
+<div style="margin-left:5%;">   qui répond au critère d'égalité est exécuté. Si tous les test échous et qu'il
+</div>
+<div style="margin-left:5%;">   y a un bloc d'instruction entre le derner ENDOF et le ENDCASE c'est ce bloc
+</div>
+<div style="margin-left:5%;">   qui est exécuté.   
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="OF">
+<b>OF</b>  ( x1 x2  -- |x1 )
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   S'utilise à l'intérieur d'une structure CASE ... ENDCASE    
+</div>
+<div style="margin-left:5%;">   Vérifie si x1==x2 En cas d'égalité les 2 valeurs sont consommée et 
+</div>
+<div style="margin-left:5%;">   le bloc d'instruction qui suis le OF jusqu'au ENDOF est exécuté.    
+</div>
+<div style="margin-left:5%;">   Si la condition d'égalité n'est pas vérifiée la valeur x1 est conservée
+</div>
+<div style="margin-left:5%;">   et l'exécution se poursuis après le prochain ENDOF.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x1</i>&nbsp;&nbsp;   Valeur de contrôle du case.
+</div>
+<div style="margin-left:5%;"><i>x2</i>&nbsp;&nbsp;   Valeur de test du OF ... ENDOF    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>|x1</i>&nbsp;&nbsp;  x1 n'est pas consommé si la condition d'égalité n'est pas rencontrée.      
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ENDOF">
+<b>ENDOF</b>  ( -- )   
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   S'utilise à l'intérieur d'une structure  CASE ... ENDCASE    
+</div>
+<div style="margin-left:5%;">   Termine un bloc d'instruction introduit par le mot OF
+</div>
+<div style="margin-left:5%;">   ENDOF branche après le ENDCASE    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ENDCASE">
+<b>ENDCASE</b> ( x -- )    
+<div style="margin-left:5%;">   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
+</div>
+<div style="margin-left:5%;">   S'utilise pour terminer une structure CASE ... ENDCASE.
+</div>
+<div style="margin-left:5%;">   ENDCASE n'est exécuté que si aucun bloc OF ... ENDOF n'a été exécuté.
+</div>
+<div style="margin-left:5%;">   Dans ce cas la valeur de contrôle qui est restée sur la pile est jeté.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   Valeur de contrôle qui est restée sur la pile.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="?COMPILE">
+<b>?COMPILE</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat.
+</div>
+<div style="margin-left:5%;">   Vérifie la valeur de la variable système STATE et si cette valeur est 0.
+</div>
+<div style="margin-left:5%;">   appelle ABORT" avec le message "compile only word". Ce mot débute la définition
+</div>
+<div style="margin-left:5%;">   de tous les mots qui ne doivent-être utilisés qu'en mode compilation.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="?NAME">
+<b>?NAME</b>  ( f -- )    
+<div style="margin-left:5%;">   Si f==0 appelle ABORT" avec le message "name missing" 
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   Indicateur Booléen, si VRAI ABORT" name missing"
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id=":NONAME">
+<b>:NONAME</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Cré une définition sans nom dans l'espace de donnée.
+</div>
+<div style="margin-left:5%;">   et laisse son CFA sur la pile des arguments.
+</div>
+<div style="margin-left:5%;">   Met la variable STATE en mode compilation.
+</div>
+<div style="margin-left:5%;">   Le CFA de cette définition peut par exemple est assigné
+</div>
+<div style="margin-left:5%;">   à un mot créé avec DEFER.
+</div>
+<div style="margin-left:5%;">   exemple:
+</div>
+<div style="margin-left:5%;">   DEFER  p2 
+</div>
+<div style="margin-left:5%;">   :noname  DUP * ;
+</div>
+<div style="margin-left:5%;">   ' p2 DEFER! / maintenant p2 utilise le code de défini par :noname.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  CFA de la nouvelle définition.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="FORGET">
+<b>FORGET</b>  ( cccc -- )    
+<div style="margin-left:5%;">   Extrait du flux d'entrée le mot suivant et supprime du dictionnaire ce mot
+</div>
+<div style="margin-left:5%;">   ainsi que tous ceux qui ont été définis après lui.
+</div>
+<div style="margin-left:5%;">   Les mots système définis en mémoire FLASH ne peuvent-êtr supprimés.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   Mot suivant dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><i>arguments:
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="MARKER">
+<b>MARKER</b>  ( cccc -- )    
+<div style="margin-left:5%;">   Extrait du flux d'entrée le mot suivant et cré un mot portant ce nom
+</div>
+<div style="margin-left:5%;">   dans le dictionnaire. Lorsque ce mot est invoqué il se suprime lui-même
+</div>
+<div style="margin-left:5%;">   ainsi que tous les mots qui ont été définis après lui.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   Mot suivant dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><i>arguments:
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id=":">
+<b>:</b>   ( cccc -- )    
+<div style="margin-left:5%;">   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans
+</div>
+<div style="margin-left:5%;">   le dictionnaire qui porte ce nom. Ce mot introduit une définition de haut niveau.
+</div>
+<div style="margin-left:5%;">   Modifie la variable système STATE pour passer en mode compilation.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Mot suivant dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="CREATE">
+<b>CREATE</b>  ( cccc -- )     
+<div style="margin-left:5%;">   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans le dictionnaire
+</div>
+<div style="margin-left:5%;">   Lorsque ce nouveau mot est exécuté il retourne l'adresse PFA. Cependant la sémantique
+</div>
+<div style="margin-left:5%;">   du mot peut-être étendue en utilisant le mot DOES&gt;.    
+</div>
+<div style="margin-left:5%;"> exemple:     
+</div>
+<div style="margin-left:5%;">       / le mot VECTOR sert à créer des tableaux de n éléments.    
+</div>
+<div style="margin-left:5%;">	: VECTOR  ( n  -- )
+</div>
+<div style="margin-left:5%;">           CREATE CELLS ALLOT DOES&gt; CELLS PLUS ;     
+</div>
+<div style="margin-left:5%;">       / utilisation du mot VECTOR pour créer le tableau V1 de 5 éléments.
+</div>
+<div style="margin-left:5%;">       5 VECTOR V1
+</div>
+<div style="margin-left:5%;">       / Met la valeur 35 dans l'élément d'indice 2 de V1
+</div>
+<div style="margin-left:5%;">       35 2 V1 !    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Mot suivant dans le flux d'entrée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="DOES&gt;">
+<b>DOES&gt;</b>  ( -- )
+<div style="margin-left:5%;">   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
+</div>
+<div style="margin-left:5%;">   Ce mot permet définir l'action d'un mot créé avec CREATE. Surtout utile
+</div>
+<div style="margin-left:5%;">   pour définir des mots compilants. U mot compilant est un mot qui sert à
+</div>
+<div style="margin-left:5%;">   créer une classe de mots. Par exemples les mots VARIABLE et CONSTANT sont
+</div>
+<div style="margin-left:5%;">   des mots compilants.    
+</div>
+<div style="margin-left:5%;">   Le concept de DOES&gt; est un des plus complexe du langage forth. Un article
+</div>
+<div style="margin-left:5%;">   sera donc consacré à son utilisation.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id=";">
+<b>;</b>  ( -- )    
+<div style="margin-left:5%;">   Termine une définition débutée par ":".
+</div>
+<div style="margin-left:5%;">   Modifie la valeur de la variable STATE pour passer en mode interprétation.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VARIABLE">
+<b>VARIABLE</b>  ( cccc -- )    
+<div style="margin-left:5%;">   Mot compilant qui sert à créer des variables dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
+</div>
+<div style="margin-left:5%;">   de la nouvelle variable. Les variables sont initialisées à 0.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le flux d'entrée. Nom de la variable.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="CONSTANT">
+<b>CONSTANT</b>  ( cccc  n -- )    
+<div style="margin-left:5%;">   Mot compilant qui sert à créer des constantes dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
+</div>
+<div style="margin-left:5%;">   de la nouvelle constante. La constante  initialisée avec la valeur
+</div>
+<div style="margin-left:5%;">   qui est au sommet de la pile des arguments au moment de sa création.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le flux d'entrée. Nom de la constante.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;      Valeur qui sera assignée à cette constante.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="DEFER">
+<b>DEFER</b> ( cccc -- )     
+<div style="margin-left:5%;">   Mot compilant.
+</div>
+<div style="margin-left:5%;">   Cré un nouveau mot dont l'action ne sera défini ultérieurement.
+</div>
+<div style="margin-left:5%;">   Cependant ce mot possède une action par défaut qui consiste à affiché
+</div>
+<div style="margin-left:5%;">   le message "Uninitialized defered word"     
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Prochain mot dans le flux d'entrée. Nom du nouveau mot.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;     
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="DEFER!">
+<b>DEFER!</b>  ( a-addr1 a-addr2 -- )     
+<div style="margin-left:5%;">   Initialise une action à  un mot défini avec DEFER.
+</div>
+<div style="margin-left:5%;">   exemple:
+</div>
+<div style="margin-left:5%;">   DEFER p2  / le mot p2 est créé mais n'a pas d'action défini.
+</div>
+<div style="margin-left:5%;">   :noname  dup * ; / ( -- a-addr1 )  un mot sans nom viens d'être créé.
+</div>
+<div style="margin-left:5%;">   ' p2 DEFER!  / ' p2 retourne le xt de p2 et DEFER! affecte a-addr1 à a-addr2
+</div>
+<div style="margin-left:5%;">   2 p2  4 ok  / maintenant lorsque p2 est utilisé retourne le carré d'un entier.  
+</div>
+<div style="margin-left:5%;">    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;  CFA de l'action que le mot doit exécuter.
+</div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;  CFA du mot différé.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="DEFER@">
+<b>DEFER@</b>  ( a-addr1 -- a-addr2 )    
+<div style="margin-left:5%;">   Empile le CFA interprété par un mot défini avec DEFER dont le CFA est
+</div>
+<div style="margin-left:5%;">   au sommet de la pile des arguments.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp; CFA du mot différé dont on veut obtenir l'action.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;  CFA de l'action  exécutée par le mot différé.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="IS">
+<b>IS</b>    ( cccc a-addr -- )     
+<div style="margin-left:5%;">   Extrait le prochain mot du flux d'entrée. Recherche ce mot dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Ce mot doit-être  un mot créé avec DEFER. Lorsque ce mot est trouvé,    
+</div>
+<div style="margin-left:5%;">   enregistre a-addr dans son CFA. a-addr est le CFA d'une action. 
+</div>
+<div style="margin-left:5%;"> exemple:
+</div>
+<div style="margin-left:5%;">     / création d'un mot différé qui peut effectuer différentes opérations arithmétiques.
+</div>
+<div style="margin-left:5%;">     DEFER  MATH
+</div>
+<div style="margin-left:5%;">     ' * IS MATH   / maintenant le mot MATH agit comme *
+</div>
+<div style="margin-left:5%;">     ' + IS MATH   / maintenant le mot MATH agit comme +    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Prochain mot dans le flux d'entrée. Correspond au nom d'un mot créé avec DEFER.
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Sommet de la pile des arguments qui correspond au CFA de l'action à assigné à ce mot.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ACTION-OF">
+<b>ACTION-OF</b>   ( cccc -- a-addr )
+<div style="margin-left:5%;">   Extrait le prochain mot du flux d'entrée et le recherche dans le dictionnaire.
+</div>
+<div style="margin-left:5%;">   Ce mot doit-être un mot créé avec DEFER. Si le mot est trouvé dans le dictinnaire
+</div>
+<div style="margin-left:5%;">   le CFA de son action est empilé.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le flux d'entrée. Nom recherché dans le dictionnaire.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse du CFA de l'action du mot différé.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><h4 id="index">Index</h4>
+<p>
+<ul>
+<li><a href="#&gt;BODY">&gt;BODY</a></li>
+<li><a href="#&gt;COUNTED">&gt;COUNTED</a></li>
+<li><a href="#'">'</a></li>
+<li><a href="#+LOOP">+LOOP</a></li>
+<li><a href="#,">,</a></li>
+<li><a href="#."">."</a></li>
+<li><a href="#:">:</a></li>
+<li><a href="#:NONAME">:NONAME</a></li>
+<li><a href="#;">;</a></li>
+<li><a href="#?COMPILE">?COMPILE</a></li>
+<li><a href="#?DO">?DO</a></li>
+<li><a href="#?EMPTY">?EMPTY</a></li>
+<li><a href="#?NAME">?NAME</a></li>
+<li><a href="#?WORD">?WORD</a></li>
+<li><a href="#ABORT">ABORT</a></li>
+<li><a href="#ABORT"">ABORT"</a></li>
+<li><a href="#ACCEPT">ACCEPT</a></li>
+<li><a href="#ACTION-OF">ACTION-OF</a></li>
+<li><a href="#ADR&gt;IN">ADR&gt;IN</a></li>
+<li><a href="#AGAIN">AGAIN</a></li>
+<li><a href="#ALIGN">ALIGN</a></li>
+<li><a href="#ALIGNED">ALIGNED</a></li>
+<li><a href="#ALLOT">ALLOT</a></li>
+<li><a href="#BEGIN">BEGIN</a></li>
+<li><a href="#C"">C"</a></li>
+<li><a href="#C,">C,</a></li>
+<li><a href="#CASE">CASE</a></li>
+<li><a href="#CFA&gt;NFA">CFA&gt;NFA</a></li>
+<li><a href="#CLIP">CLIP</a></li>
+<li><a href="#CONSTANT">CONSTANT</a></li>
+<li><a href="#COUNT">COUNT</a></li>
+<li><a href="#CREATE">CREATE</a></li>
+<li><a href="#DEFER">DEFER</a></li>
+<li><a href="#DEFER!">DEFER!</a></li>
+<li><a href="#DEFER@">DEFER@</a></li>
+<li><a href="#DO">DO</a></li>
+<li><a href="#DOES&gt;">DOES&gt;</a></li>
+<li><a href="#ELSE">ELSE</a></li>
+<li><a href="#ENDCASE">ENDCASE</a></li>
+<li><a href="#ENDOF">ENDOF</a></li>
+<li><a href="#EVALUATE">EVALUATE</a></li>
+<li><a href="#FIND">FIND</a></li>
+<li><a href="#FORGET">FORGET</a></li>
+<li><a href="#GETCLIP">GETCLIP</a></li>
+<li><a href="#HERE">HERE</a></li>
+<li><a href="#HIDE">HIDE</a></li>
+<li><a href="#IF">IF</a></li>
+<li><a href="#IMMEDIATE">IMMEDIATE</a></li>
+<li><a href="#INTERPRET">INTERPRET</a></li>
+<li><a href="#IS">IS</a></li>
+<li><a href="#LEAVE">LEAVE</a></li>
+<li><a href="#LITERAL">LITERAL</a></li>
+<li><a href="#LOOP">LOOP</a></li>
+<li><a href="#MARKER">MARKER</a></li>
+<li><a href="#NFA&gt;CFA">NFA&gt;CFA</a></li>
+<li><a href="#NFA&gt;LFA">NFA&gt;LFA</a></li>
+<li><a href="#OF">OF</a></li>
+<li><a href="#PARSE">PARSE</a></li>
+<li><a href="#PARSE-NAME">PARSE-NAME</a></li>
+<li><a href="#POSTPONE">POSTPONE</a></li>
+<li><a href="#QUIT">QUIT</a></li>
+<li><a href="#RECURSE">RECURSE</a></li>
+<li><a href="#REPEAT">REPEAT</a></li>
+<li><a href="#S"">S"</a></li>
+<li><a href="#SOURCE">SOURCE</a></li>
+<li><a href="#SOURCE!">SOURCE!</a></li>
+<li><a href="#THEN">THEN</a></li>
+<li><a href="#UNTIL">UNTIL</a></li>
+<li><a href="#VARIABLE">VARIABLE</a></li>
+<li><a href="#WHILE">WHILE</a></li>
+<li><a href="#WORD">WORD</a></li>
+<li><a href="#WORDS">WORDS</a></li>
+<li><a href="#[">[</a></li>
+<li><a href="#[']">[']</a></li>
+<li><a href="#]">]</a></li>
+</ul>
+</p>
+<hr style="border-width:1px;"><div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+
+</body>
+</html>

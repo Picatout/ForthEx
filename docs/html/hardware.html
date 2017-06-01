@@ -1,0 +1,239 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body id="#top">
+<h1>hardware</h1><div><a href="#index">index</a></div>
+<div><a href="index.html">index principal</a></div>
+<h2 id="description">Description</h2><div style="margin-left:5%;">    
+</div>
+<div style="margin-left:5%;">  Initialisation du MCU et définitions liés étroitement au fonctionnement du
+</div>
+<div style="margin-left:5%;">   MCU    
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="REBOOT">
+<b>REBOOT</b> ( -- )
+<div style="margin-left:5%;">   Redémarre le système avec le même effet qu'une mise sous tension
+</div>
+<div style="margin-left:5%;">   en exécutant l'instruction machine RESET.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="TICKS">
+<b>TICKS</b>  ( -- n )    
+<div style="margin-left:5%;">   Le système contient un compteur qui est incrémenté à toute les millisecondes.
+</div>
+<div style="margin-left:5%;">   Il s'agit d'un compteur 16 bits, le compteur boucle à zéro à toute les 65,5 secondes.    
+</div>
+<div style="margin-left:5%;">   TICKS retourne la valeur de ce compteur.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n	</i>&nbsp;&nbsp;    Valeur du compteur système systicks.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="USEC">
+<b>USEC</b>   ( u -- ) 
+<div style="margin-left:5%;">   Pause en microsecondes. A cause des interruptions cette valeur ne peut-être
+</div>
+<div style="margin-left:5%;">   garantie. La valeur u passée en argument est une valeur minimale.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   durée de la pause en microsecondes.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="MS">
+<b>MS</b>  ( u -- )
+<div style="margin-left:5%;">   Boucle d'attente qui dure au moins u millisecondes. Cette boucle utitise
+</div>
+<div style="margin-left:5%;">   le compteur systicks. L'erreur sur la durée est de ± 1msec.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Durée en millisecondes.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LFSR">
+<b>LFSR</b>  ( -- n )
+<div style="margin-left:5%;">   Générnateur pseudo-hasard basé sur un Linear Feedback Shift Register de 32 bits.
+</div>
+<div style="margin-left:5%;">   Ce générateur doit-être initialisé avec SRAND avant utilisation sinon 
+</div>
+<div style="margin-left:5%;">   la valeur retournée est toujours 0.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Un entier de 16 bits.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="RAND">
+<b>RAND</b>   ( -- n )    
+<div style="margin-left:5%;">   Générateur pseudo-hasard qui génère un entier de 16 bits. 
+</div>
+<div style="margin-left:5%;">   Ce générateur doit-être initialisé avec SRAND avant utilisation sinon 
+</div>
+<div style="margin-left:5%;">   la valeur retournée est toujours 0.
+</div>
+<div style="margin-left:5%;">   algorithme:
+</div>
+<div style="margin-left:5%;">    rand=0
+</div>
+<div style="margin-left:5%;">    count=0
+</div>
+<div style="margin-left:5%;">    a) rand&lt;&lt;1
+</div>
+<div style="margin-left:5%;">    b) si impair(seed) alors seed++
+</div>
+<div style="margin-left:5%;">    c) seed=seed*3/2
+</div>
+<div style="margin-left:5%;">    d) rand |= seed&1
+</div>
+<div style="margin-left:5%;">    e) ++count==16?termine:goto a    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Entier de 16 bits.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SRAND">
+<b>SRAND</b> ( -- )    
+<div style="margin-left:5%;">   Initialisation du registre des générateurs pseudo-aléatoire LFSR et RAND.
+</div>
+<div style="margin-left:5%;">   Cette initialisation doit-être faite avant le premier appel de LFSR ou RAND.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    Modifie seulement un registre 'seed' interne au système.      
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="CLEAR">
+<b>CLEAR</b>  ( -- )
+<div style="margin-left:5%;">   Efface la mémoire de données utilisateur. Tous les mots définis par l'utilisateur
+</div>
+<div style="margin-left:5%;">   sont supprimés du dictionnaire.  La valeur de DP est réiniialisé à DP0.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="UNUSED">
+<b>UNUSED</b> ( -- n )    
+<div style="margin-left:5%;">   Retourne la quantité de RAM de données disponible.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">   Générateur de tonalité
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="TONE">
+<b>TONE</b>   ( u1 u2 -- )
+<div style="margin-left:5%;">   Génère une tonalité de fréquence u2 et de durée u1.	
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;   durée en millisecondes.
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;   fréquence en hertz.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; 
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><h4 id="index">Index</h4>
+<p>
+<ul>
+<li><a href="#CLEAR">CLEAR</a></li>
+<li><a href="#LFSR">LFSR</a></li>
+<li><a href="#MS">MS</a></li>
+<li><a href="#RAND">RAND</a></li>
+<li><a href="#REBOOT">REBOOT</a></li>
+<li><a href="#SRAND">SRAND</a></li>
+<li><a href="#TICKS">TICKS</a></li>
+<li><a href="#TONE">TONE</a></li>
+<li><a href="#UNUSED">UNUSED</a></li>
+<li><a href="#USEC">USEC</a></li>
+</ul>
+</p>
+<hr style="border-width:1px;"><div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+
+</body>
+</html>

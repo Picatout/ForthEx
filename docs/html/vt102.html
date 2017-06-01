@@ -1,0 +1,575 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body id="#top">
+<h1>vt102</h1><div><a href="#index">index</a></div>
+<div><a href="index.html">index principal</a></div>
+<h2 id="description">Description</h2><div style="margin-left:5%;"> séquence de contrôle générées par l'émulateur de terminal minicom
+</div>
+<div style="margin-left:5%;">  en mode VT102.
+</div>
+<div style="margin-left:5%;">  La touche CTRL enfoncée simultanément avec une lettre génère un code entre
+</div>
+<div style="margin-left:5%;">  1 et 26 correspondant à l'ordre de la lettre dans l'alphabet. i.e. CTRL_A=1, CTRL_Z=26
+</div>
+<div style="margin-left:5%;">    
+</div>
+<div style="margin-left:5%;"> DATE: 2017-04-12
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="XON">
+<b>XON</b>  ( -- c ) 
+<div style="margin-left:5%;">   Constante, retourne le caractère ASCII DC1
+</div>
+<div style="margin-left:5%;">   Ce caractère est utilisé dans le contrôle de flux logicel pour signifier
+</div>
+<div style="margin-left:5%;">   que le terminal est prêt à rececoir.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   Caractère ASCII DC1 valeur 17   
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="XOFF">
+<b>XOFF</b>  ( -- c ) 
+<div style="margin-left:5%;">   Constante, retourne le caractère ASCII DC3
+</div>
+<div style="margin-left:5%;">   Ce caractère est utilisé dans le contrôle de flux logicel pour signifier
+</div>
+<div style="margin-left:5%;">   que le terminal n'est pas prêt à rececoir.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   Caractère ASCII DC3 valeur 19   
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-EKEY">
+<b>VT-EKEY</b>  ( -- u )
+<div style="margin-left:5%;">   Réception d'un code étendue du terminal VT102. Les séquencees ANSI
+</div>
+<div style="margin-left:5%;">   sont converties en touche virtuelles VK_xx. 
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   Code  reçu du terminal.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-FILTER">
+<b>VT-FILTER</b> ( u -- u false | c true )    
+<div style="margin-left:5%;">   Filtre u et retourne un caractère 'c' et 'vrai' si u fait partie de l'ensemble reconnu.
+</div>
+<div style="margin-left:5%;">   sinon retourne 'u' et 'faux'   
+</div>
+<div style="margin-left:5%;">   accepte:
+</div>
+<div style="margin-left:5%;">      VK_CR, VK_BACK, CTRL_X, CTRL_V et {32-126}
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Le code qui doit-être filtré.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>-</i>&nbsp;&nbsp; refusé:    
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       même code
+</div>
+<div style="margin-left:5%;"><i>false</i>&nbsp;&nbsp;   indicateur booléen 
+</div>
+<div style="margin-left:5%;"><i>-</i>&nbsp;&nbsp; reconnu:
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;       caractère reconnu.
+</div>
+<div style="margin-left:5%;"><i>true</i>&nbsp;&nbsp;    indicateur booléen.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-KEY?">
+<b>VT-KEY?</b> ( -- 0|c)
+<div style="margin-left:5%;">   vérifie s'il y a un caractère répondant aux 
+</div>
+<div style="margin-left:5%;">   critères du filtre disponible dans la file. 
+</div>
+<div style="margin-left:5%;">   S'il y a des caractères non valides les jettes.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>0</i>&nbsp;&nbsp;   aucun caractère disponible
+</div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   le premier caractère valide de la file.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-KEY">
+<b>VT-KEY</b>  ( -- c )
+<div style="margin-left:5%;">   Attend la réception d'un caractère valide du terminal VT102.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp; 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère filtré 
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-EMIT">
+<b>VT-EMIT</b> ( c -- )
+<div style="margin-left:5%;">  transmet un caractère à la console VT102.
+</div>
+<div style="margin-left:5%;">  VT-EMIT filtre c rejette les caractères non reconnus.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère à transmettre
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-TYPE">
+<b>VT-TYPE</b>  ( c-addr u -- )
+<div style="margin-left:5%;">   Transmet au terminal VT102 une chaîne de caractère. 
+</div>
+<div style="margin-left:5%;">   VT-TYPE utilise SPUTC, les caractères de la chaîne ne sont pas filtrés.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;     adresse du premier caractère
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;          longueur de la chaîne.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-SNDARG">
+<b>VT-SNDARG</b>  ( n -- )
+<div style="margin-left:5%;">   convertie un entier en chaîne avant de l'envoyer au terminal VT102.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n	entier</i>&nbsp;&nbsp; à envoyer.
+</div>
+<div style="margin-left:5%;"><b> retourne:  
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ESC[">
+<b>ESC[</b> ( -- )
+<div style="margin-left:5%;">   Envoie la séquence 'ESC['  i.e. 27 91  au terminal VT102
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-UP">
+<b>VT-UP</b> ( -- )
+<div style="margin-left:5%;">   Envoie la séquence ANSI 'ESC[A'  au terminal VT102.
+</div>
+<div style="margin-left:5%;">   Cette séquence déplace le curseur à la ligne précédente de l'affichage.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-DOWN">
+<b>VT-DOWN</b> ( -- )
+<div style="margin-left:5%;">   Envoie la séquence ANSI 'ESC[B' au terminal VT102.
+</div>
+<div style="margin-left:5%;">   Cette séquence déplace le curseur sur la ligne suivante de l'affichage.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-RIGHT">
+<b>VT-RIGHT</b> ( -- )
+<div style="margin-left:5%;">   Envoie la séquence ANSI 'ESC[C'  au terminal VT102.
+</div>
+<div style="margin-left:5%;">   Cete séquence déplace le curseur d'un caractère vers la droite.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-LEFT">
+<b>VT-LEFT</b> ( -- )
+<div style="margin-left:5%;">   Envoie la séquence ANSI 'ESC[D'  au terminal VT102.
+</div>
+<div style="margin-left:5%;">   Cette séquence déplace le curseur d'un caractère vers la gauche.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-HOME">
+<b>VT-HOME</b> ( -- )
+<div style="margin-left:5%;">   Envoie une séquence de contrôle au terminal VT102 pour déplacer le curseur en début de ligne.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-END">
+<b>VT-END</b> ( -- )
+<div style="margin-left:5%;">   Envoie une séquence de contrôle au terminal VT102 pour déplacer le curseur à la fin de la ligne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-AT-XY">
+<b>VT-AT-XY</b> ( u1 u2 -- )
+<div style="margin-left:5%;">   Envoie une séquence de contrôle au terminal VT102 pour positionner le curseur    
+</div>
+<div style="margin-left:5%;">   aux coordonnées {u1,u2}
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;   numéro de colonne {1..64}
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;   numéro de ligne   {1..24}
+</div>
+<div style="margin-left:5%;"><b>  retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-PAGE">
+<b>VT-PAGE</b> ( -- )
+<div style="margin-left:5%;">  Envoie une commande au terminal VT102 pour effacer l'écran.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-DELBACK">
+<b>VT-DELBACK</b>  ( -- )
+<div style="margin-left:5%;">   Envoie une commande au terminal VT102 pour effacer le caractère à gauche du curseur.
+</div>
+<div style="margin-left:5%;">   Le curseur est déplacé à la position du caractère supprimé.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-DELLN">
+<b>VT-DELLN</b>   ( -- )    
+<div style="margin-left:5%;">   Envoie une commande au terminal VT102 pour supprimer la ligne sur laquelle
+</div>
+<div style="margin-left:5%;">   se trouve le curseur. Le curseur est déplacé au début de la ligne.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-DSR">
+<b>VT-DSR</b>  ( -- )
+<div style="margin-left:5%;">   Envoie la séquence de contrôle ANSI 'ESC[6n' au terminal VT102.
+</div>
+<div style="margin-left:5%;">   Le terminal répond à cette commande en envoyant la la position du curseur. 
+</div>
+<div style="margin-left:5%;">   VT-DSR est utilisé par VT-GETCUR
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-GETP">
+<b>VT-GETP</b>  ( c -- n f )
+<div style="margin-left:5%;">   Réception d'un paramètre numérique envoyé par le terminal.    
+</div>
+<div style="margin-left:5%;">   La valeur numérique est terminée par le caractère c.
+</div>
+<div style="margin-left:5%;">   VT-GETP est utilisé par les commandes qui attendent une réponse du terminal
+</div>
+<div style="margin-left:5%;">   en sachant que la réponse contient des valeur numériques.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; caractère délimitant la chaîne numérique.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    nombre lue
+</div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;    indicateur booléen de succès.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ESCSEQ?">
+<b>ESCSEQ?</b>  ( -- f )
+<div style="margin-left:5%;">   Attend une séquence d'échappement  'ESC[' du terminal.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  indicateur booléen, FAUX si la séquence reçu n'est pas ESC[  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-GETCUR">
+<b>VT-GETCUR</b>  ( -- u1 u2 | -1 -1 )
+<div style="margin-left:5%;">   Envoie une requête de position du curseur au terminal VT102 et fait la lecture de la réponse.
+</div>
+<div style="margin-left:5%;">   Contrairement à la console locale le terminal VT102 numérote les colonnes et ligne à partir de 1.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    colonne  {1..64}
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    ligne    {1..24}
+</div>
+<div style="margin-left:5%;"><i>en</i>&nbsp;&nbsp; cas d'erreur reoturne -1 -1  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-CRLF">
+<b>VT-CRLF</b> 
+<div style="margin-left:5%;">   Envoie la séquence 'CRTL_M CTRL_J'  (i.e. ASCII 13 10)  au terminal VT102.
+</div>
+<div style="margin-left:5%;">   Le terminal répond en déplacant le curseur au début de la ligne suivante.  
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-PUTC
+">
+<b>VT-PUTC
+</b> L_M,SPUTC,LIT,CTRL_J,SPUTC,EXIT
+<div style="margin-left:5%;">   Envoie un caractère au terminal VT102. Les caractères ne sont pas filtrés.
+</div>
+<div style="margin-left:5%;">   Si la colonne du curseur après l'affichage du caractère est à 65 force un VT-CRLF.   
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère à envoyer au terminal.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-B/W">
+<b>VT-B/W</b>  ( f -- )
+<div style="margin-left:5%;">   Terminal VT102. 
+</div>
+<div style="margin-left:5%;">   Détermine si les caractères s'affichent noir sur blanc ou l'inverse
+</div>
+<div style="margin-left:5%;">   Si l'indicateur Booléen 'f' est vrai les caractères s'affichent noir sur blanc.
+</div>
+<div style="margin-left:5%;">   Sinon ils s'affiche blancs sur noir (valeur par défaut).
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   Indicateur Booléen, inverse vidéo si vrai.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><h4 id="index">Index</h4>
+<p>
+<ul>
+<li><a href="#ESCSEQ?">ESCSEQ?</a></li>
+<li><a href="#ESC[">ESC[</a></li>
+<li><a href="#VT-AT-XY">VT-AT-XY</a></li>
+<li><a href="#VT-B/W">VT-B/W</a></li>
+<li><a href="#VT-CRLF">VT-CRLF</a></li>
+<li><a href="#VT-DELBACK">VT-DELBACK</a></li>
+<li><a href="#VT-DELLN">VT-DELLN</a></li>
+<li><a href="#VT-DOWN">VT-DOWN</a></li>
+<li><a href="#VT-DSR">VT-DSR</a></li>
+<li><a href="#VT-EKEY">VT-EKEY</a></li>
+<li><a href="#VT-EMIT">VT-EMIT</a></li>
+<li><a href="#VT-END">VT-END</a></li>
+<li><a href="#VT-FILTER">VT-FILTER</a></li>
+<li><a href="#VT-GETCUR">VT-GETCUR</a></li>
+<li><a href="#VT-GETP">VT-GETP</a></li>
+<li><a href="#VT-HOME">VT-HOME</a></li>
+<li><a href="#VT-KEY">VT-KEY</a></li>
+<li><a href="#VT-KEY?">VT-KEY?</a></li>
+<li><a href="#VT-LEFT">VT-LEFT</a></li>
+<li><a href="#VT-PAGE">VT-PAGE</a></li>
+<li><a href="#VT-PUTC
+">VT-PUTC
+</a></li>
+<li><a href="#VT-RIGHT">VT-RIGHT</a></li>
+<li><a href="#VT-SNDARG">VT-SNDARG</a></li>
+<li><a href="#VT-TYPE">VT-TYPE</a></li>
+<li><a href="#VT-UP">VT-UP</a></li>
+<li><a href="#XOFF">XOFF</a></li>
+<li><a href="#XON">XON</a></li>
+</ul>
+</p>
+<hr style="border-width:1px;"><div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+
+</body>
+</html>

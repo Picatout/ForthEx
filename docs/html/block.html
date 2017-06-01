@@ -1,0 +1,620 @@
+<DOCTYPE! html>
+<html lang="fr-CA">
+<head>
+</head>
+<body id="#top">
+<h1>block</h1><div><a href="#index">index</a></div>
+<div><a href="index.html">index principal</a></div>
+<h2 id="description">Description</h2><div style="margin-left:5%;"> 
+</div>
+<div style="margin-left:5%;">   Implémentation des mots de gestion de fichiers par blocs.
+</div>
+<div style="margin-left:5%;">REF: <a href=" http://lars.nocrew.org/forth2012/block.html
+"> http://lars.nocrew.org/forth2012/block.html
+</a></div>
+<div style="margin-left:5%;">REF: <a href=" http://lars.nocrew.org/dpans/dpans7.htm#7.6.1    
+"> http://lars.nocrew.org/dpans/dpans7.htm#7.6.1    
+</a></div>
+<div style="margin-left:5%;"> NOTES:
+</div>
+<div style="margin-left:5%;">  1) Les blocs sont de 1024 octets par tradition car à l'époque où
+</div>
+<div style="margin-left:5%;">     Charles Moore a développé ce système il l'utilisait pour stocker
+</div>
+<div style="margin-left:5%;">     les écrans du moniteur sous forme de texte source. Le moniteur qu'il
+</div>
+<div style="margin-left:5%;">     utilisait affichait 16 lignes de 64 caractères donc 1024 caractères.
+</div>
+<div style="margin-left:5%;">     Son éditeur de texte fonctionnait par pages écran.
+</div>
+<div style="margin-left:5%;">    
+</div>
+<div style="margin-left:5%;">  2) La numérotation des blocs de stockage commence à 1.     
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="BLK">
+<b>BLK</b>   ( -- a-addr)  
+<div style="margin-left:5%;">   Variable qui contient le no de bloc actuellement interprété.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  adresse de la variable _blk
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SCR">
+<b>SCR</b> ( -- a-addr )
+<div style="margin-left:5%;">   variable contenant le dernier numéro de bloc affiché à l'écran.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp;    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   adresse de la variable SCR.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLKDEV">
+<b>BLKDEV</b>  ( -- a-addr )
+<div style="margin-left:5%;">    variable contenant l'adresse du descripteur du périphérique
+</div>
+<div style="margin-left:5%;">    de stockage actif.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable BLKDEV
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="BUFARRAY">
+<b>BUFARRAY</b>  ( -- a-ddr )
+<div style="margin-left:5%;">   Retourne l'adresse du tableau contenant les structures BUFFER.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;    Adresse du tableau qui contient le structures BUFFER.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="STRUCADR">
+<b>STRUCADR</b> ( n -- a-addr)
+<div style="margin-left:5%;">   convertie le numéro de buffer en adresse de la structure BUFFER.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Numéro du buffer.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse début de la structure.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="DATA">
+<b>DATA</b> ( a-addr1 -- a-addr2 )
+<div style="margin-left:5%;">   Retourne un pointeur sur le début du bloc de données du BUFFER.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;   Adresse de la structure BUFFER.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;   Adresse début du bloc de données.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="OWN?">
+<b>OWN?</b>  ( n+ u a-addr -- f )
+<div style="margin-left:5%;">    Vérifie si le numéro de bloc et l'identifiant périphique correspondent
+</div>
+<div style="margin-left:5%;">    à ce buffer.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;      Numéro de bloc.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       Périphérique de stockage.
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la structure BUFFER.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;    Indicateur booléen vrai si n+==BLOCK_NBR && u==DEVICE.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="BUFFERED?">
+<b>BUFFERED?</b>  ( n+ u -- a-addr|0)
+<div style="margin-left:5%;">   Vérifie si le bloc est dans un buffer.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  Numéro du bloc recherché.    
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   Descripteur du périphérique auquel appartient ce bloc.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr|0</i>&nbsp;&nbsp; Adresse du  buffer contenant ce bloc ou 0 s'il n'est pas dans un buffer.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="NOTUSED">
+<b>NOTUSED</b> ( -- a-addr|0 )
+<div style="margin-left:5%;">   Recherche un buffer libre. Retourne 0 si aucun buffer libre.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr|0</i>&nbsp;&nbsp;  Adresse de la struturce BUFFER libre ou 0.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="OLDEST">
+<b>OLDEST</b> ( -- a-addr )
+<div style="margin-left:5%;">   Recherche la mémoire tampon dont la dernière modification est la plus ancienne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse de la structure BUFFER.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="UPDATED@">
+<b>UPDATED@</b>  ( a-addr -- u )
+<div style="margin-left:5%;">   Retourne la valeur du champ UPDATED d'une structure BUFFER.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la structure BUFFER.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp; Valeur du champ UPDATED.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLKDEV@">
+<b>BLKDEV@</b>  ( -- u )
+<div style="margin-left:5%;">   Retourne le descripteur du périphérique de stockage actif.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp; 
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Descripteur du périphérique actif.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLK&gt;ADR">
+<b>BLK&gt;ADR</b> ( a-addr -- ud )
+<div style="margin-left:5%;">   Convertie un numéro de bloc d'un buffer en adresse 32 bits. Qui correspond
+</div>
+<div style="margin-left:5%;">   à la position absolue sur le média de stockage.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse de la structure BUFFER.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  Adresse 32 bits sur le périphérique de stockage.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="FIELDS">
+<b>FIELDS</b>  ( a-addr -- u1 u2 u3 a-addr )
+<div style="margin-left:5%;">   Obtient les paramètres du buffer à partir de son adresse.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse de la structure BUFFER.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    Champ DATA
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    Champ BLOCK_NBR    
+</div>
+<div style="margin-left:5%;"><i>u3</i>&nbsp;&nbsp;    Champ DEVICE
+</div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;    Adresse de la structure BUFFER.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="UPDATE">
+<b>UPDATE</b>  ( a-addr -- )
+<div style="margin-left:5%;">    Met à jour le compteur UPDATED avec la valeur incrémentée de _update_cntr.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse de la structure BUFFER.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="NOUPDATE">
+<b>NOUPDATE</b>  ( a-addr -- )
+<div style="margin-left:5%;">    Remet le champ UPDATED de la structure BUFFER à zéro.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;     Adresse de la structure BUFFER.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="DATA&gt;">
+<b>DATA&gt;</b> ( a-addr -- )    
+<div style="margin-left:5%;">   Sauvegarde du data sur le périphérique de stockage et remise à zéro du champ UPDATED.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse de la structure BUFFER.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; 
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="&gt;DATA">
+<b>&gt;DATA</b>  ( a-addr -- )
+<div style="margin-left:5%;">   Charge un bloc dans un buffer à partir du périphérique de stockage.
+</div>
+<div style="margin-left:5%;">   La structure BUFFER indentifié par a-addr doit contenir le numéro 
+</div>
+<div style="margin-left:5%;">   du bloc et le descripteur du périphérique.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;    Adresse de la structure BUFFER.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ASSIGN">
+<b>ASSIGN</b>  ( n+ -- a-addr )
+<div style="margin-left:5%;">   Assigne un BUFFER à un bloc appartenant au périphérique sélectionné par
+</div>
+<div style="margin-left:5%;">   BLKDEV. Libère un BUFFER au besoin.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  numéro du bloc requis.    
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse du début de la zone de données.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="BUFFER">
+<b>BUFFER</b>  ( n+ -- a-addr )
+<div style="margin-left:5%;">   Retourne l'adresse d'un bloc de données. Si aucun buffer n'est disponible
+</div>
+<div style="margin-left:5%;">   libère celui qui à la plus petite valeur UPDATED.
+</div>
+<div style="margin-left:5%;">   Contrairement à BLOCK il n'y a pas de lecture du périphérique de stockage.
+</div>
+<div style="margin-left:5%;">   le contenu du buffer est mis à zéro.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;    numéro du bloc.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse début de la zone de données.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLOCK">
+<b>BLOCK</b>  ( n+ -- a-addr )
+<div style="margin-left:5%;">   Lit un bloc d'un périphérique de stockage vers un buffer. Libère un buffer au besoin.
+</div>
+<div style="margin-left:5%;">   Le périphérique est celui déterminé par la variable BLKDEV.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   no. du bloc requis.
+</div>
+<div style="margin-left:5%;"><b> retourne:    
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse du début de la zone de données.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LOAD">
+<b>LOAD</b> ( i*x n+ -- j*x )
+<div style="margin-left:5%;">   Évalue un bloc. Si le bloc n'est pas déjà dans un buffer il est chargé
+</div>
+<div style="margin-left:5%;">   à partir du périphérique désigné par BLKDEV. Le numéro du bloc évalué 
+</div>
+<div style="margin-left:5%;">   est enregistré dans la variable BLK.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;  État de la pile des arguments avant l'évalutaion du bloc n+.    
+</div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   Numéro du bloc à évaluer.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;  État de la pile des arguments après l'évaluation du bloc n+.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SAVE-BUFFERS">
+<b>SAVE-BUFFERS</b> ( -- )  
+<div style="margin-left:5%;">   Sauvegarde tous les buffers qui ont été modifiés.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="EMPTY-BUFFERS">
+<b>EMPTY-BUFFERS</b>  ( -- )
+<div style="margin-left:5%;">   Libère tous les buffers sans sauvegarder.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; 
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="FLUSH">
+<b>FLUSH</b> ( -- )
+<div style="margin-left:5%;">   Sauvegarde tous les buffers et les libères.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; 
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LIST">
+<b>LIST</b> ( n+ -- )
+<div style="margin-left:5%;">   Affiche le contenu du bloc à l'écran. Si le bloc n'est pas déjà dans un buffer
+</div>
+<div style="margin-left:5%;">   il est chargé à partir du périphérique désigné par BLKDEV. L'affichage s'arrête
+</div>
+<div style="margin-left:5%;">   sitôt qu'un caractère autre que 32..126|VK_CR est rencontré.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  numéro du bloc
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="REFILL">
+<b>REFILL</b>  ( -- f )
+<div style="margin-left:5%;">   **comportement non standard**  
+</div>
+<div style="margin-left:5%;">   Si la variable BLK est à zéro retourne faux.
+</div>
+<div style="margin-left:5%;">   Sinon incrémente BLK et si cette nouvelle valeur est valide
+</div>
+<div style="margin-left:5%;">   charge ce bloc pour évaluation et retourne vrai, sinon
+</div>
+<div style="margin-left:5%;">   remet BLK à zéro et retourne faux.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;    retourne faux si la variable BLK=0 ou s'il n'y a plus de bock valide.  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="THRU">
+<b>THRU</b>  ( i*x u1 u2 -- j*x )
+<div style="margin-left:5%;">   Interprétation des blocs u1 à u2 . LOAD est appellé pour chacun des blocs dans la séquence.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;  État initial de pile.
+</div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;   premier bloc à interpréter.
+</div>
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;   dernier bloc à interpréter.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;  État de la pile après l'interprétation des blocs.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SCR-SIZE">
+<b>SCR-SIZE</b> ( -- n )
+<div style="margin-left:5%;">    Calcule la taille que la mémoire tampon vidéo occuperait dans un bloc s'il était sauvegardé avec SCR&gt;BLK.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n	Taille</i>&nbsp;&nbsp; qui serait occupée par l'écran dans un bloc.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SCR&gt;BLK">
+<b>SCR&gt;BLK</b>  ( n+ -- f )
+<div style="margin-left:5%;">   Sauvegarde du frame buffer de l'écran dans un bloc sur périphérique de stockage.
+</div>
+<div style="margin-left:5%;">   Si le contenu de l'écran n'entre pas dans un bloc, l'opération est abaondonnée et retourne faux.
+</div>
+<div style="margin-left:5%;">   Les espaces qui termines les lignes sont supprimés et chaque ligne est complétée
+</div>
+<div style="margin-left:5%;">   par un VK_CR.
+</div>
+<div style="margin-left:5%;">   * ne fonctionne qu'avec LOCAL CONSOLE. Cependant BLKEDIT utilise le frame buffer
+</div>
+<div style="margin-left:5%;">     local même lorsque la console est en mode REMOTE, donc BLKEDIT peut sauvegarder
+</div>
+<div style="margin-left:5%;">     le bloc en édition.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;    numéro du bloc où sera sauvegardé l'écran.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;     indicateur booléen, T si sauvegarde réussie, F si trop grand.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><h4 id="index">Index</h4>
+<p>
+<ul>
+<li><a href="#&gt;DATA">&gt;DATA</a></li>
+<li><a href="#ASSIGN">ASSIGN</a></li>
+<li><a href="#BLK">BLK</a></li>
+<li><a href="#BLK&gt;ADR">BLK&gt;ADR</a></li>
+<li><a href="#BLKDEV">BLKDEV</a></li>
+<li><a href="#BLKDEV@">BLKDEV@</a></li>
+<li><a href="#BLOCK">BLOCK</a></li>
+<li><a href="#BUFARRAY">BUFARRAY</a></li>
+<li><a href="#BUFFER">BUFFER</a></li>
+<li><a href="#BUFFERED?">BUFFERED?</a></li>
+<li><a href="#DATA">DATA</a></li>
+<li><a href="#DATA&gt;">DATA&gt;</a></li>
+<li><a href="#EMPTY-BUFFERS">EMPTY-BUFFERS</a></li>
+<li><a href="#FIELDS">FIELDS</a></li>
+<li><a href="#FLUSH">FLUSH</a></li>
+<li><a href="#LIST">LIST</a></li>
+<li><a href="#LOAD">LOAD</a></li>
+<li><a href="#NOTUSED">NOTUSED</a></li>
+<li><a href="#NOUPDATE">NOUPDATE</a></li>
+<li><a href="#OLDEST">OLDEST</a></li>
+<li><a href="#OWN?">OWN?</a></li>
+<li><a href="#REFILL">REFILL</a></li>
+<li><a href="#SAVE-BUFFERS">SAVE-BUFFERS</a></li>
+<li><a href="#SCR">SCR</a></li>
+<li><a href="#SCR&gt;BLK">SCR&gt;BLK</a></li>
+<li><a href="#SCR-SIZE">SCR-SIZE</a></li>
+<li><a href="#STRUCADR">STRUCADR</a></li>
+<li><a href="#THRU">THRU</a></li>
+<li><a href="#UPDATE">UPDATE</a></li>
+<li><a href="#UPDATED@">UPDATED@</a></li>
+</ul>
+</p>
+<hr style="border-width:1px;"><div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+
+</body>
+</html>
