@@ -15,9 +15,9 @@
 </div>
 <div style="margin-left:5%;">  pour une image du dictionnaire en RAM  qui peut-être sauvegardé dans la FLASH 
 </div>
-<div style="margin-left:5%;">  à partir de l'adresse 0x8000 avec le mot IMG>FLASH. Cette image est 
+<div style="margin-left:5%;">  à partir de l'adresse 0x8000 avec le mot IMGSAVE. Cette image est 
 </div>
-<div style="margin-left:5%;">  automatiquement récupérée au démarrage du sytème par le mot FLASH>IMG.  
+<div style="margin-left:5%;">  automatiquement récupérée au démarrage du sytème par le mot IMGLOAD.  
 </div>
 <div style="margin-left:5%;">
 </div>
@@ -29,23 +29,7 @@
 <div style="margin-left:5%;">    
 </div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:4px;"><p id="MFLASH">
-<b>MFLASH</b>   ( -- a-addr ) 
-<div style="margin-left:5%;">   Retourne l'adresse du descripteur mémoire FLASH MCU
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp; 
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="FBUFFER">
+<hr style="border-width:4px;"><p id="FBUFFER">
 <b>FBUFFER</b>  ( -- a-addr )
 <div style="margin-left:5%;">   Réservation d'un bloc de mémoire dynamique pour écriture d'une page flash MCU.
 </div>
@@ -61,11 +45,13 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="FTBL@L">
-<b>FTBL@L</b>  (  ud1 -- n )    
-<div style="margin-left:5%;">   Lecture d'un mot dans la mémoire flash low word (adresse paire).
+<hr style="border-width:1px;"><p id="F@">
+<b>F@</b>  (  ud1 -- n )    
+<div style="margin-left:5%;">   Lecture d'un mot de 16 bits dans la mémoire.
 </div>
-<div style="margin-left:5%;">   Utiliste l'instruction machine 'tblrdl'.    
+<div style="margin-left:5%;">   Si ud1 est pair utilise l'instruction machine TBLRDL pour retourner les bits 15:0
+</div>
+<div style="margin-left:5%;">   Si ud1 est impair utilise l'instruction machine TBLRDH pour retourner les bits 23:16    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -74,16 +60,38 @@
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    valeur lue à l'adresse ud1. n représente les bits 15..0 de l'instruction à cette adresse.
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    valeur lue à l'adresse ud1. Si ud1 est impair les bits 15:8 sont à zéro.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="FTBL@H">
-<b>FTBL@H</b>   ( ud1 -- n )    
-<div style="margin-left:5%;">    Lecture d'un mot dans la mémoire flash high word (adresse impaire).
+<hr style="border-width:1px;"><p id="FC@L">
+<b>FC@L</b> ( ud1 -- n )
+<div style="margin-left:5%;">   Lecture d'un octet dans la partie basse de l'instruction. 
 </div>
-<div style="margin-left:5%;">    Utilise l'instruction machine 'tblrdh'.     
+<div style="margin-left:5%;">   Utilise l'instruction machine TBLRDL.B    
+</div>
+<div style="margin-left:5%;">    Si ud1 est impair  les bits 15:8 sont retournés, sinon les bits 7:0 sont retournés.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  entier double correspondant à l'adresse en mémoire flash.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    si impair(ud1) n=bits{15:8}  sinon n=bits{7:0}
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="FC@H">
+<b>FC@H</b>   ( ud1 -- n )    
+<div style="margin-left:5%;">    Lecture d'un octet dans la mémoire flash du mot lourd de l'instruction.
+</div>
+<div style="margin-left:5%;">    Utilise l'instruction machine TBLRDH.B
+</div>
+<div style="margin-left:5%;">    Si ud1 est impair retourne la valeur 0, sinon retourne les bits 23:16 de l'instruction.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -115,6 +123,32 @@
 <div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;  bits 8:15
 </div>
 <div style="margin-left:5%;"><i>u3</i>&nbsp;&nbsp;  bits 0:7    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="IC@">
+<b>IC@</b> ( ud n -- c )
+<div style="margin-left:5%;">   Lit 1 octet dans la mémoire flash à l'adresse d'instruction ud et à la position
+</div>
+<div style="margin-left:5%;">   désignée par n. n est dans l'intervalle {0..2}
+</div>
+<div style="margin-left:5%;">   0 retourne l'octet le faible, bits 7:0
+</div>
+<div style="margin-left:5%;">   1 retourne l'octet du milieu, bits 15:8
+</div>
+<div style="margin-left:5%;">   2 retourne l'octet le fort, bits 23:16
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Entier double pair adresse de l'instruction.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    entier dans l'intervalle {0..2} indiquant quel octet de l'instruction doit-être lu.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;    octet lu dans la mémoire flash.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -161,22 +195,6 @@
 <div style="margin-left:5%;"><b> arguments:    
 </b></div>
 <div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse du premier octet en mémoire RAM à copié dans les tampons flash.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="FLASH_OP	">
-<b>FLASH_OP	</b> ( n -- )    
-<div style="margin-left:5%;">   Séquence d'écriture dans la mémoire flash du MCU.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Constante identifiant le type d'opération flash à effectuer.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -262,12 +280,20 @@
 </div>
 <div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  adresse mémoire flash  24 bits
 </div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="RAM&gt;FLASH">
 <b>RAM&gt;FLASH</b>  ( addr n ud -- )    
 <div style="margin-left:5%;">   Écris en mémoire flash un bloc de données en RAM.
+</div>
+<div style="margin-left:5%;">   Le bloc de mémoire RAM identifié par addr doit avoir une grandeur multiple de 6. 
+</div>
+<div style="margin-left:5%;">   Au besoin remplir les octets excédentaires avec la valeur 0xFF.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:    
@@ -286,17 +312,17 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="FLASH&gt;RAM">
-<b>FLASH&gt;RAM</b>  ( addr n ud -- )  
-<div style="margin-left:5%;">  Lecture d'un bloc FLASH dans un tamp en mémoire RAM.
+<b>FLASH&gt;RAM</b>  ( c-addr n ud -- )  
+<div style="margin-left:5%;">  Lecture d'un bloc FLASH dans un tampon en mémoire RAM.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:  
 </b></div>
-<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp;  Adresse 16 bits début RAM.
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse 16 bits début RAM.
 </div>
 <div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     Nombre d'octets à lire.
 </div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   adresse début bloc FLASH.
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;    adresse début bloc FLASH.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -463,19 +489,19 @@
 <li><a href="#BOOT_HEADER">BOOT_HEADER</a></li>
 <li><a href="#Constantes">Constantes</a></li>
 <li><a href="#ERASEROWS">ERASEROWS</a></li>
+<li><a href="#F@">F@</a></li>
 <li><a href="#FADDR">FADDR</a></li>
 <li><a href="#FBUFFER">FBUFFER</a></li>
+<li><a href="#FC@H">FC@H</a></li>
+<li><a href="#FC@L">FC@L</a></li>
 <li><a href="#FERASE">FERASE</a></li>
 <li><a href="#FLASH&gt;RAM">FLASH&gt;RAM</a></li>
-<li><a href="#FLASH_OP	">FLASH_OP	</a></li>
 <li><a href="#FNEXT">FNEXT</a></li>
-<li><a href="#FTBL@H">FTBL@H</a></li>
-<li><a href="#FTBL@L">FTBL@L</a></li>
 <li><a href="#I@">I@</a></li>
+<li><a href="#IC@">IC@</a></li>
 <li><a href="#IMGADDR">IMGADDR</a></li>
 <li><a href="#IMGLOAD">IMGLOAD</a></li>
 <li><a href="#IMGSAVE">IMGSAVE</a></li>
-<li><a href="#MFLASH">MFLASH</a></li>
 <li><a href="#RAM&gt;FLASH">RAM&gt;FLASH</a></li>
 <li><a href="#ROW&gt;FADR">ROW&gt;FADR</a></li>
 <li><a href="#WRITE_LATCH">WRITE_LATCH</a></li>

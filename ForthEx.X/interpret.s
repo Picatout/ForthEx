@@ -827,9 +827,9 @@ DEFWORD "DO",2,F_IMMED,DO
 ; retourne:
 ;   rien    
 DEFWORD "?DO",3,F_IMMED,QDO 
-    .word QCOMPILE,CFA_COMMA,DOQDO
-    .word HERE,LIT,2*CELL_SIZE,PLUS,TOCSTK,LIT,0,TOCSTK
-    .word CFA_COMMA,BRANCH,HERE,TOCSTK,EXIT
+    .word QCOMPILE,CFA_COMMA,DOQDO,CFA_COMMA,BRANCH,MARKSLOT
+    .word HERE,TOCSTK,LIT,0,TOCSTK
+    .word TOCSTK,EXIT
     
 ; nom: LEAVE  runtime ( -- )
 ;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.

@@ -1,3 +1,11 @@
+2017-05-31
+----------
+Correcton bogue dans M+
+Correction bogue dans FLASH>RAM
+Correction bogue dans ?DO
+Ajout des mots  F@ FC@L FC@H et IC@
+
+
 2017-05-30
 ----------
 Travail sur la documentation. Création du fichier presentation.html

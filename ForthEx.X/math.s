@@ -249,11 +249,13 @@ DEFCODE "D-",2,,DMINUS ; ( d1 d2 -- d3 )
 ; retourne:
 ;   d2  Entier double résultant de d1+n    
 DEFCODE "M+",2,,MPLUS
-    mov [DSP-2], W0 ; d1 faible
-    add W0,T, W0 ; d2 faible
-    DPOP    ; T= d1 fort
-    addc #0, T
-    mov W0,[DSP]
+    mov T,W0
+    DPOP
+    clr W1
+    btsc W0,#15
+    setm W1
+    add W0,[DSP],[DSP]
+    addc W1,T,T
     NEXT
  
 ; nom: *  ( n1 n2 -- n3 )  n3=n1*n2

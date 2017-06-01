@@ -24,8 +24,8 @@
 ;  Pour protéger le système l'écriture n'est autorisée qu'à partir de l'adresse 
 ;  0x8000. Le système au complet doit résidé en déça de cette adresse sauf
 ;  pour une image du dictionnaire en RAM  qui peut-être sauvegardé dans la FLASH 
-;  à partir de l'adresse 0x8000 avec le mot IMG>FLASH. Cette image est 
-;  automatiquement récupérée au démarrage du sytème par le mot FLASH>IMG.  
+;  à partir de l'adresse 0x8000 avec le mot IMGSAVE. Cette image est 
+;  automatiquement récupérée au démarrage du sytème par le mot IMGLOAD.  
 ;
 ; REF:    
 ;  documents de référence Microchip: DS70609D et DS70000613D
@@ -40,18 +40,18 @@ _mflash_buffer: .space 2
 ; l'accès à la mémoire FLASH
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; nom: MFLASH   ( -- a-addr ) 
+; MFLASH   ( -- a-addr ) 
 ;   Retourne l'adresse du descripteur mémoire FLASH MCU
 ; arguments:
 ;   aucun
 ; retourne:
 ;   aucun 
-DEFTABLE "MFLASH",6,,MFLASH
-    .word _MCUFLASH ; mémoire FLASH du MCU    
-    .word FFETCH 
-    .word TOFLASH
-    .word FLASHTORAM
-    .word RAMTOFLASH
+;DEFTABLE "MFLASH",6,,MFLASH
+;    .word _MCUFLASH ; mémoire FLASH du MCU    
+;    .word FFETCH 
+;    .word TOFLASH
+;    .word FLASHTORAM
+;    .word RAMTOFLASH
     
 ; nom: FBUFFER  ( -- a-addr )
 ;   Réservation d'un bloc de mémoire dynamique pour écriture d'une page flash MCU.
@@ -142,6 +142,34 @@ DEFCODE "I@",2,,IFETCH
     RPOP TBLPAG
     NEXT
  
+; nom: IC@ ( ud n -- c )
+;   Lit 1 octet dans la mémoire flash à l'adresse d'instruction ud et à la position
+;   désignée par n. n est dans l'intervalle {0..2}
+;   0 retourne l'octet le faible, bits 7:0
+;   1 retourne l'octet du milieu, bits 15:8
+;   2 retourne l'octet le fort, bits 23:16
+; arguments:
+;   ud   Entier double pair adresse de l'instruction.
+;   n    entier dans l'intervalle {0..2} indiquant quel octet de l'instruction doit-être lu.
+; retourne:
+;   c    octet lu dans la mémoire flash.
+DEFCODE "IC@",3,,ICFETCH ; ( ud n -- c )
+    mov T, W0
+    DPOP
+    RPUSH TBLPAG
+    mov T,TBLPAG
+    DPOP
+    cp0 W0
+    bra z, 4f
+    dec W0,W0
+    bra z, 2f
+    tblrdh.b [T],T
+    bra 9f
+2:  inc T,T
+4:  tblrdl.b [T],T
+9:  RPOP TBLPAG
+    NEXT
+    
 ; nom: FADDR   ( ud -- )    
 ;   Initialise le pointeur d'addresse 24 bits pour la programmation de la mémoire FLASH du MCU.
 ;   Les addresse FLASH ont 24 bits.
@@ -196,7 +224,7 @@ HEADLESS "WRITE_LATCH" ; ( addr --  )
     RPOP DSRPAG
     NEXT
 
-; nom: FLASH_OP	 ( n -- )    
+; FLASH_OP	 ( n -- )    
 ;   Séquence d'écriture dans la mémoire flash du MCU.
 ; arguments:
 ;   n    Constante identifiant le type d'opération flash à effectuer.
@@ -270,6 +298,8 @@ DEFWORD "FERASE",6,,FERASE ; ( u -- )
 ; arguments: 
 ;   addr adresse RAM du premier octet de donnée.
 ;    ud  adresse mémoire flash  24 bits
+; retourne:
+;   rien  
 DEFWORD ">FLASH",6,,TOFLASH ; ( addr ud -- )
     .word QFLIMITS,TBRANCH,1f-$
     .word TWODROP,DROP,EXIT ; jette les 2 adresses avant de quitter
@@ -280,7 +310,7 @@ DEFWORD ">FLASH",6,,TOFLASH ; ( addr ud -- )
 ; nom: RAM>FLASH  ( addr n ud -- )    
 ;   Écris en mémoire flash un bloc de données en RAM.
 ;   Le bloc de mémoire RAM identifié par addr doit avoir une grandeur multiple de 6. 
-;   Au besoin remplir les octets excédaires avec la valeur 0xFF.    
+;   Au besoin remplir les octets excédentaires avec la valeur 0xFF.    
 ; arguments:    
 ;   addr  Adresse début données en RAM.
 ;   n     Nombre d'octets à écrire.
@@ -305,14 +335,16 @@ DEFWORD "RAM>FLASH",9,,RAMTOFLASH ; ( adr size ud -- )
 ; retourne:
 ;   rien  
 DEFWORD "FLASH>RAM",9,,FLASHTORAM ; ( c-addr size ud -- )
-    .word ROT ; S: adr ud size  
-    .word LIT,0,DODO ; S: adr ud 
-1:  .word TWODUP,TWOTOR,DOI,LIT,3,MOD,LIT,2,EQUAL,ZBRANCH,2f-$ ; S: adr ud  R: ud
-    .word FCFETCHL,BRANCH,6f-$
-2:  .word FCFETCHH   
-6:  .word OVER,CSTORE,ONEPLUS,TWORFROM,LIT,1,MPLUS,DOLOOP,1b-$
-    .word TWODROP,DROP
-9:  .word EXIT  
+    .word ROT ; S: c-addr ud size  
+    .word LIT,0,DOQDO,BRANCH,9f-$ ; S: c-addr ud 
+1:  .word DOI,LIT,3,MOD,DUP,TOR ; S: c-addr ud n R: n
+2:  .word NROT,TWODUP,TWOTOR,ROT,ICFETCH ; S: c-addr n  R: n ud
+    .word OVER,CSTORE,ONEPLUS,TWORFROM,RFROM
+    .word LIT,2,EQUAL,ZBRANCH,8f-$
+    .word LIT,2,MPLUS
+8:  .word DOLOOP,1b-$
+9:  .word TWODROP,DROP
+    .word EXIT  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   Sauvegarde et restauration
@@ -367,7 +399,7 @@ DEFWORD "IMGDP",5,,IMGDP ; ( -- n addr )
 DEFWORD "IMGSIZE",7,,IMGSIZE ; ( -- n addr )
     .word LIT,3,IMGHEAD,EXIT
     
-    
+;    
 ; initialise l'entête d'image  
 DEFWORD "SETHEADER",9,,SETHEADER ; ( -- )
     .word MAGIC,IMGSIGN,TBLSTORE ; signature
