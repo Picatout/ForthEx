@@ -26,11 +26,11 @@
 ;    
 ;  STRUCTURE ENTÊTE DE BLOC
 ;  ========================
-;  pos.   octets   description
+;  pos. |  octets |  description
 ; ----------------------------
-;   0       2        grandeur excluant l'entête
-;   2       2        lien vers le bloc suivant.
-;   4	    2	     lien vers le bloc précédent.
+;   0   |   2   |    grandeur excluant l'entête
+;   2   |   2   |    lien vers le bloc suivant.
+;   4	|    2	|    lien vers le bloc précédent.
     
 ;  La taille mininale d'un bloc est de 8 octets, 6 pour l'entête plus 2 octets
 ;  pour le data. Les blocs sont arrondis au nombre pair supérieur pour assurer
@@ -96,24 +96,26 @@ HEADLESS FREE_BYTES_STORE
     DPOP
     NEXT
     
-; nom: FREELIST   ( -- a-addr )    
+; FREELIST   ( -- a-addr )    
 ;   Retourne l'adresse de la variable qui contient la tête de liste des blocs libres.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   a-addr  Adresse de la variable contenant le pointeur tête de la liste des blocs libres.    
-DEFCODE "FREELIST",8,,FREELIST
+HEADLESS FREELIST,CODE    
+;DEFCODE "FREELIST",8,,FREELIST
     DPUSH
     mov #_heap_free,T
     NEXT
     
-; nom: USEDLIST  ( -- a-addr )    
+; USEDLIST  ( -- a-addr )    
 ;   Retourne l'adresse de la variable qui contient la tête de liste des blocs utilisés.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   a-addr  Adresse de la variable contenant le pointeur tête de liste des blocs utilisés.    
-DEFCODE "USEDLIST",8,,USEDLIST
+HEADLESS USEDLIST,CODE    
+;DEFCODE "USEDLIST",8,,USEDLIST
     DPUSH
     mov #_heap_used,T
     NEXT
@@ -127,58 +129,64 @@ DEFCODE "USEDLIST",8,,USEDLIST
 DEFWORD "BSIZE@",6,,BSIZEFETCH ; ( a-addr -- n )
     .word LIT,BSIZE,MINUS,EFETCH,EXIT
 
-; nom: BSIZE!   ( n a-addr -- )    
+; BSIZE!   ( n a-addr -- )    
 ;   Initialise la grandeur du bloc de donnée.
 ; arguments:
 ;    n   Nombre d'octets dans le bloc de données.
 ;   a-addr pointeur vers la structure bloc.
-DEFWORD "BSIZE!",6,,BSIZESTORE ; ( n addr -- )
+HEADLESS BSIZESTORE,HWORD    
+;DEFWORD "BSIZE!",6,,BSIZESTORE ; ( n addr -- )
     .word LIT,BSIZE,MINUS,STORE,EXIT
     
-; nom: NLNK@   ( a-addr1 -- a-addr2 )    
+; NLNK@   ( a-addr1 -- a-addr2 )    
 ;   Retourne le pointeur sur le prochain bloc dans la chaîne de blocs.
 ; arguments:
 ;   a-addr1 adresse d'un bloc dans la chaîne.
 ; retourne:
 ;   a-addr2  adresse du prochain bloc dans la chaîne.
-DEFWORD "NLNK@",5,,NLNKFETCH ; ( addr1 -- addr2 )
+HEADLESS NLNKFETCH,HWORD    
+;DEFWORD "NLNK@",5,,NLNKFETCH ; ( addr1 -- addr2 )
     .word LIT,NLNK,MINUS,EFETCH,EXIT
   
-; nom: PLNK@   ( a-addr1 -- a-addr2 )    
+; PLNK@   ( a-addr1 -- a-addr2 )    
 ;   Retourne le pointeur sur le bloc précédent dans la chaîne de blocs.
 ; arguments:
 ;   a-addr1   adresse d'un bloc dans la chaîne.
 ; retourne:
 ;   a-addr2  adresse du bloc précédent dans la chaîne.    
-DEFWORD "PLNK@",5,,PLNKFETCH ; ( addr1 -- addr2 )
+HEADLESS PLNKFETCH,HWORD    
+;DEFWORD "PLNK@",5,,PLNKFETCH ; ( addr1 -- addr2 )
     .word LIT,PLNK,MINUS,EFETCH,EXIT
     
-; nom: NLNK!  ( a-addr1 a-addr2 -- )    
+; NLNK!  ( a-addr1 a-addr2 -- )    
 ;   Initialise le champ NLNK de la structure bloc, c'est le pointeur
 ;   vers le bloc suivant dans la chaîne.    
 ; arguments:
 ;   a-addr1  adresse du bloc suivant.    
 ;   a-addr2  pointeur sur le bloc dont le champ NLNK doit-être initialisé.
-DEFWORD "NLNK!",5,,NLNKSTORE  ; ( n addr -- )
+HEADLESS NLNKSTORE,HWORD    
+;DEFWORD "NLNK!",5,,NLNKSTORE  ; ( n addr -- )
     .word LIT,NLNK,MINUS,STORE,EXIT
     
-; nom: PLNK!   ( a-addr1 a-addr2 -- )    
+; PLNK!   ( a-addr1 a-addr2 -- )    
 ;   Initialise le champ PLNK de la structure bloc, c'est le pointeur
 ;   vers le bloc précédent dans la chaîne.    
 ; arguments:
 ;   a-addr1  adresse du bloc précédent.    
 ;   a-addr2  pointeur sur le bloc dont le champ PLNK doit-être initialisé.
-DEFWORD "PLNK!",5,,PLNKSTORE  ; ( n addr -- )
+HEADLESS PLNKSTORE,HWORD    
+;DEFWORD "PLNK!",5,,PLNKSTORE  ; ( n addr -- )
     .word LIT,PLNK,MINUS,STORE,EXIT
     
-; nom: UNLINK   ( a-addr1 a-addr2 -- a-addr1 )    
+; UNLINK   ( a-addr1 a-addr2 -- a-addr1 )    
 ;   Retire un bloc de la liste auquel il apartient.
 ; arguments:
 ;   a-addr1  pointeur du bloc à retirer.
 ;   a-addr2  Adresse de la variable qui contient tête de liste auquel appartient ce bloc.  
 ; retourne:
 ;   a-addr1   pointeur du bloc avec NLNK et PLNK à 0
-DEFWORD "UNLINK",6,,UNLINK ; ( addr list -- addr )
+HEADLESS UNLINK,HWORD    
+;DEFWORD "UNLINK",6,,UNLINK ; ( addr list -- addr )
     .word OVER,DUP,PLNKFETCH,LIT,0,ROT,PLNKSTORE,TOR ; S: addr list R: plnk
     .word OVER,DUP,NLNKFETCH,LIT,0,ROT,NLNKSTORE ; S: addr list nlnk R: plnk
     .word RFETCH,ZBRANCH,2f-$
@@ -191,37 +199,40 @@ DEFWORD "UNLINK",6,,UNLINK ; ( addr list -- addr )
 6:  .word TWODROP
     .word EXIT
     
-; nom: PREPEND  ( a-addr1 a-addr2 -- )    
+; PREPEND  ( a-addr1 a-addr2 -- )    
 ;   Insère un bloc orphelin au début d'une liste
 ; arguments:
 ;    a-addr1  pointeur du bloc à insérer
 ;    a-addr2  Adresse de la variable contenant le pointeur de tête de la liste.
 ; retourne:
 ;    rien
-DEFWORD "PREPEND",7,,PREPEND ; ( addr1 list -- )
+HEADLESS PREPEND,HWORD    
+;DEFWORD "PREPEND",7,,PREPEND ; ( addr1 list -- )
     .word TUCK,EFETCH,DUP,ZBRANCH,2f-$ ; S: list addr1 listhead
     .word TWODUP,PLNKSTORE ; S: list addr1 listhead
 2:  .word OVER,NLNKSTORE,SWAP,STORE
     .word EXIT
     
-; nom: ?FIT  ( n a-addr1 -- f )    
+; ?FIT  ( n a-addr1 -- f )    
 ;   vérifie si le bloc désigné par a-addr1 est assez grand pour contenir n octets de données.
 ; arguments:
 ;    n     nombre d'octets requis.    
 ;    a-addr1   pointeur sur le bloc à vérifier.
 ; retourne:
 ;    f   indicateur booléen
-DEFWORD "?FIT",4,,QFIT ;  ( n addr1 -- f )    
+HEADLESS QFIT,HWORD    
+;DEFWORD "?FIT",4,,QFIT ;  ( n addr1 -- f )    
     .word BSIZEFETCH,ONEPLUS,ULESS,EXIT
 
-; nom: SMALLBLK   ( a-addr1 a-addr2 -- a-addr )    
+; SMALLBLK   ( a-addr1 a-addr2 -- a-addr )    
 ;   Compare la grandeur de 2 blocs et retourne le pointeur du plus petit des deux.
 ; arguments:
 ;   a-addr1   pointeur sur le premier bloc.
 ;   a-addr2   pointeur sur le deuxième bloc.
 ; retourne:
 ;   a-addr    pointeur sur le plus petit des 2 blocs.    
-DEFWORD "SMALLBLK",8,,SMALLBLK ; ( addr1 addr2 -- addr )
+HEADLESS SMALLBLK,HWORD    
+;DEFWORD "SMALLBLK",8,,SMALLBLK ; ( addr1 addr2 -- addr )
     .word QDUP,ZBRANCH,9f-$
     .word TOR,DUP,ZBRANCH,2f-$,DUP,BSIZEFETCH ; S: addr1 size1 R: addr2
     .word RFETCH,BSIZEFETCH,ULESS,ZBRANCH,2f-$
@@ -230,7 +241,7 @@ DEFWORD "SMALLBLK",8,,SMALLBLK ; ( addr1 addr2 -- addr )
 9:  .word EXIT
   
   
-; nom: SMALLEST   ( n a-addr -- a-addr1 | 0 )  
+; SMALLEST   ( n a-addr -- a-addr1 | 0 )  
 ;   Recherche dans une liste de blocs le plus petit qui est assez grand pour contenir n octets.
 ;   Si aucun ne peut contenir ce nombre d'octets, retourne 0.  
 ; arguments:
@@ -238,7 +249,8 @@ DEFWORD "SMALLBLK",8,,SMALLBLK ; ( addr1 addr2 -- addr )
 ;    a-addr  Adresse de la variable contenant le pointeur sur la tête de liste.
 ; retourne:
 ;    a-addr1 | 0    pointeur sur le bloc ou 0 si aucun n'est assez grand.
-DEFWORD "SMALLEST",8,,SMALLEST ; ( n list -- addr|0 )
+HEADLESS SMALLEST,HWORD  
+;DEFWORD "SMALLEST",8,,SMALLEST ; ( n list -- addr|0 )
     .word FETCH,LIT,0,TOR ; S: n addr1 R: 0
     ; début boucle
 2:  .word QDUP,ZBRANCH,8f-$    
@@ -248,14 +260,15 @@ DEFWORD "SMALLEST",8,,SMALLEST ; ( n list -- addr|0 )
 8:  .word DROP,RFROM
 9:  .word EXIT
   
-; nom: CUT  ( n a-addr1 -- a-addr2 )  
+; CUT  ( n a-addr1 -- a-addr2 )  
 ;   Ampute  l'excédent d'un bloc et cré un nouveau bloc libre avec l'excédent.
 ; arguments:
 ;    n    octets requis
 ;    a-addr1 pointeur bloc à réduire.
 ; retourne:
 ;    a-addr2  pointeur du bloc de taille ajusté.
-DEFWORD "CUT",3,,CUT ; ( n addr -- addr )
+HEADLESS CUT,HWORD  
+;DEFWORD "CUT",3,,CUT ; ( n addr -- addr )
     .word DUP,TOR,BSIZEFETCH,OVER,MINUS ; S: n diff R: addr
     .word DUP,LIT,HEAD_SIZE,GREATER,ZBRANCH,8f-$ ; S: n diff R: addr
     .word SWAP,DUP,RFETCH,BSIZESTORE,RFETCH,PLUS ; S: diff addr2 R: addr
@@ -283,14 +296,15 @@ DEFWORD "MALLOC",6,,MALLOC ; ( n -- addr|0 )
     .word DUP,USEDLIST,PREPEND
 9:  .word EXIT
   
-; nom: ?>LIST   ( a-addr1 a-addr2 -- a-addr | 0 )  
+; ?>LIST   ( a-addr1 a-addr2 -- a-addr | 0 )  
 ;   Vérifie si le bloc à l'adresse a-addr1 est membre de la liste désignée par a-addr2
 ; arguments:
 ;   a-addr1  adresse du bloc à vérifier
 ;   a-addr2  Variable contenant le pointeur de tête de la liste.  
 ;  retourne:
 ;   a-addr | 0   Adresse du bloc ou 0 si le bloc n'est pas membre de cette liste.
-DEFWORD "?>LIST",6,,QINLIST ; ( addr list -- addr|0 )
+HEADLESS QINLIST,HWORD  
+;DEFWORD "?>LIST",6,,QINLIST ; ( addr list -- addr|0 )
     .word FETCH
 1:  .word DUP,ZBRANCH,8f-$
     .word TWODUP,EQUAL,TBRANCH,8f-$
@@ -314,4 +328,20 @@ DEFWORD "FREE",4,,FREE ; ( addr -- )
     .word FREELIST,PREPEND
     .word EXIT
    
+; nom: BUFFER:  ( n "cccc" --  )
+;   Alloue un bloc de mémoire dynamique de 'n' octets. Cré une constante dont
+;   le nom "cccc' suis dans le flux d'entrée et assigne l'adresse du buffer à cette constante.
+;   Ce buffer ne doit pas être libéré à moins que la constante qui le lie soit détruite
+;   avec forget, sinon l'adresse retournée par cette constante serait invalide.  
+;   exemple:
+;   120 BUFFER: data \ l'invocation de 'data' va retourner l'adresse du premier octet
+;   du bloc de donnée.    
+; arguments:
+;   n Grandeur en octet du buffer.
+;   "cccc" Nom de la constante qui va retourner l'adresse du buffer.
+; retourne:
+;    rien
+DEFWORD "BUFFER:",7,,BUFFERCOLON
+    .word MALLOC,HEADER,REVEAL,LIT,DOCONST,COMMA,COMMA,EXIT
+    
     

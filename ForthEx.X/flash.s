@@ -58,11 +58,12 @@ _mflash_buffer: .space 2
 ;    .word FLASHTORAM
 ;    .word RAMTOFLASH
     
-; nom: FBUFFER  ( -- a-addr )
+; nom: FBUFFER  (  -- a-addr )
 ;   Réservation d'un bloc de mémoire dynamique pour écriture d'une rangée flash MCU.
 ;   Pour modifier une rangée on la lit dans ce tampon et lorsque les modifications sont
-;   complétée, la page est effacée et reprogrammée avec le contenu de ce tampon. 
-;   Ce bloc de mémoire dynamique peut-être libéré après usage en utilisant FREE. 
+;   complétée, la rangée est effacée et reprogrammée avec le contenu de ce tampon. 
+;   Ce bloc de mémoire dynamique peut-être libéré après usage en utilisant FREE il est
+;   donc important de conserver une copie de son adresse. 
 ; arguments:
 ;   aucun
 ; retourne:
@@ -551,6 +552,7 @@ HEADLESS ERASEROWS,HWORD
 ;   Les données à partir de l'adresse DP0 jusqu'à l'adresse DP-1 sont
 ;   sauvegardées dans cette image, ainsi que les valeurs des variables
 ;   systèmes LATEST et DP.
+;   Si le MCU est reprogrammé l'image est perdue et devra être resauvegardée.    
 ;   l'image est sauvegardée à l'adresse flash 0x8000. Les 8 premiers octets sont
 ;   une structure de données utilisé par IMGLOAD. Cette structure est la suivante.
 ;   offset | description

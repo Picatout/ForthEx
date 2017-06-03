@@ -278,13 +278,24 @@ DEFWORD "CLEARLN",7,,CLEARLN   ; ( -- )
 ; retourne:
 ;   rien    
 DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
-    .word DUP,TBRANCH,1f-$
-    .word TWODROP, EXIT
-1:  .word LIT, 0, DODO
-2:  .word DUP,CFETCH,EMIT,ONEPLUS
-    .word DOLOOP,2b-$
-    .word DROP, EXIT     
+    .word LIT, 0, DOQDO,BRANCH,9f-$
+1:  .word DUP,CFETCH,EMIT,ONEPLUS
+    .word DOLOOP,1b-$
+9:  .word DROP, EXIT     
 
+; nom: ETYPE ( c-addr u -- )
+;   Imprime à l'écran de la console une chaîne qui réside en mémoire EDS.
+; arguments:    
+;   c-addr  Adresse du premier caractère de la chaîne.
+;   u Longueur de la chaîne.
+; retourne:
+;   rien
+DEFWORD "ETYPE",5,,ETYPE
+    .word LIT,0,DOQDO,BRANCH,9f-$
+1:  .word DUP,ECFETCH,EMIT,ONEPLUS
+    .word DOLOOP,1b-$
+9:  .word DROP,EXIT
+    
 ; nom: DELETE  ( -- )
 ;   Supprime le caractère à la position du cureur.
 ; arguments:

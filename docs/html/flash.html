@@ -40,14 +40,16 @@
 </div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:4px;"><p id="FBUFFER">
-<b>FBUFFER</b>  ( -- a-addr )
+<b>FBUFFER</b>  (  -- a-addr )
 <div style="margin-left:5%;">   Réservation d'un bloc de mémoire dynamique pour écriture d'une rangée flash MCU.
 </div>
 <div style="margin-left:5%;">   Pour modifier une rangée on la lit dans ce tampon et lorsque les modifications sont
 </div>
-<div style="margin-left:5%;">   complétée, la page est effacée et reprogrammée avec le contenu de ce tampon. 
+<div style="margin-left:5%;">   complétée, la rangée est effacée et reprogrammée avec le contenu de ce tampon. 
 </div>
-<div style="margin-left:5%;">   Ce bloc de mémoire dynamique peut-être libéré après usage en utilisant FREE. 
+<div style="margin-left:5%;">   Ce bloc de mémoire dynamique peut-être libéré après usage en utilisant FREE il est
+</div>
+<div style="margin-left:5%;">   donc important de conserver une copie de son adresse. 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -310,6 +312,8 @@
 <div style="margin-left:5%;">   sauvegardées dans cette image, ainsi que les valeurs des variables
 </div>
 <div style="margin-left:5%;">   systèmes LATEST et DP.
+</div>
+<div style="margin-left:5%;">   Si le MCU est reprogrammé l'image est perdue et devra être resauvegardée.    
 </div>
 <div style="margin-left:5%;">   l'image est sauvegardée à l'adresse flash 0x8000. Les 8 premiers octets sont
 </div>

@@ -231,7 +231,21 @@ DEFCODE "SKIP",4,,SKIP
 8:  mov W1,[DSP]
     RESET_EDS
     NEXT
-  
+
+; nom: GETLINE ( c-addr u1 -- c-addr u2 )
+;   Scan une mémoire tampon contenant du texte jusqu'au prochain caractère de fin de ligne.
+; arguments:
+;   c-addr  Adresse du premier caractère.
+;   u1 Longueur du tampon.      
+; retourne:
+;   c-addr Adresse du premier caractère de la ligne.
+;   u2 Longueur de la ligne excluant le caractère de fin de ligne.
+;HEADLESS GETLINE,HWORD ; ( c-addr u -- c-addr u' )
+DEFWORD "GETLINE",7,,GETLINE      
+      .word OVER,SWAP,LIT,VK_CR,SCAN ; s: c-addr c-addr' u'
+      .word DROP,OVER,MINUS,EXIT
+      
+    
 ; nom: MOVE  ( c-addr1 c-addr2 u -- )    
 ;   Copie un bloc mémoire RAM en évitant la propagation. La propagation se
 ;   produit lorsque les 2 région se superposent et qu'un octet copié est recopié

@@ -300,9 +300,13 @@ DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
 ;    j*x   Contenu final de la pile après l'évaluation de la chaîne.      
 DEFWORD "EVALUATE",8,,EVAL ; ( i*x c-addr u -- j*x )
     .word TSOURCE,TWOTOR ; sauvegarde source
-    .word TOIN,FETCH,TOR,INTERPRET
+    .word TOIN,FETCH,TOR
+    .word OVER,PLUS,SWAP,DODO
+1:  .word DOI,DOL,OVER,MINUS,GETLINE ; s: c-addr u
+    .word DUP,TOR,INTERPRET
+    .word RFROM,ONEPLUS,DOPLOOP,1b-$
     .word RFROM,TOIN,STORE,TWORFROM,SRCSTORE 
-    .word EXIT
+    .word LIT,0,BLK,STORE,EXIT
     
 ; imprime le prompt et passe à la ligne suivante    
 ;DEFWORD "OK",2,,OK 

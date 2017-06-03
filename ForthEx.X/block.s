@@ -386,6 +386,23 @@ DEFWORD "BLOCK",5,,BLOCK
     .word ASSIGN,DUP,TODATA
     .word DATA,EXIT
 
+; BLKFLITER ( c-addr u1 -- u2 )
+;   Scan le bloc jusqu'au premier caractère non valide et retourne le nombre de caractère valides.
+;   Les caractères acceptés sont 32..126|VK_CR
+; arguments:
+;   c-addr  Adresse premier octet de donnée.
+;   u1      Grandeur du bloc 
+; retourne:
+;   u2      Nombre d'octets valides.    
+HEADLESS BLKFILTER,HWORD ; ( c-addr u1 -- u2 )
+    .word DUP,ZBRANCH,9f-$,DUP,TOR,LIT,0,DODO 
+1:  .word DUP,ECFETCH,DUP,BL,ULESS,TBRANCH,2f-$
+    .word LIT,127,ULESS,TBRANCH,4f-$,BRANCH,8f-$
+2:  .word LIT,VK_CR,EQUAL,ZBRANCH,8f-$
+4:  .word ONEPLUS,DOLOOP,1b-$,RFROM,BRANCH,9f-$
+8:  .word DOI,UNLOOP,RDROP  
+9:  .word NIP,EXIT
+
 ; nom: LOAD ( i*x n+ -- j*x )
 ;   Évalue un bloc. Si le bloc n'est pas déjà dans un buffer il est chargé
 ;   à partir du périphérique désigné par BLKDEV. Le numéro du bloc évalué 
@@ -396,11 +413,10 @@ DEFWORD "BLOCK",5,,BLOCK
 ; retourne:
 ;    j*x  État de la pile des arguments après l'évaluation du bloc n+.
 DEFWORD "LOAD",4,,LOAD
-    .word DUP,BLK,STORE,BLOCK,DUP,LIT,BLOCK_SIZE,LIT,0,SCAN ; s: c-addr c-addr' u'
-    .word DROP,SWAP,DODO
-1:  .word DOI,DUP,DOL,OVER,MINUS,LIT,VK_CR,SCAN ; s: c-addr c-addr' u'
-    .word DROP,OVER,MINUS,DUP,TOR,EVAL
-    .word RFROM,ONEPLUS,DOPLOOP,1b-$,EXIT
+    .word DUP,BLK,STORE,BLOCK,DUP,LIT,BLOCK_SIZE,BLKFILTER ; s: c-addr  u
+    .word DUP,ZBRANCH,9f-$
+    .word EVAL,EXIT
+9:  .word NIP,BLK,STORE,EXIT
     
 ; nom: SAVE-BUFFERS ( -- )  
 ;   Sauvegarde tous les buffers qui ont été modifiés.
@@ -447,13 +463,8 @@ DEFWORD "FLUSH",5,,FLUSH
 ;   rien    
 DEFWORD "LIST",4,,LIST
     .word DUP,SCR,STORE,CLS
-    .word BLOCK,LIT,BLOCK_SIZE,LIT,0,DODO ; s: data
-1:  .word DUP,ECFETCH
-    .word DUP,LIT,VK_CR,EQUAL,TBRANCH,3f-$
-    .word DUP,BL,ULESS,TBRANCH,4f-$
-    .word DUP,LIT,126,UGREATER,TBRANCH,4f-$
-3:  .word EMIT,ONEPLUS,DOLOOP,1b-$,BRANCH,9f-$
-4:  .word DROP,UNLOOP 
+    .word BLOCK,DUP,LIT,BLOCK_SIZE,BLKFILTER,LIT,0,DOQDO,BRANCH,9f-$ 
+1:  .word DUP,ECFETCH,EMIT,ONEPLUS,DOLOOP,1b-$
 9:  .word DROP,EXIT
 
   
@@ -469,9 +480,9 @@ DEFWORD "LIST",4,,LIST
 ;   f    retourne faux si la variable BLK=0 ou s'il n'y a plus de bock valide.  
 DEFWORD "REFILL",6,,REFILL
     .word BLK,FETCH,DUP,ZBRANCH,9f-$
-    .word BLK,LIT,1,OVER,FETCH,PLUS,DUP,ROT,STORE
+    .word ONEPLUS
     .word DUP,FN_BOUND,BLKDEV,FETCH,VEXEC
-    .word DUP,ZBRANCH,8f-$
+    .word ZBRANCH,8f-$
     .word DROP,BLOCK,TRUE,EXIT
 8:  .word DUP,BLK,STORE    
 9:  .word EXIT    
