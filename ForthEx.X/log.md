@@ -2,6 +2,7 @@
 ----------
 Travail dans dynamem.s et block.s
 Ajout du mot BUFFER: à dynamem.s
+Ajout de ETYPE dans console.s
 
 2017-06-01
 ----------
