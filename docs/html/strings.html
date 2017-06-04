@@ -1124,6 +1124,44 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="?PRTCHAR">
+<b>?PRTCHAR</b>   ( n -- f )
+<div style="margin-left:5%;">   Vérifie si  'n' est une caractère imprimable dans l'intervalle {32..126}
+</div>
+<div style="margin-left:5%;">   et retourne un indicateur booléen.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n	</i>&nbsp;&nbsp; Entier simple
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur booléen, vrai si n -&gt; {32..126}  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="?QUOTED-CHAR">
+<b>?QUOTED-CHAR</b>  ( c-addr -- c-addr 0 | n -1 )
+<div style="margin-left:5%;">   Vérifie si la chaîne est un caractère entre 2 apostrophe si c'est le cas
+</div>
+<div style="margin-left:5%;">   Empile la valeur ASCII du caractère et TRUE, sinon retourne 'c-addr' et FALSE.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse de la chaîne comptée.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  0 Adresse orignale et FALSE si ce n'est pas un quoted char.
+</div>
+<div style="margin-left:5%;"><i>n	-1</i>&nbsp;&nbsp; Valeur ascii du caractère et VRAI.  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="?NUMBER">
 <b>?NUMBER</b>   ( c-addr -- c-addr 0 | n -1 )  
 <div style="margin-left:5%;">   Conversion d'une chaîne en nombre
@@ -1131,6 +1169,10 @@
 <div style="margin-left:5%;">    c-addr indique le début de la chaîne
 </div>
 <div style="margin-left:5%;">   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
+</div>
+<div style="margin-left:5%;">   Accepte aussi 'c'  c'est à dire un caractère ASCII imprimable entre 2 apostrophes.
+</div>
+<div style="margin-left:5%;">   Dans ce cas la valeur de l'entier est la valeur ASCII du caractère.  
 </div>
 <div style="margin-left:5%;">   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
 </div>
@@ -1171,6 +1213,8 @@
 <li><a href="#?DIGIT">?DIGIT</a></li>
 <li><a href="#?DOUBLE">?DOUBLE</a></li>
 <li><a href="#?NUMBER">?NUMBER</a></li>
+<li><a href="#?PRTCHAR">?PRTCHAR</a></li>
+<li><a href="#?QUOTED-CHAR">?QUOTED-CHAR</a></li>
 <li><a href="#?SIGN">?SIGN</a></li>
 <li><a href="#BLANK">BLANK</a></li>
 <li><a href="#C?">C?</a></li>

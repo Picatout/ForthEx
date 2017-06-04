@@ -229,8 +229,7 @@ DEFWORD "VT-KEY",6,,VTKEY
 ; retourne:
 ;    rien    
 DEFWORD "VT-EMIT",7,,VTEMIT
-    .word DUP,BL,LESS,TBRANCH,2f-$
-    .word DUP,LIT,127,LESS,ZBRANCH,2f-$
+    .word DUP,QPRTCHAR,ZBRANCH,2f-$
     .word VTPUTC,EXIT
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
     .word SPUTC,EXIT

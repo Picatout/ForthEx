@@ -25,7 +25,7 @@
 ;   bloc peut-être évalué avec la commande LOAD. 
 ;   L'idée d'un éditeur de bloc viens de l'origine même du langage. Charles Moore
 ;   Travaillait sur un terminal vidéo de 16 lignes de 64 caractères, ce qui fait qu'un
-;   écran occupait 1024 carctères. Il avait donc eu l'idée de sauvegarder le contenu
+;   écran occupait 1024 caractères. Il avait donc eu l'idée de sauvegarder le contenu
 ;   de la mémoire vidéo sur l'unité de stockage permanent sans modification.
 ;   Chaque écran sauvegardé s'appelait un bloc.
 ;   Le problème c'est que ForthEx utilise un écran de 24 lignes au lieu de 16 ce qui
@@ -90,7 +90,7 @@
 ; arguments:
 ;   aucun
 ; retourne:
-;   u  Nombre maximum de caractères que peut contenir l'écran. Selon le standard ANS Forth c'est 1024 octets.    
+;   u  Nombre maximum de caractères que peut contenir l'écran. Selon le standard ANS Forth c'est 1024 caractères.    
 DEFCONST "MAXCHAR",7,,MAXCHAR,BLOCK_SIZE
     
     

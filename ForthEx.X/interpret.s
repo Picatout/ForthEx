@@ -178,7 +178,7 @@ DEFWORD "WORD",4,,WORD
 .equ  TARGET,W3 ;pointer chaîne recherchée
 .equ  LEN, W4  ; longueur de la chaîne recherchée
 .equ CNTR, W5
-.equ NAME, W6 ; nom dans dictionnaire 
+.equ NAME, W6 ; copie de TARGET pour comparaison 
 .equ FLAGS,W7    
 DEFCODE "FIND",4,,FIND 
     mov T, TARGET
@@ -204,7 +204,12 @@ same_len:
 1:  cp0.b CNTR
     bra z, match
     mov.b [NAME++],W0
-    cp.b W0,[NFA++]
+    cp.b W0,#'a'
+    bra ltu,2f
+    cp.b W0,#'z'
+    bra gtu,2f
+    sub W0,#32
+2:  cp.b W0,[NFA++]
     bra neq, next_entry
     dec.b CNTR,CNTR
     bra 1b
@@ -278,7 +283,7 @@ DEFWORD "COUNT",5,,COUNT ; ( c-addr1 -- c-addr2 u )
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
         .word SRCSTORE,LIT,0,TOIN,STORE
 1:      .word BL,WORD,DUP,CFETCH,ZBRANCH,9f-$
-        .word UPPER,FIND,QDUP,ZBRANCH,4f-$
+        .word FIND,QDUP,ZBRANCH,4f-$
         .word ONEPLUS,STATE,FETCH,ZEROEQ,OR
         .word ZBRANCH,2f-$
         .word EXECUTE,BRANCH,1b-$

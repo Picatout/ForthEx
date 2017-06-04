@@ -1,3 +1,14 @@
+2017-06-03
+----------
+
+Complété boitier de l'ordinateur.
+Ajout de ?PRTCHAR et ?QUOTED-CHAR dans strings.s
+Modification de ?NUMBER dans strings.s
+Modifié BLKFILTER dans block.s
+Modification LC-EMIT dans tvout.s
+Modification VT-EMIT dans vt102.s
+Modification de INTERPRET dans interpret.s
+
 2017-06-02
 ----------
 Travail dans dynamem.s et block.s

@@ -79,283 +79,7 @@
 </b></div>
 <div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable BLKDEV
 </div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="BUFARRAY">
-<b>BUFARRAY</b>  ( -- a-ddr )
-<div style="margin-left:5%;">   Retourne l'adresse du tableau contenant les structures BUFFER.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;    Adresse du tableau qui contient le structures BUFFER.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="STRUCADR">
-<b>STRUCADR</b> ( n -- a-addr)
-<div style="margin-left:5%;">   convertie le numéro de buffer en adresse de la structure BUFFER.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Numéro du buffer.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse début de la structure.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="DATA">
-<b>DATA</b> ( a-addr1 -- a-addr2 )
-<div style="margin-left:5%;">   Retourne un pointeur sur le début du bloc de données du BUFFER.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr1</i>&nbsp;&nbsp;   Adresse de la structure BUFFER.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr2</i>&nbsp;&nbsp;   Adresse début du bloc de données.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="OWN?">
-<b>OWN?</b>  ( n+ u a-addr -- f )
-<div style="margin-left:5%;">    Vérifie si le numéro de bloc et l'identifiant périphique correspondent
-</div>
-<div style="margin-left:5%;">    à ce buffer.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;      Numéro de bloc.
-</div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       Périphérique de stockage.
-</div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la structure BUFFER.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;    Indicateur booléen vrai si n+==BLOCK_NBR && u==DEVICE.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="BUFFERED?">
-<b>BUFFERED?</b>  ( n+ u -- a-addr|0)
-<div style="margin-left:5%;">   Vérifie si le bloc est dans un buffer.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  Numéro du bloc recherché.    
-</div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   Descripteur du périphérique auquel appartient ce bloc.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr|0</i>&nbsp;&nbsp; Adresse du  buffer contenant ce bloc ou 0 s'il n'est pas dans un buffer.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="NOTUSED">
-<b>NOTUSED</b> ( -- a-addr|0 )
-<div style="margin-left:5%;">   Recherche un buffer libre. Retourne 0 si aucun buffer libre.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr|0</i>&nbsp;&nbsp;  Adresse de la struturce BUFFER libre ou 0.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="OLDEST">
-<b>OLDEST</b> ( -- a-addr )
-<div style="margin-left:5%;">   Recherche la mémoire tampon dont la dernière modification est la plus ancienne.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse de la structure BUFFER.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="UPDATED@">
-<b>UPDATED@</b>  ( a-addr -- u )
-<div style="margin-left:5%;">   Retourne la valeur du champ UPDATED d'une structure BUFFER.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la structure BUFFER.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp; Valeur du champ UPDATED.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="BLKDEV@">
-<b>BLKDEV@</b>  ( -- u )
-<div style="margin-left:5%;">   Retourne le descripteur du périphérique de stockage actif.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp; 
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Descripteur du périphérique actif.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="BLK&gt;ADR">
-<b>BLK&gt;ADR</b> ( a-addr -- ud )
-<div style="margin-left:5%;">   Convertie un numéro de bloc d'un buffer en adresse 32 bits. Qui correspond
-</div>
-<div style="margin-left:5%;">   à la position absolue sur le média de stockage.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse de la structure BUFFER.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  Adresse 32 bits sur le périphérique de stockage.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="FIELDS">
-<b>FIELDS</b>  ( a-addr -- u1 u2 u3 a-addr )
-<div style="margin-left:5%;">   Obtient les paramètres du buffer à partir de son adresse.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse de la structure BUFFER.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    Champ DATA
-</div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    Champ BLOCK_NBR    
-</div>
-<div style="margin-left:5%;"><i>u3</i>&nbsp;&nbsp;    Champ DEVICE
-</div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;    Adresse de la structure BUFFER.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="UPDATE">
-<b>UPDATE</b>  ( a-addr -- )
-<div style="margin-left:5%;">    Met à jour le compteur UPDATED avec la valeur incrémentée de _update_cntr.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse de la structure BUFFER.
-</div>
-<div style="margin-left:5%;"><b> retourne:    
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="NOUPDATE">
-<b>NOUPDATE</b>  ( a-addr -- )
-<div style="margin-left:5%;">    Remet le champ UPDATED de la structure BUFFER à zéro.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;     Adresse de la structure BUFFER.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="DATA&gt;">
-<b>DATA&gt;</b> ( a-addr -- )    
-<div style="margin-left:5%;">   Sauvegarde du data sur le périphérique de stockage et remise à zéro du champ UPDATED.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse de la structure BUFFER.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; 
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="&gt;DATA">
-<b>&gt;DATA</b>  ( a-addr -- )
-<div style="margin-left:5%;">   Charge un bloc dans un buffer à partir du périphérique de stockage.
-</div>
-<div style="margin-left:5%;">   La structure BUFFER indentifié par a-addr doit contenir le numéro 
-</div>
-<div style="margin-left:5%;">   du bloc et le descripteur du périphérique.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;    Adresse de la structure BUFFER.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="ASSIGN">
-<b>ASSIGN</b>  ( n+ -- a-addr )
-<div style="margin-left:5%;">   Assigne un BUFFER à un bloc appartenant au périphérique sélectionné par
-</div>
-<div style="margin-left:5%;">   BLKDEV. Libère un BUFFER au besoin.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  numéro du bloc requis.    
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse du début de la zone de données.
+<div style="margin-left:5%;"><i>HEADLESS</i>&nbsp;&nbsp; BLKDEV,CODE    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -545,7 +269,7 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n	Taille</i>&nbsp;&nbsp; qui serait occupée par l'écran dans un bloc.    
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Taille qui serait occupée par l'écran dans un bloc.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -581,36 +305,20 @@
 <hr style="border-width:1px;"><h4 id="index">Index</h4>
 <p>
 <ul>
-<li><a href="#&gt;DATA">&gt;DATA</a></li>
-<li><a href="#ASSIGN">ASSIGN</a></li>
 <li><a href="#BLK">BLK</a></li>
-<li><a href="#BLK&gt;ADR">BLK&gt;ADR</a></li>
 <li><a href="#BLKDEV">BLKDEV</a></li>
-<li><a href="#BLKDEV@">BLKDEV@</a></li>
 <li><a href="#BLOCK">BLOCK</a></li>
-<li><a href="#BUFARRAY">BUFARRAY</a></li>
 <li><a href="#BUFFER">BUFFER</a></li>
-<li><a href="#BUFFERED?">BUFFERED?</a></li>
-<li><a href="#DATA">DATA</a></li>
-<li><a href="#DATA&gt;">DATA&gt;</a></li>
 <li><a href="#EMPTY-BUFFERS">EMPTY-BUFFERS</a></li>
-<li><a href="#FIELDS">FIELDS</a></li>
 <li><a href="#FLUSH">FLUSH</a></li>
 <li><a href="#LIST">LIST</a></li>
 <li><a href="#LOAD">LOAD</a></li>
-<li><a href="#NOTUSED">NOTUSED</a></li>
-<li><a href="#NOUPDATE">NOUPDATE</a></li>
-<li><a href="#OLDEST">OLDEST</a></li>
-<li><a href="#OWN?">OWN?</a></li>
 <li><a href="#REFILL">REFILL</a></li>
 <li><a href="#SAVE-BUFFERS">SAVE-BUFFERS</a></li>
 <li><a href="#SCR">SCR</a></li>
 <li><a href="#SCR&gt;BLK">SCR&gt;BLK</a></li>
 <li><a href="#SCR-SIZE">SCR-SIZE</a></li>
-<li><a href="#STRUCADR">STRUCADR</a></li>
 <li><a href="#THRU">THRU</a></li>
-<li><a href="#UPDATE">UPDATE</a></li>
-<li><a href="#UPDATED@">UPDATED@</a></li>
 </ul>
 </p>
 <hr style="border-width:1px;"><div><a href="#top">haut</a></div>

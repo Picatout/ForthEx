@@ -1043,8 +1043,7 @@ DEFWORD "LC-BEL",6,,LCBEL
 ;   rien    
 DEFWORD "LC-EMIT",7,,LCEMIT ; ( c -- )
     ; caractères imprimables 32-126
-    .word DUP,LIT,VK_SPACE,ULESS,TBRANCH,2f-$
-    .word DUP,LIT,126,UGREATER,TBRANCH,2f-$
+    .word DUP,QPRTCHAR,ZBRANCH,2f-$
     .word PUTC,EXIT
     ; déplacement du curseur
 2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$

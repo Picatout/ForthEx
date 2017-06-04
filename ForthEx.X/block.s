@@ -97,43 +97,43 @@ DEFCODE "SCR",3,,SCR
 ;   aucun
 ; retourne:
 ;    a-addr  Adresse de la variable BLKDEV
+; HEADLESS BLKDEV,CODE    
 DEFCODE "BLKDEV",6,,BLKDEV
     DPUSH
     mov #_block_dev,T
     NEXT
  
-; nom: BUFARRAY  ( -- a-ddr )
+; BUFARRAY  ( -- a-ddr )
 ;   Retourne l'adresse du tableau contenant les structures BUFFER.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   a-addr    Adresse du tableau qui contient le structures BUFFER.
-DEFCODE "BUFARRAY",8,,BUFARRAY
+HEADLESS BUFARRAY,CODE    
+;DEFCODE "BUFARRAY",8,,BUFARRAY
     DPUSH
     mov #_blk_buffers,T
     NEXT
 
-; nom: STRUCADR ( n -- a-addr)
+; STRUCADR ( n -- a-addr)
 ;   convertie le numéro de buffer en adresse de la structure BUFFER.
 ; arguments:
 ;    n   Numéro du buffer.
 ; retourne:
 ;    a-addr  Adresse début de la structure.
-    
-;HEADLESS STRUCADR, HWORD ; ( n -- u )
-DEFWORD "STRUCADR",8,,STRUCADR    
+HEADLESS STRUCADR, HWORD ; ( n -- u )
+;DEFWORD "STRUCADR",8,,STRUCADR    
     .word LIT,BUFFER_STRUCT_SIZE,STAR
     .word BUFARRAY,PLUS,EXIT
 
-; nom: DATA ( a-addr1 -- a-addr2 )
+; DATA ( a-addr1 -- a-addr2 )
 ;   Retourne un pointeur sur le début du bloc de données du BUFFER.    
 ; arguments:
 ;   a-addr1   Adresse de la structure BUFFER.
 ; retourne:
 ;   a-addr2   Adresse début du bloc de données.
-    
-;HEADLESS DATA,HWORD 
-DEFWORD "DATA",4,,DATA
+HEADLESS DATA,HWORD 
+;DEFWORD "DATA",4,,DATA
     .word LIT,DATA_ADDR,SWAP,TBLFETCH,EXIT
     
     
@@ -142,7 +142,7 @@ DEFWORD "DATA",4,,DATA
 ; arguments:
 ;   aucun
 ; retourne:
-;       
+;   rien
 HEADLESS BLOCK_INIT, HWORD
     ; allocation de mémoire dynamique pour les buffers
     .word LIT,MAX_BUFFERS,LIT,0,DODO
@@ -153,7 +153,7 @@ HEADLESS BLOCK_INIT, HWORD
     .word EEPROM,BLKDEV,STORE
     .word EXIT
  
-; nom: OWN?  ( n+ u a-addr -- f )
+; OWN?  ( n+ u a-addr -- f )
 ;    Vérifie si le numéro de bloc et l'identifiant périphique correspondent
 ;    à ce buffer.
 ; arguments:
@@ -162,9 +162,8 @@ HEADLESS BLOCK_INIT, HWORD
 ;    a-addr  Adresse de la structure BUFFER.
 ; retourne:
 ;    f    Indicateur booléen vrai si n+==BLOCK_NBR && u==DEVICE.
-    
-;HEADLESS OWNQ,HWORD
-DEFWORD "OWN?",4,,OWNQ
+HEADLESS OWNQ,HWORD
+;DEFWORD "OWN?",4,,OWNQ
     .word TOR,LIT,DEVICE,RFETCH,TBLFETCH
     .word EQUAL,ZBRANCH,8f-$
     .word LIT,BLOCK_NBR,RFROM,TBLFETCH
@@ -172,31 +171,29 @@ DEFWORD "OWN?",4,,OWNQ
 8:  .word DROP,RDROP,LIT,0,EXIT
   
   
-; nom: BUFFERED?  ( n+ u -- a-addr|0)
+; BUFFERED?  ( n+ u -- a-addr|0)
 ;   Vérifie si le bloc est dans un buffer.
 ; arguments:
 ;   n+  Numéro du bloc recherché.    
 ;   u   Descripteur du périphérique auquel appartient ce bloc.
 ; retourne:
 ;   a-addr|0 Adresse du  buffer contenant ce bloc ou 0 s'il n'est pas dans un buffer.
-  
-;HEADLESS BUFFEREDQ, HWORD
-DEFWORD "BUFFERED?",9,,BUFFEREDQ  
+HEADLESS BUFFEREDQ, HWORD
+;DEFWORD "BUFFERED?",9,,BUFFEREDQ  
     .word LIT,MAX_BUFFERS,LIT,0,DODO
 1:  .word TWODUP,DOI,STRUCADR,OWNQ
     .word TBRANCH,8f-$
     .word DOLOOP,1b-$,TWODROP,LIT,0,EXIT
 8:  .word TWODROP,DOI,STRUCADR,UNLOOP,EXIT
    
-; nom: NOTUSED ( -- a-addr|0 )
+; NOTUSED ( -- a-addr|0 )
 ;   Recherche un buffer libre. Retourne 0 si aucun buffer libre.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   a-addr|0  Adresse de la struturce BUFFER libre ou 0.
-  
-;HEADLESS NOTUSED, HWORD
-DEFWORD "NOTUSED",7,,NOTUSED  
+HEADLESS NOTUSED, HWORD
+;DEFWORD "NOTUSED",7,,NOTUSED  
     .word LIT, MAX_BUFFERS,LIT,0,DODO
 1:  .word LIT,BLOCK_NBR,DOI,STRUCADR,TBLFETCH
     .word TBRANCH,2f-$
@@ -204,15 +201,14 @@ DEFWORD "NOTUSED",7,,NOTUSED
 2:  .word DOLOOP,1b-$,LIT,0
 9:  .word EXIT
   
-; nom: OLDEST ( -- a-addr )
+; OLDEST ( -- a-addr )
 ;   Recherche la mémoire tampon dont la dernière modification est la plus ancienne.
 ; arguments:
 ;   aucun
 ; retourne:
 ;    a-addr   Adresse de la structure BUFFER.    
-  
-;HEADLESS OLDEST,HWORD 
-DEFWORD "OLDEST",6,,OLDEST  
+HEADLESS OLDEST,HWORD 
+;DEFWORD "OLDEST",6,,OLDEST  
     .word LIT,0,LIT,0xffff,LIT,MAX_BUFFERS,LIT,0,DODO
 1:  .word LIT,UPDATED,DOI,STRUCADR,TBLFETCH  ; S: n old_update new_updated
     .word TWODUP,LESS,TBRANCH,2f-$ ; S: n old_updated new_updated 
@@ -221,41 +217,40 @@ DEFWORD "OLDEST",6,,OLDEST
 4:  .word DOLOOP,1b-$ ; S: n oldest_updated
 9:  .word DROP,STRUCADR,EXIT
   
-; nom: UPDATED@  ( a-addr -- u )
+; UPDATED@  ( a-addr -- u )
 ;   Retourne la valeur du champ UPDATED d'une structure BUFFER.
 ; arguments:
 ;   a-addr  Adresse de la structure BUFFER.
 ; retourne:
 ;   u Valeur du champ UPDATED.
-  
-;HEADLESS UPDATEDFETCH, HWORD 
-DEFWORD "UPDATED@",8,,UPDATEDFETCH  
+HEADLESS UPDATEDFETCH, HWORD 
+;DEFWORD "UPDATED@",8,,UPDATEDFETCH  
     .word LIT,UPDATED,SWAP,TBLFETCH
     .word EXIT
     
-; nom: BLKDEV@  ( -- u )
+; BLKDEV@  ( -- u )
 ;   Retourne le descripteur du périphérique de stockage actif.
 ; arguments:
 ;   aucun 
 ; retourne:
 ;    u    Descripteur du périphérique actif.
-    
-;HEADLESS BLKDEVFETCH,HWORD 
-DEFWORD "BLKDEV@",7,,BLKDEVFETCH
+HEADLESS BLKDEVFETCH,HWORD 
+;DEFWORD "BLKDEV@",7,,BLKDEVFETCH
     .word BLKDEV,FETCH,EXIT
     
-; nom: BLK>ADR ( a-addr -- ud )
+; BLK>ADR ( a-addr -- ud )
 ;   Convertie un numéro de bloc d'un buffer en adresse 32 bits. Qui correspond
 ;   à la position absolue sur le média de stockage.    
 ; arguments:
 ;    a-addr Adresse de la structure BUFFER.
 ; retourne:
 ;    ud  Adresse 32 bits sur le périphérique de stockage.
-DEFWORD "BLK>ADR",7,,BLKTOADR
+HEADLESS BLKTOADR,HWORD    
+;DEFWORD "BLK>ADR",7,,BLKTOADR
     .word DUP,TOR,LIT,BLOCK_NBR,SWAP,TBLFETCH
     .word RFROM,FN_BLKTOADR,VEXEC,EXIT
     
-; nom: FIELDS  ( a-addr -- u1 u2 u3 a-addr )
+; FIELDS  ( a-addr -- u1 u2 u3 a-addr )
 ;   Obtient les paramètres du buffer à partir de son adresse.
 ; arguments:
 ;    a-addr   Adresse de la structure BUFFER.
@@ -264,7 +259,8 @@ DEFWORD "BLK>ADR",7,,BLKTOADR
 ;   u2    Champ BLOCK_NBR    
 ;   u3    Champ DEVICE
 ;   a-addr    Adresse de la structure BUFFER.
-DEFWORD "FIELDS",6,,FIELDS
+HEADLESS FIELDS,HWORD    
+;DEFWORD "FIELDS",6,,FIELDS
     .word TOR
     ; @ adresse du data
     .word LIT,DATA_ADDR,RFETCH,TBLFETCH
@@ -274,13 +270,14 @@ DEFWORD "FIELDS",6,,FIELDS
     .word LIT,DEVICE,RFETCH,TBLFETCH
     .word RFROM,EXIT
 
-; nom: UPDATE  ( a-addr -- )
+; UPDATE  ( a-addr -- )
 ;    Met à jour le compteur UPDATED avec la valeur incrémentée de _update_cntr.
 ; arguments:
 ;    a-addr   Adresse de la structure BUFFER.
 ; retourne:    
 ;   rien
-DEFWORD "UPDATE",6,,UPDATE
+HEADLESS UPDATE,HWORD    
+;DEFWORD "UPDATE",6,,UPDATE
     ; incrémente _update_cntr
     .word LIT,1,LIT,_update_cntr,PLUSSTORE
     .word LIT,_update_cntr,FETCH,QDUP,ZBRANCH,2f-$ ; S: a-addr cntr
@@ -289,22 +286,24 @@ DEFWORD "UPDATE",6,,UPDATE
     ; tous les buffers modifiés.
     .word DROP,SAVEBUFFERS,EXIT
     
-; nom: NOUPDATE  ( a-addr -- )
+; NOUPDATE  ( a-addr -- )
 ;    Remet le champ UPDATED de la structure BUFFER à zéro.
 ; arguments:
 ;   a-addr     Adresse de la structure BUFFER.
 ; retourne:
-;   rien    
-DEFWORD "NOUPDATE",8,,NOUPDATE
+;   rien
+HEADLESS NOUPDATE,HWORD    
+;DEFWORD "NOUPDATE",8,,NOUPDATE
     .word LIT,0,LIT,UPDATED,ROT,TBLSTORE,EXIT
     
-; nom: DATA> ( a-addr -- )    
+; DATA> ( a-addr -- )    
 ;   Sauvegarde du data sur le périphérique de stockage et remise à zéro du champ UPDATED.
 ; arguments:
 ;   a-addr   Adresse de la structure BUFFER.
 ; retourne:
 ;   rien 
-DEFWORD "DATA>",5,,DATAOUT 
+HEADLESS DATAOUT    
+;DEFWORD "DATA>",5,,DATAOUT 
     ; ne sauvegarder que si nécessaire
     .word DUP,UPDATEDFETCH,TBRANCH,2f-$,DROP,EXIT
 2:  .word FIELDS ; S: data  no-block device *BUFFER
@@ -317,7 +316,7 @@ DEFWORD "DATA>",5,,DATAOUT
     .word RFROM,NOUPDATE
     .word EXIT
     
-; nom: >DATA  ( a-addr -- )
+; >DATA  ( a-addr -- )
 ;   Charge un bloc dans un buffer à partir du périphérique de stockage.
 ;   La structure BUFFER indentifié par a-addr doit contenir le numéro 
 ;   du bloc et le descripteur du périphérique.
@@ -325,7 +324,8 @@ DEFWORD "DATA>",5,,DATAOUT
 ;   a-addr    Adresse de la structure BUFFER.
 ; retourne:
 ;   rien  
-DEFWORD ">DATA",5,,TODATA
+HEADLESS TODATA,HWORD    
+;DEFWORD ">DATA",5,,TODATA
     .word FIELDS,TOR,DUP,TOR ; S: data block_nbr device r: a-addr device
     ; conversion BLK>ADR
     .word FN_BLKTOADR,VEXEC,LIT,BLOCK_SIZE,NROT ; s: data u ud r: a-addr device
@@ -335,14 +335,15 @@ DEFWORD ">DATA",5,,TODATA
     .word RFROM,NOUPDATE
     .word EXIT
     
-; nom: ASSIGN  ( n+ -- a-addr )
+; ASSIGN  ( n+ -- a-addr )
 ;   Assigne un BUFFER à un bloc appartenant au périphérique sélectionné par
 ;   BLKDEV. Libère un BUFFER au besoin.
 ; arguments:
 ;   n+  numéro du bloc requis.    
 ; retourne:
 ;   a-addr   Adresse du début de la zone de données.
-DEFWORD "ASSIGN",6,,ASSIGN
+HEADLESS ASSIGN,HWORD    
+;DEFWORD "ASSIGN",6,,ASSIGN
     ; est-ce que le bloc est déjà dans un buffer?
     .word DUP,BLKDEVFETCH,BUFFEREDQ,QDUP,ZBRANCH,4f-$
     ; oui S: n+ a-addr  
@@ -396,8 +397,8 @@ DEFWORD "BLOCK",5,,BLOCK
 ;   u2      Nombre d'octets valides.    
 HEADLESS BLKFILTER,HWORD ; ( c-addr u1 -- u2 )
     .word DUP,ZBRANCH,9f-$,DUP,TOR,LIT,0,DODO 
-1:  .word DUP,ECFETCH,DUP,BL,ULESS,TBRANCH,2f-$
-    .word LIT,127,ULESS,TBRANCH,4f-$,BRANCH,8f-$
+1:  .word DUP,ECFETCH,DUP,QPRTCHAR,ZBRANCH,2f-$
+    .word DROP,BRANCH,4f-$
 2:  .word LIT,VK_CR,EQUAL,ZBRANCH,8f-$
 4:  .word ONEPLUS,DOLOOP,1b-$,RFROM,BRANCH,9f-$
 8:  .word DOI,UNLOOP,RDROP  
@@ -505,7 +506,7 @@ DEFWORD "THRU",4,,THRU
 ; arguments:
 ;   aucun
 ; retourne:
-;   n	Taille qui serait occupée par l'écran dans un bloc.    
+;   n Taille qui serait occupée par l'écran dans un bloc.    
 DEFWORD "SCR-SIZE",8,,SCRSIZE ; ( -- n )
     .word LIT,0,LIT,LPS,OVER,DODO
 1:  .word SCRBUF,DOI,LIT,CPL,DUP,TOR

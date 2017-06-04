@@ -852,10 +852,47 @@ DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
 8:  .word SWAP,ONEPLUS,SWAP,ONEMINUS    
 9:  .word EXIT
 
+; nom: ?PRTCHAR   ( n -- f )
+;   Vérifie si  'n' est une caractère imprimable dans l'intervalle {32..126}
+;   et retourne un indicateur booléen.
+; arguments:
+;    n	 Entier simple
+; retourne:
+;    f Indicateur booléen, vrai si n -> {32..126}  
+DEFWORD "?PRTCHAR",8,,QPRTCHAR 
+    .word DUP,BL,ULESS,TBRANCH,7f-$
+    .word LIT,127,ULESS,ZBRANCH,8f-$
+    .word TRUE,EXIT
+7:  .word DROP
+8:  .word FALSE,EXIT
+  
+; nom: ?QUOTED-CHAR  ( c-addr -- c-addr 0 | n -1 )
+;   Vérifie si la chaîne est un caractère entre 2 apostrophe si c'est le cas
+;   Empile la valeur ASCII du caractère et TRUE, sinon retourne 'c-addr' et FALSE.
+; arguments:
+;    c-addr  Adresse de la chaîne comptée.
+; retourne:
+;   c-addr  0 Adresse orignale et FALSE si ce n'est pas un quoted char.
+;   n	-1 Valeur ascii du caractère et VRAI.  
+DEFWORD "?QUOTED-CHAR",12,,QQUOTEDCHAR
+    .word DUP,COUNT,LIT,3,EQUAL,ZBRANCH,9f-$
+    ; s: c-addr c-addr+1
+    .word DUP,CFETCH,DUP,LIT,'\'',EQUAL,ZBRANCH,8f-$
+    ; s: c-addr c-addr+1 '
+    .word OVER,LIT,2,CHARS,PLUS,CFETCH,XOR
+    .word TBRANCH,9f-$
+    ; s: c-addr c-addr+1
+    .word LIT,1,CHARS,PLUS,CFETCH,DUP,QPRTCHAR,ZBRANCH,9f-$
+    .word SWAP,DROP,TRUE,EXIT
+8:  .word DROP  
+9:  .word DROP,FALSE,EXIT
+  
 ; nom: ?NUMBER   ( c-addr -- c-addr 0 | n -1 )  
 ;   Conversion d'une chaîne en nombre
 ;    c-addr indique le début de la chaîne
 ;   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
+;   Accepte aussi 'c'  c'est à dire un caractère ASCII imprimable entre 2 apostrophes.
+;   Dans ce cas la valeur de l'entier est la valeur ASCII du caractère.  
 ;   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
 ;   à une position quelconque de la chaîne saisie sauf à la première position.
 ; arguments:
@@ -864,7 +901,9 @@ DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
 ;   c-addr 0   S'il la conversio échoue retourne l'adresse et l'indicateur FAUX	
 ;   n -1    Si la conversion réussie retourne l'entier et l'indicateur VRAI.  
 DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
-    .word BASE,FETCH,TOR ; sauvegarde la valeur de BASE 
+    .word QQUOTEDCHAR,ZBRANCH,2f-$
+    .word TRUE,EXIT  
+2:  .word BASE,FETCH,TOR ; sauvegarde la valeur de BASE 
     .word DUP,LIT,0,DUP,ROT,COUNT,QBASE  ; c-addr 0 0 c-addr' u'
     .word QSIGN,TOR  ; c-addr 0 0 c-addr' u' R: signFlag
 4:  .word TONUMBER ; c-addr n1 n2 c-addr' u'
@@ -877,6 +916,6 @@ DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
     .word DROP
 3:  .word LIT,-1
 8:  .word RFROM,BASE,STORE ; restitue la valeur de BASE
-    .word EXIT
+9:  .word EXIT
     
     
