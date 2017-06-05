@@ -67,33 +67,23 @@
 ;   DELETE  Efface le caractère à la position du curseur.
 ;   INSERT  Insère un espace à la position du curseur. S'il y a un caractère à la colonne 64 il est perdu.    
 ;   BACKSPACE Efface le caractère à gauche du curseur.
-;   CTRL_K Efface à partir du curseur jusqu'à la fin de la ligne    
+;   CTRL_A  Efface tout l'écran.     
+;   CTRL_K  Efface à partir du curseur jusqu'à la fin de la ligne    
 ;   CTRL_X  Supprime la ligne sur laquelle le curseur réside.
 ;   CTRL_Y  Insère une ligne vide avant celle où se trouve le curseur.
 ;   Manipulation des blocs:    
 ;   CTRL_B  Affiche le numéro du bloc en édition ainsi que sa taille.    
 ;   CTRL_S  Sauvegarde de l'écran dans le bloc.
-;   CTRL_N  Charge le bloc suivant pour édition.
-;   CTRL_P  Charge le bloc précédent pour édition.     
-;   CTRL_I  Édtion d'un bloc quelconque. Demande le numéro du bloc.
-;   CTRL_Q  Quitte l'éditeur.
+;   CTRL_N  Sauvegarde le bloc actuel et charge le bloc suivant pour édition.
+;   CTRL_P  Sauvegarde le bloc actuel et charge le bloc précédent pour édition.     
+;   CTRL_I  Sauvegarde le bloc actuel et saisie d'un numéro de bloc pour édition.
+;   CTRL_Q  Quitte l'éditeur,le contenu de l'écran n'est pas sauvegardé.
 
      
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes utilisées par l'éditeur.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; nom: MAXCHAR  ( -- u )
-;   Retourne le nombre maximum de caractères que peut contenir un écran pour être
-;   sauvegardé dans un bloc. Cette valeur correspond à la grandeur d'un bloc sur
-;   le périphérique de stockage.
-; arguments:
-;   aucun
-; retourne:
-;   u  Nombre maximum de caractères que peut contenir l'écran. Selon le standard ANS Forth c'est 1024 caractères.    
-DEFCONST "MAXCHAR",7,,MAXCHAR,BLOCK_SIZE
-    
-    
 ; nom: TEXTEND  ( -- )
 ;   Positionne le curseur à la fin du texte. Balaie la mémoire tampon de l'écran à partir
 ;   de la fin et s'arrête après le premier caractère non blanc.     
@@ -111,16 +101,6 @@ DEFWORD "TEXTEND",7,,TEXTEND
 9:   .word ONEPLUS,SCRBUF,MINUS,LIT,CPL,SLASHMOD
      .word ONEPLUS,SWAP,ONEPLUS,SWAP,CURPOS,EXIT
      
-; EDINIT  ( n+ -- )
-;   Initialise les variable de l'éditeur BLKED. Appellé par BLKED au démarrage de ce dernier.
-; arguments:
-;   n+    Numéro du bloc à éditer
-; retourne:
-;   rien     
-HEADLESS EDINIT,HWORD
-    .word LIST,EXIT
- 
-    
 ;  KCASE  ( c n -- c f )    
 ;   compare le caractère 'c' reçu du clavier avec la valeur n.  
 ; arguments:
@@ -135,42 +115,64 @@ HEADLESS KCASE,HWORD
 2:  .word EXIT
   
 ; nom: SAVELINE ( n -- )
-;   Sauvegarde la ligne d'écran n dans le tampon PAD.
+;   Sauvegarde de la ligne d'écran 'n' dans le tampon PAD.
+;   Pour que RESTORELINE restitue la ligne d'écran à son état original
+;   l'application doit éviter d'écraser le contenu des 64 premiers caractères
+;   du  PAD entre les 2 appels.
 ; arguments:
-;   n	numéro de ligne {1..24}
+;   n Numéro de ligne {1..24}
 ; retourne:
 ;   rien  
 DEFWORD "SAVELINE",8,,SAVELINE ; ( n -- )
-    .word LNADR  ; s: src
-    .word PAD,FETCH,LIT,CPL,OVER,CSTORE ; s: src dest 
-    .word ONEPLUS,LIT,CPL,MOVE,EXIT
+    .word FALSE,CURENBL,LNADR  ; s: src
+    .word PAD,FETCH,LIT,CPL,MOVE 
+    .word TRUE,CURENBL,EXIT
     
 ; nom: RESTORELINE  ( n -- )
-;   Restaure la ligne d'écran à partir du tampon PASTE
+;   Restaure la ligne d'écran à partir du tampon PAD.
 ; arguments:
-;   n	numéro de la ligne à restaurer {1..24}.
+;   n Numéro de la ligne à restaurer {1..24}.
 ; retourne:
 ;   rien
 DEFWORD "RESTORELINE",11,,RESTORELINE 
-    .word PAD,FETCH,COUNT,ROT ; s: src len n
-    .word LNADR ; s: src len dest
+    .word FALSE,CURENBL,LNADR,PAD,FETCH,LIT,CPL,ROT ; s: src len n
     .word SWAP,MOVE
-    .word EXIT
+    .word TRUE,CURENBL,EXIT
+    
+; nom: PROMPT  ( c-addr u n -- )
+;   Affiche un message en vidéo inversé sur la ligne 'n' de l'écran.
+;   Utilise SAVELINE pour conserver le contenu original de cette ligne dans
+;   la mémoire tampon PAD.  Les applications qui utilisent PROMPT et doivent restaurer
+;   le contenu original de la ligne utilisée par PROMPT doivent s'assurer
+;   de ne pas écraser les 64 premiers caractères du PAD.
+;   Après l'exécution de PROMPT la sortie vidéo est en mode inversée et le curseur
+;   est positionné après le prompt permettant une saisie d'information par l'application.    
+; arguments:
+;   c-addr Adresse du premier caractère du message à afficher.
+;   u Nombre de caractères du message, maximum 63.
+;   n Numéro de la ligne sur laquelle le message sera affiché, {1..24}
+; retourne:
+;   rien    
+DEFWORD "PROMPT",6,,PROMPT ; ( c-addr u n+ -- )
+    .word DUP,SAVELINE,DUP,SETY,CLEARLN ; s: c-addr u n+
+    .word DUP,TRUE,INVLN,TRUE,BSLASHW ; s: c-addr u n+
+    .word LIT,1,SWAP,ATXY,LIT,CPL-1,AND,TYPE,EXIT
     
 ; nom: MSGLINE  ( c-addr u n -- )
 ;   Affiche un message à l'écran et attend une touche au clavier pour poursuivre
 ;   l'exécution. Le message doit tenir sur une seule ligne d'écran. Cette ligne
-;   d'écran est sauvegardée et restaurée à la sortie de ce mot.
+;   d'écran est sauvegardée et restaurée à la sortie de ce mot. Le curseur texte
+;   est retourné à la position qu'il avait avant l'appel de MSGLINE.    
 ; arguments:
 ;   c-addr Adresse du premier caractère du message.
 ;   u  Longueur du message, limité à 63 caractères.
-;   n  numéro de la ligne où doit-être affiché le message.
+;   n  Numéro de la ligne où doit-être affiché le message.
 DEFWORD "MSGLINE",7,,MSGLINE ; ( c-addr u n -- )
-    .word FALSE,CURENBL,GETCUR,TWOTOR,DUP,SAVELINE
-    .word DUP,LIT,1,SWAP,ATXY,TRUE,BSLASHW,CLEARLN,NROT ; S: n c-addr u
-    .word LIT,CPL-1,AND,TYPE,DUP,TRUE,INVLN
-1:  .word KEYQ,ZBRANCH,1b-$
-    .word FALSE,BSLASHW,RESTORELINE,TWORFROM,ATXY,TRUE,CURENBL,EXIT
+     .word GETCUR,TWOTOR ; S: c-addr u n R: col line
+     .word DUP,TOR,PROMPT ; s:  r: col line n
+     .word KEY,DROP
+     .word FALSE,BSLASHW,RFROM,RESTORELINE
+     .word TWORFROM,ATXY,EXIT
   
 HEADLESS SAVEFAILED,HWORD
     .word STRQUOTE
@@ -223,20 +225,18 @@ HEADLESS PREVBLOCK,HWORD
 ;   rien
 HEADLESS OPENBLOCK,HWORD  
 ;DEFWORD "OPENBLOCK",9,,OPENBLOCK
-    .word FALSE,CURENBL,LIT,1,DUP,SAVELINE,GETCUR ; s: 1 col line
-    .word ROT,SETY,CLEARLN ; s: col line
-    .word STRQUOTE
+    .word GETCUR,STRQUOTE
     .byte 14
     .ascii "block number? "
     .align 2
-    .word TYPE,LIT,1,TRUE,INVLN,TRUE,CURENBL
-    .word TIB,FETCH,DUP,LIT,CPL,GETX,MINUS,TRUE,BSLASHW,ACCEPT,FALSE,DUP,BSLASHW,CURENBL
+    .word LIT,1,PROMPT
+    .word TIB,FETCH,DUP,LIT,CPL,GETX,MINUS,ACCEPT,FALSE,BSLASHW
     .word SRCSTORE,LIT,0,TOIN,STORE
     .word BL,WORD,DUP,CFETCH,ZBRANCH,8f-$
     .word QNUMBER,ZBRANCH,8f-$
-    .word LIST,BRANCH,9f-$
+    .word LIST,TWODROP,EXIT
 8:  .word LIT,1,RESTORELINE,CURPOS
-9:  .word TRUE,CURENBL,EXIT
+9:  .word EXIT
     
     
 ; VT-UPDATE  ( -- )
@@ -333,7 +333,7 @@ HEADLESS PUTCHR,HWORD ; ( c -- )
 
 ; attend une touche au clavier.  
 HEADLESS EDKEY,HWORD
-    .word SCRSIZE,MAXCHAR,GREATER,ZBRANCH,2f-$
+    .word SCRSIZE,LIT,BLOCK_SIZE,GREATER,ZBRANCH,2f-$
     .word STRQUOTE
     .byte 31
     .ascii "Screen to big to fit in a bloc."
@@ -371,7 +371,7 @@ DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )
     
 ; affiche le numéro du bloc et sa taille.    
 HEADLESS BLKINFO,HWORD
-    .word FALSE,CURENBL,GETCUR,SCRSIZE ; S: col line size
+    .word GETCUR,SCRSIZE ; S: col line size
     .word LIT,1,DUP,SAVELINE,DUP,CURPOS,CLEARLN
     .word STRQUOTE
     .byte  6
@@ -384,27 +384,28 @@ HEADLESS BLKINFO,HWORD
     .align 2
     .word TYPE,UDOT
     .word LIT,1,DUP,TRUE,INVLN
-    .word LCKEY,DROP,RESTORELINE
-    .word CURPOS,TRUE,CURENBL,EXIT
+    .word KEY,DROP,RESTORELINE
+    .word CURPOS,EXIT
     
 ; nom: BLKED  ( n+ -- )  
 ;   Éditeur de bloc texte. Edite 1 bloc à la fois.
 ;   Le curseur peut-être déplacé à n'importe qu'elle position sur l'écran et 
 ;   son contenu modifié à volonté avant de le sauvegarder le bloc sur le
-;   périphéirque de stockage actif. Ce bloc contenant du texte source peut-être
-;   ultérieurement évalué par la commande LOAD ou THRU.  
+;   périphéirque de stockage actif. Si ce bloc contient du texte source ForthEx
+;   il peut-être ultérieurement évalué par la commande LOAD ou THRU.  
 ; arguments:
 ;   n+   Le numéro du bloc à éditer.
 ; retourne:
 ;   rien  
 DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
-    .word EDINIT
+    .word LIST
 1:  .word EDKEY,DUP,LIT,31,GREATER,ZBRANCH,2f-$
     .word DUP,LIT,127,ULESS,ZBRANCH,4f-$
     .word PUTCHR,BRANCH,1b-$
     ; c<32
 2:  .word LIT,VK_CR,KCASE,ZBRANCH,2f-$,CRLF,BRANCH,1b-$
 2:  .word LIT,VK_BACK,KCASE,ZBRANCH,2f-$,BACKCHAR,BRANCH,1b-$
+2:  .word LIT,CTRL_A,KCASE,ZBRANCH,2f-$,CLS,BRANCH,1b-$  
 2:  .word LIT,CTRL_B,KCASE,ZBRANCH,2f-$,BLKINFO,BRANCH,1b-$  
 2:  .word LIT,CTRL_N,KCASE,ZBRANCH,2f-$,NEXTBLOCK,BRANCH,1b-$ 
 2:  .word LIT,CTRL_P,KCASE,ZBRANCH,2f-$,PREVBLOCK,BRANCH,1b-$ 

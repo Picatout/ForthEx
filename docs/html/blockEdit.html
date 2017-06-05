@@ -101,7 +101,9 @@
 </div>
 <div style="margin-left:5%;">   BACKSPACE Efface le caractère à gauche du curseur.
 </div>
-<div style="margin-left:5%;">   CTRL_K Efface à partir du curseur jusqu'à la fin de la ligne    
+<div style="margin-left:5%;">   CTRL_A  Efface tout l'écran.     
+</div>
+<div style="margin-left:5%;">   CTRL_K  Efface à partir du curseur jusqu'à la fin de la ligne    
 </div>
 <div style="margin-left:5%;">   CTRL_X  Supprime la ligne sur laquelle le curseur réside.
 </div>
@@ -113,36 +115,16 @@
 </div>
 <div style="margin-left:5%;">   CTRL_S  Sauvegarde de l'écran dans le bloc.
 </div>
-<div style="margin-left:5%;">   CTRL_N  Charge le bloc suivant pour édition.
+<div style="margin-left:5%;">   CTRL_N  Sauvegarde le bloc actuel et charge le bloc suivant pour édition.
 </div>
-<div style="margin-left:5%;">   CTRL_P  Charge le bloc précédent pour édition.     
+<div style="margin-left:5%;">   CTRL_P  Sauvegarde le bloc actuel et charge le bloc précédent pour édition.     
 </div>
-<div style="margin-left:5%;">   CTRL_I  Édtion d'un bloc quelconque. Demande le numéro du bloc.
+<div style="margin-left:5%;">   CTRL_I  Sauvegarde le bloc actuel et saisie d'un numéro de bloc pour édition.
 </div>
-<div style="margin-left:5%;">   CTRL_Q  Quitte l'éditeur.
+<div style="margin-left:5%;">   CTRL_Q  Quitte l'éditeur,le contenu de l'écran n'est pas sauvegardé.
 </div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:4px;"><p id="MAXCHAR">
-<b>MAXCHAR</b>  ( -- u )
-<div style="margin-left:5%;">   Retourne le nombre maximum de caractères que peut contenir un écran pour être
-</div>
-<div style="margin-left:5%;">   sauvegardé dans un bloc. Cette valeur correspond à la grandeur d'un bloc sur
-</div>
-<div style="margin-left:5%;">   le périphérique de stockage.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Nombre maximum de caractères que peut contenir l'écran. Selon le standard ANS Forth c'est 1024 caractères.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="TEXTEND">
+<hr style="border-width:4px;"><p id="TEXTEND">
 <b>TEXTEND</b>  ( -- )
 <div style="margin-left:5%;">   Positionne le curseur à la fin du texte. Balaie la mémoire tampon de l'écran à partir
 </div>
@@ -162,12 +144,18 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="SAVELINE">
 <b>SAVELINE</b> ( n -- )
-<div style="margin-left:5%;">   Sauvegarde la ligne d'écran n dans le tampon PAD.
+<div style="margin-left:5%;">   Sauvegarde de la ligne d'écran 'n' dans le tampon PAD.
+</div>
+<div style="margin-left:5%;">   Pour que RESTORELINE restitue la ligne d'écran à son état original
+</div>
+<div style="margin-left:5%;">   l'application doit éviter d'écraser le contenu des 64 premiers caractères
+</div>
+<div style="margin-left:5%;">   du  PAD entre les 2 appels.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n	numéro</i>&nbsp;&nbsp; de ligne {1..24}
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Numéro de ligne {1..24}
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -178,17 +166,49 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="RESTORELINE">
 <b>RESTORELINE</b>  ( n -- )
-<div style="margin-left:5%;">   Restaure la ligne d'écran à partir du tampon PASTE
+<div style="margin-left:5%;">   Restaure la ligne d'écran à partir du tampon PAD.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n	numéro</i>&nbsp;&nbsp; de la ligne à restaurer {1..24}.
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Numéro de la ligne à restaurer {1..24}.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
 <div style="margin-left:5%;"><i>rien
 </i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="PROMPT">
+<b>PROMPT</b>  ( c-addr u n -- )
+<div style="margin-left:5%;">   Affiche un message en vidéo inversé sur la ligne 'n' de l'écran.
+</div>
+<div style="margin-left:5%;">   Utilise SAVELINE pour conserver le contenu original de cette ligne dans
+</div>
+<div style="margin-left:5%;">   la mémoire tampon PAD.  Les applications qui utilisent PROMPT et doivent restaurer
+</div>
+<div style="margin-left:5%;">   le contenu original de la ligne utilisée par PROMPT doivent s'assurer
+</div>
+<div style="margin-left:5%;">   de ne pas écraser les 64 premiers caractères du PAD.
+</div>
+<div style="margin-left:5%;">   Après l'exécution de PROMPT la sortie vidéo est en mode inversée et le curseur
+</div>
+<div style="margin-left:5%;">   est positionné après le prompt permettant une saisie d'information par l'application.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractère du message à afficher.
+</div>
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp; Nombre de caractères du message, maximum 63.
+</div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Numéro de la ligne sur laquelle le message sera affiché, {1..24}
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
@@ -198,7 +218,9 @@
 </div>
 <div style="margin-left:5%;">   l'exécution. Le message doit tenir sur une seule ligne d'écran. Cette ligne
 </div>
-<div style="margin-left:5%;">   d'écran est sauvegardée et restaurée à la sortie de ce mot.
+<div style="margin-left:5%;">   d'écran est sauvegardée et restaurée à la sortie de ce mot. Le curseur texte
+</div>
+<div style="margin-left:5%;">   est retourné à la position qu'il avait avant l'appel de MSGLINE.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -207,7 +229,7 @@
 </div>
 <div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Longueur du message, limité à 63 caractères.
 </div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  numéro de la ligne où doit-être affiché le message.
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Numéro de la ligne où doit-être affiché le message.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -220,9 +242,9 @@
 </div>
 <div style="margin-left:5%;">   son contenu modifié à volonté avant de le sauvegarder le bloc sur le
 </div>
-<div style="margin-left:5%;">   périphéirque de stockage actif. Ce bloc contenant du texte source peut-être
+<div style="margin-left:5%;">   périphéirque de stockage actif. Si ce bloc contient du texte source ForthEx
 </div>
-<div style="margin-left:5%;">   ultérieurement évalué par la commande LOAD ou THRU.  
+<div style="margin-left:5%;">   il peut-être ultérieurement évalué par la commande LOAD ou THRU.  
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -240,8 +262,8 @@
 <p>
 <ul>
 <li><a href="#BLKED">BLKED</a></li>
-<li><a href="#MAXCHAR">MAXCHAR</a></li>
 <li><a href="#MSGLINE">MSGLINE</a></li>
+<li><a href="#PROMPT">PROMPT</a></li>
 <li><a href="#RESTORELINE">RESTORELINE</a></li>
 <li><a href="#SAVELINE">SAVELINE</a></li>
 <li><a href="#TEXTEND">TEXTEND</a></li>

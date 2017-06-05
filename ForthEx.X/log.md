@@ -1,3 +1,9 @@
+2017-06-05
+----------
+Suppression de MAXCHAR dans blockEdit.s
+Travail dans blockEdit.s
+Ajout du mot PROMPT et modifications d'autres définitions.
+
 2017-06-04
 ----------
 Élimination des mots 'SOURCE et #SOURCE dans core.s
