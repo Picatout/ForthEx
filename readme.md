@@ -17,6 +17,10 @@ Schématique
 
 ![interface clavier](/docs/html/img/forthex_schematic_ps2.png)
 
+![boitier face avant](/docs/html/img/boitier-face.png)
+
+![boitier face arrière](/docs/html/img/boitier-arrière.png)
+
 [vidéo description matérielle](https://youtu.be/hgAJy2Itfcw)
 
 2017-03-24
