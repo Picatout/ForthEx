@@ -24,7 +24,7 @@
 ;   REF: http://lars.nocrew.org/forth2012/block.html
 ;   REF: http://lars.nocrew.org/dpans/dpans7.htm#7.6.1    
 ; NOTES:
-;  1) Les blocs sont de 1024 octets par tradition car à l'époque où
+;  1) Les blocs sont de 1024 caractères par tradition car à l'époque où
 ;     Charles Moore a développé ce système il l'utilisait pour stocker
 ;     les écrans du moniteur sous forme de texte source. Le moniteur qu'il
 ;     utilisait affichait 16 lignes de 64 caractères donc 1024 caractères.
@@ -302,10 +302,11 @@ HEADLESS NOUPDATE,HWORD
 ;   a-addr   Adresse de la structure BUFFER.
 ; retourne:
 ;   rien 
-HEADLESS DATAOUT    
+HEADLESS DATAOUT,HWORD    
 ;DEFWORD "DATA>",5,,DATAOUT 
     ; ne sauvegarder que si nécessaire
-    .word DUP,UPDATEDFETCH,TBRANCH,2f-$,DROP,EXIT
+    .word DUP,UPDATEDFETCH,TBRANCH,2f-$
+    .word DROP,EXIT
 2:  .word FIELDS ; S: data  no-block device *BUFFER
     .word TOR,DUP,TOR  ; s: data no-block device r: *BUFFER device
     ; conversion BLK>ADR
@@ -466,10 +467,10 @@ DEFWORD "LIST",4,,LIST
     .word DUP,SCR,STORE,CLS
     .word BLOCK,DUP,LIT,BLOCK_SIZE,BLKFILTER,LIT,0,DOQDO,BRANCH,9f-$ 
 1:  .word DUP,ECFETCH,EMIT,ONEPLUS,DOLOOP,1b-$
-9:  .word DROP,EXIT
+9:  .word DROP,TEXTEND,EXIT
 
   
-; nom: REFILL  ( -- f )
+; REFILL  ( -- f )
 ;   **comportement non standard**  
 ;   Si la variable BLK est à zéro retourne faux.
 ;   Sinon incrémente BLK et si cette nouvelle valeur est valide
@@ -479,14 +480,14 @@ DEFWORD "LIST",4,,LIST
 ;   aucun
 ; retourne:
 ;   f    retourne faux si la variable BLK=0 ou s'il n'y a plus de bock valide.  
-DEFWORD "REFILL",6,,REFILL
-    .word BLK,FETCH,DUP,ZBRANCH,9f-$
-    .word ONEPLUS
-    .word DUP,FN_BOUND,BLKDEV,FETCH,VEXEC
-    .word ZBRANCH,8f-$
-    .word DROP,BLOCK,TRUE,EXIT
-8:  .word DUP,BLK,STORE    
-9:  .word EXIT    
+;DEFWORD "REFILL",6,,REFILL
+;    .word BLK,FETCH,DUP,ZBRANCH,9f-$
+;    .word ONEPLUS
+;    .word DUP,FN_BOUND,BLKDEV,FETCH,VEXEC
+;    .word ZBRANCH,8f-$
+;    .word DROP,BLOCK,TRUE,EXIT
+;8:  .word DUP,BLK,STORE    
+;9:  .word EXIT    
   
 ; nom: THRU  ( i*x u1 u2 -- j*x )
 ;   Interprétation des blocs u1 à u2 . LOAD est appellé pour chacun des blocs dans la séquence.

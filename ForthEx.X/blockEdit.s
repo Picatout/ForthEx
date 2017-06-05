@@ -41,8 +41,8 @@
 ;   Lors de la sauvegarde dans un bloc les lignes sont tronquées après le dernier caractère
 ;   et un caractère de fin de ligne est ajouté. Il y a 24 lignes sur un écran donc
 ;   si la longueur moyenne des lignes est inférieure à (BLOCK_SIZE-24)/24 l'écran peut
-;   être sauvegardé dans un bloc. L'éditeur le mot SCR-SIZE défini dans le fichier block.s
-;   et rapporte une alerte si ce nombre dépasse BLOCK_SIZE.
+;   être sauvegardé dans un bloc. Le mot SCR-SIZE défini dans le fichier block.s
+;   permet de connaître la taille occupée par un écran dans un bloc.
 ;   Il est problable que la majorité du temps un écran avec les lignes tronquées après
 ;   le dernier caractère répondra à ce critère. Au pire il suffira de raccourcir les commentaires.    
 ; FONCTIONNEMENT:
@@ -71,7 +71,7 @@
 ;   CTRL_X  Supprime la ligne sur laquelle le curseur réside.
 ;   CTRL_Y  Insère une ligne vide avant celle où se trouve le curseur.
 ;   Manipulation des blocs:    
-;   CTRL_B  Affiche le numéro du bloc, sa taille ainsi que numéro du bloc précédemment édité.    
+;   CTRL_B  Affiche le numéro du bloc en édition ainsi que sa taille.    
 ;   CTRL_S  Sauvegarde de l'écran dans le bloc.
 ;   CTRL_N  Charge le bloc suivant pour édition.
 ;   CTRL_P  Charge le bloc précédent pour édition.     
@@ -79,9 +79,9 @@
 ;   CTRL_Q  Quitte l'éditeur.
 
      
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; constantes utilisées par l'éditeur.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; nom: MAXCHAR  ( -- u )
 ;   Retourne le nombre maximum de caractères que peut contenir un écran pour être
@@ -118,7 +118,7 @@ DEFWORD "TEXTEND",7,,TEXTEND
 ; retourne:
 ;   rien     
 HEADLESS EDINIT,HWORD
-    .word LIST,TEXTEND,EXIT
+    .word LIST,EXIT
  
     
 ;  KCASE  ( c n -- c f )    
@@ -172,36 +172,57 @@ DEFWORD "MSGLINE",7,,MSGLINE ; ( c-addr u n -- )
 1:  .word KEYQ,ZBRANCH,1b-$
     .word FALSE,BSLASHW,RESTORELINE,TWORFROM,ATXY,TRUE,CURENBL,EXIT
   
-; nom: NEXTBLOCK ( -- )
+HEADLESS SAVEFAILED,HWORD
+    .word STRQUOTE
+    .byte 30
+    .ascii "Failed to save screen."
+    .align 2
+9:  .word LIT,1,MSGLINE,EXIT
+    
+HEADLESS SAVESUCCESS,HWORD
+    .word STRQUOTE
+    .byte 13
+    .ascii "Screen saved."
+    .align 2
+    .word BRANCH,9b-$
+    
+; NEXTBLOCK ( -- )
 ;   Sauvegarde l'écran actuel et charge le bloc suivant pour édition.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "NEXTBLOCK",9,,NEXTBLOCK
-    .word SCR,FETCH,DUP,SCRTOBLK,DROP
-    .word ONEPLUS,LIST,TEXTEND,EXIT
+HEADLESS NEXTBLOCK,HWORD    
+;DEFWORD "NEXTBLOCK",9,,NEXTBLOCK
+    .word SCR,FETCH,DUP,SCRTOBLK,TBRANCH,2f-$
+    .word SAVEFAILED,EXIT
+2:  .word ONEPLUS,DUP,BLKDEVFETCH,FN_BOUND,VEXEC,ZBRANCH,9f-$
+    .word LIST,EXIT
+9:  .word DROP,EXIT
     
-; nom: PREVBLOCK  ( -- )
+; PREVBLOCK  ( -- )
 ;   Sauvegarde l'écran actuel et charge le bloc précédent pour édition.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "PREVBLOCK",9,,PREVBLOCK
-    .word SCR,FETCH,DUP,SCRTOBLK,DROP
-    .word ONEMINUS,QDUP,ZBRANCH,9f-$
-    .word LIST,TEXTEND
+HEADLESS PREVBLOCK,HWORD  
+;DEFWORD "PREVBLOCK",9,,PREVBLOCK
+    .word SCR,FETCH,DUP,SCRTOBLK,TBRANCH,2f-$
+    .word SAVEFAILED,EXIT
+2:  .word ONEMINUS,QDUP,ZBRANCH,9f-$
+    .word LIST
 9:  .word EXIT
 
 
-; nom: OPENBLOCK  ( -- )
+; OPENBLOCK  ( -- )
 ;   Charge un nouveau bloc pour édition. Le numéro du bloc est fourni par l'utilisateur.    
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "OPENBLOCK",9,,OPENBLOCK
+HEADLESS OPENBLOCK,HWORD  
+;DEFWORD "OPENBLOCK",9,,OPENBLOCK
     .word FALSE,CURENBL,LIT,1,DUP,SAVELINE,GETCUR ; s: 1 col line
     .word ROT,SETY,CLEARLN ; s: col line
     .word STRQUOTE
@@ -209,11 +230,11 @@ DEFWORD "OPENBLOCK",9,,OPENBLOCK
     .ascii "block number? "
     .align 2
     .word TYPE,LIT,1,TRUE,INVLN,TRUE,CURENBL
-    .word TIB,FETCH,DUP,LIT,CPL-1,ACCEPT,FALSE,CURENBL
+    .word TIB,FETCH,DUP,LIT,CPL,GETX,MINUS,TRUE,BSLASHW,ACCEPT,FALSE,DUP,BSLASHW,CURENBL
     .word SRCSTORE,LIT,0,TOIN,STORE
     .word BL,WORD,DUP,CFETCH,ZBRANCH,8f-$
     .word QNUMBER,ZBRANCH,8f-$
-    .word LIST,TEXTEND,BRANCH,9f-$
+    .word LIST,BRANCH,9f-$
 8:  .word LIT,1,RESTORELINE,CURPOS
 9:  .word TRUE,CURENBL,EXIT
     
@@ -344,16 +365,8 @@ DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )
 ;HEADLESS SAVESCREEN,HWORD
     .word SCR,FETCH,SCRTOBLK
     .word TBRANCH,8f-$
-    .word STRQUOTE
-    .byte 22
-    .ascii "Failed to save screen."
-    .align 2
-    .word BRANCH,9f-$
-8:  .word STRQUOTE
-    .byte 13
-    .ascii "Screen saved."
-    .align 2
-9:  .word LIT,1,MSGLINE
+    .word SAVEFAILED,EXIT
+8:  .word SAVESUCCESS
     .word EXIT    
     
 ; affiche le numéro du bloc et sa taille.    

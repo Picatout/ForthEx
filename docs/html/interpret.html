@@ -32,7 +32,211 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:4px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
 </div>
-<div style="margin-left:5%;">   Mots utilisés par l'intepréteur de texte.
+<div style="margin-left:5%;">   Constantes système utilisées par l'interpréteur/compilateur.
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="IMMED">
+<b>IMMED</b>  ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne le bit F_IMMEDIATE. Ce bit est inscrit dans le
+</div>
+<div style="margin-left:5%;">   premier octet du champ NFA et indique si le mot est immmédiat.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     F_IMMED bit indicateur mot immédiat.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="HIDDEN">
+<b>HIDDEN</b>   ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne le bit F_HIDDEN. Ce bit est inscrit dans le 
+</div>
+<div style="margin-left:5%;">   premier octet du champ NFA et indique si le mot est caché à la recherche par FIND.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n	F_HIDDEN</i>&nbsp;&nbsp; bit indicateur de mot caché.       
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="NMARK">
+<b>NMARK</b>  ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne le bit F_MARK. Ce bit est inscrit dans le
+</div>
+<div style="margin-left:5%;">   premier octet du champ NFA et sert la localisé ce champ. Ce bit est utilisé
+</div>
+<div style="margin-left:5%;">   par le mot CFA&gt;NFA.    
+</div>
+</p>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LENMASK">
+<b>LENMASK</b>   ( -- n )
+<div style="margin-left:5%;">   Constante système retourne le masque pour la longueur du nom dans les entêtes
+</div>
+<div style="margin-left:5%;">   du dictionnaire. Ce masque sert à éliminer les bits F_NMARK,F_HIDDEN et F_IMMED
+</div>
+<div style="margin-left:5%;">   pour ne conserver que les bits qui indique la longueur du nom.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   masque LEN_MASK    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="TIBSIZE">
+<b>TIBSIZE</b>   ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne la longueur du TIB (Transaction Input Buffer)
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    longueur du tampon TIB.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="PADSIZE">
+<b>PADSIZE</b>   ( -- n )
+<div style="margin-left:5%;">   Constante système qui retourne la longueur du tampon PAD.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    longueur du tampon PAD.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">   variables système utilisées par l'interpréteur/compilateur.
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="STATE">
+<b>STATE</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui indique si le système est en mode interprétation ou compilation.
+</div>
+<div style="margin-left:5%;">   STATE=0 -&gt; interprétation,  STATE=-1 -&gt; compilation.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="PAD">
+<b>PAD</b> ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui contient l'adresse d'une mémoire tampon utilisée pour le travail
+</div>
+<div style="margin-left:5%;">   sur des chaînes de caractères. Ce tampon est utilisé entre autre pour la conversion
+</div>
+<div style="margin-left:5%;">   des entiers en chaîne de caractères pour l'affichage.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="TIB">
+<b>TIB</b> ( -- a-addr )
+<div style="margin-left:5%;">   Variable système contenant l'adresse de la mémoire tampon de saisie des chaînes à partir
+</div>
+<div style="margin-left:5%;">   de la console. Ce tampon est utilisé par l'interpréteur/compilateur en mode interactif.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="PASTE">
+<b>PASTE</b>  ( -- a-addr )
+<div style="margin-left:5%;">   Variable système qui contient l'adresse d'un tampon qui contient une copie
+</div>
+<div style="margin-left:5%;">   de la dernière chaîne interprétée en mode interactif. Permet de rappeller cette
+</div>
+<div style="margin-left:5%;">   chaîne à l'écran par la commande CTRL_V.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="&gt;IN">
+<b>&gt;IN</b>   ( -- a-addr )
+<div style="margin-left:5%;">   Variable système, indique la position où est rendue l'analyseur lexical dans
+</div>
+<div style="margin-left:5%;">   le traitement de la chaîne d'entrée. Cette variable est utilisée par l'interpréteur/compilateur.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">   Mots utilisés par l'intepréteur/compilateur de texte et utilitaires dictionnaire.
 </div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:4px;"><p id="WORDS">
@@ -1284,7 +1488,7 @@
 </div>
 <div style="margin-left:5%;">   Met la variable STATE en mode compilation.
 </div>
-<div style="margin-left:5%;">   Le CFA de cette définition peut par exemple est assigné
+<div style="margin-left:5%;">   Le CFA de cette définition peut par exemple être assigné2
 </div>
 <div style="margin-left:5%;">   à un mot créé avec DEFER.
 </div>
@@ -1292,9 +1496,9 @@
 </div>
 <div style="margin-left:5%;">   DEFER  p2 
 </div>
-<div style="margin-left:5%;">   :noname  DUP * ;
+<div style="margin-left:5%;">   :noname  DUP * ; IS p2
 </div>
-<div style="margin-left:5%;">   ' p2 DEFER! / maintenant p2 utilise le code de défini par :noname.    
+<div style="margin-left:5%;">   2 p2  / 4 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -1621,6 +1825,7 @@
 <ul>
 <li><a href="#&gt;BODY">&gt;BODY</a></li>
 <li><a href="#&gt;COUNTED">&gt;COUNTED</a></li>
+<li><a href="#&gt;IN">&gt;IN</a></li>
 <li><a href="#'">'</a></li>
 <li><a href="#+LOOP">+LOOP</a></li>
 <li><a href="#,">,</a></li>
@@ -1664,20 +1869,27 @@
 <li><a href="#FORGET">FORGET</a></li>
 <li><a href="#GETCLIP">GETCLIP</a></li>
 <li><a href="#HERE">HERE</a></li>
+<li><a href="#HIDDEN">HIDDEN</a></li>
 <li><a href="#HIDE">HIDE</a></li>
 <li><a href="#IF">IF</a></li>
+<li><a href="#IMMED">IMMED</a></li>
 <li><a href="#IMMEDIATE">IMMEDIATE</a></li>
 <li><a href="#INTERPRET">INTERPRET</a></li>
 <li><a href="#IS">IS</a></li>
 <li><a href="#LEAVE">LEAVE</a></li>
+<li><a href="#LENMASK">LENMASK</a></li>
 <li><a href="#LITERAL">LITERAL</a></li>
 <li><a href="#LOOP">LOOP</a></li>
 <li><a href="#MARKER">MARKER</a></li>
 <li><a href="#NFA&gt;CFA">NFA&gt;CFA</a></li>
 <li><a href="#NFA&gt;LFA">NFA&gt;LFA</a></li>
+<li><a href="#NMARK">NMARK</a></li>
 <li><a href="#OF">OF</a></li>
+<li><a href="#PAD">PAD</a></li>
+<li><a href="#PADSIZE">PADSIZE</a></li>
 <li><a href="#PARSE">PARSE</a></li>
 <li><a href="#PARSE-NAME">PARSE-NAME</a></li>
+<li><a href="#PASTE">PASTE</a></li>
 <li><a href="#POSTPONE">POSTPONE</a></li>
 <li><a href="#QUIT">QUIT</a></li>
 <li><a href="#RECURSE">RECURSE</a></li>
@@ -1685,7 +1897,10 @@
 <li><a href="#S"">S"</a></li>
 <li><a href="#SOURCE">SOURCE</a></li>
 <li><a href="#SOURCE!">SOURCE!</a></li>
+<li><a href="#STATE">STATE</a></li>
 <li><a href="#THEN">THEN</a></li>
+<li><a href="#TIB">TIB</a></li>
+<li><a href="#TIBSIZE">TIBSIZE</a></li>
 <li><a href="#UNTIL">UNTIL</a></li>
 <li><a href="#VARIABLE">VARIABLE</a></li>
 <li><a href="#WHILE">WHILE</a></li>

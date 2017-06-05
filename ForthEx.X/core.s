@@ -21,10 +21,11 @@
 ; DATE: 2015-10-03
 ; DESCRIPTION: 
 ;    Vocabulaire de base du système ForthEx.
+;    Liste de références utiles concernant le langage Forth.    
+; REF: http://www.forth200x.org/documents/forth16-1.pdf    
 ; REF: http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt
 ; REF: http://www.bradrodriguez.com/papers/
 ; REF: http://www.camelforth.com/download.php?view.25
-; REF: http://www.greenarraychips.com/home/documents/dpans94.pdf
 ; REF: http://sinclairql.speccy.org/archivo/docs/books/Threaded_interpretive_languages.pdf    
 ; REF: http://www.exemark.com/FORTH/eForthOverviewv5.pdf
 ; REF: http://forthfiles.net/ting/sysguidefig.pdf    
@@ -304,82 +305,28 @@ DEFCONST "R0",2,,R0,rstack   ; base pile retour
 DEFCONST "S0",2,,S0,pstack   ; base pile arguments   
     
 ; nom: RAMEND  ( -- a-addr )
-;   Constante système qui retourne l'adresse après la fin de la mémoire RAM.
+;   Constante système qui retourne l'adresse qui suis la fin de la mémoire RAM.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   a-addr  Adresse fin de la RAM+1    
 DEFCONST "RAMEND",6,,RAMEND,RAM_END
     
-; nom: IMMED  ( -- n )
-;   Constante système qui retourne le bit F_IMMEDIATE. Ce bit inscrit dans le
-;   premier octet du champ NFA et indique si le mot est immmédiat.
-; arguments:
-;   aucun
-; retourne:
-;   n     F_IMMED bit indicateur mot immédiat.    
-DEFCONST "IMMED",5,,IMMED,F_IMMED       ; drapeau mot immédiat
-    
-; nom: HIDDEN   ( -- n )
-;   Constante système qui retourne le bit F_HIDDEN. Ce bit est inscrit dans le 
-;   premier octet du champ NFA et indique si le mot est caché à la recherche par FIND.
-; arguments:
-;   rien
-; retourne:
-;   n	F_HIDDEN bit indicateur de mot caché.       
-DEFCONST "HIDDEN",6,,HIDDEN,F_HIDDEN    ; drapeau mot caché
-    
-; nom: NMARK  ( -- n )
-;   Constante système qui retourne le bit F_MARK. Ce bit est inscrit dans le
-;   premier octet du champ NFA et sert la localisé ce champ. Ce bit est utilisé
-;   par le mot CFA>NFA.    
-DEFCONST "NMARK",5,,NMARK,F_MARK     ; drapeau marqueur utilisé par CFA>NFA
-    
-; nom: LENMASK   ( -- n )
-;   Constante système retourne le masque pour la longueur du nom dans les entêtes
-;   du dictionnaire. Ce masque sert à éliminer les bits F_NMARK,F_HIDDEN et F_IMMED
-;   pour ne conserver que les bits qui indique la longueur du nom.
-; arguments:
-;   aucun
-; retourne:
-;   n   masque LEN_MASK    
-DEFCONST "LENMASK",7,,LENMASK,LEN_MASK ; masque longueur nom
-
-; nom: BL  ( -- n )
-;   Constante système qui retourne la valeur ASCII 32 (espace).
-; arguments:
-;   aucun
-; retourne:
-;   n    valeur ASCII 32  qui représente l'espace.    
-DEFCONST "BL",2,,BL,32                       ; caractère espace
-
-; nom: TIBSIZE   ( -- n )
-;   Constante système qui retourne la longueur du TIB (Transaction Input Buffer)
-; arguments:
-;   aucun
-; retourne:
-;   n    longueur du tampon TIB.    
-DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
-    
-; nom: PADSIZE   ( -- n )
-;   Constante système qui retourne la longueur du tampon PAD.
-; arguments:
-;   aucun
-; retourne:
-;   n    longueur du tampon PAD.    
-DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
-
 ; nom: ULIMIT   ( -- a-addr )
-;   Constante système qui retourne l'adresse limite+1 de la mémoire réservré
-;   au données du dictionnaire utilisateur.
+;   Constante système qui retourne l'adresse qui suis la fin de la RAM utilisateur.
+;   Cette adresse correspond au début de la mémoire HEAP qui est gérée par les définitions dans dynamem.s
+;   Microchip appelle cette de mémoire RAM, débutant à 0x8000, EDS (Extended Data Space).
+;   Le mémoire tampon vidéo se trouve à la fin de l'EDS. Le reste de l'EDS constitue
+;   le HEAP. 
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr  Adresse fin dictionnaire+1    
+;   a-addr  Adresse début HEAP.    
 DEFCONST "ULIMIT",6,,ULIMIT,EDS_BASE        ; limite espace dictionnaire
 
 ; nom: TRUE  ( -- f )
-;   Constante système qui retourne la valeur Booléenne VRAI.
+;   Constante système qui retourne la valeur Booléenne VRAI. Cette valeur est représentée
+;   par l'entier -1 (tous les bit à 1 ). 
 ; arguments:
 ;   rien
 ; retourne:
@@ -387,7 +334,8 @@ DEFCONST "ULIMIT",6,,ULIMIT,EDS_BASE        ; limite espace dictionnaire
 DEFCONST "TRUE",4,,TRUE,-1 ; valeur booléenne vrai
     
 ; nom: FALSE  ( -- f )
-;   Constante système qui retourne la valeur Booléenne FAUX.
+;   Constante système qui retourne la valeur Booléenne FAUX. Cette valeur est représentée
+;   par l'entier 0 ( tous les bits à zéro). 
 ; arguments:
 ;   rien
 ; retourne:
@@ -399,7 +347,7 @@ DEFCONST "FALSE",5,,FALSE,0 ; valeur booléenne faux
 ; arguments:
 ;   rien
 ; retourne:
-;   a-addr   Adresse du début espace utilisateur en mémoire RAM.    
+;   a-addr   Adresse du début de l'espace utilisateur en mémoire RAM.    
 DEFCONST "DP0",3,,DP0,DATA_BASE ; début espace utilisateur
    
 ; nom: CELL   ( -- u )    
@@ -410,25 +358,17 @@ DEFCONST "DP0",3,,DP0,DATA_BASE ; début espace utilisateur
 ; arguments:
 ;   aucun
 ; retourne:
-;   u   Grandeur d'une cellule.    
+;   u   Grandeur d'une cellule en octets.    
 DEFCONST "CELL",4,,CELL,CELL_SIZE
  
 ; DESCRIPTION:
 ;  Cette section décris les différentes variables utilisées par le système.
     
-; nom: STATE  ( -- a-addr )
-;   Variable système qui indique si le système est en mode interprétation ou compilation.
-;   STATE=0 -> interprétation,  STATE=-1 -> compilation.
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "STATE",5,,STATE 
-
 ; nom: DP ( -- a-addr )
 ;   Variable système qui contient la position du pointeur de donnée dans l'esapce utilisateur.
 ;   Lorsqu'une nouvelle définition est créée ou que de l'espace est réservé avec ALLOT ce
-;   pointeur avance à la première position libre.    
+;   pointeur avance à la première position libre. Cette valeur de cette variable est retournée
+;   par le mot HERE.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -437,7 +377,9 @@ DEFUSER "DP",2,,DP
 
 ; nom: BASE  ( -- a-addr )
 ;   Variable système qui contient la valeur de la base numérique active.
-;   Le contenu de cette variable est modifié par les mots HEX et DECIMAL.
+;   Le contenu de cette variable est modifiée par les mots HEX et DECIMAL.
+;   peut aussi être modifiée manuellement exemple:
+;   2 BASE ! \ passage en base binaire. 
 ; arguments:
 ;   aucun
 ; retourne:
@@ -446,7 +388,8 @@ DEFUSER "BASE",4,,BASE     ; base numérique
 
 ; nom: SYSLATEST  ( -- a-addr )
 ;   Variable système qui contient le NFA du dernier mot défini dans le dictionnaire
-;   système en mémoire FLASH.
+;   système en mémoire FLASH. Le dictionnaire est divisé en 2 parties, la partie système
+;   qui réside en mémoire FLASH et la partie utilisateur qui réside en mémoire RAM. 
 ; arguments:
 ;   aucun
 ; retourne:
@@ -454,103 +397,15 @@ DEFUSER "BASE",4,,BASE     ; base numérique
 DEFUSER "SYSLATEST",9,,SYSLATEST ; tête du dictionnaire en FLASH
     
 ; nom: LATEST  ( -- a-addr )
-;   Variable système qui contient le NFA du dernier mot défini par l'utilisateur.    
+;   Variable système qui contient le NFA du dernier mot défini par l'utilisateur.
+;   Si le dictionnaire utilisateur est vide LASTEST contient la même valeur que SYSLATEST. 
+;   C'est le début de la liste des mots définis par l'utilisateur. 
 ; arguments:
 ;   aucun
 ; retourne:
 ;   a-addr  Adresse de la variable.    
 DEFUSER "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
 
-; nom: PAD ( -- a-addr )
-;   Variable système qui contient l'adresse d'un tampon utilisé pour le travail
-;   sur des chaînes de caractère. Ce tampon est utilisé entre autre pour la conversion
-;   des entiers en chaêine de caractères pour l'affichage.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "PAD",3,,PAD       ; tampon de travail
-
-; nom: TIB ( -- a-addr )
-;   Variable système contenant l'adresse du tampon de saisie des chaînes à partir
-;   du clavier. Ce tampon est utilisé par l'interpréteur/compilateur en mode interactif.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "TIB",3,,TIB       ; tampon de saisie clavier
-; nom: PASTE  ( -- a-addr )
-;   Variable système qui contient l'adresse d'un tampon qui contient une copie
-;   de la dernière chaîne interprétée en mode interactif. Permet de rappeller cette
-;   chaîne à l'écran par la commande CTRL_V.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "PASTE",5,,PASTE   ; copie de TIB
-    
-; nom: >IN   ( -- a-addr )
-;   Variable système indique la position ou est rendue l'analyseur lexical dans
-;   le traitement de la chaîne d'entrée. Cette variable est utilisée par l'interpréteur/compilateur.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER ">IN",3,,TOIN     ; pointeur position après le dernier mot retourné par WORD
-    
-; NOM: HP   ( -- a-addr )
-;   Variable système contenant la position du pointeur de conversion de nombres en chaîne.
-;   Cette variable est utilisée lors de la conversion d'entiers en chaîne de caractères.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "HP",2,,HP       ; HOLD pointer
-    
-; nom: 'SOURCE	( -- a-addr )
-;   Variable système qui contient le pointeur du début du tampon utilisé par
-;   l'interpréteur/compilateur.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "'SOURCE",7,,TICKSOURCE ; tampon source pour l'évaluation
-    
-; nom: #SOURCE  ( -- a-addr )
-;   Variable système contenant la grandeur du tampon source.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "#SOURCE",7,,CNTSOURCE ; grandeur du tampon
-
-; nom: RPBREAK   ( -- a-addr )
-;   Variable système utilisé par le mot BREAK pour sauvegarder la position
-;   de RSP pour la réentrée.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
-    
-; nom: DBGEN  ( -- a-addr)
-;   Variable système qui contient un indicateur Booléen d'activation/désactivation des breakpoints.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
-    
-; nom: SYSCONS   ( -- a-addr )
-;   Variable système qui indique le périphérique actuel utilisé par la console.
-;   La console peut fonctionné en mode LOCAL ou REMOTE.    
-; arguments:
-;   aucun
-; retourne:
-;   a-addr  Adresse de la variable.    
-DEFUSER "SYSCONS",7,,SYSCONS 
-    
- 
 ; DESCRIPTION:
 ;  La machine Virtuelle ForthEx utilise 3 piles.
 ;  La pile des arguments sert a passer des arguments d'une fonction à une autre
@@ -780,9 +635,9 @@ DEFCODE ">R",2,,TOR
 ;   Après cette opération la pile des retours a raccourcie de 1 élément et la
 ;   pile des arguments a rallongée d'un élément.
 ; arguments:
-;   x   Valeur au somment des retours.
+;   x  Valeur au somment des retours.
 ; retourne:
-;   x   valeur qui était au somment de R: est maintenant ajoutée au sommet de S:.    
+;   x  Valeur qui était au sommet de R: est maintenant ajoutée au sommet de S:.    
 DEFCODE "R>",2,,RFROM  
     DPUSH
     RPOP T
@@ -806,7 +661,7 @@ DEFCODE "IP@",3,,IPFETCH  ; ( -- n )
 ;   aucun
 ; retourne:
 ;   n   Nombre d'éléments qu'il y avait sur la pile avant cette opération.    
-DEFCODE "DEPTH",5,,DEPTH ; ( -- +n1 )
+DEFCODE "DEPTH",5,,DEPTH ; ( -- n )
     mov #pstack,W0
     sub DSP,W0,W0
     DPUSH
@@ -814,16 +669,16 @@ DEFCODE "DEPTH",5,,DEPTH ; ( -- +n1 )
     NEXT
 
 ; nom: PICK  ( i*x n --  i*x x )
-;   Insère le nième élément de la pile au sommet
+;   Place une copie du nième élément de la pile au sommet de celle-ci.
 ;   l'argument n est retiré de la pile avant le comptage.
 ;   Si n==0 équivaut à DUP 
 ;   Si n==1 équivaut à OVER
 ; arguments:
 ;   i*x   Liste des éléments présent sur la pile.
-;   n     position de l'élément recherché, 0 étant le sommet.
+;   n     Position de l'élément recherché, 0 étant le sommet.
 ; retourne:
 ;   i*x   Liste originale des éléments.
-;   x     copie de l'élément en position n.    
+;   x     Copie de l'élément en position n.    
 DEFCODE "PICK",4,,PICK
     mov DSP,W0
     sl T,T
@@ -837,7 +692,7 @@ DEFCODE "PICK",4,,PICK
 ;    des arguments. Le contenu de la pile des retours n'est pas modifié. Le contenu
 ;    de la pile des arguments a 1 élément supplémentaire.
 ; arguments:
-;    x   Valeur au somment de R
+;    aucun  
 ; retourne:
 ;    x    Valeur ajoutée à la pile des arguments, copie du sommet de R.    
 DEFCODE "R@",2,,RFETCH 
@@ -850,7 +705,7 @@ DEFCODE "R@",2,,RFETCH
 ; arguments:
 ;   aucun
 ; retourne:
-;   n   Valeur du pointeur SP.    
+;   n   Valeur du pointeur SP avant cette opération.
 DEFCODE "SP@",3,,SPFETCH ; ( -- n )
     mov DSP,W0
     DPUSH
@@ -880,7 +735,7 @@ DEFCODE "RP@",3,,RPFETCH  ; ( -- n )
     NEXT
     
 ; nom: RP! ( n -- )
-;   Initialiste le pointeur de la pile des retours avec la valeur
+;   Initialise le pointeur de la pile des retours avec la valeur
 ;   qui est au sommet de la pile des arguments.
 ; arguments:
 ;   n   Valeur d'initialistaion de RP.
@@ -927,7 +782,8 @@ DEFCODE "CSTK>",5,,CSTKFROM
 ; nom: @   ( a-addr -- n )
 ;   Retourne l'entier qui se trouve à l'adresse qui est au sommet de la pile des arguments.
 ;   Cette adresse doit-être alignée sur une adresse paire.    
-;   Les adresses > 32767 accèdent la mémoire FLASH dans l'interval {0..32766}.    
+;   Les adresses >= 32768 accèdent la mémoire FLASH dans l'interval {0..32766}.
+;   L'accès à la mémoire flash ne permet que la lecture du mot faible, i.e. bits 15:0 de l'instruction.    
 ; arguments:
 ;   a-addr  Adresse de la variable.
 ; retourne:
@@ -938,7 +794,10 @@ DEFCODE "@",1,,FETCH
 
 ; nom: C@  ( c-addr -- c )
 ;   Retourne l'octet contenu à l'adresse caractère qui est au sommet de la pile.
-;   Les adresses > 32767 accèdent la mémoire FLASH dans l'interval {0..32767}.    
+;   Les adresses >= 32768 accèdent la mémoire FLASH dans l'interval {0..32767}.    
+;   L'accès à la mémoire flash ne permet que la lecture des 2 octets du mot faible.
+;   Si l'adresse est paire les bits 7:0 sont lus.
+;   Si l'adresse est impaire les bits 15:8 sont lus.    
 ; arguments:
 ;   c-addr  Adresse alignée sur un octet.
 ; retourne:
@@ -951,24 +810,27 @@ DEFCODE "C@",2,,CFETCH
 ; nom: 2@  ( a-addr -- d )    
 ;   Retourne la valeur de type entier double qui est à l'adresse a-addr.
 ;   Cette adresse doit-être alignée sur une valeur paire.    
-;   Les adresses > 32767 accès la mémoire EDS.    
+;   Les adresses >= 32768 accèdent la mémoire FLASH.  
+;   S'il s'agit d'une adresse en FLASH, les valeurs du mot faible de 2 instructions
+;   successive sont retournées.    
 ; arguments:
 ;   a-addr   Adresse de la variable
 ; retourne:
 ;   d   Entier double, valeur de cette variable.    
 DEFCODE "2@",2,,TWOFETCH 
-    SET_EDS
+;    SET_EDS
     mov [T],W0 
     add #CELL_SIZE,T
     mov [T],T
     mov W0,[++DSP]
-    RESET_EDS
+;    RESET_EDS
     NEXT
     
 ; nom: TBL@  ( n a-addr -- n )    
 ;   Retourne l'élément n d'un vecteur. Les valeurs d'indice débute à zéro.
 ;   L'adresse de la table doit-être alignée sur une adresse paire.
-;   Les adresses > 32767 sont en mémoire FLASH.    
+;   Les adresses >= 32768 sont en mémoire FLASH. S'il s'agit d'une adresse en FLASH
+;   la valeur du mot faible de l'instruction est retourné.    
 ; arguments:
 ;   n  Indice dans le vecteur.
 ;   a-addr  Adresse du vecteur.
@@ -987,7 +849,7 @@ DEFCODE "TBL@",4,,TBLFETCH
 ;   Sauvegarde l'entier n1 dans l'élément d'indice n2 du vecteur dont d'adresse a-addr.
 ;   L'adresse de table doit-être alignée sur un nombre pair.    
 ;   a-addr[n2] = n1.
-;   Les adresses > 32767 accès la mémoire EDS.    
+;   Les adresses >= 32768 accèdent la mémoire EDS.    
 ; arguments:
 ;   n1  Valeur à affecté à l'élément.
 ;   n2  Indice de l'élément.
@@ -1006,9 +868,10 @@ DEFCODE "TBL!",4,,TBLSTORE ; ( n1 n2 addr -- )
     
 ; nom: !  ( n a-addr -- )    
 ;   Sauvegarde d'un entier dans une variable.
-;   Accès RAM et EDS.    
+;   Accède les SFR, la RAM utilisateur et la RAM EDS.
+    
 ; arguments:
-;   n    Valeur à sauvegarder
+;   n    Valeur à sauvegarder.
 ;   a-addr Adresse de la variable.    
 ; retourne:
 ;   rien    
@@ -1019,7 +882,7 @@ DEFCODE "!",1,,STORE
 
 ; nom: C!  ( c c-addr -- )    
 ;   Sauvegarde un caractère dans une variable.
-;   Accès RAM et EDS.
+;   Accède les SFR, la RAM utilisateur et la RAM EDS.
 ; arguments:
 ;   c   Valeur à sauvegarder.
 ;   c-addr  Adresse de la variable.
@@ -1033,10 +896,10 @@ DEFCODE "C!",2,,CSTORE
 
 ; nom: 2!   ( d a-addr -- )    
 ;   Sauvegarde d'un entier double.
-;   Accès RAM et EDS    
+;   Accède les SFR, la RAM utilisateur et la RAM EDS    
 ; arguments:
-;   d   entier double
-;   a-addr  adresse de la variable.
+;   d   Entier double
+;   a-addr  Adresse de la variable.
 ; retourne:
 ;   rien    
 DEFCODE "2!",2,,TWOSTORE
@@ -1085,7 +948,7 @@ DEFCODE "CELL+",5,,CELLPLUS ; ( addr -- addr+CELL_SIZE )
     NEXT
 
 ; nom: CELLS  ( n1 -- n2 )    
-;    Convertie l'entier n1 en la taille occupée par n1 cellules.
+;    Convertie l'entier n1 en taille occupée par n1 cellules.
 ;    n2=n1*CELL_SIZE    
 ; arguments:
 ;    n1   Nombre de cellules.
@@ -1148,12 +1011,12 @@ DEFCODE "UNLOOP",6,,UNLOOP
 ;   qui se trouve sur la pile des arguments.
     
 ; nom: EXECUTE  ( i*x a-addr -- j*x )
-;   Exécute le mot dont le Code Field Address est au sommet de la pile.
+;   Exécute le mot dont le CFA (Code Field Address) est au sommet de la pile.
 ; arguments:
 ;   i*x    Liste des arguments consommés par ce mot.
 ;   a-addr CFA du mot à exécuter.
 ; retourne:
-;   j*x   Valeurs retournées l'exécution du mot.
+;   j*x   Valeurs retournées par l'exécution du mot.
 DEFCODE "EXECUTE",7,,EXECUTE
 exec:
     mov T, WP ; CFA
@@ -1164,7 +1027,7 @@ exec:
 ; nom: @XT  ( i*x a-addr -- j*x )
 ;   Exécution vectorisée. 
 ;   Lit le contenu d'une adresse qui contient le CFA d'un mot et exécute ce mot.
-;   : @XT  @ EXECUTE ;    
+;   : @XT @ EXECUTE ;    
 ; arguments:
 ;    i*x   Arguments attendus par la fonction qui sera exécutée.    
 ;    a-addr Adresse qui contient le CFA du code à exécuter. Accès RAM + FLASH
@@ -1175,7 +1038,8 @@ DEFCODE "@EXEC",5,,FETCHEXEC
     bra exec
 
 ; nom: VEXEC ( i*x a-addr n -- j*x )
-;   Excécute la fonction n dans une table contenant des CFA.
+;   Excécution vectorisé de la fonction 'n' dans la table 'a-addr'.
+;   Le premier indice de la table est zéro.    
 ;   : VEXEC CELLS + @ EXECUTE ;    
 ; arguments:
 ;    i*x   Arguments requis par la fonction à exécuter.
@@ -1193,10 +1057,15 @@ DEFCODE "VEXEC",5,,VEXEC
 ; nom: CALL  ( i*x ud -- j*x )
 ;    Appel d'une routine écrite en code machine et résident en mémoire flash.
 ;    La routine doit se terminée par une instruction machine RETURN.
-;    Utilise l'instruction machine CALL.L spécifique aux PIC24E et dsPIC33E. 
+;    Utilise l'instruction machine CALL.L spécifique aux PIC24E et dsPIC33E.
+;    À utiliser avec précaution, la routine en code machine ne doit pas écraser
+;    les registres utilisés par le système ForthEx {W8..W15}.
+;    Le code machine doit avoir été préalablement flashée en utilisant
+;    le mot RAM>FLASH. Un outil externe doit-être utilisé pour générer le code
+;    binaire de cette fonction. ForthEx n'a pas d'assembleur.    
 ; arguments:
 ;     i*x    Arguments consommés par la routine, dépend de celle-ci.
-;     ud     adresse 24 bits de la routine.
+;     ud     Adresse 24 bits de la routine.
 ; retourne:
 ;     j*x    Valeurs laissées sur la pile par la routine, dépend de celle-ci.   
 DEFCODE "CALL",4,,CALL 

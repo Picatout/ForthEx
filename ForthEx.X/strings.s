@@ -28,6 +28,14 @@
 ;  Mot qui manipules les caractères caractères.
 
 
+; nom: BL  ( -- n )
+;   Constante système qui retourne la valeur ASCII 32 (espace).
+; arguments:
+;   aucun
+; retourne:
+;   n    valeur ASCII 32  qui représente l'espace.    
+DEFCONST "BL",2,,BL,32                       ; caractère espace
+
 ; nom: >CHAR  ( n -- c )    
 ;   Vérifie que n est dans l'intervalle ASCII 32..126, sinon remplace c par '_'  
 ; arguments:
@@ -490,7 +498,7 @@ DEFWORD "(",1,F_IMMED,LPAREN ; parse ccccc)
 DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
     .word BLK,FETCH,ZBRANCH,2f-$
     .word CLIT,VK_CR,PARSE,TWODROP,EXIT
-2:  .word TSOURCE,PLUS,ADRTOIN,EXIT
+2:  .word SOURCE,PLUS,ADRTOIN,EXIT
 
 ; nom: .(   cccc) ( -- )    
 ;   Affiche le texte délimité par ).

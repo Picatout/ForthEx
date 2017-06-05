@@ -104,6 +104,15 @@ DEFTABLE "SERCONS",7,,SERCONS
     .word VTFILTER ; vt102.s
     .word VTGETCUR ; vt102.s
     .word VTBSLASHW   ; vt102.s
+   
+; nom: SYSCONS   ( -- a-addr )
+;   Variable système qui indentifie le périphérique actuel utilisé par la console.
+;   La console peut fonctionné en mode LOCAL ou REMOTE.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "SYSCONS",7,,SYSCONS 
     
 ; nom: LOCAL ( -- a-addr )
 ;   Empile le vecteur de la table LCONSOLE qui sert d'argument pour CONSOLE.

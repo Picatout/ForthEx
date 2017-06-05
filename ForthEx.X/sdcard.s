@@ -22,6 +22,7 @@
 ;Date: 2017-03-20
     
 .equ BLOCK_SIZE, 512 ; nombre d'octets par secteur carte SD.    
+.equ FIRST_USED, 2*BLOCK_SIZE  ; premier secteur utilisé pour les BLOCKS
     
 .section .hardware.bss  bss
 .global sdc_status
@@ -176,6 +177,9 @@ wait_response:
 ; retourne:
 ;    f   Indicateur Booléen de succès.    
 DEFCODE "SDCINIT",7,,SDCINIT ; ( -- f )
+    mov #FIRST_USED,W0
+    mov WREG,sdc_first
+    clr sdc_first+2
     clr sdc_status
     btsc SDC_PORT,#SDC_DETECT
     bra failed
@@ -449,6 +453,8 @@ DEFWORD "SDC>IMG",7,,SDCTOIMG ; ( u1 u2 ud1 -- )
 DEFCODE "SDFIRST",7,,SDFIRST
     DPUSH
     mov #sdc_first,T
+    DPUSH
+    clr T
     NEXT
     
 ; nom: SDBLKCOUNT  ( -- u )    

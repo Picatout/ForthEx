@@ -20,6 +20,24 @@
 ; DATE: 2017-05-18
 ; DESCRIPTION: 
 ;    Outils d'aide au débogage.
+  
+; nom: RPBREAK   ( -- a-addr )
+;   Variable système utilisé par le mot BREAK pour sauvegarder la position
+;   de RSP pour la réentrée.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
+    
+; nom: DBGEN  ( -- a-addr)
+;   Variable système qui contient un indicateur Booléen d'activation/désactivation des breakpoints.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
+    
     
 ; nom: ?DSP  ( -- )    
 ;   Outil de débogage.    

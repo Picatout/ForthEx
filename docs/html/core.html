@@ -9,6 +9,11 @@
 </div>
 <div style="margin-left:5%;">    Vocabulaire de base du système ForthEx.
 </div>
+<div style="margin-left:5%;">    Liste de références utiles concernant le langage Forth.    
+</div>
+<div style="margin-left:5%;">REF: <a href=" http://www.forth200x.org/documents/forth16-1.pdf    
+"> http://www.forth200x.org/documents/forth16-1.pdf    
+</a></div>
 <div style="margin-left:5%;">REF: <a href=" http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt
 "> http://www.eecs.wsu.edu/~hauser/teaching/Arch-F07/handouts/jonesforth.s.txt
 </a></div>
@@ -17,9 +22,6 @@
 </a></div>
 <div style="margin-left:5%;">REF: <a href=" http://www.camelforth.com/download.php?view.25
 "> http://www.camelforth.com/download.php?view.25
-</a></div>
-<div style="margin-left:5%;">REF: <a href=" http://www.greenarraychips.com/home/documents/dpans94.pdf
-"> http://www.greenarraychips.com/home/documents/dpans94.pdf
 </a></div>
 <div style="margin-left:5%;">REF: <a href=" http://sinclairql.speccy.org/archivo/docs/books/Threaded_interpretive_languages.pdf    
 "> http://sinclairql.speccy.org/archivo/docs/books/Threaded_interpretive_languages.pdf    
@@ -88,7 +90,7 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="RAMEND">
 <b>RAMEND</b>  ( -- a-addr )
-<div style="margin-left:5%;">   Constante système qui retourne l'adresse après la fin de la mémoire RAM.
+<div style="margin-left:5%;">   Constante système qui retourne l'adresse qui suis la fin de la mémoire RAM.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -102,127 +104,17 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="IMMED">
-<b>IMMED</b>  ( -- n )
-<div style="margin-left:5%;">   Constante système qui retourne le bit F_IMMEDIATE. Ce bit inscrit dans le
-</div>
-<div style="margin-left:5%;">   premier octet du champ NFA et indique si le mot est immmédiat.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     F_IMMED bit indicateur mot immédiat.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="HIDDEN">
-<b>HIDDEN</b>   ( -- n )
-<div style="margin-left:5%;">   Constante système qui retourne le bit F_HIDDEN. Ce bit est inscrit dans le 
-</div>
-<div style="margin-left:5%;">   premier octet du champ NFA et indique si le mot est caché à la recherche par FIND.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>n	F_HIDDEN</i>&nbsp;&nbsp; bit indicateur de mot caché.       
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="NMARK">
-<b>NMARK</b>  ( -- n )
-<div style="margin-left:5%;">   Constante système qui retourne le bit F_MARK. Ce bit est inscrit dans le
-</div>
-<div style="margin-left:5%;">   premier octet du champ NFA et sert la localisé ce champ. Ce bit est utilisé
-</div>
-<div style="margin-left:5%;">   par le mot CFA&gt;NFA.    
-</div>
-</p>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LENMASK">
-<b>LENMASK</b>   ( -- n )
-<div style="margin-left:5%;">   Constante système retourne le masque pour la longueur du nom dans les entêtes
-</div>
-<div style="margin-left:5%;">   du dictionnaire. Ce masque sert à éliminer les bits F_NMARK,F_HIDDEN et F_IMMED
-</div>
-<div style="margin-left:5%;">   pour ne conserver que les bits qui indique la longueur du nom.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   masque LEN_MASK    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="BL">
-<b>BL</b>  ( -- n )
-<div style="margin-left:5%;">   Constante système qui retourne la valeur ASCII 32 (espace).
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    valeur ASCII 32  qui représente l'espace.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="TIBSIZE">
-<b>TIBSIZE</b>   ( -- n )
-<div style="margin-left:5%;">   Constante système qui retourne la longueur du TIB (Transaction Input Buffer)
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    longueur du tampon TIB.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="PADSIZE">
-<b>PADSIZE</b>   ( -- n )
-<div style="margin-left:5%;">   Constante système qui retourne la longueur du tampon PAD.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    longueur du tampon PAD.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="ULIMIT">
 <b>ULIMIT</b>   ( -- a-addr )
-<div style="margin-left:5%;">   Constante système qui retourne l'adresse limite+1 de la mémoire réservré
+<div style="margin-left:5%;">   Constante système qui retourne l'adresse qui suis la fin de la RAM utilisateur.
 </div>
-<div style="margin-left:5%;">   au données du dictionnaire utilisateur.
+<div style="margin-left:5%;">   Cette adresse correspond au début de la mémoire HEAP qui est gérée par les définitions dans dynamem.s
+</div>
+<div style="margin-left:5%;">   Microchip appelle cette de mémoire RAM, débutant à 0x8000, EDS (Extended Data Space).
+</div>
+<div style="margin-left:5%;">   Le mémoire tampon vidéo se trouve à la fin de l'EDS. Le reste de l'EDS constitue
+</div>
+<div style="margin-left:5%;">   le HEAP. 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -231,14 +123,16 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse fin dictionnaire+1    
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse début HEAP.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="TRUE">
 <b>TRUE</b>  ( -- f )
-<div style="margin-left:5%;">   Constante système qui retourne la valeur Booléenne VRAI.
+<div style="margin-left:5%;">   Constante système qui retourne la valeur Booléenne VRAI. Cette valeur est représentée
+</div>
+<div style="margin-left:5%;">   par l'entier -1 (tous les bit à 1 ). 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -254,7 +148,9 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="FALSE">
 <b>FALSE</b>  ( -- f )
-<div style="margin-left:5%;">   Constante système qui retourne la valeur Booléenne FAUX.
+<div style="margin-left:5%;">   Constante système qui retourne la valeur Booléenne FAUX. Cette valeur est représentée
+</div>
+<div style="margin-left:5%;">   par l'entier 0 ( tous les bits à zéro). 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -279,7 +175,7 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse du début espace utilisateur en mémoire RAM.    
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse du début de l'espace utilisateur en mémoire RAM.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -301,7 +197,7 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   Grandeur d'une cellule.    
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   Grandeur d'une cellule en octets.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -311,31 +207,15 @@
 <div style="margin-left:5%;">  Cette section décris les différentes variables utilisées par le système.
 </div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:4px;"><p id="STATE">
-<b>STATE</b>  ( -- a-addr )
-<div style="margin-left:5%;">   Variable système qui indique si le système est en mode interprétation ou compilation.
-</div>
-<div style="margin-left:5%;">   STATE=0 -&gt; interprétation,  STATE=-1 -&gt; compilation.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="DP">
+<hr style="border-width:4px;"><p id="DP">
 <b>DP</b> ( -- a-addr )
 <div style="margin-left:5%;">   Variable système qui contient la position du pointeur de donnée dans l'esapce utilisateur.
 </div>
 <div style="margin-left:5%;">   Lorsqu'une nouvelle définition est créée ou que de l'espace est réservé avec ALLOT ce
 </div>
-<div style="margin-left:5%;">   pointeur avance à la première position libre.    
+<div style="margin-left:5%;">   pointeur avance à la première position libre. Cette valeur de cette variable est retournée
+</div>
+<div style="margin-left:5%;">   par le mot HERE.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -353,7 +233,11 @@
 <b>BASE</b>  ( -- a-addr )
 <div style="margin-left:5%;">   Variable système qui contient la valeur de la base numérique active.
 </div>
-<div style="margin-left:5%;">   Le contenu de cette variable est modifié par les mots HEX et DECIMAL.
+<div style="margin-left:5%;">   Le contenu de cette variable est modifiée par les mots HEX et DECIMAL.
+</div>
+<div style="margin-left:5%;">   peut aussi être modifiée manuellement exemple:
+</div>
+<div style="margin-left:5%;">   2 BASE ! \ passage en base binaire. 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -371,7 +255,9 @@
 <b>SYSLATEST</b>  ( -- a-addr )
 <div style="margin-left:5%;">   Variable système qui contient le NFA du dernier mot défini dans le dictionnaire
 </div>
-<div style="margin-left:5%;">   système en mémoire FLASH.
+<div style="margin-left:5%;">   système en mémoire FLASH. Le dictionnaire est divisé en 2 parties, la partie système
+</div>
+<div style="margin-left:5%;">   qui réside en mémoire FLASH et la partie utilisateur qui réside en mémoire RAM. 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -387,169 +273,11 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="LATEST">
 <b>LATEST</b>  ( -- a-addr )
-<div style="margin-left:5%;">   Variable système qui contient le NFA du dernier mot défini par l'utilisateur.    
+<div style="margin-left:5%;">   Variable système qui contient le NFA du dernier mot défini par l'utilisateur.
 </div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+<div style="margin-left:5%;">   Si le dictionnaire utilisateur est vide LASTEST contient la même valeur que SYSLATEST. 
 </div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="PAD">
-<b>PAD</b> ( -- a-addr )
-<div style="margin-left:5%;">   Variable système qui contient l'adresse d'un tampon utilisé pour le travail
-</div>
-<div style="margin-left:5%;">   sur des chaînes de caractère. Ce tampon est utilisé entre autre pour la conversion
-</div>
-<div style="margin-left:5%;">   des entiers en chaêine de caractères pour l'affichage.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="TIB">
-<b>TIB</b> ( -- a-addr )
-<div style="margin-left:5%;">   Variable système contenant l'adresse du tampon de saisie des chaînes à partir
-</div>
-<div style="margin-left:5%;">   du clavier. Ce tampon est utilisé par l'interpréteur/compilateur en mode interactif.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="PASTE">
-<b>PASTE</b>  ( -- a-addr )
-<div style="margin-left:5%;">   Variable système qui contient l'adresse d'un tampon qui contient une copie
-</div>
-<div style="margin-left:5%;">   de la dernière chaîne interprétée en mode interactif. Permet de rappeller cette
-</div>
-<div style="margin-left:5%;">   chaîne à l'écran par la commande CTRL_V.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="&gt;IN">
-<b>&gt;IN</b>   ( -- a-addr )
-<div style="margin-left:5%;">   Variable système indique la position ou est rendue l'analyseur lexical dans
-</div>
-<div style="margin-left:5%;">   le traitement de la chaîne d'entrée. Cette variable est utilisée par l'interpréteur/compilateur.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="'SOURCE	(">
-<b>'SOURCE	(</b> -- a-addr )
-<div style="margin-left:5%;">   Variable système qui contient le pointeur du début du tampon utilisé par
-</div>
-<div style="margin-left:5%;">   l'interpréteur/compilateur.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="#SOURCE">
-<b>#SOURCE</b>  ( -- a-addr )
-<div style="margin-left:5%;">   Variable système contenant la grandeur du tampon source.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="RPBREAK">
-<b>RPBREAK</b>   ( -- a-addr )
-<div style="margin-left:5%;">   Variable système utilisé par le mot BREAK pour sauvegarder la position
-</div>
-<div style="margin-left:5%;">   de RSP pour la réentrée.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="DBGEN">
-<b>DBGEN</b>  ( -- a-addr)
-<div style="margin-left:5%;">   Variable système qui contient un indicateur Booléen d'activation/désactivation des breakpoints.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="SYSCONS">
-<b>SYSCONS</b>   ( -- a-addr )
-<div style="margin-left:5%;">   Variable système qui indique le périphérique actuel utilisé par la console.
-</div>
-<div style="margin-left:5%;">   La console peut fonctionné en mode LOCAL ou REMOTE.    
+<div style="margin-left:5%;">   C'est le début de la liste des mots définis par l'utilisateur. 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -901,11 +629,11 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   Valeur au somment des retours.
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;  Valeur au somment des retours.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   valeur qui était au somment de R: est maintenant ajoutée au sommet de S:.    
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;  Valeur qui était au sommet de R: est maintenant ajoutée au sommet de S:.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -946,7 +674,7 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="PICK">
 <b>PICK</b>  ( i*x n --  i*x x )
-<div style="margin-left:5%;">   Insère le nième élément de la pile au sommet
+<div style="margin-left:5%;">   Place une copie du nième élément de la pile au sommet de celle-ci.
 </div>
 <div style="margin-left:5%;">   l'argument n est retiré de la pile avant le comptage.
 </div>
@@ -959,13 +687,13 @@
 </b></div>
 <div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;   Liste des éléments présent sur la pile.
 </div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     position de l'élément recherché, 0 étant le sommet.
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     Position de l'élément recherché, 0 étant le sommet.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
 <div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;   Liste originale des éléments.
 </div>
-<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;     copie de l'élément en position n.    
+<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;     Copie de l'élément en position n.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -981,7 +709,7 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>x</i>&nbsp;&nbsp;   Valeur au somment de R
+<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp;  
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -1001,7 +729,7 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Valeur du pointeur SP.    
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Valeur du pointeur SP avant cette opération.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -1042,7 +770,7 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="RP!">
 <b>RP!</b> ( n -- )
-<div style="margin-left:5%;">   Initialiste le pointeur de la pile des retours avec la valeur
+<div style="margin-left:5%;">   Initialise le pointeur de la pile des retours avec la valeur
 </div>
 <div style="margin-left:5%;">   qui est au sommet de la pile des arguments.
 </div>
@@ -1110,7 +838,9 @@
 </div>
 <div style="margin-left:5%;">   Cette adresse doit-être alignée sur une adresse paire.    
 </div>
-<div style="margin-left:5%;">   Les adresses &gt; 32767 accèdent la mémoire FLASH dans l'interval {0..32766}.    
+<div style="margin-left:5%;">   Les adresses &gt;= 32768 accèdent la mémoire FLASH dans l'interval {0..32766}.
+</div>
+<div style="margin-left:5%;">   L'accès à la mémoire flash ne permet que la lecture du mot faible, i.e. bits 15:0 de l'instruction.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -1128,7 +858,13 @@
 <b>C@</b>  ( c-addr -- c )
 <div style="margin-left:5%;">   Retourne l'octet contenu à l'adresse caractère qui est au sommet de la pile.
 </div>
-<div style="margin-left:5%;">   Les adresses &gt; 32767 accèdent la mémoire FLASH dans l'interval {0..32767}.    
+<div style="margin-left:5%;">   Les adresses &gt;= 32768 accèdent la mémoire FLASH dans l'interval {0..32767}.    
+</div>
+<div style="margin-left:5%;">   L'accès à la mémoire flash ne permet que la lecture des 2 octets du mot faible.
+</div>
+<div style="margin-left:5%;">   Si l'adresse est paire les bits 7:0 sont lus.
+</div>
+<div style="margin-left:5%;">   Si l'adresse est impaire les bits 15:8 sont lus.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -1148,7 +884,11 @@
 </div>
 <div style="margin-left:5%;">   Cette adresse doit-être alignée sur une valeur paire.    
 </div>
-<div style="margin-left:5%;">   Les adresses &gt; 32767 accès la mémoire EDS.    
+<div style="margin-left:5%;">   Les adresses &gt;= 32768 accèdent la mémoire FLASH.  
+</div>
+<div style="margin-left:5%;">   S'il s'agit d'une adresse en FLASH, les valeurs du mot faible de 2 instructions
+</div>
+<div style="margin-left:5%;">   successive sont retournées.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -1168,7 +908,9 @@
 </div>
 <div style="margin-left:5%;">   L'adresse de la table doit-être alignée sur une adresse paire.
 </div>
-<div style="margin-left:5%;">   Les adresses &gt; 32767 sont en mémoire FLASH.    
+<div style="margin-left:5%;">   Les adresses &gt;= 32768 sont en mémoire FLASH. S'il s'agit d'une adresse en FLASH
+</div>
+<div style="margin-left:5%;">   la valeur du mot faible de l'instruction est retourné.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -1192,7 +934,7 @@
 </div>
 <div style="margin-left:5%;">   a-addr[n2] = n1.
 </div>
-<div style="margin-left:5%;">   Les adresses &gt; 32767 accès la mémoire EDS.    
+<div style="margin-left:5%;">   Les adresses &gt;= 32768 accèdent la mémoire EDS.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -1214,19 +956,9 @@
 <b>!</b>  ( n a-addr -- )    
 <div style="margin-left:5%;">   Sauvegarde d'un entier dans une variable.
 </div>
-<div style="margin-left:5%;">   Accès RAM et EDS.    
+<div style="margin-left:5%;">   Accède les SFR, la RAM utilisateur et la RAM EDS.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Valeur à sauvegarder
-</div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse de la variable.    
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
@@ -1234,7 +966,7 @@
 <b>C!</b>  ( c c-addr -- )    
 <div style="margin-left:5%;">   Sauvegarde un caractère dans une variable.
 </div>
-<div style="margin-left:5%;">   Accès RAM et EDS.
+<div style="margin-left:5%;">   Accède les SFR, la RAM utilisateur et la RAM EDS.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -1254,14 +986,14 @@
 <b>2!</b>   ( d a-addr -- )    
 <div style="margin-left:5%;">   Sauvegarde d'un entier double.
 </div>
-<div style="margin-left:5%;">   Accès RAM et EDS    
+<div style="margin-left:5%;">   Accède les SFR, la RAM utilisateur et la RAM EDS    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;   entier double
+<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;   Entier double
 </div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  adresse de la variable.
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -1336,7 +1068,7 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="CELLS">
 <b>CELLS</b>  ( n1 -- n2 )    
-<div style="margin-left:5%;">    Convertie l'entier n1 en la taille occupée par n1 cellules.
+<div style="margin-left:5%;">    Convertie l'entier n1 en taille occupée par n1 cellules.
 </div>
 <div style="margin-left:5%;">    n2=n1*CELL_SIZE    
 </div>
@@ -1429,7 +1161,7 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:4px;"><p id="EXECUTE">
 <b>EXECUTE</b>  ( i*x a-addr -- j*x )
-<div style="margin-left:5%;">   Exécute le mot dont le Code Field Address est au sommet de la pile.
+<div style="margin-left:5%;">   Exécute le mot dont le CFA (Code Field Address) est au sommet de la pile.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -1440,7 +1172,7 @@
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;   Valeurs retournées l'exécution du mot.
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;   Valeurs retournées par l'exécution du mot.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -1451,7 +1183,7 @@
 </div>
 <div style="margin-left:5%;">   Lit le contenu d'une adresse qui contient le CFA d'un mot et exécute ce mot.
 </div>
-<div style="margin-left:5%;">   : @XT  @ EXECUTE ;    
+<div style="margin-left:5%;">   : @XT @ EXECUTE ;    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -1469,7 +1201,9 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="VEXEC">
 <b>VEXEC</b> ( i*x a-addr n -- j*x )
-<div style="margin-left:5%;">   Excécute la fonction n dans une table contenant des CFA.
+<div style="margin-left:5%;">   Excécution vectorisé de la fonction 'n' dans la table 'a-addr'.
+</div>
+<div style="margin-left:5%;">   Le premier indice de la table est zéro.    
 </div>
 <div style="margin-left:5%;">   : VEXEC CELLS + @ EXECUTE ;    
 </div>
@@ -1495,14 +1229,24 @@
 </div>
 <div style="margin-left:5%;">    La routine doit se terminée par une instruction machine RETURN.
 </div>
-<div style="margin-left:5%;">    Utilise l'instruction machine CALL.L spécifique aux PIC24E et dsPIC33E. 
+<div style="margin-left:5%;">    Utilise l'instruction machine CALL.L spécifique aux PIC24E et dsPIC33E.
+</div>
+<div style="margin-left:5%;">    À utiliser avec précaution, la routine en code machine ne doit pas écraser
+</div>
+<div style="margin-left:5%;">    les registres utilisés par le système ForthEx {W8..W15}.
+</div>
+<div style="margin-left:5%;">    Le code machine doit avoir été préalablement flashée en utilisant
+</div>
+<div style="margin-left:5%;">    le mot RAM&gt;FLASH. Un outil externe doit-être utilisé pour générer le code
+</div>
+<div style="margin-left:5%;">    binaire de cette fonction. ForthEx n'a pas d'assembleur.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
 <div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;    Arguments consommés par la routine, dépend de celle-ci.
 </div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;     adresse 24 bits de la routine.
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;     Adresse 24 bits de la routine.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -1515,11 +1259,8 @@
 <p>
 <ul>
 <li><a href="#!">!</a></li>
-<li><a href="##SOURCE">#SOURCE</a></li>
 <li><a href="#&gt;CSTK">&gt;CSTK</a></li>
-<li><a href="#&gt;IN">&gt;IN</a></li>
 <li><a href="#&gt;R">&gt;R</a></li>
-<li><a href="#'SOURCE	(">'SOURCE	(</a></li>
 <li><a href="#-ROT">-ROT</a></li>
 <li><a href="#2!">2!</a></li>
 <li><a href="#2&gt;R">2&gt;R</a></li>
@@ -1534,7 +1275,6 @@
 <li><a href="#@">@</a></li>
 <li><a href="#@XT">@XT</a></li>
 <li><a href="#BASE">BASE</a></li>
-<li><a href="#BL">BL</a></li>
 <li><a href="#C!">C!</a></li>
 <li><a href="#C@">C@</a></li>
 <li><a href="#CALL">CALL</a></li>
@@ -1542,7 +1282,6 @@
 <li><a href="#CELL+">CELL+</a></li>
 <li><a href="#CELLS">CELLS</a></li>
 <li><a href="#CSTK&gt;">CSTK&gt;</a></li>
-<li><a href="#DBGEN">DBGEN</a></li>
 <li><a href="#DEPTH">DEPTH</a></li>
 <li><a href="#DP">DP</a></li>
 <li><a href="#DP0">DP0</a></li>
@@ -1550,20 +1289,13 @@
 <li><a href="#DUP">DUP</a></li>
 <li><a href="#EXECUTE">EXECUTE</a></li>
 <li><a href="#FALSE">FALSE</a></li>
-<li><a href="#HIDDEN">HIDDEN</a></li>
 <li><a href="#I">I</a></li>
-<li><a href="#IMMED">IMMED</a></li>
 <li><a href="#IP@">IP@</a></li>
 <li><a href="#J">J</a></li>
 <li><a href="#L">L</a></li>
 <li><a href="#LATEST">LATEST</a></li>
-<li><a href="#LENMASK">LENMASK</a></li>
 <li><a href="#NIP">NIP</a></li>
-<li><a href="#NMARK">NMARK</a></li>
 <li><a href="#OVER">OVER</a></li>
-<li><a href="#PAD">PAD</a></li>
-<li><a href="#PADSIZE">PADSIZE</a></li>
-<li><a href="#PASTE">PASTE</a></li>
 <li><a href="#PICK">PICK</a></li>
 <li><a href="#R&gt;">R&gt;</a></li>
 <li><a href="#R0">R0</a></li>
@@ -1573,18 +1305,13 @@
 <li><a href="#ROT">ROT</a></li>
 <li><a href="#RP!">RP!</a></li>
 <li><a href="#RP@">RP@</a></li>
-<li><a href="#RPBREAK">RPBREAK</a></li>
 <li><a href="#S0">S0</a></li>
 <li><a href="#SP!">SP!</a></li>
 <li><a href="#SP@">SP@</a></li>
-<li><a href="#STATE">STATE</a></li>
 <li><a href="#SWAP">SWAP</a></li>
-<li><a href="#SYSCONS">SYSCONS</a></li>
 <li><a href="#SYSLATEST">SYSLATEST</a></li>
 <li><a href="#TBL!">TBL!</a></li>
 <li><a href="#TBL@">TBL@</a></li>
-<li><a href="#TIB">TIB</a></li>
-<li><a href="#TIBSIZE">TIBSIZE</a></li>
 <li><a href="#TRUE">TRUE</a></li>
 <li><a href="#TUCK">TUCK</a></li>
 <li><a href="#ULIMIT">ULIMIT</a></li>

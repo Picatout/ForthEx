@@ -1,12 +1,19 @@
+2017-06-04
+----------
+Élimination des mots 'SOURCE et #SOURCE dans core.s
+Transfert de certains mots de core.s vers d'autres fichiers.
+Correction de la documentation de core.s
+Correction bogue dans block.s
+Correction bogue dans blockedit.s
+
 2017-06-03
 ----------
-
 Complété boitier de l'ordinateur.
 Ajout de ?PRTCHAR et ?QUOTED-CHAR dans strings.s
 Modification de ?NUMBER dans strings.s
-Modifié BLKFILTER dans block.s
-Modification LC-EMIT dans tvout.s
-Modification VT-EMIT dans vt102.s
+Modification de BLKFILTER dans block.s
+Modification de LC-EMIT dans tvout.s
+Modification de VT-EMIT dans vt102.s
 Modification de INTERPRET dans interpret.s
 
 2017-06-02

@@ -30,10 +30,123 @@
 ;    
 ;    Certains mots font passer le système en mode compilation qui permet d'ajouter
 ;    de nouvelles définitions au dictionnaire.
+
+; DESCRIPTION:
+;   Constantes système utilisées par l'interpréteur/compilateur.
+
+; nom: IMMED  ( -- n )
+;   Constante système qui retourne le bit F_IMMEDIATE. Ce bit est inscrit dans le
+;   premier octet du champ NFA et indique si le mot est immmédiat.
+; arguments:
+;   aucun
+; retourne:
+;   n     F_IMMED bit indicateur mot immédiat.    
+DEFCONST "IMMED",5,,IMMED,F_IMMED       ; drapeau mot immédiat
+    
+; nom: HIDDEN   ( -- n )
+;   Constante système qui retourne le bit F_HIDDEN. Ce bit est inscrit dans le 
+;   premier octet du champ NFA et indique si le mot est caché à la recherche par FIND.
+; arguments:
+;   rien
+; retourne:
+;   n	F_HIDDEN bit indicateur de mot caché.       
+DEFCONST "HIDDEN",6,,HIDDEN,F_HIDDEN    ; drapeau mot caché
+    
+; nom: NMARK  ( -- n )
+;   Constante système qui retourne le bit F_MARK. Ce bit est inscrit dans le
+;   premier octet du champ NFA et sert la localisé ce champ. Ce bit est utilisé
+;   par le mot CFA>NFA.    
+DEFCONST "NMARK",5,,NMARK,F_MARK     ; drapeau marqueur utilisé par CFA>NFA
+    
+; nom: LENMASK   ( -- n )
+;   Constante système retourne le masque pour la longueur du nom dans les entêtes
+;   du dictionnaire. Ce masque sert à éliminer les bits F_NMARK,F_HIDDEN et F_IMMED
+;   pour ne conserver que les bits qui indique la longueur du nom.
+; arguments:
+;   aucun
+; retourne:
+;   n   masque LEN_MASK    
+DEFCONST "LENMASK",7,,LENMASK,LEN_MASK ; masque longueur nom
+
+; nom: TIBSIZE   ( -- n )
+;   Constante système qui retourne la longueur du TIB (Transaction Input Buffer)
+; arguments:
+;   aucun
+; retourne:
+;   n    longueur du tampon TIB.    
+DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
+    
+; nom: PADSIZE   ( -- n )
+;   Constante système qui retourne la longueur du tampon PAD.
+; arguments:
+;   aucun
+; retourne:
+;   n    longueur du tampon PAD.    
+DEFCONST "PADSIZE",7,,PADSIZE,PAD_SIZE       ; grandeur tampon PAD
+
     
 ; DESCRIPTION:
-;   Mots utilisés par l'intepréteur de texte.
+;   variables système utilisées par l'interpréteur/compilateur.
+
+; nom: STATE  ( -- a-addr )
+;   Variable système qui indique si le système est en mode interprétation ou compilation.
+;   STATE=0 -> interprétation,  STATE=-1 -> compilation.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "STATE",5,,STATE 
+
     
+; nom: PAD ( -- a-addr )
+;   Variable système qui contient l'adresse d'une mémoire tampon utilisée pour le travail
+;   sur des chaînes de caractères. Ce tampon est utilisé entre autre pour la conversion
+;   des entiers en chaîne de caractères pour l'affichage.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "PAD",3,,PAD       ; tampon de travail
+
+; nom: TIB ( -- a-addr )
+;   Variable système contenant l'adresse de la mémoire tampon de saisie des chaînes à partir
+;   de la console. Ce tampon est utilisé par l'interpréteur/compilateur en mode interactif.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "TIB",3,,TIB       ; tampon de saisie clavier
+ 
+; nom: PASTE  ( -- a-addr )
+;   Variable système qui contient l'adresse d'un tampon qui contient une copie
+;   de la dernière chaîne interprétée en mode interactif. Permet de rappeller cette
+;   chaîne à l'écran par la commande CTRL_V.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "PASTE",5,,PASTE   ; copie de TIB
+    
+; nom: >IN   ( -- a-addr )
+;   Variable système, indique la position où est rendue l'analyseur lexical dans
+;   le traitement de la chaîne d'entrée. Cette variable est utilisée par l'interpréteur/compilateur.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER ">IN",3,,TOIN     ; pointeur position après le dernier mot retourné par WORD
+    
+; NOM: HP   ( -- a-addr )
+;   Variable système 'Hold Pointer' contenant la position du pointeur de conversion de nombres en chaîne.
+;   Cette variable est utilisée lors de la conversion d'entiers en chaîne de caractères.    
+; arguments:
+;   aucun
+; retourne:
+;   a-addr  Adresse de la variable.    
+DEFUSER "HP",2,,HP       ; HOLD pointer
+    
+; DESCRIPTION:
+;   Mots utilisés par l'intepréteur/compilateur de texte et utilitaires dictionnaire.
     
     
 ; nom: WORDS   ( -- )  
@@ -62,7 +175,7 @@ DEFWORD "WORDS",5,,WORDS ; ( -- )
 ; retourne:
 ;   rien
 DEFWORD "ADR>IN",6,,ADRTOIN
-    .word TSOURCE,ROT,ROT,MINUS,MIN,LIT,0,MAX
+    .word SOURCE,ROT,ROT,MINUS,MIN,LIT,0,MAX
     .word TOIN,STORE,EXIT
 
 ; nom: PARSE   ( c -- c-addr u )    
@@ -75,7 +188,7 @@ DEFWORD "ADR>IN",6,,ADRTOIN
 ;   c-addr   adresse du premier caractère de la chaîne
 ;   u        longueur de la chaîne.
 DEFWORD "PARSE",5,,PARSE ; c -- c-addr u
-    .word TSOURCE,TOIN,FETCH,SLASHSTRING ; c src' u'
+    .word SOURCE,TOIN,FETCH,SLASHSTRING ; c src' u'
     .word OVER,TOR,ROT,SCAN  ; src' u'
     .word OVER,SWAP,ZBRANCH, 1f-$ 
     .word ONEPLUS  ; char+
@@ -158,7 +271,7 @@ DEFCODE "PARSE-NAME",10,,PARSENAME
 ; retourne:    
 ;   c-addr    adresse chaîne comptée.    
 DEFWORD "WORD",4,,WORD 
-    .word DUP,TSOURCE,TOIN,FETCH,SLASHSTRING ; c c c-addr' u'
+    .word DUP,SOURCE,TOIN,FETCH,SLASHSTRING ; c c c-addr' u'
     .word ROT,SKIP ; c c-addr' u'
     .word DROP,ADRTOIN,PARSE
     .word HERE,TOCOUNTED,HERE
@@ -304,7 +417,7 @@ DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
 ; retourne:
 ;    j*x   Contenu final de la pile après l'évaluation de la chaîne.      
 DEFWORD "EVALUATE",8,,EVAL ; ( i*x c-addr u -- j*x )
-    .word TSOURCE,TWOTOR ; sauvegarde source
+    .word SOURCE,TWOTOR ; sauvegarde source
     .word TOIN,FETCH,TOR
     .word OVER,PLUS,SWAP,DODO
 1:  .word DOI,DOL,OVER,MINUS,GETLINE ; s: c-addr u
@@ -434,7 +547,7 @@ DEFCODE "ALIGNED",7,,ALIGNED ; ( addr -- a-addr )
 ; retourne:
 ;   c-addr  Adresse début du tampon.
 ;   u       longueur du tampon.    
-DEFCODE "'SOURCE",7,,TSOURCE ; ( -- c-addr u ) 
+DEFCODE "SOURCE",6,,SOURCE ; ( -- c-addr u ) 
     DPUSH
     mov _TICKSOURCE,T
     DPUSH
@@ -1085,12 +1198,12 @@ DEFWORD "?NAME",5,,QNAME ; ( i*x f -- | i*x )
 ;   Cré une définition sans nom dans l'espace de donnée.
 ;   et laisse son CFA sur la pile des arguments.
 ;   Met la variable STATE en mode compilation.
-;   Le CFA de cette définition peut par exemple est assigné
+;   Le CFA de cette définition peut par exemple être assigné2
 ;   à un mot créé avec DEFER.
 ;   exemple:
 ;   DEFER  p2 
-;   :noname  DUP * ;
-;   ' p2 DEFER! / maintenant p2 utilise le code de défini par :noname.    
+;   :noname  DUP * ; IS p2
+;   2 p2  / 4 
 ; arguments:
 ;   aucun
 ; retourne:
