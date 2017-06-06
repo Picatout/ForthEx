@@ -241,6 +241,8 @@ DEFWORD "VT-EMIT",7,,VTEMIT
     .word DROP,VTDELBACK,EXIT
 2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
     .word DROP,VTDELLN,EXIT
+2:  .word DUP,LIT,CTRL_Y,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTINSRTLN,EXIT
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
     .word SPUTC,EXIT
 2:  .word DUP,LIT,VK_UP,EQUAL,ZBRANCH,2f-$
@@ -402,6 +404,25 @@ DEFWORD "VT-DELLN",8,,VTDELLN ; ( -- )
     .word LIT,'2',SPUTC
     .word LIT,'K',SPUTC,LIT,13,SPUTC,EXIT
 
+; nom: VT-INSRTLN ( -- )
+;   Insère une ligne avant la ligne où se trouve le curseur.
+;   S'il y a du texte sur la dernière ligne ce texte est perdu.
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "VT-INSRTLN",10,,VTINSRTLN 
+    .word ESCRBRAC,LIT,'L',SPUTC,VTHOME,EXIT
+  
+; nom: VT-RMVLN ( -- )
+;   Supprime la ligne du curseur et décale toutes celles en dessus vers le haut.    
+; arguments:
+;   aucun
+; retourne:
+;    rien
+DEFWORD "VT-RMVLN",8,,VTRMVLN
+    .word ESCRBRAC,LIT,'M',SPUTC,EXIT
+     
 ; nom: VT-DSR  ( -- )
 ;   Envoie la séquence de contrôle ANSI 'ESC[6n' au terminal VT102.
 ;   Le terminal répond à cette commande en envoyant la la position du curseur. 

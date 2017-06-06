@@ -983,14 +983,15 @@ DEFWORD "BACKDEL",7,,BACKDEL   ; ( -- )
     .word LCLEFT,LCDEL
 9:  .word EXIT
     
-; nom: CLRLN ( -- )
+; nom: LC-DELLN ( -- )
 ;   Console locale.  
-;   Efface toute la ligne sur laquelle se trouve le curseur.
+;   Efface toute la ligne sur laquelle se trouve le curseur et positionne
+;   le curseur en début de ligne.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFCODE "CLRLN",5,,CLRLN 
+DEFCODE "LC-DELLN",8,,LCDELLN 
     cursor_incr_sema
     cursor_sync
     mov #CPL,W0
@@ -1003,6 +1004,35 @@ DEFCODE "CLRLN",5,,CLRLN
     clr.b xpos
     cursor_decr_sema
     NEXT
+
+; nom: LC-RMVLN ( -- )    
+;   Retire la ligne sur laquelle se trouve le curseur.
+;   Les lignes qui se trouvent sous celle-ci sont décallées vers le haut.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFWORD "LC-RMVLN",8,,LCRMVLN
+    .word FALSE,CURENBL
+    .word GETY,LNADR,TOR,RFETCH,LIT,CPL,PLUS
+    .word DUP,SCRBUF,LIT,CPL,LIT,LPS,STAR,PLUS,SWAP,MINUS
+    .word RFROM,SWAP,MOVE
+    .word LIT,1,GETY,LIT,LPS,SETY,LCDELLN,CURPOS
+    .word TRUE,CURENBL,EXIT
+   
+    
+; nom: LC-INSRTLN ( -- )
+;   Insère une ligne avant la ligne où se trouve le curseur.
+;   Les lignes à partir du curseur sont décalées vers le bas.    
+;   S'il y a du texte sur la dernière ligne ce texte est perdu.
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "LC-INSRTLN",10,,LCINSRTLN
+    .word GETY,LNADR,DUP,LIT,CPL,PLUS ; s: src dest
+    .word LIT,LPS,GETY,MINUS,LIT,CPL,STAR ; s: src dest count
+    .word MOVE,LCDELLN,EXIT
     
     
 ; nom: LC-BEL ( -- )
@@ -1030,8 +1060,9 @@ DEFWORD "LC-BEL",6,,LCBEL
 ;     VK_UP   déplace le curseur 1 ligne vers le haut.
 ;     VK_DOWN déplace le curseur 1 ligne vers le bas.
 ;   - modification de l'affichage
-;     VK_BACK déplace le curseur à gauche d'un caractère et efface le caractère.    
+;     VK_BACK déplace le curseur à gauche d'un caractère et efface le caractère.
 ;     CTRL_X  efface la ligne sur laquelle le curseur est.
+;     CTRL_Y  insère une ligne avant celle où est le curseur.    
 ;     VK_DELETE efface le caractère à la position du curseur.    
 ;     CTRL_L  efface l'écran au complet
 ;     VK_INSERT  insère un espace
@@ -1066,7 +1097,9 @@ DEFWORD "LC-EMIT",7,,LCEMIT ; ( c -- )
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
     .word DROP,BACKDEL,EXIT
 2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
-    .word DROP,CLRLN,EXIT
+    .word DROP,LCDELLN,EXIT
+2:  .word DUP,LIT,CTRL_Y,EQUAL,ZBRANCH,2f-$
+    .word DROP,LCINSRTLN,EXIT
 2:  .word DUP,LIT,VK_DELETE,EQUAL,ZBRANCH,2f-$
     .word DROP,LCDEL,EXIT
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$

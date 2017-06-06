@@ -154,7 +154,7 @@ DEFWORD "RESTORELINE",11,,RESTORELINE
 ; retourne:
 ;   rien    
 DEFWORD "PROMPT",6,,PROMPT ; ( c-addr u n+ -- )
-    .word DUP,SAVELINE,DUP,SETY,CLEARLN ; s: c-addr u n+
+    .word DUP,SAVELINE,DUP,SETY,DELLN ; s: c-addr u n+
     .word DUP,TRUE,INVLN,TRUE,BSLASHW ; s: c-addr u n+
     .word LIT,1,SWAP,ATXY,LIT,CPL-1,AND,TYPE,EXIT
     
@@ -267,18 +267,9 @@ HEADLESS INSLN,HWORD
 2:  .word FALSE,CURENBL    
     .word SWAP,DROP,TOR,RFETCH,LNADR,DUP,LIT,CPL,PLUS
     .word SCRBUF,LIT,CPL,LIT,LPS,STAR,PLUS,OVER,MINUS
-    .word MOVE,RFROM,SETY,CLRLN
+    .word MOVE,RFROM,SETY,DELLN
     .word TRUE,CURENBL,EXIT
     
-; Retire la ligne sur laquelle se trouve le curseur    
-HEADLESS RMLN,HWORD
-    .word FALSE,CURENBL
-    .word GETY,LNADR,TOR,RFETCH,LIT,CPL,PLUS
-    .word DUP,SCRBUF,LIT,CPL,LIT,LPS,STAR,PLUS,SWAP,MINUS
-    .word RFROM,SWAP,MOVE
-    .word LIT,1,GETY,LIT,LPS,SETY,CLRLN,CURPOS
-    .word TRUE,CURENBL,EXIT
-   
 ; Supprime le caractère à la position du curseur.
 HEADLESS DELCHR,HWORD
     .word DELETE
@@ -372,7 +363,7 @@ DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )
 ; affiche le numéro du bloc et sa taille.    
 HEADLESS BLKINFO,HWORD
     .word GETCUR,SCRSIZE ; S: col line size
-    .word LIT,1,DUP,SAVELINE,DUP,CURPOS,CLEARLN
+    .word LIT,1,DUP,SAVELINE,DUP,CURPOS,DELLN
     .word STRQUOTE
     .byte  6
     .ascii "bloc#:"
@@ -399,9 +390,9 @@ HEADLESS BLKINFO,HWORD
 ;   rien  
 DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
     .word LIST
-1:  .word EDKEY,DUP,LIT,31,GREATER,ZBRANCH,2f-$
-    .word DUP,LIT,127,ULESS,ZBRANCH,4f-$
+1:  .word EDKEY,DUP,QPRTCHAR,ZBRANCH,2f-$
     .word PUTCHR,BRANCH,1b-$
+2:  .word DUP,BL,ULESS,ZBRANCH,4f-$    
     ; c<32
 2:  .word LIT,VK_CR,KCASE,ZBRANCH,2f-$,CRLF,BRANCH,1b-$
 2:  .word LIT,VK_BACK,KCASE,ZBRANCH,2f-$,BACKCHAR,BRANCH,1b-$
@@ -413,7 +404,7 @@ DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
 2:  .word LIT,CTRL_S,KCASE,ZBRANCH,2f-$,SAVESCREEN,BRANCH,1b-$
 2:  .word LIT,CTRL_I,KCASE,ZBRANCH,2f-$,OPENBLOCK,BRANCH,1b-$  
 2:  .word LIT,CTRL_K,KCASE,ZBRANCH,2f-$,DELEOL,BRANCH,1b-$
-2:  .word LIT,CTRL_X,KCASE,ZBRANCH,2f-$,RMLN,BRANCH,1b-$  
+2:  .word LIT,CTRL_X,KCASE,ZBRANCH,2f-$,RMVLN,BRANCH,1b-$  
 2:  .word LIT,CTRL_Y,KCASE,ZBRANCH,2f-$,INSLN,BRANCH,1b-$
 2:  .word DROP,BRANCH,1b-$
     ; c>=127

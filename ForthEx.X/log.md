@@ -4,6 +4,9 @@ Suppression de MAXCHAR dans blockEdit.s
 Travail dans blockEdit.s
 Ajout du mot PROMPT et modifications d'autres définitions.
 
+Travail dans console.s, vt102.s et tvout.s
+
+
 2017-06-04
 ----------
 Élimination des mots 'SOURCE et #SOURCE dans core.s
