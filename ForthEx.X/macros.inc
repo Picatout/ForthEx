@@ -202,6 +202,12 @@ lfa_\label :
 	;pfa:  liste des paramètres
 .endm
 
+;macro utilisé pour créer un alias pour un nom déjà dans le dictionnaire.
+.macro ALIAS name,namelen,flags=0,label,alias_of
+	HEADER "\name",\namelen,\flags,\label 
+	.word ENTER,\alias_of,EXIT
+.endm
+	
 ; macro utilisée pour créer les entêtes des mots en code machine	
 .macro DEFCODE name, namelen, flags=0, label
 	HEADER "\name",\namelen,\flags,\label

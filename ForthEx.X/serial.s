@@ -74,7 +74,7 @@ serial_disable:
     return
     
     
-    
+; réception d'un caractère du port RS-232.    
 INTR
 .global __U1RXInterrupt
 __U1RXInterrupt:
@@ -83,11 +83,11 @@ __U1RXInterrupt:
     btss SER_STA,#URXDA
     bra 9f
     mov SER_RXREG, T
-    cp.b T,#A_XOFF
+    cp.b T,#CTRL_S ; XOFF
     bra nz, 1f
     bset ser_flags,#F_TXSTOP ; XOFF reçu du terminal
     bra 9f
-1:  cp.b T,#A_XON
+1:  cp.b T,#CTRL_Q ; XON
     bra nz, 2f
     bclr ser_flags,#F_TXSTOP ; XON reçu du terminal
     bra 9f

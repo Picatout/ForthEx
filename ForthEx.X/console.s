@@ -87,7 +87,7 @@ DEFTABLE "LC-CONS",7,,LCCONS
     .word LCEKEYQ  ; keyboard.s
     .word LCEMIT   ; tvout.s
     .word LCEMITQ  ; tvout.s
-    .word CURPOS   ; tvout.s
+    .word LCATXY   ; tvout.s
     .word LCPAGE   ; tvout.s
     .word LCFILTER ; keyboard.s
     .word LCGETCUR ; tvout.s
@@ -118,7 +118,29 @@ DEFTABLE "VT-CONS",7,,VTCONS
     .word VTRMVLN ; vt102.s
     .word VTDELLN ; vt102.s
     
-   
+; nom: ED-CONS ( -- a-addr )
+;   Retourne l'adresse du vecteur des fonctions pour la console de l'éditeur de bloc.
+; arguments:
+;   aucun
+; retourne:
+;   Adresse du vecteur contenant les CFA des fonctions de la console de l'éditeur.
+DEFTABLE "ED-CONS"7,,EDCONS
+    .word VTKEY    ; vt102.s
+    .word VTKEYQ   ; vt102.s
+    .word VTEKEY   ; serial.s
+    .word SGETCQ   ; serial.s
+    .word EDEMIT   ; vt102.s
+    .word SREADYQ  ; serial.s
+    .word VTATXY   ; vt102.s
+    .word VTPAGE   ; vt102.s
+    .word VTFILTER ; vt102.s
+    .word VTGETCUR ; vt102.s
+    .word VTBSLASHW   ; vt102.s
+    .word VTINSRTLN ; vt102.2
+    .word VTRMVLN ; vt102.s
+    .word VTDELLN ; vt102.s
+    
+    
 ; nom: SYSCONS   ( -- a-addr )
 ;   Variable système qui contient l'adresse de la table des fonctions du 
 ;   périphérique utilisé par la console.
@@ -135,10 +157,11 @@ DEFUSER "SYSCONS",7,,SYSCONS
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr Adresse de la table LCONSOLE    
+;   a-addr Adresse de la table LCONSOLE   
 DEFWORD "LOCAL",5,,LOCAL 
     .word LCPAGE,LCCONS,EXIT
 
+    
 ; nom: REMOTE ( -- a-addr )
 ;   Active le port sériel et envoie une commande au terminal VT102 
 ;   pour effacer l'écran. Ensuite empile l'adresse de la table des fonctions
@@ -152,6 +175,7 @@ DEFWORD "REMOTE",6,,REMOTE
     .word LIT,4,LIT,0,DODO
 1:  .word LIT,65,SPUTC,DOLOOP,1b-$
     .word LIT,CTRL_L,SPUTC,VTCONS,EXIT
+    
     
 ; nom: CONSOLE ( a-addr --  )
 ;   Détermine la CONSOLE active {LOCAL,REMOTE}    
@@ -370,6 +394,15 @@ DEFWORD "DELBACK",7,,DELBACK ; ( -- )
 DEFWORD "DELLINE",7,,DELLINE ; ( -- )
     .word LIT,CTRL_X,EMIT,EXIT
  
+; nom: DELEOL ( -- )
+;  Efface tous les caractères de la position du curseur jusqu'à la fin de la ligne.
+; arguments:
+;   rien
+; retourne:
+;   rien    
+DEFWORD "DELEOL",6,,DELEOL
+    .word LIT,CTRL_K,EMIT,EXIT
+    
 ; nom: CR ( -- )    
 ;   Renvoie le curseur au début de la ligne suivante.
 ; arguments:

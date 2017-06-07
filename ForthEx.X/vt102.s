@@ -231,6 +231,10 @@ DEFWORD "VT-KEY",6,,VTKEY
 DEFWORD "VT-EMIT",7,,VTEMIT
     .word DUP,QPRTCHAR,ZBRANCH,2f-$
     .word VTPUTC,EXIT
+2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTDELLN,EXIT
+2:  .word DUP,LIT,CTRL_K,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTDELEOL,EXIT
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
     .word SPUTC,EXIT
 2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
@@ -240,7 +244,7 @@ DEFWORD "VT-EMIT",7,,VTEMIT
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
     .word DROP,VTDELBACK,EXIT
 2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTDELLN,EXIT
+    .word DROP,VTRMVLN,EXIT
 2:  .word DUP,LIT,CTRL_Y,EQUAL,ZBRANCH,2f-$
     .word DROP,VTINSRTLN,EXIT
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
@@ -369,6 +373,16 @@ DEFWORD "VT-AT-XY",8,,VTATXY
     .word LIT,'H',SPUTC
     .word EXIT
 
+; nom: VT-DELEOL ( -- )
+;   Efface tous les caractères à partir du curseur jusqu'à la fin de la ligne.
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "VT-DELEOL",9,,VTDELEOL
+    .word ESCRBRAC,LIT,'K',SPUTC,EXIT
+    
+    
 ; nom: VT-PAGE ( -- )
 ;  Envoie une commande au terminal VT102 pour effacer l'écran.
 ; arguments:

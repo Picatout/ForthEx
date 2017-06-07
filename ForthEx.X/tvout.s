@@ -577,7 +577,10 @@ DEFCODE "GETY",4,,GETY
 DEFCODE "SETX",4,, SETX ; ( u -- )
     cursor_incr_sema
     cursor_sync
-    dec T,T
+    cp0 T
+    bra gt, 1f
+    mov #1,T
+1:  dec T,T
     mov #CPL-1,W0
     cp T, W0
     bra gtu, 1f
@@ -597,7 +600,10 @@ DEFCODE "SETX",4,, SETX ; ( u -- )
 DEFCODE "SETY",4,,SETY  ; ( u -- )
     cursor_incr_sema
     cursor_sync
-    dec T,T
+    cp0 T
+    bra gt,1f
+    mov #1,T
+1:  dec T,T
     mov #LPS-1,W0
     cp T, W0
     bra gtu, 1f
@@ -649,6 +655,8 @@ DEFCODE "CURADR",6,,CURADR
 DEFWORD "CURPOS",6,,CURPOS  ; ( u1 u2 -- )
     .word SETY, SETX, EXIT
 
+ALIAS "LC-AT-XY",8,,LCATXY,CURPOS
+    
 ; nom: LC-GETCUR  ( -- u1 u2 )
 ;   Console locale.    
 ;   Retourne la position du curseur texte.
@@ -1005,6 +1013,19 @@ DEFCODE "LC-DELLN",8,,LCDELLN
     cursor_decr_sema
     NEXT
 
+; nom: LC-DELEOL ( -- )
+;   Efface tous les caractères à partir du curseur jusqu'à la fin de la ligne.
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "LC-DELEOL",9,,LCDELEOL
+    .word FALSE,CURENBL
+    .word CURADR,LIT,CPL,GETX,MINUS,BL,FILL
+    .word TRUE,CURENBL,EXIT
+    
+    
+    
 ; nom: LC-RMVLN ( -- )    
 ;   Retire la ligne sur laquelle se trouve le curseur.
 ;   Les lignes qui se trouvent sous celle-ci sont décallées vers le haut.
@@ -1097,11 +1118,13 @@ DEFWORD "LC-EMIT",7,,LCEMIT ; ( c -- )
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
     .word DROP,BACKDEL,EXIT
 2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCDELLN,EXIT
+    .word DROP,LCRMVLN,EXIT
 2:  .word DUP,LIT,CTRL_Y,EQUAL,ZBRANCH,2f-$
     .word DROP,LCINSRTLN,EXIT
 2:  .word DUP,LIT,VK_DELETE,EQUAL,ZBRANCH,2f-$
     .word DROP,LCDEL,EXIT
+2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
+    .word DROP,LCDELLN,EXIT
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
     .word DROP,CLS,EXIT
 2:  .word DUP,LIT,VK_INSERT,EQUAL,ZBRANCH,2f-$

@@ -67,17 +67,18 @@
 ;   DELETE  Efface le caractère à la position du curseur.
 ;   INSERT  Insère un espace à la position du curseur. S'il y a un caractère à la colonne 64 il est perdu.    
 ;   BACKSPACE Efface le caractère à gauche du curseur.
-;   CTRL_A  Efface tout l'écran.     
-;   CTRL_K  Efface à partir du curseur jusqu'à la fin de la ligne    
+;   CTRL_D  Efface la ligne du curseur et place celui-ci à la marge gauche.     
+;   CTRL_K  Efface à partir du curseur jusqu'à la fin de la ligne.    
+;   CTRL_L  Efface tout l'écran. 
 ;   CTRL_X  Supprime la ligne sur laquelle le curseur réside.
 ;   CTRL_Y  Insère une ligne vide avant celle où se trouve le curseur.
 ;   Manipulation des blocs:    
-;   CTRL_B  Affiche le numéro du bloc en édition ainsi que sa taille.    
-;   CTRL_S  Sauvegarde de l'écran dans le bloc.
+;   CTRL_I  Affiche le numéro du bloc en édition ainsi que sa taille.    
+;   CTRL_B  Sauvegarde de l'écran dans le bloc.
 ;   CTRL_N  Sauvegarde le bloc actuel et charge le bloc suivant pour édition.
 ;   CTRL_P  Sauvegarde le bloc actuel et charge le bloc précédent pour édition.     
-;   CTRL_I  Sauvegarde le bloc actuel et saisie d'un numéro de bloc pour édition.
-;   CTRL_Q  Quitte l'éditeur,le contenu de l'écran n'est pas sauvegardé.
+;   CTRL_O  Sauvegarde le bloc actuel et saisie d'un numéro de bloc pour édition.
+;   CTRL_E  Quitte l'éditeur,le contenu de l'écran n'est pas sauvegardé.
 
      
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -239,26 +240,6 @@ HEADLESS OPENBLOCK,HWORD
 9:  .word EXIT
     
     
-; VT-UPDATE  ( -- )
-;   l'éditeur doit mettre à jour l'écran de la console VT102 si le système est en REMOTE CONSOLE
-; arguments:
-;   aucun
-; retourne:
-;   rien    
-;DEFWORD "VT-UPDATE",9,,VTUPDATE
-;    .word SYSCONS,FETCH,SERCONS,EQUAL,TBRANCH,2f-$,DROP,EXIT
-;2:  .word GETCUR,ROT  
-;    .word DUP,LIT,0,SWAP,VTATXY
-;    .word LIT,CPL,STAR,SCRBUF,PLUS,LIT,CPL,LIT 
-;    .word EXIT   
- 
-; Efface du curseur jusqu'à la fin de la ligne    
-HEADLESS DELEOL,HWORD
-    .word FALSE,CURENBL
-    .word LIT,CPL,GETX,DODO
-1:  .word DOI,GETY,BL,CHRTOSCR,DOLOOP,1b-$
-    .word TRUE,CURENBL,EXIT
-
 ; Insière une ligne au dessus de celle où se trouve le curseur.
 ; Sauf s'il y a du texte sur la dernière ligne de l'éran.    
 HEADLESS INSLN,HWORD
@@ -306,7 +287,7 @@ HEADLESS LNDN,HWORD
 ; sauf s'il est sur la dernière ligne.    
 HEADLESS CRLF,HWORD
     .word GETY,LIT,LPS,EQUAL,TBRANCH,9f-$
-    .word LCCR
+    .word CR
 9:  .word EXIT
     
 ; dépose le caractère dans la mémoire tampon vidéo.
@@ -330,7 +311,7 @@ HEADLESS EDKEY,HWORD
     .ascii "Screen to big to fit in a bloc."
     .align 2
     .word LIT,1,MSGLINE
-2:  .word LCEKEY, EXIT
+2:  .word EKEY, EXIT
 
 ; efface le caractère avant le curseur.  
 HEADLESS BACKCHAR,HWORD 
@@ -342,7 +323,7 @@ HEADLESS LEFT,HWORD
     .word LIT,VK_LEFT,EMIT
     .word EXIT
 
-; Déplacele curseur 1 caractère à droite.    
+; Déplace le curseur 1 caractère à droite.    
 HEADLESS RIGHT,HWORD
     .word LIT,VK_RIGHT,EMIT
     .word EXIT
@@ -377,6 +358,19 @@ HEADLESS BLKINFO,HWORD
     .word LIT,1,DUP,TRUE,INVLN
     .word KEY,DROP,RESTORELINE
     .word CURPOS,EXIT
+   
+; nom: ED-EMIT ( c -- )
+;   Émetteur de caractère utilisé par BLKED lorsque la console est en REMOTE.
+;   Cet émetteur spécial est requis car il faut maintenir un tampon local de
+;   l'écran. À cet effet le tampon vidéo local est utilisé.    
+; arguments
+;   c	Caractère à émettre
+; retourne:    
+;   rien
+DEFWORD "ED-EMIT",7,,EDEMIT
+    .word DUP,LCEMIT,VTEMIT
+    .word EXIT
+    
     
 ; nom: BLKED  ( n+ -- )  
 ;   Éditeur de bloc texte. Edite 1 bloc à la fois.
@@ -389,20 +383,23 @@ HEADLESS BLKINFO,HWORD
 ; retourne:
 ;   rien  
 DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
-    .word LIST
+    .word SYSCONS,FETCH,DUP,TOR,VTCONS,EQUAL,ZBRANCH,1f-$
+    .word LCPAGE,EDCONS,SYSCONS,STORE
+1:  .word LIST
 1:  .word EDKEY,DUP,QPRTCHAR,ZBRANCH,2f-$
     .word PUTCHR,BRANCH,1b-$
 2:  .word DUP,BL,ULESS,ZBRANCH,4f-$    
     ; c<32
 2:  .word LIT,VK_CR,KCASE,ZBRANCH,2f-$,CRLF,BRANCH,1b-$
 2:  .word LIT,VK_BACK,KCASE,ZBRANCH,2f-$,BACKCHAR,BRANCH,1b-$
-2:  .word LIT,CTRL_A,KCASE,ZBRANCH,2f-$,CLS,BRANCH,1b-$  
-2:  .word LIT,CTRL_B,KCASE,ZBRANCH,2f-$,BLKINFO,BRANCH,1b-$  
+2:  .word LIT,CTRL_L,KCASE,ZBRANCH,2f-$,CLS,BRANCH,1b-$  
+2:  .word LIT,CTRL_I,KCASE,ZBRANCH,2f-$,BLKINFO,BRANCH,1b-$ 
+2:  .word LIT,CTRL_D,KCASE,ZBRANCH,2f-$,DELLN,BRANCH,1b-$  
 2:  .word LIT,CTRL_N,KCASE,ZBRANCH,2f-$,NEXTBLOCK,BRANCH,1b-$ 
 2:  .word LIT,CTRL_P,KCASE,ZBRANCH,2f-$,PREVBLOCK,BRANCH,1b-$ 
-2:  .word LIT,CTRL_Q,KCASE,ZBRANCH,2f-$,CLS,EXIT
-2:  .word LIT,CTRL_S,KCASE,ZBRANCH,2f-$,SAVESCREEN,BRANCH,1b-$
-2:  .word LIT,CTRL_I,KCASE,ZBRANCH,2f-$,OPENBLOCK,BRANCH,1b-$  
+2:  .word LIT,CTRL_E,KCASE,ZBRANCH,2f-$,CLS,RFROM,SYSCONS,STORE,EXIT
+2:  .word LIT,CTRL_B,KCASE,ZBRANCH,2f-$,SAVESCREEN,BRANCH,1b-$
+2:  .word LIT,CTRL_O,KCASE,ZBRANCH,2f-$,OPENBLOCK,BRANCH,1b-$  
 2:  .word LIT,CTRL_K,KCASE,ZBRANCH,2f-$,DELEOL,BRANCH,1b-$
 2:  .word LIT,CTRL_X,KCASE,ZBRANCH,2f-$,RMVLN,BRANCH,1b-$  
 2:  .word LIT,CTRL_Y,KCASE,ZBRANCH,2f-$,INSLN,BRANCH,1b-$

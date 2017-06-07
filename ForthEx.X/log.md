@@ -1,3 +1,8 @@
+2017-06-06
+----------
+Travail pour rendre BLKED fonctionnel sur les 2 consoles LOCAL et REMOTE.
+
+
 2017-06-05
 ----------
 Suppression de MAXCHAR dans blockEdit.s
