@@ -1,3 +1,8 @@
+2017-06-07
+-----------
+Travail sur console, réorganisation.
+à faire: bogue dans REMOTE CONSOLE, Plante sur lorsque saisie trop rapide.
+
 2017-06-06
 ----------
 Travail pour rendre BLKED fonctionnel sur les 2 consoles LOCAL et REMOTE.

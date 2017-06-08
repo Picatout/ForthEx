@@ -38,6 +38,8 @@ even: .space 1
 
 ; indicateurs booléens dans la variable video_flags 
 .equ F_VIDEO_OFF,0 ; sortie vidéo désactivée.
+.equ F_SCROLL,1 ; le curseur de déplace pas lorsqu'il est dans le coin inférieur-droit. 
+.equ F_WRAP,2 ; activation retour à la ligne automatique
 .equ F_INVERT,7  ; inverse vidéo, caractères noir/blanc.
  
 video_flags: .space 1
@@ -445,6 +447,8 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
 .endif    
     mov.b #4,W0 ; largeur tabulation
     mov.b WREG,_htab
+    bset video_flags,#F_SCROLL
+    bset video_flags,#F_WRAP
     bra code_LCPAGE
     
 ; nom: VIDEO  ( f -- )
@@ -480,6 +484,20 @@ DEFCODE "LC-B/W",6,,LCBSLASHW
 2:  bclr.b video_flags,#F_INVERT
 9:  DPOP
     NEXT
+    
+; nom: LC-WHITLN ( n -- )
+;   Imprime une ligne blanche sur la console LOCAL.
+;   Laisse le curseur au début de la ligne et le mode noir/blanc.    
+; arguments:
+;   n  Numéro de la ligne {1..24}
+; retourne:
+;   rien
+DEFWORD "LC-WHITELN",10,,LCWHITELN
+    .word TRUE,LCBSLASHW
+    .word LIT,1,OVER,LCATXY
+    .word LNADR,LIT,CPL,LIT,128+32,FILL
+    .word EXIT
+    
     
 ; nom: CURENBL   ( f -- )
 ;   Console locale.    
@@ -899,13 +917,18 @@ DEFCODE "PUTC",4,,PUTC
     bra z, 2f
     inc.b xpos
     bra 9f
-2:  clr.b xpos
+2:  btss.b video_flags,#F_WRAP
+    bra 9f
     mov #(LPS-1),W0
     cp.b ypos
     bra z,8f
+    clr.b xpos
     inc.b ypos
     bra 9f
-8:  call scroll_up
+8:  btss.b video_flags,#F_SCROLL
+    bra 9f
+    clr.b xpos
+    call scroll_up
 9:  cursor_decr_sema
     NEXT
     
@@ -1149,5 +1172,35 @@ DEFCODE "LC-EMIT?",8,,LCEMITQ
     mov #-1,T
     NEXT
     
+; nom: LC-WRAP ( f -- )
+;   Active ou désactive le retour à la ligne automatique.
+; arguments:
+;   f Indicateur Booléen, VRAI wrap actif, FAUX inactif.
+; retourne:
+;   rien
+DEFCODE "LC-WRAP",7,,LCWRAP
+    cp0 T
+    bra z,2f
+    bset.b video_flags,#F_WRAP
+    bra 9f
+2:  bclr.b video_flags,#F_WRAP
+9:  DPOP
+    NEXT
 
+; nom: SCROLL ( f -- )
+;   Active ou désactive le défilement de l'écran lorsque le curseur
+;   atteint la fin de celui-ci, i.e. position {64,24}
+;   Ce blocage du défilement ne concerne que EMIT.    
+; arguments:
+;   f Indicateur Booléen, VRAI définelement actif, FAUX inactif
+; retourne:
+;   rien
+DEFCODE "SCROLL",6,,SCROLL
+    cp0 T
+    bra z,2f
+    bset.b video_flags,#F_SCROLL
+    bra 9f
+2:  bclr.b video_flags,#F_SCROLL
+9:  DPOP
+    NEXT
     

@@ -52,6 +52,8 @@
 ;11   |  INSRTLN   |  LC-INSRTLN | VT-INSRTLN    
 ;12   |  RMVLN     |  LC-RMVLN   | VT-RMVLN
 ;13   |  DELLN     |  LC-DELLN   | VT-DELLN
+;14   |  WHTELN    |  LC-WHTELN  | VT-WHITELN
+;15   |  WRAP      |  LC-WRAP    | VT-WRAP
     
 ;  Exemple de définition d'un mot vectorisé.
 ; : KEY  SYSCONS @ FN_KEY VEXEC ;
@@ -73,7 +75,9 @@
 .equ FN_INSRTLN,11
 .equ FN_RMVLN,12
 .equ FN_DELLN,13    
-  
+.equ FN_WHITELN,14
+.equ FN_WRAP,15
+    
 ; nom: LC-CONS ( -- a-addr )
 ;   Retourne l'adresse du vecteur des fonctions pour la console locale.
 ; arguments:
@@ -95,6 +99,8 @@ DEFTABLE "LC-CONS",7,,LCCONS
     .word LCINSRTLN ; tvout.s
     .word LCRMVLN ; tvout.s
     .word LCDELLN ; tvout.s
+    .word LCWHITELN ; tvout.s
+    .word LCWRAP    ; tvout.s
     
 ; nom: VT-CONS ( -- a-addr )
 ;   Retourne l'adresse du vecteur des fonctions pour la console locale.
@@ -117,6 +123,8 @@ DEFTABLE "VT-CONS",7,,VTCONS
     .word VTINSRTLN ; vt102.2
     .word VTRMVLN ; vt102.s
     .word VTDELLN ; vt102.s
+    .word VTWHITELN ; vt102.s
+    .word VTWRAP   ; vt102.s
     
 ; nom: ED-CONS ( -- a-addr )
 ;   Retourne l'adresse du vecteur des fonctions pour la console de l'éditeur de bloc.
@@ -129,16 +137,18 @@ DEFTABLE "ED-CONS"7,,EDCONS
     .word VTKEYQ   ; vt102.s
     .word VTEKEY   ; serial.s
     .word SGETCQ   ; serial.s
-    .word EDEMIT   ; vt102.s
+    .word EDEMIT   ; blockEdit.s
     .word SREADYQ  ; serial.s
-    .word VTATXY   ; vt102.s
-    .word VTPAGE   ; vt102.s
+    .word EDATXY   ; blockEdit.s
+    .word EDPAGE   ; blockEdit.s
     .word VTFILTER ; vt102.s
     .word VTGETCUR ; vt102.s
-    .word VTBSLASHW   ; vt102.s
-    .word VTINSRTLN ; vt102.2
-    .word VTRMVLN ; vt102.s
-    .word VTDELLN ; vt102.s
+    .word EDBSLASHW ; blockEdit.s
+    .word EDINSRTLN ; blockEdit.s
+    .word EDRMVLN ; blockEdit.s
+    .word EDDELLN ; blockEdit.s
+    .word EDWHITELN ; blockEdit.s
+    .word VTWRAP    ; vt102.s
     
     
 ; nom: SYSCONS   ( -- a-addr )
@@ -187,6 +197,15 @@ DEFWORD "REMOTE",6,,REMOTE
 ;   rien   
 DEFWORD "CONSOLE",7,,CONSOLE
     .word SYSCONS,STORE,EXIT
+    
+; nom: IS-LOCAL ( -- f )
+;   Retourne un indicateur Booléen VRAI si la console est en mode LOCAL.
+; arguments:
+;   aucun
+; retourne:
+;   f	Indicateur Booléen vrai si console LOCAL.
+DEFWORD "IS-LOCAL",8,,ISLOCAL
+    .word SYSCONS,FETCH,LCCONS,EQUAL,EXIT
     
     
 ; nom: KEY  ( -- c )  
@@ -318,7 +337,7 @@ DEFWORD "SPACES",6,,SPACES
 ; retourne:
 ;    rien
 DEFWORD "DELLN",5,,DELLN   ; ( -- )
-    .word LIT,CTRL_X,EMIT,EXIT
+    .word LIT,CTRL_D,EMIT,EXIT
     
 ; nom: INSRTLN ( -- )
 ;   Décalle toutes les lignes à partir du curseur d'une position vers le bas.
@@ -337,7 +356,7 @@ DEFWORD "INSRTLN",7,,INSRTLN
 ; retourne:
 ;    rien
 DEFWORD "RMVLN",5,,RMVLN
-    .word SYSCONS,FETCH,LIT,FN_RMVLN,VEXEC,EXIT
+    .word LIT,CTRL_X,EMIT,EXIT
     
     
 ; nom:  TYPE ( c-addr n+ -- )
@@ -442,4 +461,24 @@ DEFWORD "GETCUR",6,,GETCUR
 ;   rien    
 DEFWORD "B/W",3,,BSLASHW
     .word SYSCONS,FETCH,LIT,FN_BSLASHW,VEXEC,EXIT
+    
+; nom: WITHELN ( n -- )
+;   Imprime une ligne blanche et laisse le curseur au début de celle-ci
+;   À la sortie le mode vidéo est inversé, i.e. noir/blanc.
+; arguments:
+;   n Numéro de la ligne {1..24}
+; retourne:
+;   rien
+DEFWORD "WHITELN",7,,WHITELN
+    .word SYSCONS,FETCH,LIT,FN_WHITELN,VEXEC,EXIT
+    
+; nom: SCROLL ( f -- )
+;   Activation désactivation du défilement lors de l'impression d'un caractère
+;   en dernière position de l'écran.
+; arguments:
+;   f Indicateur Booléean, VRAI défilement actif, FAUX défilement inactif.
+; retourne:
+;   rien
+DEFWORD "WRAP",6,,WRAP
+    .word SYSCONS,FETCH,LIT,FN_WRAP,VEXEC,EXIT
     

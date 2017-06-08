@@ -100,7 +100,7 @@ DEFWORD "TEXTEND",7,,TEXTEND
      .word UNLOOP,BRANCH,9f-$
 2:   .word DOLOOP,1b-$
 9:   .word ONEPLUS,SCRBUF,MINUS,LIT,CPL,SLASHMOD
-     .word ONEPLUS,SWAP,ONEPLUS,SWAP,CURPOS,EXIT
+     .word ONEPLUS,SWAP,ONEPLUS,SWAP,ATXY,EXIT
      
 ;  KCASE  ( c n -- c f )    
 ;   compare le caractère 'c' reçu du clavier avec la valeur n.  
@@ -140,6 +140,17 @@ DEFWORD "RESTORELINE",11,,RESTORELINE
     .word SWAP,MOVE
     .word TRUE,CURENBL,EXIT
     
+; nom: ED-WITHELN ( n -- )
+;   Console LOCAL et REMOTE.    
+;   Imprime une ligne blanche et laisse le curseur au début de celle-ci
+;   À la sortie le mode vidéo est inversé, i.e. noir/blanc.
+; arguments:
+;   n Numéro de la ligne {1..24}
+; retourne:
+;   rien
+DEFWORD "ED-WHITELN",10,,EDWHITELN
+    .word DUP,LCWHITELN,VTWHITELN,EXIT
+    
 ; nom: PROMPT  ( c-addr u n -- )
 ;   Affiche un message en vidéo inversé sur la ligne 'n' de l'écran.
 ;   Utilise SAVELINE pour conserver le contenu original de cette ligne dans
@@ -155,9 +166,8 @@ DEFWORD "RESTORELINE",11,,RESTORELINE
 ; retourne:
 ;   rien    
 DEFWORD "PROMPT",6,,PROMPT ; ( c-addr u n+ -- )
-    .word DUP,SAVELINE,DUP,SETY,DELLN ; s: c-addr u n+
-    .word DUP,TRUE,INVLN,TRUE,BSLASHW ; s: c-addr u n+
-    .word LIT,1,SWAP,ATXY,LIT,CPL-1,AND,TYPE,EXIT
+    .word DUP,SAVELINE,WHITELN ; s: c-addr u n+
+    .word TYPE,EXIT 
     
 ; nom: MSGLINE  ( c-addr u n -- )
 ;   Affiche un message à l'écran et attend une touche au clavier pour poursuivre
@@ -173,7 +183,7 @@ DEFWORD "MSGLINE",7,,MSGLINE ; ( c-addr u n -- )
      .word DUP,TOR,PROMPT ; s:  r: col line n
      .word KEY,DROP
      .word FALSE,BSLASHW,RFROM,RESTORELINE
-     .word TWORFROM,ATXY,EXIT
+2:   .word TWORFROM,ATXY,EXIT
   
 HEADLESS SAVEFAILED,HWORD
     .word STRQUOTE
@@ -239,7 +249,8 @@ HEADLESS OPENBLOCK,HWORD
 8:  .word LIT,1,RESTORELINE,CURPOS
 9:  .word EXIT
     
-    
+
+  
 ; Insière une ligne au dessus de celle où se trouve le curseur.
 ; Sauf s'il y a du texte sur la dernière ligne de l'éran.    
 HEADLESS INSLN,HWORD
@@ -266,8 +277,9 @@ HEADLESS INSERTBL,HWORD
     
 ; Déplace le curseur à la fin du texte sur cette ligne.    
 HEADLESS TOEOL,HWORD
-    .word LIT,VK_END,EMIT
-    .word EXIT
+    .word LCEND, ISLOCAL,TBRANCH,2f-$
+    .word LCGETCUR,VTATXY
+2:  .word EXIT
    
 ; Déplace le curseur au début de la ligne.    
 HEADLESS TOSOL,HWORD
@@ -292,17 +304,24 @@ HEADLESS CRLF,HWORD
     
 ; dépose le caractère dans la mémoire tampon vidéo.
 ; à la position actuelle du curseur.    
-HEADLESS CHRTOBUF,HWORD ; ( c -- )
-    .word CURADR,CSTORE,EXIT
+;HEADLESS CHRTOBUF,HWORD ; ( c -- )
+;    .word CURADR,CSTORE,EXIT
     
-; Affiche le caractère à la position de l'écran.
+; check si c'est la dernière position de l'écran.
+HEADLESS LASTPOS,HWORD
+    .word LCGETCUR,LIT,LPS,EQUAL,ZBRANCH,9f-$
+    .word LIT,CPL,EQUAL,EXIT
+9:  .word FALSE,EXIT    
+    
+; Affiche le caractère à la position du curseur.
 HEADLESS PUTCHR,HWORD ; ( c -- )
-    .word LCGETCUR,LIT,LPS,EQUAL,ZBRANCH,8f-$
-    .word LIT,CPL,EQUAL,ZBRANCH,9f-$
-    .word CHRTOBUF,EXIT
-8:  .word DROP
-9:  .word LCEMIT,EXIT
+    .word LASTPOS,NOT,WRAP
+    .word ISLOCAL,TBRANCH,2f-$
+    .word DUP,VTEMIT
+2:  .word LCEMIT    
+    .word EXIT
 
+  
 ; attend une touche au clavier.  
 HEADLESS EDKEY,HWORD
     .word SCRSIZE,LIT,BLOCK_SIZE,GREATER,ZBRANCH,2f-$
@@ -360,6 +379,7 @@ HEADLESS BLKINFO,HWORD
     .word CURPOS,EXIT
    
 ; nom: ED-EMIT ( c -- )
+;   Console locale et remote    
 ;   Émetteur de caractère utilisé par BLKED lorsque la console est en REMOTE.
 ;   Cet émetteur spécial est requis car il faut maintenir un tampon local de
 ;   l'écran. À cet effet le tampon vidéo local est utilisé.    
@@ -371,6 +391,69 @@ DEFWORD "ED-EMIT",7,,EDEMIT
     .word DUP,LCEMIT,VTEMIT
     .word EXIT
     
+; nom: ED-AT-XY ( n1 n2 -- )
+;   Console locate et remote.
+;   Positionne le curseur à la colonnne 'n1' et la ligne 'n2'
+; arguments:
+;   n1 Colonne {1..64}
+;   n2 Ligne {1..24}
+; retourne:
+;   rien
+DEFWORD "ED-AT-XY",8,,EDATXY
+    .word TWODUP,LCATXY,VTATXY,EXIT
+
+; nom: ED-PAGE ( -- )
+;   Console LOCAL et REMOTE
+;   Efface l'écrran.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+DEFWORD "ED-PAGE",7,,EDPAGE
+    .word LCPAGE,VTPAGE,EXIT
+    
+; nom: ED-B/W  ( f -- )  
+;   Console LOCAL et REMOTE    
+;   Inverse l'affichage vidéo.
+; arguments:
+;   f Indicateur Booléen, si VRAI inverse la sortie vidéo, si FAUX vidéo normal.
+; retourne:
+;   rien
+DEFWORD "ED-B/W",6,,EDBSLASHW
+    .word DUP,LCBSLASHW,VTBSLASHW,EXIT
+    
+; nom: ED-INSRTLN ( -- )
+;   Console LOCAL et REMOTE    
+;   Insère une ligne vide à la position du curseur. Les lignes à partir du curseur
+;   en sont décalées vers le bas. S'il y a du texte sur la dernière ligne celui-ci disparaît.
+; arguments:    
+;   aucun
+; retourne:
+;   rien
+DEFWORD "ED-INSRTLN",10,,EDINSRTLN
+    .word LCINSRTLN,VTINSRTLN,EXIT
+    
+; nom: ED-DELLN ( -- )
+;   Console LOCAL et REMOTE
+;   Vide la ligne du curseur et ramène celui-ci à gauche de l'écran.
+; arguments:    
+;   aucun
+; retourne:
+;   rien
+DEFWORD "ED-DELLN",8,,EDDELLN
+    .word LCDELLN,VTDELLN,EXIT
+    
+; nom: ED-RMVLN  ( -- )
+;   Console LOCAL et REMOTE    
+;   Supprime la ligne à la position du curseur. Les lignes sous celle-ci sont
+;   décalées vers haut pour combler le vide et la dernière ligne de la console
+;   se retrouve vide.
+; arguments:    
+;   aucun
+; retourne:
+;   rien
+DEFWORD "ED-RMVLN",8,,EDRMVLN
+    .word LCRMVLN,VTRMVLN,EXIT
     
 ; nom: BLKED  ( n+ -- )  
 ;   Éditeur de bloc texte. Edite 1 bloc à la fois.
@@ -383,11 +466,12 @@ DEFWORD "ED-EMIT",7,,EDEMIT
 ; retourne:
 ;   rien  
 DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
-    .word SYSCONS,FETCH,DUP,TOR,VTCONS,EQUAL,ZBRANCH,1f-$
-    .word LCPAGE,EDCONS,SYSCONS,STORE
-1:  .word LIST
+    .word SYSCONS,FETCH,TOR
+    .word ISLOCAL,TBRANCH,1f-$
+    .word EDCONS,SYSCONS,STORE
+1:  .word FALSE,SCROLL,LIST
 1:  .word EDKEY,DUP,QPRTCHAR,ZBRANCH,2f-$
-    .word PUTCHR,BRANCH,1b-$
+    .word EMIT,BRANCH,1b-$
 2:  .word DUP,BL,ULESS,ZBRANCH,4f-$    
     ; c<32
 2:  .word LIT,VK_CR,KCASE,ZBRANCH,2f-$,CRLF,BRANCH,1b-$
@@ -397,7 +481,7 @@ DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
 2:  .word LIT,CTRL_D,KCASE,ZBRANCH,2f-$,DELLN,BRANCH,1b-$  
 2:  .word LIT,CTRL_N,KCASE,ZBRANCH,2f-$,NEXTBLOCK,BRANCH,1b-$ 
 2:  .word LIT,CTRL_P,KCASE,ZBRANCH,2f-$,PREVBLOCK,BRANCH,1b-$ 
-2:  .word LIT,CTRL_E,KCASE,ZBRANCH,2f-$,CLS,RFROM,SYSCONS,STORE,EXIT
+2:  .word LIT,CTRL_E,KCASE,ZBRANCH,2f-$,CLS,RFROM,SYSCONS,STORE,TRUE,SCROLL,EXIT
 2:  .word LIT,CTRL_B,KCASE,ZBRANCH,2f-$,SAVESCREEN,BRANCH,1b-$
 2:  .word LIT,CTRL_O,KCASE,ZBRANCH,2f-$,OPENBLOCK,BRANCH,1b-$  
 2:  .word LIT,CTRL_K,KCASE,ZBRANCH,2f-$,DELEOL,BRANCH,1b-$

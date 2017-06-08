@@ -79,43 +79,42 @@ INTR
 .global __U1RXInterrupt
 __U1RXInterrupt:
     bclr  SER_RX_IFS, #SER_RX_IF
-    DPUSH
+    push.d W0
+    push W2
     btss SER_STA,#URXDA
     bra 9f
-    mov SER_RXREG, T
-    cp.b T,#CTRL_S ; XOFF
+    mov SER_RXREG, W2
+    cp.b W2,#CTRL_S ; XOFF
     bra nz, 1f
     bset ser_flags,#F_TXSTOP ; XOFF reçu du terminal
     bra 9f
-1:  cp.b T,#CTRL_Q ; XON
+1:  cp.b W2,#CTRL_Q ; XON
     bra nz, 2f
     bclr ser_flags,#F_TXSTOP ; XON reçu du terminal
     bra 9f
-2:  cp.b T,#CTRL_C
+2:  cp.b W2,#CTRL_C
     bra nz, 3f
     mov #USER_ABORT,W0
     mov W0, fwarm
     reset
-3:  push.d W0
-    mov.b rx_tail, WREG
+3:  mov.b rx_tail, WREG
     ze W0,W0
     mov #rx_queue, W1
     add W0,W1,W1
-    mov.b T, [W1]
+    mov.b W2, [W1]
     bset ser_flags,#F_RXDAT
     inc rx_in
     inc.b rx_tail
     mov #(QUEUE_SIZE-1), W0
     and.b rx_tail
-    mov #(QUEUE_SIZE/4), W1
-    sub W0,W1,W0
+    mov #(QUEUE_SIZE/3), W0
     cp.b rx_in
-    bra ltu, 8f   
+    bra ltu, 9f   
     mov #A_XOFF, W0
     mov.b WREG, SER_TXREG   ; envoie un XOFF au terminal
     bset ser_flags,#F_RXSTOP 
-8:  pop.d W0
-9:  DPOP
+9:  pop W2
+    pop.d W0
     retfie
  
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
@@ -298,8 +297,7 @@ DEFCODE "SGETC",5,,SGETC  ; ( -- c )
     and.b rx_head
     btss ser_flags,#F_RXSTOP
     bra 2f
-    mov #(QUEUE_SIZE/4),W1
-    sub W0,W1,W0
+    mov #(QUEUE_SIZE/4),W0
     cp.b rx_in
     bra gtu, 2f
     mov #A_XON,W0

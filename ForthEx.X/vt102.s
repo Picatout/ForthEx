@@ -324,7 +324,8 @@ DEFWORD "VT-DOWN",7,,VTDOWN
 ; retourne:
 ;    rien
 DEFWORD "VT-RIGHT",8,,VTRIGHT
-    .word ESCRBRAC,LIT,'C',SPUTC,EXIT
+    .word VTGETCUR,DROP,LIT,CPL,EQUAL,ZBRANCH,2f-$,EXIT
+2:  .word ESCRBRAC,LIT,'C',SPUTC,EXIT
     
 ; nom: VT-LEFT ( -- )
 ;   Envoie la séquence ANSI 'ESC[D'  au terminal VT102.
@@ -429,14 +430,38 @@ DEFWORD "VT-INSRTLN",10,,VTINSRTLN
     .word ESCRBRAC,LIT,'L',SPUTC,VTHOME,EXIT
   
 ; nom: VT-RMVLN ( -- )
-;   Supprime la ligne du curseur et décale toutes celles en dessus vers le haut.    
+;   Supprime la ligne du curseur et décale toutes celles en dessous vers le haut.    
 ; arguments:
 ;   aucun
 ; retourne:
 ;    rien
 DEFWORD "VT-RMVLN",8,,VTRMVLN
     .word ESCRBRAC,LIT,'M',SPUTC,EXIT
-     
+
+; nom: VT-WHITELN ( n -- )
+;   Imprime ligne blanche de 64 caractères sur la console REMOTE.
+;   Laisse le curseur au début de la ligne et le mode noir/blanc.    
+; arguments:
+;   n  Numéro de ligne, {1..24}
+; retourne:
+;   rien
+DEFWORD "VT-WHILELN",10,,VTWHITELN
+    .word DUP,LIT,1,SWAP,VTATXY,TRUE,VTBSLASHW
+    .word LIT,64,LIT,0,DODO
+1:  .word BL,VTEMIT,DOLOOP,1b-$    
+    .word LIT,1,SWAP,VTATXY,EXIT
+    
+; nom: VT-PRTINV  ( c-addr u n -- )
+;   Imprime sur la REMOTE console la ligne de texte 'c-addr' sur la ligne 'n'.
+;   Si 'f' est vrai imprime noir/blanc, sinon imprime blanc/noir.
+; arguments:
+;   c-addr Adresse du premier caractère à imprimer.
+;   u Nombre de caractères
+;   n Numéro de la ligne {1..24}
+DEFWORD "VT-PRTINV",9,,VTPRTINV
+    .word DUP,VTWHITELN
+    .word LIT,1,SWAP,VTATXY,VTTYPE,EXIT
+    
 ; nom: VT-DSR  ( -- )
 ;   Envoie la séquence de contrôle ANSI 'ESC[6n' au terminal VT102.
 ;   Le terminal répond à cette commande en envoyant la la position du curseur. 
@@ -533,7 +558,21 @@ DEFWORD "VT-PUTC",7,,VTPUTC
 ; retourne:
 ;   rien    
 DEFWORD "VT-B/W",6,,VTBSLASHW
+    .word DUP,LCBSLASHW
     .word ESCRBRAC,ZBRANCH,2f-$
     .word LIT,'7',SPUTC
 2:  .word LIT,'m',SPUTC,EXIT
+   
+; nom: VT-WRAP ( f -- )
+;   Active ou désactive le retour à la ligne automatique.
+; arguments:
+;   f Indicateur Booléen, VRAI actif, FAUX inactif.
+; retourne:
+;   rien
+DEFWORD "VT-WRAP",7,,VTWRAP
+    .word DUP,LCWRAP,ESCRBRAC,LIT,'?',SPUTC,LIT,'7',SPUTC
+    .word ZBRANCH,2f-$,LIT,'h',SPUTC,EXIT
+2:  .word LIT,'l',SPUTC,EXIT    
+    
+    
     
