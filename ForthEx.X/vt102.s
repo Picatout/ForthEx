@@ -186,8 +186,8 @@ CTRL_TABLE:
 ;   c       caractère reconnu.
 ;   true    indicateur booléen.
 DEFWORD "VT-FILTER",9,,VTFILTER
-    .word DUP,BL,LESS,TBRANCH,2f-$
-    .word DUP,LIT,127,LESS,TBRANCH,1f-$
+    .word DUP,BL,ULESS,TBRANCH,2f-$
+    .word DUP,LIT,127,ULESS,TBRANCH,1f-$
     .word FALSE,EXIT
 1:  .word TRUE,EXIT
 2:  .word DUP,CELLS 
@@ -446,10 +446,11 @@ DEFWORD "VT-RMVLN",8,,VTRMVLN
 ; retourne:
 ;   rien
 DEFWORD "VT-WHILELN",10,,VTWHITELN
+    .word FALSE,VTWRAP
     .word DUP,LIT,1,SWAP,VTATXY,TRUE,VTBSLASHW
     .word LIT,64,LIT,0,DODO
 1:  .word BL,VTEMIT,DOLOOP,1b-$    
-    .word LIT,1,SWAP,VTATXY,EXIT
+    .word LIT,1,SWAP,VTATXY,TRUE,VTWRAP,EXIT
     
 ; nom: VT-PRTINV  ( c-addr u n -- )
 ;   Imprime sur la REMOTE console la ligne de texte 'c-addr' sur la ligne 'n'.
@@ -500,8 +501,8 @@ DEFWORD "VT-GETP",7,,VTGETP
 ; retourne:
 ;   f  indicateur booléen, FAUX si la séquence reçu n'est pas ESC[  
 DEFWORD "ESCSEQ?",7,,ESCSEQQ  ; ( -- f )
-    .word SGETC,LIT,27,EQUAL,ZBRANCH,9b-$
-    .word SGETC,LIT,'[',EQUAL,ZBRANCH,9b-$
+    .word SGETC,LIT,27,EQUAL,ZBRANCH,9f-$
+    .word SGETC,LIT,'[',EQUAL,ZBRANCH,9f-$
     .word TRUE,EXIT
 9:  .word FALSE,EXIT
 
@@ -544,8 +545,10 @@ DEFWORD "VT-CRLF",7,,VTCRLF
 ; retourne:
 ;   rien
 DEFWORD "VT-PUTC",7,,VTPUTC
-   .word SPUTC,VTGETCUR,DROP,LIT,CPL+1,EQUAL,ZBRANCH,9f-$
-   .word VTCRLF
+   .word SPUTC,VTGETCUR,DROP
+   .word LIT,CPL+1,EQUAL,ZBRANCH,9f-$
+   .word QWRAP,TBRANCH,2f-$,VTLEFT,EXIT
+2: .word VTCRLF
 9: .word EXIT
  
 ; nom: VT-B/W  ( f -- )

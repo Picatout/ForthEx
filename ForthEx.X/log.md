@@ -1,3 +1,11 @@
+2017-06-08
+----------
+Travail sur console.
+Déboger vt102.s, le test suivant plante continuellement. 
+: test begin vt-key  vt-emit ; 
+Vérification faite j'en suis venu à la conclusion que le problème est matériel.
+Je dois modifier le circuit du port rs-232.
+
 2017-06-07
 -----------
 Travail sur console, réorganisation.

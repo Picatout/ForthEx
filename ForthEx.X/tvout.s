@@ -1187,6 +1187,20 @@ DEFCODE "LC-WRAP",7,,LCWRAP
 9:  DPOP
     NEXT
 
+; nom: ?WRAP ( -- f )
+;   Vérifie si le mode retour automatique est actif.
+; arguments:
+;   aucun
+; retourne:
+;    f Indicateur Booléean VRAI si actif.
+DEFCODE "?WRAP",5,,QWRAP
+    DPUSH
+    clr T
+    btsc.b video_flags,#F_WRAP
+    setm T
+    NEXT
+    
+    
 ; nom: SCROLL ( f -- )
 ;   Active ou désactive le défilement de l'écran lorsque le curseur
 ;   atteint la fin de celui-ci, i.e. position {64,24}

@@ -503,13 +503,16 @@ DEFWORD "THRU",4,,THRU
     .word EXIT
 
 ; nom: SCR-SIZE ( -- n )
-;    Calcule la taille que la mémoire tampon vidéo occuperait dans un bloc s'il était sauvegardé avec SCR>BLK.
+;    Calcule la taille que la mémoire tampon vidéo occuperait dans un bloc 
+;    s'il était sauvegardé avec SCR>BLK. Seul les lignes 1..23 sont sauvegardées.
+;    BLKED utilise la ligne 24 comme ligne d'état.    
+;        
 ; arguments:
 ;   aucun
 ; retourne:
 ;   n Taille qui serait occupée par l'écran dans un bloc.    
 DEFWORD "SCR-SIZE",8,,SCRSIZE ; ( -- n )
-    .word LIT,0,LIT,LPS,OVER,DODO
+    .word LIT,0,EDITLN,OVER,DODO
 1:  .word SCRBUF,DOI,LIT,CPL,DUP,TOR
     .word STAR,PLUS,RFROM,MINUSTRAILING,SWAP,DROP,ONEPLUS
     .word PLUS,DOLOOP,1b-$
@@ -517,7 +520,8 @@ DEFWORD "SCR-SIZE",8,,SCRSIZE ; ( -- n )
     
     
 ; nom: SCR>BLK  ( n+ -- f )
-;   Sauvegarde du frame buffer de l'écran dans un bloc sur périphérique de stockage.
+;   Sauvegarde de la mémoire tampon de l'écran dans un bloc sur périphérique de stockage.
+;   Seul lignes 1..23 sont sauvegardées.    
 ;   Si le contenu de l'écran n'entre pas dans un bloc, l'opération est abaondonnée et retourne faux.
 ;   Les espaces qui termines les lignes sont supprimés et chaque ligne est complétée
 ;   par un VK_CR.
@@ -534,7 +538,7 @@ DEFWORD "SCR>BLK",7,,SCRTOBLK
     .word NOT,EXIT
 2:  .word FALSE,CURENBL
     .word DUP,BUFFER,SWAP,BLKDEVFETCH,BUFFEREDQ,UPDATE ; s: data
-    .word LIT,LPS,LIT,0,DODO 
+    .word EDITLN,LIT,0,DODO 
 1:  .word TOR,DOI,ONEPLUS,LNADR ; S: scrline r: data
     .word LIT,CPL,MINUSTRAILING,TOR ; S: scrline r: data len
     .word TWORFETCH,MOVE ; R: data len

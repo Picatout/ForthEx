@@ -28,24 +28,26 @@
 ;   écran occupait 1024 caractères. Il avait donc eu l'idée de sauvegarder le contenu
 ;   de la mémoire vidéo sur l'unité de stockage permanent sans modification.
 ;   Chaque écran sauvegardé s'appelait un bloc.
-;   Le problème c'est que ForthEx utilise un écran de 24 lignes au lieu de 16 ce qui
-;   fait qu'un bloc serait de 1536 caractères au lieu de 1024. Mais comme le standard
+;   Le problème c'est que BLKED utilise un écran de 23 lignes au lieu de 16 ce qui
+;   fait qu'un bloc serait de 1472 caractères au lieu de 1024. Mais comme le standard
 ;   ANS Forth définie toujours les blocs comme étant 1024 caractères je devais trouver
 ;   une solution pour sauvegarder les écrans dans des blocs. Entre autre solutions il y a
-;   1) M'écarter du standard et modifier la taille des blocs à 1536 octets.
+;   1) M'écarter du standard et modifier la taille des blocs à 1472 octets.
 ;   2) Utiliser 2 blocs standards pour sauvegarder un écran, occasionne une perte d'espace.
 ;   3) Compressser le contenu de l'écran pour le faire entrer dans un bloc standard, gain d'espace.
 ;   J'ai opté pour la 3ième solution.     
 ;   En principe Lorsqu'on écris du code source les lignes ne sont pas pleines.
 ;   Parfois on laisse même des lignes vides pour rendre le texte plus facile à lire.
 ;   Lors de la sauvegarde dans un bloc les lignes sont tronquées après le dernier caractère
-;   et un caractère de fin de ligne est ajouté. Il y a 24 lignes sur un écran donc
-;   si la longueur moyenne des lignes est inférieure à (BLOCK_SIZE-24)/24 l'écran peut
+;   et un caractère de fin de ligne est ajouté. Il y a 23 lignes sur un écran donc
+;   si la longueur moyenne des lignes est inférieure à (BLOCK_SIZE-23)/23 l'écran peut
 ;   être sauvegardé dans un bloc. Le mot SCR-SIZE défini dans le fichier block.s
 ;   permet de connaître la taille occupée par un écran dans un bloc.
-;   Il est problable que la majorité du temps un écran avec les lignes tronquées après
+;   Il est problable que la majorité des cas un écran avec les lignes tronquées après
 ;   le dernier caractère répondra à ce critère. Au pire il suffira de raccourcir les commentaires.    
 ; FONCTIONNEMENT:
+;   BLKED réserve la ligne 24 comme ligne d'état donc un bloc de texte occupe les
+;   lignes 1..23.     
 ;   Le curseur peut-être déplacé n'importe où sur l'écran et le texte modifié.
 ;   Cependant le curseur ne peut sortir des limites de l'écran, il n'y a pas de défilement.
 ;   L'éditeur fonctionne en mode écrasement, donc si le curseur est déplacé au dessus d'un
@@ -53,8 +55,8 @@
 ;   un caractère au milieu d'un ligne est d'utiliser la touche INSERT suivie du caractère.     
 ; COMMANDES:
 ;   Déplacement du curseur:
-;   UP Déplace le curseur sur la ligne supérieure.
-;   DOWN Déplace le curseur sur la ligne suivante.
+;   UP Déplace le curseur d'une ligne vers le haut.
+;   DOWN Déplace le curseur d'une ligne vers le bas.
 ;   LEFT Déplace le curseur d'un caractère vers la gauche.
 ;   RIGHT Déplace le curseur d'un caractère vers la droite.    
 ;   HOME   Va au début de la ligne.
@@ -73,7 +75,6 @@
 ;   CTRL_X  Supprime la ligne sur laquelle le curseur réside.
 ;   CTRL_Y  Insère une ligne vide avant celle où se trouve le curseur.
 ;   Manipulation des blocs:    
-;   CTRL_I  Affiche le numéro du bloc en édition ainsi que sa taille.    
 ;   CTRL_B  Sauvegarde de l'écran dans le bloc.
 ;   CTRL_N  Sauvegarde le bloc actuel et charge le bloc suivant pour édition.
 ;   CTRL_P  Sauvegarde le bloc actuel et charge le bloc précédent pour édition.     
@@ -85,22 +86,36 @@
 ; constantes utilisées par l'éditeur.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; NOM: EDITLN ( -- n )
+;   Nombre de lignes de texte utilisées par BLKED.
+; arguments:
+;   aucun
+; retourne:
+;   n Nombre de lignes, 23, i.e. {1..23}, ligne 24 réservée.
+DEFCODE "EDITLN",6,,EDITLN
+     DPUSH
+     mov #LPS-1,T
+     NEXT
+     
 ; nom: TEXTEND  ( -- )
 ;   Positionne le curseur à la fin du texte. Balaie la mémoire tampon de l'écran à partir
-;   de la fin et s'arrête après le premier caractère non blanc.     
+;   de la fin de la ligne 23 et s'arrête après le premier caractère non blanc.     
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien 
 DEFWORD "TEXTEND",7,,TEXTEND     
 ;HEADLESS TEXTEND,HWORD
-     .word SCRBUF,LIT,CPL,LIT,LPS,STAR,DUP,TOR,PLUS
+     .word SCRBUF,LIT,CPL,EDITLN,STAR,DUP,TOR,PLUS
      .word RFROM,LIT,0,DODO
 1:   .word ONEMINUS,DUP,ECFETCH,BL,UGREATER,ZBRANCH,2f-$
      .word UNLOOP,BRANCH,9f-$
 2:   .word DOLOOP,1b-$
 9:   .word ONEPLUS,SCRBUF,MINUS,LIT,CPL,SLASHMOD
-     .word ONEPLUS,SWAP,ONEPLUS,SWAP,ATXY,EXIT
+     .word ONEPLUS,SWAP,ONEPLUS,SWAP
+     .word DUP,EDITLN,UGREATER,ZBRANCH,2f-$
+     .word TWODROP,LIT,CPL,EDITLN
+2:   .word ATXY,EXIT
      
 ;  KCASE  ( c n -- c f )    
 ;   compare le caractère 'c' reçu du clavier avec la valeur n.  
@@ -167,7 +182,7 @@ DEFWORD "ED-WHITELN",10,,EDWHITELN
 ;   rien    
 DEFWORD "PROMPT",6,,PROMPT ; ( c-addr u n+ -- )
     .word DUP,SAVELINE,WHITELN ; s: c-addr u n+
-    .word TYPE,EXIT 
+    .word LIT,CPL-1,AND,TYPE,EXIT 
     
 ; nom: MSGLINE  ( c-addr u n -- )
 ;   Affiche un message à l'écran et attend une touche au clavier pour poursuivre
@@ -190,7 +205,7 @@ HEADLESS SAVEFAILED,HWORD
     .byte 30
     .ascii "Failed to save screen."
     .align 2
-9:  .word LIT,1,MSGLINE,EXIT
+9:  .word LIT,LPS,MSGLINE,EXIT
     
 HEADLESS SAVESUCCESS,HWORD
     .word STRQUOTE
@@ -240,13 +255,13 @@ HEADLESS OPENBLOCK,HWORD
     .byte 14
     .ascii "block number? "
     .align 2
-    .word LIT,1,PROMPT
+    .word LIT,LPS,PROMPT
     .word TIB,FETCH,DUP,LIT,CPL,GETX,MINUS,ACCEPT,FALSE,BSLASHW
     .word SRCSTORE,LIT,0,TOIN,STORE
     .word BL,WORD,DUP,CFETCH,ZBRANCH,8f-$
     .word QNUMBER,ZBRANCH,8f-$
     .word LIST,TWODROP,EXIT
-8:  .word LIT,1,RESTORELINE,CURPOS
+8:  .word LIT,LPS,RESTORELINE,CURPOS
 9:  .word EXIT
     
 
@@ -292,36 +307,29 @@ HEADLESS LNUP,HWORD
     
 ;Déplace le curseur une ligne vers le bas.     
 HEADLESS LNDN,HWORD
+    .word LCGETCUR,SWAP,DROP,EDITLN,EQUAL,TBRANCH,9f-$
     .word LIT,VK_DOWN,EMIT
-    .word EXIT
+9:  .word EXIT
 
 ; Déplace le curseur au début de la ligne suivante
 ; sauf s'il est sur la dernière ligne.    
 HEADLESS CRLF,HWORD
-    .word GETY,LIT,LPS,EQUAL,TBRANCH,9f-$
+    .word GETY,EDITLN,EQUAL,TBRANCH,9f-$
     .word CR
 9:  .word EXIT
     
-; dépose le caractère dans la mémoire tampon vidéo.
-; à la position actuelle du curseur.    
-;HEADLESS CHRTOBUF,HWORD ; ( c -- )
-;    .word CURADR,CSTORE,EXIT
-    
 ; check si c'est la dernière position de l'écran.
 HEADLESS LASTPOS,HWORD
-    .word LCGETCUR,LIT,LPS,EQUAL,ZBRANCH,9f-$
+    .word LCGETCUR,EDITLN,EQUAL,ZBRANCH,9f-$
     .word LIT,CPL,EQUAL,EXIT
-9:  .word FALSE,EXIT    
+9:  .word DROP,FALSE,EXIT    
     
 ; Affiche le caractère à la position du curseur.
 HEADLESS PUTCHR,HWORD ; ( c -- )
     .word LASTPOS,NOT,WRAP
-    .word ISLOCAL,TBRANCH,2f-$
-    .word DUP,VTEMIT
-2:  .word LCEMIT    
+    .word EDEMIT
     .word EXIT
 
-  
 ; attend une touche au clavier.  
 HEADLESS EDKEY,HWORD
     .word SCRSIZE,LIT,BLOCK_SIZE,GREATER,ZBRANCH,2f-$
@@ -329,8 +337,8 @@ HEADLESS EDKEY,HWORD
     .byte 31
     .ascii "Screen to big to fit in a bloc."
     .align 2
-    .word LIT,1,MSGLINE
-2:  .word EKEY, EXIT
+    .word LIT,LPS,MSGLINE
+2:  .word STATUSLN,EKEY,EXIT
 
 ; efface le caractère avant le curseur.  
 HEADLESS BACKCHAR,HWORD 
@@ -359,24 +367,39 @@ DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )
     .word SAVEFAILED,EXIT
 8:  .word SAVESUCCESS
     .word EXIT    
+ 
+; avance le curseur à la prochaine tabulation.    
+HEADLESS TABADV, HWORD
+    .word NEXTCOLON,ISLOCAL,ZBRANCH,1f-$,EXIT
+1:  .word LCGETCUR,VTATXY,EXIT    
     
-; affiche le numéro du bloc et sa taille.    
-HEADLESS BLKINFO,HWORD
-    .word GETCUR,SCRSIZE ; S: col line size
-    .word LIT,1,DUP,SAVELINE,DUP,CURPOS,DELLN
+; Affiche la ligne d'état    
+; Indique le numéro du bloc et la taille actuelle de l'écran.    
+HEADLESS STATUSLN,HWORD
+    .word LCGETCUR,SCRSIZE ; S: col line size
+    .word LIT,LPS,WHITELN
     .word STRQUOTE
     .byte  6
     .ascii "bloc#:"
     .align 2
-    .word TYPE,SCR,FETCH,UDOT,LIT,16,SETX
+    .word TYPE,SCR,FETCH,UDOT,SPACE,NEXTCOLON
     .word STRQUOTE
     .byte 5
     .ascii "size:"
     .align 2
-    .word TYPE,UDOT
-    .word LIT,1,DUP,TRUE,INVLN
-    .word KEY,DROP,RESTORELINE
-    .word CURPOS,EXIT
+    .word TYPE,UDOT,SPACE,NEXTCOLON
+    .word STRQUOTE
+    .byte 4
+    .ascii "col:"
+    .align 2
+    .word TYPE,OVER,UDOT,SPACE,NEXTCOLON
+    .word STRQUOTE
+    .byte 5
+    .ascii "line:"
+    .align 2
+    .word TYPE,DUP,UDOT
+    .word FALSE,BSLASHW
+    .word EDATXY,EXIT
    
 ; nom: ED-EMIT ( c -- )
 ;   Console locale et remote    
@@ -455,6 +478,11 @@ DEFWORD "ED-DELLN",8,,EDDELLN
 DEFWORD "ED-RMVLN",8,,EDRMVLN
     .word LCRMVLN,VTRMVLN,EXIT
     
+HEADLESS BLKEDINIT ,HWORD
+    .word ISLOCAL,TBRANCH,1f-$
+    .word EDCONS,SYSCONS,STORE
+1:  .word LIST,EXIT    
+    
 ; nom: BLKED  ( n+ -- )  
 ;   Éditeur de bloc texte. Edite 1 bloc à la fois.
 ;   Le curseur peut-être déplacé à n'importe qu'elle position sur l'écran et 
@@ -466,18 +494,15 @@ DEFWORD "ED-RMVLN",8,,EDRMVLN
 ; retourne:
 ;   rien  
 DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
-    .word SYSCONS,FETCH,TOR
-    .word ISLOCAL,TBRANCH,1f-$
-    .word EDCONS,SYSCONS,STORE
-1:  .word FALSE,SCROLL,LIST
+    .word SYSCONS,FETCH,TOR,BLKEDINIT
 1:  .word EDKEY,DUP,QPRTCHAR,ZBRANCH,2f-$
-    .word EMIT,BRANCH,1b-$
+    .word PUTCHR,BRANCH,1b-$
 2:  .word DUP,BL,ULESS,ZBRANCH,4f-$    
     ; c<32
 2:  .word LIT,VK_CR,KCASE,ZBRANCH,2f-$,CRLF,BRANCH,1b-$
 2:  .word LIT,VK_BACK,KCASE,ZBRANCH,2f-$,BACKCHAR,BRANCH,1b-$
+2:  .word LIT,VK_TAB,KCASE,ZBRANCH,2f-$,TABADV,BRANCH,1b-$ 
 2:  .word LIT,CTRL_L,KCASE,ZBRANCH,2f-$,CLS,BRANCH,1b-$  
-2:  .word LIT,CTRL_I,KCASE,ZBRANCH,2f-$,BLKINFO,BRANCH,1b-$ 
 2:  .word LIT,CTRL_D,KCASE,ZBRANCH,2f-$,DELLN,BRANCH,1b-$  
 2:  .word LIT,CTRL_N,KCASE,ZBRANCH,2f-$,NEXTBLOCK,BRANCH,1b-$ 
 2:  .word LIT,CTRL_P,KCASE,ZBRANCH,2f-$,PREVBLOCK,BRANCH,1b-$ 
