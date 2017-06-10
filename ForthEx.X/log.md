@@ -1,3 +1,8 @@
+2017-06-10
+----------
+Retravailler vt102.s
+Vitesse de la console REMOTE améliorée et bogue semble réglé.
+
 2017-06-09
 ----------
 Modification matériel circuit port rs-232.

@@ -18,13 +18,14 @@
 ;****************************************************************************
 
 ; NOM: vt102.s
-; DESCRIPTION: séquence de contrôle générées par l'émulateur de terminal minicom
-;  en mode VT102.
-;  La touche CTRL enfoncée simultanément avec une lettre génère un code entre
-;  1 et 26 correspondant à l'ordre de la lettre dans l'alphabet. i.e. CTRL_A=1, CTRL_Z=26
-;    
 ; DATE: 2017-04-12
-
+; DESCRIPTION: 
+; Périphérique pour la comminication avec un terminal ou émulateur
+; VT102. Le contrôle de flux est logiciel, i.e. XON, XOFF
+; La vitesse de transmission par défaut est 115200 bauds.
+; Configuration:  8 bits, 1 stop, pas de parité.    
+; Lorsque le terminal reçois un ASCII 13 (CR) il ne doit pas ajouté un ASCII 10 (LF).
+    
 SYSDICT
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -35,7 +36,7 @@ SYSDICT
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;  séquences de contrôles ^[
+;  séquences de contrôle ESC[
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; les 4 flèches
@@ -80,25 +81,94 @@ CPGUP: ; CTRL_PGUP
 CPGDN: ; CTRL_PGDN
  .byte 27,91,54,59,53,126
  
-; nom: XON  ( -- c ) 
-;   Constante, retourne le caractère ASCII DC1
-;   Ce caractère est utilisé dans le contrôle de flux logicel pour signifier
-;   que le terminal est prêt à rececoir.
+.section .vt102.bss bss
+; maintient une copie locale de la position du curseur
+; pour des raison d'efficacité. 
+vtcolon: .space 1
+vtline: .space 1
+
+; sauvegarde la position du curseur vt102
+; u1 colonne
+; u2 ligne
+HEADLESS CPOS_STORE,CODE  ; ( u1 u2 -- )
+    mov T, W0
+    mov.b WREG,vtline
+    DPOP
+    mov T, W0
+    mov.b WREG,vtcolon
+    DPOP
+    NEXT
+
+; empile la position du curseur vt102    
+; u1 colonne
+; u2 ligne
+HEADLESS CPOS_FETCH,CODE ; ( -- u1 u2 )	
+    DPUSH
+    mov.b vtcolon,WREG
+    ze W0,T
+    DPUSH
+    mov.b vtline,WREG
+    ze W0,T
+    NEXT
+    
+; curseur en début de ligne
+HEADLESS COLON1,CODE
+    mov #1,W0
+    mov.b WREG,vtcolon
+    NEXT
+    
+; incrémente vtcolon
+HEADLESS INC_COLON,CODE
+    mov #CPL,W0
+    cp.b vtcolon
+    bra z, 9f
+    inc.b vtcolon
+9:  NEXT
+
+; décrémente vtcolon
+HEADLESS DEC_COLON,CODE
+    mov #1,W0
+    cp.b vtcolon
+    bra z, 9f
+    dec.b vtcolon
+9:  NEXT
+    
+; incrémente vtline
+HEADLESS INC_LINE,CODE
+    mov #LPS,W0
+    cp.b vtline
+    bra z, 9f
+    inc.b vtline
+9:  NEXT
+    
+    
+; nom: VT-INIT ( -- )
+;   Initialise le périphérique VT102. 115200 BAUD 8N1
+; arguments;
+;   aucun
+; retourne:
+;   rien
+DEFWORD "VT-INIT",7,,VTINIT
+    .word B115200,BAUD,XON,VTPAGE,LIT,1,DUP,CPOS_STORE,EXIT
+    
+ 
+; nom: XON  ( -- ) 
+;   Envoie le caractère de contrôle XON (ASCII 17) au terminal VT102
 ; arguments:
 ;   aucun
 ; retourne:
 ;   c   Caractère ASCII DC1 valeur 17   
-DEFCONST "XON",3,,XON,CTRL_Q 
+DEFWORD "XON",3,,XON
+    .word LIT,CTRL_Q,SPUTC,EXIT 
  
 ; nom: XOFF  ( -- c ) 
-;   Constante, retourne le caractère ASCII DC3
-;   Ce caractère est utilisé dans le contrôle de flux logicel pour signifier
-;   que le terminal n'est pas prêt à rececoir.
+;   Envoie le caractère de contrôle XOFF (ASCII 19) au terminal VT102.
 ; arguments:
 ;   aucun
 ; retourne:
-;   c   Caractère ASCII DC3 valeur 19   
-DEFCONST "XOFF",4,,XOFF,CTRL_S
+;   rien
+DEFWORD "XOFF",4,,XOFF
+    .word LIT,CTRL_S,SPUTC,EXIT
 
 SYSDICT 
  VK_TILDE:
@@ -304,8 +374,9 @@ DEFWORD "ESC[",4,,ESCRBRAC
 ; retourne:
 ;   rien
 DEFWORD "VT-UP",5,,VTUP
-    .word ESCRBRAC,LIT,'A',SPUTC,EXIT
-    
+    .word CPOS_FETCH,DUP,LIT,1,EQUAL,ZBRANCH,2f-$,TWODROP,EXIT
+2:  .word ESCRBRAC,LIT,'A',SPUTC,ONEMINUS,CPOS_STORE,EXIT
+  
 ; nom: VT-DOWN ( -- )
 ;   Envoie la séquence ANSI 'ESC[B' au terminal VT102.
 ;   Cette séquence déplace le curseur sur la ligne suivante de l'affichage.    
@@ -314,8 +385,9 @@ DEFWORD "VT-UP",5,,VTUP
 ; retourne:
 ;    rien
 DEFWORD "VT-DOWN",7,,VTDOWN
-    .word ESCRBRAC,LIT,'B',SPUTC,EXIT
-
+    .word CPOS_FETCH,DUP,LIT,LPS,EQUAL,ZBRANCH,2f-$,TWODROP,EXIT
+2:  .word ESCRBRAC,LIT,'B',SPUTC,ONEPLUS,CPOS_STORE,EXIT
+  
 ; nom: VT-RIGHT ( -- )
 ;   Envoie la séquence ANSI 'ESC[C'  au terminal VT102.
 ;   Cete séquence déplace le curseur d'un caractère vers la droite.    
@@ -324,8 +396,8 @@ DEFWORD "VT-DOWN",7,,VTDOWN
 ; retourne:
 ;    rien
 DEFWORD "VT-RIGHT",8,,VTRIGHT
-    .word VTGETCUR,DROP,LIT,CPL,EQUAL,ZBRANCH,2f-$,EXIT
-2:  .word ESCRBRAC,LIT,'C',SPUTC,EXIT
+    .word CPOS_FETCH,DROP,LIT,CPL,EQUAL,ZBRANCH,2f-$,EXIT
+2:  .word ESCRBRAC,LIT,'C',SPUTC,INC_COLON,EXIT
     
 ; nom: VT-LEFT ( -- )
 ;   Envoie la séquence ANSI 'ESC[D'  au terminal VT102.
@@ -335,8 +407,10 @@ DEFWORD "VT-RIGHT",8,,VTRIGHT
 ; retourne:
 ;    rien
 DEFWORD "VT-LEFT",7,,VTLEFT
-    .word ESCRBRAC,LIT,'D',SPUTC,EXIT
-    
+    .word CPOS_FETCH,DROP,LIT,1,EQUAL,ZBRANCH,2f-$,EXIT
+2:  .word ESCRBRAC,LIT,'D',CPOS_FETCH,SWAP,ONEMINUS,SWAP
+    .word CPOS_STORE,EXIT
+  
 ; nom: VT-HOME ( -- )
 ;   Envoie une séquence de contrôle au terminal VT102 pour déplacer le curseur en début de ligne.    
 ; arguments:
@@ -344,9 +418,7 @@ DEFWORD "VT-LEFT",7,,VTLEFT
 ; retourne:
 ;    rien
 DEFWORD "VT-HOME",7,,VTHOME
-    .word VTGETCUR,DUP,ZEROLT,ZBRANCH,2f-$,DROP,EXIT
-2:  .word SWAP,DROP,LIT,1,SWAP
-    .word VTATXY,EXIT
+    .word COLON1,CPOS_FETCH,VTATXY,EXIT
     
 ; nom: VT-END ( -- )
 ;   Envoie une séquence de contrôle au terminal VT102 pour déplacer le curseur à la fin de la ligne.
@@ -355,9 +427,7 @@ DEFWORD "VT-HOME",7,,VTHOME
 ; retourne:
 ;    rien
 DEFWORD "VT-END",6,,VTEND
-    .word VTGETCUR,DUP,ZEROLT,ZBRANCH,2f-$,DROP,EXIT
-2:  .word SWAP,DROP,LIT,CPL-1,SWAP
-    .word VTATXY,EXIT
+    .word CPOS_FETCH,SWAP,DROP,LIT,CPL,SWAP,VTATXY,EXIT
     
 ; nom: VT-AT-XY ( u1 u2 -- )
 ;   Envoie une séquence de contrôle au terminal VT102 pour positionner le curseur    
@@ -368,6 +438,7 @@ DEFWORD "VT-END",6,,VTEND
 ;  retourne:
 ;    rien
 DEFWORD "VT-AT-XY",8,,VTATXY
+    .word TWODUP,CPOS_STORE
     .word ESCRBRAC,VTSNDARG
     .word LIT,';',SPUTC
     .word VTSNDARG
@@ -381,7 +452,7 @@ DEFWORD "VT-AT-XY",8,,VTATXY
 ; retourne:
 ;   rien
 DEFWORD "VT-DELEOL",9,,VTDELEOL
-    .word ESCRBRAC,LIT,'K',SPUTC,EXIT
+    .word ESCRBRAC,LIT,'K',SPUTC,CPOS_SYNC,EXIT
     
     
 ; nom: VT-PAGE ( -- )
@@ -391,7 +462,7 @@ DEFWORD "VT-DELEOL",9,,VTDELEOL
 ; retourne:
 ;   rien
 DEFWORD "VT-PAGE",7,,VTPAGE
-    .word LIT,CTRL_L,SPUTC
+    .word LIT,CTRL_L,SPUTC,LIT,1,DUP,CPOS_STORE
     .word EXIT
     
   
@@ -403,9 +474,9 @@ DEFWORD "VT-PAGE",7,,VTPAGE
 ; retourne:
 ;   rien
 DEFWORD "VT-DELBACK",10,,VTDELBACK ; ( -- )
-    .word LIT,VK_BACK,SPUTC
-    .word BL,SPUTC,LIT,VK_BACK,SPUTC
-    .word EXIT
+    .word CPOS_FETCH,DROP,LIT,1,EQUAL,ZBRANCH,2f-$,EXIT
+2:  .word LIT,VK_BACK,SPUTC,ESCRBRAC,LIT,'K',SPUTC
+    .word DEC_COLON,EXIT
 
 ; nom: VT-DELLN   ( -- )    
 ;   Envoie une commande au terminal VT102 pour supprimer la ligne sur laquelle
@@ -415,9 +486,9 @@ DEFWORD "VT-DELBACK",10,,VTDELBACK ; ( -- )
 ; retourne:
 ;   rien
 DEFWORD "VT-DELLN",8,,VTDELLN ; ( -- )
-    .word LIT,27,SPUTC,LIT,'[',SPUTC
-    .word LIT,'2',SPUTC
-    .word LIT,'K',SPUTC,LIT,13,SPUTC,EXIT
+    .word ESCRBRAC,LIT,'2',SPUTC
+    .word LIT,'K',SPUTC,LIT,13,SPUTC
+    .word COLON1,EXIT
 
 ; nom: VT-INSRTLN ( -- )
 ;   Insère une ligne avant la ligne où se trouve le curseur.
@@ -427,7 +498,7 @@ DEFWORD "VT-DELLN",8,,VTDELLN ; ( -- )
 ; retourne:
 ;   rien
 DEFWORD "VT-INSRTLN",10,,VTINSRTLN 
-    .word ESCRBRAC,LIT,'L',SPUTC,VTHOME,EXIT
+    .word ESCRBRAC,LIT,'L',SPUTC,COLON1,EXIT
   
 ; nom: VT-RMVLN ( -- )
 ;   Supprime la ligne du curseur et décale toutes celles en dessous vers le haut.    
@@ -436,7 +507,7 @@ DEFWORD "VT-INSRTLN",10,,VTINSRTLN
 ; retourne:
 ;    rien
 DEFWORD "VT-RMVLN",8,,VTRMVLN
-    .word ESCRBRAC,LIT,'M',SPUTC,EXIT
+    .word ESCRBRAC,LIT,'M',SPUTC,COLON1,EXIT
 
 ; nom: VT-WHITELN ( n -- )
 ;   Imprime ligne blanche de 64 caractères sur la console REMOTE.
@@ -446,11 +517,11 @@ DEFWORD "VT-RMVLN",8,,VTRMVLN
 ; retourne:
 ;   rien
 DEFWORD "VT-WHILELN",10,,VTWHITELN
-    .word FALSE,VTWRAP
+    .word FALSE,WRAP
     .word DUP,LIT,1,SWAP,VTATXY,TRUE,VTBSLASHW
     .word LIT,64,LIT,0,DODO
-1:  .word BL,VTEMIT,DOLOOP,1b-$    
-    .word LIT,1,SWAP,VTATXY,TRUE,VTWRAP,EXIT
+1:  .word BL,SPUTC,DOLOOP,1b-$    
+    .word LIT,1,SWAP,VTATXY,TRUE,WRAP,EXIT
     
 ; nom: VT-PRTINV  ( c-addr u n -- )
 ;   Imprime sur la REMOTE console la ligne de texte 'c-addr' sur la ligne 'n'.
@@ -463,19 +534,20 @@ DEFWORD "VT-PRTINV",9,,VTPRTINV
     .word DUP,VTWHITELN
     .word LIT,1,SWAP,VTATXY,VTTYPE,EXIT
     
-; nom: VT-DSR  ( -- )
+; VT-DSR  ( -- )
 ;   Envoie la séquence de contrôle ANSI 'ESC[6n' au terminal VT102.
 ;   Le terminal répond à cette commande en envoyant la la position du curseur. 
 ;   VT-DSR est utilisé par VT-GETCUR
 ; arguments:
 ;   aucun
 ; retourne:
-;   rien    
-DEFWORD "VT-DSR",6,,VTDSR ; ( -- )
+;   rien
+HEADLESS VTDSR,HWORD    
+;DEFWORD "VT-DSR",6,,VTDSR ; ( -- )
     .word LIT,27,SPUTC,LIT,'[',SPUTC,LIT,'6',SPUTC
     .word LIT,'n',SPUTC,EXIT
 
-; nom: VT-GETP  ( c -- n f )
+; VT-GETP  ( c -- n f )
 ;   Réception d'un paramètre numérique envoyé par le terminal.    
 ;   La valeur numérique est terminée par le caractère c.
 ;   VT-GETP est utilisé par les commandes qui attendent une réponse du terminal
@@ -485,7 +557,8 @@ DEFWORD "VT-DSR",6,,VTDSR ; ( -- )
 ; retourne:
 ;   n    nombre lue
 ;   f    indicateur booléen de succès.
-DEFWORD "VT-GETP",7,,VTGETP
+HEADLESS VTGETP,HWORD    
+;DEFWORD "VT-GETP",7,,VTGETP
     .word TOR,LIT,0
 1:  .word SGETC,DUP,RFETCH,EQUAL,TBRANCH,8f-$
     .word DUP,DECIMALQ,ZBRANCH,2f-$ ; si ce n'est pas un digit décimial erreur
@@ -494,13 +567,14 @@ DEFWORD "VT-GETP",7,,VTGETP
 8:  .word DROP,RDROP,TRUE,EXIT  
     
   
-; nom: ESCSEQ?  ( -- f )
+; ESCSEQ?  ( -- f )
 ;   Attend une séquence d'échappement  'ESC[' du terminal.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   f  indicateur booléen, FAUX si la séquence reçu n'est pas ESC[  
-DEFWORD "ESCSEQ?",7,,ESCSEQQ  ; ( -- f )
+HEADLESS ESCSEQQ,HWORD  
+;DEFWORD "ESCSEQ?",7,,ESCSEQQ  ; ( -- f )
     .word SGETC,LIT,27,EQUAL,ZBRANCH,9f-$
     .word SGETC,LIT,'[',EQUAL,ZBRANCH,9f-$
     .word TRUE,EXIT
@@ -527,6 +601,11 @@ DEFWORD "VT-GETCUR",9,,VTGETCUR ; ( -- u1 u2 | -1 -1 )
 2:  .word SWAP,EXIT
 8:  .word LIT,-1,DUP,EXIT    
    
+; synchronise les variables vtcolon et vtline avec la position
+; rapportée par VT-GETCUR
+HEADLESS CPOS_SYNC,HWORD
+    .word VTGETCUR,CPOS_STORE,EXIT
+  
 ; nom: VT-CRLF 
 ;   Envoie la séquence 'CRTL_M CTRL_J'  (i.e. ASCII 13 10)  au terminal VT102.
 ;   Le terminal répond en déplacant le curseur au début de la ligne suivante.  
@@ -535,21 +614,21 @@ DEFWORD "VT-GETCUR",9,,VTGETCUR ; ( -- u1 u2 | -1 -1 )
 ; retourne:
 ;   rien
 DEFWORD "VT-CRLF",7,,VTCRLF
-   .word LIT,CTRL_M,SPUTC,LIT,CTRL_J,SPUTC,EXIT
+   .word LIT,CTRL_M,SPUTC,LIT,CTRL_J,SPUTC
+   .word CPOS_SYNC,EXIT
    
-; nom: VT-PUTC
+; nom: VT-PUTC ( c -- )
 ;   Envoie un caractère au terminal VT102. Les caractères ne sont pas filtrés.
-;   Si la colonne du curseur après l'affichage du caractère est à 65 force un VT-CRLF.   
 ; arguments:
 ;   c   caractère à envoyer au terminal.
 ; retourne:
 ;   rien
 DEFWORD "VT-PUTC",7,,VTPUTC
-   .word SPUTC,VTGETCUR,DROP
-   .word LIT,CPL+1,EQUAL,ZBRANCH,9f-$
+   .word SPUTC,CPOS_FETCH,DROP
+   .word LIT,CPL,EQUAL,ZBRANCH,9f-$
    .word QWRAP,TBRANCH,2f-$,VTLEFT,EXIT
-2: .word VTCRLF
-9: .word EXIT
+2: .word VTCRLF,EXIT
+9: .word INC_COLON,EXIT
  
 ; nom: VT-B/W  ( f -- )
 ;   Terminal VT102. 
@@ -566,16 +645,6 @@ DEFWORD "VT-B/W",6,,VTBSLASHW
     .word LIT,'7',SPUTC
 2:  .word LIT,'m',SPUTC,EXIT
    
-; nom: VT-WRAP ( f -- )
-;   Active ou désactive le retour à la ligne automatique.
-; arguments:
-;   f Indicateur Booléen, VRAI actif, FAUX inactif.
-; retourne:
-;   rien
-DEFWORD "VT-WRAP",7,,VTWRAP
-    .word DUP,LCWRAP,ESCRBRAC,LIT,'?',SPUTC,LIT,'7',SPUTC
-    .word ZBRANCH,2f-$,LIT,'h',SPUTC,EXIT
-2:  .word LIT,'l',SPUTC,EXIT    
     
     
     

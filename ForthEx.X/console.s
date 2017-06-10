@@ -53,7 +53,6 @@
 ;12   |  RMVLN     |  LC-RMVLN   | VT-RMVLN
 ;13   |  DELLN     |  LC-DELLN   | VT-DELLN
 ;14   |  WHTELN    |  LC-WHTELN  | VT-WHITELN
-;15   |  WRAP      |  LC-WRAP    | VT-WRAP
     
 ;  Exemple de définition d'un mot vectorisé.
 ; : KEY  SYSCONS @ FN_KEY VEXEC ;
@@ -76,7 +75,6 @@
 .equ FN_RMVLN,12
 .equ FN_DELLN,13    
 .equ FN_WHITELN,14
-.equ FN_WRAP,15
     
 ; nom: LC-CONS ( -- a-addr )
 ;   Retourne l'adresse du vecteur des fonctions pour la console locale.
@@ -100,7 +98,6 @@ DEFTABLE "LC-CONS",7,,LCCONS
     .word LCRMVLN ; tvout.s
     .word LCDELLN ; tvout.s
     .word LCWHITELN ; tvout.s
-    .word LCWRAP    ; tvout.s
     
 ; nom: VT-CONS ( -- a-addr )
 ;   Retourne l'adresse du vecteur des fonctions pour la console locale.
@@ -124,7 +121,6 @@ DEFTABLE "VT-CONS",7,,VTCONS
     .word VTRMVLN ; vt102.s
     .word VTDELLN ; vt102.s
     .word VTWHITELN ; vt102.s
-    .word VTWRAP   ; vt102.s
     
 ; nom: ED-CONS ( -- a-addr )
 ;   Retourne l'adresse du vecteur des fonctions pour la console de l'éditeur de bloc.
@@ -148,7 +144,6 @@ DEFTABLE "ED-CONS"7,,EDCONS
     .word EDRMVLN ; blockEdit.s
     .word EDDELLN ; blockEdit.s
     .word EDWHITELN ; blockEdit.s
-    .word VTWRAP    ; vt102.s
     
     
 ; nom: SYSCONS   ( -- a-addr )
@@ -472,13 +467,49 @@ DEFWORD "B/W",3,,BSLASHW
 DEFWORD "WHITELN",7,,WHITELN
     .word SYSCONS,FETCH,LIT,FN_WHITELN,VEXEC,EXIT
     
-; nom: SCROLL ( f -- )
-;   Activation désactivation du défilement lors de l'impression d'un caractère
-;   en dernière position de l'écran.
+; nom: WRAP ( f -- )
+;   Active ou désactive le retour à la ligne automatique.
 ; arguments:
-;   f Indicateur Booléean, VRAI défilement actif, FAUX défilement inactif.
+;   f Indicateur Booléen, VRAI wrap actif, FAUX inactif.
 ; retourne:
 ;   rien
-DEFWORD "WRAP",6,,WRAP
-    .word SYSCONS,FETCH,LIT,FN_WRAP,VEXEC,EXIT
+DEFCODE "WRAP",4,,WRAP
+    cp0 T
+    bra z,2f
+    bset.b video_flags,#F_WRAP
+    bra 9f
+2:  bclr.b video_flags,#F_WRAP
+9:  DPOP
+    NEXT
+
+; nom: ?WRAP ( -- f )
+;   Vérifie si le mode retour automatique est actif.
+; arguments:
+;   aucun
+; retourne:
+;    f Indicateur Booléean VRAI si actif.
+DEFCODE "?WRAP",5,,QWRAP
+    DPUSH
+    clr T
+    btsc.b video_flags,#F_WRAP
+    setm T
+    NEXT
+    
+    
+; nom: SCROLL ( f -- )
+;   Active ou désactive le défilement de l'écran lorsque le curseur
+;   atteint la fin de celui-ci, i.e. position {64,24}
+;   Ce blocage du défilement ne concerne que EMIT.    
+; arguments:
+;   f Indicateur Booléen, VRAI définelement actif, FAUX inactif
+; retourne:
+;   rien
+DEFCODE "SCROLL",6,,SCROLL
+    cp0 T
+    bra z,2f
+    bset.b video_flags,#F_SCROLL
+    bra 9f
+2:  bclr.b video_flags,#F_SCROLL
+9:  DPOP
+    NEXT
     
