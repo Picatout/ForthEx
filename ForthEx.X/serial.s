@@ -288,11 +288,12 @@ DEFCODE "SGETC",5,,SGETC  ; ( -- c )
     DPUSH
     mov.b [W1], T
     ze T,T
-    disi #6
+    bclr SER_RX_IEC,#SER_RX_IE
     dec rx_in
     bra nz,1f
     bclr ser_flags, #F_RXDAT
-1:  inc.b rx_head
+1:  bset SER_RX_IEC, #SER_RX_IE
+    inc.b rx_head
     mov #(QUEUE_SIZE-1), W0
     and.b rx_head
     btss ser_flags,#F_RXSTOP

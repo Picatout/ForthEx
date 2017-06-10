@@ -187,7 +187,7 @@ CTRL_TABLE:
 ;   true    indicateur booléen.
 DEFWORD "VT-FILTER",9,,VTFILTER
     .word DUP,BL,ULESS,TBRANCH,2f-$
-    .word DUP,LIT,127,ULESS,TBRANCH,1f-$
+    .word DUP,LIT,128,ULESS,TBRANCH,1f-$
     .word FALSE,EXIT
 1:  .word TRUE,EXIT
 2:  .word DUP,CELLS 

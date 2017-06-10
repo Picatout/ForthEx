@@ -1,3 +1,8 @@
+2017-06-09
+----------
+Modification matériel circuit port rs-232.
+Tentative de débogage port rs-232.
+
 2017-06-08
 ----------
 Travail sur console.
