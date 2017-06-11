@@ -36,7 +36,55 @@
 <div style="margin-left:5%;">    fonctions suivante:
 </div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:4px;"><p id="SYSCONS">
+<hr style="border-width:4px;"><p id="LC-CONS">
+<b>LC-CONS</b> ( -- a-addr )
+<div style="margin-left:5%;">   Retourne l'adresse du vecteur des fonctions pour la console locale.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse du vecteur contenant les CFA des fonctions de la console locale.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="VT-CONS">
+<b>VT-CONS</b> ( -- a-addr )
+<div style="margin-left:5%;">   Retourne l'adresse du vecteur des fonctions pour la console locale.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse du vecteur contenant les CFA des fonctions de la console locale.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ED-CONS">
+<b>ED-CONS</b> ( -- a-addr )
+<div style="margin-left:5%;">   Retourne l'adresse du vecteur des fonctions pour la console de l'éditeur de bloc.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>Adresse</i>&nbsp;&nbsp; du vecteur contenant les CFA des fonctions de la console de l'éditeur.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SYSCONS">
 <b>SYSCONS</b>   ( -- a-addr )
 <div style="margin-left:5%;">   Variable système qui contient l'adresse de la table des fonctions du 
 </div>
@@ -69,7 +117,7 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse de la table LCONSOLE    
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse de la table LCONSOLE   
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -110,6 +158,22 @@
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
 <div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="IS-LOCAL">
+<b>IS-LOCAL</b> ( -- f )
+<div style="margin-left:5%;">   Retourne un indicateur Booléen VRAI si la console est en mode LOCAL.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f	Indicateur</i>&nbsp;&nbsp; Booléen vrai si console LOCAL.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -318,11 +382,45 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="CLEARLN">
-<b>CLEARLN</b>  ( -- )
+<hr style="border-width:1px;"><p id="DELLN">
+<b>DELLN</b>  ( -- )
 <div style="margin-left:5%;">   Efface la ligne sur laquelle le curseur est situé.
 </div>
 <div style="margin-left:5%;">   Place le curseur au début de la ligne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="INSRTLN">
+<b>INSRTLN</b> ( -- )
+<div style="margin-left:5%;">   Décalle toutes les lignes à partir du curseur d'une position vers le bas.
+</div>
+<div style="margin-left:5%;">   Efface la ligne du curseur et positionne le curseur au début de celle-ci.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="RMVLN">
+<b>RMVLN</b> ( -- )
+<div style="margin-left:5%;">   Supprime la ligne du curseur et décale toutes celles en dessus vers le haut.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -422,6 +520,22 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="DELEOL">
+<b>DELEOL</b> ( -- )
+<div style="margin-left:5%;">  Efface tous les caractères de la position du curseur jusqu'à la fin de la ligne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="CR">
 <b>CR</b> ( -- )    
 <div style="margin-left:5%;">   Renvoie le curseur au début de la ligne suivante.
@@ -492,18 +606,91 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="WITHELN">
+<b>WITHELN</b> ( n -- )
+<div style="margin-left:5%;">   Imprime une ligne blanche et laisse le curseur au début de celle-ci
+</div>
+<div style="margin-left:5%;">   À la sortie le mode vidéo est inversé, i.e. noir/blanc.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Numéro de la ligne {1..24}
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="WRAP">
+<b>WRAP</b> ( f -- )
+<div style="margin-left:5%;">   Active ou désactive le retour à la ligne automatique.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur Booléen, VRAI wrap actif, FAUX inactif.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="?WRAP">
+<b>?WRAP</b> ( -- f )
+<div style="margin-left:5%;">   Vérifie si le mode retour automatique est actif.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur Booléean VRAI si actif.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SCROLL">
+<b>SCROLL</b> ( f -- )
+<div style="margin-left:5%;">   Active ou désactive le défilement de l'écran lorsque le curseur
+</div>
+<div style="margin-left:5%;">   atteint la fin de celui-ci, i.e. position {64,24}
+</div>
+<div style="margin-left:5%;">   Ce blocage du défilement ne concerne que EMIT.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur Booléen, VRAI définelement actif, FAUX inactif
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><h4 id="index">Index</h4>
 <p>
 <ul>
+<li><a href="#?WRAP">?WRAP</a></li>
 <li><a href="#AT-XY">AT-XY</a></li>
 <li><a href="#B/W">B/W</a></li>
-<li><a href="#CLEARLN">CLEARLN</a></li>
 <li><a href="#CLS">CLS</a></li>
 <li><a href="#CONSOLE">CONSOLE</a></li>
 <li><a href="#CR">CR</a></li>
 <li><a href="#DELBACK">DELBACK</a></li>
+<li><a href="#DELEOL">DELEOL</a></li>
 <li><a href="#DELETE">DELETE</a></li>
 <li><a href="#DELLINE">DELLINE</a></li>
+<li><a href="#DELLN">DELLN</a></li>
+<li><a href="#ED-CONS">ED-CONS</a></li>
 <li><a href="#EKEY">EKEY</a></li>
 <li><a href="#EKEY&gt;CHAR">EKEY&gt;CHAR</a></li>
 <li><a href="#EKEY?">EKEY?</a></li>
@@ -511,15 +698,23 @@
 <li><a href="#EMIT?">EMIT?</a></li>
 <li><a href="#ETYPE">ETYPE</a></li>
 <li><a href="#GETCUR">GETCUR</a></li>
+<li><a href="#INSRTLN">INSRTLN</a></li>
+<li><a href="#IS-LOCAL">IS-LOCAL</a></li>
 <li><a href="#KEY">KEY</a></li>
 <li><a href="#KEY?">KEY?</a></li>
+<li><a href="#LC-CONS">LC-CONS</a></li>
 <li><a href="#LOCAL">LOCAL</a></li>
 <li><a href="#PAGE">PAGE</a></li>
 <li><a href="#REMOTE">REMOTE</a></li>
+<li><a href="#RMVLN">RMVLN</a></li>
+<li><a href="#SCROLL">SCROLL</a></li>
 <li><a href="#SPACE">SPACE</a></li>
 <li><a href="#SPACES">SPACES</a></li>
 <li><a href="#SYSCONS">SYSCONS</a></li>
 <li><a href="#TYPE">TYPE</a></li>
+<li><a href="#VT-CONS">VT-CONS</a></li>
+<li><a href="#WITHELN">WITHELN</a></li>
+<li><a href="#WRAP">WRAP</a></li>
 </ul>
 </p>
 <hr style="border-width:1px;"><div><a href="#top">haut</a></div>

@@ -21,7 +21,8 @@
 ; DATE: 2017-04-12
 ; DESCRIPTION: 
 ; Périphérique pour la comminication avec un terminal ou émulateur
-; VT102. Le contrôle de flux est logiciel, i.e. XON, XOFF
+; VT102, implémentation partielle. 
+; Le contrôle de flux est logiciel, i.e. XON, XOFF
 ; La vitesse de transmission par défaut est 115200 bauds.
 ; Configuration:  8 bits, 1 stop, pas de parité.    
 ; Lorsque le terminal reçois un ASCII 13 (CR) il ne doit pas ajouté un ASCII 10 (LF).
@@ -41,45 +42,45 @@ SYSDICT
 
 ; les 4 flèches
  
-CUU: ; curseur vers le haut 
- .byte 27,91,65
-CUD: ; curseur vers le bas
- .byte 27,91,66
-CUF: ; curseur vers la droite
- .byte 27,91,67
-CUB: ; curseur vers la gauche
- .byte 27,91,68
-CCUU: ; CTRL curseur vers le haut
- .byte 27,91,49,59,53,65   
-CCUD: ; CTRL curseur vers le bas
- .byte 27,91,49,59,53,66
-CCUF: ; CTRL curseur vers la droite
- .byte 27,91,49,59,53,67
-CCUB: ; CTRL curseur vers la gauche
- .byte 27,91,49,59,53,68
-
-INSERT: 
- .byte 27,91,50,126
-HOME:
- .byte 27,91,49,126    
-VTDELETE:
- .byte 27,91,51,126
-END:
- .byte 27,79,70
-PGUP:
- .byte 27,91,53,126  
-PGDN:
- .byte 27,91,54,126
-CDELETE: ; CTRL_DELETE
- .byte 27,91,51,59,53,126
-CHOME: ;CTRL_HOME
- .byte 27,91,51,59,53,72   
-CEND: ; CTRL_END 
- .byte 27,91,51,59,53,70    
-CPGUP: ; CTRL_PGUP
- .byte 27,91,53,59,53,126
-CPGDN: ; CTRL_PGDN
- .byte 27,91,54,59,53,126
+;CUU: ; curseur vers le haut 
+; .byte 27,91,65
+;CUD: ; curseur vers le bas
+; .byte 27,91,66
+;CUF: ; curseur vers la droite
+; .byte 27,91,67
+;CUB: ; curseur vers la gauche
+; .byte 27,91,68
+;CCUU: ; CTRL curseur vers le haut
+; .byte 27,91,49,59,53,65   
+;CCUD: ; CTRL curseur vers le bas
+; .byte 27,91,49,59,53,66
+;CCUF: ; CTRL curseur vers la droite
+; .byte 27,91,49,59,53,67
+;CCUB: ; CTRL curseur vers la gauche
+; .byte 27,91,49,59,53,68
+;
+;INSERT: 
+; .byte 27,91,50,126
+;HOME:
+; .byte 27,91,49,126    
+;VTDELETE:
+; .byte 27,91,51,126
+;END:
+; .byte 27,79,70
+;PGUP:
+; .byte 27,91,53,126  
+;PGDN:
+; .byte 27,91,54,126
+;CDELETE: ; CTRL_DELETE
+; .byte 27,91,51,59,53,126
+;CHOME: ;CTRL_HOME
+; .byte 27,91,51,59,53,72   
+;CEND: ; CTRL_END 
+; .byte 27,91,51,59,53,70    
+;CPGUP: ; CTRL_PGUP
+; .byte 27,91,53,59,53,126
+;CPGDN: ; CTRL_PGDN
+; .byte 27,91,54,59,53,126
  
 .section .vt102.bss bss
 ; maintient une copie locale de la position du curseur
@@ -241,7 +242,7 @@ CTRL_TABLE:
     .word -1,0,0,0  ; CTRL_X
     .word 0,0,0,0  
  
-; nom: VT-FILTER ( u -- u false | c true )    
+; VT-FILTER ( u -- u false | c true )    
 ;   Filtre u et retourne un caractère 'c' et 'vrai' si u fait partie de l'ensemble reconnu.
 ;   sinon retourne 'u' et 'faux'   
 ;   accepte:
@@ -255,7 +256,8 @@ CTRL_TABLE:
 ;   - reconnu:
 ;   c       caractère reconnu.
 ;   true    indicateur booléen.
-DEFWORD "VT-FILTER",9,,VTFILTER
+HEADLESS VTFILTER,HWORD    
+;DEFWORD "VT-FILTER",9,,VTFILTER
     .word DUP,BL,ULESS,TBRANCH,2f-$
     .word DUP,LIT,128,ULESS,TBRANCH,1f-$
     .word FALSE,EXIT
@@ -301,6 +303,10 @@ DEFWORD "VT-KEY",6,,VTKEY
 DEFWORD "VT-EMIT",7,,VTEMIT
     .word DUP,QPRTCHAR,ZBRANCH,2f-$
     .word VTPUTC,EXIT
+2:  .word DUP,LIT,VK_DELETE,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTDEL,EXIT 
+2:  .word DUP,LIT,VK_INSERT,EQUAL,ZBRANCH,2f-$
+    .word DROP,VTINSERT,EXIT
 2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
     .word DROP,VTDELLN,EXIT
 2:  .word DUP,LIT,CTRL_K,EQUAL,ZBRANCH,2f-$
@@ -408,7 +414,7 @@ DEFWORD "VT-RIGHT",8,,VTRIGHT
 ;    rien
 DEFWORD "VT-LEFT",7,,VTLEFT
     .word CPOS_FETCH,DROP,LIT,1,EQUAL,ZBRANCH,2f-$,EXIT
-2:  .word ESCRBRAC,LIT,'D',CPOS_FETCH,SWAP,ONEMINUS,SWAP
+2:  .word ESCRBRAC,LIT,'D',SPUTC,CPOS_FETCH,SWAP,ONEMINUS,SWAP
     .word CPOS_STORE,EXIT
   
 ; nom: VT-HOME ( -- )
@@ -465,7 +471,31 @@ DEFWORD "VT-PAGE",7,,VTPAGE
     .word LIT,CTRL_L,SPUTC,LIT,1,DUP,CPOS_STORE
     .word EXIT
     
-  
+
+; nom: VT-DELETE ( -- )
+;   Supprime le caractère à la position du curseur ferme l'espace.
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "VT-DEL",6,,VTDEL
+    .word ESCRBRAC,LIT,'1',SPUTC,LIT,'P',SPUTC
+    .word EXIT
+    
+; nom: VT-INSERT ( -- )
+;   Insère un espace à la position du curseur.
+; arguments:
+;   aucun
+; retourne:
+;   rien
+DEFWORD "VT-INSERT",9,,VTINSERT
+    .word ESCRBRAC,LIT,'4',SPUTC,LIT,'h',SPUTC
+    .word BL,SPUTC,VTLEFT
+    .word ESCRBRAC,LIT,'4',SPUTC,LIT,'l',SPUTC
+    .word CPOS_FETCH,LIT,65,OVER,VTATXY,VTDEL
+    .word VTATXY
+    .word EXIT
+    
 ; nom: VT-DELBACK  ( -- )
 ;   Envoie une commande au terminal VT102 pour effacer le caractère à gauche du curseur.
 ;   Le curseur est déplacé à la position du caractère supprimé.
@@ -617,13 +647,14 @@ DEFWORD "VT-CRLF",7,,VTCRLF
    .word LIT,CTRL_M,SPUTC,LIT,CTRL_J,SPUTC
    .word CPOS_SYNC,EXIT
    
-; nom: VT-PUTC ( c -- )
+; VT-PUTC ( c -- )
 ;   Envoie un caractère au terminal VT102. Les caractères ne sont pas filtrés.
 ; arguments:
 ;   c   caractère à envoyer au terminal.
 ; retourne:
 ;   rien
-DEFWORD "VT-PUTC",7,,VTPUTC
+HEADLESS VTPUTC,HWORD   
+;DEFWORD "VT-PUTC",7,,VTPUTC
    .word SPUTC,CPOS_FETCH,DROP
    .word LIT,CPL,EQUAL,ZBRANCH,9f-$
    .word QWRAP,TBRANCH,2f-$,VTLEFT,EXIT

@@ -149,7 +149,7 @@ DEFTABLE "ED-CONS"7,,EDCONS
 ; nom: SYSCONS   ( -- a-addr )
 ;   Variable système qui contient l'adresse de la table des fonctions du 
 ;   périphérique utilisé par la console.
-;   La console peut fonctionné en mode LOCAL ou REMOTE.    
+;   La console peut fonctionner en mode LOCAL ou REMOTE.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -164,7 +164,7 @@ DEFUSER "SYSCONS",7,,SYSCONS
 ; retourne:
 ;   a-addr Adresse de la table LCONSOLE   
 DEFWORD "LOCAL",5,,LOCAL 
-    .word LCPAGE,LCCONS,EXIT
+    .word LCINIT,LCCONS,EXIT
 
     
 ; nom: REMOTE ( -- a-addr )
@@ -176,10 +176,7 @@ DEFWORD "LOCAL",5,,LOCAL
 ; retourne:
 ;   a-addr Adresse de la table LREMOTE    
 DEFWORD "REMOTE",6,,REMOTE
-    .word TRUE,SERENBL
-    .word LIT,4,LIT,0,DODO
-1:  .word LIT,65,SPUTC,DOLOOP,1b-$
-    .word LIT,CTRL_L,SPUTC,VTCONS,EXIT
+    .word VTINIT,VTCONS,EXIT
     
     
 ; nom: CONSOLE ( a-addr --  )

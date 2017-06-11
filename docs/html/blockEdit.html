@@ -23,15 +23,15 @@
 </div>
 <div style="margin-left:5%;">   Chaque écran sauvegardé s'appelait un bloc.
 </div>
-<div style="margin-left:5%;">   Le problème c'est que ForthEx utilise un écran de 24 lignes au lieu de 16 ce qui
+<div style="margin-left:5%;">   Le problème c'est que BLKED utilise un écran de 23 lignes au lieu de 16 ce qui
 </div>
-<div style="margin-left:5%;">   fait qu'un bloc serait de 1536 caractères au lieu de 1024. Mais comme le standard
+<div style="margin-left:5%;">   fait qu'un bloc serait de 1472 caractères au lieu de 1024. Mais comme le standard
 </div>
 <div style="margin-left:5%;">   ANS Forth définie toujours les blocs comme étant 1024 caractères je devais trouver
 </div>
 <div style="margin-left:5%;">   une solution pour sauvegarder les écrans dans des blocs. Entre autre solutions il y a
 </div>
-<div style="margin-left:5%;">   1) M'écarter du standard et modifier la taille des blocs à 1536 octets.
+<div style="margin-left:5%;">   1) M'écarter du standard et modifier la taille des blocs à 1472 octets.
 </div>
 <div style="margin-left:5%;">   2) Utiliser 2 blocs standards pour sauvegarder un écran, occasionne une perte d'espace.
 </div>
@@ -45,19 +45,23 @@
 </div>
 <div style="margin-left:5%;">   Lors de la sauvegarde dans un bloc les lignes sont tronquées après le dernier caractère
 </div>
-<div style="margin-left:5%;">   et un caractère de fin de ligne est ajouté. Il y a 24 lignes sur un écran donc
+<div style="margin-left:5%;">   et un caractère de fin de ligne est ajouté. Il y a 23 lignes sur un écran donc
 </div>
-<div style="margin-left:5%;">   si la longueur moyenne des lignes est inférieure à (BLOCK_SIZE-24)/24 l'écran peut
+<div style="margin-left:5%;">   si la longueur moyenne des lignes est inférieure à (BLOCK_SIZE-23)/23 l'écran peut
 </div>
 <div style="margin-left:5%;">   être sauvegardé dans un bloc. Le mot SCR-SIZE défini dans le fichier block.s
 </div>
 <div style="margin-left:5%;">   permet de connaître la taille occupée par un écran dans un bloc.
 </div>
-<div style="margin-left:5%;">   Il est problable que la majorité du temps un écran avec les lignes tronquées après
+<div style="margin-left:5%;">   Il est problable que la majorité des cas un écran avec les lignes tronquées après
 </div>
 <div style="margin-left:5%;">   le dernier caractère répondra à ce critère. Au pire il suffira de raccourcir les commentaires.    
 </div>
 <div style="margin-left:5%;"> FONCTIONNEMENT:
+</div>
+<div style="margin-left:5%;">   BLKED réserve la ligne 24 comme ligne d'état donc un bloc de texte occupe les
+</div>
+<div style="margin-left:5%;">   lignes 1..23.     
 </div>
 <div style="margin-left:5%;">   Le curseur peut-être déplacé n'importe où sur l'écran et le texte modifié.
 </div>
@@ -73,9 +77,9 @@
 </div>
 <div style="margin-left:5%;">   Déplacement du curseur:
 </div>
-<div style="margin-left:5%;">   UP Déplace le curseur sur la ligne supérieure.
+<div style="margin-left:5%;">   UP Déplace le curseur d'une ligne vers le haut.
 </div>
-<div style="margin-left:5%;">   DOWN Déplace le curseur sur la ligne suivante.
+<div style="margin-left:5%;">   DOWN Déplace le curseur d'une ligne vers le bas.
 </div>
 <div style="margin-left:5%;">   LEFT Déplace le curseur d'un caractère vers la gauche.
 </div>
@@ -101,9 +105,11 @@
 </div>
 <div style="margin-left:5%;">   BACKSPACE Efface le caractère à gauche du curseur.
 </div>
-<div style="margin-left:5%;">   CTRL_A  Efface tout l'écran.     
+<div style="margin-left:5%;">   CTRL_D  Efface la ligne du curseur et place celui-ci à la marge gauche.     
 </div>
-<div style="margin-left:5%;">   CTRL_K  Efface à partir du curseur jusqu'à la fin de la ligne    
+<div style="margin-left:5%;">   CTRL_K  Efface à partir du curseur jusqu'à la fin de la ligne.    
+</div>
+<div style="margin-left:5%;">   CTRL_L  Efface tout l'écran. 
 </div>
 <div style="margin-left:5%;">   CTRL_X  Supprime la ligne sur laquelle le curseur réside.
 </div>
@@ -111,24 +117,22 @@
 </div>
 <div style="margin-left:5%;">   Manipulation des blocs:    
 </div>
-<div style="margin-left:5%;">   CTRL_B  Affiche le numéro du bloc en édition ainsi que sa taille.    
-</div>
-<div style="margin-left:5%;">   CTRL_S  Sauvegarde de l'écran dans le bloc.
+<div style="margin-left:5%;">   CTRL_B  Sauvegarde de l'écran dans le bloc.
 </div>
 <div style="margin-left:5%;">   CTRL_N  Sauvegarde le bloc actuel et charge le bloc suivant pour édition.
 </div>
 <div style="margin-left:5%;">   CTRL_P  Sauvegarde le bloc actuel et charge le bloc précédent pour édition.     
 </div>
-<div style="margin-left:5%;">   CTRL_I  Sauvegarde le bloc actuel et saisie d'un numéro de bloc pour édition.
+<div style="margin-left:5%;">   CTRL_O  Sauvegarde le bloc actuel et saisie d'un numéro de bloc pour édition.
 </div>
-<div style="margin-left:5%;">   CTRL_Q  Quitte l'éditeur,le contenu de l'écran n'est pas sauvegardé.
+<div style="margin-left:5%;">   CTRL_E  Quitte l'éditeur,le contenu de l'écran n'est pas sauvegardé.
 </div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:4px;"><p id="TEXTEND">
 <b>TEXTEND</b>  ( -- )
 <div style="margin-left:5%;">   Positionne le curseur à la fin du texte. Balaie la mémoire tampon de l'écran à partir
 </div>
-<div style="margin-left:5%;">   de la fin et s'arrête après le premier caractère non blanc.     
+<div style="margin-left:5%;">   de la fin de la ligne 23 et s'arrête après le premier caractère non blanc.     
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -172,6 +176,26 @@
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
 <div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Numéro de la ligne à restaurer {1..24}.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ED-WITHELN">
+<b>ED-WITHELN</b> ( n -- )
+<div style="margin-left:5%;">   Console LOCAL et REMOTE.    
+</div>
+<div style="margin-left:5%;">   Imprime une ligne blanche et laisse le curseur au début de celle-ci
+</div>
+<div style="margin-left:5%;">   À la sortie le mode vidéo est inversé, i.e. noir/blanc.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Numéro de la ligne {1..24}
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -234,6 +258,144 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ED-EMIT">
+<b>ED-EMIT</b> ( c -- )
+<div style="margin-left:5%;">   Console locale et remote    
+</div>
+<div style="margin-left:5%;">   Émetteur de caractère utilisé par BLKED lorsque la console est en REMOTE.
+</div>
+<div style="margin-left:5%;">   Cet émetteur spécial est requis car il faut maintenir un tampon local de
+</div>
+<div style="margin-left:5%;">   l'écran. À cet effet le tampon vidéo local est utilisé.    
+</div>
+<div style="margin-left:5%;"> arguments
+</div>
+<div style="margin-left:5%;">   c	Caractère à émettre
+</div>
+<div style="margin-left:5%;"> retourne:    
+</div>
+<div style="margin-left:5%;">   rien
+</div>
+</p>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ED-AT-XY">
+<b>ED-AT-XY</b> ( n1 n2 -- )
+<div style="margin-left:5%;">   Console locate et remote.
+</div>
+<div style="margin-left:5%;">   Positionne le curseur à la colonnne 'n1' et la ligne 'n2'
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp; Colonne {1..64}
+</div>
+<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp; Ligne {1..24}
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ED-PAGE">
+<b>ED-PAGE</b> ( -- )
+<div style="margin-left:5%;">   Console LOCAL et REMOTE
+</div>
+<div style="margin-left:5%;">   Efface l'écrran.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ED-B/W">
+<b>ED-B/W</b>  ( f -- )  
+<div style="margin-left:5%;">   Console LOCAL et REMOTE    
+</div>
+<div style="margin-left:5%;">   Inverse l'affichage vidéo.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur Booléen, si VRAI inverse la sortie vidéo, si FAUX vidéo normal.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ED-INSRTLN">
+<b>ED-INSRTLN</b> ( -- )
+<div style="margin-left:5%;">   Console LOCAL et REMOTE    
+</div>
+<div style="margin-left:5%;">   Insère une ligne vide à la position du curseur. Les lignes à partir du curseur
+</div>
+<div style="margin-left:5%;">   en sont décalées vers le bas. S'il y a du texte sur la dernière ligne celui-ci disparaît.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ED-DELLN">
+<b>ED-DELLN</b> ( -- )
+<div style="margin-left:5%;">   Console LOCAL et REMOTE
+</div>
+<div style="margin-left:5%;">   Vide la ligne du curseur et ramène celui-ci à gauche de l'écran.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="ED-RMVLN">
+<b>ED-RMVLN</b>  ( -- )
+<div style="margin-left:5%;">   Console LOCAL et REMOTE    
+</div>
+<div style="margin-left:5%;">   Supprime la ligne à la position du curseur. Les lignes sous celle-ci sont
+</div>
+<div style="margin-left:5%;">   décalées vers haut pour combler le vide et la dernière ligne de la console
+</div>
+<div style="margin-left:5%;">   se retrouve vide.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:    
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLKED">
 <b>BLKED</b>  ( n+ -- )  
 <div style="margin-left:5%;">   Éditeur de bloc texte. Edite 1 bloc à la fois.
@@ -262,6 +424,14 @@
 <p>
 <ul>
 <li><a href="#BLKED">BLKED</a></li>
+<li><a href="#ED-AT-XY">ED-AT-XY</a></li>
+<li><a href="#ED-B/W">ED-B/W</a></li>
+<li><a href="#ED-DELLN">ED-DELLN</a></li>
+<li><a href="#ED-EMIT">ED-EMIT</a></li>
+<li><a href="#ED-INSRTLN">ED-INSRTLN</a></li>
+<li><a href="#ED-PAGE">ED-PAGE</a></li>
+<li><a href="#ED-RMVLN">ED-RMVLN</a></li>
+<li><a href="#ED-WITHELN">ED-WITHELN</a></li>
 <li><a href="#MSGLINE">MSGLINE</a></li>
 <li><a href="#PROMPT">PROMPT</a></li>
 <li><a href="#RESTORELINE">RESTORELINE</a></li>

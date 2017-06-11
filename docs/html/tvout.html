@@ -79,6 +79,24 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LC-WHITLN">
+<b>LC-WHITLN</b> ( n -- )
+<div style="margin-left:5%;">   Imprime une ligne blanche sur la console LOCAL.
+</div>
+<div style="margin-left:5%;">   Laisse le curseur au début de la ligne et le mode noir/blanc.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Numéro de la ligne {1..24}
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="CURENBL">
 <b>CURENBL</b>   ( f -- )
 <div style="margin-left:5%;">   Console locale.    
@@ -613,11 +631,67 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="CLRLN">
-<b>CLRLN</b> ( -- )
+<hr style="border-width:1px;"><p id="LC-DELLN">
+<b>LC-DELLN</b> ( -- )
 <div style="margin-left:5%;">   Console locale.  
 </div>
-<div style="margin-left:5%;">   Efface toute la ligne sur laquelle se trouve le curseur.
+<div style="margin-left:5%;">   Efface toute la ligne sur laquelle se trouve le curseur et positionne
+</div>
+<div style="margin-left:5%;">   le curseur en début de ligne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LC-DELEOL">
+<b>LC-DELEOL</b> ( -- )
+<div style="margin-left:5%;">   Efface tous les caractères à partir du curseur jusqu'à la fin de la ligne.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LC-RMVLN">
+<b>LC-RMVLN</b> ( -- )    
+<div style="margin-left:5%;">   Retire la ligne sur laquelle se trouve le curseur.
+</div>
+<div style="margin-left:5%;">   Les lignes qui se trouvent sous celle-ci sont décallées vers le haut.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="LC-INSRTLN">
+<b>LC-INSRTLN</b> ( -- )
+<div style="margin-left:5%;">   Insère une ligne avant la ligne où se trouve le curseur.
+</div>
+<div style="margin-left:5%;">   Les lignes à partir du curseur sont décalées vers le bas.    
+</div>
+<div style="margin-left:5%;">   S'il y a du texte sur la dernière ligne ce texte est perdu.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -677,9 +751,11 @@
 </div>
 <div style="margin-left:5%;">   - modification de l'affichage
 </div>
-<div style="margin-left:5%;">     VK_BACK déplace le curseur à gauche d'un caractère et efface le caractère.    
+<div style="margin-left:5%;">     VK_BACK déplace le curseur à gauche d'un caractère et efface le caractère.
 </div>
 <div style="margin-left:5%;">     CTRL_X  efface la ligne sur laquelle le curseur est.
+</div>
+<div style="margin-left:5%;">     CTRL_Y  insère une ligne avant celle où est le curseur.    
 </div>
 <div style="margin-left:5%;">     VK_DELETE efface le caractère à la position du curseur.    
 </div>
@@ -728,7 +804,6 @@
 <ul>
 <li><a href="#BACKDEL">BACKDEL</a></li>
 <li><a href="#CHR&gt;SCR">CHR&gt;SCR</a></li>
-<li><a href="#CLRLN">CLRLN</a></li>
 <li><a href="#CURADR">CURADR</a></li>
 <li><a href="#CURENBL">CURENBL</a></li>
 <li><a href="#CURPOS">CURPOS</a></li>
@@ -740,6 +815,8 @@
 <li><a href="#LC-BEL">LC-BEL</a></li>
 <li><a href="#LC-CR">LC-CR</a></li>
 <li><a href="#LC-DEL">LC-DEL</a></li>
+<li><a href="#LC-DELEOL">LC-DELEOL</a></li>
+<li><a href="#LC-DELLN">LC-DELLN</a></li>
 <li><a href="#LC-DOWN">LC-DOWN</a></li>
 <li><a href="#LC-EMIT">LC-EMIT</a></li>
 <li><a href="#LC-EMIT?">LC-EMIT?</a></li>
@@ -747,10 +824,13 @@
 <li><a href="#LC-GETCUR">LC-GETCUR</a></li>
 <li><a href="#LC-HOME">LC-HOME</a></li>
 <li><a href="#LC-INSRT">LC-INSRT</a></li>
+<li><a href="#LC-INSRTLN">LC-INSRTLN</a></li>
 <li><a href="#LC-LEFT">LC-LEFT</a></li>
 <li><a href="#LC-PAGE">LC-PAGE</a></li>
 <li><a href="#LC-RIGHT">LC-RIGHT</a></li>
+<li><a href="#LC-RMVLN">LC-RMVLN</a></li>
 <li><a href="#LC-UP">LC-UP</a></li>
+<li><a href="#LC-WHITLN">LC-WHITLN</a></li>
 <li><a href="#LNADR">LNADR</a></li>
 <li><a href="#NEXT-COLON">NEXT-COLON</a></li>
 <li><a href="#PUTC">PUTC</a></li>

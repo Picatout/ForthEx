@@ -279,16 +279,16 @@ HEADLESS INSLN,HWORD
     
 ; Supprime le caractère à la position du curseur.
 HEADLESS DELCHR,HWORD
-    .word DELETE
-    .word EXIT
+    .word LCDEL,ISLOCAL,TBRANCH,2f-$,VTDEL
+2:  .word EXIT
     
 ; Déplace le texte d'un position vers la droite
 ; pour laisser un espace à la position du curseur.
 HEADLESS INSERTBL,HWORD
     .word FALSE,CURENBL
     .word CURADR,DUP,ONEPLUS,LIT,CPL,GETX,MINUS,MOVE
-    .word BL,CURADR,CSTORE
-    .word TRUE,CURENBL,EXIT
+    .word BL,CURADR,CSTORE,ISLOCAL,TBRANCH,2f-$,VTINSERT
+2:  .word TRUE,CURENBL,EXIT
     
 ; Déplace le curseur à la fin du texte sur cette ligne.    
 HEADLESS TOEOL,HWORD

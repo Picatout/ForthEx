@@ -467,6 +467,12 @@ DEFCODE "VIDEO",5,,VIDEO
 9:  DPOP
     NEXT
 
+; LC-INIT  ( -- )
+; initialise la console locale
+HEADLESS LCINIT,HWORD
+    .word LCPAGE,LIT,0,DUP,LIT,kbd_head,STORE
+    .word LIT,kbd_tail,STORE,EXIT
+    
 ; nom: LC-B/W ( f -- ) 
 ;   Console locale.    
 ;   Détermine si les caractères s'affichent noir sur blanc ou l'inverse
