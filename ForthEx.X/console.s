@@ -45,7 +45,7 @@
 ; <tr><td>6</td><td>AT-XY</td></tr>
 ; <tr><td>7</td><td>PAGE</td></tr>
 ; <tr><td>8</td><td>EKEY>CHAR</td></tr>
-; <tr><td>9</td><td>AT-XY?</td></tr>
+; <tr><td>9</td><td>XY?</td></tr>
 ; <tr><td>10</td><td>B/W</td></tr>
 ; <tr><td>11</td><td>INSRTLN</td></tr>
 ; <tr><td>12</td><td>RMVLN</td></tr>
@@ -69,7 +69,7 @@
 .equ FN_ATXY,6  ; AT-XY
 .equ FN_PAGE,7  ; PAGE
 .equ FN_EKEYTOCHAR,8 ; EKEY>CHAR
-.equ FN_CURPOS,9  ; CURPOS  
+.equ FN_XYQ,9  ; XY?  
 .equ FN_BSLASHW,10 ; B/W
 .equ FN_INSRTLN,11 ; INSERTLN
 .equ FN_RMVLN,12   ; RMVLN
@@ -92,7 +92,7 @@ DEFTABLE "LC-CONS",7,,LCCONS
     .word LCATXY   ; tvout.s
     .word LCPAGE   ; tvout.s
     .word LCFILTER ; keyboard.s
-    .word LCCURPOS ; tvout.s
+    .word LCXYQ ; tvout.s
     .word LCBSLASHW   ; tvout.s
     .word LCINSRTLN ; tvout.s
     .word LCRMVLN ; tvout.s
@@ -115,7 +115,7 @@ DEFTABLE "VT-CONS",7,,VTCONS
     .word VTATXY   ; vt102.s
     .word VTPAGE   ; vt102.s
     .word VTFILTER ; vt102.s
-    .word VTCURPOS ; vt102.s
+    .word VTXYQ ; vt102.s
     .word VTBSLASHW   ; vt102.s
     .word VTINSRTLN ; vt102.2
     .word VTRMVLN ; vt102.s
@@ -140,7 +140,7 @@ DEFTABLE "ED-CONS"7,,EDCONS
     .word EDATXY   ; blockEdit.s
     .word EDPAGE   ; blockEdit.s
     .word VTFILTER ; vt102.s
-    .word VTCURPOS ; vt102.s
+    .word VTXYQ ; vt102.s
     .word EDBSLASHW ; blockEdit.s
     .word EDINSRTLN ; blockEdit.s
     .word EDRMVLN ; blockEdit.s
@@ -448,7 +448,7 @@ DEFWORD "CLS",3,,CLS
 ;   u1 Colonne  {1..64}
 ;   u2 Ligne    {1..24}
 DEFWORD "XY?",3,,XYQ
-    .word SYSCONS,FETCH,LIT,FN_CURPOS,VEXEC,EXIT
+    .word SYSCONS,FETCH,LIT,FN_XYQ,VEXEC,EXIT
 
 ; nom: B/W  ( f -- )    
 ;   Détermine si les caractères s'affichent noir sur blanc ou l'inverse

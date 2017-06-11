@@ -194,7 +194,7 @@ DEFWORD "PROMPT",6,,PROMPT ; ( c-addr u n+ -- )
 ;   u  Longueur du message, limité à 63 caractères.
 ;   n  Numéro de la ligne où doit-être affiché le message.
 DEFWORD "MSGLINE",7,,MSGLINE ; ( c-addr u n -- )
-     .word CURPOS,TWOTOR ; S: c-addr u n R: col line
+     .word XYQ,TWOTOR ; S: c-addr u n R: col line
      .word DUP,TOR,PROMPT ; s:  r: col line n
      .word KEY,DROP
      .word FALSE,BSLASHW,RFROM,RESTORELINE
@@ -251,7 +251,7 @@ HEADLESS PREVBLOCK,HWORD
 ;   rien
 HEADLESS OPENBLOCK,HWORD  
 ;DEFWORD "OPENBLOCK",9,,OPENBLOCK
-    .word CURPOS,STRQUOTE
+    .word XYQ,STRQUOTE
     .byte 14
     .ascii "block number? "
     .align 2
@@ -261,7 +261,7 @@ HEADLESS OPENBLOCK,HWORD
     .word BL,WORD,DUP,CFETCH,ZBRANCH,8f-$
     .word QNUMBER,ZBRANCH,8f-$
     .word LIST,TWODROP,EXIT
-8:  .word LIT,LPS,RESTORELINE,CURPOS
+8:  .word LIT,LPS,RESTORELINE,ATXY
 9:  .word EXIT
     
 
@@ -269,8 +269,8 @@ HEADLESS OPENBLOCK,HWORD
 ; Insière une ligne au dessus de celle où se trouve le curseur.
 ; Sauf s'il y a du texte sur la dernière ligne de l'éran.    
 HEADLESS INSLN,HWORD
-    .word LCCURPOS,TEXTEND,GETY,LIT,LPS,EQUAL,ZBRANCH,2f-$
-    .word CURPOS,EXIT
+    .word LCXYQ,TEXTEND,GETY,LIT,LPS,EQUAL,ZBRANCH,2f-$
+    .word ATXY,EXIT
 2:  .word FALSE,CURENBL    
     .word SWAP,DROP,TOR,RFETCH,LNADR,DUP,LIT,CPL,PLUS
     .word SCRBUF,LIT,CPL,LIT,LPS,STAR,PLUS,OVER,MINUS
@@ -293,7 +293,7 @@ HEADLESS INSERTBL,HWORD
 ; Déplace le curseur à la fin du texte sur cette ligne.    
 HEADLESS TOEOL,HWORD
     .word LCEND, ISLOCAL,TBRANCH,2f-$
-    .word LCCURPOS,VTATXY
+    .word LCXYQ,VTATXY
 2:  .word EXIT
    
 ; Déplace le curseur au début de la ligne.    
@@ -307,7 +307,7 @@ HEADLESS LNUP,HWORD
     
 ;Déplace le curseur une ligne vers le bas.     
 HEADLESS LNDN,HWORD
-    .word LCCURPOS,SWAP,DROP,EDITLN,EQUAL,TBRANCH,9f-$
+    .word LCXYQ,SWAP,DROP,EDITLN,EQUAL,TBRANCH,9f-$
     .word LIT,VK_DOWN,EMIT
 9:  .word EXIT
 
@@ -320,7 +320,7 @@ HEADLESS CRLF,HWORD
     
 ; check si c'est la dernière position de l'écran.
 HEADLESS LASTPOS,HWORD
-    .word LCCURPOS,EDITLN,EQUAL,ZBRANCH,9f-$
+    .word LCXYQ,EDITLN,EQUAL,ZBRANCH,9f-$
     .word LIT,CPL,EQUAL,EXIT
 9:  .word DROP,FALSE,EXIT    
     
@@ -355,9 +355,9 @@ HEADLESS RIGHT,HWORD
     .word LIT,VK_RIGHT,EMIT
     .word EXIT
 
-; Déplace le caractère dans le coin supérieur gauche.    
+; Déplace le carseur dans le coin supérieur gauche.    
 HEADLESS PAGEUP,HWORD
-    .word LIT,1,LIT,1,CURPOS,EXIT
+    .word LIT,1,LIT,1,ATXY,EXIT
     
 ; sauvegarde l'écran dans le bloc. 
 DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )   
@@ -371,12 +371,12 @@ DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )
 ; avance le curseur à la prochaine tabulation.    
 HEADLESS TABADV, HWORD
     .word NEXTCOLON,ISLOCAL,ZBRANCH,1f-$,EXIT
-1:  .word LCCURPOS,VTATXY,EXIT    
+1:  .word LCXYQ,VTATXY,EXIT    
     
 ; Affiche la ligne d'état    
 ; Indique le numéro du bloc et la taille actuelle de l'écran.    
 HEADLESS STATUSLN,HWORD
-    .word LCCURPOS,SCRSIZE ; S: col line size
+    .word LCXYQ,SCRSIZE ; S: col line size
     .word LIT,LPS,WHITELN
     .word STRQUOTE
     .byte  6
