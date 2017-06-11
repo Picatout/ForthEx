@@ -1,7 +1,13 @@
+2017-06-11
+----------
+Travail sur la console. Modifications dans console.s,tvout.s et vt102.s
+Renommé GETCUR -> XY?
+
 2017-06-10
 ----------
 Retravailler vt102.s
 Vitesse de la console REMOTE améliorée et bogue semble réglé.
+Travail dans blockEdit.s et vt102.s
 
 2017-06-09
 ----------

@@ -363,13 +363,14 @@ DEFWORD "VT-SNDARG",9,,VTSNDARG
     .word LIT,0,STR,VTTYPE,EXIT
     
     
-; nom: ESC[ ( -- )
+; ESC[ ( -- )
 ;   Envoie la séquence 'ESC['  i.e. 27 91  au terminal VT102
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "ESC[",4,,ESCRBRAC
+HEADLESS ESCRBRAC,HWORD    
+;DEFWORD "ESC[",4,,ESCRBRAC
     .word CLIT,27,SPUTC,CLIT,'[',SPUTC,EXIT
     
 ; nom: VT-UP ( -- )
@@ -567,7 +568,7 @@ DEFWORD "VT-PRTINV",9,,VTPRTINV
 ; VT-DSR  ( -- )
 ;   Envoie la séquence de contrôle ANSI 'ESC[6n' au terminal VT102.
 ;   Le terminal répond à cette commande en envoyant la la position du curseur. 
-;   VT-DSR est utilisé par VT-GETCUR
+;   VT-DSR est utilisé par VT-CURPOS
 ; arguments:
 ;   aucun
 ; retourne:
@@ -611,7 +612,7 @@ HEADLESS ESCSEQQ,HWORD
 9:  .word FALSE,EXIT
 
   
-; nom: VT-GETCUR  ( -- u1 u2 | -1 -1 )
+; nom: VT-CURPOS  ( -- u1 u2 | -1 -1 )
 ;   Envoie une requête de position du curseur au terminal VT102 et fait la lecture de la réponse.
 ;   Contrairement à la console locale le terminal VT102 numérote les colonnes et ligne à partir de 1.  
 ; arguments:
@@ -620,7 +621,7 @@ HEADLESS ESCSEQQ,HWORD
 ;   u1    colonne  {1..64}
 ;   u2    ligne    {1..24}
 ;   en cas d'erreur reoturne -1 -1  
-DEFWORD "VT-GETCUR",9,,VTGETCUR ; ( -- u1 u2 | -1 -1 )
+DEFWORD "VT-CURPOS",9,,VTCURPOS ; ( -- u1 u2 | -1 -1 )
     .word VTDSR ; requête position du curseur
     ; attend la réponse
     .word ESCSEQQ,ZBRANCH,8f-$
@@ -632,9 +633,9 @@ DEFWORD "VT-GETCUR",9,,VTGETCUR ; ( -- u1 u2 | -1 -1 )
 8:  .word LIT,-1,DUP,EXIT    
    
 ; synchronise les variables vtcolon et vtline avec la position
-; rapportée par VT-GETCUR
+; rapportée par VT-CURPOS
 HEADLESS CPOS_SYNC,HWORD
-    .word VTGETCUR,CPOS_STORE,EXIT
+    .word VTCURPOS,CPOS_STORE,EXIT
   
 ; nom: VT-CRLF 
 ;   Envoie la séquence 'CRTL_M CTRL_J'  (i.e. ASCII 13 10)  au terminal VT102.

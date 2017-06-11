@@ -137,6 +137,16 @@ int refLine(char *line,FILE *out){
 	}
 }
 
+void addEmbeddedHtml(FILE *in, FILE *out){
+	char line[256];
+	
+	while (fgets(line,255,in) && (*line==';') && !strstr(line,":HTML")){
+		line[0]=' ';
+        fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",line);
+	}
+}
+
+
 void addEntry(char* line, FILE *in, FILE *out){
 	char *ref;
 	int i;
@@ -144,12 +154,16 @@ void addEntry(char* line, FILE *in, FILE *out){
 	// nom:
 	formatNameLine(line,out);
 	// description
-	while ((fgets(line,255,in))&&(*line==';')&&!strstr(line,"arguments:")){
+	while ((fgets(line,255,in))&&(*line==';') && !strstr(line,"arguments:")){
 		line++;
-		replaceAngleBrackets(line);
-		ref=strstr(line,"REF:");
-		if (!refLine(line,out)){
-			fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",html);
+		if (strstr(line,"HTML:")) {
+			addEmbeddedHtml(in,out);
+		}else{
+			replaceAngleBrackets(line);
+			ref=strstr(line,"REF:");
+			if (!refLine(line,out)){
+				fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",html);
+			}
 		}
 	}
 	fputs("</p>\n",out);
@@ -175,6 +189,7 @@ void addEntry(char* line, FILE *in, FILE *out){
     addHorzLine(out,1);
 }
 
+
 void addDescription(char *line,FILE* in, FILE* out){
 	char *colon;
 	fputs("<h2 id=\"description\">Description</h2>",out);
@@ -185,9 +200,13 @@ void addDescription(char *line,FILE* in, FILE* out){
 	line=strchr(line,':');
 	while (fgets(line,255,in) && (*line==';')) {
 		line++;
-		replaceAngleBrackets(line);
-		if (!refLine(line,out)){
-			fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",line);
+		if (strstr(line,"HTML:")){
+			addEmbeddedHtml(in,out);
+		}else{
+			replaceAngleBrackets(line);
+			if (!refLine(line,out)){
+				fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",html);
+			}
 		}
 	}
 	addMasterRef(out);

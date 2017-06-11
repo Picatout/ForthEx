@@ -681,7 +681,7 @@ DEFWORD "CURPOS",6,,CURPOS  ; ( u1 u2 -- )
 
 ALIAS "LC-AT-XY",8,,LCATXY,CURPOS
     
-; nom: LC-GETCUR  ( -- u1 u2 )
+; nom: LC-CURPOS  ( -- u1 u2 )
 ;   Console locale.    
 ;   Retourne la position du curseur texte.
 ; arguments:
@@ -689,7 +689,7 @@ ALIAS "LC-AT-XY",8,,LCATXY,CURPOS
 ; retourne:
 ;   u1    colonne  {1..64}
 ;   u2    ligne    {1..24}
-DEFWORD "LC-GETCUR",9,,LCGETCUR
+DEFWORD "LC-CURPOS",9,,LCCURPOS
     .word GETX,GETY,EXIT
     
 ; nom: SCRCHAR  ( -- c )    

@@ -19,13 +19,11 @@
 </div>
 <div style="margin-left:5%;">    pour se connecter à un PC qui utilise à émulateur de terminal VT102.
 </div>
-<div style="margin-left:5%;">    On passe d'une console à l'autre avec les 2 phrases suivantes:
+<div style="margin-left:5%;">    On passe d'une console à l'autre en invoquant leur nom:
 </div>
-<div style="margin-left:5%;">    REMOTE CONSOLE  \ l'interface utilisateur utilise le port sériel.
+<div style="margin-left:5%;">    REMOTE  \ l'interface utilisateur utilise le port sériel.
 </div>
-<div style="margin-left:5%;">    LOCAL CONSOLE   \ l'interface utilisateur utilise le clavier et le moniteur
-</div>
-<div style="margin-left:5%;">                    \ de l'ordinateur ForthEx. C'est la console par défaut.    
+<div style="margin-left:5%;">    LOCAL  \ l'interface utilisateur utilise le clavier et le moniteur de l'ordinateur.
 </div>
 <div style="margin-left:5%;">
 </div>
@@ -33,7 +31,47 @@
 </div>
 <div style="margin-left:5%;">    Ce vecteur est une table contenant les fonctions à exécuter pour chacune des
 </div>
-<div style="margin-left:5%;">    fonctions suivante:
+<div style="margin-left:5%;">    fonctions suivantes:
+</div>
+<div style="margin-left:5%;">  <table border="single">
+</div>
+<div style="margin-left:5%;">  <tr><th>fonction#</th><th>nom</th></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>0</td><td>KEY</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>1</td><td>KEY?</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>2</td><td>EKEY</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>3</td><td>EKEY?</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>4</td><td>EMIT</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>5</td><td>EMIT?</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>6</td><td>AT-XY</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>7</td><td>PAGE</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>8</td><td>EKEY>CHAR</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>9</td><td>AT-XY?</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>10</td><td>B/W</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>11</td><td>INSRTLN</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>12</td><td>RMVLN</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>13</td><td>DELLN</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>14</td><td>WHTLN</td></tr>
+</div>
+<div style="margin-left:5%;">  </table>    
+</div>
+<div style="margin-left:5%;">  Exemple de définition d'un mot vectorisé.
+</div>
+<div style="margin-left:5%;"> : KEY  SYSCONS @ 0 VEXEC ;
 </div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:4px;"><p id="LC-CONS">
@@ -72,6 +110,10 @@
 <b>ED-CONS</b> ( -- a-addr )
 <div style="margin-left:5%;">   Retourne l'adresse du vecteur des fonctions pour la console de l'éditeur de bloc.
 </div>
+<div style="margin-left:5%;">   BLKED utilise cette console en mode REMOTE. Cette console a de particulier que
+</div>
+<div style="margin-left:5%;">   les sorties sont dirigées vers le moniteur vidéo et le port sériel.    
+</div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
@@ -79,7 +121,7 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>Adresse</i>&nbsp;&nbsp; du vecteur contenant les CFA des fonctions de la console de l'éditeur.
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse du vecteur contenant les CFA des fonctions de la console de l'éditeur.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -88,9 +130,9 @@
 <b>SYSCONS</b>   ( -- a-addr )
 <div style="margin-left:5%;">   Variable système qui contient l'adresse de la table des fonctions du 
 </div>
-<div style="margin-left:5%;">   périphérique utilisé par la console.
+<div style="margin-left:5%;">   périphérique utilisé par la console. Information utilisée par la console.
 </div>
-<div style="margin-left:5%;">   La console peut fonctionné en mode LOCAL ou REMOTE.    
+<div style="margin-left:5%;">   La console peut fonctionner en mode LOCAL ou REMOTE.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -99,16 +141,16 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable SYSCONS   
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="LOCAL">
-<b>LOCAL</b> ( -- a-addr )
-<div style="margin-left:5%;">   Efface l'écran local et empile l'adresse de la table des fonctions
+<b>LOCAL</b> ( -- )
+<div style="margin-left:5%;">   Passe en mode console locale.
 </div>
-<div style="margin-left:5%;">   de la console locale.    
+<div style="margin-left:5%;">   La console locale utilise le clavier et l'écran de l'ordinateur ForthEx.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -117,18 +159,28 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse de la table LCONSOLE   
-</div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="REMOTE">
-<b>REMOTE</b> ( -- a-addr )
-<div style="margin-left:5%;">   Active le port sériel et envoie une commande au terminal VT102 
+<b>REMOTE</b> ( -- )
+<div style="margin-left:5%;">   Passe en mode console VT102 via le port sériel.
 </div>
-<div style="margin-left:5%;">   pour effacer l'écran. Ensuite empile l'adresse de la table des fonctions
+<div style="margin-left:5%;">   Dans ce mode l'interface utilisateur utilise un terminal ou émulateur VT102
 </div>
-<div style="margin-left:5%;">   de la console REMOTE.    
+<div style="margin-left:5%;">   pour contrôler l'ordinateur. 
+</div>
+<div style="margin-left:5%;">   La commication est à 115200 bauds, 8 bits, 1 stop bit et pas de parité. 
+</div>
+<div style="margin-left:5%;">   Le contrôle de flux est logiciel via XON, XOFF.
+</div>
+<div style="margin-left:5%;">   L'ordinateur ForthEx n'implémente que partiellement le standard VT102
+</div>
+<div style="margin-left:5%;">   juste ce qui est nécessaire pour que la console REMOTE est les même fonctionnalités
+</div>
+<div style="margin-left:5%;">   que la console LOCAL.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -137,28 +189,8 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse de la table LREMOTE    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="CONSOLE">
-<b>CONSOLE</b> ( a-addr --  )
-<div style="margin-left:5%;">   Détermine la CONSOLE active {LOCAL,REMOTE}    
-</div>
-<div style="margin-left:5%;">   Affecte la variable système SYSCONS avec l'adresse 'a-addr'.
-</div>
-<div style="margin-left:5%;">   Cette adresse correspond à une table fonctions à utiliser par la console.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse de la table des fonctions qui seront utilisées par la console.
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   
-</div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
@@ -568,8 +600,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="GETCUR">
-<b>GETCUR</b>  ( -- u1 u2 )
+<hr style="border-width:1px;"><p id="XY?">
+<b>XY?</b>  ( -- u1 u2 )
 <div style="margin-left:5%;">   Retourne la position du curseur texte.
 </div>
 </p>
@@ -683,7 +715,6 @@
 <li><a href="#AT-XY">AT-XY</a></li>
 <li><a href="#B/W">B/W</a></li>
 <li><a href="#CLS">CLS</a></li>
-<li><a href="#CONSOLE">CONSOLE</a></li>
 <li><a href="#CR">CR</a></li>
 <li><a href="#DELBACK">DELBACK</a></li>
 <li><a href="#DELEOL">DELEOL</a></li>
@@ -697,7 +728,6 @@
 <li><a href="#EMIT">EMIT</a></li>
 <li><a href="#EMIT?">EMIT?</a></li>
 <li><a href="#ETYPE">ETYPE</a></li>
-<li><a href="#GETCUR">GETCUR</a></li>
 <li><a href="#INSRTLN">INSRTLN</a></li>
 <li><a href="#IS-LOCAL">IS-LOCAL</a></li>
 <li><a href="#KEY">KEY</a></li>
@@ -715,6 +745,7 @@
 <li><a href="#VT-CONS">VT-CONS</a></li>
 <li><a href="#WITHELN">WITHELN</a></li>
 <li><a href="#WRAP">WRAP</a></li>
+<li><a href="#XY?">XY?</a></li>
 </ul>
 </p>
 <hr style="border-width:1px;"><div><a href="#top">haut</a></div>

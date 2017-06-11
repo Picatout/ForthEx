@@ -194,7 +194,7 @@ DEFWORD "PROMPT",6,,PROMPT ; ( c-addr u n+ -- )
 ;   u  Longueur du message, limité à 63 caractères.
 ;   n  Numéro de la ligne où doit-être affiché le message.
 DEFWORD "MSGLINE",7,,MSGLINE ; ( c-addr u n -- )
-     .word GETCUR,TWOTOR ; S: c-addr u n R: col line
+     .word CURPOS,TWOTOR ; S: c-addr u n R: col line
      .word DUP,TOR,PROMPT ; s:  r: col line n
      .word KEY,DROP
      .word FALSE,BSLASHW,RFROM,RESTORELINE
@@ -251,7 +251,7 @@ HEADLESS PREVBLOCK,HWORD
 ;   rien
 HEADLESS OPENBLOCK,HWORD  
 ;DEFWORD "OPENBLOCK",9,,OPENBLOCK
-    .word GETCUR,STRQUOTE
+    .word CURPOS,STRQUOTE
     .byte 14
     .ascii "block number? "
     .align 2
@@ -269,7 +269,7 @@ HEADLESS OPENBLOCK,HWORD
 ; Insière une ligne au dessus de celle où se trouve le curseur.
 ; Sauf s'il y a du texte sur la dernière ligne de l'éran.    
 HEADLESS INSLN,HWORD
-    .word LCGETCUR,TEXTEND,GETY,LIT,LPS,EQUAL,ZBRANCH,2f-$
+    .word LCCURPOS,TEXTEND,GETY,LIT,LPS,EQUAL,ZBRANCH,2f-$
     .word CURPOS,EXIT
 2:  .word FALSE,CURENBL    
     .word SWAP,DROP,TOR,RFETCH,LNADR,DUP,LIT,CPL,PLUS
@@ -293,7 +293,7 @@ HEADLESS INSERTBL,HWORD
 ; Déplace le curseur à la fin du texte sur cette ligne.    
 HEADLESS TOEOL,HWORD
     .word LCEND, ISLOCAL,TBRANCH,2f-$
-    .word LCGETCUR,VTATXY
+    .word LCCURPOS,VTATXY
 2:  .word EXIT
    
 ; Déplace le curseur au début de la ligne.    
@@ -307,7 +307,7 @@ HEADLESS LNUP,HWORD
     
 ;Déplace le curseur une ligne vers le bas.     
 HEADLESS LNDN,HWORD
-    .word LCGETCUR,SWAP,DROP,EDITLN,EQUAL,TBRANCH,9f-$
+    .word LCCURPOS,SWAP,DROP,EDITLN,EQUAL,TBRANCH,9f-$
     .word LIT,VK_DOWN,EMIT
 9:  .word EXIT
 
@@ -320,7 +320,7 @@ HEADLESS CRLF,HWORD
     
 ; check si c'est la dernière position de l'écran.
 HEADLESS LASTPOS,HWORD
-    .word LCGETCUR,EDITLN,EQUAL,ZBRANCH,9f-$
+    .word LCCURPOS,EDITLN,EQUAL,ZBRANCH,9f-$
     .word LIT,CPL,EQUAL,EXIT
 9:  .word DROP,FALSE,EXIT    
     
@@ -371,12 +371,12 @@ DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )
 ; avance le curseur à la prochaine tabulation.    
 HEADLESS TABADV, HWORD
     .word NEXTCOLON,ISLOCAL,ZBRANCH,1f-$,EXIT
-1:  .word LCGETCUR,VTATXY,EXIT    
+1:  .word LCCURPOS,VTATXY,EXIT    
     
 ; Affiche la ligne d'état    
 ; Indique le numéro du bloc et la taille actuelle de l'écran.    
 HEADLESS STATUSLN,HWORD
-    .word LCGETCUR,SCRSIZE ; S: col line size
+    .word LCCURPOS,SCRSIZE ; S: col line size
     .word LIT,LPS,WHITELN
     .word STRQUOTE
     .byte  6

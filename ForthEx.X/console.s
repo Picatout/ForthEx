@@ -26,55 +26,55 @@
 ;    Il y a 2 terminaux, la console LOCAL constituée du clavier et du moniteur
 ;    branché à l'ordinateur ForthEx et la REMOTE qui utilise le port sériel RS-232
 ;    pour se connecter à un PC qui utilise à émulateur de terminal VT102.
-;    On passe d'une console à l'autre avec les 2 phrases suivantes:
-;    REMOTE CONSOLE  \ l'interface utilisateur utilise le port sériel.
-;    LOCAL CONSOLE   \ l'interface utilisateur utilise le clavier et le moniteur
-;                    \ de l'ordinateur ForthEx. C'est la console par défaut.    
+;    On passe d'une console à l'autre en invoquant leur nom:
+;    REMOTE  \ l'interface utilisateur utilise le port sériel.
+;    LOCAL  \ l'interface utilisateur utilise le clavier et le moniteur de l'ordinateur.
 ;
 ;    La variable système SYSCONS contient le vecteur de la console sélectionnée.
 ;    Ce vecteur est une table contenant les fonctions à exécuter pour chacune des
-;    fonctions suivante:
-        
-;FNBR |  NOM       |  NOM        | NOM
-;     |  FONCTION  |  LOCAL      | REMOTE         
-;========================================
-;0    |  KEY       |  LC-KEY     | VT-KEY
-;1    |  KEY?      |  LC-KEY?    | VT-CHAR?
-;2    |  EKEY      |  LC-EKEY    | VT-ECHAR
-;3    |  EKEY?     |  LC-EKEY?   | SGETC?
-;4    |  EMIT      |  LC-EMIT    | VT-EMIT
-;5    |  EMIT?     |  LC-EMIT?   | VT-EMIT?    
-;6    |  AT-XY     |  CURPOS     | VT-AT-XY
-;7    |  PAGE      |  LC-PAGE    | VT-PAGE
-;8    |  EKEY>CHAR |  LC-FILTER  | VT-FILTER
-;9    |  GETCUR    |  LC-GETCUR  | VT-GETCUR
-;10   |  B/W       |  LC-B/W     |  VT-B/W   
-;11   |  INSRTLN   |  LC-INSRTLN | VT-INSRTLN    
-;12   |  RMVLN     |  LC-RMVLN   | VT-RMVLN
-;13   |  DELLN     |  LC-DELLN   | VT-DELLN
-;14   |  WHTELN    |  LC-WHTELN  | VT-WHITELN
-    
+;    fonctions suivantes:
+; HTML:
+; <table border="single">
+; <tr><th>fonction#</th><th>nom</th></tr>
+; <tr><td>0</td><td>KEY</td></tr>
+; <tr><td>1</td><td>KEY?</td></tr>
+; <tr><td>2</td><td>EKEY</td></tr>
+; <tr><td>3</td><td>EKEY?</td></tr>
+; <tr><td>4</td><td>EMIT</td></tr>
+; <tr><td>5</td><td>EMIT?</td></tr>
+; <tr><td>6</td><td>AT-XY</td></tr>
+; <tr><td>7</td><td>PAGE</td></tr>
+; <tr><td>8</td><td>EKEY>CHAR</td></tr>
+; <tr><td>9</td><td>AT-XY?</td></tr>
+; <tr><td>10</td><td>B/W</td></tr>
+; <tr><td>11</td><td>INSRTLN</td></tr>
+; <tr><td>12</td><td>RMVLN</td></tr>
+; <tr><td>13</td><td>DELLN</td></tr>
+; <tr><td>14</td><td>WHTLN</td></tr>
+; </table>    
+; :HTML
 ;  Exemple de définition d'un mot vectorisé.
-; : KEY  SYSCONS @ FN_KEY VEXEC ;
+; : KEY  SYSCONS @ 0 VEXEC ;
+    
     
 
 
 ; constantes numéro de fonction.    
-.equ FN_KEY, 0
-.equ FN_KEYQ,1
-.equ FN_EKEY,2
-.equ FN_EKEYQ,3
-.equ FN_EMIT,4
-.equ FN_EMITQ,5    
-.equ FN_ATXY,6
-.equ FN_PAGE,7
-.equ FN_EKEYTOCHAR,8
-.equ FN_GETCUR,9    
-.equ FN_BSLASHW,10
-.equ FN_INSRTLN,11
-.equ FN_RMVLN,12
-.equ FN_DELLN,13    
-.equ FN_WHITELN,14
+.equ FN_KEY, 0  ; KEY
+.equ FN_KEYQ,1  ; KEY?
+.equ FN_EKEY,2  ; EKEY
+.equ FN_EKEYQ,3 ; EKEY?
+.equ FN_EMIT,4  ; EMIT
+.equ FN_EMITQ,5 ; EMIT?   
+.equ FN_ATXY,6  ; AT-XY
+.equ FN_PAGE,7  ; PAGE
+.equ FN_EKEYTOCHAR,8 ; EKEY>CHAR
+.equ FN_CURPOS,9  ; CURPOS  
+.equ FN_BSLASHW,10 ; B/W
+.equ FN_INSRTLN,11 ; INSERTLN
+.equ FN_RMVLN,12   ; RMVLN
+.equ FN_DELLN,13   ; DELLN 
+.equ FN_WHITELN,14 ; WHITELN
     
 ; nom: LC-CONS ( -- a-addr )
 ;   Retourne l'adresse du vecteur des fonctions pour la console locale.
@@ -92,7 +92,7 @@ DEFTABLE "LC-CONS",7,,LCCONS
     .word LCATXY   ; tvout.s
     .word LCPAGE   ; tvout.s
     .word LCFILTER ; keyboard.s
-    .word LCGETCUR ; tvout.s
+    .word LCCURPOS ; tvout.s
     .word LCBSLASHW   ; tvout.s
     .word LCINSRTLN ; tvout.s
     .word LCRMVLN ; tvout.s
@@ -115,7 +115,7 @@ DEFTABLE "VT-CONS",7,,VTCONS
     .word VTATXY   ; vt102.s
     .word VTPAGE   ; vt102.s
     .word VTFILTER ; vt102.s
-    .word VTGETCUR ; vt102.s
+    .word VTCURPOS ; vt102.s
     .word VTBSLASHW   ; vt102.s
     .word VTINSRTLN ; vt102.2
     .word VTRMVLN ; vt102.s
@@ -124,10 +124,12 @@ DEFTABLE "VT-CONS",7,,VTCONS
     
 ; nom: ED-CONS ( -- a-addr )
 ;   Retourne l'adresse du vecteur des fonctions pour la console de l'éditeur de bloc.
+;   BLKED utilise cette console en mode REMOTE. Cette console a de particulier que
+;   les sorties sont dirigées vers le moniteur vidéo et le port sériel.    
 ; arguments:
 ;   aucun
 ; retourne:
-;   Adresse du vecteur contenant les CFA des fonctions de la console de l'éditeur.
+;   a-addr Adresse du vecteur contenant les CFA des fonctions de la console de l'éditeur.
 DEFTABLE "ED-CONS"7,,EDCONS
     .word VTKEY    ; vt102.s
     .word VTKEYQ   ; vt102.s
@@ -138,7 +140,7 @@ DEFTABLE "ED-CONS"7,,EDCONS
     .word EDATXY   ; blockEdit.s
     .word EDPAGE   ; blockEdit.s
     .word VTFILTER ; vt102.s
-    .word VTGETCUR ; vt102.s
+    .word VTCURPOS ; vt102.s
     .word EDBSLASHW ; blockEdit.s
     .word EDINSRTLN ; blockEdit.s
     .word EDRMVLN ; blockEdit.s
@@ -148,46 +150,51 @@ DEFTABLE "ED-CONS"7,,EDCONS
     
 ; nom: SYSCONS   ( -- a-addr )
 ;   Variable système qui contient l'adresse de la table des fonctions du 
-;   périphérique utilisé par la console.
+;   périphérique utilisé par la console. Information utilisée par la console.
 ;   La console peut fonctionner en mode LOCAL ou REMOTE.    
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr  Adresse de la variable.    
+;   a-addr  Adresse de la variable SYSCONS   
 DEFUSER "SYSCONS",7,,SYSCONS 
     
-; nom: LOCAL ( -- a-addr )
-;   Efface l'écran local et empile l'adresse de la table des fonctions
-;   de la console locale.    
+; nom: LOCAL ( -- )
+;   Passe en mode console locale.
+;   La console locale utilise le clavier et l'écran de l'ordinateur ForthEx.    
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr Adresse de la table LCONSOLE   
+;   rien
 DEFWORD "LOCAL",5,,LOCAL 
-    .word LCINIT,LCCONS,EXIT
+    .word LCINIT,LCCONS,CONSOLE,EXIT
 
     
-; nom: REMOTE ( -- a-addr )
-;   Active le port sériel et envoie une commande au terminal VT102 
-;   pour effacer l'écran. Ensuite empile l'adresse de la table des fonctions
-;   de la console REMOTE.    
+; nom: REMOTE ( -- )
+;   Passe en mode console VT102 via le port sériel.
+;   Dans ce mode l'interface utilisateur utilise un terminal ou émulateur VT102
+;   pour contrôler l'ordinateur. 
+;   La commication est à 115200 bauds, 8 bits, 1 stop bit et pas de parité. 
+;   Le contrôle de flux est logiciel via XON, XOFF.
+;   L'ordinateur ForthEx n'implémente que partiellement le standard VT102
+;   juste ce qui est nécessaire pour que la console REMOTE est les même fonctionnalités
+;   que la console LOCAL.    
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr Adresse de la table LREMOTE    
+;   rien
 DEFWORD "REMOTE",6,,REMOTE
-    .word VTINIT,VTCONS,EXIT
+    .word VTINIT,VTCONS,CONSOLE,EXIT
     
-    
-; nom: CONSOLE ( a-addr --  )
+; CONSOLE ( a-addr --  )
 ;   Détermine la CONSOLE active {LOCAL,REMOTE}    
 ;   Affecte la variable système SYSCONS avec l'adresse 'a-addr'.
 ;   Cette adresse correspond à une table fonctions à utiliser par la console.
 ; arguments:
 ;   a-addr Adresse de la table des fonctions qui seront utilisées par la console.
 ; retourne:
-;   rien   
-DEFWORD "CONSOLE",7,,CONSOLE
+;   rien 
+HEADLESS CONSOLE,HWORD    
+;DEFWORD "CONSOLE",7,,CONSOLE
     .word SYSCONS,STORE,EXIT
     
 ; nom: IS-LOCAL ( -- f )
@@ -433,15 +440,15 @@ DEFWORD "CLS",3,,CLS
     .word SYSCONS,FETCH,LIT,FN_PAGE,VEXEC,EXIT
     
     
-; nom: GETCUR  ( -- u1 u2 )
+; nom: XY?  ( -- u1 u2 )
 ;   Retourne la position du curseur texte.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   u1 Colonne  {1..64}
 ;   u2 Ligne    {1..24}
-DEFWORD "GETCUR",6,,GETCUR
-    .word SYSCONS,FETCH,LIT,FN_GETCUR,VEXEC,EXIT
+DEFWORD "XY?",3,,XYQ
+    .word SYSCONS,FETCH,LIT,FN_CURPOS,VEXEC,EXIT
 
 ; nom: B/W  ( f -- )    
 ;   Détermine si les caractères s'affichent noir sur blanc ou l'inverse
