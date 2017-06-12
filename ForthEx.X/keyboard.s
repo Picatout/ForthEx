@@ -201,7 +201,7 @@ DEFCODE "LC-FILTER",9,,LCFILTER
     bra z, 9f
     cp.b W0, #VK_BACK
     bra z, 9f
-    cp.b W0, #CTRL_X
+    cp.b W0, #CTRL_D
     bra z, 9f
     cp.b W0, #CTRL_V
     bra z, 9f

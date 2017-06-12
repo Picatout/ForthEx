@@ -43,18 +43,15 @@
 ; <tr><td>4</td><td>EMIT</td></tr>
 ; <tr><td>5</td><td>EMIT?</td></tr>
 ; <tr><td>6</td><td>AT-XY</td></tr>
-; <tr><td>7</td><td>PAGE</td></tr>
-; <tr><td>8</td><td>EKEY>CHAR</td></tr>
-; <tr><td>9</td><td>XY?</td></tr>
-; <tr><td>10</td><td>B/W</td></tr>
-; <tr><td>11</td><td>INSRTLN</td></tr>
-; <tr><td>12</td><td>RMVLN</td></tr>
-; <tr><td>13</td><td>DELLN</td></tr>
-; <tr><td>14</td><td>WHTLN</td></tr>
-; </table>    
+; <tr><td>7</td><td>CLS</td></tr>
+; <tr><td>8</td><td>XY?</td></tr>
+; <tr><td>9</td><td>B/W</td></tr>
+; <tr><td>10</td><td>INSRTLN</td></tr>
+; <tr><td>11</td><td>RMVLN</td></tr>
+; <tr><td>12</td><td>DELLN</td></tr>
+; <tr><td>13</td><td>WHTLN</td></tr>
+; </table><br>    
 ; :HTML
-;  Exemple de définition d'un mot vectorisé.
-; : KEY  SYSCONS @ 0 VEXEC ;
     
     
 
@@ -67,22 +64,21 @@
 .equ FN_EMIT,4  ; EMIT
 .equ FN_EMITQ,5 ; EMIT?   
 .equ FN_ATXY,6  ; AT-XY
-.equ FN_PAGE,7  ; PAGE
-.equ FN_EKEYTOCHAR,8 ; EKEY>CHAR
-.equ FN_XYQ,9  ; XY?  
-.equ FN_BSLASHW,10 ; B/W
-.equ FN_INSRTLN,11 ; INSERTLN
-.equ FN_RMVLN,12   ; RMVLN
-.equ FN_DELLN,13   ; DELLN 
-.equ FN_WHITELN,14 ; WHITELN
+.equ FN_CLS,7  ; CLS
+.equ FN_XYQ,8  ; XY?  
+.equ FN_BSLASHW,9 ; B/W
+.equ FN_INSRTLN,10 ; INSERTLN
+.equ FN_RMVLN,11   ; RMVLN
+.equ FN_DELLN,12   ; DELLN 
+.equ FN_WHITELN,13 ; WHITELN
     
-; nom: LC-CONS ( -- a-addr )
+; LC-CONS ( -- a-addr )
 ;   Retourne l'adresse du vecteur des fonctions pour la console locale.
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr  Adresse du vecteur contenant les CFA des fonctions de la console locale.    
-DEFTABLE "LC-CONS",7,,LCCONS
+;   a-addr  Adresse du vecteur contenant les CFA des fonctions de la console LOCAL.    
+DEFTABLE "LC-CONS",7,F_HIDDEN,LCCONS
     .word LCKEY    ; keyboard.s
     .word LCKEYQ   ; keyboard.s
     .word LCEKEY   ; keyboard.s
@@ -90,8 +86,7 @@ DEFTABLE "LC-CONS",7,,LCCONS
     .word LCEMIT   ; tvout.s
     .word LCEMITQ  ; tvout.s
     .word LCATXY   ; tvout.s
-    .word LCPAGE   ; tvout.s
-    .word LCFILTER ; keyboard.s
+    .word LCCLS   ; tvout.s
     .word LCXYQ ; tvout.s
     .word LCBSLASHW   ; tvout.s
     .word LCINSRTLN ; tvout.s
@@ -99,13 +94,13 @@ DEFTABLE "LC-CONS",7,,LCCONS
     .word LCDELLN ; tvout.s
     .word LCWHITELN ; tvout.s
     
-; nom: VT-CONS ( -- a-addr )
-;   Retourne l'adresse du vecteur des fonctions pour la console locale.
+; VT-CONS ( -- a-addr )
+;   Retourne l'adresse du vecteur des fonctions pour la console REMOTE.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   a-addr  Adresse du vecteur contenant les CFA des fonctions de la console locale.    
-DEFTABLE "VT-CONS",7,,VTCONS
+DEFTABLE "VT-CONS",7,F_HIDDEN,VTCONS
     .word VTKEY    ; vt102.s
     .word VTKEYQ   ; vt102.s
     .word VTEKEY   ; serial.s
@@ -113,8 +108,7 @@ DEFTABLE "VT-CONS",7,,VTCONS
     .word VTEMIT   ; vt102.s
     .word SREADYQ  ; serial.s
     .word VTATXY   ; vt102.s
-    .word VTPAGE   ; vt102.s
-    .word VTFILTER ; vt102.s
+    .word VTCLS   ; vt102.s
     .word VTXYQ ; vt102.s
     .word VTBSLASHW   ; vt102.s
     .word VTINSRTLN ; vt102.2
@@ -122,15 +116,15 @@ DEFTABLE "VT-CONS",7,,VTCONS
     .word VTDELLN ; vt102.s
     .word VTWHITELN ; vt102.s
     
-; nom: ED-CONS ( -- a-addr )
+; ED-CONS ( -- a-addr )
 ;   Retourne l'adresse du vecteur des fonctions pour la console de l'éditeur de bloc.
-;   BLKED utilise cette console en mode REMOTE. Cette console a de particulier que
-;   les sorties sont dirigées vers le moniteur vidéo et le port sériel.    
+;   BLKED utilise cette console en mode REMOTE.
+;   Les sorties sont dirigées vers le moniteur vidéo et le port sériel.    
 ; arguments:
 ;   aucun
 ; retourne:
 ;   a-addr Adresse du vecteur contenant les CFA des fonctions de la console de l'éditeur.
-DEFTABLE "ED-CONS"7,,EDCONS
+DEFTABLE "ED-CONS"7,F_HIDDEN,EDCONS
     .word VTKEY    ; vt102.s
     .word VTKEYQ   ; vt102.s
     .word VTEKEY   ; serial.s
@@ -138,8 +132,7 @@ DEFTABLE "ED-CONS"7,,EDCONS
     .word EDEMIT   ; blockEdit.s
     .word SREADYQ  ; serial.s
     .word EDATXY   ; blockEdit.s
-    .word EDPAGE   ; blockEdit.s
-    .word VTFILTER ; vt102.s
+    .word EDCLS    ; blockEdit.s
     .word VTXYQ ; vt102.s
     .word EDBSLASHW ; blockEdit.s
     .word EDINSRTLN ; blockEdit.s
@@ -147,8 +140,7 @@ DEFTABLE "ED-CONS"7,,EDCONS
     .word EDDELLN ; blockEdit.s
     .word EDWHITELN ; blockEdit.s
     
-    
-; nom: SYSCONS   ( -- a-addr )
+; SYSCONS   ( -- a-addr )
 ;   Variable système qui contient l'adresse de la table des fonctions du 
 ;   périphérique utilisé par la console. Information utilisée par la console.
 ;   La console peut fonctionner en mode LOCAL ou REMOTE.    
@@ -156,7 +148,7 @@ DEFTABLE "ED-CONS"7,,EDCONS
 ;   aucun
 ; retourne:
 ;   a-addr  Adresse de la variable SYSCONS   
-DEFUSER "SYSCONS",7,,SYSCONS 
+DEFUSER "SYSCONS",7,F_HIDDEN,SYSCONS 
     
 ; nom: LOCAL ( -- )
 ;   Passe en mode console locale.
@@ -197,23 +189,32 @@ HEADLESS CONSOLE,HWORD
 ;DEFWORD "CONSOLE",7,,CONSOLE
     .word SYSCONS,STORE,EXIT
     
-; nom: IS-LOCAL ( -- f )
+; nom: LOCAL? ( -- f )
 ;   Retourne un indicateur Booléen VRAI si la console est en mode LOCAL.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   f	Indicateur Booléen vrai si console LOCAL.
-DEFWORD "IS-LOCAL",8,,ISLOCAL
+DEFWORD "LOCAL?",6,,ISLOCAL
     .word SYSCONS,FETCH,LCCONS,EQUAL,EXIT
     
     
 ; nom: KEY  ( -- c )  
-;   Lecture d'un caractère à partir de la console.
+;   Attend indéfiniement la réception d'un caractère de la console.    
 ;   Les caractères invalides sont rejetés jusqu'à la réception
-;   d'un caractère valide. Les caractères valides sont les
-;   caractères ASCII {32..126}|VK_CR. Pour accepter tous les caractères
-;   Il faut utiliser EKEY.
-;   Attend indéfiniement la réception d'un caractère.    
+;   d'un caractère valide. Les caractères valides sont les suivants:
+; HTML:
+; <table border="single">
+; <tr><th>code</th><th>touche<br>virtuelle</th><th>fonction</th></tr>
+; <tr><td>4</td><td>CTRL_D</td><td>Supprime la ligne du curseur.</td></tr>
+; <tr><td>8</td><td>VK_BACK</td><td>Efface le caractère à gauche du curseur.</td></tr>
+; <tr><td>12</td><td>CTRL_L</td><td>Efface tout l'écran.</td></tr>    
+; <tr><td>13</td><td>VK_CR</td><td>Retour à la ligne.</td></tr>
+; <tr><td>22</td><td>CTRL_V</td><td>En interactif rappelle la dernière ligne.</td></tr>
+; <tr><td>32..126</td><td></td><td>Caractères ASCII imprimables.</td></tr>
+; </table><br>    
+; :HTML    
+;   Pour accepter tous les codes du clavier il faut utiliser EKEY.
 ; arguments:
 ;   aucun
 ;  retourne:
@@ -254,8 +255,31 @@ DEFWORD "EKEY?",5,,EKEYQ
     
     
 ; nom: EMIT ( c -- )
-;  transmet un caractère à la console. Les caractères sont filtrés.
-;  Les codes de contrôles reconnus sont mis en actions, les autres sont jetés.    
+;  Imprime les caractère ASCII dans l'interval {32..126} et accepte certains
+;  codes de contrôle.Les codes de contrôles reconnus sont mis en actions, 
+;  les autres sont jetés. Les codes reconnus sont les suivants:
+; HTML:
+; <table border="single">
+; <tr><th>code</th><th>touche<br>virtuelle</th><th>fonction</th></tr>
+; <tr><td>4</td><td>CTRL_D</td><td>Efface la ligne du curseur sans fermer l'espace.</td></tr>
+; <tr><td>8</td><td>VK_BACK</td><td>Supprime le caractère à gauche du curseur.</td></tr>
+; <tr><td>9</td><td>VK_TAB</td><td>Avance le curseur à la prochaine colonne.</td></tr>
+; <tr><td>12</td><td>CTRL_L</td><td>Efface l'écran.</td></tr>    
+; <tr><td>13</td><td>VK_CR</td><td>Retour à la ligne.</td></tr>
+; <tr><td>24</td><td>CTRL_X</td><td>Suppression de la ligne du curseur et referme l'espace<br>
+; en décalant vers le haut les lignes sous le curseur.</td></tr>
+; <tr><td>25</td><td>CTRL_Y</td><td>Insertion d'une ligne en décalant vers le bas<br>
+; les lignes à partir du curseur.</td></tr>    
+; <tr><td>127</td><td>VK_DELETE</td><td>Supprime le caractère à la position du curseur.</td></tr>
+; <tr><td>141</td><td>VK_UP</td><td>Déplace le curseur d'une ligne vers le haut.</td></tr>
+; <tr><td>142</td><td>VK_DOWN</td><td>Déplace le curseur d'une ligne vers le bas.</td></tr>
+; <tr><td>143</td><td>VK_LEFT</td><td>Déplace le curseur d'un d'un caractère vers la gauche.</td></tr>
+; <tr><td>144</td><td>VK_RIGHT</td><td>Déplace le curseur d'un caractère vers la droite.</td></tr>
+; <tr><td>145</td><td>VK_HOME</td><td>Déplace le curseur au début de la ligne.</td></tr>
+; <tr><td>146</td><td>VK_END</td><td>Déplace le curseur à la fin de la ligne.</td></tr>
+; <tr><td>149</td><td>VK_INSERT</td><td>Ouvre un espace à la position du curseur.</td></tr>    
+; </table><br>    
+; :HTML    
 ; arguments:
 ;    c   Caractère à transmettre.
 ; retourne:
@@ -284,28 +308,6 @@ DEFWORD "EMIT?",5,,EMITQ
 DEFWORD "AT-XY",5,,ATXY 
     .word SYSCONS,FETCH,LIT,FN_ATXY,VEXEC,EXIT
     
-; nom: PAGE ( -- )
-;   Efface l'écran de la console.
-; arguments:
-;   aucun
-; retourne:
-;   rien
-DEFWORD "PAGE",4,,PAGE 
-    .word SYSCONS,FETCH,LIT,FN_PAGE,VEXEC,EXIT
-    
-; nom: EKEY>CHAR ( u -- u false | char true )
-;   convertie un code reçu de la console en caractère affichable.
-;   Si le code est valide. Le code u doit répondre au critères du filtre.
-;   Accepte les codes VK_CR, VK_BACK, CTRL_X, CTRL_V {32-126}    
-; arguments:
-;   u  code reçu de la console
-; retourne:
-;    u	FALSE  Si le code n'est pas dans l'ensemble accepté.
-;    c	TRUE   Si le code est dans l'ensemble reconnu par le filtre.
-DEFWORD "EKEY>CHAR",9,,EKEYTOCHAR
-    .word SYSCONS,FETCH,LIT,FN_EKEYTOCHAR,VEXEC,EXIT
-    
-
 ; nom: SPACE ( -- )
 ;   Imprime un espace sur la console.
 ; arguments:
@@ -402,16 +404,6 @@ DEFWORD "DELETE",6,,DELETE  ; ( -- )
 DEFWORD "DELBACK",7,,DELBACK ; ( -- )
     .word LIT,VK_BACK,EMIT,EXIT
 
-; nom: DELLINE  ( -- )    
-;   Supprime la ligne sur laquelle le curseur est positionné.
-;   Renvoie le curseur en début de ligne.    
-; arguments:
-;   rien
-; retourne:
-;   rien    
-DEFWORD "DELLINE",7,,DELLINE ; ( -- )
-    .word LIT,CTRL_X,EMIT,EXIT
- 
 ; nom: DELEOL ( -- )
 ;  Efface tous les caractères de la position du curseur jusqu'à la fin de la ligne.
 ; arguments:
@@ -431,13 +423,13 @@ DEFWORD "CR",2,,CR ; ( -- )
     .word LIT,VK_CR,EMIT,EXIT
 
 ; nom: CLS  ( -- )    
-;   Efface l'écran de la console.
+;   Efface l'écran de la console. Le standard ANSI utilise le mot PAGE pour cette fonction.
 ; arguments:
 ;   rien
 ; retourne:
 ;   rien    
 DEFWORD "CLS",3,,CLS 
-    .word SYSCONS,FETCH,LIT,FN_PAGE,VEXEC,EXIT
+    .word SYSCONS,FETCH,LIT,FN_CLS,VEXEC,EXIT
     
     
 ; nom: XY?  ( -- u1 u2 )

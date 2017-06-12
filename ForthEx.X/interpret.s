@@ -347,9 +347,9 @@ not_found:
 ;   La chaîne terminée par touche la touche 'ENTER'.
 ;   Les touches de contrôles suivantes sont reconnues:
 ;   - VK_CR   termine la saisie
-;   - CTRL_X  efface la ligne et place le curseur à gauche
+;   - CTRL_D  efface la ligne et place le curseur à gauche
 ;   - VK_BACK recule le curseur d'une position et efface le caractère.
-;   - CTRL_L  efface l'écran au complet et plac le curseur dans le coin
+;   - CTRL_L  efface l'écran au complet et place le curseur dans le coin
 ;             supérieur gauche.
 ;   - CTRL_V  Réaffiche la dernière ligne saisie
 ;   - Les autres touches de contrôles sont ignorées. 
@@ -369,12 +369,12 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
     .word DROP,TWODUP,EQUAL,TBRANCH,1b-$
     .word DELBACK,ONEMINUS,BRANCH,1b-$
-2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
-    .word DROP,DELLINE,DROP,DUP,BRANCH,1b-$
+2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
+    .word DROP,DELLN,DROP,DUP,BRANCH,1b-$
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
     .word EMIT,DROP,DUP,BRANCH,1b-$
 2:  .word DUP,LIT,CTRL_V,EQUAL,ZBRANCH,2f-$
-    .word DROP,DELLINE,PASTE,FETCH,COUNT,TYPE
+    .word DROP,DELLN,PASTE,FETCH,COUNT,TYPE
     .word DROP,DUP,GETCLIP,PLUS,BRANCH,1b-$
 2:  .word DROP,BRANCH,1b-$  
    

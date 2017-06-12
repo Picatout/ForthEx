@@ -115,8 +115,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-PAGE">
-<b>LC-PAGE</b>  ( -- )
+<hr style="border-width:1px;"><p id="LC-CLS">
+<b>LC-CLS</b>  ( -- )
 <div style="margin-left:5%;">   Console locale.    
 </div>
 <div style="margin-left:5%;">   Vide l'écran.
@@ -279,8 +279,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="CURPOS">
-<b>CURPOS</b>  ( u1 u2 -- )
+<hr style="border-width:1px;"><p id="LC-AT-XY">
+<b>LC-AT-XY</b>  ( u1 u2 -- )
 <div style="margin-left:5%;">   Console locale.    
 </div>
 <div style="margin-left:5%;">   Positionne le curseur texte à la colonne u1 et la ligne u2.
@@ -299,8 +299,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-CURPOS">
-<b>LC-CURPOS</b>  ( -- u1 u2 )
+<hr style="border-width:1px;"><p id="LC-XY?">
+<b>LC-XY?</b>  ( -- u1 u2 )
 <div style="margin-left:5%;">   Console locale.    
 </div>
 <div style="margin-left:5%;">   Retourne la position du curseur texte.
@@ -519,7 +519,7 @@
 </div>
 <div style="margin-left:5%;">   passe au début de la ligne suivante. Produit un défilement vers le haut
 </div>
-<div style="margin-left:5%;">   si nécessaire.    
+<div style="margin-left:5%;">   si nécessaire à la condition que SCROLL soit actif.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -539,7 +539,11 @@
 </div>
 <div style="margin-left:5%;">   Envoie le curseur au début de la ligne suivante défile l'écran
 </div>
-<div style="margin-left:5%;">   vers le haut si nécessaire.    
+<div style="margin-left:5%;">   vers le haut si le curseur est sur la dernière ligne sauf si
+</div>
+<div style="margin-left:5%;">   SCROLL est désactivé. Dans ce cas renvoie de le curseur au début 
+</div>
+<div style="margin-left:5%;">   de la ligne sans autre action.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -806,15 +810,15 @@
 <li><a href="#CHR&gt;SCR">CHR&gt;SCR</a></li>
 <li><a href="#CURADR">CURADR</a></li>
 <li><a href="#CURENBL">CURENBL</a></li>
-<li><a href="#CURPOS">CURPOS</a></li>
 <li><a href="#GETX">GETX</a></li>
 <li><a href="#GETY">GETY</a></li>
 <li><a href="#HTAB">HTAB</a></li>
 <li><a href="#INVLN">INVLN</a></li>
+<li><a href="#LC-AT-XY">LC-AT-XY</a></li>
 <li><a href="#LC-B/W">LC-B/W</a></li>
 <li><a href="#LC-BEL">LC-BEL</a></li>
+<li><a href="#LC-CLS">LC-CLS</a></li>
 <li><a href="#LC-CR">LC-CR</a></li>
-<li><a href="#LC-CURPOS">LC-CURPOS</a></li>
 <li><a href="#LC-DEL">LC-DEL</a></li>
 <li><a href="#LC-DELEOL">LC-DELEOL</a></li>
 <li><a href="#LC-DELLN">LC-DELLN</a></li>
@@ -826,11 +830,11 @@
 <li><a href="#LC-INSRT">LC-INSRT</a></li>
 <li><a href="#LC-INSRTLN">LC-INSRTLN</a></li>
 <li><a href="#LC-LEFT">LC-LEFT</a></li>
-<li><a href="#LC-PAGE">LC-PAGE</a></li>
 <li><a href="#LC-RIGHT">LC-RIGHT</a></li>
 <li><a href="#LC-RMVLN">LC-RMVLN</a></li>
 <li><a href="#LC-UP">LC-UP</a></li>
 <li><a href="#LC-WHITLN">LC-WHITLN</a></li>
+<li><a href="#LC-XY?">LC-XY?</a></li>
 <li><a href="#LNADR">LNADR</a></li>
 <li><a href="#NEXT-COLON">NEXT-COLON</a></li>
 <li><a href="#PUTC">PUTC</a></li>

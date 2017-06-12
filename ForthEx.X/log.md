@@ -3,6 +3,10 @@
 Travail sur la console. Modifications dans console.s,tvout.s et vt102.s
 Renommé GETCUR -> XY?
 
+à faire: repenser le foncionment de la console. EMIT conforme au standard ANSI
+sans dépendance d'implémentation. Toutes les fonctions de contrôle doivent-être
+extériosées à EMIT.
+
 2017-06-10
 ----------
 Retravailler vt102.s

@@ -150,7 +150,7 @@ HEADLESS INC_LINE,CODE
 ; retourne:
 ;   rien
 DEFWORD "VT-INIT",7,,VTINIT
-    .word B115200,BAUD,XON,VTPAGE,LIT,1,DUP,CPOS_STORE,EXIT
+    .word B115200,BAUD,XON,VTCLS,LIT,1,DUP,CPOS_STORE,EXIT
     
  
 ; nom: XON  ( -- ) 
@@ -234,12 +234,12 @@ DEFWORD "VT-EKEY",7,,VTEKEY
 SYSDICT
 CTRL_TABLE:
     .word 0,0,0,0
-    .word 0,0,0,0
+    .word -1,0,0,0  ; CTRL_D
     .word -1,0,0,0  ; VK_BACK
     .word -1,-1,0,0  ; CTRL_L,VK_CR
     .word 0,0,0,0
     .word 0,0,-1,0  ; CTRL_V 
-    .word -1,0,0,0  ; CTRL_X
+    .word 0,0,0,0  
     .word 0,0,0,0  
  
 ; VT-FILTER ( u -- u false | c true )    
@@ -462,13 +462,13 @@ DEFWORD "VT-DELEOL",9,,VTDELEOL
     .word ESCRBRAC,LIT,'K',SPUTC,CPOS_SYNC,EXIT
     
     
-; nom: VT-PAGE ( -- )
+; nom: VT-CLS ( -- )
 ;  Envoie une commande au terminal VT102 pour effacer l'écran.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "VT-PAGE",7,,VTPAGE
+DEFWORD "VT-CLS",6,,VTCLS
     .word LIT,CTRL_L,SPUTC,LIT,1,DUP,CPOS_STORE
     .word EXIT
     
@@ -645,8 +645,11 @@ HEADLESS CPOS_SYNC,HWORD
 ; retourne:
 ;   rien
 DEFWORD "VT-CRLF",7,,VTCRLF
-   .word LIT,CTRL_M,SPUTC,LIT,CTRL_J,SPUTC
-   .word CPOS_SYNC,EXIT
+   .word LIT,CTRL_M,SPUTC
+   .word CPOS_FETCH,SWAP,DROP,LIT,LPS,EQUAL,ZBRANCH,2f-$
+   .word LIT,video_flags,CFETCH,LIT,1,LIT,F_SCROLL,LSHIFT,AND,ZBRANCH,9f-$
+2: .word LIT,CTRL_J,SPUTC
+9: .word CPOS_SYNC,EXIT
    
 ; VT-PUTC ( c -- )
 ;   Envoie un caractère au terminal VT102. Les caractères ne sont pas filtrés.

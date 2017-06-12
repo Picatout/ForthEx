@@ -449,7 +449,7 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     mov.b WREG,_htab
     bset video_flags,#F_SCROLL
     bset video_flags,#F_WRAP
-    bra code_LCPAGE
+    bra code_LCCLS
     
 ; nom: VIDEO  ( f -- )
 ;   Active/désactive la sortie vidéo. La synchronisation demeure active
@@ -470,7 +470,7 @@ DEFCODE "VIDEO",5,,VIDEO
 ; LC-INIT  ( -- )
 ; initialise la console locale
 HEADLESS LCINIT,HWORD
-    .word LCPAGE,LIT,0,DUP,LIT,kbd_head,STORE
+    .word LCCLS,LIT,0,DUP,LIT,kbd_head,STORE
     .word LIT,kbd_tail,STORE,EXIT
     
 ; nom: LC-B/W ( f -- ) 
@@ -523,14 +523,14 @@ DEFCODE "CURENBL",7,,CURENBL
     call cursor_disable
     NEXT
     
-; nom: LC-PAGE  ( -- )
+; nom: LC-CLS  ( -- )
 ;   Console locale.    
 ;   Vide l'écran.
 ; arguments:    
 ;   aucun
 ; retourne:    
 ;   rien
-DEFCODE "LC-PAGE",7,,LCPAGE
+DEFCODE "LC-CLS",6,,LCCLS
     cursor_incr_sema
     mov #0x2020,W0
     mov #_video_buffer, W1
@@ -897,7 +897,7 @@ DEFCODE "TGLCHAR",7,,TGLCHAR
 ;   Affiche le caractère à la position du curseur et avance
 ;   le curseur vers la droite. Si le curseur est en fin de ligne
 ;   passe au début de la ligne suivante. Produit un défilement vers le haut
-;   si nécessaire.    
+;   si nécessaire à la condition que SCROLL soit actif.    
 ; arguments:
 ;   c   Caractère à afficher.
 ; retourne:
@@ -939,7 +939,9 @@ DEFCODE "PUTC",4,,PUTC
 ; nom: LC-CR ( -- )
 ;   Console locale.    
 ;   Envoie le curseur au début de la ligne suivante défile l'écran
-;   vers le haut si nécessaire.    
+;   vers le haut si le curseur est sur la dernière ligne sauf si
+;   SCROLL est désactivé. Dans ce cas renvoie de le curseur au début 
+;   de la ligne sans autre action.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -953,7 +955,8 @@ DEFCODE "LC-CR",5,,LCCR
     bra z, 2f
     inc.b ypos
     bra 9f
-2:  call scroll_up    
+2:  btsc video_flags,#F_SCROLL
+    call scroll_up    
 9:  cursor_decr_sema
     NEXT
 
@@ -1153,14 +1156,11 @@ DEFWORD "LC-EMIT",7,,LCEMIT ; ( c -- )
 2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
     .word DROP,LCDELLN,EXIT
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
-    .word DROP,CLS,EXIT
+    .word DROP,LCCLS,EXIT
 2:  .word DUP,LIT,VK_INSERT,EQUAL,ZBRANCH,2f-$
     .word DROP,LCINSRT,EXIT
-    ; autres fonctions
-2:  .word DUP,LIT,CTRL_G,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCBEL,EXIT
     ; les codes non reconnus sont imprimés.    
-2:  .word PUTC,EXIT
+2:  .word DROP,EXIT
     
     
 ; nom: LC-EMIT?  ( -- f )

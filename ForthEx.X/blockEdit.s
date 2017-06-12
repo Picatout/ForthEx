@@ -372,7 +372,16 @@ DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )
 HEADLESS TABADV, HWORD
     .word NEXTCOLON,ISLOCAL,ZBRANCH,1f-$,EXIT
 1:  .word LCXYQ,VTATXY,EXIT    
-    
+
+; efface la ligne 23
+;  nécessaire après une commande CTRL_X  
+HEADLESS DELLN23,HWORD
+    .word XYQ,LIT,1,LIT,23,TWODUP,LCATXY,LCDELLN
+    .word ISLOCAL,TBRANCH,2f-$
+    .word VTATXY,VTDELLN,BRANCH,9f-$
+2:  .word TWODROP
+9:  .word ATXY,EXIT
+  
 ; Affiche la ligne d'état    
 ; Indique le numéro du bloc et la taille actuelle de l'écran.    
 HEADLESS STATUSLN,HWORD
@@ -425,15 +434,15 @@ DEFWORD "ED-EMIT",7,,EDEMIT
 DEFWORD "ED-AT-XY",8,,EDATXY
     .word TWODUP,LCATXY,VTATXY,EXIT
 
-; nom: ED-PAGE ( -- )
+; nom: ED-CLS ( -- )
 ;   Console LOCAL et REMOTE
 ;   Efface l'écrran.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
-DEFWORD "ED-PAGE",7,,EDPAGE
-    .word LCPAGE,VTPAGE,EXIT
+DEFWORD "ED-CLS",7,,EDCLS
+    .word LCCLS,VTCLS,EXIT
     
 ; nom: ED-B/W  ( f -- )  
 ;   Console LOCAL et REMOTE    
@@ -510,7 +519,7 @@ DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
 2:  .word LIT,CTRL_B,KCASE,ZBRANCH,2f-$,SAVESCREEN,BRANCH,1b-$
 2:  .word LIT,CTRL_O,KCASE,ZBRANCH,2f-$,OPENBLOCK,BRANCH,1b-$  
 2:  .word LIT,CTRL_K,KCASE,ZBRANCH,2f-$,DELEOL,BRANCH,1b-$
-2:  .word LIT,CTRL_X,KCASE,ZBRANCH,2f-$,RMVLN,BRANCH,1b-$  
+2:  .word LIT,CTRL_X,KCASE,ZBRANCH,2f-$,RMVLN,DELLN23,BRANCH,1b-$  
 2:  .word LIT,CTRL_Y,KCASE,ZBRANCH,2f-$,INSLN,BRANCH,1b-$
 2:  .word DROP,BRANCH,1b-$
     ; c>=127
