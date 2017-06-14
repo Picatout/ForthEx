@@ -57,27 +57,28 @@
 ; <br><table border="single">     
 ; <tr><th colspan="2">COMMANDES</th></tr>
 ; <tr><th>touche</th><th>fonction</th></tr>
-; <tr><td>UP</td><td>Déplace le curseur d'une ligne vers le haut.</td></tr>
-; <tr><td>DOWN</td><td>Déplace le curseur d'une ligne vers le bas.</td></tr>
-; <tr><td>LEFT</td><td>Déplace le curseur d'un caractère vers la gauche.</td></tr>
-; <tr><td>RIGHT</td><td>Déplace le curseur d'un caractère vers la droite.</td></tr>    
+; <tr><td><center>&uarr;</center></td><td>Déplace le curseur d'une ligne vers le haut.</td></tr>
+; <tr><td><center>&darr;</center></td><td>Déplace le curseur d'une ligne vers le bas.</td></tr>
+; <tr><td><center>&larr;</center></td><td>Déplace le curseur d'un caractère vers la gauche.</td></tr>
+; <tr><td><center>&rarr;</center></td><td>Déplace le curseur d'un caractère vers la droite.</td></tr>    
+; <tr><td><center>&crarr;</center></td><td>Va au début de la ligne suivante.</td></tr>
 ; <tr><td>HOME</td><td>Va au début de la ligne.</td></tr>
 ; <tr><td>END</td><td>Va à la fin de la ligne.</td></tr>
-; <tr><td>PGUP</td><td>Déplace le curseur dans le coin supérieur gauche de l'écran.</td></tr>
-; <tr><td>PGDN</td><td>Déplace le curseur à la fin du texte.</td></tr>    
+; <tr><td>PAGE<br>UP</td><td>Déplace le curseur dans le coin supérieur gauche de l'écran.</td></tr>
+; <tr><td>PAGE<br>DOWN</td><td>Déplace le curseur à la fin du texte.</td></tr>    
 ; <tr><td>DELETE</td><td>Efface le caractère à la position du curseur.</td></tr>
 ; <tr><td>INSERT</td><td>Insère un espace à la position du curseur. S'il y a un caractère à la colonne 64 il est perdu.</td></tr>    
-; <tr><td>BACKSPACE</td><td>Efface le caractère à gauche du curseur.</td></tr>
-; <tr><td>CTRL_D</td><td>Efface la ligne du curseur et place celui-ci à la marge gauche.</td></tr>     
-; <tr><td>CTRL_K</td><td>Efface à partir du curseur jusqu'à la fin de la ligne.</td></tr>    
-; <tr><td>CTRL_L</td><td>Efface tout l'écran.</td></tr> 
-; <tr><td>CTRL_X</td><td>Supprime la ligne sur laquelle le curseur réside.</td></tr>
-; <tr><td>CTRL_Y</td><td>Insère une ligne vide avant celle où se trouve le curseur.</td></tr>
-; <tr><td>CTRL_B</td><td>Sauvegarde de l'écran dans le bloc.</td></tr>
-; <tr><td>CTRL_N</td><td>Sauvegarde le bloc actuel et charge le bloc suivant pour édition.</td></tr>
-; <tr><td>CTRL_P</td><td>Sauvegarde le bloc actuel et charge le bloc précédent pour édition.</td></tr>     
-; <tr><td>CTRL_O</td><td>Sauvegarde le bloc actuel et saisie d'un numéro de bloc pour édition.</td></tr>
-; <tr><td>CTRL_E</td><td>Quitte l'éditeur,le contenu de l'écran n'est pas sauvegardé.</td></tr>
+; <tr><td><center>&lAarr;</center></td><td>Efface le caractère à gauche du curseur.</td></tr>
+; <tr><td>CTRL-D</td><td>Efface la ligne du curseur et place celui-ci à la marge gauche.</td></tr>     
+; <tr><td>CTRL-K</td><td>Efface à partir du curseur jusqu'à la fin de la ligne.</td></tr>    
+; <tr><td>CTRL-L</td><td>Efface tout l'écran.</td></tr> 
+; <tr><td>CTRL-X</td><td>Supprime la ligne sur laquelle le curseur réside.</td></tr>
+; <tr><td>CTRL-Y</td><td>Insère une ligne vide avant celle où se trouve le curseur.</td></tr>
+; <tr><td>CTRL-B</td><td>Sauvegarde de l'écran dans le bloc.</td></tr>
+; <tr><td>CTRL-N</td><td>Sauvegarde le bloc actuel et charge le bloc suivant pour édition.</td></tr>
+; <tr><td>CTRL-P</td><td>Sauvegarde le bloc actuel et charge le bloc précédent pour édition.</td></tr>     
+; <tr><td>CTRL-O</td><td>Sauvegarde le bloc actuel et saisie d'un numéro de bloc pour édition.</td></tr>
+; <tr><td>CTRL-E</td><td>Quitte l'éditeur,le contenu de l'écran n'est pas sauvegardé.</td></tr>
 ; </table><br>
 ; :HTML     
      
