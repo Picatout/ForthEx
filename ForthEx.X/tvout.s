@@ -876,6 +876,24 @@ DEFCODE "LC-DOWN",7,,LCDOWN
     NEXT
     
     
+; LC-TOP ( -- )
+;    Déplace le curseur dans le coin supérieur gauche.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+HEADLESS LCTOP,HWORD
+    .word FALSE,CURENBL,LIT,1,DUP,LCATXY,TRUE,CURENBL,EXIT
+    
+; LC-BOTTOM ( -- )
+;   Déplace le curseur dans le coin inférieur droit.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+HEADLESS LCBOTTOM,HWORD
+    .word FALSE,CURENBL,LIT,CPL,LIT,LPS,LCATXY,TRUE,CURENBL,EXIT
+    
 ; nom: TGLCHAR  ( -- )
 ;   Console locale.    
 ;   Inverse le bit #7 du caractère à la position du curseur.
@@ -936,7 +954,7 @@ DEFCODE "PUTC",4,,PUTC
 9:  cursor_decr_sema
     NEXT
     
-; nom: LC-CR ( -- )
+; nom: LC-CRLF ( -- )
 ;   Console locale.    
 ;   Envoie le curseur au début de la ligne suivante défile l'écran
 ;   vers le haut si le curseur est sur la dernière ligne sauf si
@@ -946,7 +964,7 @@ DEFCODE "PUTC",4,,PUTC
 ;   aucun
 ; retourne:
 ;   rien    
-DEFCODE "LC-CR",5,,LCCR 
+DEFCODE "LC-CRLF",7,,LCCRLF 
     cursor_incr_sema
     cursor_sync
     clr.b xpos
@@ -961,21 +979,23 @@ DEFCODE "LC-CR",5,,LCCR
     NEXT
 
 
-; nom: NEXT-COLON  ( -- )    
+; nom: LC-TAB  ( -- )    
 ;   Console locale.    
 ;   Avance le curseur à la prochaine tabulation.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien 
-DEFWORD "NEXT-COLON",10,,NEXTCOLON
-    .word FALSE,CURENBL
-;    .word HTAB,CFETCH,TBRANCH,2f-$,LIT,4,HTAB,CSTORE
-2:  .word GETX,DUP,LIT,CPL,HTAB,CFETCH,MINUS,LESS,TBRANCH,2f-$
-    .word DROP,BRANCH,9f-$
-2:  .word ONEMINUS,HTAB,CFETCH,DUP,TOR,SLASH,ONEPLUS,RFROM,STAR
-    .word ONEPLUS,SETX    
-9:  .word TRUE,CURENBL,EXIT
+DEFWORD "LC-TAB",6,,LCTAB
+    .word LCXYQ,SWAP,HTAB,CFETCH,SWAP ; s: line tab col
+    .word OVER,SLASH,OVER,STAR,PLUS,SWAP,LCATXY,EXIT
+    
+;    .word FALSE,CURENBL
+;2:  .word GETX,DUP,LIT,CPL,HTAB,CFETCH,MINUS,LESS,TBRANCH,2f-$
+;    .word DROP,BRANCH,9f-$
+;2:  .word ONEMINUS,HTAB,CFETCH,DUP,TOR,SLASH,ONEPLUS,RFROM,STAR
+;    .word ONEPLUS,SETX    
+;9:  .word TRUE,CURENBL,EXIT
     
 ; nom: LC-DEL ( -- )
 ;   Console locale.  
@@ -1009,14 +1029,14 @@ DEFWORD "LC-INSRT",8,,LCINSRT
     .word OVER,GETY,BL,CHRTOSCR
 9:  .word DROP,SETX,EXIT
   
-; nom: BACKDEL ( -- )
+; nom: LC-BACKDEL ( -- )
 ;   Console locale.  
 ;   Efface le carctère à gauche du curseur.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien  
-DEFWORD "BACKDEL",7,,BACKDEL   ; ( -- )
+DEFWORD "LC-BACKDEL",10,,LCBACKDEL   ; ( -- )
     .word GETX,ZBRANCH,9f-$
     .word LCLEFT,LCDEL
 9:  .word EXIT
@@ -1086,18 +1106,8 @@ DEFWORD "LC-INSRTLN",10,,LCINSRTLN
     .word MOVE,LCDELLN,EXIT
     
     
-; nom: LC-BEL ( -- )
-;   Console locale.    
-;   Fait entendre un beep.
-; arguments:
-;   aucun
-; retourne:
-;   rien
-DEFWORD "LC-BEL",6,,LCBEL
-    .word LIT,200,LIT,1000,TONE,EXIT
     
-    
-; nom: LC-EMIT ( c -- )
+; LC-EMIT ( c -- )
 ;   Console locale.    
 ;   Imprime un caractère à l'écran ou accepte un caractère de contrôle.
 ;   Liste des contrôles reconnus:
@@ -1123,44 +1133,45 @@ DEFWORD "LC-BEL",6,,LCBEL
 ;    c  Caractère à émettre.
 ; retourne:
 ;   rien    
-DEFWORD "LC-EMIT",7,,LCEMIT ; ( c -- )
-    ; caractères imprimables 32-126
-    .word DUP,QPRTCHAR,ZBRANCH,2f-$
-    .word PUTC,EXIT
-    ; déplacement du curseur
-2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCCR,EXIT
-2:  .word DUP,LIT,VK_TAB,EQUAL,ZBRANCH,2f-$
-    .word DROP,NEXTCOLON,EXIT
-2:  .word DUP,LIT,VK_LEFT,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCLEFT,EXIT
-2:  .word DUP,LIT,VK_RIGHT,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCRIGHT,EXIT
-2:  .word DUP,LIT,VK_HOME,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCHOME,EXIT
-2:  .word DUP,LIT,VK_END,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCEND,EXIT
-2:  .word DUP,LIT,VK_UP,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCUP,EXIT
-2:  .word DUP,LIT,VK_DOWN,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCDOWN,EXIT
-    ; modification de l'affichage
-2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
-    .word DROP,BACKDEL,EXIT
-2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCRMVLN,EXIT
-2:  .word DUP,LIT,CTRL_Y,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCINSRTLN,EXIT
-2:  .word DUP,LIT,VK_DELETE,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCDEL,EXIT
-2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCDELLN,EXIT
-2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCCLS,EXIT
-2:  .word DUP,LIT,VK_INSERT,EQUAL,ZBRANCH,2f-$
-    .word DROP,LCINSRT,EXIT
-    ; les codes non reconnus sont imprimés.    
-2:  .word DROP,EXIT
+
+;DEFWORD "LC-EMIT",7,,LCEMIT ; ( c -- )
+;    ; caractères imprimables 32-126
+;    .word DUP,QPRTCHAR,ZBRANCH,2f-$
+;    .word PUTC,EXIT
+;    ; déplacement du curseur
+;2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCCR,EXIT
+;2:  .word DUP,LIT,VK_TAB,EQUAL,ZBRANCH,2f-$
+;    .word DROP,NEXTCOLON,EXIT
+;2:  .word DUP,LIT,VK_LEFT,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCLEFT,EXIT
+;2:  .word DUP,LIT,VK_RIGHT,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCRIGHT,EXIT
+;2:  .word DUP,LIT,VK_HOME,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCHOME,EXIT
+;2:  .word DUP,LIT,VK_END,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCEND,EXIT
+;2:  .word DUP,LIT,VK_UP,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCUP,EXIT
+;2:  .word DUP,LIT,VK_DOWN,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCDOWN,EXIT
+;    ; modification de l'affichage
+;2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
+;    .word DROP,BACKDEL,EXIT
+;2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCRMVLN,EXIT
+;2:  .word DUP,LIT,CTRL_Y,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCINSRTLN,EXIT
+;2:  .word DUP,LIT,VK_DELETE,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCDEL,EXIT
+;2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCDELLN,EXIT
+;2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCCLS,EXIT
+;2:  .word DUP,LIT,VK_INSERT,EQUAL,ZBRANCH,2f-$
+;    .word DROP,LCINSRT,EXIT
+;    ; les codes non reconnus sont imprimés.    
+;2:  .word DROP,EXIT
     
     
 ; nom: LC-EMIT?  ( -- f )

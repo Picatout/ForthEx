@@ -343,16 +343,22 @@ not_found:
 
   
 ; nom: ACCEPT ( c-addr +n1 -- +n2 ) 
-;   Lecture d'une ligne de texte à partir de la console.
-;   La chaîne terminée par touche la touche 'ENTER'.
+;   Interface utilisateur en mode interactif.
+;   Permet à l'utilisateur d'entrer une ligne de code au clavier.
+;   Cette ligne est interprétée/compilée lorsque l'utilisateur enfonce
+;   la touche ENTER.    
 ;   Les touches de contrôles suivantes sont reconnues:
-;   - VK_CR   termine la saisie
-;   - CTRL_D  efface la ligne et place le curseur à gauche
-;   - VK_BACK recule le curseur d'une position et efface le caractère.
-;   - CTRL_L  efface l'écran au complet et place le curseur dans le coin
-;             supérieur gauche.
-;   - CTRL_V  Réaffiche la dernière ligne saisie
-;   - Les autres touches de contrôles sont ignorées. 
+; HTML:
+; <br><table border="single">
+; <tr><th>code<br>ASCII</th><th>nom</th><th>fonction</th></tr>    
+; <tr><td>4</td><td>CTRL_D</td><td> Efface la ligne et place le curseur à gauche.</td></tr>
+; <tr><td>8</td><td>BACKSPACE</td><td> Recule le curseur d'une position et efface le caractère.</td></tr>
+; <tr><td>12</td><td>CTRL_L</td><td> Efface l'écran au complet et place le curseur dans le coin supérieur gauche.</td></tr>
+; <tr><td>13</td><td>ENTER</td><td> Termine la saisie de la ligne et interprète celle-ci.</td></tr>    
+; <tr><td>22</td><td>CTRL_V</td><td> Réaffiche la dernière ligne interprétée.</td></tr>
+; </table><br>    
+; :HTML
+;   Les autres touches de contrôles sont ignorées. 
 ; arguments:
 ;   c-addr   addresse du tampon.
 ;   +n1      longueur du tampon.
@@ -360,7 +366,7 @@ not_found:
 ;   +n2      longueur de la chaîne lue    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
-1:  .word KEY,DUP,LIT,31,UGREATER,ZBRANCH,2f-$
+1:  .word EKEY,DUP,QPRTCHAR,ZBRANCH,2f-$
     .word OVER,RFETCH,EQUAL,TBRANCH,3f-$
     .word DUP,EMIT,OVER,CSTORE,ONEPLUS,BRANCH,1b-$
 3:  .word DROP,BRANCH,1b-$
@@ -368,11 +374,11 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word DROP,SWAP,MINUS,RDROP,EXIT
 2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
     .word DROP,TWODUP,EQUAL,TBRANCH,1b-$
-    .word DELBACK,ONEMINUS,BRANCH,1b-$
+    .word BACKDEL,ONEMINUS,BRANCH,1b-$
 2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
     .word DROP,DELLN,DROP,DUP,BRANCH,1b-$
 2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
-    .word EMIT,DROP,DUP,BRANCH,1b-$
+    .word DROP,CLS,DROP,DUP,BRANCH,1b-$
 2:  .word DUP,LIT,CTRL_V,EQUAL,ZBRANCH,2f-$
     .word DROP,DELLN,PASTE,FETCH,COUNT,TYPE
     .word DROP,DUP,GETCLIP,PLUS,BRANCH,1b-$

@@ -276,7 +276,7 @@ HEADLESS VTFILTER,HWORD
 ;   c   le premier caractère valide de la file.    
 DEFWORD "VT-KEY?",7,,VTKEYQ
 1: .word SGETCQ,DUP,ZBRANCH,9f-$
-   .word DROP,VTEKEY,VTFILTER,TBRANCH,9f-$
+   .word DROP,VTEKEY,DUP,QPRTCHAR,TBRANCH,9f-$
    .word DROP,BRANCH,1b-$
 9: .word EXIT
     
@@ -293,52 +293,52 @@ DEFWORD "VT-KEY",6,,VTKEY
 
     
     
-; nom: VT-EMIT ( c -- )
+; VT-EMIT ( c -- )
 ;  transmet un caractère à la console VT102.
 ;  VT-EMIT filtre c rejette les caractères non reconnus.    
 ; arguments:
 ;    c   caractère à transmettre
 ; retourne:
 ;    rien    
-DEFWORD "VT-EMIT",7,,VTEMIT
-    .word DUP,QPRTCHAR,ZBRANCH,2f-$
-    .word VTPUTC,EXIT
-2:  .word DUP,LIT,VK_DELETE,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTDEL,EXIT 
-2:  .word DUP,LIT,VK_INSERT,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTINSERT,EXIT
-2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTDELLN,EXIT
-2:  .word DUP,LIT,CTRL_K,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTDELEOL,EXIT
-2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
-    .word SPUTC,EXIT
-2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTCRLF,EXIT
-2:  .word DUP,LIT,CTRL_J,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTCRLF,EXIT
-2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTDELBACK,EXIT
-2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTRMVLN,EXIT
-2:  .word DUP,LIT,CTRL_Y,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTINSRTLN,EXIT
-2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
-    .word SPUTC,EXIT
-2:  .word DUP,LIT,VK_UP,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTUP,EXIT
-2:  .word DUP,LIT,VK_DOWN,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTDOWN,EXIT
-2:  .word DUP,LIT,VK_LEFT,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTLEFT,EXIT
-2:  .word DUP,LIT,VK_RIGHT,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTRIGHT,EXIT
-2:  .word DUP,LIT,VK_HOME,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTHOME,EXIT
-2:  .word DUP,LIT,VK_END,EQUAL,ZBRANCH,2f-$
-    .word DROP,VTEND,EXIT
-2:  .word DROP    
-    .word EXIT
+;DEFWORD "VT-EMIT",7,,VTEMIT
+;    .word DUP,QPRTCHAR,ZBRANCH,2f-$
+;    .word VTPUTC,EXIT
+;2:  .word DUP,LIT,VK_DELETE,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTDEL,EXIT 
+;2:  .word DUP,LIT,VK_INSERT,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTINSERT,EXIT
+;2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTDELLN,EXIT
+;2:  .word DUP,LIT,CTRL_K,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTDELEOL,EXIT
+;2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
+;    .word SPUTC,EXIT
+;2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTCRLF,EXIT
+;2:  .word DUP,LIT,CTRL_J,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTCRLF,EXIT
+;2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTDELBACK,EXIT
+;2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTRMVLN,EXIT
+;2:  .word DUP,LIT,CTRL_Y,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTINSRTLN,EXIT
+;2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
+;    .word SPUTC,EXIT
+;2:  .word DUP,LIT,VK_UP,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTUP,EXIT
+;2:  .word DUP,LIT,VK_DOWN,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTDOWN,EXIT
+;2:  .word DUP,LIT,VK_LEFT,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTLEFT,EXIT
+;2:  .word DUP,LIT,VK_RIGHT,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTRIGHT,EXIT
+;2:  .word DUP,LIT,VK_HOME,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTHOME,EXIT
+;2:  .word DUP,LIT,VK_END,EQUAL,ZBRANCH,2f-$
+;    .word DROP,VTEND,EXIT
+;2:  .word DROP    
+;    .word EXIT
 
 ; nom: VT-TYPE  ( c-addr u -- )
 ;   Transmet au terminal VT102 une chaîne de caractère. 
@@ -372,7 +372,7 @@ DEFWORD "VT-SNDARG",9,,VTSNDARG
 HEADLESS ESCRBRAC,HWORD    
 ;DEFWORD "ESC[",4,,ESCRBRAC
     .word CLIT,27,SPUTC,CLIT,'[',SPUTC,EXIT
-    
+
 ; nom: VT-UP ( -- )
 ;   Envoie la séquence ANSI 'ESC[A'  au terminal VT102.
 ;   Cette séquence déplace le curseur à la ligne précédente de l'affichage.    
@@ -436,6 +436,34 @@ DEFWORD "VT-HOME",7,,VTHOME
 DEFWORD "VT-END",6,,VTEND
     .word CPOS_FETCH,SWAP,DROP,LIT,CPL,SWAP,VTATXY,EXIT
     
+; VT-TOP
+;   Envoie le curseur à colonne 1, ligne 1.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+HEADLESS VTTOP,HWORD
+    .word LIT,1,DUP,VTATXY,EXIT
+    
+; VT-BOTTOM
+;   Envoie le curseur à la position 64,24
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+HEADLESS VTBOTTOM,HWORD
+    .word LIT,CPL,LIT,LPS,VTATXY,EXIT
+    
+; VT-TAB ( -- )
+;   Déplacele curseur à la prochaine colonne.
+; arguments:
+;   aucun
+; retourne:
+;   rien    
+HEADLESS VTTAB,HWORD
+    .word CPOS_FETCH,SWAP,HTAB,CFETCH,SWAP ; s: line tab col
+    .word OVER,SLASH,OVER,STAR,PLUS,SWAP,VTATXY,EXIT
+    
 ; nom: VT-AT-XY ( u1 u2 -- )
 ;   Envoie une séquence de contrôle au terminal VT102 pour positionner le curseur    
 ;   aux coordonnées {u1,u2}
@@ -445,7 +473,9 @@ DEFWORD "VT-END",6,,VTEND
 ;  retourne:
 ;    rien
 DEFWORD "VT-AT-XY",8,,VTATXY
-    .word TWODUP,CPOS_STORE
+    .word SWAP,LIT,CPL,UMIN,SWAP
+    .word LIT,LPS,UMIN
+2:  .word TWODUP,CPOS_STORE
     .word ESCRBRAC,VTSNDARG
     .word LIT,';',SPUTC
     .word VTSNDARG
@@ -497,16 +527,16 @@ DEFWORD "VT-INSERT",9,,VTINSERT
     .word VTATXY
     .word EXIT
     
-; nom: VT-DELBACK  ( -- )
+; nom: VT-BACKDEL  ( -- )
 ;   Envoie une commande au terminal VT102 pour effacer le caractère à gauche du curseur.
 ;   Le curseur est déplacé à la position du caractère supprimé.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "VT-DELBACK",10,,VTDELBACK ; ( -- )
+DEFWORD "VT-BACKDEL",10,,VTBACKDEL ; ( -- )
     .word CPOS_FETCH,DROP,LIT,1,EQUAL,ZBRANCH,2f-$,EXIT
-2:  .word LIT,VK_BACK,SPUTC,ESCRBRAC,LIT,'K',SPUTC
+2:  .word LIT,VK_BACK,SPUTC,ESCRBRAC,LIT,'1',SPUTC,LIT,'P',SPUTC
     .word DEC_COLON,EXIT
 
 ; nom: VT-DELLN   ( -- )    
@@ -529,7 +559,7 @@ DEFWORD "VT-DELLN",8,,VTDELLN ; ( -- )
 ; retourne:
 ;   rien
 DEFWORD "VT-INSRTLN",10,,VTINSRTLN 
-    .word ESCRBRAC,LIT,'L',SPUTC,COLON1,EXIT
+    .word ESCRBRAC,LIT,'L',SPUTC,COLON1,CPOS_FETCH,VTATXY,EXIT
   
 ; nom: VT-RMVLN ( -- )
 ;   Supprime la ligne du curseur et décale toutes celles en dessous vers le haut.    

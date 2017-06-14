@@ -860,20 +860,6 @@ DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
 8:  .word SWAP,ONEPLUS,SWAP,ONEMINUS    
 9:  .word EXIT
 
-; nom: ?PRTCHAR   ( n -- f )
-;   Vérifie si  'n' est une caractère imprimable dans l'intervalle {32..126}
-;   et retourne un indicateur booléen.
-; arguments:
-;    n	 Entier simple
-; retourne:
-;    f Indicateur booléen, vrai si n -> {32..126}  
-DEFWORD "?PRTCHAR",8,,QPRTCHAR 
-    .word DUP,BL,ULESS,TBRANCH,7f-$
-    .word LIT,127,ULESS,ZBRANCH,8f-$
-    .word TRUE,EXIT
-7:  .word DROP
-8:  .word FALSE,EXIT
-  
 ; nom: ?QUOTED-CHAR  ( c-addr -- c-addr 0 | n -1 )
 ;   Vérifie si la chaîne est un caractère entre 2 apostrophe si c'est le cas
 ;   Empile la valeur ASCII du caractère et TRUE, sinon retourne 'c-addr' et FALSE.

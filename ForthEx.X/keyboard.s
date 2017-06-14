@@ -210,10 +210,23 @@ DEFCODE "LC-FILTER",9,,LCFILTER
     NEXT
 
     
+; nom: ?PRTCHAR   ( n -- f )
+;   Vérifie si  'n' est une caractère imprimable dans l'intervalle {32..126}
+;   et retourne un indicateur booléen.
+; arguments:
+;    n	 Entier simple
+; retourne:
+;    f Indicateur booléen, vrai si n -> {32..126}  
+DEFWORD "?PRTCHAR",8,,QPRTCHAR 
+    .word DUP,BL,ULESS,TBRANCH,7f-$
+    .word LIT,127,ULESS,ZBRANCH,8f-$
+    .word TRUE,EXIT
+7:  .word DROP
+8:  .word FALSE,EXIT
+  
 ; nom: LC-KEY? ( -- 0|c)
-;   Vérifie s'il y a un caractère répondant aux 
-;   critères du filtre LC-FILTER disponible dans la file du clavier. 
-;   S'il y a des caractères non valides les jettes.    
+;   Vérifie s'il y a un caractère dans l'intervalle {32..126} disponible 
+;   dans la file du clavier. S'il y a des caractères non valides les jettes.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -221,12 +234,12 @@ DEFCODE "LC-FILTER",9,,LCFILTER
 ;   c   le premier caractère valide de la file.    
 DEFWORD "LC-KEY?",7,,LCKEYQ
 1: .word LCEKEYQ,DUP,ZBRANCH,9f-$
-   .word DROP,LCEKEY,LCFILTER,TBRANCH,9f-$
+   .word DROP,LCEKEY,DUP,QPRTCHAR,TBRANCH,9f-$
    .word DROP,BRANCH,1b-$
 9: .word EXIT
     
 ; nom: LC-KEY  ( -- c )
-;   Attend la réception d'un caractère valide pour LC-FILTER du clavier.
+;   Attend la réception d'un caractère valide {32..126} du clavier.
 ; arguments:
 ;   aucun 
 ; retourne:

@@ -1,3 +1,12 @@
+2017-06-13
+----------
+Complété réorganisation de la console.
+
+2017-06-12
+----------
+Travail sur console, modification sur le fonctionnement de KEY et EMIT pour
+les rendre conforme au standard ANSI.
+
 2017-06-11
 ----------
 Travail sur la console. Modifications dans console.s,tvout.s et vt102.s

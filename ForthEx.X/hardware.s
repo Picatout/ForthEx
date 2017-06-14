@@ -198,6 +198,7 @@ _warm:
 2:  .word DROP,LIT,_unknown_reset    
 8:  .word COUNT,TYPE,CR,QUIT
   
+    
 _cold:
     .word CLR_RAM,VARS_INIT,HARDWARE_INIT
     .word VERSION,COUNT,TYPE,CR
@@ -208,6 +209,9 @@ _cold:
     .align 2
     .word QUIT ; boucle de l'interpréteur
 
+HEADLESS INFLOOP,CODE
+1: bra 1b
+    
 ; s'il y a un mot appellé AUTORUN exécute le.    
 HEADLESS QAUTORUN,HWORD
     .word DOSTR
