@@ -1,3 +1,13 @@
+2017-06-14
+----------
+Travail sur la documentation.
+Retirer le mot INVLN du fichier tvout.s
+Cacher les mots LC-* dans tvout.s, ces mots ne sont maintentant
+accessible que par l'utilisation de la console LOCAL.
+Cachez les movts VT-* dans vt102.s, ces mots ne sont maintenant
+accessible que par l'utilisation de la console REMOTE.
+Corrigé bogue dans blockEdit.s
+
 2017-06-13
 ----------
 Complété réorganisation de la console.

@@ -30,9 +30,7 @@
 ;    REMOTE  \ l'interface utilisateur utilise le port sériel.
 ;    LOCAL  \ l'interface utilisateur utilise le clavier et le moniteur de l'ordinateur.
 ;
-;    La variable système SYSCONS contient le vecteur de la console sélectionnée.
-;    Ce vecteur est une table contenant les fonctions à exécuter pour chacune des
-;    fonctions suivantes:
+;    Chaque console définie le code à exécuter pour chacune des fonction suivantes:
 ; HTML:
 ; <br><table border="single">
 ; <tr><th>fonction#</th><th>nom</th></tr>
@@ -177,8 +175,8 @@ DEFTABLE "VT-CONS",7,F_HIDDEN,VTCONS
 DEFUSER "SYSCONS",7,F_HIDDEN,SYSCONS 
     
 ; nom: LOCAL ( -- )
-;   Passe en mode console locale.
-;   La console locale utilise le clavier et l'écran de l'ordinateur ForthEx.    
+;   Transfert l'interface utilisateur à la console LOCAL.
+;   La console LOCAL utilise le clavier et l'écran de l'ordinateur ForthEx.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -188,13 +186,15 @@ DEFWORD "LOCAL",5,,LOCAL
 
     
 ; nom: REMOTE ( -- )
-;   Passe en mode console VT102 via le port sériel.
-;   Dans ce mode l'interface utilisateur utilise un terminal ou émulateur VT102
+;   Transfert l'interface utilisateur vers la console sérielle.
+;   Cette interface utilisateur utilise un terminal ou émulateur VT102
 ;   pour contrôler l'ordinateur. 
 ;   La commication est à 115200 bauds, 8 bits, 1 stop bit et pas de parité. 
-;   Le contrôle de flux est logiciel via XON, XOFF.
+;   Le contrôle de flux est logiciel (XON | XOFF).
+;   L'émulateur de terminal ne doit pas ajouter de LF (ASCII 10) lorsqu'il 
+;   reçoit un CR (ASCII 13).     
 ;   L'ordinateur ForthEx n'implémente que partiellement le standard VT102
-;   juste ce qui est nécessaire pour que la console REMOTE est les même fonctionnalités
+;   juste ce qui est nécessaire pour que la console REMOTE ait les même fonctionnalités
 ;   que la console LOCAL.    
 ; arguments:
 ;   aucun
@@ -282,7 +282,7 @@ DEFWORD "EKEY?",5,,EKEYQ
     
     
 ; nom: EMIT ( c -- )
-;  Imprime les caractère ASCII dans l'intervalle {32..126}
+;  Imprime les caractères ASCII dans l'intervalle {32..126}
 ;  EMIT transmet tous les codes reçu sans filtre donc l'effet des codes
 ;  en dehors de l'intervalle {32..126} dépend de la console utilisée.   
 ;  Pour la console LOCAL  les codes 0..32 ont une représentation graphique
@@ -301,6 +301,8 @@ DEFWORD "EMIT",4,,EMIT
     
 ; nom: EMIT? ( -- f )
 ;  Vérifie si le terminal est prêt à recevoir. La console LOCAL retourne toujours VRAI.
+;  La console remote retourne faux si le terminal a envoyé un XOFF et que l'ordinateur
+;  ForthEx est en attente d'un XON.    
 ; arguments:
 ;    aucun
 ; retourne:
@@ -374,6 +376,7 @@ DEFWORD "INSRTLN",7,,INSRTLN
     
 ; nom:  TYPE ( c-addr n+ -- )
 ;  Imprime une chaîne à l'écran de la console.
+;  TYPE utilise EMIT donc ne filtre pas les caractères.    
 ; arguments:
 ;   c-addr  adresse du premier caractère de la chaîne.
 ;   n+   Longueur de la chaîne. 
@@ -387,6 +390,7 @@ DEFWORD "TYPE",4,,TYPE  ; (c-addr n+ .. )
 
 ; nom: ETYPE ( c-addr u -- )
 ;   Imprime à l'écran de la console une chaîne qui réside en mémoire EDS.
+;   ETYPE utilise EMIT donc ne filtre pas les caractères.  
 ; arguments:    
 ;   c-addr  Adresse du premier caractère de la chaîne.
 ;   u Longueur de la chaîne.
@@ -427,6 +431,8 @@ DEFWORD "DELEOL",6,,DELEOL
     
 ; nom: CR ( -- )    
 ;   Renvoie le curseur à la marge gauche de la ligne suivante.
+;   Si le curseur n'est pas après le dernier caractère de la ligne CR ne brise
+;   pas la ligne pour insérer la fin de celle-ci sur la ligne suivante.
 ; arguments:
 ;   rien
 ; retourne:

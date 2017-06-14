@@ -455,7 +455,7 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
 ;   Active/désactive la sortie vidéo. La synchronisation demeure active
 ;   mais les pixels vidéo ne sont plus envoyés au moniteur.   
 ; arguments:
-;    f Indicateur booléen  \ T=on F=off .
+;    f Indicateur booléen, si VRAI active la sortie vidéo, autrement la désactive.
 ; retourne:
 ;   rien    
 DEFCODE "VIDEO",5,,VIDEO   
@@ -473,7 +473,7 @@ HEADLESS LCINIT,HWORD
     .word LCCLS,LIT,0,DUP,LIT,kbd_head,STORE
     .word LIT,kbd_tail,STORE,EXIT
     
-; nom: LC-B/W ( f -- ) 
+; LC-B/W ( f -- ) 
 ;   Console locale.    
 ;   Détermine si les caractères s'affichent noir sur blanc ou l'inverse
 ;   Si l'indicateur Booléen 'f' est vrai les caractères s'affichent noir sur blanc.
@@ -482,7 +482,8 @@ HEADLESS LCINIT,HWORD
 ;   f   Indicateur Booléen, inverse vidéo si vrai.    
 ; retourne:
 ;   rien    
-DEFCODE "LC-B/W",6,,LCBSLASHW
+HEADLESS LCBSLASHW,CODE   
+;DEFCODE "LC-B/W",6,,LCBSLASHW
     cp0 T
     bra z, 2f
     bset.b video_flags,#F_INVERT
@@ -491,14 +492,15 @@ DEFCODE "LC-B/W",6,,LCBSLASHW
 9:  DPOP
     NEXT
     
-; nom: LC-WHITLN ( n -- )
+; LC-WHITLN ( n -- )
 ;   Imprime une ligne blanche sur la console LOCAL.
 ;   Laisse le curseur au début de la ligne et le mode noir/blanc.    
 ; arguments:
 ;   n  Numéro de la ligne {1..24}
 ; retourne:
 ;   rien
-DEFWORD "LC-WHITELN",10,,LCWHITELN
+HEADLESS LCWHITELN,HWORD    
+;DEFWORD "LC-WHITELN",10,,LCWHITELN
     .word TRUE,LCBSLASHW
     .word LIT,1,OVER,LCATXY
     .word LNADR,LIT,CPL,LIT,128+32,FILL
@@ -509,7 +511,7 @@ DEFWORD "LC-WHITELN",10,,LCWHITELN
 ;   Console locale.    
 ;   Active ou désactive le curseur texte.
 ; arguments:
-;   f   indicateur booléen, T=activ, F=inactif.
+;   f   indicateur booléen, si VRAI active le curseur, sinon le désactive.
 ; retourne:    
 ;   rien
 DEFCODE "CURENBL",7,,CURENBL 
@@ -523,14 +525,15 @@ DEFCODE "CURENBL",7,,CURENBL
     call cursor_disable
     NEXT
     
-; nom: LC-CLS  ( -- )
+;  LC-CLS  ( -- )
 ;   Console locale.    
 ;   Vide l'écran.
 ; arguments:    
 ;   aucun
 ; retourne:    
 ;   rien
-DEFCODE "LC-CLS",6,,LCCLS
+HEADLESS LCCLS,CODE  
+;DEFCODE "LC-CLS",6,,LCCLS
     cursor_incr_sema
     mov #0x2020,W0
     mov #_video_buffer, W1
@@ -541,25 +544,25 @@ DEFCODE "LC-CLS",6,,LCCLS
     cursor_decr_sema
     NEXT
 
-; nom: SCRLUP  ( -- )
+; nom: SCROLL-UP  ( -- )
 ;   Console locale.    
 ;   Glisse l'affichage vers le haut d'une ligne texte et efface la dernière ligne.
 ; arguments:
 ;   aucun
 ; retourne:    
 ;   rien
-DEFCODE "SCRLUP",6,,SCRLUP
+DEFCODE "SCROLL-UP",9,,SCRLUP
     call scroll_up
     NEXT
 
-; nom: SCRLDN  ( -- )
+; nom: SCROLL-DOWN  ( -- )
 ;   Console locale.    
 ;   Glisse l'affichage vers le bas d'une ligne texte et efface la première ligne.
 ; arguments:
 ;   aucun
 ; retourne:    
 ;   rien
-DEFCODE "SCRLDN",6,,SCRLDN 
+DEFCODE "SCROLL-DOWN",11,,SCRLDN 
     call scroll_down
     NEXT
     
@@ -639,7 +642,7 @@ DEFCODE "SETY",4,,SETY  ; ( u -- )
 
 ; nom: LNADR  ( n -- c-addr )
 ;   Console locale.
-;   Retourne l'adresse dans du premier caractère de la ligne dans le tampon vidéo.
+;   Retourne l'adresse du premier caractère de la ligne dans le tampon vidéo.
 ; arguments:
 ;   n+	Numéro de la ligne {1..24}
 ; retourne:
@@ -650,7 +653,7 @@ DEFWORD "LNADR",5,,LNADR
     
 ; nom: CURADR  ( -- c-addr )
 ;   Console locale.    
-;   Retourne l'adresse dans le tampon d'écran correspondant
+;   Retourne l'adresse dans le tampon vidéo correspondant
 ;   à la position actuelle du curseur.
 ; arguments:
 ;   aucun
@@ -668,7 +671,7 @@ DEFCODE "CURADR",6,,CURADR
     NEXT
     
     
-; nom: LC-AT-XY  ( u1 u2 -- )
+;  LC-AT-XY  ( u1 u2 -- )
 ;   Console locale.    
 ;   Positionne le curseur texte à la colonne u1 et la ligne u2.
 ; arguments:
@@ -676,10 +679,11 @@ DEFCODE "CURADR",6,,CURADR
 ;    u2    ligne {1..24}
 ; retourne:
 ;   rien    
-DEFWORD "LC-AT-XY",8,,LCATXY  ; ( u1 u2 -- )
+HEADLESS LCATXY,HWORD    
+;DEFWORD "LC-AT-XY",8,,LCATXY  ; ( u1 u2 -- )
     .word SETY, SETX, EXIT
 
-; nom: LC-XY?  ( -- u1 u2 )
+; LC-XY?  ( -- u1 u2 )
 ;   Console locale.    
 ;   Retourne la position du curseur texte.
 ; arguments:
@@ -687,17 +691,18 @@ DEFWORD "LC-AT-XY",8,,LCATXY  ; ( u1 u2 -- )
 ; retourne:
 ;   u1    colonne  {1..64}
 ;   u2    ligne    {1..24}
-DEFWORD "LC-XY?",6,,LCXYQ
+HEADLESS LCXYQ,HWORD    
+;DEFWORD "LC-XY?",6,,LCXYQ
     .word GETX,GETY,EXIT
     
-; nom: SCRCHAR  ( -- c )    
+; nom: SCR-CHAR  ( -- c )    
 ;   Console locale.    
 ;   Retourne le caractère à la position du curseur.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   c   caractère à la position du curseur.    
-DEFCODE "SCRCHAR",7,,SCRCHAR ; ( -- c )
+DEFCODE "SCR-CHAR",8,,SCRCHAR ; ( -- c )
     SET_EDS
     mov.b ypos,WREG
     ze W0,W0
@@ -718,7 +723,8 @@ DEFCODE "SCRCHAR",7,,SCRCHAR ; ( -- c )
 
 ; nom: CHR>SCR  ( u1 u2 c -- )    
 ;   Console locale.    
-;   Met le caractère c la position {u1,u2} de l'écran.
+;   Dépose le caractère 'c' la position {u1,u2} dans le tampon vidéo. 
+;   Cette opération n'affecte pas la position du curseur texte.    
 ; arguments:
 ;   u1 Colonne {1..64}
 ;   u2 Ligne {1..24}
@@ -744,7 +750,7 @@ DEFCODE "CHR>SCR",7,,CHRTOSCR
     cursor_decr_sema
     NEXT
     
-; nom: INVLN  ( n f -- )    
+; INVLN  ( n f -- )    
 ;   Console locale.    
 ;   Inverse vidéo de la ligne n. L'inverse vidéo signifie que les caractères sont affiché noir/blanc.
 ; arguments:
@@ -752,35 +758,36 @@ DEFCODE "CHR>SCR",7,,CHRTOSCR
 ;   f   T=inverse, F=vidéo normal
 ; retourne:
 ;   rien    
-DEFCODE "INVLN",5,,INVLN
-    SET_EDS
-    mov #CPL,W0
-    mov [DSP--],W1
-    dec W1,W1
-    mul.uu W0,W1,W0
-    mov #_video_buffer,W1
-    add W1,W0,W0
-    cp0 T
-    bra z, normal_video
-    repeat #CPL-1
-    bset.b [W0++],#7
-    bra 9f
-normal_video:
-    repeat #CPL-1
-    bclr.b [W0++],#7
-9:  RESET_EDS
-    DPOP
-    NEXT
+;DEFCODE "INVLN",5,,INVLN
+;    SET_EDS
+;    mov #CPL,W0
+;    mov [DSP--],W1
+;    dec W1,W1
+;    mul.uu W0,W1,W0
+;    mov #_video_buffer,W1
+;    add W1,W0,W0
+;    cp0 T
+;    bra z, normal_video
+;    repeat #CPL-1
+;    bset.b [W0++],#7
+;    bra 9f
+;normal_video:
+;    repeat #CPL-1
+;    bclr.b [W0++],#7
+;9:  RESET_EDS
+;    DPOP
+;    NEXT
     
     
-; nom: LC-LEFT  ( -- )
+;  LC-LEFT  ( -- )
 ;   Console locale.    
 ;   Déplace le curseur 1 caractère vers la gauche.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
-DEFCODE "LC-LEFT",7,,LCLEFT
+HEADLESS LCLEFT,CODE    
+;DEFCODE "LC-LEFT",7,,LCLEFT
     cursor_incr_sema
     cursor_sync
     cp0.b xpos
@@ -791,14 +798,15 @@ DEFCODE "LC-LEFT",7,,LCLEFT
     NEXT
     
     
-; nom: LC-RIGHT  ( -- )
+;  LC-RIGHT  ( -- )
 ;   Console locale.    
 ;   Déplace le curseur 1 caractère vers la droite.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
-DEFCODE "LC-RIGHT",8,,LCRIGHT
+HEADLESS LCRIGHT,CODE    
+;DEFCODE "LC-RIGHT",8,,LCRIGHT
     cursor_incr_sema
     cursor_sync
     mov #CPL-1,W0
@@ -810,28 +818,30 @@ DEFCODE "LC-RIGHT",8,,LCRIGHT
     NEXT
 
 
-; nom: LC-HOME  ( -- )
+; LC-HOME  ( -- )
 ;   Console locale.    
 ;   Déplace le curseur au début de la ligne.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFCODE "LC-HOME",7,,LCHOME
+HEADLESS LCHOME,CODE    
+;DEFCODE "LC-HOME",7,,LCHOME
     cursor_incr_sema
     cursor_sync
     clr.b xpos
     cursor_decr_sema
     NEXT
     
-; nom: LC-END  ( -- )
+; LC-END  ( -- )
 ;   Console locale.    
 ;   Déplace le curseur après le dernier caractère de la ligne.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "LC-END",6,,LCEND
+HEADLESS LCEND,HWORD    
+;DEFWORD "LC-END",6,,LCEND
     .word FALSE,CURENBL
     .word CURADR,LIT,CPL-1,DUP,INVERT,ROT,AND,SWAP ; S: c-addr CPL-1
 1:  .word TWODUP,PLUS,ECFETCH,BL,EQUAL,ZBRANCH,2f-$    
@@ -842,14 +852,15 @@ DEFWORD "LC-END",6,,LCEND
     .word DROP,TRUE,CURENBL  
     .word EXIT
   
-; nom: LC-UP   ( -- )
+; LC-UP   ( -- )
 ;   Console locale.    
 ;   Déplace le curseur d'une ligne vers le haut.
 ; arguments:
 ;   aucun
 ; retourne:
-;   rien    
-DEFCODE "LC-UP",5,,LCUP
+;   rien
+HEADLESS LCUP,CODE    
+;DEFCODE "LC-UP",5,,LCUP
     cursor_incr_sema
     cursor_sync
     cp0.b ypos
@@ -858,14 +869,15 @@ DEFCODE "LC-UP",5,,LCUP
 9:  cursor_decr_sema
     NEXT
 
-; nom: LC-DOWN   ( -- )
+; LC-DOWN   ( -- )
 ;  Console locale.    
 ;  Déplace le curseur d'une ligne vers le bas.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
-DEFCODE "LC-DOWN",7,,LCDOWN
+HEADLESS LCDOWN, CODE    
+;DEFCODE "LC-DOWN",7,,LCDOWN
     cursor_incr_sema
     cursor_sync
     mov #LPS-1,W0
@@ -913,9 +925,9 @@ DEFCODE "TGLCHAR",7,,TGLCHAR
 ; nom: PUTC  ( c -- )
 ;   Console locale.    
 ;   Affiche le caractère à la position du curseur et avance
-;   le curseur vers la droite. Si le curseur est en fin de ligne
-;   passe au début de la ligne suivante. Produit un défilement vers le haut
-;   si nécessaire à la condition que SCROLL soit actif.    
+;   le curseur vers la droite. Lorsque le curseur dépasse la fin de la ligne
+;   l'état de WRAP et SCROLL sont pris en compte pour le retour à la ligne
+;   automatique et le défilement vers le haut.    
 ; arguments:
 ;   c   Caractère à afficher.
 ; retourne:
@@ -954,7 +966,7 @@ DEFCODE "PUTC",4,,PUTC
 9:  cursor_decr_sema
     NEXT
     
-; nom: LC-CRLF ( -- )
+;  LC-CRLF ( -- )
 ;   Console locale.    
 ;   Envoie le curseur au début de la ligne suivante défile l'écran
 ;   vers le haut si le curseur est sur la dernière ligne sauf si
@@ -964,7 +976,8 @@ DEFCODE "PUTC",4,,PUTC
 ;   aucun
 ; retourne:
 ;   rien    
-DEFCODE "LC-CRLF",7,,LCCRLF 
+HEADLESS LCCRLF,CODE    
+;DEFCODE "LC-CRLF",7,,LCCRLF 
     cursor_incr_sema
     cursor_sync
     clr.b xpos
@@ -979,14 +992,15 @@ DEFCODE "LC-CRLF",7,,LCCRLF
     NEXT
 
 
-; nom: LC-TAB  ( -- )    
+;  LC-TAB  ( -- )    
 ;   Console locale.    
 ;   Avance le curseur à la prochaine tabulation.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien 
-DEFWORD "LC-TAB",6,,LCTAB
+HEADLESS LCTAB,HWORD    
+;DEFWORD "LC-TAB",6,,LCTAB
     .word LCXYQ,SWAP,HTAB,CFETCH,SWAP ; s: line tab col
     .word OVER,SLASH,OVER,STAR,PLUS,SWAP,LCATXY,EXIT
     
@@ -997,21 +1011,22 @@ DEFWORD "LC-TAB",6,,LCTAB
 ;    .word ONEPLUS,SETX    
 ;9:  .word TRUE,CURENBL,EXIT
     
-; nom: LC-DEL ( -- )
+;  LC-DEL ( -- )
 ;   Console locale.  
 ;   Supprime le caractère à la position du curseur.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "LC-DEL",6,,LCDEL
+HEADLESS LCDEL,HWORD    
+;DEFWORD "LC-DEL",6,,LCDEL
     .word FALSE,CURENBL
     .word CURADR,ONEPLUS ; S: c-addr
     .word LIT,CPL,GETX,ONEPLUS,DOQDO,BRANCH,2f-$
 1:  .word DUP,ECFETCH,OVER,ONEMINUS,CSTORE,ONEPLUS,DOLOOP,1b-$
 2:  .word ONEMINUS,BL,SWAP,CSTORE,TRUE,CURENBL,EXIT
     
-; nom: LC-INSRT ( -- )
+;  LC-INSRT ( -- )
 ;   Console locale.  
 ;   Insère un espace à la position du curseur.
 ;   Il y a 2 conditions pour refuser l'insertion:  
@@ -1021,7 +1036,8 @@ DEFWORD "LC-DEL",6,,LCDEL
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "LC-INSRT",8,,LCINSRT 
+HEADLESS LCINSRT,HWORD  
+;DEFWORD "LC-INSRT",8,,LCINSRT 
     .word GETX,LCEND,GETX,TWODUP,EQUAL,TBRANCH,9f-$ ; si vrai curseur en fin de ligne
     .word DUP,LIT,CPL-1,EQUAL,TBRANCH,9f-$ ; si vrai ligne pleine.
 1:  .word LCLEFT,SCRCHAR,GETX,ONEPLUS,GETY,ROT,CHRTOSCR
@@ -1029,19 +1045,20 @@ DEFWORD "LC-INSRT",8,,LCINSRT
     .word OVER,GETY,BL,CHRTOSCR
 9:  .word DROP,SETX,EXIT
   
-; nom: LC-BACKDEL ( -- )
+; LC-BACKDEL ( -- )
 ;   Console locale.  
 ;   Efface le carctère à gauche du curseur.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien  
-DEFWORD "LC-BACKDEL",10,,LCBACKDEL   ; ( -- )
+HEADLESS LCBACKDEL,HWORD  
+;DEFWORD "LC-BACKDEL",10,,LCBACKDEL   ; ( -- )
     .word GETX,ZBRANCH,9f-$
     .word LCLEFT,LCDEL
 9:  .word EXIT
     
-; nom: LC-DELLN ( -- )
+; LC-DELLN ( -- )
 ;   Console locale.  
 ;   Efface toute la ligne sur laquelle se trouve le curseur et positionne
 ;   le curseur en début de ligne.
@@ -1049,7 +1066,8 @@ DEFWORD "LC-BACKDEL",10,,LCBACKDEL   ; ( -- )
 ;   aucun
 ; retourne:
 ;   rien
-DEFCODE "LC-DELLN",8,,LCDELLN 
+HEADLESS LCDELLN,CODE  
+;DEFCODE "LC-DELLN",8,,LCDELLN 
     cursor_incr_sema
     cursor_sync
     mov #CPL,W0
@@ -1063,27 +1081,29 @@ DEFCODE "LC-DELLN",8,,LCDELLN
     cursor_decr_sema
     NEXT
 
-; nom: LC-DELEOL ( -- )
+; LC-DELEOL ( -- )
 ;   Efface tous les caractères à partir du curseur jusqu'à la fin de la ligne.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "LC-DELEOL",9,,LCDELEOL
+HEADLESS LCDELEOL,HWORD    
+;DEFWORD "LC-DELEOL",9,,LCDELEOL
     .word FALSE,CURENBL
     .word CURADR,LIT,CPL,GETX,MINUS,BL,FILL
     .word TRUE,CURENBL,EXIT
     
     
     
-; nom: LC-RMVLN ( -- )    
+;  LC-RMVLN ( -- )    
 ;   Retire la ligne sur laquelle se trouve le curseur.
 ;   Les lignes qui se trouvent sous celle-ci sont décallées vers le haut.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
-DEFWORD "LC-RMVLN",8,,LCRMVLN
+HEADLESS LCRMVLN,HWORD    
+;DEFWORD "LC-RMVLN",8,,LCRMVLN
     .word FALSE,CURENBL
     .word GETY,LNADR,TOR,RFETCH,LIT,CPL,PLUS
     .word DUP,SCRBUF,LIT,CPL,LIT,LPS,STAR,PLUS,SWAP,MINUS
@@ -1092,7 +1112,7 @@ DEFWORD "LC-RMVLN",8,,LCRMVLN
     .word TRUE,CURENBL,EXIT
    
     
-; nom: LC-INSRTLN ( -- )
+; LC-INSRTLN ( -- )
 ;   Insère une ligne avant la ligne où se trouve le curseur.
 ;   Les lignes à partir du curseur sont décalées vers le bas.    
 ;   S'il y a du texte sur la dernière ligne ce texte est perdu.
@@ -1100,81 +1120,15 @@ DEFWORD "LC-RMVLN",8,,LCRMVLN
 ;   aucun
 ; retourne:
 ;   rien
-DEFWORD "LC-INSRTLN",10,,LCINSRTLN
+HEADLESS LCINSRTLN,HWORD    
+;DEFWORD "LC-INSRTLN",10,,LCINSRTLN
     .word GETY,LNADR,DUP,LIT,CPL,PLUS ; s: src dest
     .word LIT,LPS,GETY,MINUS,LIT,CPL,STAR ; s: src dest count
     .word MOVE,LCDELLN,EXIT
     
     
     
-; LC-EMIT ( c -- )
-;   Console locale.    
-;   Imprime un caractère à l'écran ou accepte un caractère de contrôle.
-;   Liste des contrôles reconnus:
-;   - Déplacement du curseur   
-;     VK_CR   retour de chariot et ligne suivante.
-;     VK_TAB  avance à la colonne de tabulation suivante.
-;     VK_LEFT déplace le curseur à gauche d'un caractère
-;     VL_RIGHT déplace le curseur à droite d'un caractère.    
-;     VK_HOME déplace le curseur au début de la ligne.
-;     VK_END  déplace le curseur à la fin de la ligne.
-;     VK_UP   déplace le curseur 1 ligne vers le haut.
-;     VK_DOWN déplace le curseur 1 ligne vers le bas.
-;   - modification de l'affichage
-;     VK_BACK déplace le curseur à gauche d'un caractère et efface le caractère.
-;     CTRL_X  efface la ligne sur laquelle le curseur est.
-;     CTRL_Y  insère une ligne avant celle où est le curseur.    
-;     VK_DELETE efface le caractère à la position du curseur.    
-;     CTRL_L  efface l'écran au complet
-;     VK_INSERT  insère un espace
-;  - autres fonctions    
-;    
-; arguments:
-;    c  Caractère à émettre.
-; retourne:
-;   rien    
-
-;DEFWORD "LC-EMIT",7,,LCEMIT ; ( c -- )
-;    ; caractères imprimables 32-126
-;    .word DUP,QPRTCHAR,ZBRANCH,2f-$
-;    .word PUTC,EXIT
-;    ; déplacement du curseur
-;2:  .word DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCCR,EXIT
-;2:  .word DUP,LIT,VK_TAB,EQUAL,ZBRANCH,2f-$
-;    .word DROP,NEXTCOLON,EXIT
-;2:  .word DUP,LIT,VK_LEFT,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCLEFT,EXIT
-;2:  .word DUP,LIT,VK_RIGHT,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCRIGHT,EXIT
-;2:  .word DUP,LIT,VK_HOME,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCHOME,EXIT
-;2:  .word DUP,LIT,VK_END,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCEND,EXIT
-;2:  .word DUP,LIT,VK_UP,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCUP,EXIT
-;2:  .word DUP,LIT,VK_DOWN,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCDOWN,EXIT
-;    ; modification de l'affichage
-;2:  .word DUP,LIT,VK_BACK,EQUAL,ZBRANCH,2f-$
-;    .word DROP,BACKDEL,EXIT
-;2:  .word DUP,LIT,CTRL_X,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCRMVLN,EXIT
-;2:  .word DUP,LIT,CTRL_Y,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCINSRTLN,EXIT
-;2:  .word DUP,LIT,VK_DELETE,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCDEL,EXIT
-;2:  .word DUP,LIT,CTRL_D,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCDELLN,EXIT
-;2:  .word DUP,LIT,CTRL_L,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCCLS,EXIT
-;2:  .word DUP,LIT,VK_INSERT,EQUAL,ZBRANCH,2f-$
-;    .word DROP,LCINSRT,EXIT
-;    ; les codes non reconnus sont imprimés.    
-;2:  .word DROP,EXIT
-    
-    
-; nom: LC-EMIT?  ( -- f )
+; LC-EMIT?  ( -- f )
 ;   Console locale.
 ;   Vérifie si la console est prête à recevoir des caractères.  
 ;   Retourne toujrours VRAI.
@@ -1182,7 +1136,8 @@ DEFWORD "LC-INSRTLN",10,,LCINSRTLN
 ;  aucun
 ; retourne:
 ;   f   VRAI  
-DEFCODE "LC-EMIT?",8,,LCEMITQ  
+HEADLESS LCEMITQ,CODE    
+;DEFCODE "LC-EMIT?",8,,LCEMITQ  
     DPUSH
     mov #-1,T
     NEXT

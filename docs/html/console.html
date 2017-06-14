@@ -27,11 +27,7 @@
 </div>
 <div style="margin-left:5%;">
 </div>
-<div style="margin-left:5%;">    La variable système SYSCONS contient le vecteur de la console sélectionnée.
-</div>
-<div style="margin-left:5%;">    Ce vecteur est une table contenant les fonctions à exécuter pour chacune des
-</div>
-<div style="margin-left:5%;">    fonctions suivantes:
+<div style="margin-left:5%;">    Chaque console définie le code à exécuter pour chacune des fonction suivantes:
 </div>
 <div style="margin-left:5%;">  <br><table border="single">
 </div>
@@ -96,9 +92,9 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:4px;"><p id="LOCAL">
 <b>LOCAL</b> ( -- )
-<div style="margin-left:5%;">   Passe en mode console locale.
+<div style="margin-left:5%;">   Transfert l'interface utilisateur à la console LOCAL.
 </div>
-<div style="margin-left:5%;">   La console locale utilise le clavier et l'écran de l'ordinateur ForthEx.    
+<div style="margin-left:5%;">   La console LOCAL utilise le clavier et l'écran de l'ordinateur ForthEx.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -114,19 +110,23 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="REMOTE">
 <b>REMOTE</b> ( -- )
-<div style="margin-left:5%;">   Passe en mode console VT102 via le port sériel.
+<div style="margin-left:5%;">   Transfert l'interface utilisateur vers la console sérielle.
 </div>
-<div style="margin-left:5%;">   Dans ce mode l'interface utilisateur utilise un terminal ou émulateur VT102
+<div style="margin-left:5%;">   Cette interface utilisateur utilise un terminal ou émulateur VT102
 </div>
 <div style="margin-left:5%;">   pour contrôler l'ordinateur. 
 </div>
 <div style="margin-left:5%;">   La commication est à 115200 bauds, 8 bits, 1 stop bit et pas de parité. 
 </div>
-<div style="margin-left:5%;">   Le contrôle de flux est logiciel via XON, XOFF.
+<div style="margin-left:5%;">   Le contrôle de flux est logiciel (XON | XOFF).
+</div>
+<div style="margin-left:5%;">   L'émulateur de terminal ne doit pas ajouter de LF (ASCII 10) lorsqu'il 
+</div>
+<div style="margin-left:5%;">   reçoit un CR (ASCII 13).     
 </div>
 <div style="margin-left:5%;">   L'ordinateur ForthEx n'implémente que partiellement le standard VT102
 </div>
-<div style="margin-left:5%;">   juste ce qui est nécessaire pour que la console REMOTE est les même fonctionnalités
+<div style="margin-left:5%;">   juste ce qui est nécessaire pour que la console REMOTE ait les même fonctionnalités
 </div>
 <div style="margin-left:5%;">   que la console LOCAL.    
 </div>
@@ -242,7 +242,7 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="EMIT">
 <b>EMIT</b> ( c -- )
-<div style="margin-left:5%;">  Imprime les caractère ASCII dans l'intervalle {32..126}
+<div style="margin-left:5%;">  Imprime les caractères ASCII dans l'intervalle {32..126}
 </div>
 <div style="margin-left:5%;">  EMIT transmet tous les codes reçu sans filtre donc l'effet des codes
 </div>
@@ -275,6 +275,10 @@
 <hr style="border-width:1px;"><p id="EMIT?">
 <b>EMIT?</b> ( -- f )
 <div style="margin-left:5%;">  Vérifie si le terminal est prêt à recevoir. La console LOCAL retourne toujours VRAI.
+</div>
+<div style="margin-left:5%;">  La console remote retourne faux si le terminal a envoyé un XOFF et que l'ordinateur
+</div>
+<div style="margin-left:5%;">  ForthEx est en attente d'un XON.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -396,6 +400,8 @@
 <b>TYPE</b> ( c-addr n+ -- )
 <div style="margin-left:5%;">  Imprime une chaîne à l'écran de la console.
 </div>
+<div style="margin-left:5%;">  TYPE utilise EMIT donc ne filtre pas les caractères.    
+</div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
@@ -413,6 +419,8 @@
 <hr style="border-width:1px;"><p id="ETYPE">
 <b>ETYPE</b> ( c-addr u -- )
 <div style="margin-left:5%;">   Imprime à l'écran de la console une chaîne qui réside en mémoire EDS.
+</div>
+<div style="margin-left:5%;">   ETYPE utilise EMIT donc ne filtre pas les caractères.  
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:    
@@ -479,6 +487,10 @@
 <hr style="border-width:1px;"><p id="CR">
 <b>CR</b> ( -- )    
 <div style="margin-left:5%;">   Renvoie le curseur à la marge gauche de la ligne suivante.
+</div>
+<div style="margin-left:5%;">   Si le curseur n'est pas après le dernier caractère de la ligne CR ne brise
+</div>
+<div style="margin-left:5%;">   pas la ligne pour insérer la fin de celle-ci sur la ligne suivante.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:

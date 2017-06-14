@@ -73,12 +73,12 @@
 ; <tr><td>CTRL-K</td><td>Efface à partir du curseur jusqu'à la fin de la ligne.</td></tr>    
 ; <tr><td>CTRL-L</td><td>Efface tout l'écran.</td></tr> 
 ; <tr><td>CTRL-X</td><td>Supprime la ligne sur laquelle le curseur réside.</td></tr>
-; <tr><td>CTRL-Y</td><td>Insère une ligne vide avant celle où se trouve le curseur.</td></tr>
+; <tr><td>CTRL-Y</td><td>Insère une ligne vide à la position du curseur.</td></tr>
 ; <tr><td>CTRL-B</td><td>Sauvegarde de l'écran dans le bloc.</td></tr>
 ; <tr><td>CTRL-N</td><td>Sauvegarde le bloc actuel et charge le bloc suivant pour édition.</td></tr>
 ; <tr><td>CTRL-P</td><td>Sauvegarde le bloc actuel et charge le bloc précédent pour édition.</td></tr>     
 ; <tr><td>CTRL-O</td><td>Sauvegarde le bloc actuel et saisie d'un numéro de bloc pour édition.</td></tr>
-; <tr><td>CTRL-E</td><td>Quitte l'éditeur,le contenu de l'écran n'est pas sauvegardé.</td></tr>
+; <tr><td>CTRL-E</td><td>Quitte l'éditeur, le contenu de l'écran n'est pas sauvegardé.</td></tr>
 ; </table><br>
 ; :HTML     
      
@@ -384,11 +384,11 @@ HEADLESS EDTAB, HWORD
 ; efface la ligne 23
 ;  nécessaire après une commande CTRL_X  
 HEADLESS DELLN23,HWORD
-    .word XYQ,LIT,1,LIT,23,TWODUP,LCATXY,LCDELLN
+    .word LCXYQ,LIT,1,LIT,23,TWODUP,LCATXY,LCDELLN
     .word ISLOCAL,TBRANCH,2f-$
-    .word VTATXY,VTDELLN,BRANCH,9f-$
+    .word VTATXY,VTDELLN,TWODUP,VTATXY,BRANCH,9f-$
 2:  .word TWODROP
-9:  .word ATXY,EXIT
+9:  .word LCATXY,EXIT
   
 ; Affiche la ligne d'état    
 ; Indique le numéro du bloc et la taille actuelle de l'écran.    
@@ -455,7 +455,7 @@ HEADLESS EDBSLASHW,HWORD
 HEADLESS EDINSRTLN,HWORD  
 ;DEFWORD "ED-INSRTLN",10,,EDINSRTLN
     .word LCINSRTLN,ISLOCAL,TBRANCH,9f-$
-2:  .word VTINSRTLN
+    .word VTINSRTLN
 9:  .word EXIT    
   
 ; ED-DELLN ( -- )
@@ -468,7 +468,7 @@ HEADLESS EDINSRTLN,HWORD
 HEADLESS EDDELLN,HWORD  
 ;DEFWORD "ED-DELLN",8,,EDDELLN
     .word LCDELLN,ISLOCAL,TBRANCH,9f-$
-2:  .word VTDELLN
+    .word VTDELLN
 9:  .word EXIT
   
 ; ED-RMVLN  ( -- )
@@ -483,7 +483,7 @@ HEADLESS EDDELLN,HWORD
 HEADLESS EDRMVLN,HWORD  
 ;DEFWORD "ED-RMVLN",8,,EDRMVLN
     .word LCRMVLN,ISLOCAL,TBRANCH,9f-$
-2:  .word VTRMVLN
+    .word VTRMVLN
 9:  .word EXIT
   
 

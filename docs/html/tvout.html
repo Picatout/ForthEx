@@ -48,52 +48,12 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur booléen  \ T=on F=off .
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur booléen, si VRAI active la sortie vidéo, autrement la désactive.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
 <div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
 </div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-B/W">
-<b>LC-B/W</b> ( f -- ) 
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Détermine si les caractères s'affichent noir sur blanc ou l'inverse
-</div>
-<div style="margin-left:5%;">   Si l'indicateur Booléen 'f' est vrai les caractères s'affichent noir sur blanc.
-</div>
-<div style="margin-left:5%;">   Sinon ils s'affiche blancs sur noir (valeur par défaut).
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   Indicateur Booléen, inverse vidéo si vrai.    
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-WHITLN">
-<b>LC-WHITLN</b> ( n -- )
-<div style="margin-left:5%;">   Imprime une ligne blanche sur la console LOCAL.
-</div>
-<div style="margin-left:5%;">   Laisse le curseur au début de la ligne et le mode noir/blanc.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Numéro de la ligne {1..24}
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
@@ -106,7 +66,7 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen, T=activ, F=inactif.
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen, si VRAI active le curseur, sinon le désactive.
 </div>
 <div style="margin-left:5%;"><b> retourne:    
 </b></div>
@@ -115,26 +75,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-CLS">
-<b>LC-CLS</b>  ( -- )
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Vide l'écran.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:    
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:    
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="SCRLUP">
-<b>SCRLUP</b>  ( -- )
+<hr style="border-width:1px;"><p id="SCROLL-UP">
+<b>SCROLL-UP</b>  ( -- )
 <div style="margin-left:5%;">   Console locale.    
 </div>
 <div style="margin-left:5%;">   Glisse l'affichage vers le haut d'une ligne texte et efface la dernière ligne.
@@ -151,8 +93,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="SCRLDN">
-<b>SCRLDN</b>  ( -- )
+<hr style="border-width:1px;"><p id="SCROLL-DOWN">
+<b>SCROLL-DOWN</b>  ( -- )
 <div style="margin-left:5%;">   Console locale.    
 </div>
 <div style="margin-left:5%;">   Glisse l'affichage vers le bas d'une ligne texte et efface la première ligne.
@@ -245,7 +187,7 @@
 <b>LNADR</b>  ( n -- c-addr )
 <div style="margin-left:5%;">   Console locale.
 </div>
-<div style="margin-left:5%;">   Retourne l'adresse dans du premier caractère de la ligne dans le tampon vidéo.
+<div style="margin-left:5%;">   Retourne l'adresse du premier caractère de la ligne dans le tampon vidéo.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -263,7 +205,7 @@
 <b>CURADR</b>  ( -- c-addr )
 <div style="margin-left:5%;">   Console locale.    
 </div>
-<div style="margin-left:5%;">   Retourne l'adresse dans le tampon d'écran correspondant
+<div style="margin-left:5%;">   Retourne l'adresse dans le tampon vidéo correspondant
 </div>
 <div style="margin-left:5%;">   à la position actuelle du curseur.
 </div>
@@ -279,48 +221,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-AT-XY">
-<b>LC-AT-XY</b>  ( u1 u2 -- )
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Positionne le curseur texte à la colonne u1 et la ligne u2.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    colonne {1..64}
-</div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    ligne {1..24}
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-XY?">
-<b>LC-XY?</b>  ( -- u1 u2 )
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Retourne la position du curseur texte.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;    colonne  {1..64}
-</div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    ligne    {1..24}
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="SCRCHAR">
-<b>SCRCHAR</b>  ( -- c )    
+<hr style="border-width:1px;"><p id="SCR-CHAR">
+<b>SCR-CHAR</b>  ( -- c )    
 <div style="margin-left:5%;">   Console locale.    
 </div>
 <div style="margin-left:5%;">   Retourne le caractère à la position du curseur.
@@ -341,7 +243,9 @@
 <b>CHR&gt;SCR</b>  ( u1 u2 c -- )    
 <div style="margin-left:5%;">   Console locale.    
 </div>
-<div style="margin-left:5%;">   Met le caractère c la position {u1,u2} de l'écran.
+<div style="margin-left:5%;">   Dépose le caractère 'c' la position {u1,u2} dans le tampon vidéo. 
+</div>
+<div style="margin-left:5%;">   Cette opération n'affecte pas la position du curseur texte.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -352,134 +256,6 @@
 </div>
 <div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; Caractère    
 </div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="INVLN">
-<b>INVLN</b>  ( n f -- )    
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Inverse vidéo de la ligne n. L'inverse vidéo signifie que les caractères sont affiché noir/blanc.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Ligne {1..24}
-</div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   T=inverse, F=vidéo normal
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-LEFT">
-<b>LC-LEFT</b>  ( -- )
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Déplace le curseur 1 caractère vers la gauche.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-RIGHT">
-<b>LC-RIGHT</b>  ( -- )
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Déplace le curseur 1 caractère vers la droite.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-HOME">
-<b>LC-HOME</b>  ( -- )
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Déplace le curseur au début de la ligne.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-END">
-<b>LC-END</b>  ( -- )
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Déplace le curseur après le dernier caractère de la ligne.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-UP">
-<b>LC-UP</b>   ( -- )
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Déplace le curseur d'une ligne vers le haut.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-DOWN">
-<b>LC-DOWN</b>   ( -- )
-<div style="margin-left:5%;">  Console locale.    
-</div>
-<div style="margin-left:5%;">  Déplace le curseur d'une ligne vers le bas.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
 <div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
@@ -515,11 +291,11 @@
 </div>
 <div style="margin-left:5%;">   Affiche le caractère à la position du curseur et avance
 </div>
-<div style="margin-left:5%;">   le curseur vers la droite. Si le curseur est en fin de ligne
+<div style="margin-left:5%;">   le curseur vers la droite. Lorsque le curseur dépasse la fin de la ligne
 </div>
-<div style="margin-left:5%;">   passe au début de la ligne suivante. Produit un défilement vers le haut
+<div style="margin-left:5%;">   l'état de WRAP et SCROLL sont pris en compte pour le retour à la ligne
 </div>
-<div style="margin-left:5%;">   si nécessaire à la condition que SCROLL soit actif.    
+<div style="margin-left:5%;">   automatique et le défilement vers le haut.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -533,202 +309,6 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-CRLF">
-<b>LC-CRLF</b> ( -- )
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Envoie le curseur au début de la ligne suivante défile l'écran
-</div>
-<div style="margin-left:5%;">   vers le haut si le curseur est sur la dernière ligne sauf si
-</div>
-<div style="margin-left:5%;">   SCROLL est désactivé. Dans ce cas renvoie de le curseur au début 
-</div>
-<div style="margin-left:5%;">   de la ligne sans autre action.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-TAB">
-<b>LC-TAB</b>  ( -- )    
-<div style="margin-left:5%;">   Console locale.    
-</div>
-<div style="margin-left:5%;">   Avance le curseur à la prochaine tabulation.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; 
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-DEL">
-<b>LC-DEL</b> ( -- )
-<div style="margin-left:5%;">   Console locale.  
-</div>
-<div style="margin-left:5%;">   Supprime le caractère à la position du curseur.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-INSRT">
-<b>LC-INSRT</b> ( -- )
-<div style="margin-left:5%;">   Console locale.  
-</div>
-<div style="margin-left:5%;">   Insère un espace à la position du curseur.
-</div>
-<div style="margin-left:5%;">   Il y a 2 conditions pour refuser l'insertion:  
-</div>
-<div style="margin-left:5%;">       1) le curseur est après le dernier caractère de la ligne.
-</div>
-<div style="margin-left:5%;">       2) la ligne est pleine.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-BACKDEL">
-<b>LC-BACKDEL</b> ( -- )
-<div style="margin-left:5%;">   Console locale.  
-</div>
-<div style="margin-left:5%;">   Efface le carctère à gauche du curseur.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-DELLN">
-<b>LC-DELLN</b> ( -- )
-<div style="margin-left:5%;">   Console locale.  
-</div>
-<div style="margin-left:5%;">   Efface toute la ligne sur laquelle se trouve le curseur et positionne
-</div>
-<div style="margin-left:5%;">   le curseur en début de ligne.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-DELEOL">
-<b>LC-DELEOL</b> ( -- )
-<div style="margin-left:5%;">   Efface tous les caractères à partir du curseur jusqu'à la fin de la ligne.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-RMVLN">
-<b>LC-RMVLN</b> ( -- )    
-<div style="margin-left:5%;">   Retire la ligne sur laquelle se trouve le curseur.
-</div>
-<div style="margin-left:5%;">   Les lignes qui se trouvent sous celle-ci sont décallées vers le haut.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-INSRTLN">
-<b>LC-INSRTLN</b> ( -- )
-<div style="margin-left:5%;">   Insère une ligne avant la ligne où se trouve le curseur.
-</div>
-<div style="margin-left:5%;">   Les lignes à partir du curseur sont décalées vers le bas.    
-</div>
-<div style="margin-left:5%;">   S'il y a du texte sur la dernière ligne ce texte est perdu.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>rien
-</i>&nbsp;&nbsp;</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-EMIT?">
-<b>LC-EMIT?</b>  ( -- f )
-<div style="margin-left:5%;">   Console locale.
-</div>
-<div style="margin-left:5%;">   Vérifie si la console est prête à recevoir des caractères.  
-</div>
-<div style="margin-left:5%;">   Retourne toujrours VRAI.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   VRAI  
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><h4 id="index">Index</h4>
 <p>
 <ul>
@@ -738,34 +318,12 @@
 <li><a href="#GETX">GETX</a></li>
 <li><a href="#GETY">GETY</a></li>
 <li><a href="#HTAB">HTAB</a></li>
-<li><a href="#INVLN">INVLN</a></li>
-<li><a href="#LC-AT-XY">LC-AT-XY</a></li>
-<li><a href="#LC-B/W">LC-B/W</a></li>
-<li><a href="#LC-BACKDEL">LC-BACKDEL</a></li>
-<li><a href="#LC-CLS">LC-CLS</a></li>
-<li><a href="#LC-CRLF">LC-CRLF</a></li>
-<li><a href="#LC-DEL">LC-DEL</a></li>
-<li><a href="#LC-DELEOL">LC-DELEOL</a></li>
-<li><a href="#LC-DELLN">LC-DELLN</a></li>
-<li><a href="#LC-DOWN">LC-DOWN</a></li>
-<li><a href="#LC-EMIT?">LC-EMIT?</a></li>
-<li><a href="#LC-END">LC-END</a></li>
-<li><a href="#LC-HOME">LC-HOME</a></li>
-<li><a href="#LC-INSRT">LC-INSRT</a></li>
-<li><a href="#LC-INSRTLN">LC-INSRTLN</a></li>
-<li><a href="#LC-LEFT">LC-LEFT</a></li>
-<li><a href="#LC-RIGHT">LC-RIGHT</a></li>
-<li><a href="#LC-RMVLN">LC-RMVLN</a></li>
-<li><a href="#LC-TAB">LC-TAB</a></li>
-<li><a href="#LC-UP">LC-UP</a></li>
-<li><a href="#LC-WHITLN">LC-WHITLN</a></li>
-<li><a href="#LC-XY?">LC-XY?</a></li>
 <li><a href="#LNADR">LNADR</a></li>
 <li><a href="#PUTC">PUTC</a></li>
+<li><a href="#SCR-CHAR">SCR-CHAR</a></li>
 <li><a href="#SCRBUF">SCRBUF</a></li>
-<li><a href="#SCRCHAR">SCRCHAR</a></li>
-<li><a href="#SCRLDN">SCRLDN</a></li>
-<li><a href="#SCRLUP">SCRLUP</a></li>
+<li><a href="#SCROLL-DOWN">SCROLL-DOWN</a></li>
+<li><a href="#SCROLL-UP">SCROLL-UP</a></li>
 <li><a href="#SETX">SETX</a></li>
 <li><a href="#SETY">SETY</a></li>
 <li><a href="#TGLCHAR">TGLCHAR</a></li>
