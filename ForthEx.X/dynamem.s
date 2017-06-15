@@ -23,14 +23,15 @@
 ;  Le gestionnaire maintiens 2 listes chaînée.
 ;  * la liste des blocs disponibles
 ;  * la liste des blocs utilisés.    
-;    
-;  STRUCTURE ENTÊTE DE BLOC
-;  ========================
-;  pos. |  octets |  description
-; ----------------------------
-;   0   |   2   |    grandeur excluant l'entête
-;   2   |   2   |    lien vers le bloc suivant.
-;   4	|    2	|    lien vers le bloc précédent.
+; HTML:
+; <br><table border="single">    
+; <tr><th colspan="3">STRUCTURE ENTÊTE DE BLOC</th></tr>
+; <tr><th>offset</th><th>grandeur</th><th>description</th><tr>
+; <tr><td><center>0</center></td><td><center>2</center></td><td>grandeur excluant l'entête.</td></tr>
+; <tr><td><center>2</center></td><td><center>2</center></td><td>lien vers le bloc suivant.</td></tr>
+; <tr><td><center>4</center></td><td><center>2</center></td><td>lien vers le bloc précédent.</td></tr>
+; </table><br>    
+; :HTML
     
 ;  La taille mininale d'un bloc est de 8 octets, 6 pour l'entête plus 2 octets
 ;  pour le data. Les blocs sont arrondis au nombre pair supérieur pour assurer
@@ -54,7 +55,10 @@ _heap_used: .space 2
 
 ; nom: HEAPINIT  ( -- ) 
 ;   Initialiation du gestionnaire, libère tous les blocs alloués.
-;   Remet à zéro la mémoire. 
+;   Remet à zéro la mémoire.
+;   Au démarrage l'unité de gestion des blocs réserve de la mémoire dynamique
+;   donc si vous appellez HEAPINIT sur la ligne de commande ou dans une application
+;   l'unité de gestion des blocs ne fonctionnera plus. 
 ; arguments:
 ;   aucun
 ; retourne:
@@ -285,7 +289,7 @@ HEADLESS CUT,HWORD
 ;  arguments:
 ;     n    grandeur requise
 ;  retourne:
-;     a-addr | 0  Adresse du premier octet de donnée du bloc, ou 0 si non disponible.  
+;     a-addr|0  Adresse du premier octet de donnée du bloc, ou 0 si non disponible.  
 DEFWORD "MALLOC",6,,MALLOC ; ( n -- addr|0 )
     .word ALIGNED ; n doit-êter pair.
     .word DUP,FREELIST,SMALLEST ; S: n addr|0
@@ -334,8 +338,12 @@ DEFWORD "FREE",4,,FREE ; ( addr -- )
 ;   Ce buffer ne doit pas être libéré à moins que la constante qui le lie soit détruite
 ;   avec forget, sinon l'adresse retournée par cette constante serait invalide.  
 ;   exemple:
-;   120 BUFFER: data \ l'invocation de 'data' va retourner l'adresse du premier octet
-;   du bloc de donnée.    
+; HTML:
+;   <p>
+;   <b>120 BUFFER: data</b> \ l'invocation de <b>data</b> va retourner l'adresse<br>
+;   \ du premier octet du bloc de donnée.
+;   </p>    
+; :HTML    
 ; arguments:
 ;   n Grandeur en octet du buffer.
 ;   "cccc" Nom de la constante qui va retourner l'adresse du buffer.

@@ -34,31 +34,40 @@
 ; DESCRIPTION:
 ;   Constantes système utilisées par l'interpréteur/compilateur.
 
-; nom: IMMED  ( -- n )
+; IMMED  ( -- n )
 ;   Constante système qui retourne le bit F_IMMEDIATE. Ce bit est inscrit dans le
 ;   premier octet du champ NFA et indique si le mot est immmédiat.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   n     F_IMMED bit indicateur mot immédiat.    
-DEFCONST "IMMED",5,,IMMED,F_IMMED       ; drapeau mot immédiat
+HEADLESS IMMED,CODE
+    DPUSH
+    mov #F_IMMED,T       ; drapeau mot immédiat
+    NEXT
     
-; nom: HIDDEN   ( -- n )
+; HIDDEN   ( -- n )
 ;   Constante système qui retourne le bit F_HIDDEN. Ce bit est inscrit dans le 
 ;   premier octet du champ NFA et indique si le mot est caché à la recherche par FIND.
 ; arguments:
 ;   rien
 ; retourne:
 ;   n	F_HIDDEN bit indicateur de mot caché.       
-DEFCONST "HIDDEN",6,,HIDDEN,F_HIDDEN    ; drapeau mot caché
+HEADLESS HIDDEN,CODE
+    DPUSH
+    mov #F_HIDDEN,T    ; drapeau mot caché
+    NEXT
     
-; nom: NMARK  ( -- n )
+;  NMARK  ( -- n )
 ;   Constante système qui retourne le bit F_MARK. Ce bit est inscrit dans le
 ;   premier octet du champ NFA et sert la localisé ce champ. Ce bit est utilisé
 ;   par le mot CFA>NFA.    
-DEFCONST "NMARK",5,,NMARK,F_MARK     ; drapeau marqueur utilisé par CFA>NFA
+HEADLESS NMARK,CODE
+    DPUSH
+    mov #F_MARK,T     ; drapeau marqueur utilisé par CFA>NFA
+    NEXT
     
-; nom: LENMASK   ( -- n )
+;  LENMASK   ( -- n )
 ;   Constante système retourne le masque pour la longueur du nom dans les entêtes
 ;   du dictionnaire. Ce masque sert à éliminer les bits F_NMARK,F_HIDDEN et F_IMMED
 ;   pour ne conserver que les bits qui indique la longueur du nom.
@@ -66,8 +75,11 @@ DEFCONST "NMARK",5,,NMARK,F_MARK     ; drapeau marqueur utilisé par CFA>NFA
 ;   aucun
 ; retourne:
 ;   n   masque LEN_MASK    
-DEFCONST "LENMASK",7,,LENMASK,LEN_MASK ; masque longueur nom
-
+HEADLESS LENMASK,CODE
+    DPUSH
+    mov #LEN_MASK,T ; masque longueur nom
+    NEXT
+    
 ; nom: TIBSIZE   ( -- n )
 ;   Constante système qui retourne la longueur du TIB (Transaction Input Buffer)
 ; arguments:
@@ -181,7 +193,6 @@ DEFWORD "ADR>IN",6,,ADRTOIN
 ; nom: PARSE   ( c -- c-addr u )    
 ;   Accumule les caractères jusqu'au
 ;   prochain 'c'. Met à jour la variable >IN
-;   PARSE filtre les caractères suivants:
 ; arguments: 
 ;   c    caractère délimiteur
 ; retourne:
@@ -199,9 +210,9 @@ DEFWORD "PARSE",5,,PARSE ; c -- c-addr u
 ;   copie une chaîne dont l'adresse et la longueur sont fournies
 ;   en arguments vers une chaîne comptée dont l'adresse est fournie.
 ; arguments:    
-;   src addresse chaîne à copiée
-;   n longueur de la chaîne
-;   dest adresse destination
+;   src Addresse chaîne à copiée
+;   n Longueur de la chaîne
+;   dest Adresse destination
 ; retourne:
 ;   rien 
 DEFWORD ">COUNTED",8,,TOCOUNTED 
@@ -211,10 +222,10 @@ DEFWORD ">COUNTED",8,,TOCOUNTED
 ;   Recherche le prochain mot dans le flux d'entrée
 ;   Tout caractère < 32 est considéré comme un espace
 ; arguments:
-;   cccc    chaîne de caractères dans le flux d'entrée.
+;   cccc Chaîne de caractères dans le flux d'entrée.
 ; retourne:
-;   c-addr  addresse premier caractère.
-;   u    longueur de la chaîne.
+;   c-addr Addresse premier caractère.
+;   u    Longueur de la chaîne.
 DEFCODE "PARSE-NAME",10,,PARSENAME
     mov _TICKSOURCE,W1
     mov _CNTSOURCE,W2
@@ -263,13 +274,13 @@ DEFCODE "PARSE-NAME",10,,PARSENAME
     bra 7b
     
 ; nom: WORD  ( c -- c-addr )  
-;   localise le prochain mot délimité par 'c'
+;   Localise le prochain mot délimité par 'c'
 ;   la variable TOIN indique la position courante
 ;   le mot trouvé est copié à la position DP
 ; arguments:
-;   c   caractère délimiteur
+;   c   Caractère délimiteur
 ; retourne:    
-;   c-addr    adresse chaîne comptée.    
+;   c-addr Adresse chaîne comptée.    
 DEFWORD "WORD",4,,WORD 
     .word DUP,SOURCE,TOIN,FETCH,SLASHSTRING ; c c c-addr' u'
     .word ROT,SKIP ; c c-addr' u'
@@ -280,8 +291,9 @@ DEFWORD "WORD",4,,WORD
 ; nom: FIND  ( c-addr -- c-addr 0 | cfa 1 | cfa -1 )   
 ;   Recherche un mot dans le dictionnaire
 ;   ne retourne pas les mots cachés (attribut: F_HIDDEN).
+;   La recherche est insensible à la casse.    
 ; arguments:
-;   c-addr  adresse de la chaîne comptée à rechercher.
+;   c-addr  Adresse de la chaîne comptée à rechercher.
 ; retourne: 
 ;    c-addr 0 si adresse non trouvée
 ;    xt 1 trouvé mot immédiat
@@ -390,15 +402,18 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
 ;   c-addr1   Adresse d'une chaîne de caractères débutant par un compteur.
 ; retourne:
 ;   c-addr2   Adresse du premier caractère de la chaîne.
-;   u      longueur de la chaîne.  
+;   u  Longueur de la chaîne.  
 DEFWORD "COUNT",5,,COUNT ; ( c-addr1 -- c-addr2 u )
    .word DUP,CFETCH,TOR,ONEPLUS,RFROM,EXIT
    
-; nom: INTERPRET  ( c-addr u -- )   
+; nom: INTERPRET  ( i*x c-addr u -- j*x )   
 ;    Évaluation d'un tampon contenant du texte source par l'interpréteur/compilateur.
 ; arguments:
+;   i*x État initial de la pile des arguments avant le début de  l'interpréation.   
 ;   c-addr   Adresse du premier caractère du tampon.
-;   u   longueur du tampon.   
+;   u   Lngueur du tampon.   
+; retourne:
+;   j*x  État final de la pile des arguments à la fin de l'interprétation.     
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
         .word SRCSTORE,LIT,0,TOIN,STORE
 1:      .word BL,WORD,DUP,CFETCH,ZBRANCH,9f-$
@@ -444,7 +459,7 @@ HEADLESS OK,HWORD  ; ( -- )
 ; arguments:
 ;   aucun
 ; retourne:
-;   rien  ne retourne pas mais branche sur QUIT  
+;   rien  Ne retourne pas mais branche sur QUIT  
 DEFWORD "ABORT",5,,ABORT
     .word STATE,FETCH,ZBRANCH,1f-$
     .word LATEST,FETCH,NFATOLFA,DUP,FETCH,LATEST,STORE,DP,STORE
@@ -457,9 +472,14 @@ HEADLESS QABORT,HWORD
     .word COUNT,TYPE,CR,ABORT
 9:  .word DROP,EXIT
   
-; nom: ABORT"  ( cccc -- )     
-;   Compile le runtime de ?ABORT
-;   A  utiliser à l'intérieur d'une définition seulement.  
+; nom: ABORT"  ( cccc n -- )     
+;   Compile Affiche un message d'erreur et apel ABORT 
+;   si 'n' est différent de zéro.
+;   Ne s'utilise qu'à l'intérieur d'une définition.
+; arguments:
+;    n  Si <> 0 déclenche un ABORT avec message.
+; retourne:
+;    rien  
 DEFWORD "ABORT\"",6,F_IMMED,ABORTQUOTE ; (  --  )
     .word CFA_COMMA,QABORT,STRCOMPILE,EXIT
     
@@ -576,9 +596,9 @@ DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
 ;   A partir de l'adresse NFA (Name Field Address) retourne
 ;   l'adresse LFA  (Link Field Address).  
 ; arguments:
-;   a-addr1   adresse du champ NFA dans l'entête du dictionnaire.
+;   a-addr1  Adresse du champ NFA dans l'entête du dictionnaire.
 ; retourne:
-;   a-addr2   adresse du champ LFA dans l'entête du dictionnaire.  
+;   a-addr2  Adresse du champ LFA dans l'entête du dictionnaire.  
 DEFWORD "NFA>LFA",7,,NFATOLFA ; ( nfa -- lfa )
     .word LIT,2,MINUS,EXIT
     
@@ -604,7 +624,7 @@ DEFWORD ">BODY",5,,TOBODY ; ( cfa -- pfa )
 1:  .word CELLPLUS,EXIT;
 
 ; nom: CFA>NFA   ( a-addr1 -- a-addr2 )    
-;   Passe du champ CFA au champ NFA.
+;   Retourne l'adresse du NFA à partir du CFA.
 ;   Il n'y a pas de lien arrière entre le CFA et le NFA
 ;   Le bit F_MARK (bit 7) est utilisé pour marquer l'octet à la position NFA
 ;   Le CFA étant immédiatement après le nom, il suffit de 
@@ -632,7 +652,9 @@ DEFWORD "?EMPTY",6,,QEMPTY ; ( -- f)
     .word DP0,HERE,EQUAL,EXIT 
     
 ; nom: IMMEDIATE  ( -- )    
-;   Met à 1 l'indicateur F_IMMED dans l'entête du dernier mot défini.    
+;   Met à 1 l'indicateur F_IMMED dans l'entête du dernier mot défini.
+;   Un mot immédiat est un mot qui est exécuté même lorsque STATE est en
+;   mode compilation.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -644,6 +666,7 @@ DEFWORD "IMMEDIATE",9,,IMMEDIATE ; ( -- )
     
 ; nom: HIDE  ( -- )  
 ;   Met l'indicateur F_HIDDEN à 1 dans l'entête du dernier mot défini dans le dictionnaire.
+;   Un mot avec l'attribut HIDDEN de peut-être localisé par FIND.  
 ; arguments:
 ;   aucun
 ; retourne:
@@ -678,9 +701,9 @@ DEFWORD "REVEAL",6,,REVEAL ; ( -- )
 ;   si n est négatif n octets seront rendus.
 ;   La variable DP est ajustée en conséquence.  
 ; arguements:
-;   n   nombre d'octets
+;   n   Nombre d'octets
 ; retourne:
-;   rien    modifie la valeur de DP.  
+;   rien    Modifie la valeur de DP.  
 DEFWORD "ALLOT",5,,ALLOT ; ( n -- )
     .word DP,PLUSSTORE,EXIT
 
@@ -690,7 +713,7 @@ DEFWORD "ALLOT",5,,ALLOT ; ( n -- )
 ; arguments:
 ;    x   Valeur qui sera sauvegardée dans l'espace de donnée.    
 ; retourne:
-;   rien   x est sauvegardé à position de DP et DP est incrémenté.    
+;   rien   
 DEFWORD ",",1,,COMMA  ; ( x -- )
     .word HERE,STORE,LIT,CELL_SIZE,ALLOT
     .word EXIT
@@ -699,13 +722,12 @@ DEFWORD ",",1,,COMMA  ; ( x -- )
 ;   Alloue l'espace nécessaire pour enregistré le caractère c.
 ;   Le caractère c est sauvegardé à la position DP et DP est incrémenté.
 ; arguments:
-;   c
+;   c Caractère à compiler.
 ; retourne:
-;   rien  c est sauvegardé à la position DP et DP est incrémenté.    
+;   rien  
 DEFWORD "C,",2,,CCOMMA ; ( c -- )    
     .word HERE,CSTORE,LIT,1,ALLOT
     .word EXIT
-    
     
 ; nom: '   ( ccccc -- a-addr )    
 ;   Extrait le mot suivant du flux d'entrée et le recherche dans le dictionnaire.
@@ -788,7 +810,7 @@ DEFWORD "[",1,F_IMMED,LBRACKET ; ( -- )
   
 ; nom: ]  ( -- ) 
 ;   Mot immédiat.    
-;   Passe en mode compilation en mettant la variable sytème STATE à -1
+;   Passe en mode compilation en mettant la variable système STATE à -1
 ; arguments:
 ;   aucun
 ; retourne:
@@ -805,8 +827,9 @@ DEFWORD "]",1,F_IMMED,RBRACKET ; ( -- )
 ; arguments:
 ;   ccccc    mot extrait du flux d'entrée.
 ; retourne:
-;    a-addr 1   le CFA du mot et 1 si c'est mot immédiat.
-;    a-addr -1  le CFA du mot et -1 si le mot n'est pas immédiat.    
+;    a-addr   Le CFA du mot 
+;    1 Si c'est mot immédiat ou
+;   -1 Si le mot n'est pas immédiat.    
 DEFWORD "?WORD",5,,QWORD ; ( -- c-addr 0 | cfa 1 | cfa -1 )
    .word BL,WORD,UPPER,FIND,QDUP,ZBRANCH,2f-$,EXIT
 2: .word COUNT,TYPE,LIT,'?',EMIT,ABORT
@@ -832,7 +855,7 @@ DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
 ;   qu'en mode compilation. Dans ce cas la valeur sommet de la pile est compilée
 ;   avec la sémantique runtime qui empile un entier.
 ; arguments:
-;   x  Valeur au sommet de la pile des arguments. Cette valeur est consommée seulement en mode compilation.
+;   x  Valeur au sommet de la pile des arguments.
 ; retourne:
 ;   rien    x reste au sommet de la pile en mode interprétation.    
 DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
@@ -905,7 +928,7 @@ DEFWORD "C\"",2,F_IMMED,CQUOTE ; ccccc" runtime ( -- c-addr )
 ; nom: ."   ( ccccc -- )
 ;   Mot immédiat.    
 ;   Interprétation: imprime la chaîne litérale qui suis dans le flux d'entrée.
-;   En compilation: compile la chaîne et la sémantique permet d'imprimer cette
+;   En compilation: compile la chaîne et la sémantique qui permet d'imprimer cette
 ;   chaîne lors de l'exécution du mot en cour de définition.
 ; arguments:
 ;   ccccc    Chaîne terminée par "  dans le flux d'entrée.
@@ -934,7 +957,7 @@ DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
 ;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
 ;   Débute une boucle avec compteur. Le valeur du compteur de boucle est incrémentée
 ;   à la fin de la boucle et comparée avec la limite. La boucle se termine lorsque
-;   le compteur atteind ou dépasse la limite. La boucle s'exécute au moins 1 fois.    
+;   le compteur atteint ou dépasse la limite. La boucle s'exécute au moins 1 fois.    
 ; arguments:
 ;    n1   Valeur limite du compteur de boucle.
 ;    n2   Valeur initiale du compteur de boucle.
@@ -950,8 +973,8 @@ DEFWORD "DO",2,F_IMMED,DO
 ;   Ne sera pas excétée si n2==n1. Le compteur de boucle est incrémenté à la fin
 ;   de la boucle et le contrôle de limite est affectué après l'incrémentation.    
 ; arguments:
-;     n1     limite
-;     n2     valeur initiale du compteur de boucle.
+;     n1     Limite
+;     n2     Valeur initiale du compteur de boucle.
 ; retourne:
 ;   rien    
 DEFWORD "?DO",3,F_IMMED,QDO 
@@ -1066,7 +1089,7 @@ DEFWORD "WHILE",5,F_IMMED,WHILE ;  ( a -- slot a)
 ;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
 ;   Exécution du code qui suit le IF si et seulement is n<>0.
 ; arguments:
-;   n   Valeur consommée par IF, si n<>0 les instructions après entre IF et ELSE ou THEN sont exécutées.
+;   n   Valeur consommée par IF, si n<>0 les instructions entre IF et ELSE ou THEN sont exécutées.
 ; retourne:
 ;   rien    
 DEFWORD "IF",2,F_IMMED,IIF ; ( n --  )
@@ -1190,7 +1213,7 @@ DEFWORD "?COMPILE",8,F_IMMED,QCOMPILE ; ( -- )
 ; nom: ?NAME  ( f -- )    
 ;   Si f==0 appelle ABORT" avec le message "name missing" 
 ; arguments:
-;    f   Indicateur Booléen, si VRAI ABORT" name missing"
+;    f   Indicateur Booléen, si VRAI exécute ABORT" name missing"
 ; retourne:
 ;   rien    
 DEFWORD "?NAME",5,,QNAME ; ( i*x f -- | i*x )
@@ -1204,12 +1227,12 @@ DEFWORD "?NAME",5,,QNAME ; ( i*x f -- | i*x )
 ;   Cré une définition sans nom dans l'espace de donnée.
 ;   et laisse son CFA sur la pile des arguments.
 ;   Met la variable STATE en mode compilation.
-;   Le CFA de cette définition peut par exemple être assigné2
+;   Le CFA de cette définition peut par exemple être assignée
 ;   à un mot créé avec DEFER.
 ;   exemple:
 ;   DEFER  p2 
 ;   :noname  DUP * ; IS p2
-;   2 p2  / 4 
+;   2 p2  \ résultat 4 
 ; arguments:
 ;   aucun
 ; retourne:
@@ -1237,7 +1260,7 @@ DEFWORD "HEADER",6,,HEADER ; ( -- )
 ; nom: FORGET  ( cccc -- )    
 ;   Extrait du flux d'entrée le mot suivant et supprime du dictionnaire ce mot
 ;   ainsi que tous ceux qui ont été définis après lui.
-;   Les mots système définis en mémoire FLASH ne peuvent-êtr supprimés.
+;   Les mots systèmes définis en mémoire FLASH ne peuvent-êtr supprimés.
 ; arguments:
 ;   cccc   Mot suivant dans le flux d'entrée.
 ; arguments:
@@ -1299,12 +1322,12 @@ HEADLESS NOP,HWORD
 ;   Lorsque ce nouveau mot est exécuté il retourne l'adresse PFA. Cependant la sémantique
 ;   du mot peut-être étendue en utilisant le mot DOES>.    
 ; exemple:     
-;       / le mot VECTOR sert à créer des tableaux de n éléments.    
+;       \ le mot VECTOR sert à créer des tableaux de n éléments.    
 ;	: VECTOR  ( n  -- )
 ;           CREATE CELLS ALLOT DOES> CELLS PLUS ;     
-;       / utilisation du mot VECTOR pour créer le tableau V1 de 5 éléments.
+;       \ utilisation du mot VECTOR pour créer le tableau V1 de 5 éléments.
 ;       5 VECTOR V1
-;       / Met la valeur 35 dans l'élément d'indice 2 de V1
+;       \ Met la valeur 35 dans l'élément d'indice 2 de V1
 ;       35 2 V1 !    
 ; arguments:
 ;   cccc  Mot suivant dans le flux d'entrée.
@@ -1325,10 +1348,10 @@ HEADLESS "RT_DOES", HWORD ; ( -- )
 ; nom: DOES>  ( -- )
 ;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
 ;   Ce mot permet définir l'action d'un mot créé avec CREATE. Surtout utile
-;   pour définir des mots compilants. U mot compilant est un mot qui sert à
+;   pour définir des mots compilants. Un mot compilant est un mot qui sert à
 ;   créer une classe de mots. Par exemples les mots VARIABLE et CONSTANT sont
 ;   des mots compilants.    
-;   Le concept de DOES> est un des plus complexe du langage forth. Un article
+;   Le concept de DOES> est un des plus complexe du langage Forth. Un article
 ;   sera donc consacré à son utilisation.    
 ; arguments:
 ;   aucun
@@ -1367,7 +1390,7 @@ DEFWORD "VARIABLE",8,,VARIABLE ; ()
 ; nom: CONSTANT  ( cccc  n -- )    
 ;   Mot compilant qui sert à créer des constantes dans le dictionnaire.
 ;   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
-;   de la nouvelle constante. La constante  initialisée avec la valeur
+;   de la nouvelle constante. La constante est initialisée avec la valeur
 ;   qui est au sommet de la pile des arguments au moment de sa création.    
 ; arguments:
 ;   cccc   Prochain mot dans le flux d'entrée. Nom de la constante.
@@ -1404,12 +1427,12 @@ DEFWORD "DEFER",5,,DEFER ; cccc ( -- )
     .word RT_DOES,DEFEREXEC,EXIT
 
 ; nom: DEFER!  ( a-addr1 a-addr2 -- )     
-;   Initialise une action à  un mot défini avec DEFER.
+;   Défini l'action d'un mot créé avec DEFER.
 ;   exemple:
-;   DEFER p2  / le mot p2 est créé mais n'a pas d'action défini.
-;   :noname  dup * ; / ( -- a-addr1 )  un mot sans nom viens d'être créé.
-;   ' p2 DEFER!  / ' p2 retourne le xt de p2 et DEFER! affecte a-addr1 à a-addr2
-;   2 p2  4 ok  / maintenant lorsque p2 est utilisé retourne le carré d'un entier.  
+;   DEFER p2  \ le mot p2 est créé mais n'a pas d'action défini.
+;   :noname  dup * ; \ ( -- a-addr1 )  un mot sans nom viens d'être créé.
+;   ' p2 DEFER!  \ ' p2 retourne le CFA de p2 et DEFER! affecte a-addr1 au PFA de P2.
+;   2 p2  4 ok  \ maintenant lorsque p2 est utilisé retourne le carré d'un entier.  
 ;    
 ; arguments:    
 ;  a-addr1  CFA de l'action que le mot doit exécuter.
@@ -1432,15 +1455,15 @@ DEFWORD "DEFER@",6,,DEFERFETCH ; ( xt1 -- xt2 )
 ; nom: IS    ( cccc a-addr -- )     
 ;   Extrait le prochain mot du flux d'entrée. Recherche ce mot dans le dictionnaire.
 ;   Ce mot doit-être  un mot créé avec DEFER. Lorsque ce mot est trouvé,    
-;   enregistre a-addr dans son CFA. a-addr est le CFA d'une action. 
+;   enregistre a-addr dans son PFA. a-addr est le CFA d'une action. 
 ; exemple:
-;     / création d'un mot différé qui peut effectuer différentes opérations arithmétiques.
+;     \ création d'un mot différé qui peut effectuer différentes opérations arithmétiques.
 ;     DEFER  MATH
-;     ' * IS MATH   / maintenant le mot MATH agit comme *
-;     ' + IS MATH   / maintenant le mot MATH agit comme +    
+;     ' * IS MATH   \ maintenant le mot MATH agit comme *
+;     ' + IS MATH   \ maintenant le mot MATH agit comme +    
 ; arguments:
 ;   cccc  Prochain mot dans le flux d'entrée. Correspond au nom d'un mot créé avec DEFER.
-;   a-addr  Sommet de la pile des arguments qui correspond au CFA de l'action à assigné à ce mot.
+;   a-addr  Adresse du CFA de l'action à assigné à ce mot.
 ; retourne:
 ;   rien    
 DEFWORD "IS",2,,IS 

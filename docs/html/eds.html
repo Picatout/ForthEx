@@ -13,7 +13,7 @@
 </div>
 <div style="margin-left:5%;">   Cette plage d'adresse entre en conflit avec la plage d'adresse PSV (Progam Visibility Space).
 </div>
-<div style="margin-left:5%;">   Il y a donc un mécanisme qui permet de différiencier ces 2 plages en utilisant
+<div style="margin-left:5%;">   Il y a donc un mécanisme qui permet de différencier ces 2 plages en utilisant
 </div>
 <div style="margin-left:5%;">   les registres DSRPAG et DSWPAG.  Puisque la machine virtuelle de ForthEx fonctionne
 </div>
@@ -23,13 +23,13 @@
 </div>
 <div style="margin-left:5%;">   acccédé la plage {0..32766} de la mémoire FLASH là où réside le système Forth.
 </div>
-<div style="margin-left:5%;">   Cependant il doit-existé un mécanisme pour lire la mémoire EDS. Ce mécanisme
+<div style="margin-left:5%;">   Cependant il doit exister un mécanisme pour lire la mémoire EDS. Ce mécanisme
 </div>
 <div style="margin-left:5%;">   est constitué d'une série de mots spéciaux qui accèdent cette mémoire en lecture.
 </div>
 <div style="margin-left:5%;">       
 </div>
-<div style="margin-left:5%;">   Pour l'accès en écriture ForthEx est configurée par défaut pour accéder la mémoire
+<div style="margin-left:5%;">   Pour l'accès en écriture ForthEx est configuré par défaut pour accéder la mémoire
 </div>
 <div style="margin-left:5%;">   EDS puisque de toute façon on ne peut écrire en mémoire FLASH. Il n'est donc pas
 </div>
@@ -40,9 +40,11 @@
 <b>E@</b>  ( a-addr -- n )    
 <div style="margin-left:5%;">   Retourne l'entier contenu à l'adresse a-addr. 
 </div>
-<div style="margin-left:5%;">   L'adresse doit-être alignée sur un nombre pair.    
+<div style="margin-left:5%;">   L'adresse doit-être alignée sur un nombre pair.
 </div>
-<div style="margin-left:5%;">   Les adresses &gt; 32767 accèdent la mémoire EDS.
+<div style="margin-left:5%;">   Les adresses &lt; 32768 accèdes la RAM mais    
+</div>
+<div style="margin-left:5%;">   les adresses &gt;= 32768 accèdent la mémoire EDS.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -62,7 +64,9 @@
 </div>
 <div style="margin-left:5%;">   Cette adresse est alignée sur un octet.    
 </div>
-<div style="margin-left:5%;">   Les adresses &gt; 32767 accès la mémoire EDS.    
+<div style="margin-left:5%;">   Les adresse &lt;32768 accèdent la RAM mais 
+</div>
+<div style="margin-left:5%;">   les adresses &gt;= 32768 accès la mémoire EDS.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -82,7 +86,9 @@
 </div>
 <div style="margin-left:5%;">   L'adresse de la table doit-être alignée sur une adresse paire.
 </div>
-<div style="margin-left:5%;">   Les adresses &gt; 32767 sont en mémoire EDS.    
+<div style="margin-left:5%;">   Les addresses &lt;32768 accèdent la RAM mais 
+</div>
+<div style="margin-left:5%;">   les adresses &gt;= 32768 accèdent la mémoire EDS.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:

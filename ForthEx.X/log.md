@@ -8,6 +8,11 @@ Cachez les movts VT-* dans vt102.s, ces mots ne sont maintenant
 accessible que par l'utilisation de la console REMOTE.
 Corrigé bogue dans blockEdit.s
 
+Travail sur la documentation de dynamem.s
+Travail sur la documentation de flash.s
+Travail sur la documentaion de hardware.s
+Travail sur la documentation de interpret.s
+
 2017-06-13
 ----------
 Complété réorganisation de la console.

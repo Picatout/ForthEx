@@ -22,22 +22,23 @@
 ;   Certains PIC24 et dsPIC33 possèdent de la mémoire RAM au-delà de l'adresse
 ;   32767 (0x7FFF) Microchip appelle cette mémoire EDS (Extended Data Space).
 ;   Cette plage d'adresse entre en conflit avec la plage d'adresse PSV (Progam Visibility Space).
-;   Il y a donc un mécanisme qui permet de différiencier ces 2 plages en utilisant
+;   Il y a donc un mécanisme qui permet de différencier ces 2 plages en utilisant
 ;   les registres DSRPAG et DSWPAG.  Puisque la machine virtuelle de ForthEx fonctionne
 ;   en lisant des listes d'adresses aussi bien en RAM qu'en FLASH le registre DSRPAG
 ;   qui détermine qu'elle plage sera accédée en lecture est configuré par défaut pour
 ;   acccédé la plage {0..32766} de la mémoire FLASH là où réside le système Forth.
-;   Cependant il doit-existé un mécanisme pour lire la mémoire EDS. Ce mécanisme
+;   Cependant il doit exister un mécanisme pour lire la mémoire EDS. Ce mécanisme
 ;   est constitué d'une série de mots spéciaux qui accèdent cette mémoire en lecture.
 ;       
-;   Pour l'accès en écriture ForthEx est configurée par défaut pour accéder la mémoire
+;   Pour l'accès en écriture ForthEx est configuré par défaut pour accéder la mémoire
 ;   EDS puisque de toute façon on ne peut écrire en mémoire FLASH. Il n'est donc pas
 ;   nécessaire d'avoir de mots spéciaux pour l'écriture dans la mémoire EDS.
     
 ; nom: E@  ( a-addr -- n )    
 ;   Retourne l'entier contenu à l'adresse a-addr. 
-;   L'adresse doit-être alignée sur un nombre pair.    
-;   Les adresses > 32767 accèdent la mémoire EDS.
+;   L'adresse doit-être alignée sur un nombre pair.
+;   Les adresses < 32768 accèdes la RAM mais    
+;   les adresses >= 32768 accèdent la mémoire EDS.
 ; arguments:
 ;   a-addr  Adresse à lire.
 ; retourne:
@@ -51,7 +52,8 @@ DEFCODE "E@",2,,EFETCH ; ( addr -- n )
 ; nom: EC@  ( c-addr -- c )    
 ;   Retourne le caractère contenu à l'adressse c-addr.
 ;   Cette adresse est alignée sur un octet.    
-;   Les adresses > 32767 accès la mémoire EDS.    
+;   Les adresse <32768 accèdent la RAM mais 
+;   les adresses >= 32768 accès la mémoire EDS.    
 ; arguments:
 ;   c-addr   Adresse à lire.
 ; retourne:
@@ -66,7 +68,8 @@ DEFCODE "EC@",3,,ECFETCH
 ; nom: ETBL@  ( n a-addr -- n )
 ;   Retourne l'élément n d'un vecteur. Les valeurs d'indice débute à zéro.
 ;   L'adresse de la table doit-être alignée sur une adresse paire.
-;   Les adresses > 32767 sont en mémoire EDS.    
+;   Les addresses <32768 accèdent la RAM mais 
+;   les adresses >= 32768 accèdent la mémoire EDS.    
 ; arguments:
 ;   n  Indice dans le vecteur.
 ;   a-addr  Adresse du vecteur.

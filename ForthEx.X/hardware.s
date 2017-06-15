@@ -18,8 +18,7 @@
 ;****************************************************************************
 ; NOM: hardware.s
 ; DESCRIPTION:    
-;  Initialisation du MCU et définitions liés étroitement au fonctionnement du
-;   MCU    
+;  Initialisation du MCU et définitions liées au fonctionnement du MCU.
     
 .include "hardware.inc"
 .include "core.s"
@@ -448,7 +447,8 @@ DEFCODE "SRAND",5,,SRAND  ; ( -- )
    
 ; nom: CLEAR  ( -- )
 ;   Efface la mémoire de données utilisateur. Tous les mots définis par l'utilisateur
-;   sont supprimés du dictionnaire.  La valeur de DP est réiniialisé à DP0.
+;   sont supprimés du dictionnaire.  La variable système DP est réinitialisée à DP0.
+;   La variable système LATEST est réinitialisée à la valeur de SYSLATEST.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -468,9 +468,6 @@ DEFWORD "UNUSED",6,,UNUSED
     .word ULIMIT,HERE,MINUS,EXIT
     
 
-; DESCRIPTION:
-;   Générateur de tonalité
-    
 .include "sound.inc"
 
 .equ FCT, (FCY/64)

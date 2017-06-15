@@ -13,28 +13,32 @@
 </div>
 <div style="margin-left:5%;">  * la liste des blocs utilisés.    
 </div>
-<div style="margin-left:5%;">    
+<div style="margin-left:5%;">  <br><table border="single">    
 </div>
-<div style="margin-left:5%;">  STRUCTURE ENTÊTE DE BLOC
+<div style="margin-left:5%;">  <tr><th colspan="3">STRUCTURE ENTÊTE DE BLOC</th></tr>
 </div>
-<div style="margin-left:5%;">  ========================
+<div style="margin-left:5%;">  <tr><th>offset</th><th>grandeur</th><th>description</th><tr>
 </div>
-<div style="margin-left:5%;">  pos. |  octets |  description
+<div style="margin-left:5%;">  <tr><td><center>0</center></td><td><center>2</center></td><td>grandeur excluant l'entête.</td></tr>
 </div>
-<div style="margin-left:5%;"> ----------------------------
+<div style="margin-left:5%;">  <tr><td><center>2</center></td><td><center>2</center></td><td>lien vers le bloc suivant.</td></tr>
 </div>
-<div style="margin-left:5%;">   0   |   2   |    grandeur excluant l'entête
+<div style="margin-left:5%;">  <tr><td><center>4</center></td><td><center>2</center></td><td>lien vers le bloc précédent.</td></tr>
 </div>
-<div style="margin-left:5%;">   2   |   2   |    lien vers le bloc suivant.
-</div>
-<div style="margin-left:5%;">   4	|    2	|    lien vers le bloc précédent.
+<div style="margin-left:5%;">  </table><br>    
 </div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:4px;"><p id="HEAPINIT">
 <b>HEAPINIT</b>  ( -- ) 
 <div style="margin-left:5%;">   Initialiation du gestionnaire, libère tous les blocs alloués.
 </div>
-<div style="margin-left:5%;">   Remet à zéro la mémoire. 
+<div style="margin-left:5%;">   Remet à zéro la mémoire.
+</div>
+<div style="margin-left:5%;">   Au démarrage l'unité de gestion des blocs réserve de la mémoire dynamique
+</div>
+<div style="margin-left:5%;">   donc si vous appellez HEAPINIT sur la ligne de commande ou dans une application
+</div>
+<div style="margin-left:5%;">   l'unité de gestion des blocs ne fonctionnera plus. 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -111,7 +115,7 @@
 </div>
 <div style="margin-left:5%;"><b>  retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; | 0  Adresse du premier octet de donnée du bloc, ou 0 si non disponible.  
+<div style="margin-left:5%;"><i>a-addr|0</i>&nbsp;&nbsp;  Adresse du premier octet de donnée du bloc, ou 0 si non disponible.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -144,9 +148,13 @@
 </div>
 <div style="margin-left:5%;">   exemple:
 </div>
-<div style="margin-left:5%;">   120 BUFFER: data \ l'invocation de 'data' va retourner l'adresse du premier octet
+<div style="margin-left:5%;">    <p>
 </div>
-<div style="margin-left:5%;">   du bloc de donnée.    
+<div style="margin-left:5%;">    <b>120 BUFFER: data</b> \ l'invocation de <b>data</b> va retourner l'adresse<br>
+</div>
+<div style="margin-left:5%;">    \ du premier octet du bloc de donnée.
+</div>
+<div style="margin-left:5%;">    </p>    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:

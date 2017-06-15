@@ -76,7 +76,7 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  Adresse dans la mémmoire flash du MCU.
+<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  entier double, adresse dans la mémmoire flash du MCU.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -96,7 +96,7 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  Entier double correspondant à l'adresse en mémoire flash.
+<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  Entier double, adresse en mémoire flash.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -116,25 +116,25 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse du premier octet de donnée du tampon.
+<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp; Entier double, Adresse en mémoire flash.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; Valeur lue à l'adresse ud1.  c représente les bits 23..16 de l'instruction à l'adresse a-addr-1.
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; Valeur lue à l'adresse ud1.  c représente les bits 23..16 de l'instruction.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="I@">
 <b>I@</b>   ( ud -- u1 u2 u3 )    
-<div style="margin-left:5%;">   lit 1 instruction de la mémoire FLASH du MCU. L'instrucion est séparée en
+<div style="margin-left:5%;">   Lit 1 instruction de la mémoire FLASH du MCU. L'instrucion est séparée en
 </div>
 <div style="margin-left:5%;">   3 octets. Accès à la mémoire flash en utilisant les instructions machine TBLRDL et TBLRDH .
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:    
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  Adresse 24 bits mémoire flash
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  Entier double, adresse en  mémoire flash.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -149,9 +149,9 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="IC@">
 <b>IC@</b> ( ud u -- c )
-<div style="margin-left:5%;">   Lit 1 octet dans la mémoire flash à l'adresse d'instruction ud et à la position
+<div style="margin-left:5%;">   Lit 1 octet dans la mémoire flash à l'adresse d'instruction 'ud' et à la position
 </div>
-<div style="margin-left:5%;">   désignée par u. u est dans l'intervalle {0..2}
+<div style="margin-left:5%;">   désignée par 'u'. 'u' est dans l'intervalle {0..2}
 </div>
 <div style="margin-left:5%;">   0 retourne l'octet faible, bits 7:0
 </div>
@@ -162,7 +162,7 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Entier double adresse de l'instruction. ud doit-?tre un nombre pair.
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Entier double, adresse de l'instruction. ud doit-être un nombre pair.
 </div>
 <div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Entier dans l'intervalle {0..2} indiquant quel octet de l'instruction doit-être lu.
 </div>
@@ -175,7 +175,7 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="?FLIMITS">
 <b>?FLIMITS</b>   ( ud -- ud f )    
-<div style="margin-left:5%;">   Vérifie si l'adresse 24 bits représsentée par ud est dans la plage
+<div style="margin-left:5%;">   Vérifie si l'adresse 24 bits représsentée par 'ud' est dans la plage
 </div>
 <div style="margin-left:5%;">   valide et retourne un indicateur booléen.
 </div>
@@ -212,7 +212,7 @@
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Adresse 24 bits de la rangée.    
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Entier double, adresse 24 bits de la rangée.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -319,17 +319,19 @@
 </div>
 <div style="margin-left:5%;">   une structure de données utilisé par IMGLOAD. Cette structure est la suivante.
 </div>
-<div style="margin-left:5%;">   offset | description
+<div style="margin-left:5%;">  <br><table border="single">    
 </div>
-<div style="margin-left:5%;">   ---------------------
+<div style="margin-left:5%;">  <tr><th>offset</th><th>description</th></tr>
 </div>
-<div style="margin-left:5%;">   0 | signature 0x55AA
+<div style="margin-left:5%;">  <tr><td><center>0</center></td><td>signature 0x55AA</td></tr>
 </div>
-<div style="margin-left:5%;">   2 | valeur de la variable LATEST pour cette image.
+<div style="margin-left:5%;">  <tr><td><center>2</center></td><td>valeur de la variable LATEST pour cette image.</td></tr>
 </div>
-<div style="margin-left:5%;">   4 | valeur de la variable DP pour cette image.
+<div style="margin-left:5%;">  <tr><td><center>4</center></td><td>valeur de la variable DP pour cette image.</td></tr>
 </div>
-<div style="margin-left:5%;">   6 | grandeur du data en octets.
+<div style="margin-left:5%;">  <tr><td><center>6</center></td><td>grandeur du data en octets.</td></tr>
+</div>
+<div style="margin-left:5%;">  </table><br>    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:

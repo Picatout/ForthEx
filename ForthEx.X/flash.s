@@ -79,7 +79,7 @@ DEFWORD "FBUFFER",7,,FBUFFER ; ( -- a-addr )
 ;   Si ud1 est impair utilise l'instruction machine TBLRDH pour retourner les bits 32:16
 ;   les bit 32:24 sont à zéro puisque cet octet n'est pas implémenté dans le MCU.    
 ; arguments:
-;   ud1  Adresse dans la mémmoire flash du MCU.
+;   ud1  entier double, adresse dans la mémmoire flash du MCU.
 ; retourne:
 ;   u    Valeur lue à l'adresse ud1.
 DEFCODE "F@",2,,FFETCH ; ( ud1 -- u )
@@ -100,7 +100,7 @@ DEFCODE "F@",2,,FFETCH ; ( ud1 -- u )
 ;   Utilise l'instruction machine TBLRDL.B    
 ;    Si ud1 est impair  les bits 15:8 sont retournés, sinon les bits 7:0 sont retournés.
 ; arguments:
-;   ud1  Entier double correspondant à l'adresse en mémoire flash.
+;   ud1  Entier double, adresse en mémoire flash.
 ; retourne:
 ;   c    Si impair(ud1) c=bits{15:8}  sinon c=bits{7:0}
 DEFCODE "FC@L",4,,FCFETCHL 
@@ -118,9 +118,9 @@ DEFCODE "FC@L",4,,FCFETCHL
 ;    Utilise l'instruction machine TBLRDH.B
 ;    Si ud1 est impair retourne la valeur 0, sinon retourne les bits 23:16 de l'instruction.    
 ; arguments:
-;   a-addr Adresse du premier octet de donnée du tampon.
+;   ud1 Entier double, Adresse en mémoire flash.
 ; retourne:
-;   c Valeur lue à l'adresse ud1.  c représente les bits 23..16 de l'instruction à l'adresse a-addr-1.
+;   c Valeur lue à l'adresse ud1.  c représente les bits 23..16 de l'instruction.
 DEFCODE "FC@H",4,,FCFETCHH ; ( ud1 -- n )
     RPUSH TBLPAG
     mov T,TBLPAG
@@ -131,10 +131,10 @@ DEFCODE "FC@H",4,,FCFETCHH ; ( ud1 -- n )
     NEXT
 
 ; nom: I@   ( ud -- u1 u2 u3 )    
-;   lit 1 instruction de la mémoire FLASH du MCU. L'instrucion est séparée en
+;   Lit 1 instruction de la mémoire FLASH du MCU. L'instrucion est séparée en
 ;   3 octets. Accès à la mémoire flash en utilisant les instructions machine TBLRDL et TBLRDH .
 ; arguments:    
-;   ud  Adresse 24 bits mémoire flash
+;   ud  Entier double, adresse en  mémoire flash.
 ; retourne:
 ;   u1  Bits 16:23 
 ;   u2  Bits 8:15
@@ -153,13 +153,13 @@ DEFCODE "I@",2,,IFETCH
     NEXT
  
 ; nom: IC@ ( ud u -- c )
-;   Lit 1 octet dans la mémoire flash à l'adresse d'instruction ud et à la position
-;   désignée par u. u est dans l'intervalle {0..2}
+;   Lit 1 octet dans la mémoire flash à l'adresse d'instruction 'ud' et à la position
+;   désignée par 'u'. 'u' est dans l'intervalle {0..2}
 ;   0 retourne l'octet faible, bits 7:0
 ;   1 retourne l'octet du milieu, bits 15:8
 ;   2 retourne l'octet fort, bits 23:16
 ; arguments:
-;   ud   Entier double adresse de l'instruction. ud doit-?tre un nombre pair.
+;   ud   Entier double, adresse de l'instruction. ud doit-être un nombre pair.
 ;   u    Entier dans l'intervalle {0..2} indiquant quel octet de l'instruction doit-être lu.
 ; retourne:
 ;   c    Octet lu dans la mémoire flash.
@@ -254,7 +254,7 @@ HEADLESS "WRITE_LATCH" ; ( addr --  )
 ;   n    Constante identifiant le type d'opération flash à effectuer.
 ; retourne:
 ;   rien    
-HEADLESS "FLASH_OP"  ; ( op -- )
+HEADLESS FLASH_OP,CODE  ; ( op -- )
     cp T,#4
     bra ltu,2f
     DPOP
@@ -276,7 +276,7 @@ HEADLESS "FLASH_OP"  ; ( op -- )
 9:  NEXT
   
 ; nom: ?FLIMITS   ( ud -- ud f )    
-;   Vérifie si l'adresse 24 bits représsentée par ud est dans la plage
+;   Vérifie si l'adresse 24 bits représsentée par 'ud' est dans la plage
 ;   valide et retourne un indicateur booléen.
 ; arguments:
 ;   ud   Adresse 24 bits à contrôler.
@@ -299,7 +299,7 @@ DEFWORD "?FLIMITS",8,,QFLIMITS ; ( addrl addrh -- addrl addrh f )
 ; arguments:
 ;   u    Numéro de rangée.
 ; retourne:
-;   ud   Adresse 24 bits de la rangée.    
+;   ud   Entier double, adresse 24 bits de la rangée.    
 DEFWORD "ROW>FADR",8,,ROWTOFADR 
     .word LIT,FLASH_ROW_SIZE,MSTAR,EXIT
    
@@ -555,12 +555,15 @@ HEADLESS ERASEROWS,HWORD
 ;   Si le MCU est reprogrammé l'image est perdue et devra être resauvegardée.    
 ;   l'image est sauvegardée à l'adresse flash 0x8000. Les 8 premiers octets sont
 ;   une structure de données utilisé par IMGLOAD. Cette structure est la suivante.
-;   offset | description
-;   ---------------------
-;   0 | signature 0x55AA
-;   2 | valeur de la variable LATEST pour cette image.
-;   4 | valeur de la variable DP pour cette image.
-;   6 | grandeur du data en octets.
+; HTML:
+; <br><table border="single">    
+; <tr><th>offset</th><th>description</th></tr>
+; <tr><td><center>0</center></td><td>signature 0x55AA</td></tr>
+; <tr><td><center>2</center></td><td>valeur de la variable LATEST pour cette image.</td></tr>
+; <tr><td><center>4</center></td><td>valeur de la variable DP pour cette image.</td></tr>
+; <tr><td><center>6</center></td><td>grandeur du data en octets.</td></tr>
+; </table><br>    
+; :HTML    
 ; arguments:
 ;   aucun
 ; retourne:
