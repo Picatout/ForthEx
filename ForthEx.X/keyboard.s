@@ -18,10 +18,14 @@
 ;****************************************************************************
 ;
 ; Fichier: keyboard.s
-; Description: transcription code clavier PS/2 en ASCII
 ; Auteur: Jacques Deschênes
 ; Date: 2015-09-28
 ; REF: http://www.computer-engineering.org/ps2keyboard/scancodes2.html
+; DESCRIPTION: 
+;    Interface matérielle entre le clavier PS/2 et la console LOCAL.
+;    La majorité des mots définis dans ce module n'ont pas d'entête dans
+;    le dictionnaire ForthEx. Ils ne sont accessible qu'à travers la table
+;    des fonctions de la console LOCAL.    
 
 .include "keyboard.inc"    
  
@@ -128,18 +132,15 @@ HEADLESS KBD_RESET  ; ( -- )
     NEXT
 
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;  mots dans le dictionnaire
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    
-; nom: LC-EKEY? ( -- f )
+; LC-EKEY? ( -- f )
 ;   Vérifie s'il y a un caractère en attente
 ;   dans la file clavier et retourne un indicateur booléen.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   f   indicateur vrai|faux
-DEFCODE "LC-EKEY?",8,,LCEKEYQ
+HEADLESS LCEKEYQ,CODE    
+;DEFCODE "LC-EKEY?",8,,LCEKEYQ
     DPUSH
     clr T
     mov kbd_head,W0
@@ -149,14 +150,15 @@ DEFCODE "LC-EKEY?",8,,LCEKEYQ
 9:  NEXT
     
     
-; nom: LC-EKEY  ( -- u )
+; LC-EKEY  ( -- u )
 ;   Attend jusqu'à réception d'un code du clavier
 ;   retourne le premier code reçu.
 ; arguments:
 ;   aucun
 ; retourne:
 ;    u   code  VK_xxx non filtré reçu du clavier.
-DEFCODE "LC-EKEY",7,,LCEKEY  
+HEADLESS LCEKEY,CODE    
+;DEFCODE "LC-EKEY",7,,LCEKEY  
     DPUSH
 1:  mov kbd_tail, W0
     cp kbd_head
@@ -172,7 +174,7 @@ DEFCODE "LC-EKEY",7,,LCEKEY
     NEXT
 
     
-; nom: LC-FILTER ( u -- u FALSE | c TRUE )    
+;  LC-FILTER ( u -- u FALSE | c TRUE )    
 ;   Filtre  et retourne un caractère 'c' et 'vrai'
 ;   si u fait partie de l'ensemble reconnu.
 ;   sinon retourne 'u' et 'faux'   
@@ -187,7 +189,8 @@ DEFCODE "LC-EKEY",7,,LCEKEY
 ;   reconnu:
 ;   c       caractère reconnu.
 ;   TRUE    indicateur booléen, valeur -1
-DEFCODE "LC-FILTER",9,,LCFILTER
+HEADLESS LCFILTER,CODE    
+;DEFCODE "LC-FILTER",9,,LCFILTER
     mov T,W0
     DPUSH
     setm T
@@ -216,7 +219,7 @@ DEFCODE "LC-FILTER",9,,LCFILTER
 ; arguments:
 ;    n	 Entier simple
 ; retourne:
-;    f Indicateur booléen, vrai si n -> {32..126}  
+;    f Indicateur booléen, vrai si n &rarr; {32..126}  
 DEFWORD "?PRTCHAR",8,,QPRTCHAR 
     .word DUP,BL,ULESS,TBRANCH,7f-$
     .word LIT,127,ULESS,ZBRANCH,8f-$
@@ -224,7 +227,7 @@ DEFWORD "?PRTCHAR",8,,QPRTCHAR
 7:  .word DROP
 8:  .word FALSE,EXIT
   
-; nom: LC-KEY? ( -- 0|c)
+;  LC-KEY? ( -- 0|c)
 ;   Vérifie s'il y a un caractère dans l'intervalle {32..126} disponible 
 ;   dans la file du clavier. S'il y a des caractères non valides les jettes.    
 ; arguments:
@@ -232,19 +235,21 @@ DEFWORD "?PRTCHAR",8,,QPRTCHAR
 ; retourne:
 ;   0   aucun caractère disponible
 ;   c   le premier caractère valide de la file.    
-DEFWORD "LC-KEY?",7,,LCKEYQ
+HEADLESS LCKEYQ,HWORD  
+;DEFWORD "LC-KEY?",7,,LCKEYQ
 1: .word LCEKEYQ,DUP,ZBRANCH,9f-$
    .word DROP,LCEKEY,DUP,QPRTCHAR,TBRANCH,9f-$
    .word DROP,BRANCH,1b-$
 9: .word EXIT
     
-; nom: LC-KEY  ( -- c )
+;  LC-KEY  ( -- c )
 ;   Attend la réception d'un caractère valide {32..126} du clavier.
 ; arguments:
 ;   aucun 
 ; retourne:
 ;   c   caractère filtré. 
-DEFWORD "LC-KEY",6,,LCKEY
+HEADLESS LCKEY,HWORD 
+;DEFWORD "LC-KEY",6,,LCKEY
 1:  .word LCKEYQ,QDUP
     .word ZBRANCH,1b-$
     .word EXIT 

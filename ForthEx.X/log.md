@@ -1,3 +1,9 @@
+2017-06-15
+----------
+Travail sur keyboard.s, caché les mots LC-* qui sont maintenant accesssible
+seulement par l'utilisation de la console LOCAL.
+Travail de documentation sur math.s
+
 2017-06-14
 ----------
 Travail sur la documentation.

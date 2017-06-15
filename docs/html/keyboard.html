@@ -5,77 +5,18 @@
 <body id="#top">
 <h1>keyboard</h1><div><a href="#index">index</a></div>
 <div><a href="index.html">index principal</a></div>
-<p id="LC-EKEY?">
-<b>LC-EKEY?</b> ( -- f )
-<div style="margin-left:5%;">   Vérifie s'il y a un caractère en attente
+<h2 id="description">Description</h2><div style="margin-left:5%;"> 
 </div>
-<div style="margin-left:5%;">   dans la file clavier et retourne un indicateur booléen.
+<div style="margin-left:5%;">    Interface matérielle entre le clavier PS/2 et la console LOCAL.
 </div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur vrai|faux
+<div style="margin-left:5%;">    La majorité des mots définis dans ce module n'ont pas d'entête dans
 </div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
+<div style="margin-left:5%;">    le dictionnaire ForthEx. Ils ne sont accessible qu'à travers la table
+</div>
+<div style="margin-left:5%;">    des fonctions de la console LOCAL.    
+</div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-EKEY">
-<b>LC-EKEY</b>  ( -- u )
-<div style="margin-left:5%;">   Attend jusqu'à réception d'un code du clavier
-</div>
-<div style="margin-left:5%;">   retourne le premier code reçu.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   code  VK_xxx non filtré reçu du clavier.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-FILTER">
-<b>LC-FILTER</b> ( u -- u FALSE | c TRUE )    
-<div style="margin-left:5%;">   Filtre  et retourne un caractère 'c' et 'vrai'
-</div>
-<div style="margin-left:5%;">   si u fait partie de l'ensemble reconnu.
-</div>
-<div style="margin-left:5%;">   sinon retourne 'u' et 'faux'   
-</div>
-<div style="margin-left:5%;">   accepte:
-</div>
-<div style="margin-left:5%;">      VK_CR, VK_BACK, CTRL_X, CTRL_V {32-126}
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    code à vérifier
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>refusé:</i>&nbsp;&nbsp;    
-</div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       même code
-</div>
-<div style="margin-left:5%;"><i>FALSE</i>&nbsp;&nbsp;   indicateur booléen, valeur 0 
-</div>
-<div style="margin-left:5%;"><i>reconnu:
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;       caractère reconnu.
-</div>
-<div style="margin-left:5%;"><i>TRUE</i>&nbsp;&nbsp;    indicateur booléen, valeur -1
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="?PRTCHAR">
+<hr style="border-width:4px;"><p id="?PRTCHAR">
 <b>?PRTCHAR</b>   ( n -- f )
 <div style="margin-left:5%;">   Vérifie si  'n' est une caractère imprimable dans l'intervalle {32..126}
 </div>
@@ -88,43 +29,7 @@
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur booléen, vrai si n -&gt; {32..126}  
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-KEY?">
-<b>LC-KEY?</b> ( -- 0|c)
-<div style="margin-left:5%;">   Vérifie s'il y a un caractère dans l'intervalle {32..126} disponible 
-</div>
-<div style="margin-left:5%;">   dans la file du clavier. S'il y a des caractères non valides les jettes.    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>0</i>&nbsp;&nbsp;   aucun caractère disponible
-</div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   le premier caractère valide de la file.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="LC-KEY">
-<b>LC-KEY</b>  ( -- c )
-<div style="margin-left:5%;">   Attend la réception d'un caractère valide {32..126} du clavier.
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp; 
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère filtré. 
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur booléen, vrai si n &rarr; {32..126}  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -133,11 +38,6 @@
 <p>
 <ul>
 <li><a href="#?PRTCHAR">?PRTCHAR</a></li>
-<li><a href="#LC-EKEY">LC-EKEY</a></li>
-<li><a href="#LC-EKEY?">LC-EKEY?</a></li>
-<li><a href="#LC-FILTER">LC-FILTER</a></li>
-<li><a href="#LC-KEY">LC-KEY</a></li>
-<li><a href="#LC-KEY?">LC-KEY?</a></li>
 </ul>
 </p>
 <hr style="border-width:1px;"><div><a href="#top">haut</a></div>
