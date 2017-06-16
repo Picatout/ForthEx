@@ -4,6 +4,10 @@ Travail sur keyboard.s, caché les mots LC-* qui sont maintenant accesssible
 seulement par l'utilisation de la console LOCAL.
 Travail de documentation sur math.s
 
+Travail sur documentation sdcard.s
+Ajout de UD*D dans math.s
+
+
 2017-06-14
 ----------
 Travail sur la documentation.

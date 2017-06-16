@@ -18,8 +18,11 @@
 ;****************************************************************************
 
 ;NOM: sdcard.s
-;Description:  interface avec carte SC en utilisant l'interface SPI
 ;Date: 2017-03-20
+; DESCRIPTION:  
+; Interface de base pour l'accès à la carte SD en utilisant l'interface SPI de celle-ci.
+; Permet l'initialiation de la carte ainsi que la lecture et l'écriture d'un bloc de
+; donnée sur la carte.    
     
 .equ BLOCK_SIZE, 512 ; nombre d'octets par secteur carte SD.    
 .equ FIRST_USED, 2*BLOCK_SIZE  ; premier secteur utilisé pour les BLOCKS
@@ -90,10 +93,10 @@ sdc_wait_ready:
     return
     
 ; calcule l'adresse à partir du no de bloc
-; argument 
-;   ud1 no. de secteur
-; sortie:
-;   ud2   adresse absolue    
+; arguments: 
+;   ud1 Numéro de secteur
+; retourne:
+;   ud2   Adresse absolue sur la carte SD.    
 sector_to_address: ;   ( ud1 -- ud2 )    
     mov #BLOCK_SIZE,W2
     mul.uu T,W2,W0
@@ -175,7 +178,7 @@ wait_response:
 ; arguments:
 ;   aucun
 ; retourne:
-;    f   Indicateur Booléen de succès.    
+;    f   Indicateur Booléen vrai si l'initialisation est réussie.   
 DEFCODE "SDCINIT",7,,SDCINIT ; ( -- f )
     mov #FIRST_USED,W0
     mov WREG,sdc_first
@@ -299,22 +302,23 @@ DEFCODE "?SDC",4,,QSDC ; ( -- u )
     mov sdc_status,T
     NEXT
 
-; nom: ?SDCOK  ( -- f )    
-;   Retourne un indicateur Booléen indiquant si la carte SD est prête.
-; argments:
+; nom: ?SDCOK  ( -- n )    
+;   Retourne la valeur du bit F_SDC_OK. La valeur 2 indique qu'il y a une carte
+;   dans la fente et qu'elle est initialisée.    
+; arguments:
 ;   aucun
 ; retourne:
-;   f   Indicateur Booléen.    
+;   n Valeur du bit F_SDC_OK &rarr; {0,2}.    
 DEFWORD "?SDCOK",6,,QSDCOK ; ( -- f )
     .word QSDC,LIT,1,LIT,F_SDC_OK,LSHIFT,AND,EXIT
     
 ; nom: SDCREAD  ( c-addr ud -- f )    
 ;   Lecture d'un secteur de la carte SD, bloc de 512 octets    
 ;  arguments:
-;   addr   adresse du tampon RAM
-;   ud     numéro du secteur carte SD à lire. 
+;   addr Adresse du tampon RAM
+;   ud  Numéro du secteur sur la carte SD. 
 ;  retourne:
-;   f  indicateur booléen échec/succcès    
+;   f  Indicateur booléen échec/succcès    
 DEFCODE "SDCREAD",7,,SDCREAD ; ( addr ud -- f )
     _enable_sdc
     btss sdc_status, #F_BLK_ADDR
@@ -345,10 +349,10 @@ read_failed:
     NEXT
     
 ; nom: SDCWRITE   ( addr ud -- )   
-;   Écriture d'un secteur de 512 octest sur la carte SD.
+;   Écriture d'un secteur de 512 octets sur la carte SD.
 ; arguments:
-;   addr   adresse RAM des données à écrire.
-;   ud	   numéro du secteur la carte SD où doit se faire l'écriture.
+;   addr Adresse du tampon RAM des données à écrire.
+;   ud	 Numéro du secteur la carte SD où effectuer l'écriture.
 ; retourne:
 ;   rien    
 DEFCODE "SDCWRITE",8,,SDCWRITE ; ( addr ud -- )
@@ -389,67 +393,12 @@ write_failed:
     RESET_EDS
     NEXT
 
-; nom: NSECTOR ( u1 u2 -- u3 u4 )    
-;   Ajuste le compteur et le pointeur pour le secteur suivant.
-; arguments:
-;    u1  adresse RAM
-;    u2  nombre d'octets à lire ou écrire
-; sortie:
-;    u3  adresse RAM incrémentée de BLOCK_SIZE
-;    u4  nombre d'octets décrémentés de BLOCK_SIZE, MAX(0,u4') 
-;    R:ud  ajuste le no. de secteur qui est sur la pile des retours.
-DEFWORD "NSECTOR",7,,NSECTOR ; ( u1 u2 -- u3 u4 )
-    .word LIT,BLOCK_SIZE,MINUS,LIT,0,MAX ; u1 u4
-    .word SWAP,LIT,BLOCK_SIZE,PLUS,SWAP  ; u3 u4
-    .word RFROM,TWORFROM,LIT,1,MPLUS ; u3 u4 IP ud1+1
-    .word TWOTOR,TOR ; u3 u4 R: ud1+1 IP
-    .word EXIT
-    
-    
-; sauvegarde image système sur la carte SD
-; arugments:
-;   u1  adresse ram début
-;   u2  nombre d'octets à sauvegarder
-;   ud1 no. de secteur début sauvegarde    
-DEFWORD "IMG>SDC",7,,IMGTOSDC ; ( u1 u2 ud1 -- )
-    .word TWOTOR,QSDCOK,TBRANCH,5f-$ 
-    .word SDCINIT,ZBRANCH,9f-$
-5:  .word OVER,TWORFETCH,SDCWRITE 
-    .word NSECTOR,DUP,ZBRANCH,8f-$
-    .word BRANCH,5b-$
-8:  .word TWODROP,TWORFROM,TWODROP,EXIT
-9:  .word DOTSTR
-    .byte  18
-    .ascii "SDcard write error"
-    .align 2
-    .word CR,ABORT
-    
-    
-; récupération image système à partir de la carte SD.
-; arguments:
-;   u1 adresse RAM
-;   u2 nombre d'octets à lire    
-;   ud1 no de secteur début image sur carte SD.    
-DEFWORD "SDC>IMG",7,,SDCTOIMG ; ( u1 u2 ud1 -- )
-    .word TWOTOR,QSDCOK,TBRANCH,4f-$
-    .word SDCINIT,ZBRANCH,9f-$
-4:  .word OVER,TWORFETCH,SDCREAD,ZBRANCH,9f-$
-    .word NSECTOR,DUP,ZBRANCH,8f-$
-    .word BRANCH,4b-$
-8:  .word TWODROP,TWORFROM,TWODROP,EXIT
-9:  .word DOTSTR
-    .byte  17
-    .ascii "SDcard read error"
-    .align 2
-    .word CR,ABORT
-    
-
-; nom: SDFIRST ; ( -- u )
+; nom: SDFIRST ; ( -- a-addr )
 ;    variable contenant l'adresse du premeir bloc utilisé sur la carte SD
 ; arguments:
 ;   aucun
 ; retourne:
-;    u    pointeur de la variable
+;    a-addr Adresse de la variable
 DEFCODE "SDFIRST",7,,SDFIRST
     DPUSH
     mov #sdc_first,T
@@ -462,24 +411,24 @@ DEFCODE "SDFIRST",7,,SDFIRST
 ; arguments:
 ;   aucun
 ; retourne:
-;   u   nombre de blocs disponibles.    
+;   u   Nombre de blocs disponibles.    
 DEFCONST "SDBLKCOUNT",10,,SDBLKCOUNT,65535
 
 ; nom: SDBOUND  ( n+ -- f)
 ;   Vérifie si le numéro de bloc est dans les limites
 ; arguments:
-;   n+   numéro du bloc à vérifier. {1..65535}
+;   n+  Numéro du bloc à vérifier. {1..65535}
 ; retourne:
-;   f   indicateur booléen.
+;   f   Indicateur booléen.
 DEFWORD "SDBOUND",7,,SDBOUND
     .word ZEROEQ,NOT,EXIT
     
 ; nom: SDBLK>ADR  ( u -- ud )
 ;   Convertie un numéro de bloc de la carte SD en adresse absolue.
 ; arguments:
-;   u    numéro du bloc {1..65535}
+;   u    Numéro du bloc {1..65535}
 ; retourne:
-;   ud   adresse absolue de 32 bits sur la carte SD.
+;   ud   Adresse absolue de 32 bits sur la carte SD.
 DEFWORD "SDBLK>ADR",9,,SDBLKTOADR
     .word ONEMINUS,LIT,BLOCK_SIZE,MSTAR,SDFIRST,TWOFETCH,DPLUS,EXIT
     

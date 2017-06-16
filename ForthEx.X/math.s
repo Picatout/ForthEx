@@ -306,15 +306,28 @@ DEFCODE "UM*",3,,UMSTAR ; ( u1 u2 -- ud )
 ; retourne:    
 ;   ud3  Entier double non signé résultant du produit de ud1 u2.  
 DEFCODE "UD*",3,,UDSTAR ; ( ud1 u2 -- ud3 )
-    mul.uu T,[DSP],W0
-    mov W0,[DSP]
-    mov T,W0
+    mov T,W2
     DPOP
-    mul.uu W0,[DSP],W0
-    add W1,T,T
+    mul.uu W2,[DSP],W0
+    mov W1,W3
     mov W0,[DSP]
+    mul.uu W2,T,W0
+    add W0,W3,T
     NEXT
 
+; nom: UD*D ( ud1 ud2 -- ud3 ) \ ud3=ud1*ud2
+;   Multiplication non signée de 2 entiers double avec entier double
+;   comme résultat.
+; arguments:
+;   ud1  Premier entier double non signé.
+;   ud2  Deuxième entier double non signé.    
+; retourne:
+;   ud3  Produit de ud1 par ud2
+DEFWORD "UD*D",4,,UDSTARD
+    .word TOR,TOR,TWODUP,RFROM,UDSTAR
+    .word TWOSWAP,RFROM,UDSTAR,DROP
+    .word LIT,0,SWAP,DPLUS,EXIT
+    
 ; nom: /  ( n1 n2 -- n3 )  n3=n1/n2
 ;   Division entière signée sur nombres simple.
 ; arguments:

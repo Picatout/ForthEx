@@ -5,7 +5,16 @@
 <body id="#top">
 <h1>sdcard</h1><div><a href="#index">index</a></div>
 <div><a href="index.html">index principal</a></div>
-<p id="SDCINIT">
+<h2 id="description">Description</h2><div style="margin-left:5%;">  
+</div>
+<div style="margin-left:5%;"> Interface de base pour l'accès à la carte SD en utilisant l'interface SPI de celle-ci.
+</div>
+<div style="margin-left:5%;"> Permet l'initialiation de la carte ainsi que la lecture et l'écriture d'un bloc de
+</div>
+<div style="margin-left:5%;"> donnée sur la carte.    
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="SDCINIT">
 <b>SDCINIT</b> ( -- f )
 <div style="margin-left:5%;">   Initialisation carte SD 
 </div>
@@ -61,18 +70,18 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="?SDCOK">
-<b>?SDCOK</b>  ( -- f )    
-<div style="margin-left:5%;">   Retourne un indicateur Booléen indiquant si la carte SD est prête.
-</div>
-<div style="margin-left:5%;"> argments:
-</div>
-<div style="margin-left:5%;">   aucun
-</div>
-<div style="margin-left:5%;"> retourne:
-</div>
-<div style="margin-left:5%;">   f   Indicateur Booléen.    
+<b>?SDCOK</b>  ( -- n )    
+<div style="margin-left:5%;">   Retourne la valeur du bit F_SDC_OK. 2 indique que la carte est prête.
 </div>
 </p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Valeur du bit F_SDC_OK {0,2}.    
+</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
@@ -83,13 +92,13 @@
 </p>
 <div style="margin-left:5%;"><b>  arguments:
 </b></div>
-<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp;   adresse du tampon RAM
+<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp; Adresse du tampon RAM
 </div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;     numéro du secteur carte SD à lire. 
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  Numéro du secteur carte SD à lire. 
 </div>
 <div style="margin-left:5%;"><b>  retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  indicateur booléen échec/succcès    
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur booléen échec/succcès    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -101,9 +110,9 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp;   adresse RAM des données à écrire.
+<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp; Adresse du tampon RAM des données à écrire sur  la carte.
 </div>
-<div style="margin-left:5%;"><i>ud	</i>&nbsp;&nbsp;   numéro du secteur la carte SD où doit se faire l'écriture.
+<div style="margin-left:5%;"><i>ud	</i>&nbsp;&nbsp; Numéro du secteur la carte SD où doit se faire l'écriture.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -113,29 +122,31 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="NSECTOR">
-<b>NSECTOR</b> ( u1 u2 -- u3 u4 )    
+<b>NSECTOR</b> ( u1 u2 ud -- u3 u4 ud' )    
 <div style="margin-left:5%;">   Ajuste le compteur et le pointeur pour le secteur suivant.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  adresse RAM
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Adresse tampon RAM.
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;  nombre d'octets à lire ou écrire
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;  Nombre d'octets à lire ou écrire.
 </div>
-<div style="margin-left:5%;"><i>sortie:
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><i>u3</i>&nbsp;&nbsp;  adresse RAM incrémentée de BLOCK_SIZE
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp; Adresse sur la carte SD.    
 </div>
-<div style="margin-left:5%;"><i>u4</i>&nbsp;&nbsp;  nombre d'octets décrémentés de BLOCK_SIZE, MAX(0,u4') 
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u3</i>&nbsp;&nbsp;  Adresse RAM incrémentée de BLOCK_SIZE
 </div>
-<div style="margin-left:5%;"><i>R:ud</i>&nbsp;&nbsp;  ajuste le no. de secteur qui est sur la pile des retours.
+<div style="margin-left:5%;"><i>u4</i>&nbsp;&nbsp;  Nombre d'octets décrémentés de BLOCK_SIZE, MAX(0,u4') 
+</div>
+<div style="margin-left:5%;"><i>ud'</i>&nbsp;&nbsp; Adresse sur la carte .
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="SDFIRST">
-<b>SDFIRST</b> ; ( -- u )
+<b>SDFIRST</b> ; ( -- a-addr )
 <div style="margin-left:5%;">    variable contenant l'adresse du premeir bloc utilisé sur la carte SD
 </div>
 </p>
@@ -145,7 +156,7 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    pointeur de la variable
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse de la variable
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -161,7 +172,7 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   nombre de blocs disponibles.    
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   Nombre de blocs disponibles.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -173,11 +184,11 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   numéro du bloc à vérifier. {1..65535}
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  Numéro du bloc à vérifier. {1..65535}
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen.
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   Indicateur booléen.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -189,11 +200,11 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    numéro du bloc {1..65535}
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Numéro du bloc {1..65535}
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   adresse absolue de 32 bits sur la carte SD.
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Adresse absolue de 32 bits sur la carte SD.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
