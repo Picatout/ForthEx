@@ -82,37 +82,6 @@
 ;ref: http://www.microchip.com/forums/m530149.aspx
 ;ref: http://elm-chan.org/docs/mmc/mmc_e.html 
 
-; indicateurs booléens carte SD
-.equ F_SDC_IN, 0 ; carte dans la fente
-.equ F_SDC_OK,1 ; carte insérée et initialisée
-.equ F_SDC_V2,2 ; carte version 2
-.equ F_SDC_HC,3 ; carte haute capacité
-.equ F_SDC_TO,4 ; commande time out
-.equ F_SDC_WE,5 ; erreur écriture
-.equ F_SDC_RE,6 ; erreur lecture
-.equ F_SDC_IE,7 ; erreur initialisation  
-.equ F_BAD_CARD,8 ; la carte ne répond pas
-.equ F_BLK_ADDR,9 ; carte adressable par bloc
- 
-;commandes carte SD
-.equ GO_IDLE_STATE, 0            ; CMD0 - réinitialise carte
-.equ SEND_OP_COND,        1      ; CMD1 - requête condition d'opération
-.equ SEND_IF_COND,        8      ; CMD8 - requête condition d'interface
-.equ SEND_CSD,            9      ; CMD9 - requête status
-.equ SET_BLOCKLEN,        16     ; CMD16 - fixe longueur bloc
-.equ READ_SINGLE_BLOCK,   17     ; CMD17 - lecture d'un seul bloc
-.equ WRITE_SINGLE_BLOCK,    24   ; CMD24 - écriture d'un bloc
-.equ APP_CMD,                55  ; CMD55 - commande escape
-.equ READ_OCR,            58     ; CMD58 - requête registre ocr
-.equ CRC_ON_OFF,            59   ; CMD59 - activation/désactivation CRC
-.equ SD_STATUS,            13    ; ACMD13 - requête status
-.equ SEND_OP_COND,        41  ; ACMD41 - requête condition d'opération
-; certaines commandes requière une valeur pour CRC
-.equ CMD0_CRC, 0x95 
-.equ CMD8_CRC, 0x87
-.equ CMDX_CRC, 0xFF  ; autre commandes
- 
- 
 ; fréquence SPI clock
 .equ SCLK_SLOW, (0<<2)|(0)  ; SPRE->8:1, PPRE->64:1 pour FCY=70Mhz > 136,7Khz 
 .equ SCLK_FAST, (4<<2)|(0)  ; SPRE->4:1, PPRE->1:1 pour FCY=70Mhz > 17,5Mhz

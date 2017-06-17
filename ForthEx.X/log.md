@@ -1,3 +1,10 @@
+2017-06-16
+----------
+Trvavail sur documentation sdcard.s
+Corrigé erreur dans initialisation carte SD.
+Modification à SDBLK>ADR
+Ajout de fonctionnalité dans sdcard.s ( à compléter).
+
 2017-06-15
 ----------
 Travail sur keyboard.s, caché les mots LC-* qui sont maintenant accesssible

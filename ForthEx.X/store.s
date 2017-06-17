@@ -54,8 +54,6 @@ HEADLESS STORE_INIT,CODE
     ior SDC_IPC
     bset SDC_IEC,#SDC_IE
     bclr SDC_IFS,#SDC_IF
-    btss SDC_PORT,#SDC_SEL
-    bset sdc_status,#F_SDC_IN
     ; configuration SPI
     mov #(1<<MSTEN)|(1<<CKE)|SCLK_FAST, W0 
     mov W0, STR_SPICON1

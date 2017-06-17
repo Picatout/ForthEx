@@ -819,12 +819,33 @@ DEFCODE "C@",2,,CFETCH
 ;   d   Entier double, valeur de cette variable.    
 DEFCODE "2@",2,,TWOFETCH 
 ;    SET_EDS
-    mov [T],W0 
+    mov [T],[++DSP]
     add #CELL_SIZE,T
     mov [T],T
-    mov W0,[++DSP]
 ;    RESET_EDS
     NEXT
+
+; nom: BID@  ( c-addr -- d )
+;   Empile un entier double stocké en mémoire en format BIG INDIAN
+; arguments:
+;   c-addr  Adresse du premier octet.
+; retourne:
+;   d  Entier double.
+DEFCODE "BID@",4,,BIDFETCH
+    mov.b [T++],W0
+    ze W0,W0
+    swap W0
+    mov.b [T++],W1
+    ze W1,W1
+    mov.b [T++],W2
+    ze W2,W2
+    swap W2
+    mov.b [T],W3
+    ze W3,W3
+    add W0,W1,T
+    add W2,W3,[++DSP]
+    NEXT
+    
     
 ; nom: TBL@  ( n a-addr -- n )    
 ;   Retourne l'élément n d'un vecteur. Les valeurs d'indice débute à zéro.
