@@ -65,7 +65,7 @@
 .section .sdc.bss  bss
 .global sdc_status
 sdc_status: .space 2 ; indicateurs booléens carte SD
-blocs_count: .space 4 ; nombre de bloc de 1024 octets
+blocks_count: .space 4 ; nombre de bloc de 1024 octets
 seg_count: .space 2 ;  nombre de segments de 65535 blocs
 sdc_segment: .space 2 ; segment sélectionné. 
 sdc_R: .space 32; tampon pour la réponse de la carte 
@@ -216,7 +216,6 @@ wait_response:
 ; arguments:
 ;  W0 index commande, CMD9|CMD10
 read_card_register:
-    _enable_sdc
     clr W1
     clr W2
     clr W3
@@ -244,7 +243,7 @@ accept_crc:
     spi_read
     spi_read
     setm T
-9:  call sdc_deselect
+9:  
     return
    
 ; lecture capacité de la carte.
@@ -255,7 +254,7 @@ set_size:
     bra z, 9f
     btss sdc_status,#F_SDC_HC
     bra version1
-    mov #sdc_R,W2
+    mov #sdc_R+8,W2
     mov.b [W2++],W1
     ze W1,W1
     swap W1
@@ -270,24 +269,31 @@ version1:
 8:  ; nombre de blocs de 1Ko
     mov #512,W1
     mul.uu W0,W1,W0
+    mov W0,blocks_count
+    mov W1,blocks_count+2
+    setm W3
+    repeat #17
+    div.ud W0,W3
     mov W0,seg_count
-    mov W1,seg_count+2
-    
 9:  return
     
 ; retourne:
 ;    f   vrai si succès    
 DEFCODE "READ-CSD",8,,READCSD
+    _enable_sdc
     mov #SEND_CSD,W0
     call read_card_register
+    call sdc_deselect
     NEXT
     
     
 ; retourne:
 ;    f   vrai si succès    
 DEFCODE "READ-CID",8,,READCID
+    _enable_sdc
     mov #SEND_CID,W0
     call read_card_register
+    call sdc_deselect
     NEXT
     
 ; nom: CARD-INFO  ( -- )
@@ -363,6 +369,10 @@ DEFCONST "SDC-R",5,,SDCR,sdc_R
 ;    f   Indicateur Booléen, vrai si l'initialisation est réussie.   
 DEFCODE "SDCINIT",7,,SDCINIT ; ( -- f )
     clr sdc_status
+    clr sdc_segment
+    clr seg_count
+    clr blocks_count
+    clr blocks_count+2
     btsc SDC_PORT,#SDC_DETECT
     bra failed
     bset sdc_status,#F_SDC_IN
@@ -592,14 +602,31 @@ write_failed:
     RESET_EDS
     NEXT
 
-; nom: SDBLKCOUNT  ( -- u )    
-;   Constante, nombre maximal de blocs utilisés sur la carte SD
+; nom: SDC-BLOCKS  ( -- ud )    
+;   Nombre de blocs de 1024 octets sur la carte SD.
 ; arguments:
 ;   aucun
 ; retourne:
-;   u   Nombre de blocs disponibles.    
-DEFCONST "SDBLKCOUNT",10,,SDBLKCOUNT,65535
+;   ud   Entier double, nombre de blocs.    
+DEFCODE "SDC-BLOCKS",10,,SDCBLOCK
+    DPUSH
+    mov blocks_count,T
+    DPUSH
+    mov blocks_count+2,T
+    NEXT
 
+; nom: SDC-SEGMENTS  ( -- u )    
+;   Nombre de segments de 65535 blocs sur la carte SD.
+; arguments:
+;   aucun
+; retourne:
+;   u   Entier simple, nombre de segments.    
+DEFCODE "SDC-SEGMENTS",12,,SDCSEGMENTS
+    DPUSH
+    mov seg_count,T
+    NEXT
+
+    
 ; nom: SDBOUND  ( n+ -- f)
 ;   Vérifie si le numéro de bloc est dans les limites
 ; arguments:
