@@ -7,11 +7,11 @@
 <div><a href="index.html">index principal</a></div>
 <h2 id="description">Description</h2><div style="margin-left:5%;">  
 </div>
-<div style="margin-left:5%;"> Interface de base pour l'accès à la carte SD en utilisant l'interface SPI de celle-ci.
+<div style="margin-left:5%;"> Interface de bas niveau pour l'accès à la carte SD.
 </div>
 <div style="margin-left:5%;"> Permet l'initialisation de la carte ainsi que la lecture et l'écriture d'un bloc de
 </div>
-<div style="margin-left:5%;"> donnée sur la carte.
+<div style="margin-left:5%;"> donnée sur la carte. Cette interface n'est compatible qu'avec les cartes SD V1 et V2.
 </div>
 <div style="margin-left:5%;">REF: <a href=" http://elm-chan.org/docs/mmc/mmc_e.html
 "> http://elm-chan.org/docs/mmc/mmc_e.html
@@ -27,7 +27,31 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:4px;"><p id="CARD-INFO">
 <b>CARD-INFO</b>  ( -- )
-<div style="margin-left:5%;">   Affiche les informations inscrite dans le registre CID de la carte.
+<div style="margin-left:5%;">   Affiche les informations sur la carte SD.
+</div>
+<div style="margin-left:5%;">   La carte doit d'abord avoir été initialisée avec SDC-INIT.
+</div>
+<div style="margin-left:5%;">  <br><table border="single">
+</div>
+<div style="margin-left:5%;">  <tr><th>nom</th><th>description</th></tr>  
+</div>
+<div style="margin-left:5%;">  <tr><td>VER</td><td> Card version.</td></tr>  
+</div>
+<div style="margin-left:5%;">  <tr><td>MID</td><td> Manufacturer ID.</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>OID</td><td> OEM/Application ID.</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>PNM</td><td> Product name.</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>PRV</td><td> Product revision.</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>PSN</td><td> Product serial number.</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>MTD</td><td> Manufacturing date.</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>SIZE</td><td> Storage rounded to nearest Gigabyte.</td></tr>
+</div>
+<div style="margin-left:5%;">  </table><br> 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -43,7 +67,7 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="SDC-R">
 <b>SDC-R</b> ( -- a-addr )
-<div style="margin-left:5%;">   Adresse de la mémoire tampon de 16 octets qui reçois la réponse de la carte SD.
+<div style="margin-left:5%;">   Adresse de la mémoire tampon de 16 octets qui reçois les réponses de la carte SD.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -52,13 +76,13 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse du vecteur réponse carte SD.
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp; Adresse du tampon réponse carte SD.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="SDCINIT">
-<b>SDCINIT</b> ( -- f )
+<hr style="border-width:1px;"><p id="SDC-INIT">
+<b>SDC-INIT</b> ( -- f )
 <div style="margin-left:5%;">   Initialisation carte SD 
 </div>
 <div style="margin-left:5%;">REF: <a href=" http://elm-chan.org/docs/mmc/pic/sdinit.png    
@@ -76,17 +100,17 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="segment">
-<b>segment</b> ( u -- )
+<hr style="border-width:1px;"><p id="SEGMENT">
+<b>SEGMENT</b> ( u -- )
 <div style="margin-left:5%;">   Détermine quel segment de la carte est actif.
 </div>
 <div style="margin-left:5%;">   Le système définit dans block.s ne permet que d'accéder 65535 blocs sur un périphérique
 </div>
-<div style="margin-left:5%;">   ce qui représente 1024*65535 ou 2^10 * (2^16-1)= 67107840 octets hors les plus petites
+<div style="margin-left:5%;">   ce qui représente 1024*65535 ou 2^10 * (2^16-1)= 67 107 840 octets hors les plus petites
 </div>
-<div style="margin-left:5%;">   cartes disponible de nos jours sont de 2Go. Les cartes sont donc subdivisées en segments
+<div style="margin-left:5%;">   cartes disponible de nos jours sont de 2Go. ForthEx divise donc les cartes 
 </div>
-<div style="margin-left:5%;">   de 65535 blocs chacun.    
+<div style="margin-left:5%;">   en segments de 65535 blocs.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -96,6 +120,22 @@
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
 <div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SEGMENT?">
+<b>SEGMENT?</b> ( -- u )
+<div style="margin-left:5%;">   Retourne le numéro du segment actif.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>u	Numéro</i>&nbsp;&nbsp; du segment actif {0..SDC-SEGMENTS-1}    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -242,9 +282,13 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="SDBLK&gt;ADR">
-<b>SDBLK&gt;ADR</b>  ( u -- ud )
+<hr style="border-width:1px;"><p id="SDC-BLK&gt;ADR">
+<b>SDC-BLK&gt;ADR</b>  ( u -- ud )
 <div style="margin-left:5%;">   Convertie un numéro de bloc de la carte SD en adresse absolue.
+</div>
+<div style="margin-left:5%;">   addresse=(u-1)*adr_factor + segment*66535*adr_factor
+</div>
+<div style="margin-left:5%;">   adr_factor et 1024 pour les cartes V1 et 2 pour les cartes V2.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -264,15 +308,16 @@
 <li><a href="#?SDC">?SDC</a></li>
 <li><a href="#?SDCOK">?SDCOK</a></li>
 <li><a href="#CARD-INFO">CARD-INFO</a></li>
-<li><a href="#SDBLK&gt;ADR">SDBLK&gt;ADR</a></li>
 <li><a href="#SDBOUND">SDBOUND</a></li>
+<li><a href="#SDC-BLK&gt;ADR">SDC-BLK&gt;ADR</a></li>
 <li><a href="#SDC-BLOCKS">SDC-BLOCKS</a></li>
+<li><a href="#SDC-INIT">SDC-INIT</a></li>
 <li><a href="#SDC-R">SDC-R</a></li>
 <li><a href="#SDC-SEGMENTS">SDC-SEGMENTS</a></li>
-<li><a href="#SDCINIT">SDCINIT</a></li>
 <li><a href="#SDCREAD">SDCREAD</a></li>
 <li><a href="#SDCWRITE">SDCWRITE</a></li>
-<li><a href="#segment">segment</a></li>
+<li><a href="#SEGMENT">SEGMENT</a></li>
+<li><a href="#SEGMENT?">SEGMENT?</a></li>
 </ul>
 </p>
 <hr style="border-width:1px;"><div><a href="#top">haut</a></div>

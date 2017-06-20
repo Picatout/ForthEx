@@ -20,9 +20,9 @@
 ;NOM: sdcard.s
 ;Date: 2017-03-20
 ; DESCRIPTION:  
-; Interface de base pour l'accès à la carte SD en utilisant l'interface SPI de celle-ci.
+; Interface de bas niveau pour l'accès à la carte SD.
 ; Permet l'initialisation de la carte ainsi que la lecture et l'écriture d'un bloc de
-; donnée sur la carte.
+; donnée sur la carte. Cette interface n'est compatible qu'avec les cartes SD V1 et V2.
 ; REF: http://elm-chan.org/docs/mmc/mmc_e.html
 ; REF: http://elm-chan.org/docs/mmc/pic/sdinit.png    
 ; REF: https://www.sdcard.org/downloads/pls/
@@ -72,7 +72,7 @@ sdc_R: .space 32; tampon pour la réponse de la carte
  
  
 INTR
-;la broche SDC_DETECT
+; La broche SDC_DETECT
 ; a changée d'état
 ; carte insérée ou retirée. 
 .global __CNInterrupt
@@ -264,8 +264,38 @@ set_size:
     inc W0,W0
     bra 8f
 version1:
-    ; à complété
-
+    mov #sdc_R+5,W2
+    mov.b [W2++],W3
+    and #15,W3
+    mov #1,W0
+    dec W3,W3
+    repeat W3
+    sl W0,W0
+    mov W0,W3 ; 2^READ_BL_LEN
+    mov.b [W2++],W0
+    and #3,W0
+    repeat #9
+    sl W0,W0
+    mov W0,W1
+    mov.b [W2++],W0
+    ze W0,W0
+    sl W0
+    sl W0
+    ior W0,W1
+    mov.b [W2++],W0
+    and #0xc0,W0
+    repeat #5
+    lsr W0,W0
+    ior W0,W1,W4; C_SIZE
+    add #2,W2
+    mov.b [W2++],W0
+    and #3,W0
+    swap W0
+    mov.b [W2],W0
+    sl W0,W0
+    swap W0
+    ze W0,W0  ; C_SIZE_MULT
+    
 8:  ; nombre de blocs de 1Ko
     mov #512,W1
     mul.uu W0,W1,W0
@@ -296,15 +326,43 @@ DEFCODE "READ-CID",8,,READCID
     call sdc_deselect
     NEXT
     
+HEADLESS QCAPACITY,HWORD
+    .word READCSD,DUP,ZBRANCH,9f-$
+    .word DROP,SDCR,LIT,8,PLUS,DUP,CFETCH,LIT,8,LSHIFT,TOR,ONEPLUS,CFETCH,RFROM,PLUS
+    .word ONEPLUS
+    .word LIT,2000,SLASHMOD,SWAP,LIT,1000,ULESS,TBRANCH,9f-$,ONEPLUS
+9:  .word EXIT
+    
 ; nom: CARD-INFO  ( -- )
-;   Affiche les informations inscrite dans le registre CID de la carte.
+;   Affiche les informations sur la carte SD.
+;   La carte doit d'abord avoir été initialisée avec SDC-INIT.
+; HTML:
+; <br><table border="single">
+; <tr><th>nom</th><th>description</th></tr>  
+; <tr><td>VER</td><td> Card version.</td></tr>  
+; <tr><td>MID</td><td> Manufacturer ID.</td></tr>
+; <tr><td>OID</td><td> OEM/Application ID.</td></tr>
+; <tr><td>PNM</td><td> Product name.</td></tr>
+; <tr><td>PRV</td><td> Product revision.</td></tr>
+; <tr><td>PSN</td><td> Product serial number.</td></tr>
+; <tr><td>MTD</td><td> Manufacturing date.</td></tr>
+; <tr><td>SIZE</td><td> Storage rounded to nearest Gigabyte.</td></tr>
+; </table><br> 
+; :HTML  
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
 DEFWORD "CARD-INFO",9,,CARDINFO
+    .word QSDCOK,ZBRANCH,9f-$
     .word READCID, ZBRANCH,9f-$
-    .word SDCR,CR,STRQUOTE
+    .word CR,STRQUOTE
+    .byte 5
+    .ascii "VER: "
+    .align 2
+    .word TYPE,LIT,1,QSDC,LIT,F_SDC_V2,AND,ZBRANCH,2f-$,TWOSTAR
+2:  .word UDOT,CR
+    .word SDCR,STRQUOTE
     .byte 4
     .ascii "MID:"
     .align 2
@@ -338,36 +396,34 @@ DEFWORD "CARD-INFO",9,,CARDINFO
     .word TYPE,DUP,CFETCH,LIT,4,LSHIFT,TOR,ONEPLUS,CFETCH,DUP,LIT,4,RSHIFT
     .word RFROM,PLUS,LIT,2000,PLUS,UDOT,LIT,'/',EMIT
     .word LIT,15,AND,UDOT,CR
-    .word READCSD,ZBRANCH,9f-$
-    .word SDCR,LIT,8,PLUS,DUP,CFETCH,LIT,8,LSHIFT,TOR,ONEPLUS,CFETCH,RFROM,PLUS
-    .word ONEPLUS,LIT,10,SLASH
     .word STRQUOTE
     .byte 5
     .ascii "SIZE:"
     .align 2
-    .word TYPE,UDOT,STRQUOTE
-    .byte 2
-    .ascii "GB"
+    .word TYPE,QCAPACITY,UDOT,STRQUOTE
+    .byte 3
+    .ascii " GB"
     .align 2
     .word TYPE,CR
 9:  .word EXIT
   
+  
 ; nom: SDC-R ( -- a-addr )
-;   Adresse de la mémoire tampon de 16 octets qui reçois la réponse de la carte SD.
+;   Adresse de la mémoire tampon de 16 octets qui reçois les réponses de la carte SD.
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr Adresse du vecteur réponse carte SD.
+;   a-addr Adresse du tampon réponse carte SD.
 DEFCONST "SDC-R",5,,SDCR,sdc_R    
     
-; nom: SDCINIT ( -- f )
+; nom: SDC-INIT ( -- f )
 ;   Initialisation carte SD 
 ;   REF: http://elm-chan.org/docs/mmc/pic/sdinit.png    
 ; arguments:
 ;   aucun
 ; retourne:
 ;    f   Indicateur Booléen, vrai si l'initialisation est réussie.   
-DEFCODE "SDCINIT",7,,SDCINIT ; ( -- f )
+DEFCODE "SDC-INIT",8,,SDCINIT ; ( -- f )
     clr sdc_status
     clr sdc_segment
     clr seg_count
@@ -475,16 +531,35 @@ succeed:
     call set_spi_clock
     NEXT
 
-; nom: segment ( u -- )
+; nom: SEGMENT ( u -- )
 ;   Détermine quel segment de la carte est actif.
 ;   Le système définit dans block.s ne permet que d'accéder 65535 blocs sur un périphérique
-;   ce qui représente 1024*65535 ou 2^10 * (2^16-1)= 67107840 octets hors les plus petites
-;   cartes disponible de nos jours sont de 2Go. Les cartes sont donc subdivisées en segments
-;   de 65535 blocs chacun.    
+;   ce qui représente 1024*65535 ou 2^10 * (2^16-1)= 67 107 840 octets hors les plus petites
+;   cartes disponible de nos jours sont de 2Go. ForthEx divise donc les cartes 
+;   en segments de 65535 blocs.
 ; arguments:
 ;   u Numéro du segment.
 ; retourne:
 ;   rien    
+DEFCODE "SEGMENT",7,,SEGMENT 
+    mov seg_count,W0
+    dec W0,W0
+    cp T,W0
+    bra gtu, 9f
+    mov T,sdc_segment
+    DPOP
+9:  NEXT
+    
+; nom: SEGMENT? ( -- u )
+;   Retourne le numéro du segment actif.
+; arguments:
+;   aucun
+; retourne:
+;   u	Numéro du segment actif {0..SDC-SEGMENTS-1}    
+DEFCODE "SEGMENT?",8,,SEGMENTQ
+    DPUSH
+    mov sdc_segment,T
+    NEXT
     
 ; nom: ?SDC  ( -- u )    
 ;   Retourne un entier non signé contenant les indicateurs booléen suivants
@@ -608,7 +683,7 @@ write_failed:
 ;   aucun
 ; retourne:
 ;   ud   Entier double, nombre de blocs.    
-DEFCODE "SDC-BLOCKS",10,,SDCBLOCK
+DEFCODE "SDC-BLOCKS",10,,SDCBLOCKS
     DPUSH
     mov blocks_count,T
     DPUSH
@@ -636,16 +711,20 @@ DEFCODE "SDC-SEGMENTS",12,,SDCSEGMENTS
 DEFWORD "SDBOUND",7,,SDBOUND
     .word ZEROEQ,NOT,EXIT
     
-; nom: SDBLK>ADR  ( u -- ud )
+; nom: SDC-BLK>ADR  ( u -- ud )
 ;   Convertie un numéro de bloc de la carte SD en adresse absolue.
+;   addresse=(u-1)*adr_factor + segment*66535*adr_factor
+;   adr_factor et 1024 pour les cartes V1 et 2 pour les cartes V2.    
 ; arguments:
 ;   u    Numéro du bloc {1..65535}
 ; retourne:
 ;   ud   Adresse absolue de 32 bits sur la carte SD.
-DEFWORD "SDBLK>ADR",9,,SDBLKTOADR
-    .word ONEMINUS,LIT,BLOCK_SIZE,QSDC,LIT,F_SDC_HC,AND,ZBRANCH,9f-$
+    
+DEFWORD "SDC-BLK>ADR",11,,SDBLKTOADR
+    .word ONEMINUS,LIT,BLOCK_SIZE,QSDC,LIT,F_SDC_HC,AND,ZBRANCH,2f-$
     .word LIT,SECTOR_SIZE,SLASH
-9:  .word MSTAR,EXIT
+2:  .word DUP,TOR,UMSTAR,SEGMENTQ,RFROM,UMSTAR,TRUE,UDSTAR,DPLUS
+9:  .word EXIT
     
     
 ; descripteur carte Secure Digital    
