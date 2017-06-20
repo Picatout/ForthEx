@@ -1,3 +1,7 @@
+2017-06-20
+----------
+Travail sur sdcard.s, complété support pour carte version 1.
+
 2017-06-19
 ----------
 Travail sur sdcard.s, set_size version à compléter.

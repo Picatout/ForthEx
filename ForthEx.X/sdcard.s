@@ -264,47 +264,69 @@ set_size:
     inc W0,W0
     bra 8f
 version1:
-    mov #sdc_R+5,W2
-    mov.b [W2++],W3
-    and #15,W3
+;C_SIZE
+;This parameter is used to compute the user?s data card capacity (not include the security protected
+;area). The memory capacity of the card is computed from the entries C_SIZE, C_SIZE_MULT and
+;READ_BL_LEN as follows:
+;memory capacity = BLOCKNR * BLOCK_LEN
+;Where
+; BLOCKNR = (C_SIZE+1) * MULT
+; MULT = 2^C_SIZE_MULT+2
+; (C_SIZE_MULT < 8)
+; BLOCK_LEN = 2^READ_BL_LEN , (READ_BL_LEN < 12)
+;To indicate 2 GByte card, BLOCK_LEN shall be 1024 bytes.
+;Therefore, the maximal capacity that can be coded is 4096*512*1024 = 2 G bytes.
+;Example: A 32 Mbyte card with BLOCK_LEN = 512 can be coded by C_SIZE_MULT = 3 and C_SIZE =
+;2000.    
+    mov #sdc_R+4,W2
+    mov [W2++],W0
+    and #0xf,W0 ; READ_BL_LEN
+    dec W0,W0
+    mov  #1,W4
+    repeat W0
+    sl W4,W4   ; W4=BLOCK_LEN=2^READ_BL_LEN   
+    mov [W2++],W0
+    and #0x3ff,W0
+    mov [W2++],W1
+    sl W1,W3
+    rlc W0,W0
+    sl W3,W3
+    rlc W0,W3 ; C_SIZE
+    inc W3,W3 ; C_SIZE+1
+    mov [W2],W0
+    sl W0,W0
+    rlc W1,W1 
+    and #7,W1 ; W1=C_SIZE_MULT
+    inc W1,W1
     mov #1,W0
-    dec W3,W3
-    repeat W3
-    sl W0,W0
-    mov W0,W3 ; 2^READ_BL_LEN
-    mov.b [W2++],W0
-    and #3,W0
-    repeat #9
-    sl W0,W0
-    mov W0,W1
-    mov.b [W2++],W0
-    ze W0,W0
-    sl W0
-    sl W0
-    ior W0,W1
-    mov.b [W2++],W0
-    and #0xc0,W0
-    repeat #5
-    lsr W0,W0
-    ior W0,W1,W4; C_SIZE
-    add #2,W2
-    mov.b [W2++],W0
-    and #3,W0
-    swap W0
-    mov.b [W2],W0
-    sl W0,W0
-    swap W0
-    ze W0,W0  ; C_SIZE_MULT
-    
-8:  ; nombre de blocs de 1Ko
+    repeat W1 ; 
+    sl W0,W0  ; W0=MULT=2^(C_SIZE_MULT+2)
+    mul.uu W0,W3,W0 ; BLOCKNR=(C_SIZE+1)*MULT
+    mov W1,W2
+    ; BLOCKBR * BLOCK_LEN
+    mul.uu W4,W0,W0
+    mul.uu W4,W2,W2
+    add W2,W1,W1 ; W1:W0=capacity
+    ; division par 1Ko pour obtenir le nombre de blocs.
+    mov #10,W2
+2:  lsr W1,W1
+    rrc W0,W1
+    dec W2,W2
+    bra nz, 2b
+    bra 4f
+8:  ; carte V2
+    ; nombre de blocs de 1Ko
     mov #512,W1
     mul.uu W0,W1,W0
-    mov W0,blocks_count
+4:  mov W0,blocks_count
     mov W1,blocks_count+2
     setm W3
     repeat #17
     div.ud W0,W3
     mov W0,seg_count
+    cp0 W0
+    bra nz, 9f
+    inc seg_count
 9:  return
     
 ; retourne:
@@ -326,13 +348,6 @@ DEFCODE "READ-CID",8,,READCID
     call sdc_deselect
     NEXT
     
-HEADLESS QCAPACITY,HWORD
-    .word READCSD,DUP,ZBRANCH,9f-$
-    .word DROP,SDCR,LIT,8,PLUS,DUP,CFETCH,LIT,8,LSHIFT,TOR,ONEPLUS,CFETCH,RFROM,PLUS
-    .word ONEPLUS
-    .word LIT,2000,SLASHMOD,SWAP,LIT,1000,ULESS,TBRANCH,9f-$,ONEPLUS
-9:  .word EXIT
-    
 ; nom: CARD-INFO  ( -- )
 ;   Affiche les informations sur la carte SD.
 ;   La carte doit d'abord avoir été initialisée avec SDC-INIT.
@@ -346,7 +361,8 @@ HEADLESS QCAPACITY,HWORD
 ; <tr><td>PRV</td><td> Product revision.</td></tr>
 ; <tr><td>PSN</td><td> Product serial number.</td></tr>
 ; <tr><td>MTD</td><td> Manufacturing date.</td></tr>
-; <tr><td>SIZE</td><td> Storage rounded to nearest Gigabyte.</td></tr>
+; <tr><td>BLK</td><td> Capacitée en nombre de blocs de 1024 octets.</td></tr>
+; <tr><td>SEG</td><td> Nombre de segments, 1 segment correspond à 65535 blocs.</td></tr>    
 ; </table><br> 
 ; :HTML  
 ; arguments:
@@ -397,12 +413,20 @@ DEFWORD "CARD-INFO",9,,CARDINFO
     .word RFROM,PLUS,LIT,2000,PLUS,UDOT,LIT,'/',EMIT
     .word LIT,15,AND,UDOT,CR
     .word STRQUOTE
-    .byte 5
-    .ascii "SIZE:"
+    .byte 4
+    .ascii "BLK:"
     .align 2
-    .word TYPE,QCAPACITY,UDOT,STRQUOTE
-    .byte 3
-    .ascii " GB"
+    .word TYPE,LIT,blocks_count,TWOFETCH,UDDOT,STRQUOTE
+    .byte 7
+    .ascii " blocks"
+    .align 2
+    .word TYPE,CR,STRQUOTE
+    .byte 4
+    .ascii "SEG:"
+    .align 2
+    .word TYPE,LIT,seg_count,FETCH,UDOT,STRQUOTE
+    .byte 9
+    .ascii " segments"
     .align 2
     .word TYPE,CR
 9:  .word EXIT
@@ -709,7 +733,11 @@ DEFCODE "SDC-SEGMENTS",12,,SDCSEGMENTS
 ; retourne:
 ;   f   Indicateur booléen.
 DEFWORD "SDBOUND",7,,SDBOUND
-    .word ZEROEQ,NOT,EXIT
+    .word DUP,ZEROEQ,NOT,SWAP
+    .word LIT,blocks_count,TWOFETCH,TBRANCH,8f-$
+    .word UGREATER,NOT,BRANCH,9f-$
+8:  .word DROP,TRUE    
+9:  .word AND,EXIT
     
 ; nom: SDC-BLK>ADR  ( u -- ud )
 ;   Convertie un numéro de bloc de la carte SD en adresse absolue.
