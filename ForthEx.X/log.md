@@ -2,6 +2,8 @@
 ----------
 Travail sur sdcard.s, complété support pour carte version 1.
 
+Travail de documentation sur serial.s et store.s
+
 2017-06-19
 ----------
 Travail sur sdcard.s, set_size version à compléter.

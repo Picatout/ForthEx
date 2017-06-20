@@ -18,8 +18,9 @@
 ;****************************************************************************
 
 ;NOM: serial.s
-;Description:  communication port sériel RS232 via USART
 ;Date: 2015-10-07
+; DESCRIPTION:
+;    Configuration et fonctions de base pour la communication par le port sériel RS232.
     
 .include "serial.inc"
    
@@ -182,7 +183,7 @@ HEADLESS SERIAL_INIT,CODE ; ( -- )
     NEXT
 
 ; nom: SERENBL  ( f -- )    
-;   activation/désactivation du port sériel. Le port est activé si 'f' est VRAI
+;   Activation/désactivation du port sériel. Le port est activé si 'f' est VRAI
 ;   sinon il est désactivé.    
 ; arguments:
 ;     f TRUE activation, FALSE désactivation    
@@ -197,20 +198,25 @@ DEFCODE "SERENBL",7,,SERENBL ; ( f -- )
 1:  call serial_disable
 9:  NEXT
 
-; nom: Bxxxxx  ( -- n )  
+; nom: Bnnnnnn  ( -- n )  
 ;   Plusieurs constantes sont définies pour l'ajustement de la vitesse de transfert
 ;   du port sériel. Les constantes suivantes sont disponibles.
-;   B2400 -> 2400 BAUD
-;   B4800 -> 4800 BAUD
-;   B9600 -> 9600 BAUD
-;   B19200 -> 19200 BAUD
-;   B38400 -> 38400 BAUD
-;   B57600 -> 57600 BAUD
-;   B115200 -> 115200 BAUD 
+; HTML:
+; <br><table border="single">
+; <tr><th>nom</th><th>vitesse<br>BAUD</th></tr>    
+; <tr><td>B2400</td><td>2400</td></tr>
+; <tr><td>B4800</td><td>4800</td></tr>
+; <tr><td>B9600</td><td>9600</td></tr>
+; <tr><td>B19200</td><td>19200</td></tr>
+; <tr><td>B38400</td><td>38400</td></tr>
+; <tr><td>B57600</td><td>57600</td></tr>
+; <tr><td>B115200</td><td>115200</td></tr>
+; </table><br>
+; :HTML    
 ; arguments:
 ;   aucun
 ; retourne:
-;   n   Une constante qui sert à programmer le registre qui contrôle la vitesse du port.    
+;   n   Une constante qui sert à programmer la vitesse du port.    
 DEFCONST "B2400",5,,B2400,(FCY/16/2400)
 DEFCONST "B4800",5,,B4800,(FCY/16/4800)-1
 DEFCONST "B9600",5,,B9600,(FCY/16/9600)
@@ -222,7 +228,7 @@ DEFCONST "B115200",7,,B115200,(FCY/16/115200)
 ; nom: BAUD  ( u -- )     
 ;   Ajuste la vitesse du port sériel et l'active.
 ; exemple:  
-;   B57600 BAUD / le port est activé à la vitesse de 57600 BAUD.    
+;   B57600 BAUD \ Le port est activé à la vitesse à 57600 BAUD.    
 ; arguments:
 ;   u   Une des constantes pré-difinies dont le nom commence par B.
 ; retourne:
@@ -238,7 +244,7 @@ DEFCODE "BAUD",4,,BAUD   ; ( u -- )
 ;   Transmission d'un caractère via le port sériel. Au démarrage le port est
 ;   activé à la vitesse de 115200 BAUD, 8 bits, 1 stop, pas de parité.    
 ; arguments:
-;    c  caractère à transmettre.
+;    c Caractère à transmettre.
 ; retourne:
 ;   rien    
 DEFCODE "SPUTC",5,,SPUTC ; ( c -- )
@@ -250,29 +256,9 @@ DEFCODE "SPUTC",5,,SPUTC ; ( c -- )
     mov T,SER_TXREG
     DPOP
     NEXT
-;     ; vérification file transmission
-;     ; attend libération d'un espace
-;     bset SER_TX_IFS, #SER_TX_IF 
-;     mov #QUEUE_SIZE,W0
-;1:   cp.b tx_wait  
-;     bra z,1b
-;     mov.b tx_tail,WREG
-;     ze W0,W0
-;     mov #tx_queue,W1
-;     add W0,W1,W1
-;     mov.b T,[W1]
-;     DPOP
-;     bclr SER_TX_IEC,#SER_TX_IE
-;     inc.b tx_wait
-;     inc.b tx_tail
-;     mov.b #(QUEUE_SIZE-1),W0
-;     and.b tx_tail
-;     bset SER_TX_IFS,#SER_TX_IF
-;     bset SER_TX_IEC,#SER_TX_IE
-;     NEXT
  
 ; nom: SGETC  ( -- c )
-;   Attend un careactère du port sériel. Cette attente n'expire jamais.
+;   Attend un caractère du port sériel. Cette attente n'expire jamais.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -307,11 +293,11 @@ DEFCODE "SGETC",5,,SGETC  ; ( -- c )
 2:  NEXT
 
 ; nom: SREADY? ( -- f )
-;  vérifie si le terminal est prêt à recevoir
+;  Vérifie si le terminal est prêt à recevoir.
 ; arguments:
 ;    aucun
 ; retourne:
-;    f      indicateur booléen, vrai si terminal prêt à recevoir.
+;    f Indicateur booléen, vrai si le terminal prêt à recevoir.
 DEFCODE "SREADY?",7,,SREADYQ
     DPUSH
     clr T
@@ -325,7 +311,7 @@ DEFCODE "SREADY?",7,,SREADYQ
 ; arguments:
 ;    aucun    
 ; retourne:
-;   f   indicateur booléen, VRAI si un caractère est disponible.
+;   f Indicateur booléen, VRAI si un caractère est disponible.
 DEFCODE "SGETC?",6,,SGETCQ
     DPUSH
     clr T

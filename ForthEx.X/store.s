@@ -17,9 +17,12 @@
 ;
 ;****************************************************************************
 
-;NOM: store.s
-;Description:  interface avec les mémoire externe SPIRAM et SPIEEPROM
-;Date: 2015-10-06
+; NOM: store.s
+; DATE: 2015-10-06
+; DESCRIPTION:  
+; Interface de base avec les mémoire externe RAM SPI et EEPROM SPI.
+; Le stockage se fait par bloc de 1024 octets.
+; Le terme XRAM réfère à la mémoire RAM SPI.
     
 .include "store.inc"
     
@@ -112,24 +115,26 @@ spi_send_address: ; ( ud -- )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   interface SPI RAM
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; DESCRIPTION:
+;  La RAM SPI 23LC1024 a une capacitée de 128Ko.    
+
     
 ; nom: XBLK>ADR ; ( u -- ud )
 ;   Convertie un numéro de bloc XRAM en adresse absolue XRAM.    
 ; arguments:
-;   u    entier non signé, numéro du bloc, {1..MAX_BLOCK}
+;   u  Entier simple non signé, numéro du bloc, {1..MAX_BLOCK}
 ; retourne:
-;   ud   entier double non signé, adresse début bloc dans XRAM
+;   ud Entier double non signé, adresse début bloc dans la RAM SPI.
 DEFWORD "XBLK>ADR",8,,XBLKTOADR
     .word ONEMINUS,LIT,BLOCK_SIZE,MSTAR,EXIT
     
     
 ; nom: XWRITE ( u1 n+ ud1 -- )
-;   Transfert un bloc d'octets de la RAM du MCU vers la RAM SPI
+;   Transfert un bloc d'octets de la RAM du MCU vers la RAM SPI.
 ; arguments: 
-;    u1  adresse début bloc RAM
-;    n+  nombre d'octets
-;    ud1  adresse SPIRAM 
+;    u1 Adresse début bloc RAM.
+;    n+ Nombre d'octets à transférer.
+;    ud1 Entier double non signé, Adresse destination dans la RAM SPI. 
 ; retourne:    
 ;   rien
 DEFCODE "XWRITE",6,,XWRITE ; ( u1 n+ ud1 -- )
@@ -156,11 +161,11 @@ DEFCODE "XWRITE",6,,XWRITE ; ( u1 n+ ud1 -- )
 
 
 ; nom: XREAD  ( u1 n+ ud1 -- )
-;   Transfert un bloc d'octets de la RAM SPI vers la RAM du MCU
+;   Transfert un bloc d'octets de la RAM SPI vers la RAM du MCU.
 ; arguments: 
-;    u1  adresse début bloc RAM
-;    n+  nombre d'octets
-;    ud1  adresse SPIRAM
+;    u1  Entier simple non signé, adresse début tampon RAM.
+;    n+  Entier simple positif, Nombre d'octets à transféréer.
+;    ud1 Entier double non signé, adresse début du bloc dans la RAM SPI.
 ; retourne:    
 ;   rien
 DEFCODE "XREAD",5,,XREAD ; ( u1 n+ ud1 -- )
@@ -183,19 +188,38 @@ DEFCODE "XREAD",5,,XREAD ; ( u1 n+ ud1 -- )
     _disable_sram
     NEXT
   
+; nom: XBLKCOUNT  ( -- n )
+;   Constante, capacité en nombre de blocs de la RAM SPI.    
+; arguments:
+;   aucun
+; retourne:
+;   n   Capacité en nombre de blocs de la RAM SPI.    
+DEFCONST "XBLKCOUNT",9,,XBLKCOUNT,128    
+    
+; nom: XBOUND  ( n+ -- f )
+;   Vérifie si le numéro de bloc est dans les limites
+; arguments:
+;   n+   Numéro du bloc à vérifier.
+; retourne:
+;   f   Indicateur booléen, vrai si le numéro de bloc est valide.
+DEFWORD "XBOUND",6,,XBOUND
+    .word DUP,ZBRANCH,9f-$
+    .word XBLKCOUNT,UGREATER,NOT
+9:  .word EXIT
+   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   INTERFACE EEPROM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; INFORMATION:
-;   l'EEPROM 25LC1024 est divisée en 
+; DESCRIPTION:
+;   l'EEPROM 25LC1024 a une capacité de 128Ko et est divisée en 
 ;   512 rangées de 256 octets pour la commande EWRITE.
 ;   Il est possible de mette à jour 1 seul octet mais
-;   on ne peut donc écrire qu'un maximum de 
+;   on ne peut écrire qu'un maximum de 
 ;   256 octets par commande EWRITE.    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;       
+
 
 ; nom: ?WIP  ( -- f )    
-;   Test l'eeprom WRITE IN PROCESS bit et retourne son état.
+;   Test le bit WRITE IN PROCESS de l'EEPROM et retourne son état.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -224,9 +248,9 @@ DEFWORD "WWIP",4,,WWIP ; ( -- )
 ; nom: EEBLK>ADR  ( u -- ud )
 ;   Convertie un numéro de bloc en adresse EEPROM
 ; arguments:
-;   u	    entier simple non signé, numéro du block {1..MAX_BLOCK}
+;   u Entier simple non signé, numéro du block {1..MAX_BLOCK}
 ; retourne:
-;   ud      entier double non signé, adresse début bloc dans l'EEPROM
+;   ud Entier double non signé, adresse début bloc dans l'EEPROM
 DEFWORD "EEBLK>ADR",9,,EEBLKTOADR
     .word ONEMINUS,LIT,BLOCK_SIZE,MSTAR,EXIT
  
@@ -236,14 +260,14 @@ DEFWORD "EEBLK>ADR",9,,EEBLKTOADR
 ;     la mémoire EEPROM est divisée en
 ;     rangées de 256 octets. Lorsque le pointeur
 ;     d'adresse atteint la fin d'une rangée il 
-;     revient au début de celle-ci. Donc si 'ud'
-;     est au début de la rangée un maximum de 256
+;     revient au début de celle-ci. Donc si 'ud1'
+;     pointe le début de la rangée un maximum de 256
 ;     octets peuvent-être écris avant l'écrasement
 ;     des premiers octets. 
 ; arguments: 
-;    u1	  entier simple, adresse 16 bits début bloc RAM
-;    n+  entier simple positif, nombre d'octets à enregistrer {1..256} 
-;    ud2  entier double, adresse 24 bits destination EEPROM
+;    u1 Entier simple, adresse 16 bits début bloc RAM
+;    n+ Entier simple positif, nombre d'octets à enregistrer {1..256} 
+;    ud2 Entier double non signé, adresse destination dans l'EEPROM
 ; retourne: 
 ;   rien
 DEFCODE "RAM>EE",6,,RAMTOEE  
@@ -275,11 +299,11 @@ DEFCODE "RAM>EE",6,,RAMTOEE
     NEXT
     
 ; nom: EEREAD   ( u1 n+ ud -- )
-;   Copie d'une plage EEPROM vers la mémoire RAM
+;   Copie d'une plage EEPROM vers la mémoire RAM.
 ; arguments:
-;    u1	    entier simple, adresse 16 bits début RAM
-;    n+	    entier simple, nombre d'octets à copier. 
-;    ud     entier double, adresse source EEPROM
+;    u1 Entier simple non signé, adresse 16 bits début RAM.
+;    n+ Entier simple positif, nombre d'octets à copier. 
+;    ud Entier double non signé, adresse source dans l'EEPROM.
 ; retourne:
 ;   rien    
 DEFCODE "EEREAD",6,,EEREAD   
@@ -304,9 +328,9 @@ DEFCODE "EEREAD",6,,EEREAD
     _disable_eeprom
     NEXT
     
-; l'EEPROM peut-être effacée par page,secteur ou au complet. 
 ; nom: EPAGE  ( -- n )
-;   Valeur constante indicant qu'il s'agit d'une opération d'effacement d'une page.
+;   Valeur constante indiquant qu'il s'agit d'une opération d'effacement d'une page.
+;   L'EEPROM peut-être effacée par page,secteur ou au complet. 
 ; arguments:
 ;   aucun
 ; retourne:
@@ -314,15 +338,16 @@ DEFCODE "EEREAD",6,,EEREAD
 DEFCONST "EPAGE",5,,EPAGE,EPE ;efface page
 
 ; nom: ESECTOR  ( -- n )
-;   Valeur constante indicant qu'il s'agit d'une opération d'effacement d'un secteur.
+;   Valeur constante indiquant qu'il s'agit d'une opération d'effacement d'un secteur.
+;   L'EEPROM peut-être effacée par page,secteur ou au complet. 
 ; arguments:
 ;   aucun
 ; retourne:
-;   n     Consteante idenfiant cette opération.    
+;   n     Constante idenfiant cette opération.    
 DEFCONST "ESECTOR",7,,ESECTOR,ESE ; efface secteur
     
 ; nom: EALL  ( -- n )
-;   Valeur constante indicant qu'il s'agit d'une opération d'effacement complet.
+;   Valeur constante indiquant qu'il s'agit d'une opération d'effacement complet.
 ;   Toute l'EEPROM sera effacée.    
 ; arguments:
 ;   aucun
@@ -332,9 +357,10 @@ DEFCONST "EALL",4,,EALL,ECE
     
 ; nom: EERASE ( EALL | n {EPAGE|ESECTOR} -- )    
 ;   Efface une page, 1 secteur ou l'EEPROM au complet.
+;   l'argument 'n' est requis que pour les opérations EPAGE ou ESECTOR.    
 ; arguments:
-;   'n' numéro de page {0..511} ou de secteur {0..3}
-;   'op' opération: EPAGE|ESECTOR|EALL
+;   'n' Numéro de page {0..511} ou de secteur {0..3}
+;   'op' Opération: {EPAGE|ESECTOR|EALL}
 ; retourne:
 ;   rien    
 DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
@@ -374,8 +400,8 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
 ;   L'écriture se fait par segment de 256 octets. 
 ;   Un bloc compte 1024 octets.    
 ; arguments:
-;   u1	    entier simple, adresse RAM début du bloc.
-;   ud      adresse absolue dans l'EEPROM
+;   u1 Entier simple non signé, adresse RAM début du bloc.
+;   ud Entier double non signé, adresse début dans l'EEPROM.
 ; retourne:
 ;   rien    
 DEFWORD "EEWRITE",7,,EEWRITE 
@@ -384,39 +410,20 @@ DEFWORD "EEWRITE",7,,EEWRITE
     .word PLUS,TWORFROM,LIT,256,MPLUS,DOLOOP,1b-$
     .word TWODROP,DROP,EXIT
 
-; nom: XBLKCOUNT  ( -- n )
-;   Constante capacité en nombre de blocs dae la SPIRAM    
-; arguments:
-;   aucun
-; retourne:
-;   n   Capacité en nombr de blocs de la SPI RAM    
-DEFCONST "XBLKCOUNT",9,,XBLKCOUNT,128    
-    
-; nom: XBOUND  ( n+ -- f )
-;   Vérifie si le numéro de bloc est dans les limites
-; arguments:
-;   n+   numéro du bloc à vérifier. {1..128}
-; retourne:
-;   f   indicateur booléen.
-DEFWORD "XBOUND",6,,XBOUND
-    .word DUP,ZBRANCH,9f-$
-    .word XBLKCOUNT,UGREATER,NOT
-9:  .word EXIT
-   
 ; nom: EEBLKCOUNT  ( -- n )  
-;   Constante, capacité en nombre de blocs de l'EEPROM
+;   Constante, capacité en nombre de blocs de l'EEPROM.
 ; arguments:
 ;   aucun
 ; retourne:
-;    n    capacité en nombre blocs.  
+;    n  Capacité en nombre de blocs.  
 DEFCONST "EEBLKCOUNT",10,,EEBLKCOUNT,128
   
 ; nom: EEBOUND  ( n+ -- f )
-;   Vérifie si le numéro de bloc est dans les limites
+;   Vérifie si le numéro de bloc est dans les limites de validité.
 ; arguments:
-;   n+   numéro du bloc à vérifier. {1..128}
+;   n+ Numéro du bloc à vérifier.
 ; retourne:
-;   f   indicateur booléen.
+;   f  Indicateur booléen, vrai si le numéro de bloc est valide.
 DEFWORD "EEBOUND",7,,EEBOUND
     .word DUP,ZBRANCH,9f-$
     .word EEBLKCOUNT,UGREATER,NOT
@@ -426,66 +433,71 @@ DEFWORD "EEBOUND",7,,EEBOUND
 ; descripteurs de périphériques 
 ; pour les opérations sur blocs    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; il s'agit d'une structure de données
-; contenants les pointeurs de fonctions
-; des périphériques    
-;  champs:
-;   identifiant
-;   CFA lecture
-;   CFA écriture
-;   CFA load
-
-
+; DESCRIPTION:
+; Les périphériques de stockage sont définis par une table contenant
+; les CFA des fonctions de bases.  
+; HTML:
+; <br><table border="single">
+; <tr><th>nom</th><th>description</th></tr>  
+; <tr><td>DEVID</td><td>Identifiant du périphérique.</td></tr>  
+; <tr><td>READ</td><td>CFA de la fonction de lecture d'un bloc.</td></tr>
+; <tr><td>WRITE</td><td>CFA de la fonction d'écriture d'un bloc.</td></tr>
+; <tr><td>BLK&gt;ADR</td><td>CFA de la fonction de conversion numéro de bloc en adresse.</td></tr>
+; <tr><td>BOUND</td><td>CFA de la fonction qui valide le numéro de bloc.</td></tr>
+; </table><br>
+; :HTML  
+; Il y a 3 périphériques de stockage, XRAM, EEPROM et SDCARD.
+  
 ; acceseurs de champs
 ; nom: DEVID  ( -- n )
-;   Constante, accesseur du champ identifiant périphérique, dans la structure
+;   Constante, accesseur du champ identifiant le périphérique, dans la structure
 ;   descripteur de périphérique bloc.
 ; arguments:
 ;   aucun
 ; retourne:
-;   n    ordre du champ dans la structure.  
+;   n  Index du champ dans la table.  
 DEFCONST "DEVID",5,,DEVID,0    
 
 ; opérations
 
 ; nom: FN_READ  ( -- n )
-;   Constante accesseur de champ dans la structure descripteur de périphérique bloc.
-;   Ce champ accède la fonction READ qui effectue la lecture d'un bloc sur périphérique. 
+;   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
+;   Ce champ accède la fonction READ qui effectue la lecture d'un bloc sur le périphérique. 
 ; arguments:
 ;   aucun
 ; retourne:
-;   n    ordre du champ dans la structure.  
+;   n   Index du champ dans la table.  
 DEFCONST "FN_READ",7,,FN_READ,1   ; chargement d'un bloc dans un buffer
   
 ; nom: FN_WRITE  ( -- n )
-;   Constante accesseur de champ dans la structure descripteur de périphérique bloc.
+;   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
 ;   Ce champ accède la fonction WRITE qui écris un bloc sur périphérique.
 ; arguments:
 ;   aucun
 ; retourne:
-;   n    ordre du champ dans la structure.  
+;   n    Index du champ dans la table.  
 DEFCONST "FN_WRITE",8,,FN_WRITE,2 ; écriture d'un buffer dans un bloc device
 
 ; nom: FN_BLK>ADR  ( -- n )
-;   Constante accesseur de champ dans la structure descripteur de périphérique bloc.
-;   Ce champ accède la fonction BLK>ADR  qui convertie un no. bloc en adressse absolue. 
+;   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
+;   Ce champ accède la fonction BLK>ADR  qui convertie un numéro de bloc en adressse absolue. 
 ; arguments:
 ;   aucun
 ; retourne:
-;   n    ordre du champ dans la structure.  
+;   n    Index du champ dans la table.  
 DEFCONST "FN_BLK>ADR",10,,FN_BLKTOADR,3 ; convertion no. bloc à adresse absolue.
   
 ; nom: FN_BOUND  ( -- n )
-;   Constante accesseur de champ dans la structure descripteur de périphérique bloc.
+;   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
 ;   Ce champ accède la fonction BOUND  qui vérifie la validité d'un no. de bloc.
 ; arguments:
 ;   aucun
 ; retourne:
-;   n    ordre du champ dans la structure.  
+;   n    Index du champ dans la structure.  
 DEFCONST "FN_BOUND",8,,FN_BOUND,4 ; vérifie si le no. de block est dans les limites
     
 ; nom: XRAM   ( -- a-addr )  
-;   Retourne l'adresse du descripteur du périphérique SPIRAM.    
+;   Retourne l'adresse du descripteur du périphérique RAM SPI.    
 ; arguments:
 ;   aucun
 ; retourne:

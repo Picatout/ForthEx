@@ -5,34 +5,48 @@
 <body id="#top">
 <h1>store</h1><div><a href="#index">index</a></div>
 <div><a href="index.html">index principal</a></div>
-<p id="XBLK&gt;ADR">
+<h2 id="description">Description</h2><div style="margin-left:5%;">  
+</div>
+<div style="margin-left:5%;"> Interface de base avec les mémoire externe RAM SPI et EEPROM SPI.
+</div>
+<div style="margin-left:5%;"> Le stockage se fait par bloc de 1024 octets.
+</div>
+<div style="margin-left:5%;"> Le terme XRAM réfère à la mémoire RAM SPI.
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">  La RAM SPI 23LC1024 a une capacitée de 128Ko.    
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="XBLK&gt;ADR">
 <b>XBLK&gt;ADR</b> ; ( u -- ud )
 <div style="margin-left:5%;">   Convertie un numéro de bloc XRAM en adresse absolue XRAM.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    entier non signé, numéro du bloc, {1..MAX_BLOCK}
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Entier simple non signé, numéro du bloc, {1..MAX_BLOCK}
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   entier double non signé, adresse début bloc dans XRAM
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp; Entier double non signé, adresse début bloc dans la RAM SPI.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="XWRITE">
 <b>XWRITE</b> ( u1 n+ ud1 -- )
-<div style="margin-left:5%;">   Transfert un bloc d'octets de la RAM du MCU vers la RAM SPI
+<div style="margin-left:5%;">   Transfert un bloc d'octets de la RAM du MCU vers la RAM SPI.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments: 
 </b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  adresse début bloc RAM
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; Adresse début bloc RAM.
 </div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  nombre d'octets
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Nombre d'octets à transférer.
 </div>
-<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  adresse SPIRAM 
+<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp; Entier double non signé, Adresse destination dans la RAM SPI. 
 </div>
 <div style="margin-left:5%;"><b> retourne:    
 </b></div>
@@ -43,16 +57,16 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="XREAD">
 <b>XREAD</b>  ( u1 n+ ud1 -- )
-<div style="margin-left:5%;">   Transfert un bloc d'octets de la RAM SPI vers la RAM du MCU
+<div style="margin-left:5%;">   Transfert un bloc d'octets de la RAM SPI vers la RAM du MCU.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments: 
 </b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  adresse début bloc RAM
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Entier simple non signé, adresse début tampon RAM.
 </div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  nombre d'octets
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  Entier simple positif, Nombre d'octets à transféréer.
 </div>
-<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  adresse SPIRAM
+<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp; Entier double non signé, adresse début du bloc dans la RAM SPI.
 </div>
 <div style="margin-left:5%;"><b> retourne:    
 </b></div>
@@ -61,9 +75,54 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="?WIP">
+<hr style="border-width:1px;"><p id="XBLKCOUNT">
+<b>XBLKCOUNT</b>  ( -- n )
+<div style="margin-left:5%;">   Constante, capacité en nombre de blocs de la RAM SPI.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Capacité en nombre de blocs de la RAM SPI.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="XBOUND">
+<b>XBOUND</b>  ( n+ -- f )
+<div style="margin-left:5%;">   Vérifie si le numéro de bloc est dans les limites
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   Numéro du bloc à vérifier.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   Indicateur booléen, vrai si le numéro de bloc est valide.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">   l'EEPROM 25LC1024 a une capacité de 128Ko et est divisée en 
+</div>
+<div style="margin-left:5%;">   512 rangées de 256 octets pour la commande EWRITE.
+</div>
+<div style="margin-left:5%;">   Il est possible de mette à jour 1 seul octet mais
+</div>
+<div style="margin-left:5%;">   on ne peut écrire qu'un maximum de 
+</div>
+<div style="margin-left:5%;">   256 octets par commande EWRITE.    
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="?WIP">
 <b>?WIP</b>  ( -- f )    
-<div style="margin-left:5%;">   Test l'eeprom WRITE IN PROCESS bit et retourne son état.
+<div style="margin-left:5%;">   Test le bit WRITE IN PROCESS de l'EEPROM et retourne son état.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -100,11 +159,11 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u	</i>&nbsp;&nbsp;    entier simple non signé, numéro du block {1..MAX_BLOCK}
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp; Entier simple non signé, numéro du block {1..MAX_BLOCK}
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;      entier double non signé, adresse début bloc dans l'EEPROM
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp; Entier double non signé, adresse début bloc dans l'EEPROM
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -121,9 +180,9 @@
 </div>
 <div style="margin-left:5%;">     d'adresse atteint la fin d'une rangée il 
 </div>
-<div style="margin-left:5%;">     revient au début de celle-ci. Donc si 'ud'
+<div style="margin-left:5%;">     revient au début de celle-ci. Donc si 'ud1'
 </div>
-<div style="margin-left:5%;">     est au début de la rangée un maximum de 256
+<div style="margin-left:5%;">     pointe le début de la rangée un maximum de 256
 </div>
 <div style="margin-left:5%;">     octets peuvent-être écris avant l'écrasement
 </div>
@@ -132,11 +191,11 @@
 </p>
 <div style="margin-left:5%;"><b> arguments: 
 </b></div>
-<div style="margin-left:5%;"><i>u1	</i>&nbsp;&nbsp;  entier simple, adresse 16 bits début bloc RAM
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; Entier simple, adresse 16 bits début bloc RAM
 </div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  entier simple positif, nombre d'octets à enregistrer {1..256} 
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Entier simple positif, nombre d'octets à enregistrer {1..256} 
 </div>
-<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp;  entier double, adresse 24 bits destination EEPROM
+<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp; Entier double non signé, adresse destination dans l'EEPROM
 </div>
 <div style="margin-left:5%;"><b> retourne: 
 </b></div>
@@ -147,16 +206,16 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="EEREAD">
 <b>EEREAD</b>   ( u1 n+ ud -- )
-<div style="margin-left:5%;">   Copie d'une plage EEPROM vers la mémoire RAM
+<div style="margin-left:5%;">   Copie d'une plage EEPROM vers la mémoire RAM.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u1	</i>&nbsp;&nbsp;    entier simple, adresse 16 bits début RAM
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; Entier simple non signé, adresse 16 bits début RAM.
 </div>
-<div style="margin-left:5%;"><i>n+	</i>&nbsp;&nbsp;    entier simple, nombre d'octets à copier. 
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Entier simple positif, nombre d'octets à copier. 
 </div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;     entier double, adresse source EEPROM
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp; Entier double non signé, adresse source dans l'EEPROM.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -167,7 +226,9 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="EPAGE">
 <b>EPAGE</b>  ( -- n )
-<div style="margin-left:5%;">   Valeur constante indicant qu'il s'agit d'une opération d'effacement d'une page.
+<div style="margin-left:5%;">   Valeur constante indiquant qu'il s'agit d'une opération d'effacement d'une page.
+</div>
+<div style="margin-left:5%;">   L'EEPROM peut-être effacée par page,secteur ou au complet. 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -183,7 +244,9 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="ESECTOR">
 <b>ESECTOR</b>  ( -- n )
-<div style="margin-left:5%;">   Valeur constante indicant qu'il s'agit d'une opération d'effacement d'un secteur.
+<div style="margin-left:5%;">   Valeur constante indiquant qu'il s'agit d'une opération d'effacement d'un secteur.
+</div>
+<div style="margin-left:5%;">   L'EEPROM peut-être effacée par page,secteur ou au complet. 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -192,14 +255,14 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     Consteante idenfiant cette opération.    
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     Constante idenfiant cette opération.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="EALL">
 <b>EALL</b>  ( -- n )
-<div style="margin-left:5%;">   Valeur constante indicant qu'il s'agit d'une opération d'effacement complet.
+<div style="margin-left:5%;">   Valeur constante indiquant qu'il s'agit d'une opération d'effacement complet.
 </div>
 <div style="margin-left:5%;">   Toute l'EEPROM sera effacée.    
 </div>
@@ -219,12 +282,14 @@
 <b>EERASE</b> ( EALL | n {EPAGE|ESECTOR} -- )    
 <div style="margin-left:5%;">   Efface une page, 1 secteur ou l'EEPROM au complet.
 </div>
+<div style="margin-left:5%;">   l'argument 'n' est requis que pour les opérations EPAGE ou ESECTOR.    
+</div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>'n'</i>&nbsp;&nbsp; numéro de page {0..511} ou de secteur {0..3}
+<div style="margin-left:5%;"><i>'n'</i>&nbsp;&nbsp; Numéro de page {0..511} ou de secteur {0..3}
 </div>
-<div style="margin-left:5%;"><i>'op'</i>&nbsp;&nbsp; opération: EPAGE|ESECTOR|EALL
+<div style="margin-left:5%;"><i>'op'</i>&nbsp;&nbsp; Opération: {EPAGE|ESECTOR|EALL}
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -244,9 +309,9 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u1	</i>&nbsp;&nbsp;    entier simple, adresse RAM début du bloc.
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; Entier simple non signé, adresse RAM début du bloc.
 </div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;      adresse absolue dans l'EEPROM
+<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp; Entier double non signé, adresse début dans l'EEPROM.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -255,41 +320,9 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="XBLKCOUNT">
-<b>XBLKCOUNT</b>  ( -- n )
-<div style="margin-left:5%;">   Constante capacité en nombre de blocs dae la SPIRAM    
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Capacité en nombr de blocs de la SPI RAM    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="XBOUND">
-<b>XBOUND</b>  ( n+ -- f )
-<div style="margin-left:5%;">   Vérifie si le numéro de bloc est dans les limites
-</div>
-</p>
-<div style="margin-left:5%;"><b> arguments:
-</b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   numéro du bloc à vérifier. {1..128}
-</div>
-<div style="margin-left:5%;"><b> retourne:
-</b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="EEBLKCOUNT">
 <b>EEBLKCOUNT</b>  ( -- n )  
-<div style="margin-left:5%;">   Constante, capacité en nombre de blocs de l'EEPROM
+<div style="margin-left:5%;">   Constante, capacité en nombre de blocs de l'EEPROM.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -298,30 +331,55 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    capacité en nombre blocs.  
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Capacité en nombre de blocs.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="EEBOUND">
 <b>EEBOUND</b>  ( n+ -- f )
-<div style="margin-left:5%;">   Vérifie si le numéro de bloc est dans les limites
+<div style="margin-left:5%;">   Vérifie si le numéro de bloc est dans les limites de validité.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   numéro du bloc à vérifier. {1..128}
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Numéro du bloc à vérifier.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen.
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur booléen, vrai si le numéro de bloc est valide.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="DEVID">
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;"> Les périphériques de stockage sont définis par une table contenant
+</div>
+<div style="margin-left:5%;"> les CFA des fonctions de bases.  
+</div>
+<div style="margin-left:5%;">  <br><table border="single">
+</div>
+<div style="margin-left:5%;">  <tr><th>nom</th><th>description</th></tr>  
+</div>
+<div style="margin-left:5%;">  <tr><td>DEVID</td><td>Identifiant du périphérique.</td></tr>  
+</div>
+<div style="margin-left:5%;">  <tr><td>READ</td><td>CFA de la fonction de lecture d'un bloc.</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>WRITE</td><td>CFA de la fonction d'écriture d'un bloc.</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>BLK&gt;ADR</td><td>CFA de la fonction de conversion numéro de bloc en adresse.</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>BOUND</td><td>CFA de la fonction qui valide le numéro de bloc.</td></tr>
+</div>
+<div style="margin-left:5%;">  </table><br>
+</div>
+<div style="margin-left:5%;"> Il y a 3 périphériques de stockage, XRAM, EEPROM et SDCARD.
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="DEVID">
 <b>DEVID</b>  ( -- n )
-<div style="margin-left:5%;">   Constante, accesseur du champ identifiant périphérique, dans la structure
+<div style="margin-left:5%;">   Constante, accesseur du champ identifiant le périphérique, dans la structure
 </div>
 <div style="margin-left:5%;">   descripteur de périphérique bloc.
 </div>
@@ -332,16 +390,16 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    ordre du champ dans la structure.  
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Index du champ dans la table.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="FN_READ">
 <b>FN_READ</b>  ( -- n )
-<div style="margin-left:5%;">   Constante accesseur de champ dans la structure descripteur de périphérique bloc.
+<div style="margin-left:5%;">   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
 </div>
-<div style="margin-left:5%;">   Ce champ accède la fonction READ qui effectue la lecture d'un bloc sur périphérique. 
+<div style="margin-left:5%;">   Ce champ accède la fonction READ qui effectue la lecture d'un bloc sur le périphérique. 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -350,14 +408,14 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    ordre du champ dans la structure.  
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Index du champ dans la table.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="FN_WRITE">
 <b>FN_WRITE</b>  ( -- n )
-<div style="margin-left:5%;">   Constante accesseur de champ dans la structure descripteur de périphérique bloc.
+<div style="margin-left:5%;">   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
 </div>
 <div style="margin-left:5%;">   Ce champ accède la fonction WRITE qui écris un bloc sur périphérique.
 </div>
@@ -368,16 +426,16 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    ordre du champ dans la structure.  
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Index du champ dans la table.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="FN_BLK&gt;ADR">
 <b>FN_BLK&gt;ADR</b>  ( -- n )
-<div style="margin-left:5%;">   Constante accesseur de champ dans la structure descripteur de périphérique bloc.
+<div style="margin-left:5%;">   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
 </div>
-<div style="margin-left:5%;">   Ce champ accède la fonction BLK&gt;ADR  qui convertie un no. bloc en adressse absolue. 
+<div style="margin-left:5%;">   Ce champ accède la fonction BLK&gt;ADR  qui convertie un numéro de bloc en adressse absolue. 
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -386,14 +444,14 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    ordre du champ dans la structure.  
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Index du champ dans la table.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="FN_BOUND">
 <b>FN_BOUND</b>  ( -- n )
-<div style="margin-left:5%;">   Constante accesseur de champ dans la structure descripteur de périphérique bloc.
+<div style="margin-left:5%;">   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
 </div>
 <div style="margin-left:5%;">   Ce champ accède la fonction BOUND  qui vérifie la validité d'un no. de bloc.
 </div>
@@ -404,14 +462,14 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    ordre du champ dans la structure.  
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Index du champ dans la structure.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="XRAM">
 <b>XRAM</b>   ( -- a-addr )  
-<div style="margin-left:5%;">   Retourne l'adresse du descripteur du périphérique SPIRAM.    
+<div style="margin-left:5%;">   Retourne l'adresse du descripteur du périphérique RAM SPI.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:

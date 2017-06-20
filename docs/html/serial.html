@@ -5,9 +5,14 @@
 <body id="#top">
 <h1>serial</h1><div><a href="#index">index</a></div>
 <div><a href="index.html">index principal</a></div>
-<p id="SERENBL">
+<h2 id="description">Description</h2><div style="margin-left:5%;">
+</div>
+<div style="margin-left:5%;">    Configuration et fonctions de base pour la communication par le port sériel RS232.
+</div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:4px;"><p id="SERENBL">
 <b>SERENBL</b>  ( f -- )    
-<div style="margin-left:5%;">   activation/désactivation du port sériel. Le port est activé si 'f' est VRAI
+<div style="margin-left:5%;">   Activation/désactivation du port sériel. Le port est activé si 'f' est VRAI
 </div>
 <div style="margin-left:5%;">   sinon il est désactivé.    
 </div>
@@ -23,25 +28,31 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
-<hr style="border-width:1px;"><p id="Bxxxxx">
-<b>Bxxxxx</b>  ( -- n )  
+<hr style="border-width:1px;"><p id="Bnnnnnn">
+<b>Bnnnnnn</b>  ( -- n )  
 <div style="margin-left:5%;">   Plusieurs constantes sont définies pour l'ajustement de la vitesse de transfert
 </div>
 <div style="margin-left:5%;">   du port sériel. Les constantes suivantes sont disponibles.
 </div>
-<div style="margin-left:5%;">   B2400 -&gt; 2400 BAUD
+<div style="margin-left:5%;">  <br><table border="single">
 </div>
-<div style="margin-left:5%;">   B4800 -&gt; 4800 BAUD
+<div style="margin-left:5%;">  <tr><th>nom</th><th>vitesse<br>BAUD</th></tr>    
 </div>
-<div style="margin-left:5%;">   B9600 -&gt; 9600 BAUD
+<div style="margin-left:5%;">  <tr><td>B2400</td><td>2400</td></tr>
 </div>
-<div style="margin-left:5%;">   B19200 -&gt; 19200 BAUD
+<div style="margin-left:5%;">  <tr><td>B4800</td><td>4800</td></tr>
 </div>
-<div style="margin-left:5%;">   B38400 -&gt; 38400 BAUD
+<div style="margin-left:5%;">  <tr><td>B9600</td><td>9600</td></tr>
 </div>
-<div style="margin-left:5%;">   B57600 -&gt; 57600 BAUD
+<div style="margin-left:5%;">  <tr><td>B19200</td><td>19200</td></tr>
 </div>
-<div style="margin-left:5%;">   B115200 -&gt; 115200 BAUD 
+<div style="margin-left:5%;">  <tr><td>B38400</td><td>38400</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>B57600</td><td>57600</td></tr>
+</div>
+<div style="margin-left:5%;">  <tr><td>B115200</td><td>115200</td></tr>
+</div>
+<div style="margin-left:5%;">  </table><br>
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -50,7 +61,7 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Une constante qui sert à programmer le registre qui contrôle la vitesse du port.    
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;   Une constante qui sert à programmer la vitesse du port.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -61,7 +72,7 @@
 </div>
 <div style="margin-left:5%;"> exemple:  
 </div>
-<div style="margin-left:5%;">   B57600 BAUD / le port est activé à la vitesse de 57600 BAUD.    
+<div style="margin-left:5%;">   B57600 BAUD \ Le port est activé à la vitesse à 57600 BAUD.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -84,7 +95,7 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  caractère à transmettre.
+<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; Caractère à transmettre.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -95,7 +106,7 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="SGETC">
 <b>SGETC</b>  ( -- c )
-<div style="margin-left:5%;">   Attend un careactère du port sériel. Cette attente n'expire jamais.
+<div style="margin-left:5%;">   Attend un caractère du port sériel. Cette attente n'expire jamais.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -111,7 +122,7 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="SREADY?">
 <b>SREADY?</b> ( -- f )
-<div style="margin-left:5%;">  vérifie si le terminal est prêt à recevoir
+<div style="margin-left:5%;">  Vérifie si le terminal est prêt à recevoir.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -120,7 +131,7 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;      indicateur booléen, vrai si terminal prêt à recevoir.
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur booléen, vrai si le terminal prêt à recevoir.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -138,7 +149,7 @@
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen, VRAI si un caractère est disponible.
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp; Indicateur booléen, VRAI si un caractère est disponible.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -147,7 +158,7 @@
 <p>
 <ul>
 <li><a href="#BAUD">BAUD</a></li>
-<li><a href="#Bxxxxx">Bxxxxx</a></li>
+<li><a href="#Bnnnnnn">Bnnnnnn</a></li>
 <li><a href="#SERENBL">SERENBL</a></li>
 <li><a href="#SGETC">SGETC</a></li>
 <li><a href="#SGETC?">SGETC?</a></li>

@@ -754,8 +754,12 @@ DEFWORD "SDC-BLK>ADR",11,,SDBLKTOADR
 2:  .word DUP,TOR,UMSTAR,SEGMENTQ,RFROM,UMSTAR,TRUE,UDSTAR,DPLUS
 9:  .word EXIT
     
-    
-; descripteur carte Secure Digital    
+; nom: SDCARD  ( -- a-addr )  
+;   Descripteur de périphérique pour la carte Secure Digital.
+; arguments:
+;   aucun
+; retourne:
+;   a-addr Adresse du descripteur de périphérique.  
 DEFTABLE "SDCARD",6,,SDCARD
     .word _SDCARD 
     .word SDCREAD
