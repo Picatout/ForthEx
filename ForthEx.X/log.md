@@ -1,3 +1,7 @@
+2017-06-21
+----------
+Documentation de strings.s
+
 2017-06-20
 ----------
 Travail sur sdcard.s, complété support pour carte version 1.

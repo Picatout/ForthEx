@@ -25,23 +25,25 @@
 ;    REF: http://www.asciitable.com/
    
 ; DESCRIPTIONS:
-;  Mot qui manipules les caractères caractères.
+;  Mots qui manipulent des caractères.
 
-
-; nom: BL  ( -- n )
-;   Constante système qui retourne la valeur ASCII 32 (espace).
+; nom: BL  ( -- c )
+;   Constante qui retourne la valeur ASCII 32 (espace).
 ; arguments:
 ;   aucun
 ; retourne:
-;   n    valeur ASCII 32  qui représente l'espace.    
-DEFCONST "BL",2,,BL,32                       ; caractère espace
+;   c  Valeur ASCII 32  qui représente l'espace.    
+DEFCODE "BL",2,,BL
+    DPUSH
+    mov #32,T
+    NEXT
 
 ; nom: >CHAR  ( n -- c )    
-;   Vérifie que n est dans l'intervalle ASCII 32..126, sinon remplace c par '_'  
+;   Vérifie que 'n' est dans l'intervalle ASCII 32..126, sinon remplace c par '_'  
 ; arguments:
-;   n   Entier à convertir en caractère.
+;   n Entier à convertir en caractère.
 ; retourne:
-;   c    Valeur ASCII entre 32 et 126    
+;   c Valeur ASCII entre 32 et 126    
 DEFCODE ">CHAR",5,,TOCHAR 
     mov #126,W0
     cp W0,T
@@ -65,9 +67,9 @@ DEFWORD "CHARS",5,,CHARS ; ( n1 -- n2 )
 ; nom: CHAR+   ( c-addr -- c-addr' )  
 ;   Incrémente l'adresse de l'espace occupé par un caractère.
 ; arguments:
-;   c-addr   adresse alignée sur caractère.
+;   c-addr  Adresse alignée sur un caractère.
 ; retourne:
-;   c-addr'  adresse alignée sur caractère suivant.  
+;   c-addr' Adresse alignée sur caractère suivant.  
 DEFWORD "CHAR+",5,,CHARPLUS ; ( addr -- addr' )  
     .word LIT,CHAR_SIZE,PLUS,EXIT
   
@@ -75,9 +77,9 @@ DEFWORD "CHAR+",5,,CHARPLUS ; ( addr -- addr' )
 ;   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
 ;   A la suite de cette opération la variable >IN pointe après le mot.    
 ; arguments:
-;    cccc   chaîne de caractère dans le flux d'entré.
+;    cccc  Chaîne de caractère dans le flux d'entré.
 ; retourne:
-;    c      Le premier caractère du mot extrait du flux d'entrée.
+;    c  Le premier caractère du mot extrait du flux d'entrée.
 DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
     .word BL,WORD,DUP,CFETCH,ZEROEQ
     .word QABORT
@@ -87,24 +89,24 @@ DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
     .word ONEPLUS,CFETCH,EXIT
 
 ; nom: [CHAR]   ( ccccc -- )
-;   Mot à n'utiliser qu'à l'intérieur d'une définition.    
+;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.    
 ;   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
 ;   Après cette opération la variable >IN pointe après le mot trouvé.
 ; arguments:
-;   cccc  Chaîne de caractère dans le flux d'entré.    
+;   cccc Chaîne de caractère dans le flux d'entré.    
 ; retourne:
-;   rien   Le caractère es compilé dans la définition.    
+;   rien 
 DEFWORD "[CHAR]",6,F_IMMED,COMPILECHAR ; cccc 
     .word QCOMPILE
     .word CHAR,CFA_COMMA,LIT,COMMA,EXIT
     
 ; nom: FILL ( c-addr u c -- )    
-;   Initialise un bloc mémoire RAM de dimension u avec le caractère c.
+;   Initialise un bloc mémoire RAM de dimension 'u' avec le caractère 'c'.
 ;   Si c-addr > 32767 la mémoire réside en EDS.    
 ; arguments:
 ;   c-addr   Adresse du début de la zone RAM.
-;   u        Nombre de caractères à remplir.
-;   c        Caractère de remplissage.    
+;   u   Nombre de caractères à remplir.
+;   c  Caractère de remplissage.    
 ; retourne:
 ;   rien    
 DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
@@ -121,15 +123,15 @@ DEFCODE "FILL",4,,FILL ; ( c-addr u c -- )  for{0:(u-1)}-> m[T++]=c
     
     
 ; nom: -TRAILING  ( c-addr u1 -- c-addr u2 )    
-;   Raccourci la chaîne c-addr u1 du nombre d'espace qu'il y a à la fin de celle-ci.
+;   Raccourci la chaîne 'c-addr' 'u1' du nombre d'espace qu'il y a à la fin de celle-ci.
 ;   Tous les caractères <=32 sont considérés comme des espaces.    
 ;   Si c-addr > 32767 accède la mémoire EDS.    
 ; arguments:
-;   c-addr  Adresse du début de la chaîne.    
+;   c-addr Adresse du début de la chaîne.    
 ;   u1 Longueur initiale de la chaîne.
 ; retourne: 
 ;   c-addr Adresse du début de la chaîne.     
-;   u2 longueur finale de la chaîne.    
+;   u2 Longueur de la chaîne tronquée.    
 DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )
     SET_EDS
     mov [DSP],W1
@@ -145,15 +147,15 @@ DEFCODE "-TRAILING",9,,MINUSTRAILING ; ( addr u1 -- addr u2 )
 9:  RESET_EDS
     NEXT
  
-; nom: /STRING  ( c-addr u n -- c-addr' u' )   
-;   Avance c-addr de n caractères et réduit u d'autant.
+; nom: /STRING  ( c-addr1 u1 n -- c-addr2 u2 )   
+;   Avance 'c-addr' de 'n' caractères et réduit 'u' d'autant.
 ; arguments:
-;   c-addr   adresse du premier caractère de la chaîne.
-;   u        longueur de la chaîne.
-;   n        nombre de caractères à avancer.
+;   c-addr1   Adresse du premier caractère de la chaîne.
+;   u1        Longueur de la chaîne.
+;   n        Nombre de caractères à avancer.
 ; retourne:
-;   c-addr'    c-addr+n
-;   u'         u-n    
+;   c-addr2    c-addr1+n
+;   u2    u1-n    
 DEFWORD "/STRING",7,,SLASHSTRING 
     .word ROT,OVER,PLUS,ROT,ROT,MINUS,EXIT
 
@@ -185,18 +187,17 @@ DEFCODE "UPPER",5,,UPPER ; ( c-addr -- c-addr )
 3:  RESET_EDS
     NEXT
 
-; nom: SCAN ( c-addr u c -- c-addr' u' )  
-;   Recherche du caractère 'c' dans le bloc
-;   mémoire débutant à l'adresse 'c-addr' et de dimension 'u' octets
-;   retourne la position de 'c' et
-;   le nombre de caractères restant dans le bloc
+; nom: SCAN ( c-addr1 u1 c -- c-addr1 u2 )  
+;   Recherche du caractère 'c' dans la chaîne débutant à l'adresse
+;  'c-addr1' et de longueur 'u1' octets.
+;   retourne la position de 'c' et le nombre de caractères restant dans la chaîne.
 ; arguments:
-;   c-addr  adresse début zone RAM
-;   u       longueur de la zone en octets.    
-;   c       caractère recherché.
+;   c-addr1 Adresse du début de la chaîne.
+;   u1      Longueur de la chaîne.    
+;   c       Caractère recherché.
 ; retourne:
-;   c-addr'  adresse du premier 'c' trouvé dans cette zone
-;   u'       longueur de la zone restante à partir de c-addr'    
+;   c-addr2  Adresse du premier 'c' trouvé dans la chaîne.
+;   u2       Longueur restante de la chaîne à partir de c-addr2.
 DEFCODE "SCAN",4,,SCAN 
     SET_EDS
     mov T, W0   ; c
@@ -214,16 +215,16 @@ DEFCODE "SCAN",4,,SCAN
     RESET_EDS
     NEXT
 
-; nom: SKIP ( c-addr u c -- c-addr' u' )  
-;   avance au delà de 'c'. Retourne l'adresse du premier caractère
-;   différent de 'c' et la longueur restante de la zone.    
+; nom: SKIP ( c-addr1 u1 c -- c-addr2 u2 )  
+;   Avance au delà de 'c'. Retourne l'adresse du premier caractère
+;   différent de 'c' et la longueur restante de la chaîne.    
 ; arguments:
-;   c-addr    adresse début de la zone
-;   u         longueur de la zone
-;   c         caractère à sauter.
+;   c-addr Adresse début de la chaîne.
+;   u     Longueur de la chaîne.
+;   c    Caractère recherché.
 ; retourne:
-;   c-addr'   adresse premier caractère <> 'c'
-;   u'        longueur de la zone restante à partir c-addr'    
+;   c-addr2  Adresse premier caractère après 'c'.
+;   u2      Longueur restante de la chaîne à partir c-addr2.    
 DEFCODE "SKIP",4,,SKIP 
     SET_EDS
     mov T, W0 ; c
@@ -248,6 +249,7 @@ DEFCODE "SKIP",4,,SKIP
 ; retourne:
 ;   c-addr Adresse du premier caractère de la ligne.
 ;   u2 Longueur de la ligne excluant le caractère de fin de ligne.
+    
 ;HEADLESS GETLINE,HWORD ; ( c-addr u -- c-addr u' )
 DEFWORD "GETLINE",7,,GETLINE      
       .word OVER,SWAP,LIT,VK_CR,SCAN ; s: c-addr c-addr' u'
@@ -256,7 +258,7 @@ DEFWORD "GETLINE",7,,GETLINE
     
 ; nom: MOVE  ( c-addr1 c-addr2 u -- )    
 ;   Copie un bloc mémoire RAM en évitant la propagation. La propagation se
-;   produit lorsque les 2 région se superposent et qu'un octet copié est recopié
+;   produit lorsque les 2 régions se superposent et qu'un octet copié est recopié
 ;   parce qu'il a écrasé l'octet original dans la région source.     
 ; arguments:
 ;   c-addr1  Adresse de la source.
@@ -275,9 +277,9 @@ DEFCODE "MOVE",4,,MOVE  ; ( addr1 addr2 u -- )
 ;   Copie un bloc d'octets RAM.  
 ;   Débute la copie à partir de l'adresse du début du bloc en adresse croissante.
 ; arguments:
-;   c-addr1  source
-;   c-addr2  destination
-;   u      compte en octets.   
+;   c-addr1  Adresse source.
+;   c-addr2  Adresse destination.
+;   u      Compte en octets.   
 ; retourne:
 ;   rien    
 DEFCODE "CMOVE",5,,CMOVE  ;( c-addr1 c-addr2 u -- )
@@ -297,12 +299,12 @@ move_up:
     NEXT
 
 ; nom: CMOVE>  ( c-addr1 c-addr2 u -- )    
-;   Copie un bloc d'octets RAM  
+;   Copie un bloc d'octets RAM.  
 ;   La copie débute à la fin du bloc en adresses décroissantes.    
 ; arguments:
-;   c-addr1  source
-;   c-addr2  destination
-;   u      compte en octets.   
+;   c-addr1  Adresse source.
+;   c-addr2  Adresse destination.
+;   u      Compte en octets.   
 ; retourne:
 ;   rien    
 DEFCODE "CMOVE>",6,,CMOVETO ; ( c-addr1 c-addr2 u -- )
@@ -324,33 +326,33 @@ move_dn:
     NEXT
     
     
-; nom: EC@+   ( c-addr -- c-addr' c )   
-;   Retourne le caractère à l'adresse pointée par c-addr et avance le pointeur au caractère suivant.
-;   À utiliser si c-addr pointe vers la mémoire RAM et EDS.    
+; nom: EC@+   ( c-addr1 -- c-addr2 c )   
+;   Retourne le caractère à l'adresse pointée par 'c-addr1' et avance le pointeur au caractère suivant.
+;   À utiliser si 'c-addr1' pointe vers la mémoire RAM ou EDS.    
 ;  arguments:
-;	c-addr  Pointeur sur la chaîne de caractères.
+;	c-addr1  Pointeur sur la chaîne de caractères.
 ;  retourne:
-;     addr+1   Pointeur avancée d'un caractère
-;     c        caractère obtenu    
+;     addr2   Pointeur avancée d'un caractère.
+;     c       Caractère à l'adresse c-addr1.    
 DEFWORD "EC@+",5,,ECFETCHPLUS
     .word DUP,ECFETCH,TOR,CHARPLUS,RFROM,EXIT
     
-; nom: C@+   ( c-addr -- c-addr' c )    
-;   Retourne le caractère à l'adresse pointée par c-addr et avance le pointeur au caractère suivant.
-;   À utiliser si c-addr pointe la mémoire ou FLASH.
+; nom: C@+   ( c-addr1 -- c-addr2 c )    
+;   Retourne le caractère à l'adresse pointée par 'c-addr1' et avance le pointeur au caractère suivant.
+;   À utiliser si 'c-addr1' pointe la mémoire RAM ou FLASH.
 ;  arguments:
-;   c-addr  pointeur sur la chaîne de caractères.
+;   c-addr1  Pointeur sur la chaîne de caractères.
 ;  retourne:
-;   c-addr'   Pointeur avancée d'un caractère
-;     c       caractère obtenu    
+;   c-addr'   Pointeur avancée d'un caractère.
+;     c       Caractère à l'adresse 'c-addr1'.    
 DEFWORD "C@+",4,,CFETCHPLUS
     .word DUP,CFETCH,TOR,CHARPLUS,RFROM,EXIT
     
 ; nom: CSTR>RAM ( c-addr1 c-addr2 -- )     
 ;   Copie une chaine comptée de la mémoire FLASH vers la mémoire RAM.
 ; arguments:
-;   c-addr1    adresse de la chaîne en mémoire flash.
-;   c-addr2    adresse destination en mémoire RAM.
+;   c-addr1    Adresse de la chaîne en mémoire flash.
+;   c-addr2    Adresse destination en mémoire RAM.
 ; retourne:
 ;   rien    
 DEFWORD "CSTR>RAM",8,,CSTRTORAM 
@@ -362,14 +364,14 @@ DEFWORD "CSTR>RAM",8,,CSTRTORAM
     
 ; nom: S=    ( c-addr1 u1 c-addr2 u2 -- f )    
 ;   Comparaison de 2 chaînes. Retourne VRAI si égales sinon FAUX.
-;   Les 2 chaînes doivent-être en mémoire RAM.
+;   Les 2 chaînes doivent-être en mémoire RAM ou EDS.
 ; arguments:
-;   c-addr1   Adresse du premier caractère de la chaîne 1
-;   u1        longueur de la chaîne 1    
-;   c-addr2   Adresse du premier caractère de la chaîne 2
-;   u2        longueur de la chaîne 2    
+;   c-addr1   Adresse du premier caractère de la chaîne 1.
+;   u1        Longueur de la chaîne 1.    
+;   c-addr2   Adresse du premier caractère de la chaîne 2.
+;   u2        Longueur de la chaîne 2.    
 ; retourne:
-;   f	  Indicateur Booléen d'égalité.    
+;   f	  Indicateur Booléen d'égalité, vrai si les chaînes sont identiques.    
 DEFWORD "S=",2,,SEQUAL ; ( c-addr1 u1 c-addr2 u2 -- f )
     .word ROT,OVER,EQUAL,ZBRANCH,6f-$
     .word FALSE,DODO
@@ -383,10 +385,10 @@ DEFWORD "S=",2,,SEQUAL ; ( c-addr1 u1 c-addr2 u2 -- f )
 9:  .word EXIT
 
 ; nom: BLANK  ( c-addr u -- )
-;   Si u est plus grand que zéro met u caractères espace (BL) à partir de l'adresse c-addr
+;   Dépose 'u' caractères espace (BL) à partir de l'adresse c-addr
 ; arguments:
 ;   c-addr  Adresse début RAM
-;   u       nombre d'espaces à déposer dans cette région.
+;   u       Nombre d'espaces à déposer dans cette région.
 ; retourne:
 ;   rien
 DEFCODE "BLANK",5,,BLANK
@@ -401,21 +403,24 @@ DEFCODE "BLANK",5,,BLANK
     DPOP
     NEXT
  
-; nom: COMPARE ( c-addr1 u1 c-addr2 u2 -- -1|0|1 )
-;   Compare la chaîne de caractère débutant à l'adresse c-addr1de longueur u1
-;   avec la chaîne de caractère débutant à l'adresse c-addr2 de longueur u2
-;   Cette comparaison de fait selon l'orde des caractères dans la table ASCII.
-;   Si u1==u2 et que tous les caractères correspondent la valeur 0 est retournée,
-;   sinon le premier caractère qui diverge détermine la valeur retournée c1<c2 retourne -1 autrement retourne 1.    
+; nom: COMPARE ( c-addr1 u1 c-addr2 u2 -- -1|0?1 )
+;   Compare la chaîne de caractère débutant à l'adresse 'c-addr1' de longueur 'u1'
+;   avec la chaîne de caractère débutant à l'adresse 'c-addr2' de longueur 'u2'
+;   Cette comparaison se fait selon l'orde des caractères dans la table ASCII.
+;   Si 'u1'=='u2' et que tous les caractères correspondent la valeur 0 est retournée,
+;   sinon le premier caractère qui diverge détermine la valeur retournée c1<c2 
+;    retourne -1 autrement retourne 1.    
 ;   Si u1<u2 et que tous les caractères de cette chaîne sont en correspondance avec
 ;   l'autre chaîne la valeur -1 est retournée.
 ;   Si u1>u2 et que tous les caractères de c-addr2 correspondent avec ceux de c-addr1
 ;   la valeur 1 est retournée.
 ; arguments:
-;   c-addr1  Adresse du premier caractère de la chaîne 1
+;   c-addr1  Adresse du premier caractère de la chaîne 1.
 ;   u1       Longueur de la chaîne 1.
 ;   c-addr2  Adresse du premier caractère de la chaîne 2.
-;   u2       longueur de la chaîne 2.
+;   u2       Longueur de la chaîne 2.
+; retourne:
+;   -1|0|1 Retourne -1 si chaîne1<chaîne2, 0 si chaîne1==chaîne2, 1 si chaîne1>chaîne2    
 DEFWORD "COMPARE",7,,COMPARE
     .word ROT,TWODUP,TWOTOR,UMIN,FALSE,DODO ; s: c-addr1 c-addr2 r: u2 u1
 1:  .word TOR,ECFETCHPLUS,RFROM,ECFETCHPLUS,ROT,TWODUP,EQUAL,ZBRANCH,8f-$
@@ -433,17 +438,17 @@ DEFWORD "COMPARE",7,,COMPARE
 ;   est sous-chaîne de la chaîne 1, alors c-addr3 u3 indique la position et le 
 ;   nombre de caractères restants. En cas d'échec c-addr3==c-addr1 et u3==u1.
 ;   exemple:
-;     : s1 s" A la claire fontaine."
-;     : s2 s" claire"
-;     s1 s2 SEARCH   /  c-addr3=c-addr1+5 u3=16  f=VRAI  
+;     : s1 s" A la claire fontaine." ;
+;     : s2 s" claire" ;
+;     s1 s2 SEARCH   \  c-addr3=c-addr1+5 u3=16  f=VRAI  
 ; arguments:
-;   c-addr1  Adresse du premier carcactère de la chaîne cible.
-;   u1       Longueur de la chaîne cible.
+;   c-addr1  Adresse du premier carcactère de la chaîne principale.
+;   u1       Longueur de la chaîne principale.
 ;   c-addr2  Adresse du premier caractère de la sous-chaîne recherchée.
 ;   u2       Longueur de la sous-chaîne recherchée.
 ; retourne:
-;   c-addr3  si f est VRAI  Adresse du premier caractère de la sous-chaîne, sinon = c-addr1
-;   u3       si f est VRAI nombre de caractère restant dans la chaîne à partir de c-addr3
+;   c-addr3  Si f est VRAI  Adresse du premier caractère de la sous-chaîne, sinon = c-addr1
+;   u3       Si f est VRAI nombre de caractère restant dans la chaîne à partir de c-addr3
 ;   f        Indicateur Booléen succès/échec.  
 DEFWORD "SEARCH",6,,SEARCH ; ( c-addr1 u1 c-addr2 u2 -- c-addr3 u3 f )
     ; si s2 plus long que s1 retourne faux.
@@ -478,10 +483,10 @@ DEFWORD "SLITERAL",8,F_IMMED,SLITERAL
 ; nom: (    ( cccc -- )    
 ;   Ce mot introduit un commentaire qui se termine  par ')'.
 ;   Tous les caractères dans le tampon d'entrée sont sautés jusqu'après le ')'.    
-;   Il doit y avoir un espace de chaque côté de '(' car c'est un mot forth.
+;   Il doit y avoir un espace de chaque côté de '(' car c'est un mot Forth.
 ;   Il s'agit d'un mot immédiat, il s'exécute donc même en mode compilation.    
 ; arguments:
-;   aucun  
+;   cccc  commentaire dans le flux d'entrée terminé par ')'. 
 ; retourne:    
 ;   rien    
 DEFWORD "(",1,F_IMMED,LPAREN ; parse ccccc)
@@ -492,7 +497,7 @@ DEFWORD "(",1,F_IMMED,LPAREN ; parse ccccc)
 ;   Tous les caractères dans le tampon d'entré sont sautés jusqu'à la fin de ligne.    
 ;   Il s'agit d'un mot immédiat, il s'éxécute donc même en mode compilation.
 ; arguments:
-;   aucun  
+;   cccc  Caractères dans le flux d'entrée terminé par une fin de ligne. 
 ; retourne:
 ;   rien    
 DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
@@ -501,11 +506,11 @@ DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
 2:  .word SOURCE,PLUS,ADRTOIN,EXIT
 
 ; nom: .(   cccc) ( -- )    
-;   Affiche le texte délimité par ).
+;   Mot immédiat, affiche le texte délimité par ).
 ;   Extrait tous les caractères du flux d'entrée jusqu'après le caractère ')'.
 ;   Le délimiteur ')' n'est pas imprimé.    
 ; arguments:
-;   aucun
+;   cccc Caractères dans le flux d'entrée terminés par ')'.
 ; retourne:
 ;   rien    
 DEFWORD ".(",2,F_IMMED,DOTPAREN ; ccccc    
@@ -526,11 +531,11 @@ DEFWORD "DIGIT",5,,DIGIT ; ( u -- c )
     .word LIT,9,OVER,LESS,LIT,7,AND,PLUS,LIT,48,PLUS
     .word EXIT
 
-; nom: EXTRACT  ( ud u -- ud2 c )    
-;   Extrait le chiffre le moins significatif de ud et le convertie en caractère
-;   en accord avec la valeur de la base u. 
+; nom: EXTRACT  ( ud1 u -- ud2 c )    
+;   Extrait le chiffre le moins significatif de 'ud1' et le convertie en caractère
+;   en accord avec la valeur de la base 'u'. 
 ; arguments:
-;   ud Entier double non signé qui est le  nombre à convertir en chaîne ASCII.
+;   ud1 Entier double non signé qui est le  nombre à convertir en chaîne ASCII.
 ;   u  Entier simple non signé représente la valeur de la base numérique.
 ; retourne:
 ;   ud2 Entier double qui est le quotient de ud/u, c'est la partie du nombre qui reste à convertir.
@@ -540,7 +545,7 @@ DEFWORD "EXTRACT",7,,EXTRACT ; ( ud u -- ud2 c )
     
 ; nom: <#   ( -- )    
 ;   Initalise le début de la conversion d'un entier en chaîne ASCII.
-;   La valeur de la variable HP est modifiée pour pointé à la fin du PAD.
+;   La valeur de la variable HP est modifiée pour pointer à la fin du PAD.
 ;   Lors de la conversion les caractères sont ajoutés de la droite vers la gauche dans le PAD.
 ; arguments:
 ;   aucun
@@ -551,7 +556,7 @@ DEFWORD "<#",2,,LTSHARP ; ( -- )
     .word EXIT
  
 ; nom: HOLD ( c -- )    
-;   Met le caractère dans c dans le PAD et recule HP de 1 caractère.
+;   Dépose le caractère 'c' dans le PAD et recule HP de 1 caractère.
 ; arguments:
 ;   c  Caractère à insérer dans la chaîne.
 ; retourne:
@@ -566,6 +571,7 @@ DEFWORD "HOLD",4,,HOLD ; ( c -- )
 ;   dans PAD.  Retourne le restant de ud1.    
 ; arguments:
 ;     ud1  Entier double non signé à convertir.
+; retourne:    
 ;     ud2  Entier double non signé restant, i.e. ud1/base    
 DEFWORD "#",1,,SHARP ; ( ud1 -- ud2 )
     .word BASE,FETCH,EXTRACT,HOLD,EXIT
@@ -581,7 +587,7 @@ DEFWORD "#S",2,,SHARPS ; ( ud1 -- ud2==0 )
   
 ; nom: SIGN  ( n -- )  
 ;   Ajoute le signe au début de la chaîne numérique dans le PAD.
-;   Si n est  négatif alors on ajoute un signe '-' au début de la chaîne.
+;   Si 'n' est  négatif alors on ajoute un signe '-' au début de la chaîne.
 ; arguments:
 ;   n Entier qui représente le signe du nombre qui a été convertie.
 ; retourne:
@@ -592,10 +598,10 @@ DEFWORD "SIGN",4,,SIGN ; ( n -- )
 1:  .word EXIT
   
 ; nom: #>  ( ud -- addr u )  
-;   Termine la conversion d'un entier en chaîne ASCII en ajoutant la longueur
-;   au début de la chaîne.
+;   Termine la conversion d'un entier en chaîne ASCII en empilant le descripteur
+;   de la chaîne.
 ; arguments:
-;    ud   n'est pas utilisé c'est le relicat du mot #S. Cette valeur est simplement jetée.
+;    ud   N'est pas utilisé c'est le relicat du mot #S. Cette valeur est simplement jetée.
 ; retourne:
 ;   c-addr  Adresse du premier caractère de la chaîne numérique.
 ;   u       Longueur de la chaîne.  
@@ -657,7 +663,7 @@ DEFWORD "U.",2,,UDOT ; ( n -- )
 udot:  .word LIT,0,UDDOT,EXIT
   
 ; nom: .  ( n -- )  
-;   Affiche un entier simple en format libre.
+;   Affiche un entier simple signé en format libre.
 ; arguments:
 ;   n Entier à afficher.  
 ; retourne:
@@ -696,7 +702,7 @@ _uddot:
     .word EXIT
     
 ; nom: D.   ( d -- )    
-;   Affiche un entier double en format libre.
+;   Affiche un entier double signé en format libre.
 ; arguments:
 ;    d   Entier double à afficher.
 ; retourne:
@@ -732,7 +738,7 @@ DEFWORD "UD.R",4,,UDDOTR ; ( ud n+ -- )
 
 
 ; nom: DECIMAL?  ( c -- f )
-;   vérifie si c est dans l'ensemble ASCII {'0'..'9'}
+;   vérifie si 'c' est dans l'ensemble ASCII {'0'..'9'}
 ; arguments:
 ;   c   caractère ASCII à vérifier.
 ; retourne:
@@ -747,10 +753,10 @@ DEFWORD "DECIMAL?",8,,DECIMALQ
 ;   étape de conversion d'une chaîne de caractère en 
 ;   entier décimal.
 ; arguments:
-;   u1  entier résultant de la conversion d'une chaîne en décimal
-;   c  caractère ASCII  dans l'intervalle {'0'..'9'}
+;   u1  Entier résultant de la conversion d'une chaîne en décimal
+;   c  Caractère ASCII  dans l'intervalle {'0'..'9'}
 ; retourne:
-;   u2    
+;   u2  = u1*10+digit(c)
 DEFWORD ">BASE10",7,,TOBASE10
     .word LIT,'0',MINUS,LIT,10,ROT,STAR
     .word PLUS,EXIT
@@ -760,12 +766,11 @@ DEFWORD ">BASE10",7,,TOBASE10
 ;   Si valide retourne la valeur du digit et -1
 ;   Si invalide retourne x 0
 ; arguments:
-;   c   caractère à convertir dans la base active.
+;   c   Caractère à convertir dans la base active.
 ; retourne:
-;   x    un entier quelconque qui doit-être ignoré.
-;   0    le caractère n'était pas valide, x doit-être ignoré.
-;   n    Le caractère convertie en digit de la base active.
-;   -1   Le caractère était valide et n doit-être conservé.    
+;   x&nbsp;0 Faux et un entier quelconque qui doit-être ignoré car ce n'est pas un digit.
+;   ou    
+;   n&nbsp;-1 Vrai et le caractère convertie en digit de la base active.
 DEFWORD "?DIGIT",6,,QDIGIT ; ( c -- x 0 | n -1 )
     .word DUP,LIT,'a'-1,UGREATER,ZBRANCH,1f-$
     .word LIT,32,MINUS ; convertie en majuscule.
@@ -782,12 +787,12 @@ DEFWORD "?DIGIT",6,,QDIGIT ; ( c -- x 0 | n -1 )
 ;   nombre double précision. saute le caractère et retourne -1.
 ;   Dans le cas contraire retourne 0.
 ; arguments:
-;   c-addr  pointe vers l'adresse du dernier caractère analysé par >NUMBER
-;   u       longueur de la chaîne restante.
+;   c-addr  Pointe vers l'adresse du dernier caractère analysé par >NUMBER
+;   u       Longueur de la chaîne restante.
 ; retourne:
-;   c-addr' acresse incrémenté si le critère {'.'|','} est vrai.
-;   u'      longueur décrémentée si le critère {'.'|','} est vrai.
-;   f       indicateur Booléen indiquant s'il s'agit d'un entier double.    
+;   c-addr' Adresse incrémentée si le critère {'.'|','} est vrai.
+;   u'      Longueur décrémentée si le critère {'.'|','} est vrai.
+;   f       Indicateur Booléen indiquant s'il s'agit d'un entier double.    
 DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
     .word OVER,CFETCH,LIT,'.',EQUAL,ZBRANCH,2f-$
 1:  .word LIT,1,SLASHSTRING,LIT,-1,BRANCH,9f-$
@@ -797,10 +802,10 @@ DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
 9:  .word EXIT  
   
 ; nom: >NUMBER  (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )   
-;   Converti la chaîne en nombre en utilisant la valeur de BASE.
+;   Convertie la chaîne en nombre en utilisant la valeur de BASE.
 ;   La conversion s'arrête au premier caractère non numérique.
 ; arguments:  
-; 'ud1'	    est initialisé à zéro  
+; 'ud1'	    Est initialisé à zéro  
 ;  c-addr1 Adrese du début de la chaîne à convertir en entier.
 ;  u1      Longueur du tampon à analyser.  
 ; retourne:
@@ -827,13 +832,13 @@ DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
 ; nom: ?SIGN   ( c-addr u -- c-addr' u' f )   
 ;   Vérifie s'il y a un signe '-' à la première postion de la chaîne spécifiée par <c-addr u>
 ;   Retourne f=VRAI si '-' sinon f=FAUX.    
-;   S'il y a un signe avance au delà du signe
+;   S'il y a un signe avance au delà du signe.
 ; arguments:
-;   c-addr   adresse où débute l'analyse.
-;   u        longueur du tampon à analyser.
+;   c-addr   Adresse où débute l'analyse.
+;   u        Longueur du tampon à analyser.
 ; retourne:
-;   c-addr'  adresse incrément au delà du signe '-' s'il y a lieu.
-;   u'       longueur restante dans le tampon.
+;   c-addr'  Adresse incrémentée au delà du signe '-' s'il y a lieu.
+;   u'       Longueur restante dans le tampon.
 ;   f        Indicateur Booléen, VRAI s'il le premier caractère est '-'.   
 DEFWORD "?SIGN",5,,QSIGN ; ( c-addr u -- c-addr' u' f )
     .word OVER,CFETCH,CLIT,'-',EQUAL,TBRANCH,8f-$
@@ -843,13 +848,13 @@ DEFWORD "?SIGN",5,,QSIGN ; ( c-addr u -- c-addr' u' f )
     
 ; nom: ?BASE  ( c-addr u1 -- c-addr' u1' )  
 ;   Vérifie s'il y a un modificateur de base
-;   Si oui modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
+;   Si vrai, modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
 ; arguments:
 ;   c-addr  Adresse du début de la chaîne à analyser.
-;   u1      longueur maximale de la chaîne.
+;   u1      Longueur maximale de la chaîne.
 ; retourne:
-;   c-addr'  adresse incrémentée au delà du caractère modificateur de BASE.
-;   u'       longueur restante de la chaîne.  
+;   c-addr'  Adresse incrémentée au delà du caractère modificateur de BASE.
+;   u'       Longueur restante de la chaîne.  
 DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
     .word OVER,CFETCH,CLIT,'$',EQUAL,ZBRANCH,1f-$
     .word LIT,16,BASE,STORE,BRANCH,8f-$
@@ -866,8 +871,9 @@ DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
 ; arguments:
 ;    c-addr  Adresse de la chaîne comptée.
 ; retourne:
-;   c-addr  0 Adresse orignale et FALSE si ce n'est pas un quoted char.
-;   n	-1 Valeur ascii du caractère et VRAI.  
+;   c-addr&nbsp;0 Faux et adresse orignale si ce n'est pas un quoted char.
+;   ou  
+;   n&nbsp;-1 Vrai et valeur ASCII du caractère.  
 DEFWORD "?QUOTED-CHAR",12,,QQUOTEDCHAR
     .word DUP,COUNT,LIT,3,EQUAL,ZBRANCH,9f-$
     ; s: c-addr c-addr+1
@@ -882,18 +888,18 @@ DEFWORD "?QUOTED-CHAR",12,,QQUOTEDCHAR
 9:  .word DROP,FALSE,EXIT
   
 ; nom: ?NUMBER   ( c-addr -- c-addr 0 | n -1 )  
-;   Conversion d'une chaîne en nombre
-;    c-addr indique le début de la chaîne
+;   Conversion d'une chaîne en nombre, 'c-addr' indique le début de la chaîne.
 ;   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
-;   Accepte aussi 'c'  c'est à dire un caractère ASCII imprimable entre 2 apostrophes.
+;   Accepte aussi un caractère ASCII imprimable entre 2 apostrophes.
 ;   Dans ce cas la valeur de l'entier est la valeur ASCII du caractère.  
 ;   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
 ;   à une position quelconque de la chaîne saisie sauf à la première position.
 ; arguments:
-;   c-addr   adresse de la chaîne à analyser.
+;   c-addr   Adresse de la chaîne à analyser.
 ; retourne:
-;   c-addr 0   S'il la conversio échoue retourne l'adresse et l'indicateur FAUX	
-;   n -1    Si la conversion réussie retourne l'entier et l'indicateur VRAI.  
+;   c-addr&nbsp;0  Faux et l'adresse si ce n'est pas un entier.	
+;   ou  
+;   n&nbsp;-1  Vrai et l'entier.  
 DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
     .word QQUOTEDCHAR,ZBRANCH,2f-$
     .word TRUE,EXIT  
