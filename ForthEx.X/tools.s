@@ -22,8 +22,8 @@
 ;    Outils d'aide au débogage.
   
 ; nom: RPBREAK   ( -- a-addr )
-;   Variable système utilisé par le mot BREAK pour sauvegarder la position
-;   de RSP pour la réentrée.    
+;   Variable système utilisée par le mot BREAK pour sauvegarder la position
+;   de RSP. Utilisé par RESUME.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -31,7 +31,8 @@
 DEFUSER "RPBREAK",7,,RPBREAK ; valeur de RSP après l'appel de BREAK 
     
 ; nom: DBGEN  ( -- a-addr)
-;   Variable système qui contient un indicateur Booléen d'activation/désactivation des breakpoints.    
+;   Variable système qui contient un indicateur Booléen d'activation/désactivation 
+;   des breakpoints. Utilisé par DEBUG.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -41,8 +42,9 @@ DEFUSER "DBGEN",5,,DBGEN ; activation désactivation break points
     
 ; nom: ?DSP  ( -- )    
 ;   Outil de débogage.    
-;   Vérifie si la variable DSP est dans les limites, réinitialise l'ordinateur
-;   en cas d'erreur et affiche un message.
+;   Vérifie si le pointeur de la pile des arguments est dans les limites.
+;   Si le pointeur est hors limites, réinitialise l'ordinateur
+;   et affiche un message d'erreur.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -64,32 +66,32 @@ _overflow:
     mov WREG,fwarm
     reset
     
-; nom: .S   ( i*x -- i*x )    
+; nom: .S   (  --  )    
 ;   Outil de débogage.    
 ;   Affiche le contenu de la pile des arguments sans en modifier le contenu.
-;   La valeur la plus à droit est le sommet de la pile.    
+;   La valeur la plus à droite est le sommet de la pile.    
 ;   FORMAT:  < n >  X1 X2 X3 ... Xn=T
 ;   n est le nombre d'éléments
 ;   Xn  valeurs sur la pile.  
 ; arguments:
-;   i*x   Liste des valeurs sur la pile des arguments.
+;   aucun
 ; retourne:
-;   i*x   La pile est dans son état initial.    
+;   rien
 DEFWORD ".S",2,,DOTS  ; ( -- )
     .word DEPTH,CLIT,'<',EMIT,DUP,DOT,CLIT,'>',EMIT,SPACE
 1:  .word QDUP,ZBRANCH,2f-$,DUP,PICK,DOT,ONEMINUS
     .word BRANCH,1b-$  
 2:  .word EXIT
 
-; nom: .RTN    ( R: i*x -- i*x )  
+; nom: .RTN    (  --  )  
 ;   Outil de débogage.  
 ;   Affiche le contenu de la pile des retours.
 ;   La valeur la plus à droite est le sommet de la pile.  
 ;   FORMAT:  R:  X1 X2 ... XN  
 ; arguments:
-;   R: i*x  Liste des valeurs sur la pile des retours.
+;   aucun
 ; retourne:
-;   R: i*x  Le contenu de la pile n'est pas modifié.  
+;   rien
 DEFWORD ".RTN",4,,DOTRTN ; ( -- )
     .word BASE, FETCH,HEX
     .word CLIT,'R',EMIT,CLIT,':',EMIT
@@ -101,8 +103,8 @@ DEFWORD ".RTN",4,,DOTRTN ; ( -- )
 ;   Outil de débogage.
 ;   Affiche en hexadécimal le contenu d'un région mémoire.
 ; arguments:   
-;   c-addr  adresse du premier octet à afficher.
-;   n nombre d'octets à afficher.
+;   c-addr Adresse du premier octet à afficher.
+;   n Nombre d'octets à afficher.
 ; retourne:
 ;   rien    
 DEFWORD "DUMP",4,,DUMP ; ( addr +n -- )
@@ -119,7 +121,7 @@ DEFWORD "DUMP",4,,DUMP ; ( addr +n -- )
 ;   Outil de débogage.    
 ;   Active/désactive les breaks points.
 ; arguments:
-;   f   Indicateur Booléen,VRAI active les break points.
+;   f   Indicateur Booléen,VRAI active les break points,FAUX les désactives.
 ; retourne: 
 ;   rien    
 DEFWORD "DEBUG",5,,DEBUG ; ( f -- )
@@ -133,7 +135,7 @@ DEFWORD "DEBUG",5,,DEBUG ; ( f -- )
 ;   les piles, des variables ou faire un DUMP.    
 ;   L'application est redémarrée par le mot RESUME.
 ; arguments:
-;   n    Identifie le break point par une valeur entière qui est affiché sur la console inter-active.    
+;   n Identifie le break point par une valeur entière qui est affiché sur la console inter-active.    
 ; retourne:
 ;   rien    
 DEFWORD "BREAK",5,,BREAK ; ( ix n -- ix )

@@ -12,9 +12,9 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:4px;"><p id="RPBREAK">
 <b>RPBREAK</b>   ( -- a-addr )
-<div style="margin-left:5%;">   Variable système utilisé par le mot BREAK pour sauvegarder la position
+<div style="margin-left:5%;">   Variable système utilisée par le mot BREAK pour sauvegarder la position
 </div>
-<div style="margin-left:5%;">   de RSP pour la réentrée.    
+<div style="margin-left:5%;">   de RSP. Utilisé par RESUME.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -30,7 +30,9 @@
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="DBGEN">
 <b>DBGEN</b>  ( -- a-addr)
-<div style="margin-left:5%;">   Variable système qui contient un indicateur Booléen d'activation/désactivation des breakpoints.    
+<div style="margin-left:5%;">   Variable système qui contient un indicateur Booléen d'activation/désactivation 
+</div>
+<div style="margin-left:5%;">   des breakpoints. Utilisé par DEBUG.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -48,9 +50,11 @@
 <b>?DSP</b>  ( -- )    
 <div style="margin-left:5%;">   Outil de débogage.    
 </div>
-<div style="margin-left:5%;">   Vérifie si la variable DSP est dans les limites, réinitialise l'ordinateur
+<div style="margin-left:5%;">   Vérifie si le pointeur de la pile des arguments est dans les limites.
 </div>
-<div style="margin-left:5%;">   en cas d'erreur et affiche un message.
+<div style="margin-left:5%;">   Si le pointeur est hors limites, réinitialise l'ordinateur
+</div>
+<div style="margin-left:5%;">   et affiche un message d'erreur.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -65,12 +69,12 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id=".S">
-<b>.S</b>   ( i*x -- i*x )    
+<b>.S</b>   (  --  )    
 <div style="margin-left:5%;">   Outil de débogage.    
 </div>
 <div style="margin-left:5%;">   Affiche le contenu de la pile des arguments sans en modifier le contenu.
 </div>
-<div style="margin-left:5%;">   La valeur la plus à droit est le sommet de la pile.    
+<div style="margin-left:5%;">   La valeur la plus à droite est le sommet de la pile.    
 </div>
 <div style="margin-left:5%;">   FORMAT:  &lt; n &gt;  X1 X2 X3 ... Xn=T
 </div>
@@ -81,17 +85,17 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;   Liste des valeurs sur la pile des arguments.
-</div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;   La pile est dans son état initial.    
-</div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id=".RTN">
-<b>.RTN</b>    ( R: i*x -- i*x )  
+<b>.RTN</b>    (  --  )  
 <div style="margin-left:5%;">   Outil de débogage.  
 </div>
 <div style="margin-left:5%;">   Affiche le contenu de la pile des retours.
@@ -103,12 +107,12 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>R:</i>&nbsp;&nbsp; i*x  Liste des valeurs sur la pile des retours.
-</div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>R:</i>&nbsp;&nbsp; i*x  Le contenu de la pile n'est pas modifié.  
-</div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
@@ -121,9 +125,9 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:   
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  adresse du premier octet à afficher.
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier octet à afficher.
 </div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; nombre d'octets à afficher.
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Nombre d'octets à afficher.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -141,7 +145,7 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   Indicateur Booléen,VRAI active les break points.
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   Indicateur Booléen,VRAI active les break points,FAUX les désactives.
 </div>
 <div style="margin-left:5%;"><b> retourne: 
 </b></div>
@@ -165,7 +169,7 @@
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Identifie le break point par une valeur entière qui est affiché sur la console inter-active.    
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Identifie le break point par une valeur entière qui est affiché sur la console inter-active.    
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
