@@ -30,3 +30,7 @@ Schématique
 utiliser la carte SD est complété ainsi que pour la RAM externe, l'EEPROM externe et la mémoire FLASH libre du PIC24EP512GP202. 
 
 [1er vidéo de l'utilisation de l'ordinateur](https://youtu.be/jwFQXd6zAQ0)
+
+2017-06-21
+==========
+La documentation des 443 mots du dictionnaire est complétée. Il resterais à créer un tutoriel ForthEx.
