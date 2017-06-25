@@ -1,3 +1,8 @@
+2017-06-25
+----------
+Travail sur tutoriel.html
+Encore un bogue dans BLKED
+
 2017-06-24
 ----------
 Débogage BLKED

@@ -42,49 +42,54 @@ textarea#code{
 <h3>règles du jeux</h3>
 <p>
 	<div><ol>
-		<li>Le serpent ne doit pas toucher à la bordure de l'aire de jeux.</li>
+		<li>Le serpent ne doit pas entrer en collision avec à la bordure de l'aire de jeux.</li>
 		<li>Le serpent ne doit pas se mordre lui-même.</li>
 		<li>Le serpent mange les pastilles qui apparaîssent dans l'aire de jeux.</li>
-		<li>Le pointage correspond à la longueur du serpent.</li>
-		<li>Lorsque le serpent mange une pastille il s'allonge.</li>
-		<li>Le serpent raccourci lorsqu'il manque de nourriture.</li>
+		<li>Le pointage est compté de la façon suivante:
+		<ul>
+			<li>1 pastille dans un coin compte pour 4 points.</li>
+			<li>1 pastille le long d'un mur compte pour 2 points.</li>
+			<li>Les autres pastilles comptent pour 1 point.</li>
+		</ul></li>
+		<li>Lorsque le serpent mange une pastille il s'allonge d'un anneau.</li>
 		<li>Le serpent peut mourrir de faim, s'il ne mange pas assez rapidement les pastilles.</li>
-		<li>Le serpent est toujours en mouvement mais sa direction est contrôlée par les 4 flèches.</li>
+		<li>Le serpent est toujours en mouvement mais sa direction est contrôlée par les flèches gauche et droite.</li>
 	</ol></div>
 </p>
 <h3>L'aire de jeux</h3>
 <p>Le pourtour de l'écran est circonsris par une ligne blanche, le serpent est donc limité à une surface de 62 par 22 pixels. 
    Puisqu'il s'agit d'un écran texte, les pixels ici sont représentés par l'espace d'un caractère. Sur la première ligne de
-   l'écran s'affiche le pointage, et un compte à rebours qui indique combien de secondes de vie le serpent dispose s'il ne
-   mange pas. Ce compte augment chaque fois qu'il mange.</p>
+   l'écran s'affiche le pointage <b>SCORE:</b>, et l'espérance de vie du serpent <b>LIFE:</b> qui se réduit lorsque le serpent
+   mange pas. Ces compteurs augmentent chaque fois qu'il mange.</p>
 <h3>Analyse du programme.</h3>   
 <p>Essayons de voir de quoi nous avons besoins pour réaliser ce jeux.</p>
 <h4>Variables</h4>
 <p>
 	<div><ul>
-		<li><b>SCORE</b>, Cette variable contient le pointage qui est aussi la longueur du serpent.</li>
-		<li><b>LIFE</b>, Cette variable contient l'espérance de vie du serpent en fonction de son niveau d'alimentation. 
-		Un grand serpent nécessite plus de nourriture qu'un petit, il brûle ses calories plus rapidement.</li>
+		<li><b>SCORE</b>, Cette variable contient le pointage.</li>
+		<li><b>SNAKE-LEN</b>, Cette variable indique la longueur du serpent.</li>
+		<li><b>LIFE</b>, Cette variable contient l'espérance de vie du serpent. </li>
+	    <li><b>METAB</b>, Cette variable détermine la vitesse du métabolisme du serpent, augmente avec la longueur du serpent.
+	    Un grand serpent nécessite plus de nourriture qu'un petit, il brûle ses calories plus rapidement.</li>
 		<li><b>SNAKE</b>, Le corps du serpent doit-être représenté par un tableau (vecteur). Chaque élément de ce tableau
-		contient les coordonnées de chaque caractère qui consistue le corps du serpent.</li>
+		contient les coordonnées de chaque caractère qui consistuent le corps du serpent.</li>
 		<li><b>HEAD</b>, Cette variable indique la direction de déplacement de la tête du serpent. Nous voulons que la tête
 		du serpent ressemble à une bouche ouverte, nous allons donc utiliser un caractère différent pour chaque direction.
 		<table border="single">
 			<tr><th>direction</th><th>valeur</th><th>car. tête</th></tr>
-			<tr><td>droite</td><td>0</td><td>&lt;</td></tr>
-			<tr><td>bas</td><td>1</td><td>W</td></tr>
-			<tr><td>gauche</td><td>2</td><td>&gt;</td></tr>
-			<tr><td>haut</td><td>3</td><td>M</td></tr>
+			<tr><td>est</td><td>0</td><td>&lt;</td></tr>
+			<tr><td>sud</td><td>1</td><td>W</td></tr>
+			<tr><td>ouest</td><td>2</td><td>&gt;</td></tr>
+			<tr><td>nord</td><td>3</td><td>M</td></tr>
 		</table>
 		</li>
-		<li><b>C_HEAD</b>, Il s'agit d'un tableau de 4 caractères qui va nous permettre d'obtenir le caractère à afficher
+		<li><b>C-HEAD</b>, Il s'agit d'un tableau de 4 caractères qui va nous permettre d'obtenir le caractère à afficher
 		pour la tête en fonction de la direction. On obtiendra le bon caractère en indiçant le tableau avec la valeur de la variable
 	    <b>HEAD</b>.</li>
 	    <li><b>FOOD</b>, Cette variable contient les coordonnées de la pastille de nourriture. Lorsque la pastille est avalée par le serpent
 	    les coordonnées sont remises à {0,0}.</li>
 	    <li><b>TAIL</b>, Nous avons besoin de savoir où était le dernier anneau du serpent avant sont dernier déplacement.
 	    Cette information va nous permettre d'effacer cet anneau après le déplacement.</li>
-	    <li><b>METAB</b>, Cette variable détermine la vitesse du métabolisme du serpent, augmente avec la longueur du serpent.</li>
 	</ul></div>
 </p>   
 <p>
@@ -95,18 +100,31 @@ textarea#code{
 <h3>Déroulement du progamme (algorithme)</h3>
 <p>
 	<div><ol>
-		<li>Initialisation des variables.</li>
-		<li>Dessin de l'aire de jeux.</li>
-		<li>Dessin du serpent (début boucle de la partie).</li>
-		<li>Affichage du status (pointage et compte à rebours).</li>
-		<li>S'il n'y a pas de pastille dans l'aire de jeux, en générer une dont les coordonnées sont choisies au hasard.</li>
-		<li>Déplacer le serpent d'une position.</li>
-		<li>Délais de la boucle de jeux (contrôle la vitesse du serpent).</li>
-		<li>Vérification de collision avec le mur ou avec lui-même. Si collision terminer partie.</li>
-		<li>Mise à jour du compte à rebours, si zéro terminer la partie.</li>
-		<li>Vérifier si la tête du serpent a gober la pastille, si oui allonger le serpent.</li>
-		<li>Lecture du clavier et mise à jour de la direction si nécessaire.</li>
-		<li>Retourne à l'étape 3.</li>
+		<li>Déclaration des constantes.</li>
+		<li>Déclaration des variables.</li>
+		<li>Initialisation d'une partie:
+		<ul>
+			<li>Initialisation des variables.</li>
+			<li>Création du serpent initial.</li>
+			<li>Dessin des murs.</li>
+		</ul>
+		</li>
+		<li>Boucle de la partie:
+		<ol>
+			<li>S'il n'y a pas de pastille dans l'aire de jeux en créer une.</li>
+			<li>Afficher le status.</li>
+			<li>Dessin du serpent.</li>
+			<li>Mouvement du serpent.</li>
+			<li>Vérification collision, si collision terminer partie.</li>
+			<li>Vérification capture de la pastille, si mangée ajuster les variables SCORE,LIFE,METAB,SNAKE-LEN.</li>
+			<li>Délais vitesse déplacement.</li>
+			<li>Délais ajustement LIFE, si expiré soustraire METAB à LIFE. Si LIFE&lt;=0 fin de la partie.</li>
+			<li>Lire clavier, si touche <i>flèche-gauche</i> ou <i>flèche-droite</i> modifier variable HEAD.</li>
+			<li>Boucler à l'étape 1.</li>
+		</ol>
+		</li>
+		<li>Signaler fin de la partie.</li>
+		<li>Attendre touche pour intialiser la prochaine partie ou (Q)uitter.</li>
 	</ol></div>
 </p>  
 <h3>Débutons le codage</h3>
