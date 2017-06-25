@@ -1,0 +1,168 @@
+\ jeux serpent
+\ constantes
+128 constant max-len \ longueur maximale du serpent
+\ directions deplacement
+0 constant east
+1 constant south
+2 constant west
+3 constant east
+62 constant play-width \ largeur surface jeux
+22 constant play-height \ hauteur surface jeux
+2 constant x-offset \ pour affichage
+2 constant y-offset \ pour affichage
+2 constant scale \ facteur entre score et life.
+\ variables scalaires
+variable score \ pointage et longueur serpent
+variable life \ esperance de vie du serpent
+variable metab \ vitesse de metabolisme du serpent
+variable head \ direction du serpent
+variable food \ icoord de la pastille de nourriture
+variable tail \ icoor dernier anneau serpent
+variable snake-len \ longueur du serpent
+\ vector va permette de creer des variabls tableau 1D.
+: vector create cells allot does> swap cells + ;
+bloc#: 1   size: 827   col: 49     line: 23                     
+\creation du serpent
+max-len vector snake
+4 vector c-head \ caracteres representant la tete du serpent
+\ initialisation c-head
+'<' east c-head !
+'W' south c-head !
+'>' west c-head !
+'M' north c-head !
+\ conversion entier vers coordonnees
+: icoord>xy ( u -- x y )
+   256 /mod ;
+\ conversion coordonnees vers entier
+: xy>icoord ( x y -- u )
+   256 * + ;
+\ copie icoord dernier anneau serpent dans tail
+: tail! ( -- )
+   score 1- @ snake @ tail ! ;
+\ initialisation du serpent
+: snake-init ( -- )
+   32 12 score @ 0 do 2dup xy>icoord i snake !
+   swap 1- swap loop tail! ;
+
+
+\ bloc#: 2   size: 572   col: 29     line: 21                     
+\ lors de la creation d'une pastille il faut valider
+\ que sa position n'est pas en collision avec le serpent
+: valid-food?( u -- f )
+   true swap score @ 0 do
+       i snake @ over = if drop false swap leave then
+       loop drop ;
+\ creation pastille nourriture
+: new-food ( -- u )
+   repeat
+   rand abs play-width mod \ x
+   rand abs play-height mod \ y
+   xy>icoord dup valid-food? until
+   food ! ;
+\ verification serpent se mord
+: snake-bit? ( -- f )
+   false 0 snake @ score @ 1 do
+       i snake @ over = if drop true swap leave then
+       loop drop ;
+
+
+
+
+
+\ bloc#: 3   size: 566   col: 19     line: 18                     
+\ verification collision serpent vs murs
+: collision? ( -- f )
+   0 snake @ icoord>xy case
+   -1 of true endof
+   play-height of true endof
+   drop
+   -1 of true endof
+   play-width of true endof
+   >r false r>
+   endcase
+\ dessine les murs de l'arene.
+: draw-walls ( -- )
+   cls 1 whiteln 24 whiteln
+   24 2 do 1 i at-xy space 64 i at-xy space loop
+   false b/w ;
+\ dessine un pixel
+: draw-pixel ( c x y -- )
+   y-offset + swap x-offset + swap at-xy emit ;
+\ dessin du serpent
+: draw-snake ( -- )
+   true b/w head @ c-head @ 0 snake @ icoord>xy draw-pixel
+   score @ 1 do 'O' i snake @ icoord>xy draw-pixel false b/w ;
+
+\ bloc#: 4   size: 621   col: 63     line: 22                     
+ \ affiche score et life
+: status true b/w 1 1 at-xy s" SCORE:" type score @ .
+  16 1 at-xy s" LIFE:" type life @ . false b/w ;
+
+\ les pastilles dans un coins valent 4  points
+: in-corner? ( u1 -- f )
+   icoord>xy case
+   0 of case
+       0 of true endof
+       play-width 1- of true endof
+       >r false r>
+       endcase
+   play-height 1- of case
+       0 of true endof
+       play-width 1- of true endof
+       >r false r>
+       endcase
+   >r false r>
+   endcase ;
+
+
+
+
+\ bloc#: 5   size: 474   col: 13     line: 19                     
+ \ les pastilles qui sont le long du mur valent 2 points
+: on-wall? ( u1 -- f )
+   icoord>xy case
+       0 of true endof
+       play-height 1- of true endof
+       drop
+       0 of true endof
+       play-width 1- of true endof
+       >r false r>
+       endcase ;
+
+\ la pastille a ete mangee, ajuste le score
+: score+ ( -- )
+   food @ in-corner? if 4 score +! else
+   food @ on-wall? if 2 score +! else 1 food +! then
+   then ;
+
+\ rallonge le serpent
+: snake+ ( -- )
+   snake-len @ 1+ dup snake-len ! tail @  snake ! ;
+
+
+
+\ bloc#: 6   size: 521   col: 52     line: 20                     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bloc#: 7   size: 23    col: 2  line: 1                          
