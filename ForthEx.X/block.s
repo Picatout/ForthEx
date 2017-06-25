@@ -388,22 +388,24 @@ DEFWORD "BLOCK",5,,BLOCK
     .word ASSIGN,DUP,TODATA
     .word DATA,EXIT
 
-; BLKFLITER ( c-addr u1 -- u2 )
-;   Scan le bloc jusqu'au premier caractère non valide et retourne le nombre de caractère valides.
+; TEXT-BLOCK ( n+ -- c-addr u )
+;   Charge un bloc et filtre le bloc pour traitement en mode texte.    
+;   Le bloc est tronquée au premier caractère non valide.
 ;   Les caractères acceptés sont 32..126|VK_CR
 ; arguments:
-;   c-addr  Adresse premier octet de donnée.
-;   u1      Grandeur du bloc 
+;   n+  Numéro du bloc.
 ; retourne:
-;   u2      Nombre d'octets valides.    
-HEADLESS BLKFILTER,HWORD ; ( c-addr u1 -- u2 )
-    .word DUP,ZBRANCH,9f-$,DUP,TOR,LIT,0,DODO 
+;   c-addr Adresse du premier caractère.    
+;   u Nombre de caractères.
+DEFWORD "TEXT-BLOCK",10,,TEXTBLOCK    
+    .word BLOCK,DUP,TBRANCH,1f-$,DUP,EXIT ; S: 0 0 
+1:  .word DUP,TOR,LIT,BLOCK_SIZE,LIT,0,DODO 
 1:  .word DUP,ECFETCH,DUP,QPRTCHAR,ZBRANCH,2f-$
     .word DROP,BRANCH,4f-$
-2:  .word LIT,VK_CR,EQUAL,ZBRANCH,8f-$
-4:  .word ONEPLUS,DOLOOP,1b-$,RFROM,BRANCH,9f-$
-8:  .word DOI,UNLOOP,RDROP  
-9:  .word NIP,EXIT
+2:  .word LIT,VK_CR,EQUAL,TBRANCH,4f-$
+    .word UNLOOP,BRANCH,9f-$
+4:  .word ONEPLUS,DOLOOP,1b-$
+9:  .word RFROM,TUCK,MINUS,EXIT
 
 ; nom: LOAD ( i*x n+ -- j*x )
 ;   Évalue un bloc. Si le bloc n'est pas déjà dans un buffer il est chargé
@@ -415,10 +417,9 @@ HEADLESS BLKFILTER,HWORD ; ( c-addr u1 -- u2 )
 ; retourne:
 ;    j*x  État de la pile des arguments après l'évaluation du bloc n+.
 DEFWORD "LOAD",4,,LOAD
-    .word DUP,BLK,STORE,BLOCK,DUP,LIT,BLOCK_SIZE,BLKFILTER ; s: c-addr  u
-    .word DUP,ZBRANCH,9f-$
+    .word DUP,TEXTBLOCK,QDUP,TBRANCH,1f-$,TWODROP,EXIT
+1:  .word ROT,BLK,STORE ; s: c-addr  u
     .word EVAL,EXIT
-9:  .word NIP,BLK,STORE,EXIT
     
 ; nom: SAVE-BUFFERS ( -- )  
 ;   Sauvegarde tous les buffers qui ont été modifiés.
@@ -464,12 +465,13 @@ DEFWORD "FLUSH",5,,FLUSH
 ; retourne:
 ;   rien    
 DEFWORD "LIST",4,,LIST
-    .word DUP,SCR,STORE,EDCLS
-    .word BLOCK,DUP,LIT,BLOCK_SIZE,BLKFILTER,LIT,0,DOQDO,BRANCH,9f-$ 
-1:  .word DUP,ECFETCH,DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$,DROP,EDCRLF,BRANCH,3f-$
-2:  .word EDPUTC
+    .word DUP,TEXTBLOCK,QDUP,TBRANCH,1f-$,TWODROP,EXIT
+1:  .word ROT,SCR,STORE,CLS
+    .word LIT,0,DODO 
+1:  .word DUP,ECFETCH,DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$,DROP,CR,BRANCH,3f-$
+2:  .word EMIT
 3:  .word ONEPLUS,DOLOOP,1b-$
-9:  .word DROP,TEXTEND,EXIT
+9:  .word DROP,EXIT
 
   
 ; REFILL  ( -- f )
@@ -503,49 +505,5 @@ DEFWORD "THRU",4,,THRU
     .word ONEPLUS,SWAP,DODO
 1:  .word DOI,LOAD,DOLOOP,1b-$
     .word EXIT
-
-; nom: SCR-SIZE ( -- n )
-;    Calcule la taille que la mémoire tampon vidéo occuperait dans un bloc 
-;    s'il était sauvegardé avec SCR>BLK. Seul les lignes 1..23 sont sauvegardées.
-;    BLKED utilise la ligne 24 comme ligne d'état.    
-;        
-; arguments:
-;   aucun
-; retourne:
-;   n Taille qui serait occupée par l'écran dans un bloc.    
-DEFWORD "SCR-SIZE",8,,SCRSIZE ; ( -- n )
-    .word LIT,0,EDITLN,OVER,DODO
-1:  .word SCRBUF,DOI,LIT,CPL,DUP,TOR
-    .word STAR,PLUS,RFROM,MINUSTRAILING,SWAP,DROP,ONEPLUS
-    .word PLUS,DOLOOP,1b-$
-    .word EXIT
-    
-    
-; nom: SCR>BLK  ( n+ -- f )
-;   Sauvegarde de la mémoire tampon de l'écran dans un bloc sur périphérique de stockage.
-;   Seul lignes 1..23 sont sauvegardées.    
-;   Si le contenu de l'écran n'entre pas dans un bloc, l'opération est abaondonnée et retourne faux.
-;   Les espaces qui termines les lignes sont supprimés et chaque ligne est complétée
-;   par un VK_CR.
-;   * ne fonctionne qu'avec LOCAL CONSOLE. Cependant BLKEDIT utilise le frame buffer
-;     local même lorsque la console est en mode REMOTE, donc BLKEDIT peut sauvegarder
-;     le bloc en édition.    
-; arguments:
-;   n+    numéro du bloc où sera sauvegardé l'écran.
-; retourne:
-;   f     indicateur booléen, T si sauvegarde réussie, F si trop grand.
-DEFWORD "SCR>BLK",7,,SCRTOBLK
-    .word SCRSIZE,LIT,BLOCK_SIZE,UGREATER,ZBRANCH,2f-$
-    ; trop grand
-    .word NOT,EXIT
-2:  .word FALSE,CURENBL
-    .word DUP,BUFFER,SWAP,BLKDEVFETCH,BUFFEREDQ,UPDATE ; s: data
-    .word EDITLN,LIT,0,DODO 
-1:  .word TOR,DOI,ONEPLUS,LNADR ; S: scrline r: data
-    .word LIT,CPL,MINUSTRAILING,TOR ; S: scrline r: data len
-    .word TWORFETCH,MOVE ; R: data len
-    .word TWORFROM,PLUS,LIT,VK_CR,OVER,CSTORE,ONEPLUS,DOLOOP,1b-$
-    .word LIT,0,SWAP,ONEMINUS,CSTORE,SAVEBUFFERS,LIT,-1
-    .word TRUE,CURENBL,EXIT
 
     

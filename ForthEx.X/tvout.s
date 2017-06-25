@@ -281,13 +281,13 @@ toggle_char:
 cursor_enable:
     push W0
     btsc.b fcursor,#CURSOR_ACTIVE
-    return
+    bra 9f
     mov	#CURSOR_DELAY, W0
     mov W0, cursor_dly
     clr.b cursor_sema
     mov #1<<CURSOR_ACTIVE,W0
     mov.b WREG, fcursor
-    pop W0
+9:  pop W0
     return
     
 cursor_disable:
@@ -430,7 +430,7 @@ HEADLESS TVOUT_INIT, CODE ;tvout_init:
     mov #CURSOR_DELAY,W0
     mov W0, cursor_dly
     clr.b cursor_sema
-    bset fcursor, #CURSOR_ACTIVE
+;    bset fcursor, #CURSOR_ACTIVE
     bclr fcursor, #CURSOR_INV
 .ifdef BLACKLEVEL    
     mov #2*HSYNC,W0
@@ -842,14 +842,13 @@ HEADLESS LCHOME,CODE
 ;   rien
 HEADLESS LCEND,HWORD    
 ;DEFWORD "LC-END",6,,LCEND
-    .word FALSE,CURENBL
     .word CURADR,LIT,CPL-1,DUP,INVERT,ROT,AND,SWAP ; S: c-addr CPL-1
 1:  .word TWODUP,PLUS,ECFETCH,BL,EQUAL,ZBRANCH,2f-$    
     .word DUP,ZEROEQ,TBRANCH,4f-$
     .word ONEMINUS,BRANCH,1b-$
 2:  .word DUP,LIT,CPL-1,NOTEQ,MINUS 
 4:  .word ONEPLUS,SETX
-    .word DROP,TRUE,CURENBL  
+    .word DROP
     .word EXIT
   
 ; LC-UP   ( -- )
@@ -895,7 +894,7 @@ HEADLESS LCDOWN, CODE
 ; retourne:
 ;   rien    
 HEADLESS LCTOP,HWORD
-    .word FALSE,CURENBL,LIT,1,DUP,LCATXY,TRUE,CURENBL,EXIT
+    .word LIT,1,DUP,LCATXY,EXIT
     
 ; LC-BOTTOM ( -- )
 ;   Déplace le curseur dans le coin inférieur droit.
@@ -904,7 +903,7 @@ HEADLESS LCTOP,HWORD
 ; retourne:
 ;   rien    
 HEADLESS LCBOTTOM,HWORD
-    .word FALSE,CURENBL,LIT,CPL,LIT,LPS,LCATXY,TRUE,CURENBL,EXIT
+    .word LIT,CPL,LIT,LPS,LCATXY,EXIT
     
 ; nom: TGLCHAR  ( -- )
 ;   Console locale.    
@@ -1004,12 +1003,11 @@ HEADLESS LCTAB,HWORD
     .word LCXYQ,SWAP,HTAB,CFETCH,SWAP ; s: line tab col
     .word OVER,SLASH,OVER,STAR,PLUS,SWAP,LCATXY,EXIT
     
-;    .word FALSE,CURENBL
 ;2:  .word GETX,DUP,LIT,CPL,HTAB,CFETCH,MINUS,LESS,TBRANCH,2f-$
 ;    .word DROP,BRANCH,9f-$
 ;2:  .word ONEMINUS,HTAB,CFETCH,DUP,TOR,SLASH,ONEPLUS,RFROM,STAR
 ;    .word ONEPLUS,SETX    
-;9:  .word TRUE,CURENBL,EXIT
+;9:  .word EXIT
     
 ;  LC-DEL ( -- )
 ;   Console locale.  
@@ -1020,11 +1018,10 @@ HEADLESS LCTAB,HWORD
 ;   rien
 HEADLESS LCDEL,HWORD    
 ;DEFWORD "LC-DEL",6,,LCDEL
-    .word FALSE,CURENBL
     .word CURADR,ONEPLUS ; S: c-addr
     .word LIT,CPL,GETX,ONEPLUS,DOQDO,BRANCH,2f-$
 1:  .word DUP,ECFETCH,OVER,ONEMINUS,CSTORE,ONEPLUS,DOLOOP,1b-$
-2:  .word ONEMINUS,BL,SWAP,CSTORE,TRUE,CURENBL,EXIT
+2:  .word ONEMINUS,BL,SWAP,CSTORE,EXIT
     
 ;  LC-INSRT ( -- )
 ;   Console locale.  
@@ -1089,9 +1086,8 @@ HEADLESS LCDELLN,CODE
 ;   rien
 HEADLESS LCDELEOL,HWORD    
 ;DEFWORD "LC-DELEOL",9,,LCDELEOL
-    .word FALSE,CURENBL
     .word CURADR,LIT,CPL,GETX,MINUS,BL,FILL
-    .word TRUE,CURENBL,EXIT
+    .word EXIT
     
     
     
@@ -1104,12 +1100,11 @@ HEADLESS LCDELEOL,HWORD
 ;   rien    
 HEADLESS LCRMVLN,HWORD    
 ;DEFWORD "LC-RMVLN",8,,LCRMVLN
-    .word FALSE,CURENBL
     .word GETY,LNADR,TOR,RFETCH,LIT,CPL,PLUS
     .word DUP,SCRBUF,LIT,CPL,LIT,LPS,STAR,PLUS,SWAP,MINUS
     .word RFROM,SWAP,MOVE
     .word LIT,1,GETY,LIT,LPS,SETY,LCDELLN,LCATXY
-    .word TRUE,CURENBL,EXIT
+    .word EXIT
    
     
 ; LC-INSRTLN ( -- )

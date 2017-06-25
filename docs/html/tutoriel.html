@@ -16,7 +16,20 @@ div{
 	width:90%;
 	padding:5px;
 }
-</style>	
+textarea#code{
+	align:left;
+	min-width:40%;
+    max-width:60%;
+//    margin:auto;
+    line-height:1.5;
+    border-radius:4px;
+    border:1px solid #F7E98D;
+    margin:4px;
+    font:13px Tahoma, cursive;
+    font-smoothing:subpixel-antialiased;
+    background-color:#F9EFAF;
+    }
+</style>
 </head>
 <body>
 <h2>Présentation</h2>
@@ -28,7 +41,7 @@ div{
 </p>
 <h3>règles du jeux</h3>
 <p>
-	<ol>
+	<div><ol>
 		<li>Le serpent ne doit pas toucher à la bordure de l'aire de jeux.</li>
 		<li>Le serpent ne doit pas se mordre lui-même.</li>
 		<li>Le serpent mange les pastilles qui apparaîssent dans l'aire de jeux.</li>
@@ -37,7 +50,7 @@ div{
 		<li>Le serpent raccourci lorsqu'il manque de nourriture.</li>
 		<li>Le serpent peut mourrir de faim, s'il ne mange pas assez rapidement les pastilles.</li>
 		<li>Le serpent est toujours en mouvement mais sa direction est contrôlée par les 4 flèches.</li>
-	</ol>
+	</ol></div>
 </p>
 <h3>L'aire de jeux</h3>
 <p>Le pourtour de l'écran est circonsris par une ligne blanche, le serpent est donc limité à une surface de 62 par 22 pixels. 
@@ -48,13 +61,13 @@ div{
 <p>Essayons de voir de quoi nous avons besoins pour réaliser ce jeux.</p>
 <h4>Variables</h4>
 <p>
-	<ul>
-		<div><li><b>SCORE</b>, Cette variable contient le pointage qui est aussi la longueur du serpent.</li></div>
-		<div><li><b>LIFE</b>, Cette variable contient l'espérance de vie du serpent en fonction de son niveau d'alimentation. 
-		Un grand serpent nécessite plus de nourriture qu'un petit, il brûle ses calories plus rapidement.</li></div>
-		<div><li><b>SNAKE</b>, Le corps du serpent doit-être représenté par un tableau (vecteur). Chaque élément de ce tableau
-		contient les coordonnées de chaque caractère qui consistue le corps du serpent.</li></div>
-		<div><li><b>HEAD</b>, Cette variable indique la direction de déplacement de la tête du serpent. Nous voulons que la tête
+	<div><ul>
+		<li><b>SCORE</b>, Cette variable contient le pointage qui est aussi la longueur du serpent.</li>
+		<li><b>LIFE</b>, Cette variable contient l'espérance de vie du serpent en fonction de son niveau d'alimentation. 
+		Un grand serpent nécessite plus de nourriture qu'un petit, il brûle ses calories plus rapidement.</li>
+		<li><b>SNAKE</b>, Le corps du serpent doit-être représenté par un tableau (vecteur). Chaque élément de ce tableau
+		contient les coordonnées de chaque caractère qui consistue le corps du serpent.</li>
+		<li><b>HEAD</b>, Cette variable indique la direction de déplacement de la tête du serpent. Nous voulons que la tête
 		du serpent ressemble à une bouche ouverte, nous allons donc utiliser un caractère différent pour chaque direction.
 		<table border="single">
 			<tr><th>direction</th><th>valeur</th><th>car. tête</th></tr>
@@ -63,16 +76,16 @@ div{
 			<tr><td>gauche</td><td>2</td><td>&gt;</td></tr>
 			<tr><td>haut</td><td>3</td><td>M</td></tr>
 		</table>
-		</li></div>
-		<div><li><b>C_HEAD</b>, Il s'agit d'un tableau de 4 caractères qui va nous permettre d'obtenir le caractère à afficher
+		</li>
+		<li><b>C_HEAD</b>, Il s'agit d'un tableau de 4 caractères qui va nous permettre d'obtenir le caractère à afficher
 		pour la tête en fonction de la direction. On obtiendra le bon caractère en indiçant le tableau avec la valeur de la variable
-	    <b>HEAD</b>.</li></div>
-	    <div><li><b>FOOD</b>, Cette variable contient les coordonnées de la pastille de nourriture. Lorsque la pastille est avalée par le serpent
-	    les coordonnées sont remises à {0,0}.</li></div>
-	    <div><li><b>TAIL</b>, Nous avons besoin de savoir où était le dernier anneau du serpent avant sont dernier déplacement.
-	    Cette information va nous permettre d'effacer cet anneau après le déplacement.</li></div>
-	    <div><li><b>METAB</b>, Cette variable détermine la vitesse du métabolisme du serpent, augmente avec la longueur du serpent.</li></div>
-	</ul>
+	    <b>HEAD</b>.</li>
+	    <li><b>FOOD</b>, Cette variable contient les coordonnées de la pastille de nourriture. Lorsque la pastille est avalée par le serpent
+	    les coordonnées sont remises à {0,0}.</li>
+	    <li><b>TAIL</b>, Nous avons besoin de savoir où était le dernier anneau du serpent avant sont dernier déplacement.
+	    Cette information va nous permettre d'effacer cet anneau après le déplacement.</li>
+	    <li><b>METAB</b>, Cette variable détermine la vitesse du métabolisme du serpent, augmente avec la longueur du serpent.</li>
+	</ul></div>
 </p>   
 <p>
 	Le corps du serpent et les pastilles de nourritures seront représentés par le caractère <b>O</b>.<br>
@@ -81,67 +94,154 @@ div{
 </p>
 <h3>Déroulement du progamme (algorithme)</h3>
 <p>
-	<ol>
-		<div><li>Initialisation des variables.</li></div>
-		<div><li>Dessin de l'aire de jeux.</li></div>
-		<div><li>Dessin du serpent (début boucle de la partie).</li></div>
-		<div><li>Affichage du status (pointage et compte à rebours).</li></div>
-		<div><li>S'il n'y a pas de pastille dans l'aire de jeux, en générer une dont les coordonnées sont choisies au hasard.</li></div>
-		<div><li>Déplacer le serpent d'une position.</li></div>
-		<div><li>Délais de la boucle de jeux (contrôle la vitesse du serpent).</li></div>
-		<div><li>Vérification de collision avec le mur ou avec lui-même. Si collision terminer partie.</li></div>
-		<div><li>Mise à jour du compte à rebours, si zéro terminer la partie.</li></div>
-		<div><li>Vérifier si la tête du serpent a gober la pastille, si oui allonger le serpent.</li></div>
-		<div><li>Lecture du clavier et mise à jour de la direction si nécessaire.</li></div>
-		<div><li>Retourne à l'étape 3.</li></div>
-	</ol>
+	<div><ol>
+		<li>Initialisation des variables.</li>
+		<li>Dessin de l'aire de jeux.</li>
+		<li>Dessin du serpent (début boucle de la partie).</li>
+		<li>Affichage du status (pointage et compte à rebours).</li>
+		<li>S'il n'y a pas de pastille dans l'aire de jeux, en générer une dont les coordonnées sont choisies au hasard.</li>
+		<li>Déplacer le serpent d'une position.</li>
+		<li>Délais de la boucle de jeux (contrôle la vitesse du serpent).</li>
+		<li>Vérification de collision avec le mur ou avec lui-même. Si collision terminer partie.</li>
+		<li>Mise à jour du compte à rebours, si zéro terminer la partie.</li>
+		<li>Vérifier si la tête du serpent a gober la pastille, si oui allonger le serpent.</li>
+		<li>Lecture du clavier et mise à jour de la direction si nécessaire.</li>
+		<li>Retourne à l'étape 3.</li>
+	</ol></div>
 </p>  
 <h3>Débutons le codage</h3>
 <p>
 	À ce point çi nous disposons suffisamment d'information pour débuter l'écriture du code. Si nous avons manquer un point nous nous ajusterons en
 	cours de route. Mais d'abord il faut répondre à quelques questions.
-	<ul>
-	<div><li>Quel sera la longueur initiale du serpent?</li></div>	
-	<div><li>Est-ce que le serpent a une position et une direction initiale fixes, où laissons-nous ça au hasard.</li></div>
-	<div><li>Quel est la relation entre les variables <b>SCORE</b>, <B>LIFE</B>, <B>DECAY</B>?</li></div>
-	</ul>
-	On a dit que plus le serpent est long plus il brûle ses calories rapidement donc <b>DECAY</b> est proportionnel à longueur du serpent. Par contre
+	<div><ul>
+	<li>Quel sera la longueur initiale du serpent?</li>
+	<li>Est-ce que le serpent a une position et une direction initiale fixes, où laissons-nous ça au hasard?</li>
+	<li>Quel est la relation entre les variables <b>SCORE</b>, <B>LIFE</B>, <B>DECAY</B>?</li>
+	</ul></div>
+	<div>On a dit que plus le serpent est long plus il brûle ses calories rapidement donc <b>DECAY</b> est proportionnel à longueur du serpent. Par contre
 	la valeur de <b>LIFE</b> peut-être une valeur fixe mais de combien allons augmenter cette valeur lorsque le serpent avale une pastille? Il est difficile
 	de répondre a des questions, car ces valeurs influences directement la dynamique du jeux. Nous allons fixer ces valeurs pour le moment et nous ajuster
-	en cours de route. Commençons par créer les variables.
+	en cours de route. Commençons par créer les variables.<br>
+	En Forth il y a 2 types de commentaires, les commentaires qui débutent par le mot <b>\</b> et se termine à la fin de la ligne et les commenataires
+	qui débutent par le mot <b>(</b> et se termine par le délimiteur <b>)</b>. J'ai bien dit que <b>\</b> et <b>(</b> étaient des mots Forth donc ils sont
+	séparés des autres mots par un espace. exemples:<br>
+	<textarea id="code" style="height:80px;">
+	\ Ceci est un commentaire qui se termine à la fin de ligne.
+	( Ceci est un commentaire qui se termine ici.)
+	( Je peu mettre du code après ce commentaire.) 314 CONSTANT 100PI
+	\ Je viens de créer une constante qui s'appelle 100PI 
+	</textarea></div>
 </p>
 <p>
-	<div>\ création des variables, elles sont inialisée à 0 lors de leur création.</div>
-	<div>VARIABLE SCORE \ pointage</div>
-	<div>VARIABLE LIFE \ espérance de vie</div>
-	<div>VARIABLE METAB \ vitesse du métabolisme du serpent.</div>
-	<div>VARIABLE HEAD \ Indique la direction de déplacement de la tête du serpent.</div>
-	<div>VARIABLE FOOD \ Contient les coordonnées de la pastille de nourriture.</div>
-	<div>VARIABLE TAIL \ contient les coordonnées de la queue du serpent.</div>
+	Commençons donc à créer notre programme snake.<br>
+	<textarea id="code" style="height:150px;">
+	\ création des variables, elles sont inialisée à 0 lors de leur création.
+	VARIABLE SCORE \ pointage
+	VARIABLE LIFE \ espérance de vie
+	VARIABLE METAB \ vitesse du métabolisme du serpent.
+	VARIABLE HEAD \ Indique la direction de déplacement de la tête du serpent.
+	VARIABLE FOOD \ Contient les coordonnées de la pastille de nourriture.
+	VARIABLE TAIL \ contient les coordonnées de la queue du serpent.
+	</textarea>
 </p>
 <p>
 	Il nous reste encore 2 variables à créer mais ces variables sont de type tableau (quoique je préfère le mot vecteur). Avant de créer ces 2 variables vecteurs
-	je vais définir un mot particulier appellé VECTOR. Ce mot est un mot qui sert à créer d'autres mots, ou si vous préférez il sert à créer un classe de mots de
-	la même manière que le mot <b>VARIABLE</b> nous a permis de créer des objets de type <i>variable</i>, le mot <b>VECTOR</b> va nous permettre de créer des <i>tableaux</i>.
-	<div>: VECTOR CREATE CELLS ALLOT DOES&gt; SWAP CELLS + ;</div>
+	je vais définir un mot particulier appellé <b>VECTOR</b>. Ce mot est un mot qui sert à créer une classe de mots,de la même manière que le mot 
+	<b>VARIABLE</b> nous a permis de créer des objets de type <i>variable</i>, le mot <b>VECTOR</b> va nous permettre de créer des objets de type <i>tableau</i>.
+	<br>
+	<textarea id="code" style="height:80px;">
+		\ VECTOR va nous permettre de créer des tableaux à 1 dimension.
+		: VECTOR ( cccc -- )
+		  CREATE CELLS ALLOT DOES&gt; SWAP CELLS + ;
+    </textarea>
 </p> 
 <p>
-	La création du mot VECTOR fait appel à un concept avancé du langage Forth, je vais donc prendre le temps d'expliquer en détail de quoi il s'agit.
-	La définition commence par le mot <b>:</b> . Ce mot extrait le mot qui suis du flux d'entrée, dans ce cas si il s'agit du mot <b>VECTOR</b> et cré une
-	nouvelle entrée dans le dictionnaire qui porte ce nom. Ensuite la valeur de la variable système STATE est modifiée pour indiquer qu'à partir de maintenant
-	les mots qui suivent doivent-être compilés comme étant la définition du mot qui vient d'être ajouté dans le dictionnaire. Donc les mots <b>CREATE</b>,
-	<B>CELLS</B> et <B>ALLOT</B> seront compilés plutôt qu'exécutés. Par contre le mot <b>DOES&gt;</b> est un mot <i>immédiat</i>. Les mots immmédiats sont
-	exécutés même lorsque l'interpréteur est en mode compilation. Le mot <b>DOES&gt;</b> est difficile à comprendre. En gros il termine la définition en
-	cours de compilation. Dans ce cas çi il s'agit de la définition de <b>VECTOR</b> et commence à compiler une nouvelle définition anomyme composées des mots
-	qui le suivents jusqu'au <b>;</b>. Le mot <b>;</b> termine une compilation débutée avec le mot <b>:</b> et remet la variable STATE à zéro ce qui signifit
-	qu'on repasse en mode interprétation. Ce code anomyme compilé par <b>DOES&gt;</b> est le code qui va être exécuté par les mots qui seront créés par le mot
-	<b>VECTOR</b>.
+	Comme la définition de <b>VECTOR</b> fait appel à un concept avancé de Forth et que ce tutoriel est une introduction au langage Forth, je ne vous expliquerez
+	pas ici le fonctionnement de <b>CREATE</b> et <b>DOES&gt;</b>. Pour le moment ils vous suffit de savoir qu'avec ce nouveau mot nous allons pouvoir créer
+	des tableaux à une dimension.
 </p>
 <p>
-	Donc lorsque l'interpréteur à terminé la lecture de cette ligne on a un nouveau mot dans le dictionnaire, <b>VECTOR</b> et on va se servir de ce mot
-	pour créer des variables de type TABLEAU.
-	<div>64 VECTOR SNAKE \ Cette variable tableau de 64 éléments va contenir les coordonnées de chaque anneau du serpent.</div>
-	<div>4 VECTOR C_HEAD \ Cette variable tableau de 4 éléments va contenir les caractères de la tête du serpent.</div>
+	Donc lorsque l'interpréteur à terminé la lecture du code ci-haut on a un nouveau mot dans le dictionnaire, <b>VECTOR</b> et on va s'en servir
+	pour créer des variables de type <i>tableau</i>. La définition du mot commence par <b>:</b> et se termine par <b>;</b>. Le mot qui suis <b>:</b> est 
+	le nom du mot qu'on ajoute au dictionnaire Forth, en l'occurence il s'agit du mot <b>VECTOR</b>.<br>
+	<textarea id="code" style="height:300px;">
+	128 CONSTANT MAX-LEN \ longueur maximale du serpent.
+	MAX-LEN VECTOR SNAKE \ Cette variable tableau de 128 éléments va
+	            \ contenir les coordonnées de chaque anneau du serpent.
+	4 VECTOR C_HEAD \ Cette variable tableau de 4 éléments va contenir
+	                \ les caractères de la tête du serpent.
+	\ constantes directions
+	0 CONSTANT EAST
+	1 CONSTANT SOUTH
+	2 CONSTANT WEST
+	3 CONSTANT NORTH                
+    \ initialisation du tableau C_HEAD
+    '<' EAST C_HEAD !
+    'W' SOUTH C_HEAD !
+    '>' WEST C_HEAD !
+    'M' NORTH C_HEAD !
+    \ aire de jeux
+    62 CONSTANT PLAY-WIDTH	                
+    22 CONSTANT PLAY-HEIGHT
+    2 CONSTANT X-OFFSET \ translation x pour l'affichage
+    2 CONSTANT Y-OFFSET  \ translation y pour l'affichage
+    \ facteur d'échelle entre SCORE et LIFE
+    3 CONSTANT SCALE
+	</textarea>
+</p>
+<p>
+	J'ai pris la décision qu'au départ le serpent est au centre de l'écran qu'il a une longueur de 4 et qu'il se déplace vers l'est. J'ai aussi décidé
+	que <b>METAB</b> équivaudrait au logarithme en base 2 de la longueur du serpent. Donc si le score est à 4 le serpent perd 2 unités LIFE à chaque seconde. Si sa
+	longueur est de 16 il perd 4 unités LIFE à chaque seconde, etc. On va donc procéder à l'initialisation des variables.<br>
+	<textarea id="code" style="height:400px;">
+		\ initialiation des variables.
+		4 SCORE ! \ longueur initiale du serpent.
+		2 METAB ! \ vitesse du métabolisme.
+		SCORE SCALE * LIFE ! \ espérance de vie.
+		EAST HEAD ! \ direction initial du serpent
+		
+		\ les coordonnées sont conservées dans un entier
+		\ non signé. L'octet fort est la coordonnée y
+		\ l'octet faible la coordonnée x.
+		\ conversion entier vers coordonnées.
+		: coord>xy  ( u -- x y )
+		  256 /mod ;
+		\ conversion coordonnées vers entier
+		: xy>coord ( x y -- u )
+		  256 * + ;
+		\ ce mot va servir à copier la valeur de la queue 
+		\ du serpent dans la variable TAIL.  
+		: tail-set ( -- )
+		   SCORE @ 1- SNAKE @ TAIL ! ;
+		\ initialisation du serpent
+		: snake-init  ( -- )
+		  32 12 SCORE @ 0 do 2dup xy>coord i snake ! swap 1- swap loop 
+		  tail-set ;
+		\ lors de sa création une pastille ne doit pas
+		\ être en collision avec le corps du serpent.
+		: valid-food ( u -- f )
+		    true swap
+			SCORE @ 0 do i snake @ over = 
+			if drop false swap leave then
+			loop drop ; 
+		\ création d'une pastille de nourriture
+		: new-food ( -- )
+		   repeat
+		   rand abs PLAY-WIDTH MOD \ x
+		   rand abs PLAY-HEIGHT MOD \ y 
+		   xy>coord dup valid-food until
+		   food ! ;
+		 \ vérifie si le serpent se mord lui-même.
+		 : snake-bit?  ( -- f )
+		    false 0 snake @ score @ 1 do 
+		    i snake  @ over = 
+		    if drop true swap leave then loop
+		    drop ;
+		 \ vérfie si le serpent frappe le mur.
+		 : collision? ( -- f )
+			 0 snake @  coord>xy
+			 
+	</textarea>
 </p>	
 </body>
 </html>

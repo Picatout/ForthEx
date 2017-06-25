@@ -63,9 +63,8 @@ __U2RXInterrupt:
 ; kbd_queue
 1:  mov #kbd_queue, W1
     mov kbd_tail, W2
-    add W2,W1,W1
-    mov.b W0,[W1]
-    add #1,W2
+    mov.b W0,[W1+W2]
+    inc W2,W2
     and #(KBD_QUEUE_SIZE-1),W2
     mov W2, kbd_tail
 8:  pop W2
@@ -133,21 +132,50 @@ HEADLESS KBD_RESET  ; ( -- )
 
     
 ; LC-EKEY? ( -- f )
-;   Vérifie s'il y a un caractère en attente
-;   dans la file clavier et retourne un indicateur booléen.
+;   Vérifie s'il y a un caractère en attente dans la file du clavier et 
+;   retourne un indicateur booléen.
 ; arguments:
 ;   aucun
 ; retourne:
-;   f   indicateur vrai|faux
+;   f   indicateur booléen, vrai si la file n'est pas vide.
 HEADLESS LCEKEYQ,CODE    
 ;DEFCODE "LC-EKEY?",8,,LCEKEYQ
     DPUSH
-    clr T
     mov kbd_head,W0
-    cp kbd_tail
-    bra z, 9f
-    com T,T
-9:  NEXT
+    sub kbd_tail,WREG
+    mov W0,T
+    NEXT
+    
+; PEEK-KEY ( -- c )
+;   lit le caractère en tête de file sans l'extraire.
+; arguments:
+;   aucun
+; retourne:
+;   c Caractère lu    
+HEADLESS PEEK_KEY,CODE
+    DPUSH
+    mov kbd_head,W0
+    mov #kbd_queue,W1
+    mov.b [W1+W0],T
+    ze T,T
+    NEXT
+    
+; GETKEY ( -- c )
+;   Extrait le caractère en tête de file.
+; arguments;
+;   aucun
+; retourne:
+;   rien
+HEADLESS GETKEY,CODE
+    DPUSH
+    mov kbd_head,W0
+    mov #kbd_queue,W1
+    mov.b [W1+W0],T
+    ze T,T
+    inc W0,W0
+    and #(QUEUE_SIZE-1),W0
+    mov W0,kbd_head
+    NEXT
     
     
 ; LC-EKEY  ( -- u )
@@ -159,18 +187,19 @@ HEADLESS LCEKEYQ,CODE
 ;    u   code  VK_xxx non filtré reçu du clavier.
 HEADLESS LCEKEY,CODE    
 ;DEFCODE "LC-EKEY",7,,LCEKEY  
+    call cursor_enable
     DPUSH
 1:  mov kbd_tail, W0
     cp kbd_head
     bra z, 1b
     mov kbd_head,W0
     mov #kbd_queue,W1
-    add W0,W1,W1
+    mov.b [W1+W0], T
+    ze T,T
     inc kbd_head
     mov #(KBD_QUEUE_SIZE-1), W0
     and kbd_head
-    mov.b [W1], T
-    ze T,T
+    call cursor_disable
     NEXT
 
     
@@ -227,20 +256,20 @@ DEFWORD "?PRTCHAR",8,,QPRTCHAR
 7:  .word DROP
 8:  .word FALSE,EXIT
   
-;  LC-KEY? ( -- 0|c)
+;  LC-KEY? ( -- f)
 ;   Vérifie s'il y a un caractère dans l'intervalle {32..126} disponible 
-;   dans la file du clavier. S'il y a des caractères non valides les jettes.    
+;   dans la file du clavier. S'il y a des caractères non valides en début de file
+;   ils sont jetés.    
 ; arguments:
 ;   aucun
 ; retourne:
-;   0   aucun caractère disponible
-;   c   le premier caractère valide de la file.    
-HEADLESS LCKEYQ,HWORD  
+;   f   Indicateur booléen, vrai s'il y a un caractère valide en tête de file.
+HEADLESS LCKEYQ,HWORD
 ;DEFWORD "LC-KEY?",7,,LCKEYQ
-1: .word LCEKEYQ,DUP,ZBRANCH,9f-$
-   .word DROP,LCEKEY,DUP,QPRTCHAR,TBRANCH,9f-$
-   .word DROP,BRANCH,1b-$
-9: .word EXIT
+1: .word LCEKEYQ,TBRANCH,2f-$,FALSE,EXIT
+2: .word PEEK_KEY,QPRTCHAR,TBRANCH,8f-$
+   .word GETKEY,DROP,BRANCH,1b-$
+8: .word TRUE,EXIT   
     
 ;  LC-KEY  ( -- c )
 ;   Attend la réception d'un caractère valide {32..126} du clavier.
@@ -250,9 +279,9 @@ HEADLESS LCKEYQ,HWORD
 ;   c   caractère filtré. 
 HEADLESS LCKEY,HWORD 
 ;DEFWORD "LC-KEY",6,,LCKEY
-1:  .word LCKEYQ,QDUP
-    .word ZBRANCH,1b-$
-    .word EXIT 
+    .word TRUE,CURENBL
+1:  .word LCKEYQ,ZBRANCH,1b-$
+    .word GETKEY,FALSE,CURENBL,EXIT 
     
 
     

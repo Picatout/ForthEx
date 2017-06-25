@@ -107,7 +107,6 @@ HEADLESS EDITLN,CODE
 ;   rien 
 HEADLESS TEXTEND,HWORD     
 ;DEFWORD "TEXTEND",7,,TEXTEND     
-;HEADLESS TEXTEND,HWORD
      .word SCRBUF,LIT,CPL,EDITLN,STAR,DUP,TOR,PLUS
      .word RFROM,LIT,0,DODO
 1:   .word ONEMINUS,DUP,ECFETCH,BL,UGREATER,ZBRANCH,2f-$
@@ -142,9 +141,9 @@ HEADLESS KCASE,HWORD
 ; retourne:
 ;   rien  
 DEFWORD "SAVELINE",8,,SAVELINE ; ( n -- )
-    .word FALSE,CURENBL,LNADR  ; s: src
+    .word LNADR  ; s: src
     .word PAD,FETCH,LIT,CPL,MOVE 
-    .word TRUE,CURENBL,EXIT
+    .word EXIT
     
 ; nom: RESTORELINE  ( n -- )
 ;   Restaure la ligne d'écran à partir du tampon PAD.
@@ -153,9 +152,9 @@ DEFWORD "SAVELINE",8,,SAVELINE ; ( n -- )
 ; retourne:
 ;   rien
 DEFWORD "RESTORELINE",11,,RESTORELINE 
-    .word FALSE,CURENBL,LNADR,PAD,FETCH,LIT,CPL,ROT ; s: src len n
+    .word LNADR,PAD,FETCH,LIT,CPL,ROT ; s: src len n
     .word SWAP,MOVE
-    .word TRUE,CURENBL,EXIT
+    .word EXIT
     
 ; ED-WITHELN ( n -- )
 ;   Console LOCAL et REMOTE.    
@@ -190,23 +189,31 @@ DEFWORD "PROMPT",6,,PROMPT ; ( c-addr u n+ -- )
     .word DUP,SAVELINE,WHITELN ; s: c-addr u n+
     .word LIT,CPL-1,AND,TYPE,EXIT 
     
-; nom: MSGLINE  ( c-addr u n -- )
-;   Affiche un message à l'écran et attend une touche au clavier pour poursuivre
-;   l'exécution. Le message doit tenir sur une seule ligne d'écran. Cette ligne
-;   d'écran est sauvegardée et restaurée à la sortie de ce mot. Le curseur texte
-;   est retourné à la position qu'il avait avant l'appel de MSGLINE.    
+; nom: MSGLINE  ( u1 c-addr u2 n -- )
+;   Affiche un message en inverse vidéo à l'écran et attend une touche au clavier
+;   avant de poursuivre l'exécution l'exécution. Le message doit tenir sur une 
+;   seule ligne d'écran. Cette ligne d'écran est sauvegardée et restaurée à la 
+;   sortie de ce mot. Le curseur texte est retourné à la position qu'il avait 
+;   avant l'appel de MSGLINE.    
 ; arguments:
+;   u1 Durée maximale d'attente en msec ou zéro pour attendre indéfiniment.    
 ;   c-addr Adresse du premier caractère du message.
-;   u  Longueur du message, limité à 63 caractères.
+;   u1  Longueur du message, limité à 63 caractères.
 ;   n  Numéro de la ligne où doit-être affiché le message.
-DEFWORD "MSGLINE",7,,MSGLINE ; ( c-addr u n -- )
-     .word XYQ,TWOTOR ; S: c-addr u n R: col line
-     .word DUP,TOR,PROMPT ; s:  r: col line n
-     .word KEY,DROP
-     .word FALSE,BSLASHW,RFROM,RESTORELINE
-2:   .word TWORFROM,ATXY,EXIT
+; retourne:
+;   rien    
+DEFWORD "MSGLINE",7,,MSGLINE ; ( u1 c-addr u2 n -- )
+     .word XYQ,TWOTOR ; S: u1 c-addr u2 n R: col line
+     .word DUP,TOR,PROMPT ; s: u1  r: col line n
+     .word DUP,ZBRANCH,2f-$
+     .word TICKS,PLUS
+1:   .word KEYQ,TBRANCH,2f-$,DUP,TICKS,SWAP,MINUS,ZEROGT,ZBRANCH,1b-$,DROP,BRANCH,4f-$
+2:   .word DROP,KEY,DROP
+4:   .word FALSE,BSLASHW,RFROM,RESTORELINE
+     .word TWORFROM,ATXY,EXIT
   
 HEADLESS SAVEFAILED,HWORD
+    .word LIT,1000 
     .word STRQUOTE
     .byte 30
     .ascii "Failed to save screen."
@@ -214,6 +221,7 @@ HEADLESS SAVEFAILED,HWORD
 9:  .word LIT,LPS,MSGLINE,EXIT
     
 HEADLESS SAVESUCCESS,HWORD
+    .word LIT,1000
     .word STRQUOTE
     .byte 13
     .ascii "Screen saved."
@@ -231,7 +239,7 @@ HEADLESS NEXTBLOCK,HWORD
     .word SCR,FETCH,DUP,SCRTOBLK,TBRANCH,2f-$
     .word SAVEFAILED,EXIT
 2:  .word ONEPLUS,DUP,BLKDEVFETCH,FN_BOUND,VEXEC,ZBRANCH,9f-$
-    .word LIST,EXIT
+    .word BLKTOSCR,EXIT
 9:  .word DROP,EXIT
     
 ; PREVBLOCK  ( -- )
@@ -245,7 +253,7 @@ HEADLESS PREVBLOCK,HWORD
     .word SCR,FETCH,DUP,SCRTOBLK,TBRANCH,2f-$
     .word SAVEFAILED,EXIT
 2:  .word ONEMINUS,QDUP,ZBRANCH,9f-$
-    .word LIST
+    .word BLKTOSCR
 9:  .word EXIT
 
 
@@ -266,7 +274,7 @@ HEADLESS OPENBLOCK,HWORD
     .word SRCSTORE,LIT,0,TOIN,STORE
     .word BL,WORD,DUP,CFETCH,ZBRANCH,8f-$
     .word QNUMBER,ZBRANCH,8f-$
-    .word LIST,TWODROP,EXIT
+    .word BLKTOSCR,TWODROP,EXIT
 8:  .word LIT,LPS,RESTORELINE,ATXY
 9:  .word EXIT
     
@@ -281,10 +289,9 @@ HEADLESS EDDEL,HWORD
 ; Déplace le texte d'un position vers la droite
 ; pour laisser un espace à la position du curseur.
 HEADLESS EDINSERTBL,HWORD
-    .word FALSE,CURENBL
     .word CURADR,DUP,ONEPLUS,LIT,CPL,GETX,MINUS,MOVE
     .word BL,CURADR,CSTORE,ISLOCAL,TBRANCH,2f-$,VTINSERT
-2:  .word TRUE,CURENBL,EXIT
+2:  .word EXIT
     
 ; Déplace le curseur à la fin du texte sur cette ligne.    
 HEADLESS EDEND,HWORD
@@ -334,7 +341,7 @@ HEADLESS EDPUTC,HWORD ; ( c -- )
 ; attend une touche au clavier.  
 HEADLESS EDKEY,HWORD
     .word SCRSIZE,LIT,BLOCK_SIZE,GREATER,ZBRANCH,2f-$
-    .word STRQUOTE
+    .word LIT,2000,STRQUOTE
     .byte 31
     .ascii "Screen to big to fit in a bloc."
     .align 2
@@ -365,6 +372,66 @@ HEADLESS EDTOP,HWORD
     .word VTTOP
 2:  .word EXIT
   
+; nom: SCR-SIZE ( -- n )
+;    Calcule la taille que la mémoire tampon vidéo occuperait dans un bloc 
+;    s'il était sauvegardé avec SCR>BLK. Seul les lignes 1..23 sont sauvegardées.
+;    BLKED utilise la ligne 24 comme ligne d'état.    
+;        
+; arguments:
+;   aucun
+; retourne:
+;   n Taille qui serait occupée par l'écran dans un bloc.    
+DEFWORD "SCR-SIZE",8,,SCRSIZE ; ( -- n )
+    .word LIT,0,EDITLN,OVER,DODO
+1:  .word SCRBUF,DOI,LIT,CPL,DUP,TOR
+    .word STAR,PLUS,RFROM,MINUSTRAILING,SWAP,DROP,ONEPLUS
+    .word PLUS,DOLOOP,1b-$
+    .word EXIT
+    
+    
+; nom: BLK>SCR ( n+ -- )
+;   Copie le contenu d'un bloc dans le tampon d'écran arrête au premier
+;   caractère non valide.
+; arguments:
+;   n+ Numéro du bloc.
+; retourne:
+;   rien
+DEFWORD "BLK>SCR",7,,BLKTOSCR
+    .word DUP,TEXTBLOCK,QDUP,TBRANCH,1f-$,TWODROP,EXIT
+1:  .word ROT,SCR,STORE,EDCLS
+    .word LIT,0,DODO 
+1:  .word DUP,ECFETCH,DUP,LIT,VK_CR,EQUAL,ZBRANCH,2f-$,DROP,EDCRLF,BRANCH,3f-$
+2:  .word EDPUTC
+3:  .word ONEPLUS,DOLOOP,1b-$
+9:  .word DROP,TEXTEND,EXIT
+    
+    
+; nom: SCR>BLK  ( n+ -- f )
+;   Sauvegarde de la mémoire tampon de l'écran dans un bloc sur périphérique de stockage.
+;   Seul lignes 1..23 sont sauvegardées.    
+;   Si le contenu de l'écran n'entre pas dans un bloc, l'opération est abaondonnée et retourne faux.
+;   Les espaces qui termines les lignes sont supprimés et chaque ligne est complétée
+;   par un VK_CR.
+;   * ne fonctionne qu'avec LOCAL CONSOLE. Cependant BLKEDIT utilise le frame buffer
+;     local même lorsque la console est en mode REMOTE, donc BLKEDIT peut sauvegarder
+;     le bloc en édition.    
+; arguments:
+;   n+    numéro du bloc où sera sauvegardé l'écran.
+; retourne:
+;   f     indicateur booléen, T si sauvegarde réussie, F si trop grand.
+DEFWORD "SCR>BLK",7,,SCRTOBLK
+    .word SCRSIZE,LIT,BLOCK_SIZE,UGREATER,ZBRANCH,2f-$
+    ; trop grand
+    .word NOT,EXIT
+2:  .word DUP,BUFFER,SWAP,BLKDEVFETCH,BUFFEREDQ,UPDATE ; s: data
+    .word EDITLN,LIT,0,DODO 
+1:  .word TOR,DOI,ONEPLUS,LNADR ; S: scrline r: data
+    .word LIT,CPL,MINUSTRAILING,TOR ; S: scrline r: data len
+    .word TWORFETCH,MOVE ; R: data len
+    .word TWORFROM,PLUS,LIT,VK_CR,OVER,CSTORE,ONEPLUS,DOLOOP,1b-$
+    .word LIT,0,SWAP,ONEMINUS,CSTORE,SAVEBUFFERS,LIT,-1
+    .word EXIT
+
   
 ; sauvegarde l'écran dans le bloc. 
 DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )   
@@ -509,7 +576,7 @@ HEADLESS EDCLS,HWORD
 ; retourne:
 ;   rien  
 DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
-    .word LIST
+    .word BLKTOSCR
 1:  .word EDKEY,DUP,QPRTCHAR,ZBRANCH,2f-$
     .word EDPUTC,BRANCH,1b-$
 2:  .word DUP,BL,ULESS,ZBRANCH,4f-$    
