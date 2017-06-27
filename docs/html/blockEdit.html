@@ -115,6 +115,8 @@
 </div>
 <div style="margin-left:5%;">  <tr><td>CTRL-B</td><td>Sauvegarde de l'écran dans le bloc.</td></tr>
 </div>
+<div style="margin-left:5%;">  <tr><td>CTRL-V</td><td>Copie le contenu de l'écran vers un autre bloc et affiche le nouveau bloc.</td></tr>     
+</div>
 <div style="margin-left:5%;">  <tr><td>CTRL-N</td><td>Sauvegarde le bloc actuel et charge le bloc suivant pour édition.</td></tr>
 </div>
 <div style="margin-left:5%;">  <tr><td>CTRL-P</td><td>Sauvegarde le bloc actuel et charge le bloc précédent pour édition.</td></tr>     
@@ -197,23 +199,101 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html">index principal</a></div>
 <hr style="border-width:1px;"><p id="MSGLINE">
-<b>MSGLINE</b>  ( c-addr u n -- )
-<div style="margin-left:5%;">   Affiche un message à l'écran et attend une touche au clavier pour poursuivre
+<b>MSGLINE</b>  ( u1 c-addr u2 n -- )
+<div style="margin-left:5%;">   Affiche un message en inverse vidéo à l'écran et attend une touche au clavier
 </div>
-<div style="margin-left:5%;">   l'exécution. Le message doit tenir sur une seule ligne d'écran. Cette ligne
+<div style="margin-left:5%;">   avant de poursuivre l'exécution l'exécution. Le message doit tenir sur une 
 </div>
-<div style="margin-left:5%;">   d'écran est sauvegardée et restaurée à la sortie de ce mot. Le curseur texte
+<div style="margin-left:5%;">   seule ligne d'écran. Cette ligne d'écran est sauvegardée et restaurée à la 
 </div>
-<div style="margin-left:5%;">   est retourné à la position qu'il avait avant l'appel de MSGLINE.    
+<div style="margin-left:5%;">   sortie de ce mot. Le curseur texte est retourné à la position qu'il avait 
+</div>
+<div style="margin-left:5%;">   avant l'appel de MSGLINE.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; Durée maximale d'attente en msec ou zéro pour attendre indéfiniment.    
+</div>
 <div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractère du message.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Longueur du message, limité à 63 caractères.
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Longueur du message, limité à 63 caractères.
 </div>
 <div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Numéro de la ligne où doit-être affiché le message.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SCR-SIZE">
+<b>SCR-SIZE</b> ( -- n )
+<div style="margin-left:5%;">    Calcule la taille que la mémoire tampon vidéo occuperait dans un bloc 
+</div>
+<div style="margin-left:5%;">    s'il était sauvegardé avec SCR&gt;BLK. Seul les lignes 1..23 sont sauvegardées.
+</div>
+<div style="margin-left:5%;">    BLKED utilise la ligne 24 comme ligne d'état.    
+</div>
+<div style="margin-left:5%;">        
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Taille qui serait occupée par l'écran dans un bloc.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLK&gt;SCR">
+<b>BLK&gt;SCR</b> ( n+ -- )
+<div style="margin-left:5%;">   Copie le contenu d'un bloc dans le tampon d'écran arrête au premier
+</div>
+<div style="margin-left:5%;">   caractère non valide.
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Numéro du bloc.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html">index principal</a></div>
+<hr style="border-width:1px;"><p id="SCR&gt;BLK">
+<b>SCR&gt;BLK</b>  ( n+ -- f )
+<div style="margin-left:5%;">   Sauvegarde de la mémoire tampon de l'écran dans un bloc sur périphérique de stockage.
+</div>
+<div style="margin-left:5%;">   Seul lignes 1..23 sont sauvegardées.    
+</div>
+<div style="margin-left:5%;">   Si le contenu de l'écran n'entre pas dans un bloc, l'opération est abaondonnée et retourne faux.
+</div>
+<div style="margin-left:5%;">   Les espaces qui termines les lignes sont supprimés et chaque ligne est complétée
+</div>
+<div style="margin-left:5%;">   par un VK_CR.
+</div>
+<div style="margin-left:5%;">   * ne fonctionne qu'avec LOCAL CONSOLE. Cependant BLKEDIT utilise le frame buffer
+</div>
+<div style="margin-left:5%;">     local même lorsque la console est en mode REMOTE, donc BLKEDIT peut sauvegarder
+</div>
+<div style="margin-left:5%;">     le bloc en édition.    
+</div>
+</p>
+<div style="margin-left:5%;"><b> arguments:
+</b></div>
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;    numéro du bloc où sera sauvegardé l'écran.
+</div>
+<div style="margin-left:5%;"><b> retourne:
+</b></div>
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;     indicateur booléen, T si sauvegarde réussie, F si trop grand.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -245,11 +325,14 @@
 <hr style="border-width:1px;"><h4 id="index">Index</h4>
 <p>
 <ul>
+<li><a href="#BLK&gt;SCR">BLK&gt;SCR</a></li>
 <li><a href="#BLKED">BLKED</a></li>
 <li><a href="#MSGLINE">MSGLINE</a></li>
 <li><a href="#PROMPT">PROMPT</a></li>
 <li><a href="#RESTORELINE">RESTORELINE</a></li>
 <li><a href="#SAVELINE">SAVELINE</a></li>
+<li><a href="#SCR&gt;BLK">SCR&gt;BLK</a></li>
+<li><a href="#SCR-SIZE">SCR-SIZE</a></li>
 </ul>
 </p>
 <hr style="border-width:1px;"><div><a href="#top">haut</a></div>

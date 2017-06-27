@@ -75,6 +75,7 @@
 ; <tr><td>CTRL-X</td><td>Supprime la ligne sur laquelle le curseur réside.</td></tr>
 ; <tr><td>CTRL-Y</td><td>Insère une ligne vide à la position du curseur.</td></tr>
 ; <tr><td>CTRL-B</td><td>Sauvegarde de l'écran dans le bloc.</td></tr>
+; <tr><td>CTRL-V</td><td>Copie le contenu de l'écran vers un autre bloc et affiche le nouveau bloc.</td></tr>     
 ; <tr><td>CTRL-N</td><td>Sauvegarde le bloc actuel et charge le bloc suivant pour édition.</td></tr>
 ; <tr><td>CTRL-P</td><td>Sauvegarde le bloc actuel et charge le bloc précédent pour édition.</td></tr>     
 ; <tr><td>CTRL-O</td><td>Sauvegarde le bloc actuel et saisie d'un numéro de bloc pour édition.</td></tr>
@@ -257,6 +258,27 @@ HEADLESS PREVBLOCK,HWORD
 9:  .word EXIT
 
 
+; BLOCK?  ( -- n+|0 )
+;   Demande le numéro du bloc.
+; arguments:
+;   aucun
+; retourne:
+;   n+|0  Numéro du bloc ou 0.  
+HEADLESS BLOCKQ,HWORD  
+;DEFWORD "BLOCK?",6,,BLOCKQ  
+    .word XYQ,STRQUOTE
+    .byte 8
+    .ascii "block#? "
+    .align 2
+    .word LIT,LPS,PROMPT
+    .word TIB,FETCH,LIT,CPL,GETX,MINUS,ACCEPT,FALSE,BSLASHW
+    .word DUP,ZBRANCH,8f-$,TIB,FETCH,SWAP,SRCSTORE,LIT,0,TOIN,STORE
+    .word BL,WORD,DUP,CFETCH,TBRANCH,7f-$,DROP,FALSE,BRANCH,8f-$
+7:  .word QNUMBER,TBRANCH,8f-$,DROP,FALSE
+8:  .word LIT,LPS,RESTORELINE,NROT,ATXY
+9:  .word EXIT
+    
+    
 ; OPENBLOCK  ( -- )
 ;   Charge un nouveau bloc pour édition. Le numéro du bloc est fourni par l'utilisateur.    
 ; arguments:
@@ -265,20 +287,19 @@ HEADLESS PREVBLOCK,HWORD
 ;   rien
 HEADLESS OPENBLOCK,HWORD  
 ;DEFWORD "OPENBLOCK",9,,OPENBLOCK
-    .word XYQ,STRQUOTE
-    .byte 14
-    .ascii "block number? "
-    .align 2
-    .word LIT,LPS,PROMPT
-    .word TIB,FETCH,DUP,LIT,CPL,GETX,MINUS,ACCEPT,FALSE,BSLASHW
-    .word SRCSTORE,LIT,0,TOIN,STORE
-    .word BL,WORD,DUP,CFETCH,ZBRANCH,8f-$
-    .word QNUMBER,ZBRANCH,8f-$
-    .word BLKTOSCR,TWODROP,EXIT
-8:  .word LIT,LPS,RESTORELINE,ATXY
+    .word BLOCKQ,QDUP,ZBRANCH,9f-$,BLKTOSCR
 9:  .word EXIT
     
-
+; COPYBLOCK  ( -- )    
+;   Copie le contenu de l'écran vers un autre bloc et affiche le nouveau bloc.
+; arguments:
+;   aucun
+; retourne:
+;   rien
+HEADLESS COPYBLOCK,HWORD
+    .word BLOCKQ,QDUP,ZBRANCH,9f-$,DUP,SCRTOBLK,TBRANCH,8f-$,DROP,EXIT
+8:  .word SCR,STORE
+9:  .word EXIT
   
 ; Supprime le caractère à la position du curseur.
 HEADLESS EDDEL,HWORD
@@ -421,15 +442,14 @@ DEFWORD "BLK>SCR",7,,BLKTOSCR
 ;   f     indicateur booléen, T si sauvegarde réussie, F si trop grand.
 DEFWORD "SCR>BLK",7,,SCRTOBLK
     .word SCRSIZE,LIT,BLOCK_SIZE,UGREATER,ZBRANCH,2f-$
-    ; trop grand
-    .word NOT,EXIT
+    .word FALSE,EXIT
 2:  .word DUP,BUFFER,SWAP,BLKDEVFETCH,BUFFEREDQ,UPDATE ; s: data
     .word EDITLN,LIT,0,DODO 
 1:  .word TOR,DOI,ONEPLUS,LNADR ; S: scrline r: data
     .word LIT,CPL,MINUSTRAILING,TOR ; S: scrline r: data len
     .word TWORFETCH,MOVE ; R: data len
     .word TWORFROM,PLUS,LIT,VK_CR,OVER,CSTORE,ONEPLUS,DOLOOP,1b-$
-    .word LIT,0,SWAP,ONEMINUS,CSTORE,SAVEBUFFERS,LIT,-1
+    .word LIT,0,SWAP,ONEMINUS,CSTORE,SAVEBUFFERS,TRUE
     .word EXIT
 
   
@@ -441,7 +461,7 @@ DEFWORD "SAVESCREEN",10,,SAVESCREEN ; ( -- )
     .word SAVEFAILED,EXIT
 8:  .word SAVESUCCESS
     .word EXIT    
- 
+
 ; avance le curseur à la prochaine tabulation.    
 HEADLESS EDTAB, HWORD
     .word LCTAB,ISLOCAL,TBRANCH,2f-$
@@ -590,6 +610,7 @@ DEFWORD "BLKED",5,,BLKED ; ( n+ -- )
 2:  .word LIT,CTRL_P,KCASE,ZBRANCH,2f-$,PREVBLOCK,BRANCH,1b-$ 
 2:  .word LIT,CTRL_E,KCASE,ZBRANCH,2f-$,EDCLS,EXIT
 2:  .word LIT,CTRL_B,KCASE,ZBRANCH,2f-$,SAVESCREEN,BRANCH,1b-$
+2:  .word LIT,CTRL_V,KCASE,ZBRANCH,2f-$,COPYBLOCK,BRANCH,1b-$  
 2:  .word LIT,CTRL_O,KCASE,ZBRANCH,2f-$,OPENBLOCK,BRANCH,1b-$  
 2:  .word LIT,CTRL_K,KCASE,ZBRANCH,2f-$,EDDELEOL,BRANCH,1b-$
 2:  .word LIT,CTRL_X,KCASE,ZBRANCH,2f-$,EDRMVLN,DELLN23,BRANCH,1b-$  

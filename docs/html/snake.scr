@@ -5,24 +5,24 @@
 0 constant east
 1 constant south
 2 constant west
-3 constant east
+3 constant north
 62 constant play-width \ largeur surface jeux
 22 constant play-height \ hauteur surface jeux
 2 constant x-offset \ pour affichage
 2 constant y-offset \ pour affichage
-2 constant scale \ facteur entre score et life.
+3 constant scale \ facteur entre score et life.
 \ variables scalaires
 variable score \ pointage et longueur serpent
 variable life \ esperance de vie du serpent
 variable metab \ vitesse de metabolisme du serpent
 variable head \ direction du serpent
 variable food \ icoord de la pastille de nourriture
-variable tail \ icoor dernier anneau serpent
+variable tail \ icoord dernier anneau serpent
 variable snake-len \ longueur du serpent
 \ vector va permette de creer des variabls tableau 1D.
 : vector create cells allot does> swap cells + ;
-bloc#: 1   size: 827   col: 49     line: 23                     
-\creation du serpent
+
+\ creation du serpent
 max-len vector snake
 4 vector c-head \ caracteres representant la tete du serpent
 \ initialisation c-head
@@ -30,38 +30,38 @@ max-len vector snake
 'W' south c-head !
 '>' west c-head !
 'M' north c-head !
-\ conversion entier vers coordonnees
+\ conversion icoord vers coordonnees
 : icoord>xy ( u -- x y )
    256 /mod ;
-\ conversion coordonnees vers entier
+\ conversion coordonnees vers icoord
 : xy>icoord ( x y -- u )
    256 * + ;
 \ copie icoord dernier anneau serpent dans tail
 : tail! ( -- )
-   score 1- @ snake @ tail ! ;
-\ initialisation du serpent
+   snake-len @ 1- snake @ tail ! ;
+\ initialisation du serpent au centre pointe vers l'est.
 : snake-init ( -- )
-   32 12 score @ 0 do 2dup xy>icoord i snake !
+   32 12 snake-len @ 0 do 2dup xy>icoord i snake !
    swap 1- swap loop tail! ;
 
 
-\ bloc#: 2   size: 572   col: 29     line: 21                     
+
 \ lors de la creation d'une pastille il faut valider
 \ que sa position n'est pas en collision avec le serpent
-: valid-food?( u -- f )
-   true swap score @ 0 do
+: valid-food? ( u -- f )
+   true swap snake-len @ 0 do
        i snake @ over = if drop false swap leave then
        loop drop ;
 \ creation pastille nourriture
 : new-food ( -- u )
-   repeat
+   begin
    rand abs play-width mod \ x
    rand abs play-height mod \ y
    xy>icoord dup valid-food? until
    food ! ;
 \ verification serpent se mord
 : snake-bit? ( -- f )
-   false 0 snake @ score @ 1 do
+   false 0 snake @ snake-len @ 1 do
        i snake @ over = if drop true swap leave then
        loop drop ;
 
@@ -69,7 +69,6 @@ max-len vector snake
 
 
 
-\ bloc#: 3   size: 566   col: 19     line: 18                     
 \ verification collision serpent vs murs
 : collision? ( -- f )
    0 snake @ icoord>xy case
@@ -79,7 +78,7 @@ max-len vector snake
    -1 of true endof
    play-width of true endof
    >r false r>
-   endcase
+   endcase ;
 \ dessine les murs de l'arene.
 : draw-walls ( -- )
    cls 1 whiteln 24 whiteln
@@ -91,9 +90,9 @@ max-len vector snake
 \ dessin du serpent
 : draw-snake ( -- )
    true b/w head @ c-head @ 0 snake @ icoord>xy draw-pixel
-   score @ 1 do 'O' i snake @ icoord>xy draw-pixel false b/w ;
+   snake-len @ 1 do 'O' i snake @ icoord>xy draw-pixel loop
+   false b/w ;
 
-\ bloc#: 4   size: 621   col: 63     line: 22                     
  \ affiche score et life
 : status true b/w 1 1 at-xy s" SCORE:" type score @ .
   16 1 at-xy s" LIFE:" type life @ . false b/w ;
@@ -117,7 +116,6 @@ max-len vector snake
 
 
 
-\ bloc#: 5   size: 474   col: 13     line: 19                     
  \ les pastilles qui sont le long du mur valent 2 points
 : on-wall? ( u1 -- f )
    icoord>xy case
@@ -129,40 +127,50 @@ max-len vector snake
        >r false r>
        endcase ;
 
-\ la pastille a ete mangee, ajuste le score
+\ la pastille a ete mangee, ajuste SCORE et LIFE
 : score+ ( -- )
-   food @ in-corner? if 4 score +! else
-   food @ on-wall? if 2 score +! else 1 food +! then
-   then ;
+   food @ in-corner? if 4 else
+   food @ on-wall? if 2 else 1 then
+   then dup score +! scale * life +! 0 food ! ;
 
 \ rallonge le serpent
 : snake+ ( -- )
-   snake-len @ 1+ dup snake-len ! tail @  snake ! ;
+   snake-len dup >r @ 1+ dup r> ! tail @  snake !  ;
 
 
 
-\ bloc#: 6   size: 521   col: 52     line: 20                     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\ ajuste la valeur de la variable metab en fonction
+\ de la longueur du serpent. metab=log2(snake-len)
+variable metab-delay
+: set-metab ( -- )
+   0 snake-len @ begin dup while >r 1+ r> 2/ repeat
+   drop dup metab ! 1000 swap / metab-delay ! ;
+\ dessine pastille nourriture
+: draw-food true b/w 'O' food @ icoord>xy
+   draw-pixel false b/w ;
+\ deplace le serpent
+: move-snake ( -- )
+   ;
+\ initialisation de la partie
+: game-init ( -- )
+   srand 0 score ! 4 snake-len ! 3 life ! set-metab
+   snake-init draw-walls status ;
 
 
 
 
-bloc#: 7   size: 23    col: 2  line: 1                          
+
+
+
+\ boucle du jeux
+: game-loop ( -- )
+  begin
+  food @ not if new-food then draw-food
+  draw-snake
+  true  until ;
+
+\ lance le jeux.
+: snake-run ( -- )
+   begin game-init game-loop key 'q' = until
+   clear cls
+

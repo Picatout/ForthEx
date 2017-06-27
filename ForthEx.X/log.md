@@ -1,3 +1,8 @@
+2017-06-26
+----------
+Ajout d'une fonctionnalité à BLKED pour permettre de déplacé le contenu
+d'un bloc-écran vers un autre bloc-écran.
+
 2017-06-25
 ----------
 Travail sur tutoriel.html
