@@ -789,7 +789,7 @@ HEADLESS MARKSLOT,HWORD
 ; l'espace réservé pour la cible est indiquée
 ; au sommet de la pile
 HEADLESS FOREJUMP,HWORD    
-;DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( -- slot )
+;DEFWORD ">RESOLVE",8,F_IMMED,FOREJUMP ; ( slot -- )
     .word DUP,HERE,SWAP,MINUS,SWAP,STORE,EXIT
     
 ;compile un cfa fourni en literal
@@ -1140,9 +1140,9 @@ DEFWORD "ELSE",4,F_IMMED,ELSE ; ( slot1 -- slot2 )
 ; retourne:
 ;   rien    
 DEFWORD "CASE",4,F_IMMED,CASE ; ( -- case-sys )
-    .word QCOMPILE,LIT,0,EXIT ; marque la fin de la liste des fixup
+    .word QCOMPILE,LIT,0,TOCSTK,EXIT ; marque la fin de la liste des leave jump.
 
-; nom: OF  ( x1 x2  -- |x1 )
+; nom: OF  (x1 x2  -- |x1 )
 ;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
 ;   S'utilise à l'intérieur d'une structure CASE ... ENDCASE    
 ;   Vérifie si x1==x2 En cas d'égalité les 2 valeurs sont consommée et 
@@ -1156,7 +1156,7 @@ DEFWORD "CASE",4,F_IMMED,CASE ; ( -- case-sys )
 ;   |x1  x1 n'est pas consommé si la condition d'égalité n'est pas rencontrée.      
 DEFWORD "OF",2,F_IMMED,OF ; ( x1 x2 -- |x1 )    
     .word QCOMPILE,CFA_COMMA,OVER,CFA_COMMA,EQUAL,CFA_COMMA,ZBRANCH
-    .word MARKSLOT,EXIT
+    .word MARKSLOT,CFA_COMMA,DROP,EXIT
  
 ; nom: ENDOF  ( -- )   
 ;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
@@ -1167,8 +1167,8 @@ DEFWORD "OF",2,F_IMMED,OF ; ( x1 x2 -- |x1 )
 ;   aucun
 ; retourne:
 ;   rien    
-DEFWORD "ENDOF",5,F_IMMED,ENDOF ; ( slot 1 -- slot2 )
-    .word QCOMPILE,CFA_COMMA,BRANCH,MARKSLOT,SWAP,FOREJUMP,EXIT
+DEFWORD "ENDOF",5,F_IMMED,ENDOF ; ( slot1 -- slot2 )
+    .word QCOMPILE,CFA_COMMA,BRANCH,MARKSLOT,TOCSTK,FOREJUMP,EXIT
     
 ; nom: ENDCASE ( x -- )    
 ;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
@@ -1180,10 +1180,10 @@ DEFWORD "ENDOF",5,F_IMMED,ENDOF ; ( slot 1 -- slot2 )
 ; retourne:
 ;   rien    
 DEFWORD "ENDCASE",7,F_IMMED,ENDCASE ; ( case-sys -- )    
-    .word QCOMPILE
-1:  .word QDUP,ZBRANCH,8f-$
+    .word QCOMPILE,CFA_COMMA,DROP
+1:  .word CSTKFROM,QDUP,ZBRANCH,8f-$
     .word FOREJUMP,BRANCH,1b-$
-8:  .word CFA_COMMA,DROP,EXIT
+8:  .word EXIT
   
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

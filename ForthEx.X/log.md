@@ -1,3 +1,8 @@
+2017-06-27
+----------
+Travail sur jeu snake et tutoriel.html
+Correction d'un bogue régressif introduit hier dans BLKED
+Déboguer structures CASE
 2017-06-26
 ----------
 Ajout d'une fonctionnalité à BLKED pour permettre de déplacé le contenu

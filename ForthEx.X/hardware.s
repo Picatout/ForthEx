@@ -267,7 +267,7 @@ HEADLESS SET_CLOCK
     bclr INTCON1, #NSTDIS ; interruption multi-niveaux
     NEXT
 
-; efface seulement l'espace avant USER_DICT
+; efface seulement l'espace avant SYS_VARS
 HEADLESS CLR_LOW_RAM
     mov #CSTK_BASE,W0
     repeat #((DATA_BASE-CSTK_BASE)/2-1)
