@@ -249,14 +249,14 @@ notation préfixée. exemple.
 	</textarea><br>
 	Sans surprise les variables sont créées à l'aide du  mot <b>VARIABLE</b>. Lorsqu'une variable est invoquée c'est sont adresse qui est déposée
 	au sommet de la pile. Ce qui permet de lire sa valeur avec le mot <b>@</b> ou bien de modifier cette valeur avec le mot <b>!</b>.<br>
-	<textarea id="code" style="height:120px;">
+	<textarea id="code" style="height:180px;">
 	\ création des variables, elles sont inialisée à 0 lors de
 	\ leur création.
-	VARIABLE SCORE \ pointage
-	VARIABLE SNAKE-LEN \ longueur du serpent.
-	VARIABLE HEAD \ Indique la direction de déplacement de la tête du serpent.
-	VARIABLE FOOD \ Contient les coordonnées de la pastille de nourriture.
-	VARIABLE TAIL \ contient les coordonnées de la queue du serpent.
+	variable score \ pointage
+	variable head \ direction serpent
+	variable snake-len \ longueur serpent
+	variable food \ localisation pastille nourriture
+	variable tail \ localisation queue serpent
 	</textarea>
 </p>
 <p>
@@ -264,16 +264,18 @@ notation préfixée. exemple.
 	je vais définir un mot particulier appellé <b>VECTOR</b>. Ce mot est un mot qui sert à créer une classe de mots,de la même manière que le mot 
 	<b>VARIABLE</b> nous a permit de créer des objets de type <i>variable</i>, le mot <b>VECTOR</b> va nous permettre de créer des objets de type <i>vecteur</i>.
 	<br>
-	<textarea id="code" style="height:80px;">
+	<textarea id="code" style="height:120px;">
 		\ VECTOR va nous permettre de créer des 
 		\ variables de type vecteur.
-		: VECTOR ( cccc -- )
+		\  cccc représente le prochain mot dans le texte d'entrée
+		\ n est le nombre d'éléments du vecteur.
+		: VECTOR ( cccc s: n -- )
 		  CREATE CELLS ALLOT DOES&gt; SWAP CELLS + ;
     </textarea>
 </p> 
 <p>
 	Dans ce tutoriel je vais appeller les mots qui servent à créer d'autres mots dans le dictionnaire <b>mots compilants</b>. <b>CONSTANT</b> <b>VARIABLE</b>,
-	<b>:</b> et <b>CREATE</b> sont des <b>mots compilants</b>. Et maintenant que nous l'avons créé le mot <b>VECTOR</b> est aussi un <b>mot compilant</b>.
+	<b>:</b> et <b>CREATE</b> sont des <b>mots compilants</b>. Et maintenant que nous l'avons créé le mot <b>VECTOR</b> qui est aussi un <b>mot compilant</b>.
 </p>
 <p>
 	Le premier mot que nous avons utiliser pour définir <b>VECTOR</b> est le mot <b>:</b> Ce mot cré une nouvelle entrée dans le dictionnaire qui porte
@@ -285,7 +287,7 @@ notation préfixée. exemple.
 	immédiat</i> sont quand même exécutés lorsque STATE est à -1. dans la définition de <b>VECTOR</b> on utilise 2 mots immédiats <b>DOES&gt;</b>
 	et <b>;</b>. Le mot <b>;</b> est utiliser pour terminer une définition, il sert simplement à remettre à <b>0</b> la valeur de <b>STATE</b>.
 </p>
-<p> Le mot <b>DOES&gt;</b> est plus complexe. Il termine la définition du mot <b>VECTOR</b> et compile une action qui va s'exécutée par les mots créés avec
+<p> Le mot <b>DOES&gt;</b> est plus complexe. Il termine la définition du mot <b>VECTOR</b> et compile une action qui va être exécutée par les mots créés avec
 <b>VECTOR</b>. Autrement dit les mots créés par <b>VECTOR</b>, lorsqu'ils seront invoqués, vont exécuter le code:
 <br><textarea id="code" > SWAP CELLS + </textarea> <br>
 </p>
@@ -301,12 +303,15 @@ notation préfixée. exemple.
 		qu'on appelle <b>PFA</b> pour <i>Parameter Field Address</i>.</li>
 		<li><b>CELLS</b>, Multiplie la valeur qui est au sommet de la pile par le nombre d'octets d'une cellule. En ForthEx l'on l'a dit
 		les cellules sont de 16 bits donc 2 octets. Donc la valeur au sommet de la pile est multipliée par 2.</li>
-		<li><b>ALLOT</b>, Réserve L'espace nécessaire dans l'espace de données pour stocker le nombre d'octets indiqué par la valeur
-		qui est au sommet de la pile. Cette valeur est retirée de la pile.</li>
+		<li><b>ALLOT</b>, Consomme la valeur au sommet de la pile des arguments et se sert de cette valeur pour réserver l'espace nécessaire 
+		dans l'espace de données pour stocker le nombre d'octets indiqué par cette valeur.</li>
 	</ul><br>
 	<textarea id="code" style="height:180px;">
-	4 vector c-head \ tableau de 4 car. representant la tete du serpent.
-	max-len vector snake \ le corps du serpent.
+	\ creation des variables vecteur.		
+	\ tableau de 4 car. representant la tete du serpent.
+	4 vector c-head
+	\ le corps du serpent.
+	max-len vector snake
 	
 	\ initialiation de c-head
 	'&lt;' east c-head !
@@ -325,10 +330,33 @@ notation préfixée. exemple.
 	<br><textarea id="code">
 	'&lt;' east c-head !	
 	</textarea><br>
-	On commence par empiler la valeur <b>&lt;</b> qu'on veut sauvegarder dans le premier élément de <b>C-HEAD</b>, ensuite on utilise la constante <b>EAST</b>
-	qui vaut <b>0</b> pour indicer le vecteur puis on invoque le vecteur <b>C-HEAD</b>. <b>C-HEAD</b> consomme la valeur <b>EAST</b> et s'en sert
-	pour retourner l'adresse de l'élément demandé. Finalement on invoque le mot <b>!</b> <i>store</i>. <b>!</b> consomme 2 valeurs sur la pile.
-	La valeur au sommet est l'adresse où sera sauvegardée la valeur qui se trouve en deuxième position sur la pile, i.e. <b>&lt;</b>.  
+	Cette phrase comprend 4 mots, voyons ce qui se trouve sur la pile des arguments après l'exécution de chacun d'eux.<br>
+	<table border="single">
+	<tr><th>mot</th><th>description</th><th>État de la pile</th></tr>	
+	<tr><td>'&lt;'</td><td>Il s'agit d'un entier de type caractère dont la valeur ASCII est 60.</td><td>60</td></tr>
+	<tr><td>east</td><td>Il s'agit d'une constante ça valeur est empilée.</td><td>0<br>60<br</td></tr>
+	<tr><td>c-head</td><td>Il s'agit d'un vecteur. Il consomme la valeur au sommet de la pile et le<br>
+	remplace par l'adresse de cet élément.</td>
+	<td>a-addr<br>60</td></tr>
+	<tr><td>!</td><td>Ce mot consomme 2 valeurs sur la pile. Le premier est une adresse et<br>
+	le deuxième élément est la valeur à déposer à cette adresse.</td><td><i>pile vide</i><br>maintenant c-head[0]=60</td></tr>
+	</table>
+</p>
+<p> 
+	Comment est calculé l'adresse de l'élément du vecteur? C'est justement la partie de la définition de <b>VECTOR</b> qui suis <b>DOES&gt;</b>
+	qui fait ce travail. Lorsque le mot <b>C-HEAD</b> est invoqué l'adresse de son champ de données est déposé au sommet de la pile ensuite le
+	code suivant est exécuté.<br>
+	<table border="single">
+	<tr><th>mot</th><th>description</th><th>État de la pile</th></tr>	
+	<tr><td></td><td>Avant l'invocation de c-head on sur la pile</td><td>0<br>60</td></tr>
+	<tr><td>c-head</td><td>Lorsque c-head est invoqué mais avant que le code DOES&gt;<br>
+	ne soit exécuté on sur la pile.</td><td>pfa<br>0<br>60</td></tr>
+	<tr><td>swap</td><td>Commute les 2 éléments au sommet de la pile.</td><td>0<br>pfa<br>60</td></tr>
+	<tr><td>cells</td><td>Multiplie l'indice au sommet de la pile par 2.</td><td>2*0<br>pfa<br>60</td></tr>
+	<tr><td>+</td><td>Additionne les 2 valeurs au sommet de la pile. a-addr=0+pfa</td><td>a-addr<br>60</td></tr>
+	</table><br>
+	Là on voulait accéder l'élément 0 du vecteur donc l'adresse n'a pas changée mais pour les autre éléments l'adresse est incrémentée de
+	<b>2*i</b> où <b>i</b> est l'indice qu'on veut accéder. 
 </p>
 <p>
 	Notez ici combien il est important lorsqu'on programme en Forth de connaître se qu'il y a sur la pile des arguments ou même des retours si on
@@ -343,59 +371,103 @@ notation préfixée. exemple.
 	transfert le sommet de la pile des arguments vers la pile des retour et que
 	le mot <b>R&gt;</b> fait exactement le contraire. Tandis que le mot <b>DROP</b> jette la valeur au sommet de la pile des arguments.
 </p>
+<h3>Premiers mots du jeu</h3>
 <p>
-	J'ai pris la décision qu'au départ le serpent est au centre de l'écran qu'il a une longueur de 4 et qu'il se déplace vers l'est.
-On va donc procéder à l'initialisation des variables.<br>
-	<textarea id="code" style="height:400px;">
-		\ initialiation des variables.
-		4 SCORE ! \ longueur initiale du serpent.
-		2 METAB ! \ vitesse du métabolisme.
-		SCORE SCALE * LIFE ! \ espérance de vie.
-		EAST HEAD ! \ direction initial du serpent
-		
-		\ les coordonnées sont conservées dans un entier
-		\ non signé. L'octet fort est la coordonnée y
-		\ l'octet faible la coordonnée x.
-		\ conversion entier vers coordonnées.
-		: coord>xy  ( u -- x y )
-		  256 /mod ;
-		\ conversion coordonnées vers entier
-		: xy>coord ( x y -- u )
-		  256 * + ;
-		\ ce mot va servir à copier la valeur de la queue 
-		\ du serpent dans la variable TAIL.  
-		: tail-set ( -- )
-		   SCORE @ 1- SNAKE @ TAIL ! ;
-		\ initialisation du serpent
-		: snake-init  ( -- )
-		  32 12 SCORE @ 0 do 2dup xy>coord i snake ! swap 1- swap loop 
-		  tail-set ;
-		\ lors de sa création une pastille ne doit pas
-		\ être en collision avec le corps du serpent.
-		: valid-food ( u -- f )
-		    true swap
-			SCORE @ 0 do i snake @ over = 
-			if drop false swap leave then
-			loop drop ; 
-		\ création d'une pastille de nourriture
-		: new-food ( -- )
-		   repeat
-		   rand abs PLAY-WIDTH MOD \ x
-		   rand abs PLAY-HEIGHT MOD \ y 
-		   xy>coord dup valid-food until
-		   food ! ;
-		 \ vérifie si le serpent se mord lui-même.
-		 : snake-bit?  ( -- f )
-		    false 0 snake @ score @ 1 do 
-		    i snake  @ over = 
-		    if drop true swap leave then loop
-		    drop ;
-		 \ vérfie si le serpent frappe le mur.
-		 : collision? ( -- f )
-			 0 snake @  coord>xy
-			 
-	</textarea>
+	On va maintenant définir quelques mots qui seront utilisés dans les graphismes du jeu.<br>
+	<textarea id="code" style="height:500px;">
+	\ fonctions graphiques
+	\ conversion entier non signe vers couple {x,y}
+	: ucoord>xy ( u -- x y )
+	   256 /mod ;
+	\ conversion couple {x,y} vers ucoord
+	: xy>ucoord ( x y -- u )
+	   256 * + ;
+	\ dessine un pixel  c caractere {x,y} coord.
+	: draw-pixel ( c x y -- )
+	   y-offset + swap x-offset + swap at-xy emit ;
+	\ dessine une pastille u=ucoord
+	: draw-ring ( u -- )
+	   true b/w
+	   'O' swap ucoord>xy draw-pixel false b/w ;
+	\ dessine les bandes de l'arene
+	: draw-walls ( -- )
+	   cls 1 whiteln 24 whiteln
+	   24 2 do 1 i at-xy space 64 i at-xy space loop false b/w ;
+
+	\ jeu serpent
+	\ dessine le serpent
+	: draw-snake ( -- )
+	   head @ c-head @ 0 snake @ ucoord>xy draw-pixel
+	   snake-len @ 1 do i snake @ draw-ring loop ;
+
+	\ affiche le status
+	: status ( -- )
+	   true b/w 1 1 at-xy s" SCORE:" type score @ .
+	   16 1 at-xy s" LENGTH:" type snake-len @ . false b/w ;
+
+	</textarea><br>
+	Comme on le voie ici, chaque nouvelle définition de fonction commence par le mot <b>:</b> et se termine par le mot <b>;</b>. Après chaque nom 
+	de fonction on retrouve un commentaire en parenthèse qui spécifie en abrégé l'interface de chaque fonction. Les coordonnées de chaque élément du
+	jeu seront conservées dans un entier non signé représenté par un <b>u</b> dans les commentaires d'interface. Si on prend le mot <b>ucoord>xy</b>
+	en exemple, le commentaire nous dit que ce mot consomme un entier non signé et nous retourne un couple d'entier notés <b>x y</b> qui représente
+	la position de l'élément à l'écran. Le coin supérieur gauche de l'aire de jeu a les coordonnées {0,0} et le coin inférieur droit {62,22}.
+	La conversion est simple puisque la coordonnée <b>y</b> est conservée dans l'octet fort de l'entier et la coordonnée <b>x</b> dans l'octet faible.
+	Le mot <b>/mod</b> divise un entier et conserve le quotient et le reste. Le quotient est au sommet de la pile et le reste en deuxième position.
+	Donc après l'exécution de la phrase <b>256 /mod</b>, l'entier <b>u</b> est remplacé par <b>x y</b>. 
+</p>
+<p>
+	Le mot <b>xy>ucoord</b> fait exactement le contraire il convertie le couple <b>x y</b> en entier non signé <b>u</b>. Comme indiqué dans le 
+	commentaire entre parenthèses. Encore une fois l'opération est simple on multiplit <b>y</b> par 256 et on additionne <b>x</b> à ce résultat.
+</p>
+<p> Le mot <b>draw-pixel</b> affiche le caractère <b>c</b> à la position <b>x y</b> de l'aire de jeu. Le mot <b>at-xy</b> est un mot standard du
+Forth qui sert à positionner le curseur texte sur l'écran de la console. Cependant en ForthEx les coordonnées d'écran sont {1,1} pour le coin 
+supérieur gauche et {64,24} pour le coin inférieur droit. On a donc définit les constantes <b>x-offset</b> et <b>y-offset</b> pour ajuster les
+coordonnées de l'aire de jeu aux coordonnées réelles de l'écran de la console. On commence donc par ajuster la coordonnée <b>y</b> ensuite pour
+ajuster la coordonnée <b>x</b> on doit commuter les positions de <b>x</b> et <b>y</b> sur la pile pour que <b>x</b> passe au sommet. C'est ce que
+fait le mot <b>swap</b>. <b>x-offset +</b> ajuste la valeur de x et le deuxième <b>swap</b> remet les coordonnées dans le bon ordre avant 
+d'invoquer <b>at-xy</b>. Le mot <b>emit</b> sert à afficher le caractère <b>c</b> (en 3ième position sur la pile) à l'écran.
+</p>
+<p> Le mot <b>draw-ring</b> est utilisé pour dessiner le corps du serpent et la pastille de nourriture. Les 2 étant représenté par le même caractère
+ en inverse vidéo.  En ForthEx les valeurs booléennes VRAI et FAUX sont représentées par 2 constantes <b>TRUE</b> qui vaut <b>-1</b> et <b>FALSE</b>
+ qui vaut <b>0</b>. Cependant Toute valeur différente de <b>0</b> est considérée comme VRAI. Le mot <b>b/w</b> signifit black/white et sert a 
+ inverser l'affichage des caractères. Il consomme un valeur une booléenne. Si cette valeur est vrai les caractères sont affichés en inverse vidéo,
+ c'est à dire noir/blanc. Au contraire si cette valeur est fausse on revient à l'affichage normal. Donc au début de <b>draw-ring</b> on passe en
+ inverse vidéo pour afficher le caractère <b>O</b> aux coordonnées spécifiées par le paramètre <b>u</b> qui est au sommet de la pile. <b>swap</b>
+ comme on la vue précédemment commute 2 les valeur au sommet de la pile de sorte que le <b>O</b> qu'on vient d'empiler se retrouve en deuxième position
+ et que le <b>u</b> se retrouve au sommet. On utilise <b>ucoord>xy</b> pour convertir cet entier en couple <b>x y</b> qui est requis par <b>draw-pixel.</b>
+ Avant de quitter <b>draw-ring</b> on remet l'affiche en mode normal avec la phrase <b>false b/w.</b>
 </p>	
+<p> Le mot <b>draw-walls</b> dessine la bordure qui délimite l'aire du jeu. le mot <b>cls</b> vide l'écran de la console. <b>1 whiteln</b> dessine 1
+ligne blanche à la position y qui lui est fournie. Ici 2 lignes blanche sont dessinées en haut et en bas de l'écran. Pour dessiner les lignes verticales
+à droite et à gauche de l'écran on utilise une boucle avec compteur <b>DO ... LOOP</b>.  Entre le mot <b>do</b> et le mot <b>loop</b> se sont les 
+instructions qui s'exécutent en bloucle.Le mot <b>DO</b> consomme 2 arguments, <b>24</b> est la limite du compteur et  <b>2</b> est la valeur initiale 
+du compteur. On a déjà vu le mot <b>at-xy</b> qui consomme 2 arguments, soit les coordonnées colonne et ligne où doit-être positionner le curseur texte. 
+le mot <b>i</b> sert à empiler la valeur du compteur de boucle. Les instructions de la boucle commence donc par empiler la valeur <b>i</b> ensuite la 
+la valeur du compteur de boucle, dont la valeur est 2 à la première itération. On positionne le curseur et on affiche un caractère espace en invoquant le
+mot <b>space</b>. Comme on est en inverse vidéo cet espace apparaît comme un carré blanc. On recommence l'opération à la colonne <b>64</b> et on arrive à 
+<b>loop</b> qui incrémente le compteur pour ensuite le comparé à la limite. Si cette limite est atteinte l'exécution continue après le <b>loop</b> sinon
+on retourne après le <b>do</b>. Donc ici puisque <b>do</b> a été initialisé avec une limite de <b>24</b> le traçage des lignes verticales se termine à la
+ligne 23.
+</p>
+<p>Le mot <b>draw-snake</b> sert à dessiner le serpent. On commence par dessiner la tête. Comme on l'a dit le caractère utilisé pour la tête dépend de la
+direction du mouvement du serpent. Cette direction est indiquée par la valeur de la variable <b>HEAD</b>. On lit donc cette valeur avec la phrase
+<b>head @</b> et cette valeur sert d'indice pour aller chercher le bon caractère dans le vecteur <b>c-head</b> par la phrase <b>c-head @</b>. Ensuite on
+obtient la position de la tête du serpent avec la phrase <b>0 snake @</b> et on dessine la tête avec la phrase <b>ucoord>xy draw-pixel.</b> Pour dessiner
+le corps du serpent on utilise encore une boucle <b>do...loop</b>. Cette boucle est initialisée avec la longueur du serpent qu'on obtient avec la phrase
+<b>snake-len @</b> et l'indice de départ est <b>1</b> puisqu'on a déjà dessiner la tête. la phrase <b>i snake @</b> nous donne la coordonnée de l'ième 
+élément du serpent et <b>draw-ring</b> dessine l'anneau. Et bien sur <b>loop</b> incrémente le compteur et nous renvoie au début de la boucle tant qu'on
+a pas atteint la limite.
+</p>
+<p> Le mot <b>status</b> sert à afficher l'état du jeu, soit le pointage et la longueur du serpent. Cette affichage est présenté sur la première ligne
+de l'écran en inverse vidéo, le mot commence donc par la phrase <b>true b/w</b> puis la phrase <b>1 1 at-xy</b> déplace le curseur dans le coin supérieur
+gauche de l'écran.  La phrase <b>s" SCORE:" type</b> affiche le texte entre guillemets. On obtient le pointage par la lecture de la variable <b>score</b>
+et on imprime cette valeur à la position courante du curseur texte avec le mot <b>.</b> En Forth le mot <b>.</b> <i>(point)</i> sert à imprimer l'entier 
+qui se trouve au sommet de la pile. Ensuite on déplace le curseur texte à la colonne 16, ligne 1 avec la phrase <b>16 1 at-xy</b> et imprime le texte 
+<i>LENGHT:</i> avec la phrase <b>s" LENGTH:" type</b>. Finalement on affiche la longueur du serpent avec la phrase <b>snake-len @ .</b>. Avant de 
+quitter on repasse en mode vidéo normal <b>false b/w</b>.
+</p>
+<h3>La logique du jeu</h3>
+<P>On va commencer à examiner les mots qui construisent la logique du jeu.</P>
 </body>
 </html>
 	

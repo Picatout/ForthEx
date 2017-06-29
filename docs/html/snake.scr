@@ -90,7 +90,6 @@ max-len vector snake \ le corps du serpent
    ucoord>xy dup 0= swap play-height 1- = or
    swap dup 0= swap play-width 1- = or and ;
 
-
 \ jeu serpent
 \ les pastilles qui sont le long du mur valent 2 points
 : on-wall? ( u1 -- f )
@@ -107,7 +106,6 @@ max-len vector snake \ le corps du serpent
 : snake+ ( -- )
    snake-len dup >r @ dup 1+ r> ! tail @  swap snake ! ;
 
-
 \ jeu serpent
 \ dessine pastille nourriture
 : draw-food true b/w 'O' food @ ucoord>xy
@@ -115,23 +113,23 @@ max-len vector snake \ le corps du serpent
 
 \ deplace le serpent
 : move-snake ( -- )
+   0 snake @ dup ucoord>xy
    head @ case
-       east of 1 endof
-       south of 256 endof
-       west of -1 endof
-       north of -256 endof
-       >r 0 r> endcase
-   0 snake dup >r @ dup tail ! + r> !
-   snake-len @ 1 do i snake dup >r @ tail @ r> !
-   tail ! loop
-   bl tail @ ucoord>xy draw-pixel draw-snake ;
-
+       east of swap 1+ swap endof
+       south of 1+ endof
+       west of swap 1- swap endof
+       north of 1- endof
+       endcase xy>ucoord
+   0 snake !
+   snake-len @ 1 do i snake dup >r @ swap r> !
+   loop dup tail !
+   bl swap ucoord>xy draw-pixel draw-snake ;
 
 \ jeu serpent
 \ verification collision avec mur
 : wall-bang? ( -- f )
-   0 snake @ ucoord>xy dup 0< swap play-height 1- U> or
-   swap dup 0< swap play-width 1- u> or or ;
+   0 snake @ ucoord>xy  play-height 1- u>
+   swap  play-width 1- u> or ;
 
 \ verification collision
 : collision? ( -- f )
@@ -143,7 +141,6 @@ max-len vector snake \ le corps du serpent
    east head !
    play-width 2/ play-height 2/ snake-len @ 0 do
    2dup xy>ucoord i snake ! swap 1- swap loop 2drop ;
-
 
 \ jeu serpent
 \ lecture clavier touche 'q' quitte le jeu.
@@ -159,6 +156,7 @@ max-len vector snake \ le corps du serpent
 \ pastille mangee?
 : eaten? ( -- f )
    0 snake @ food @ = ;
+
 
 \ jeu serpent
 \ boucle du jeu
@@ -182,3 +180,4 @@ max-len vector snake \ le corps du serpent
 \ lance le jeux.
 : snake-run ( -- )
    begin game-init game-loop game-over 'q' = until cls ;
+
