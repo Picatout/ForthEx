@@ -34,33 +34,34 @@ textarea#code{
 <body>
 <h2>Présentation</h2>
 <p>
-	Ce tutoriel consiste à décrire toutes les étapes de la création d'un jeux vidéo simple, le classique 
-	<a href="https://fr.wikipedia.org/wiki/Snake_(jeu_vid%C3%A9o)">Snake</a>. Il existe plusieurs variantes de ce jeux.
-	Comme il s'agit d'un tutoriel sur le langage Forth, cette version sera simple. 
+	Ce tutoriel est structuré autour de la création d'un jeux vidéo simple, le classique 
+	<a href="https://fr.wikipedia.org/wiki/Snake_(jeu_vid%C3%A9o)">Snake</a>. Il existe plusieurs variantes de ce jeu.
+	Comme il s'agit d'un tutoriel sur le langage Forth, cette version sera la plus simple. 
 
 </p>
-<h3>règles du jeux</h3>
+<h3>règles du jeu</h3>
 <p>
 	<div><ol>
-		<li>Le serpent ne doit pas entrer en collision avec la bordure de l'aire de jeux.</li>
+		<li>Le serpent ne doit pas entrer en collision avec la bordure de l'aire de jeu.</li>
 		<li>Le serpent ne doit pas se mordre lui-même.</li>
 		<li>Le serpent mange les pastilles qui apparaîssent dans l'aire de jeux.</li>
 		<li>Le pointage est compté de la façon suivante:
 		<ul>
-			<li>1 pastille dans un coin compte pour 4 points.</li>
-			<li>1 pastille le long d'un mur compte pour 2 points.</li>
+			<li>Une pastille dans un coin compte pour 4 points.</li>
+			<li>Une pastille le long d'un mur compte pour 2 points.</li>
 			<li>Les autres pastilles comptent pour 1 point.</li>
 		</ul></li>
 		<li>Lorsque le serpent mange une pastille il s'allonge d'un anneau.</li>
-		<li>Le serpent est toujours en mouvement mais sa direction est contrôlée par les flèches gauche et droite.</li>
+		<li>Le serpent est toujours en mouvement mais sa direction est contrôlée par les touches <b>&larr;</b> et <b>&rarr;</b>.</li>
 	</ol></div>
 </p>
 <h3>L'aire de jeux</h3>
-<p>Le pourtour de l'écran est circonsris par une ligne blanche, le serpent est donc limité à une surface de 62 par 22 pixels. 
+<p>Le pourtour de l'écran est circonscris par une ligne blanche, le serpent est donc limité à une surface de 62 par 22 pixels. 
    Puisqu'il s'agit d'un écran texte, les pixels ici sont représentés par l'espace d'un caractère. Sur la première ligne de
    l'écran s'affiche le pointage <b>SCORE:</b>, et la longueur du serpent <b>LENGTH:</b>. Ces compteurs augmentent chaque fois qu'il mange.</p>
 <h3>Analyse du programme.</h3>   
-<p>Essayons de voir de quoi nous avons besoins pour réaliser ce jeux.</p>
+<p>Essayons de voir de quoi nous avons besoins pour réaliser ce jeux. Notez que le langage ForthEx est insensible à la casse. On peut écrire les 
+identificateurs en minuscule,majuscules ou un mélange des deux. Les indentificateurs sont convertis en majuscules avant d'être ajouter au dictionnaire.</p>
 <h4>Variables</h4>
 <p>
 	<div><ul>
@@ -89,8 +90,8 @@ textarea#code{
 </p>   
 <p>
 	Le corps du serpent et les pastilles de nourritures seront représentés par le caractère <b>O</b>.<br>
-	Dans cette version simple du jeux le serpent va toujours se déplacer à la même vitesse. Le délais de boucle sera donc déterminée
-	par une constante <b>SPEED</b>.
+	Dans cette version simple du jeux le serpent va toujours se déplacer à la même vitesse. Le délais de boucle sera donc déterminé
+	par la constante <b>SPEED</b>.
 </p>
 <h3>Déroulement du progamme (algorithme)</h3>
 <p>
@@ -109,8 +110,8 @@ textarea#code{
 			<li>Afficher le status.</li>
 			<li>S'il n'y a pas de pastille dans l'aire de jeux en créer une.</li>
 			<li>Afficher la pastille.</li>
-			<li>Dessin du serpent.</li>
-			<li>Mouvement du serpent.</li>
+			<li>déplacer le serpent d'un pas.</li>
+			<li>Dessiner le serpent à sa nouvelle position.</li>
 			<li>Si le serpent a avalé la pastille ajuster le pointage et la longueur.</li>
 			<li>Sinon vérification collision, si collision terminer partie.</li>
 			<li>Délais vitesse déplacement.</li>
@@ -122,28 +123,116 @@ textarea#code{
 		<li>Attendre touche pour intialiser la prochaine partie ou (Q)uitter.</li>
 	</ol></div>
 </p>  
+<h2>La machine virtuelle Forth</h2>
+<p>
+	Le langage Forth donne accès à ses structures internes. Il faut donc que le programmeur Forth connaisse le fonctionnement interne, ce qu'on appelle
+	la machine virtuelle. Nous allons donc décrire ici cette machine virtuelle.
+</p>
+<p>
+	Il y a 2 piles que l'utilisateur doit manipuler, la pile des arguments et la pile des retours. Dans la plupart des langages comme le 
+	<b>C</b> le programmeur n'a pas besoin de manipuler la pile, c'est le compilateur qui s'en occupe. En Forth c'est différent, vous devez connaître
+	ces 2 piles et les mots Forth qui permettent de les manipuler. 
+</p>
+<h3>Pile des arguments</h3>
+<p>
+	La pile des arguments comme son nom l'indique sert à passer des arguments entre les fonctions et aussi à retourner les valeurs des fonctions. Une
+	foncion peu retourner plus d'une valeur. En plus elle sert à garder les variables temporaires qui sont utilisées par la fonction. Ce n'est pas très
+	différent du langage <b>C</b> sauf que pour ce dernier le programmeur n'a pas besoin de connaître ces détails. Une des difficultés du Forth est que
+	justement vous devez garder en tête l'état le la pile des arguments mais aussi de la pile des retours dans certains cas. L'autre différence entre le
+	<b>C</b> et Forth est qu'en <b>C</b> il n'y a qu'une seule pile pour les arguments et les retours.
+</p>
+<p> La pile des arguments utilise un pointeur nommé <b>SP</b> qui pointe sur l'élément au sommet de la pile. Il y a des mots comme <b>SP@</b> et 
+<b>SP!</b> qui permettent de lire et initialiser la valeur de ce pointeur respectivement.</p>
+<h3>Pile des retours</h3>
+<p>
+	La pile des retours est très semblable à ce qu'on retrouve dans d'autre langages comme le <b>C</b>. Sa fonction principale est de conserver les
+	adresses de retour lors d'un appel de sous-routine. En plus de ce rôle on s'en sert aussi pour conserver certaines valeurs afin de faciliter 
+	l'accès à des valeurs de la pile des arguments qui ne sont pas au sommet. Plusieurs mots servent à transférer des valeurs entre la pile des 
+	arguments et la pile des retours.
+</p>
+<p> La pile des retours utilise un pointeur nommé <b>RP</b> qui lui pointe non pas sur la valeur au sommet de la pile mais sur le premier 
+emplacement vide. Ceci est un détail de l'implémentation de ForthEx et n'affecte en rien l'utilisation des mots Forth. Il est quand même 
+utile de savoir que le mot <b>RP@</b> retourne une adresse au dessus du sommet de la pile.</p>
+<h3>Cellule</h3>
+<p> Un mot qui revient souvent en Forth est le mot <b>CELL</b>, qui signifie <i>cellule</i>. La cellule est l'élément de base des données, c'est
+à dire la taille élémentaire d'une donnée sur les piles. Habituellement les 2 piles ont la même taille de cellule. Pour ForthEx une cellule est 
+un élément de 16 bits. Ça signifit que les opérations sur les piles se font sur des objets de 16 bits. Un entier ForthEx a 16 bits, un entier
+double a 32 bits et occupe donc 2 cellules sur la pile. L'ordinateur ForthEx utilise aussi des pointeurs 16 bits, sauf pour l'accès à certains 
+périphériques de stockages qui nécessitent des adresses de 32 bits. Dans ce cas on utilise un entier double pour les représentés.
+</p>
+<h3>Le dictionnaire</h3>
+<p> L'autre élément fondamental du Forth est ce qu'on appelle le dictionnaire.  Le dictionnaire Conserve le nom de tous les symboles utilisés par
+le langage, les opérateurs arithmétique, logiques, relationels, les fonctions, les variables et les constantes. À chacun des ces symboles est associé
+un pointeur qui indique l'action qui doit-être exécutée lorsque ce nom est invoqué dans un programme où sur la ligne de commande interactive. Par exemple
+si on invoque le nom d'une constante sa valeur est empilée au sommet de la pile des arguments. Si on invoque le nom d'une variable l'adresse de celle-ci
+est empilée au sommet de la pile des arguments. Si on invoque le nom d'un opérateur arithmétique comme <b>+</b> cette opération est exécutée en utilisant
+les 2 valeurs au sommet de la pile des arguments.
+</p>
+<h3>Constante et variables système</h3>
+<p>
+	La machine virtuelle ForthEx utilisent un certain nombre de constantes et variables qui sont accessible au programmeur nous les mentionnerons
+	lors de leur utilisation.
+</p>
+<h2>La syntaxe Forth</h2>
+<p> Je dirais que ce qui caractérise le plus le langage Forth est la simplicité de la syntaxe. Un programme Forth est simplement une liste de mots
+séparés par un espace. L'interpréteur lit un mot et le cherche dans le dictionnaire, s'il le trouve il exécute immédiatement l'action qui est associé
+à ce mot. Si le mot n'est pas dans le dictionnaire ce doit-être un entier (simple ou double) et dans ce cas l'interpréteur empile la valeur de cet entier.
+L'interpréteur Forth est donc très simple: Lire le prochain mot, le chercher dans le dictionnaire, exécuter son action si trouvé sinon vérifier si c'est
+un nombre et empiler ce nombre autrement arrêter et signaler une erreur.
+</p>
+<p>
+	Lorsqu'on est en train de compiler une nouvelle définition dans le dictionnaire, la seule différence est que l'interpréteur compile l'adresse du code
+	à exécuter au lieu de l'exécuter à moins qu'il s'agisse d'un mot <i>immédiat</i>. Les mots <i>immédiat</i> sont toujours exécutés immédiatement même
+	lors d'une compilation. 
+</p>
+<h3> Les commentaires</h3>
+<p> Il y a deux types de commentaires en Forth ceux introduit par le mot <b>(</b> et qui se termine par le délémiteur <b>)</b> et ceux qui sont 
+    introduit par le mot <b>\</b> et qui se termine à la fin de la ligne. Notez que j'ai dit qu'il s'agissait de <b>mots Forth</b>. Ça signifit 
+    qu'il faut qu'ils soient séparés par un espace de chaque côté.<br>
+    <textarea id="code" style="height:100px;">
+		\ ceci est un commentaire qui se termine à la fin de la ligne.
+		\ceci génère une erreur, l'interpréteur va affiché: \ceci?
+		( ceci est un commentaire qui se termine ici)
+		(ceci génère une erreur, l'interpréteur va affiché: (ceci? 
+    </textarea><br>
+    Lorsque l'interpréteur ne trouve pas le mot dans le dictionnaire et que ce n'est pas un nombre il s'arrête en affichant le
+    mot suivit d'un point d'interrogation.
+</p>
+<h3>Les indentifiants</h3>
+<p>
+	Puisqu'en Forth seul l'espace est utilisé comme séparateur de mot, un mot peut être formé avec n'importe quel caractère sauf l'espace.
+	<br><textarea id="code" style="height:100px">
+		&*/ \ ceci est un nom valide
+		snake-len \ ça aussi il n'y a pas d'espace de
+		\ chaque côté du '-' donc ce n'est pas un mot
+		\ en lui-même.
+	</textarea><br>
+</p>
+<h3>La notation préfixée.</h3>
+<p> Autre particularité de la syntaxe Forth est que les arguments ( sauf exception ) sont énoncés avant la fonction. C'est ce qu'on appelle la
+notation préfixée. exemple.
+   <textarea id="code" style="height:100px;">
+	   34 56 *  \ multipliation de 34 par 56
+	   21 7 /  \ division de 21 par 7
+	   12 7 2 - * \ en infixe donne 12*(7-2)
+   </textarea>
+</p>
 <h3>Débutons le codage</h3>
 <p>
 	À ce point çi nous disposons suffisamment d'information pour débuter l'écriture du code. Si nous avons manquer un point nous nous ajusterons en
 	cours de route. Mais d'abord il faut répondre à quelques questions.
 	<div><ul>
-	<li>Quel sera la longueur initiale du serpent?</li>
-	<li>Est-ce que le serpent a une position et une direction initiale fixes, où laissons-nous ça au hasard?</li>
+	<li>Quel sera la longueur initiale du serpent? J'ai opté pour 4.</li>
+	<li>Est-ce que le serpent a une position et une direction initiale fixes, où laissons-nous ça au hasard? J'ai décidé qu'il démarrait au
+	centre de l'écran et se dirigeait vers l'est.</li>
 	</ul></div>
 	<div>
-	En Forth il y a 2 types de commentaires, les commentaires qui débutent par le mot <b>\</b> et se termine à la fin de la ligne et les commenataires
-	qui débutent par le mot <b>(</b> et se termine par le délimiteur <b>)</b>. J'ai bien dit que <b>\</b> et <b>(</b> étaient des mots Forth donc ils sont
-	séparés des autres mots par un espace. exemples:<br>
-	<textarea id="code" style="height:100px;">
-	\ Ceci est un commentaire qui se termine à la fin de ligne.
-	( Ceci est un commentaire qui se termine ici.)
-	( Je peu mettre du code après ce commentaire.) 314 CONSTANT 100PI
-	\ Je viens de créer une constante qui s'appelle 100PI 
-	</textarea></div>
 </p>
 <p>
 	Commençons donc à créer notre programme snake.<br>
-	Définissons quelques constantes.<br>
+	Définissons quelques constantes. Les constantes sont créées dans le dictionnaire avec le mot <b>CONSTANT</b>. On entre la valeur de la constante
+	ensuite le mot <b>constant</b> suivit de sont nom. Une fois une constante créée il suffit d'invoquer son nom pur que sa valeur soit déposée au
+	sommet de la pile des arguments.<br>
 	<textarea id="code" style="height:220px;">
 	128 constant max-len \ longueur maximale du serpent.
 	\ directions des deplacements
@@ -158,9 +247,11 @@ textarea#code{
 	143 constant vk_left \ code touche fleche gauche
 	144 constant vk_right \ code touche fleche droite	
 	</textarea><br>
-	Et les variables<br>
+	Sans surprise les variables sont créées à l'aide du  mot <b>VARIABLE</b>. Lorsqu'une variable est invoquée c'est sont adresse qui est déposée
+	au sommet de la pile. Ce qui permet de lire sa valeur avec le mot <b>@</b> ou bien de modifier cette valeur avec le mot <b>!</b>.<br>
 	<textarea id="code" style="height:120px;">
-	\ création des variables, elles sont inialisée à 0 lors de leur création.
+	\ création des variables, elles sont inialisée à 0 lors de
+	\ leur création.
 	VARIABLE SCORE \ pointage
 	VARIABLE SNAKE-LEN \ longueur du serpent.
 	VARIABLE HEAD \ Indique la direction de déplacement de la tête du serpent.
@@ -171,27 +262,49 @@ textarea#code{
 <p>
 	Il nous reste encore 2 variables à créer mais ces variables sont de type tableau (quoique je préfère le mot vecteur). Avant de créer ces 2 variables vecteurs
 	je vais définir un mot particulier appellé <b>VECTOR</b>. Ce mot est un mot qui sert à créer une classe de mots,de la même manière que le mot 
-	<b>VARIABLE</b> nous a permis de créer des objets de type <i>variable</i>, le mot <b>VECTOR</b> va nous permettre de créer des objets de type <i>tableau</i>.
+	<b>VARIABLE</b> nous a permit de créer des objets de type <i>variable</i>, le mot <b>VECTOR</b> va nous permettre de créer des objets de type <i>vecteur</i>.
 	<br>
 	<textarea id="code" style="height:80px;">
-		\ VECTOR va nous permettre de créer des tableaux à 1 dimension.
+		\ VECTOR va nous permettre de créer des 
+		\ variables de type vecteur.
 		: VECTOR ( cccc -- )
 		  CREATE CELLS ALLOT DOES&gt; SWAP CELLS + ;
     </textarea>
 </p> 
 <p>
-	Comme la définition de <b>VECTOR</b> fait appel à un concept avancé de Forth et que ce tutoriel est une introduction au langage Forth, je ne vous expliquerez
-	pas ici le fonctionnement de <b>CREATE</b> et <b>DOES&gt;</b>. Pour le moment ils vous suffit de savoir qu'avec ce nouveau mot nous allons pouvoir créer
-	des tableaux à une dimension.
+	Dans ce tutoriel je vais appeller les mots qui servent à créer d'autres mots dans le dictionnaire <b>mots compilants</b>. <b>CONSTANT</b> <b>VARIABLE</b>,
+	<b>:</b> et <b>CREATE</b> sont des <b>mots compilants</b>. Et maintenant que nous l'avons créé le mot <b>VECTOR</b> est aussi un <b>mot compilant</b>.
+</p>
+<p>
+	Le premier mot que nous avons utiliser pour définir <b>VECTOR</b> est le mot <b>:</b> Ce mot cré une nouvelle entrée dans le dictionnaire qui porte
+	le nom qui le suis dans le texte d'entrée. En l'occurence ici il s'agit du mot <B>VECTOR</B>. Il existe une variable système qui s'appelle <b>STATE</b>.
+	Cette variable détermine l'action de l'interpréteur. Lorsque cette variable est à <b>0</b> l'interpréteur exécute immédiatement chaque mot qu'il lit dans le
+	texte d'entrée. Mais lorsque <b>STATE</b> a la valeur <b>-1</b>, l'interpréteur compile dans le dictionnaire l'adresse du code d'action au lieu de
+	l'exécuter. Le mot <b>:</b> après avoir créer une entrée dans le dictionnaire pour <b>VECTOR</b> change la valeur de <b>STATE</b> à <b>-1</b>. Donc tous
+	les mots qui suivent le mot <b>VECTOR</b> seront compilés dans le dictionnaire à la suite du mot <b>VECTOR</b>. Il y a une exception. Les mots dits <i>
+	immédiat</i> sont quand même exécutés lorsque STATE est à -1. dans la définition de <b>VECTOR</b> on utilise 2 mots immédiats <b>DOES&gt;</b>
+	et <b>;</b>. Le mot <b>;</b> est utiliser pour terminer une définition, il sert simplement à remettre à <b>0</b> la valeur de <b>STATE</b>.
+</p>
+<p> Le mot <b>DOES&gt;</b> est plus complexe. Il termine la définition du mot <b>VECTOR</b> et compile une action qui va s'exécutée par les mots créés avec
+<b>VECTOR</b>. Autrement dit les mots créés par <b>VECTOR</b>, lorsqu'ils seront invoqués, vont exécuter le code:
+<br><textarea id="code" > SWAP CELLS + </textarea> <br>
 </p>
 <p>
 	Donc lorsque l'interpréteur à terminé la lecture du code ci-haut on a un nouveau mot dans le dictionnaire, <b>VECTOR</b> et on va s'en servir
-	pour créer des variables de type <i>tableau</i>. La définition du mot commence par <b>:</b> et se termine par <b>;</b>. Le mot qui suis <b>:</b> est 
-	le nom du mot qu'on ajoute au dictionnaire Forth, en l'occurence il s'agit du mot <b>VECTOR</b>. Nous allons nous servir de vector pour creer les
-	variables <b>c-head</b> et <b>snake</b>.<br>
+	pour créer des variables de type <i>vecteur</i>. Voici ce qui se passe lorsqu'on invoque le mot <b>VECTOR</b>. Regardons la partie de sa 
+	définition qui précède <b>DOES&gt;</b>.<br>
+	<textarea id="code" >CREATE CELLS ALLOT</textarea><br>
+	Seulement 3 mots.
+	<ul>
+		<li><b>CREATE</b>, Lit le prochain mot dans le texte d'entré et cré un nouveau mot dans le dictionnaire avec ce nom. Lorsqu'un mot
+		qui a été créé par <b>CREATE</b> est invoqué son action est de déposé au sommet de la pile l'adresse du premier octet de donnée, ce
+		qu'on appelle <b>PFA</b> pour <i>Parameter Field Address</i>.</li>
+		<li><b>CELLS</b>, Multiplie la valeur qui est au sommet de la pile par le nombre d'octets d'une cellule. En ForthEx l'on l'a dit
+		les cellules sont de 16 bits donc 2 octets. Donc la valeur au sommet de la pile est multipliée par 2.</li>
+		<li><b>ALLOT</b>, Réserve L'espace nécessaire dans l'espace de données pour stocker le nombre d'octets indiqué par la valeur
+		qui est au sommet de la pile. Cette valeur est retirée de la pile.</li>
+	</ul><br>
 	<textarea id="code" style="height:180px;">
-	\ ForthEx ne fait pas de difference entre lettres
-	\ minuscules et majuscules.	
 	4 vector c-head \ tableau de 4 car. representant la tete du serpent.
 	max-len vector snake \ le corps du serpent.
 	
@@ -200,7 +313,35 @@ textarea#code{
 	'W' south c-head !
 	'&gt;' west c-head !
 	'M' north c-head !
-	</textarea>
+	</textarea><br>
+	Prenons l'exemple de <b>C-HEAD</b>. On empile la valeur <b>4</b> qui sera consommé par <b>VECTOR</b> qui est invoqué à la suite de son
+	argument suivit du nom de la <i>variable vecteur</i>, ici <b>C-HEAD</b>. Une fois que l'interpréteur a lu cette phrase il y a donc un 
+	nouveau mot dans le dictionnaire appellé <b>C-HEAD</b>. l'initialisation de <b>C-HEAD</b> nous montre comment utiliser un vecteur.
+	les vecteurs consomme 1 argument et en retourne 1. Notez la façon dont on documente les arguments d'un mot en Forth <b>( u -- a-addr )</b>.
+	Lorsque vous lirez du code Forth vous verrez constamment ce type de commentaires. C'est une description abrégée de l'interface de la 
+	fonction. Dans le cas qui nous concerne un <b>vecteur</b> consomme un entier non signé représenté par <b>u</b> et retourne 
+	une adresse alignée sur une cellule représenté par <b>a-addr</b>.  La valeur de <b>u</b> indique quel élément du vecteur nous voulons 
+	atteindre. Le permier élément d'un vecteur porte l'indice <b>0</b>, le deuxième l'indice <b>1</b>, etc. Prenons en exemple la phrase suivante:
+	<br><textarea id="code">
+	'&lt;' east c-head !	
+	</textarea><br>
+	On commence par empiler la valeur <b>&lt;</b> qu'on veut sauvegarder dans le premier élément de <b>C-HEAD</b>, ensuite on utilise la constante <b>EAST</b>
+	qui vaut <b>0</b> pour indicer le vecteur puis on invoque le vecteur <b>C-HEAD</b>. <b>C-HEAD</b> consomme la valeur <b>EAST</b> et s'en sert
+	pour retourner l'adresse de l'élément demandé. Finalement on invoque le mot <b>!</b> <i>store</i>. <b>!</b> consomme 2 valeurs sur la pile.
+	La valeur au sommet est l'adresse où sera sauvegardée la valeur qui se trouve en deuxième position sur la pile, i.e. <b>&lt;</b>.  
+</p>
+<p>
+	Notez ici combien il est important lorsqu'on programme en Forth de connaître se qu'il y a sur la pile des arguments ou même des retours si on
+	utilise cette dernière pour conserver des valeurs temporairement. On peut s'aider à l'aide de commentaires qui indique les valeurs sur
+	la pile des arguments par une liste précédé de <b>S:</b> et <b>R:</b> pour la pile des retours. Voici un exemple de commentaire.
+	<br><textarea id="code" style="height:100px;">
+	4 3 \ après avoir empilé 4 et 3 on a S: 4 3
+	>r  \ après avoir transféré T sur R on a S: 4  R: 3
+	drop r> \ après avoir jeté T et transféré R sur S on S: 3 R:
+	</textarea><br>
+	Pour comprendre cet exemple il faut savoir qu'on nomme le sommet de la pile des arguments <b>T</b> et que le mot <b>&gt;R</b> 
+	transfert le sommet de la pile des arguments vers la pile des retour et que
+	le mot <b>R&gt;</b> fait exactement le contraire. Tandis que le mot <b>DROP</b> jette la valeur au sommet de la pile des arguments.
 </p>
 <p>
 	J'ai pris la décision qu'au départ le serpent est au centre de l'écran qu'il a une longueur de 4 et qu'il se déplace vers l'est.
