@@ -400,6 +400,26 @@ notation préfixée. exemple.
 	   head @ c-head @ 0 snake @ ucoord>xy draw-pixel
 	   snake-len @ 1 do i snake @ draw-ring loop ;
 
+	\ dessine pastille nourriture
+	: draw-food ( -- )
+	   true b/w 'O' food @ ucoord>xy
+	   draw-pixel false b/w ;
+
+	\ déplace le serpent dans la direction
+	\ indiquée par la variable HEAD.
+	: move-snake ( -- )
+	   0 snake @ dup ucoord>xy
+	   head @ case
+		   east of swap 1+ swap endof
+		   south of 1+ endof
+		   west of swap 1- swap endof
+		   north of 1- endof
+		   endcase xy>ucoord
+	   0 snake !
+	   snake-len @ 1 do i snake dup >r @ swap r> !
+	   loop dup tail !
+	   bl swap ucoord>xy draw-pixel draw-snake ;
+
 	\ affiche le status
 	: status ( -- )
 	   true b/w 1 1 at-xy s" SCORE:" type score @ .
@@ -449,14 +469,78 @@ mot <b>space</b>. Comme on est en inverse vidéo cet espace apparaît comme un car
 on retourne après le <b>do</b>. Donc ici puisque <b>do</b> a été initialisé avec une limite de <b>24</b> le traçage des lignes verticales se termine à la
 ligne 23.
 </p>
+<p> <b>draw-food</b> sert à dessiner la pastille de nourriture en inverse vidéo. La position de la pastille est conservée dans la variable <b>food.</b>
+ Donc après être passé en mode vidéo inverse par la phrase <b>true b/w</b> on obtient la position par la phrase <b>food @</b>, on convertit l'entier
+ en couple x,y avec <b>ucoord&gt;xy</b> avant d'appeller <b>draw-pixel</b>. Pour conclure on repasse en vidéo normal avec <b>false b/w.</b>
+</p>
 <p>Le mot <b>draw-snake</b> sert à dessiner le serpent. On commence par dessiner la tête. Comme on l'a dit le caractère utilisé pour la tête dépend de la
 direction du mouvement du serpent. Cette direction est indiquée par la valeur de la variable <b>HEAD</b>. On lit donc cette valeur avec la phrase
 <b>head @</b> et cette valeur sert d'indice pour aller chercher le bon caractère dans le vecteur <b>c-head</b> par la phrase <b>c-head @</b>. Ensuite on
-obtient la position de la tête du serpent avec la phrase <b>0 snake @</b> et on dessine la tête avec la phrase <b>ucoord>xy draw-pixel.</b> Pour dessiner
+obtient la position de la tête du serpent avec la phrase <b>0 snake @</b> et on dessine la tête avec la phrase <b>ucoord&gt;xy draw-pixel.</b> Pour dessiner
 le corps du serpent on utilise encore une boucle <b>do...loop</b>. Cette boucle est initialisée avec la longueur du serpent qu'on obtient avec la phrase
 <b>snake-len @</b> et l'indice de départ est <b>1</b> puisqu'on a déjà dessiner la tête. la phrase <b>i snake @</b> nous donne la coordonnée de l'ième 
 élément du serpent et <b>draw-ring</b> dessine l'anneau. Et bien sur <b>loop</b> incrémente le compteur et nous renvoie au début de la boucle tant qu'on
 a pas atteint la limite.
+</p>
+<p>Le mot <b>move-snake</b>, qui sert à déplacer le serpent, est plus complexe que les précédent. Je vais donc commencer par expliquer comment on déplace le
+serpent avant d'examiner le code qui effectue cette action.
+<ol>
+	<li>La variable <b>head</b> nous indique dans qu'elle direction on doit déplacer le serpent. Selon la valeur de <b>head</b> on doit:
+	<table border="single">
+		<tr><th>head</th><th>modification</th></tr>
+		<tr><td>est</td><td>x=x+1</td></tr>
+		<tr><td>sud</td><td>y=y+1</td></tr>
+		<tr><td>ouest</td><td>x=x-1</td></tr>
+		<tr><td>nord</td><td>y=y-1</td></tr>
+	</table>
+	</li>
+	<li>Le corps du serpent suis la tête çe qui signifit qu'une fois que la tête a été déplacée le premier anneau va à la position précédente
+	de la tête. Le deuxième anneau à la position précédente du premier anneau, ainsi de suite jusqu'à la queue du serpent.</li>
+	<li>Il s'agit donc de déplacer la tête en premier pour ensuite utiliser une boucle <b>do...loop</b> pour déplacer le reste du serpent.</li>
+</ol>
+	On commence donc par lire la valeur <i>ucoord</i> de la tête du serpent avec la phrase <b>0 snake @</b>. <b>dup</b>fait une copie de cette valeur
+	car nous aurons besoin de cette valeur pour l'affecter au premier anneau du serpent. On transforme l'entier en couple <b>x,y</b> avec <b>ucoord&gt;xy</b>.
+</p>
+<h4>CASE</h4>
+<p> Voici comment fonctione le <b>CASE</b> en Forth. Le <b>CASE</b> sert à sélectionner un choix multiple en comparant la valeur au sommet de la pile
+avec différentes valeurs de contrôles. Ici la valeur au sommet de la pile est la direction obtenue par <b>head @</b>. Après le <b>case</b> suis la liste
+des valeurs de contrôle. Dans ce cas ci, il s'agit des constantes <b>east, south, west et north</b>. Le mot <b>of</b> suis chaque valeur de contrôle et
+est lui-même suivit du code à exécuter si la valeur de contrôle est égale à la valeur au sommet de la pile. <b>endof</b> indique la fin du code pour
+cette condition. Il y a autant de <b>x of .... endof</b> qu'il y a de valeurs à contrôler. Le mot <b>endcase</b> termine le <b>case</b> en retirant
+du sommet de la pile la valeur utilisée par <b>case</b>. Si aucune condition n'est rencontrée on peut insérer entre le dernier <b>endof</b> et 
+<b>endcase</b> du code qui sera exécuté par défaut. <b>Attention</b>, si le code par défaut laisse une valeur sur la pile il doit faire un <b>swap</b>
+pour ramené la valeur utilisée par <b>case</b> au sommet pour que celle-ci soit jetée par <b>endcase</b>.
+</p>
+<p> Maintenant que les coordonnées de la tête ont étées modifiées à l'intérieur du <b>case</b> on reconvertie le couple <b>x,y</b> en <i>ucoord</i>
+avant de sauvegarder cette nouvelle valeur dans l'élément 0 du vecteur <b>snake</b> par la prhase <b>xy&gt;ucoord 0 snake !</b>.
+</p>
+<p>A ce point ci il nous reste au sommet de la pile l'ancienne <i>ucoord</i> de la tête. On commence une boucle pour déplacer le reste du serpent.
+<b>snake-len @ 1 do</b>. Le code à l'intérieur du <b>do...loop</b> est en fait simple à comprendre. Pour chaque élément <b>i</b> du vecteur snake,
+on commence par lire la valeur actuelle, on commute les 2 éléments au sommet de la pile et on sauvegarde la valeur qui est maintenant au sommet dans
+cet ième élément. <b>dup &gt;r</b> sert simplement à conserver une copie de l'adresse du ième élément sur la pile des retours pour ensuite récupérer cette
+adresse avec <b>r&gt;</b> lorsque viens le temps d'enregistrer la nouvelle valeur <i>ucoord</i> de cet élément. Gardez en tête qu'au début de chaque boucle
+la valeur qui est au sommet de la pile des arguments est la position avant déplacement de l'élément précédent du serpent. Action à l'intérieur de la boucle:
+<br><b>i snake dup &gt;r @ swap r&gt; !</b><br><table border="single">
+<tr><th>action</th><th>S:</th><th>R:</th><th>commentaire</th></tr>
+<tr><td></td><td>ucoord</td><td></td><td>juste avant de débuter le do...loop<br>on a sur la pile<br>l'ancienne position de la tête.</td></tr>	
+<tr><td>i</td><td>compteur-boucle<br>ucoord</td><td></td><td>Le compteur de boucle débute à 1</td></tr>
+<tr><td>snake</td><td>a-addr(i)<br>ucoord</td><td></td><td>Maintenant au sommet de la pile<br>on a l'adresse du ième élément du vecteur snake.</td></tr>
+<tr><td>dup</td><td>a-addr(i)<br>a-addr(i)<br>ucoord</td><td></td><td>On a créer une copie de l'adresse.</td></tr>
+<tr><td>&gt;r</td><td>a-addr(i)<br>ucoord</td><td>a-addr(i)</td><td>On envoie la copie sur la pile des retours.</td></tr>
+<tr><td>@</td><td>ucoord-i<br>ucoord</td><td>a-addr(i)</td><td>Maintenant on a au sommet de S: <i>ucoord</i> du ième élément.</td></tr>
+<tr><td>swap</td><td>ucoord<br>ucoord-i</td><td>a-addr(i)</td><td>On a commuter les 2 éléments au sommet de S:</td></tr>
+<tr><td>r&gt;</td><td>a-addr(i)<br>ucoord<br>ucoord-i</td><td></td><td>On a ramené l'adresse du ième élément sur S:</td></tr>
+<tr><td>!</td><td>ucoord-i</td><td></td><td>On a sauvegarder la valeur de l'élément (i-1) dans l'élément (i)<br>
+et conserver l'ancienne valeur de l'élément (i) au sommet de S:</td></tr>
+</table><br>
+Lorsqu'on quitte la boucle <b>do...loop</b> il reste au sommet de la pile <i>l'ucoord</i> de la queue du serpent avant déplacement. On doit faire 2 
+choses avec cette valeur. Premièrement on cré une copie et on la conserve dans la variable <b>tail</b>, <b>dup tail !</b>. Ensuite on va effacer
+L'anneau qui se trouve à cette position puisque le serpent s'est déplacé il n'y a plus rien à cette coordonnée. <b>bl swap ucoord&gt;xy draw-pixel</b>.
+Finalement on appelle <b>draw-snake</b> pour redesssiner le serpent au complet à sa nouvelle position.
+</p>
+<p>Pourquoi conserve-t'on l'ancienne position du dernier à anneau du serpent dans tail?  Parce qu'au moment où on déplace le serpent on ne sais pas
+encore si le serpent a avalé la pastille de nourriture. Lorsqu'on va faire cette vérification et dans l'éventualité ou on doit rallonger le serpent
+on va dessiner le nouvel anneau à cette position.
 </p>
 <p> Le mot <b>status</b> sert à afficher l'état du jeu, soit le pointage et la longueur du serpent. Cette affichage est présenté sur la première ligne
 de l'écran en inverse vidéo, le mot commence donc par la phrase <b>true b/w</b> puis la phrase <b>1 1 at-xy</b> déplace le curseur dans le coin supérieur
