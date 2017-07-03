@@ -74,9 +74,12 @@ max-len vector snake \ le corps du serpent
 
 \ creation d'une pastille de nourriture
 : new-food ( -- )
-   begin rand abs play-width mod \ x
-       rand abs play-height mod \ y
-       xy>ucoord dup valid-food? until food ! ;
+   0 \ valeur à jeter
+   begin
+	   drop 
+	   rand abs play-width mod \ x
+	   rand abs play-height mod \ y
+	   xy>ucoord dup valid-food? until food ! ;
 
 \ jeu serpent
 \ verifie si le serpent se mord.
@@ -85,22 +88,28 @@ max-len vector snake \ le corps du serpent
        i snake @ over = if swap drop true swap leave then
        loop drop ;
 
-\ les pastilles dans un coins valent 4  points
-: in-corner? ( u1 -- f )
-   ucoord>xy dup 0= swap play-height 1- = or
-   swap dup 0= swap play-width 1- = or and ;
-
 \ jeu serpent
-\ les pastilles qui sont le long du mur valent 2 points
-: on-wall? ( u1 -- f )
-   ucoord>xy dup 0= swap play-height 1- = or
-   swap dup 0= swap play-width 1- = or or ;
+\ verification collision avec mur
+: wall-bang? ( -- f )
+   0 snake @ ucoord>xy  play-height 1- u>
+   swap  play-width 1- u> or ;
 
+\ verification collision
+: collision? ( -- f )
+   snake-bit? wall-bang? or ;
+
+\ la pastille est-elle le long d'un mur?
+\ retourne un incateur pour chaque coordonnée.
+: borders? ( u -- fy fx )
+   ucoord>xy dup 0= swap play-height 1- = or
+   swap dup 0= swap play-width 1- = or ;
+	
 \ ajuste SCORE
 : score+ ( -- )
-   food @ dup in-corner? if drop 4 else
-   on-wall? if 2 else 1 then
-   then score +! 0 food ! ;
+   1 food @ borders?
+   if swap 2* swap then
+   if 2* then
+   score +! -1 food ! ;
 
 \ rallonge le serpent
 : snake+ ( -- )
@@ -117,24 +126,13 @@ max-len vector snake \ le corps du serpent
    head @ case
        east of swap 1+ swap endof
        south of 1+ endof
-       west of swap 1- swap endof
+       west of swap 1- 255 and swap endof
        north of 1- endof
        endcase xy>ucoord
    0 snake !
    snake-len @ 1 do i snake dup >r @ swap r> !
    loop dup tail !
    bl swap ucoord>xy draw-pixel draw-snake ;
-
-\ jeu serpent
-\ verification collision avec mur
-: wall-bang? ( -- f )
-   0 snake @ ucoord>xy  play-height 1- u>
-   swap  play-width 1- u> or ;
-
-\ verification collision
-: collision? ( -- f )
-   snake-bit? wall-bang? or ;
-
 
  \ initialisation du serpent
 : snake-init ( -- )
@@ -163,14 +161,14 @@ max-len vector snake \ le corps du serpent
 : game-loop ( -- )
   begin
   speed ms
-  status food @ 0= if new-food then draw-food
+  status food @ -1 = if new-food then draw-food
   game-exit? ?dup 0= if
   move-snake eaten? if score+  snake+ false else
   collision? then then until ;
 
 \ initialisation du jeu
 : game-init ( -- )
-   srand 4 snake-len ! 0 score !
+   srand 4 snake-len ! 0 score ! -1 food !
    snake-init draw-walls ;
 
 \ partie terminee
