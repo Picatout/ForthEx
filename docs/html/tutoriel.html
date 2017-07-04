@@ -452,6 +452,18 @@ notation préfixée. exemple.
 	   24 2 do 1 i at-xy space 64 i at-xy space loop false b/w ;
 
 	</textarea><br>
+ Le mot <b>draw-walls</b> dessine la bordure qui délimite l'aire du jeu. le mot <b>cls</b> vide l'écran de la console. <b>1 whiteln</b> dessine 1
+ligne blanche à la position y qui lui est fournie. Ici 2 lignes blanche sont dessinées en haut et en bas de l'écran. Pour dessiner les lignes verticales
+à droite et à gauche de l'écran on utilise une boucle avec compteur <b>DO ... LOOP</b>.  Entre le mot <b>do</b> et le mot <b>loop</b> se sont les 
+instructions qui s'exécutent en bloucle.Le mot <b>DO</b> consomme 2 arguments, <b>24</b> est la limite du compteur et  <b>2</b> est la valeur initiale 
+du compteur. On a déjà vu le mot <b>at-xy</b> qui consomme 2 arguments, soit les coordonnées colonne et ligne où doit-être positionner le curseur texte. 
+le mot <b>i</b> sert à empiler la valeur du compteur de boucle. Les instructions de la boucle commence donc par empiler la valeur <b>i</b> ensuite la 
+la valeur du compteur de boucle, dont la valeur est 2 à la première itération. On positionne le curseur et on affiche un caractère espace en invoquant le
+mot <b>space</b>. Comme on est en inverse vidéo cet espace apparaît comme un carré blanc. On recommence l'opération à la colonne <b>64</b> et on arrive à 
+<b>loop</b> qui incrémente le compteur pour ensuite le comparé à la limite. Si cette limite est atteinte l'exécution continue après le <b>loop</b> sinon
+on retourne après le <b>do</b>. Donc ici puisque <b>do</b> a été initialisé avec une limite de <b>24</b> le traçage des lignes verticales se termine à la
+ligne 23.<br>
+
 	<textarea id="code" style="height:100px;">
 	\ dessine le serpent
 	: draw-snake ( -- )
@@ -459,13 +471,25 @@ notation préfixée. exemple.
 	   snake-len @ 1 do i snake @ draw-ring loop ;
 
 	</textarea><br>
+Le mot <b>draw-snake</b> sert à dessiner le serpent. On commence par dessiner la tête. Comme on l'a dit le caractère utilisé pour la tête dépend de la
+direction du mouvement du serpent. Cette direction est indiquée par la valeur de la variable <b>HEAD</b>. On lit donc cette valeur avec la phrase
+<b>head @</b> et cette valeur sert d'indice pour aller chercher le bon caractère dans le vecteur <b>c-head</b> par la phrase <b>c-head @</b>. Ensuite on
+obtient la position de la tête du serpent avec la phrase <b>0 snake @</b> et on dessine la tête avec la phrase <b>ucoord&gt;xy draw-pixel.</b> Pour dessiner
+le corps du serpent on utilise encore une boucle <b>do...loop</b>. Cette boucle est initialisée avec la longueur du serpent qu'on obtient avec la phrase
+<b>snake-len @</b> et l'indice de départ est <b>1</b> puisqu'on a déjà dessiner la tête. la phrase <b>i snake @</b> nous donne la coordonnée de l'ième 
+élément du serpent et <b>draw-ring</b> dessine l'anneau. Et bien sur <b>loop</b> incrémente le compteur et nous renvoie au début de la boucle tant qu'on
+a pas atteint la limite.
+<br>
 	<textarea id="code" style="height:100px;">
 	\ dessine pastille nourriture
 	: draw-food ( -- )
 	   true b/w 'O' food @ ucoord>xy
 	   draw-pixel false b/w ;
-
 	</textarea><br>
+<b>draw-food</b> sert à dessiner la pastille de nourriture en inverse vidéo. La position de la pastille est conservée dans la variable <b>food.</b>
+ Donc après être passé en mode vidéo inverse par la phrase <b>true b/w</b> on obtient la position par la phrase <b>food @</b>, on convertit l'entier
+ en couple x,y avec <b>ucoord&gt;xy</b> avant d'appeller <b>draw-pixel</b>. Pour conclure on repasse en vidéo normal avec <b>false b/w.</b>
+<br>
 	<textarea id="code" style="height:100px;">
 	\ déplace le serpent dans la direction
 	\ indiquée par la variable HEAD.
@@ -483,70 +507,7 @@ notation préfixée. exemple.
 	   bl swap ucoord>xy draw-pixel draw-snake ;
 
 	</textarea><br>
-	<textarea id="code" style="height:100px;">
-	\ affiche le status
-	: status ( -- )
-	   true b/w 1 1 at-xy s" SCORE:" type score @ .
-	   16 1 at-xy s" LENGTH:" type snake-len @ . false b/w ;
-
-	</textarea><br>
-	Comme on le voie ici, chaque nouvelle définition de fonction commence par le mot <b>:</b> et se termine par le mot <b>;</b>. Après chaque nom 
-	de fonction on retrouve un commentaire en parenthèse qui spécifie en abrégé l'interface de chaque fonction. Les coordonnées de chaque élément du
-	jeu seront conservées dans un entier non signé représenté par un <b>u</b> dans les commentaires d'interface. Si on prend le mot <b>ucoord>xy</b>
-	en exemple, le commentaire nous dit que ce mot consomme un entier non signé et nous retourne un couple d'entier notés <b>x y</b> qui représente
-	la position de l'élément à l'écran. Le coin supérieur gauche de l'aire de jeu a les coordonnées {0,0} et le coin inférieur droit {62,22}.
-	La conversion est simple puisque la coordonnée <b>y</b> est conservée dans l'octet fort de l'entier et la coordonnée <b>x</b> dans l'octet faible.
-	Le mot <b>/mod</b> divise un entier et conserve le quotient et le reste. Le quotient est au sommet de la pile et le reste en deuxième position.
-	Donc après l'exécution de la phrase <b>256 /mod</b>, l'entier <b>u</b> est remplacé par <b>x y</b>. 
-</p>
-<p>
-	Le mot <b>xy>ucoord</b> fait exactement le contraire il convertie le couple <b>x y</b> en entier non signé <b>u</b>. Comme indiqué dans le 
-	commentaire entre parenthèses. Encore une fois l'opération est simple on multiplit <b>y</b> par 256 et on additionne <b>x</b> à ce résultat.
-</p>
-<p> Le mot <b>draw-pixel</b> affiche le caractère <b>c</b> à la position <b>x y</b> de l'aire de jeu. Le mot <b>at-xy</b> est un mot standard du
-Forth qui sert à positionner le curseur texte sur l'écran de la console. Cependant en ForthEx les coordonnées d'écran sont {1,1} pour le coin 
-supérieur gauche et {64,24} pour le coin inférieur droit. On a donc définit les constantes <b>x-offset</b> et <b>y-offset</b> pour ajuster les
-coordonnées de l'aire de jeu aux coordonnées réelles de l'écran de la console. On commence donc par ajuster la coordonnée <b>y</b> ensuite pour
-ajuster la coordonnée <b>x</b> on doit commuter les positions de <b>x</b> et <b>y</b> sur la pile pour que <b>x</b> passe au sommet. C'est ce que
-fait le mot <b>swap</b>. <b>x-offset +</b> ajuste la valeur de x et le deuxième <b>swap</b> remet les coordonnées dans le bon ordre avant 
-d'invoquer <b>at-xy</b>. Le mot <b>emit</b> sert à afficher le caractère <b>c</b> (en 3ième position sur la pile) à l'écran.
-</p>
-<p> Le mot <b>draw-ring</b> est utilisé pour dessiner le corps du serpent et la pastille de nourriture. Les 2 étant représenté par le même caractère
- en inverse vidéo.  En ForthEx les valeurs booléennes VRAI et FAUX sont représentées par 2 constantes <b>TRUE</b> qui vaut <b>-1</b> et <b>FALSE</b>
- qui vaut <b>0</b>. Cependant Toute valeur différente de <b>0</b> est considérée comme VRAI. Le mot <b>b/w</b> signifit black/white et sert a 
- inverser l'affichage des caractères. Il consomme un valeur une booléenne. Si cette valeur est vrai les caractères sont affichés en inverse vidéo,
- c'est à dire noir/blanc. Au contraire si cette valeur est fausse on revient à l'affichage normal. Donc au début de <b>draw-ring</b> on passe en
- inverse vidéo pour afficher le caractère <b>O</b> aux coordonnées spécifiées par le paramètre <b>u</b> qui est au sommet de la pile. <b>swap</b>
- comme on la vue précédemment commute 2 les valeur au sommet de la pile de sorte que le <b>O</b> qu'on vient d'empiler se retrouve en deuxième position
- et que le <b>u</b> se retrouve au sommet. On utilise <b>ucoord>xy</b> pour convertir cet entier en couple <b>x y</b> qui est requis par <b>draw-pixel.</b>
- Avant de quitter <b>draw-ring</b> on remet l'affiche en mode normal avec la phrase <b>false b/w.</b>
-</p>	
-<p> Le mot <b>draw-walls</b> dessine la bordure qui délimite l'aire du jeu. le mot <b>cls</b> vide l'écran de la console. <b>1 whiteln</b> dessine 1
-ligne blanche à la position y qui lui est fournie. Ici 2 lignes blanche sont dessinées en haut et en bas de l'écran. Pour dessiner les lignes verticales
-à droite et à gauche de l'écran on utilise une boucle avec compteur <b>DO ... LOOP</b>.  Entre le mot <b>do</b> et le mot <b>loop</b> se sont les 
-instructions qui s'exécutent en bloucle.Le mot <b>DO</b> consomme 2 arguments, <b>24</b> est la limite du compteur et  <b>2</b> est la valeur initiale 
-du compteur. On a déjà vu le mot <b>at-xy</b> qui consomme 2 arguments, soit les coordonnées colonne et ligne où doit-être positionner le curseur texte. 
-le mot <b>i</b> sert à empiler la valeur du compteur de boucle. Les instructions de la boucle commence donc par empiler la valeur <b>i</b> ensuite la 
-la valeur du compteur de boucle, dont la valeur est 2 à la première itération. On positionne le curseur et on affiche un caractère espace en invoquant le
-mot <b>space</b>. Comme on est en inverse vidéo cet espace apparaît comme un carré blanc. On recommence l'opération à la colonne <b>64</b> et on arrive à 
-<b>loop</b> qui incrémente le compteur pour ensuite le comparé à la limite. Si cette limite est atteinte l'exécution continue après le <b>loop</b> sinon
-on retourne après le <b>do</b>. Donc ici puisque <b>do</b> a été initialisé avec une limite de <b>24</b> le traçage des lignes verticales se termine à la
-ligne 23.
-</p>
-<p> <b>draw-food</b> sert à dessiner la pastille de nourriture en inverse vidéo. La position de la pastille est conservée dans la variable <b>food.</b>
- Donc après être passé en mode vidéo inverse par la phrase <b>true b/w</b> on obtient la position par la phrase <b>food @</b>, on convertit l'entier
- en couple x,y avec <b>ucoord&gt;xy</b> avant d'appeller <b>draw-pixel</b>. Pour conclure on repasse en vidéo normal avec <b>false b/w.</b>
-</p>
-<p>Le mot <b>draw-snake</b> sert à dessiner le serpent. On commence par dessiner la tête. Comme on l'a dit le caractère utilisé pour la tête dépend de la
-direction du mouvement du serpent. Cette direction est indiquée par la valeur de la variable <b>HEAD</b>. On lit donc cette valeur avec la phrase
-<b>head @</b> et cette valeur sert d'indice pour aller chercher le bon caractère dans le vecteur <b>c-head</b> par la phrase <b>c-head @</b>. Ensuite on
-obtient la position de la tête du serpent avec la phrase <b>0 snake @</b> et on dessine la tête avec la phrase <b>ucoord&gt;xy draw-pixel.</b> Pour dessiner
-le corps du serpent on utilise encore une boucle <b>do...loop</b>. Cette boucle est initialisée avec la longueur du serpent qu'on obtient avec la phrase
-<b>snake-len @</b> et l'indice de départ est <b>1</b> puisqu'on a déjà dessiner la tête. la phrase <b>i snake @</b> nous donne la coordonnée de l'ième 
-élément du serpent et <b>draw-ring</b> dessine l'anneau. Et bien sur <b>loop</b> incrémente le compteur et nous renvoie au début de la boucle tant qu'on
-a pas atteint la limite.
-</p>
-<p>Le mot <b>move-snake</b>, qui sert à déplacer le serpent, est plus complexe que les précédent. Je vais donc commencer par expliquer comment on déplace le
+Le mot <b>move-snake</b>, qui sert à déplacer le serpent, est plus complexe que les précédent. Je vais donc commencer par expliquer comment on déplace le
 serpent avant d'examiner le code qui effectue cette action.
 <ol>
 	<li>La variable <b>head</b> nous indique dans qu'elle direction on doit déplacer le serpent. Selon la valeur de <b>head</b> on doit:
@@ -564,7 +525,6 @@ serpent avant d'examiner le code qui effectue cette action.
 </ol>
 	On commence donc par lire la valeur <i>ucoord</i> de la tête du serpent avec la phrase <b>0 snake @</b>. <b>dup</b>fait une copie de cette valeur
 	car nous aurons besoin de cette valeur pour l'affecter au premier anneau du serpent. On transforme l'entier en couple <b>x,y</b> avec <b>ucoord&gt;xy</b>.
-</p>
 <h4>CASE</h4>
 <p> Voici comment fonctione le <b>CASE</b> en Forth. Le <b>CASE</b> sert à sélectionner un choix multiple en comparant la valeur au sommet de la pile
 avec différentes valeurs de contrôles. Ici la valeur au sommet de la pile est la direction obtenue par <b>head @</b>. Après le <b>case</b> suis la liste
@@ -605,7 +565,15 @@ Finalement on appelle <b>draw-snake</b> pour redesssiner le serpent au complet à
 <p>Pourquoi conserve-t'on l'ancienne position du dernier à anneau du serpent dans tail?  Parce qu'au moment où on déplace le serpent on ne sais pas
 encore si le serpent a avalé la pastille de nourriture. Lorsqu'on va faire cette vérification et dans l'éventualité ou on doit rallonger le serpent
 on va dessiner le nouvel anneau à cette position.
-</p>
+</p><p>
+	<textarea id="code" style="height:100px;">
+	\ affiche le status
+	: status ( -- )
+	   true b/w 1 1 at-xy s" SCORE:" type score @ .
+	   16 1 at-xy s" LENGTH:" type snake-len @ . false b/w ;
+
+	</textarea><br>
+<br>
 <p> Le mot <b>status</b> sert à afficher l'état du jeu, soit le pointage et la longueur du serpent. Cette affichage est présenté sur la première ligne
 de l'écran en inverse vidéo, le mot commence donc par la phrase <b>true b/w</b> puis la phrase <b>1 1 at-xy</b> déplace le curseur dans le coin supérieur
 gauche de l'écran.  La phrase <b>s" SCORE:" type</b> affiche le texte entre guillemets. On obtient le pointage par la lecture de la variable <b>score</b>
