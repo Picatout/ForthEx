@@ -17,14 +17,14 @@ div{
 	padding:5px;
 }
 textarea#code{
+	margin: 10px;
+	padding: 5px;
 	align:left;
 	min-width:40%;
     max-width:60%;
-//    margin:auto;
     line-height:1.5;
     border-radius:4px;
     border:1px solid #F7E98D;
-    margin:4px;
     font:13px Tahoma, cursive;
     font-smoothing:subpixel-antialiased;
     background-color:#F9EFAF;
@@ -43,6 +43,9 @@ table,th,td{
 	<a href="https://fr.wikipedia.org/wiki/Snake_(jeu_vid%C3%A9o)">Snake</a>. Il existe plusieurs variantes de ce jeu.
 	Comme il s'agit d'un tutoriel sur le langage Forth, cette version sera la plus simple. 
 
+</p>
+<p> Il est préférable de lire la <a href="presentation.html">présentation du projet ForthEx</a> avant de lire ce tutoriel
+ainsi que les 4 premiers paragraphes de l'<a href="index.html">index principal</a>.
 </p>
 <h3>règles du jeu</h3>
 <p>
@@ -88,13 +91,13 @@ identificateurs en minuscule,majuscules ou un mélange des deux. Les indentificat
 		pour la tête en fonction de la direction. On obtiendra le bon caractère en indiçant le tableau avec la valeur de la variable
 	    <b>HEAD</b>.</li>
 	    <li><b>FOOD</b>, Cette variable contient les coordonnées de la pastille de nourriture. Lorsque la pastille est avalée par le serpent
-	    les coordonnées sont remises à {0,0}.</li>
+	    les coordonnées sont remises à {-1,-1}.</li>
 	    <li><b>TAIL</b>, Nous avons besoin de savoir où était le dernier anneau du serpent avant son dernier déplacement.
 	    Cette information va nous permettre d'effacer cet anneau après le déplacement ou d'allonger le serpent lorsqu'il mange.</li>
 	</ul></div>
 </p>   
 <p>
-	Le corps du serpent et les pastilles de nourritures seront représentés par le caractère <b>O</b>.<br>
+	Le corps du serpent et les pastilles de nourritures seront représentés par le caractère <b>O</b> en inverse vidéo.<br>
 	Dans cette version simple du jeux le serpent va toujours se déplacer à la même vitesse. Le délais de boucle sera donc déterminé
 	par la constante <b>SPEED</b>.
 </p>
@@ -173,7 +176,7 @@ si on invoque le nom d'une constante sa valeur est empilée au sommet de la pile 
 est empilée au sommet de la pile des arguments. Si on invoque le nom d'un opérateur arithmétique comme <b>+</b> cette opération est exécutée en utilisant
 les 2 valeurs au sommet de la pile des arguments.
 </p>
-<h3>Constante et variables système</h3>
+<h3>Constantes et variables système</h3>
 <p>
 	La machine virtuelle ForthEx utilisent un certain nombre de constantes et variables qui sont accessible au programmeur nous les mentionnerons
 	lors de leur utilisation.
@@ -182,7 +185,7 @@ les 2 valeurs au sommet de la pile des arguments.
 <p> Je dirais que ce qui caractérise le plus le langage Forth est la simplicité de la syntaxe. Un programme Forth est simplement une liste de mots
 séparés par un espace. L'interpréteur lit un mot et le cherche dans le dictionnaire, s'il le trouve il exécute immédiatement l'action qui est associé
 à ce mot. Si le mot n'est pas dans le dictionnaire ce doit-être un entier (simple ou double) et dans ce cas l'interpréteur empile la valeur de cet entier.
-L'interpréteur Forth est donc très simple: Lire le prochain mot, le chercher dans le dictionnaire, exécuter son action si trouvé sinon vérifier si c'est
+L'interpréteur Forth est donc très simple: Lire le prochain mot, le chercher dans le dictionnaire, exécuter son action si trouvé. Sinon vérifier si c'est
 un nombre et empiler ce nombre autrement arrêter et signaler une erreur.
 </p>
 <p>
@@ -190,7 +193,7 @@ un nombre et empiler ce nombre autrement arrêter et signaler une erreur.
 	à exécuter au lieu de l'exécuter à moins qu'il s'agisse d'un mot <i>immédiat</i>. Les mots <i>immédiat</i> sont toujours exécutés immédiatement même
 	lors d'une compilation. 
 </p>
-<h3> Les commentaires</h3>
+<h3>Les commentaires</h3>
 <p> Il y a deux types de commentaires en Forth ceux introduit par le mot <b>(</b> et qui se termine par le délémiteur <b>)</b> et ceux qui sont 
     introduit par le mot <b>\</b> et qui se termine à la fin de la ligne. Notez que j'ai dit qu'il s'agissait de <b>mots Forth</b>. Ça signifit 
     qu'il faut qu'ils soient séparés par un espace de chaque côté.<br>
@@ -202,6 +205,29 @@ un nombre et empiler ce nombre autrement arrêter et signaler une erreur.
     </textarea><br>
     Lorsque l'interpréteur ne trouve pas le mot dans le dictionnaire et que ce n'est pas un nombre il s'arrête en affichant le
     mot suivit d'un point d'interrogation.
+</p>
+<p>
+	Il existe une forme de commentaire qui sert à décrire en abrégé l'interface d'un mot (fonction). Vous rencontrerai cett forme de commentaires
+	en lisant la description de chaque mot du langage ForthEx. Voici un exemple:<br>
+	<textarea id="code">
+	: xy&gt;ucoord ( c1 c2 -- u )
+		256 * + ; 
+	</textarea><br>
+	Le commentaire <b>( c1 c2 -- u )</b>  nous informe que la fonction <b>xy&gt;ucoord</b> accepte comme arguments 2 caractères (octets) et retourne
+	un entier non signé. 
+</p>
+<p>
+	Une autre forme de commentaire nous aide à nous rappeller ce qui se trouve sur la pile des arguments. Voici la définition du même avec
+	ce type de commentaire.<br>
+	<textarea id="code" style="height:150px;">
+	: xy&gt;ucoord ( c1 c2 -- u )
+		256 \ s: x y 256
+		*    \ s: x n ( * a consommé y et 256 n est le produit.)
+		+ ;  \ s: uccoord ( ucoord est la somme de x et n.)
+	</textarea><br>
+	L'argument <b>c1</b> représente une coordonnée <b>x</b>, l'argument <b>c2</b> représente une coordonnée <b>y</b> et l'entier non signé final
+	est une version compressée du couple {x,y}  appellé  <b>ucoord</b>. <b>S:</b> représente la pile des arguments et ce qui suis son contenu.
+	La valeur la plus à droite est au sommet de la pile.
 </p>
 <h3>Les indentifiants</h3>
 <p>
@@ -219,7 +245,7 @@ notation préfixée. exemple.
    <textarea id="code" style="height:100px;">
 	   34 56 *  \ multipliation de 34 par 56
 	   21 7 /  \ division de 21 par 7
-	   12 7 2 - * \ en infixe donne 12*(7-2)
+	   12 7 2 - * \ en infixe serait écris: 12*(7-2)
    </textarea>
 </p>
 <h3>Débutons le codage</h3>
@@ -231,11 +257,10 @@ notation préfixée. exemple.
 	<li>Est-ce que le serpent a une position et une direction initiale fixes, où laissons-nous ça au hasard? J'ai décidé qu'il démarrait au
 	centre de l'écran et se dirigeait vers l'est.</li>
 	</ul></div>
-	<div>
 </p>
 <p>
 	Commençons donc à créer notre programme snake.<br>
-	Définissons quelques constantes. Les constantes sont créées dans le dictionnaire avec le mot <b>CONSTANT</b>. On entre la valeur de la constante
+	Définissons quelques constantes. Les constantes sont créées avec le mot <b>CONSTANT</b>. On entre la valeur de la constante
 	ensuite le mot <b>constant</b> suivit de sont nom. Une fois une constante créée il suffit d'invoquer son nom pur que sa valeur soit déposée au
 	sommet de la pile des arguments.<br>
 	<textarea id="code" style="height:220px;">
@@ -266,8 +291,8 @@ notation préfixée. exemple.
 </p>
 <p>
 	Il nous reste encore 2 variables à créer mais ces variables sont de type tableau (quoique je préfère le mot vecteur). Avant de créer ces 2 variables vecteurs
-	je vais définir un mot particulier appellé <b>VECTOR</b>. Ce mot est un mot qui sert à créer une classe de mots,de la même manière que le mot 
-	<b>VARIABLE</b> nous a permit de créer des objets de type <i>variable</i>, le mot <b>VECTOR</b> va nous permettre de créer des objets de type <i>vecteur</i>.
+	je vais définir un mot particulier appellé <b>VECTOR</b>. De la même manière que le mot <b>VARIABLE</b> nous a permit de créer des objets 
+	de type <i>variable</i>, le mot <b>VECTOR</b> va nous permettre de créer des objets de type <i>vecteur</i>.
 	<br>
 	<textarea id="code" style="height:120px;">
 		\ VECTOR va nous permettre de créer des 
@@ -280,7 +305,7 @@ notation préfixée. exemple.
 </p> 
 <p>
 	Dans ce tutoriel je vais appeller les mots qui servent à créer d'autres mots dans le dictionnaire <b>mots compilants</b>. <b>CONSTANT</b> <b>VARIABLE</b>,
-	<b>:</b> et <b>CREATE</b> sont des <b>mots compilants</b>. Et maintenant que nous l'avons créé le mot <b>VECTOR</b> qui est aussi un <b>mot compilant</b>.
+	<b>:</b> et <b>CREATE</b> sont des <b>mots compilants</b>. Et maintenant que nous l'avons créé le mot <b>VECTOR</b> est aussi un <b>mot compilant</b>.
 </p>
 <p>
 	Le premier mot que nous avons utiliser pour définir <b>VECTOR</b> est le mot <b>:</b> Ce mot cré une nouvelle entrée dans le dictionnaire qui porte
@@ -297,13 +322,13 @@ notation préfixée. exemple.
 <br><textarea id="code" > SWAP CELLS + </textarea> <br>
 </p>
 <p>
-	Donc lorsque l'interpréteur à terminé la lecture du code ci-haut on a un nouveau mot dans le dictionnaire, <b>VECTOR</b> et on va s'en servir
+	Donc lorsque l'interpréteur à terminé la lecture du code ci-haut on a une nouvelle entrée dans le dictionnaire, <b>VECTOR</b> et on va s'en servir
 	pour créer des variables de type <i>vecteur</i>. Voici ce qui se passe lorsqu'on invoque le mot <b>VECTOR</b>. Regardons la partie de sa 
 	définition qui précède <b>DOES&gt;</b>.<br>
 	<textarea id="code" >CREATE CELLS ALLOT</textarea><br>
 	Seulement 3 mots.
 	<ul>
-		<li><b>CREATE</b>, Lit le prochain mot dans le texte d'entré et cré un nouveau mot dans le dictionnaire avec ce nom. Lorsqu'un mot
+		<li><b>CREATE</b>, Lit le prochain mot dans le texte d'entré et cré une nouvelle entrée dans le dictionnaire avec ce nom. Lorsqu'un mot
 		qui a été créé par <b>CREATE</b> est invoqué son action est de déposé au sommet de la pile l'adresse du premier octet de donnée, ce
 		qu'on appelle <b>PFA</b> pour <i>Parameter Field Address</i>.</li>
 		<li><b>CELLS</b>, Multiplie la valeur qui est au sommet de la pile par le nombre d'octets d'une cellule. En ForthEx l'on l'a dit
@@ -311,7 +336,7 @@ notation préfixée. exemple.
 		<li><b>ALLOT</b>, Consomme la valeur au sommet de la pile des arguments et se sert de cette valeur pour réserver l'espace nécessaire 
 		dans l'espace de données pour stocker le nombre d'octets indiqué par cette valeur.</li>
 	</ul><br>
-	<textarea id="code" style="height:180px;">
+	<textarea id="code" style="height:200px;">
 	\ creation des variables vecteur.		
 	\ tableau de 4 car. representant la tete du serpent.
 	4 vector c-head
@@ -327,9 +352,7 @@ notation préfixée. exemple.
 	Prenons l'exemple de <b>C-HEAD</b>. On empile la valeur <b>4</b> qui sera consommé par <b>VECTOR</b> qui est invoqué à la suite de son
 	argument suivit du nom de la <i>variable vecteur</i>, ici <b>C-HEAD</b>. Une fois que l'interpréteur a lu cette phrase il y a donc un 
 	nouveau mot dans le dictionnaire appellé <b>C-HEAD</b>. l'initialisation de <b>C-HEAD</b> nous montre comment utiliser un vecteur.
-	les vecteurs consomme 1 argument et en retourne 1. Notez la façon dont on documente les arguments d'un mot en Forth <b>( u -- a-addr )</b>.
-	Lorsque vous lirez du code Forth vous verrez constamment ce type de commentaires. C'est une description abrégée de l'interface de la 
-	fonction. Dans le cas qui nous concerne un <b>vecteur</b> consomme un entier non signé représenté par <b>u</b> et retourne 
+	Les vecteurs consomme 1 argument et en retourne 1. Un <b>vecteur</b> consomme un entier non signé représenté par <b>u</b> et retourne 
 	une adresse alignée sur une cellule représenté par <b>a-addr</b>.  La valeur de <b>u</b> indique quel élément du vecteur nous voulons 
 	atteindre. Le permier élément d'un vecteur porte l'indice <b>0</b>, le deuxième l'indice <b>1</b>, etc. Prenons en exemple la phrase suivante:
 	<br><textarea id="code">
@@ -373,43 +396,77 @@ notation préfixée. exemple.
 	drop r> \ après avoir jeté T et transféré R sur S on S: 3 R:
 	</textarea><br>
 	Pour comprendre cet exemple il faut savoir qu'on nomme le sommet de la pile des arguments <b>T</b> et que le mot <b>&gt;R</b> 
-	transfert le sommet de la pile des arguments vers la pile des retour et que
+	transfert le sommet de la pile des arguments vers la pile des retours et que
 	le mot <b>R&gt;</b> fait exactement le contraire. Tandis que le mot <b>DROP</b> jette la valeur au sommet de la pile des arguments.
 </p>
 <h3>Premiers mots du jeu</h3>
 <p>
 	On va maintenant définir quelques mots qui seront utilisés dans les graphismes du jeu.<br>
-	<textarea id="code" style="height:500px;">
+	<textarea id="code" style="height:100px;">
 	\ fonctions graphiques
 	\ conversion entier non signe vers couple {x,y}
 	: ucoord>xy ( u -- x y )
 	   256 /mod ;
+	</textarea><br>
+	Chaque définition d'une fonction commence par le mot <b>:</b> et se termine par le mot <b>;</b>. Le mot <b>ucoord&gt;xy</b> convertie un
+	entier non signé en 2 octets représentant un couple de coordonnées {x,y}. L'opération est simple puisqu'il s'agit simplement de diviser
+	l'entier par <b>256</b> et de conserver le quotient et le reste. <b>y</b> est le quotient et <b>x</b> le reste. <b>/mod</b> divise un 
+	entier par un autre en conserve le quotient et le reste. Le quotient est au sommet de la pile.<br>
+	<textarea id="code" style="height:100px;">
 	\ conversion couple {x,y} vers ucoord
 	: xy>ucoord ( x y -- u )
 	   256 * + ;
+	</textarea><br>
+	Le mot <b>xy&gt;ucoord</b> est l'inverse du mot précédent. Il convertie un couple de coordonnées {x,y} en un entier non signé que j'appelle
+	tout au long de ce tutoriel une <i>ucoord</i>. Cette conversion est tout aussi simple que la première puisqu'il s'agit simplement de
+	multiplier <b>y</b> par 256 et ensuite d'additionner <b>x</b> au produit. Pour que ça fonctionne <b>x</b> et <b>y</b> doivent-être dans le
+	domaine {0..255}.<br>
+	<textarea id="code" style="height:100px;">
 	\ dessine un pixel  c caractere {x,y} coord.
 	: draw-pixel ( c x y -- )
 	   y-offset + swap x-offset + swap at-xy emit ;
+	</textarea><br>
+	Le mot <b>draw-pixel</b> en fait affiche un caractère <b>c</b> à la position de l'écran déterminé par le couple de coordonnées <b>{x,y}</b>.
+	On doit d'abord ajuster les coordonnées à celle de l'écran du moniteur. Selon les coordonnées de l'écran du moniteur le coin supérieur gauche
+	de l'aire de jeu est à la position {2,2} donc on ajoute <b>y-offset</b> dont la valeur est 2 et x-offset dont la valeur est aussi 2 à chacune
+	des coordonnées. Le mot <b>swap</b> est utilisé pour commuter la position des 2 éléments qui sont au sommet de la pile. Pour travailler sur
+	<b>x</b> on le met au sommet avec le premier <b>swap</b> et une fois <b>x</b> ajusté on remet les coordonnées dans le bon ordre avec le second
+	<b>swap</b>. Le mot <b>at-xy</b> sert simplement à déplacer le curseur texte à la position désignée par {x,y}. Le mot <b>emit</b> lui sert à
+	afficher le caractère <b>c</b> à cette position de l'écran.<br> 
+	<textarea id="code" style="height:100px;">
 	\ dessine une pastille u=ucoord
 	: draw-ring ( u -- )
 	   true b/w
 	   'O' swap ucoord>xy draw-pixel false b/w ;
+	</textarea><br>
+	le mot <b>draw-ring</b> sert à dessiner une pastille en inverse vidéo. Ces pastilles représente à la fois la nourriture et les anneaux qui 
+	construisent le corps du serpent. Le mot <b>b/w</b> consomme un argument booléen et met le mode vidéo en noir sur fond blanc lorsque cette valeur
+	est vrai on en vidéo normale si elle est fausse. <b>b/w</b> signifit <i>Black on White</i>. Puisqu'on dessine les anneaux en inverse vidéo
+	on fait donc <b>true b/w</b>. <b>draw-ring</b> consomme un argument <b>u</b> qui est l'<i>ucoord</i> de la position.  On convertie cette valeur
+	en couple<b>{x,y}</b> avant d'appeller <b>draw-pixel.</b> Finalement on retourne au mode vidéo normal avec <b>false b/w</b>.
+	<br>
+	<textarea id="code" style="height:100px;">
 	\ dessine les bandes de l'arene
 	: draw-walls ( -- )
 	   cls 1 whiteln 24 whiteln
 	   24 2 do 1 i at-xy space 64 i at-xy space loop false b/w ;
 
-	\ jeu serpent
+	</textarea><br>
+	<textarea id="code" style="height:100px;">
 	\ dessine le serpent
 	: draw-snake ( -- )
 	   head @ c-head @ 0 snake @ ucoord>xy draw-pixel
 	   snake-len @ 1 do i snake @ draw-ring loop ;
 
+	</textarea><br>
+	<textarea id="code" style="height:100px;">
 	\ dessine pastille nourriture
 	: draw-food ( -- )
 	   true b/w 'O' food @ ucoord>xy
 	   draw-pixel false b/w ;
 
+	</textarea><br>
+	<textarea id="code" style="height:100px;">
 	\ déplace le serpent dans la direction
 	\ indiquée par la variable HEAD.
 	: move-snake ( -- )
@@ -425,6 +482,8 @@ notation préfixée. exemple.
 	   loop dup tail !
 	   bl swap ucoord>xy draw-pixel draw-snake ;
 
+	</textarea><br>
+	<textarea id="code" style="height:100px;">
 	\ affiche le status
 	: status ( -- )
 	   true b/w 1 1 at-xy s" SCORE:" type score @ .
@@ -850,10 +909,126 @@ en créant un nouveau mot qui exécute le code commun au 2 définitions et redéfini
 			score +! 0 food ! ;
 	</textarea><br>
 	Après avoir factorisé <i>in-corner?</i> et <i>on-wall?</i> j'ai réalisé que grâce à <b>borders?</b> qui retourne 2 indicateurs booléens non seulement on
-	n'a plus besoin des mots <b>in-corner?</b> et <i>on-wall?</i> mais  le mot <b>score+</b> est plus élégant. On commence par accordé 1 points ensuite
-	on vérifie si la pastille est le long des murs avec la phrase <b>food @ borders?</b> puis pour chaque indicateur vrai on multiplie le score par 2.
-	Donc si un seul des indicateur est vrai on obtient 2 points mais si les 2 sont vrai on obtient 4 points. La factorisation nous a fait sauver encore 
-	plus de code que je l'envisageais au départ.
+	n'a plus besoin des mots <b>in-corner?</b> et <b>on-wall?</b> mais  le mot <b>score+</b> peut-être redéfinie plus simplement. On commence par accordé 
+	1 point ensuite on vérifie si la pastille est le long des murs avec la phrase <b>food @ borders?</b> puis pour chaque indicateur booléen retourné par 
+	<b>borders?</b> qui est vrai on multiplie le score par 2. Donc si un seul des indicateur est vrai on obtient 2 points mais si les 2 sont vrai on 
+	obtient 4 points. La factorisation nous a fait sauver encore plus de code que je l'envisageais au départ.
+</p>
+<p> Lorsque le serpent avale une pastille en plus d'augmenter le pointage il faut aussi ajouter un anneau au serpent. Le mot <b>snake+</b> accomplie cette
+tâche.<br>
+<textarea id="code" style="height:150px;">
+	\ rallonge le serpent
+	: snake+ ( -- )
+		snake-len dup >r  \ s: a-addr  r: a-addr
+		@ dup 1+ \ s: n n+1 r: a-addr 
+		r> ! \ s: n r:  nouvelle valeur de snake-len sauvegardée.
+		tail @  swap \ s: ucoord n
+		snake ! ; \ s: ucoord du nouvel anneau sauvegardée.
+</textarea> <br>
+	<b>snake-len</b> est la variable qui contient la  longueur du serpent. On doit incrémenter cette valeur de 1. On envoie une copie de l'adresse de
+	cette variable sur la pile des retours car on doit lire sa valeur et après l'avoir incrémentée il faut sauvegarder la nouvelle valeur. Bien sur on
+	aurait pu simplement invoqué <b>snake-len</b> 2 fois mais cette façon de faire monte comment on peut utiliser les mots <b>&gt;R</b> et <b>R&gt;</b>
+	pour sauvegarder temporairement une valeur sur la pile des retours pour accéder plus facilement les autres variables locales. Voici la version 
+	simplifiée de ce mot:<br>
+	<textarea id="code" style="height:200px;">
+		\ rallonge le serpent
+		: snake+ ( -- )
+			snake-len @ \ s: n
+			dup 1+ \ s: n n+1
+			snake-len \ s: n n+1 a-addr
+			! \ s: n  nouvelle valeur de snake-len sauvegardée.
+			tail @  \ s: n u
+			swap \ s: u n
+			snake \ s: u a-addr(n)
+			!  ; \ s: ucoord du nouvel anneau sauvegardée.
+	</textarea><br>
+	Ces deux définitions de <b>snake+</b> font exactement la même chose mais en procédent différemment.
+	Rappellons-nous que la variable <b>tail</b> contient <i>l'ucoord</i> du dernier anneau du serpent avant l'exécution de <b>move-snake</b>.
+	Lorsqu'on rallonge le serpent le nouvel anneau occupe cette position. 
+</p>
+<p> Le mot <b>eaten?</b> sert à vérifier si la pastille a été mangée par le serpent.<br>
+<textarea id="code" style="height:150px;">
+\ pastille mangee?
+: eaten? ( -- f )
+   0 snake @ \ s: u1
+   food @ \ s: u1 u2
+   = ; \ s: f  vrai si u1=u2
+</textarea>
+  Ce mot est très simple puisqu'il s'agit simple de comparer la position de la pastille conservée dans la variable <b>food</b> avec la position de la 
+  tête du serpent qui est l'élément <b>0</b> de <b>snake</b>. Si les deux sont égales <b>eaten?</b> retourne vrai.
+</p>
+<p>
+	<textarea id="code" style="height:200px;">
+	\ lecture clavier touche 'q' quitte le jeu.
+	: game-exit? ( -- f )
+	   ekey? if ekey case
+	   ar_left of head @ 1- 3 and head ! false endof
+	   ar_right of head @ 1+ 3 and head ! false endof
+	   'q' of true endof
+	   'Q' of true endof
+	   >r false r>
+	   endcase else false then ;
+</textarea><br>
+	On doit faire une lecture du clavier. C'est le rôle du mot <b>game-exit?</b>. Il s'appelle ainsi car le joueur peut choisir de quitter la partie
+	à n'importe quel moment en enfonçant la touche <b>Q</b>. <b>game-exit?</b> retourne <b>TRUE</b> si le joueur enfonce <b>Q</b> et <b>FALSE</b>
+	autrement. Autrement que la touche <b>Q</b>, <b>game-exit?</b> ne reconnait que les touche <b>&larr;</b> et <b>&rarr;</b> qui font pivoter la
+	tête du serpent vers la gauche ou la droite. On vérifie s'il y a une touche d'enfoncée avec <b>ekey?</b> et si c'est le cas on utilise <b>ekey</b>
+	pour obtenir la valeur de cette touche et ensuite une structure <b>case ... endcase</b> déjà étudiée pour décider de l'action à accomplir. 
+	S'il n'y pas de touche enfoncée on retourne simplement <b>FALSE</b>. Notez que le <b>q</b> est accepté aussi bien que le <b>Q</b>. 
+	Les deux retourne <b>TRUE</b> pour indiquer que le joueur veut quitter la partie.
+	
+</p>
+<p>Tous les mots nécessaire à l'exécution du jeu sont maintenant définis. La partie elle-même s'exécute à l'intérieur du mot <b>game-loop</b>.<br>
+<textarea id="code" style="height:250px;">
+	\ boucle du jeu
+	: game-loop ( -- )
+	  begin
+	  speed ms \ délais vitesse serpent.
+	  status food @ -1 = if new-food then draw-food
+	  game-exit? ?dup 0= if
+	  move-snake eaten? if score+  snake+ false else
+	  collision? then then until ;
+</textarea><br>
+  La boucle se déroule à l'intérieur d'une boucle <b>begin ... until</b>. On a déjà vu cette structure de contrôle. Cette boucle se répète tant que la
+  valeur au sommet de la pile lorsqu'on arrive au mot <b>until</b> est fausse. <b>speed</b> est une constante qui contrôle la vitesse du serpent.
+  au début de chaque boucle on affiche le <b>status</b>. Si <b>l'ucoord</b> est -1 ça signifit qu'il n'y pas de pastille de nourriture dans l'aire de
+  jeux donc on en cré une nouvelle avec <b>new-food</b>. On affiche la pastille <b>draw-food</b>. on appelle le mot <b>game-exit?</b> qui fait une
+  lecture du clavier et retourne un booléen. <b>?dup</b> est un mot qu'on a pas encore vue. Ce mot cré une copie de la valeur au sommet de la pile
+  seulement si cette valeur est différent de <b>0</b>. Si cette valeur est nulle c'est que soit le joueur n'a pas enfoncer de touches ou bien il a
+  enfoncée une touche autre que <b>Q</b>. Dans ce cas on déplace le serpent <b>move-snake</b>, on vérifie s'il a mangé la pastille <b>eaten?</b>.
+  S'il a mangé la pastille on augmente le pointage <b>score+</b> et rallonge le serpent <b>snake+</b> autrement on vérifie s'il y eu <b>collision?</b>.
+  Quel que soit le chemin parcouru on doit avoir au sommet de la pile un indicateur booléen lorsqu'on arrive à <b>until.</b>. Il y a deux <b>then</b>
+  qui se suivent parce qu'il y a un deuxième <b>if</b> à l'intérieur du premier.
+</p>
+<p> Mais avant d'exécuter une partie il faut initialiser les variables avec le mot <b>game-init</b> qui appelle <b>snake-init</b>.
+<br><textarea id="code" style="height:200px;">
+	 \ initialisation du serpent
+	: snake-init ( -- )
+	   east head !
+	   play-width 2/ play-height 2/ xy&gt;ucoord snake-len @ 0 do
+	   dup i snake ! 1- loop drop ;
+
+	\ initialisation du jeu
+	: game-init ( -- )
+	   srand 4 snake-len ! 0 score ! -1 food !
+	   snake-init draw-walls ;
+</textarea><br>
+  <b>srand</b> initialise le générateur pseudo hasard (PRNG), c'est indispensable de le faire avant d'appeller <b>rand</b>, sinon ce dernier retourne
+  toujours <b>0</b>. Ensuite on initialise la <b>snake-len</b> à <b>4</b>, <b>score</b> à <b>0</b> et <b>food</b> à <b>-1</b>. Ensuite on appelle 
+  <b>snake-init</b> qui initialise <b>head</b> avec la constante <b>east</b> pour ensuite positionner le serpent au centre de l'écran.
+</p>
+<p>Il ne nous reste que deux petits mots à définir, <b>game-over</b> et <b>snake-run</b>. Le premier affiche un message pour demander au joueur
+s'il veut vraiment quitter en enfonçant la touche <b>Q</b> ou bien jouer une autre partie en enfonçant n'importe qu'elle autre touche. <b>game-over</b>
+retourne la valeur de la touche enfoncée c'est à l'intérieur de <b>snake-run</b> que la décision est prise.<br>
+<textarea id="code" style="height:200px;">
+	\ partie terminee
+	: game-over ( -- )
+	   1 24 at-xy s" game over <Q> leave" type key ;
+
+	\ lance le jeux.
+	: snake-run ( -- )
+	   begin game-init game-loop game-over 'q' = until cls ;
+</textarea><br>
 </p>
 <h3>Conclusion</h3>
 <p>

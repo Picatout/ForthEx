@@ -134,13 +134,6 @@ max-len vector snake \ le corps du serpent
    loop dup tail !
    bl swap ucoord>xy draw-pixel draw-snake ;
 
- \ initialisation du serpent
-: snake-init ( -- )
-   east head !
-   play-width 2/ play-height 2/ snake-len @ 0 do
-   2dup xy>ucoord i snake ! swap 1- swap loop 2drop ;
-
-\ jeu serpent
 \ lecture clavier touche 'q' quitte le jeu.
 : game-exit? ( -- f )
    ekey? if ekey case
@@ -155,8 +148,6 @@ max-len vector snake \ le corps du serpent
 : eaten? ( -- f )
    0 snake @ food @ = ;
 
-
-\ jeu serpent
 \ boucle du jeu
 : game-loop ( -- )
   begin
@@ -165,6 +156,12 @@ max-len vector snake \ le corps du serpent
   game-exit? ?dup 0= if
   move-snake eaten? if score+  snake+ false else
   collision? then then until ;
+
+ \ initialisation du serpent
+: snake-init ( -- )
+   east head !
+   play-width 2/ play-height 2/ xy>ucoord snake-len @ 0 do
+   dup i snake ! 1- loop drop ;
 
 \ initialisation du jeu
 : game-init ( -- )
