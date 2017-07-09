@@ -14,7 +14,6 @@
 143 constant ar_left \ fleche a gauche
 144 constant ar_right \ fleche a droite
 
-\ jeu serpent
 \ variables
 variable score \ pointage
 variable head \ direction serpent
@@ -32,29 +31,32 @@ max-len vector snake \ le corps du serpent
 '<' east c-head ! \ tete direction est
 'W' south c-head ! \ tete direction sud
 '>' west c-head ! \ tete direction ouest
-'M' north c-head ! \ tete direction nord
+'V' north c-head ! \ tete direction nord
 
-\ jeu serpent
+
 \ fonctions graphiques
 \ conversion entier non signe vers couple {x,y}
 : ucoord>xy ( u -- x y )
    256 /mod ;
+
 \ conversion couple {x,y} vers ucoord
 : xy>ucoord ( x y -- u )
    256 * + ;
+
 \ dessine un pixel  c caractere {x,y} coord.
 : draw-pixel ( c x y -- )
    y-offset + swap x-offset + swap at-xy emit ;
+
 \ dessine une pastille u=ucoord
 : draw-ring ( u -- )
    true b/w
    'O' swap ucoord>xy draw-pixel false b/w ;
+
 \ dessine les bandes de l'arene
 : draw-walls ( -- )
    cls 1 whiteln 24 whiteln
    24 2 do 1 i at-xy space 64 i at-xy space loop false b/w ;
 
-\ jeu serpent
 \ dessine le serpent
 : draw-snake ( -- )
    head @ c-head @ 0 snake @ ucoord>xy draw-pixel
@@ -62,8 +64,8 @@ max-len vector snake \ le corps du serpent
 
 \ affiche le status
 : status ( -- )
-   true b/w 1 1 at-xy s" SCORE:" type score @ .
-   16 1 at-xy s" LENGTH:" type snake-len @ . false b/w ;
+   true b/w 1 1 at-xy ." SCORE:" score @ .
+   16 1 at-xy ." LENGTH:" snake-len @ . false b/w ;
 
 \ Lors de la creation d'une patille il faut valider
 \ qu'elle ne superpose pas au serpent.
@@ -74,36 +76,22 @@ max-len vector snake \ le corps du serpent
 
 \ creation d'une pastille de nourriture
 : new-food ( -- )
-   0 \ valeur à jeter
-   begin
-	   drop 
-	   rand abs play-width mod \ x
-	   rand abs play-height mod \ y
-	   xy>ucoord dup valid-food? until food ! ;
+   0 begin drop rand abs play-width mod \ x
+       rand abs play-height mod \ y
+       xy>ucoord dup valid-food? until food ! ;
 
-\ jeu serpent
 \ verifie si le serpent se mord.
-: snake-bit? ( -- f )
+: snake-bite? ( -- f )
    false 0 snake @  snake-len @ 1 do
        i snake @ over = if swap drop true swap leave then
        loop drop ;
 
-\ jeu serpent
-\ verification collision avec mur
-: wall-bang? ( -- f )
-   0 snake @ ucoord>xy  play-height 1- u>
-   swap  play-width 1- u> or ;
-
-\ verification collision
-: collision? ( -- f )
-   snake-bit? wall-bang? or ;
-
-\ la pastille est-elle le long d'un mur?
-\ retourne un incateur pour chaque coordonnée.
-: borders? ( u -- fy fx )
+\ retourne un flag pour chaque coordonnee
+\ vrai si le long d'un mur.
+: borders? ( u1 -- fy fx )
    ucoord>xy dup 0= swap play-height 1- = or
    swap dup 0= swap play-width 1- = or ;
-	
+
 \ ajuste SCORE
 : score+ ( -- )
    1 food @ borders?
@@ -115,10 +103,8 @@ max-len vector snake \ le corps du serpent
 : snake+ ( -- )
    snake-len dup >r @ dup 1+ r> ! tail @  swap snake ! ;
 
-\ jeu serpent
 \ dessine pastille nourriture
-: draw-food true b/w 'O' food @ ucoord>xy
-   draw-pixel false b/w ;
+: draw-food  food @ draw-ring ;
 
 \ deplace le serpent
 : move-snake ( -- )
@@ -133,6 +119,21 @@ max-len vector snake \ le corps du serpent
    snake-len @ 1 do i snake dup >r @ swap r> !
    loop dup tail !
    bl swap ucoord>xy draw-pixel draw-snake ;
+
+\ verification collision avec mur
+: wall-bang? ( -- f )
+   0 snake @ ucoord>xy  play-height 1- u>
+   swap  play-width 1- u> or ;
+
+\ verification collision
+: collision? ( -- f )
+   snake-bite? wall-bang? or ;
+
+ \ initialisation du serpent
+: snake-init ( -- )
+   east head ! -1 food !
+   play-width 2/ play-height 2/ snake-len @ 0 do
+   2dup xy>ucoord i snake ! swap 1- swap loop 2drop ;
 
 \ lecture clavier touche 'q' quitte le jeu.
 : game-exit? ( -- f )
@@ -157,22 +158,16 @@ max-len vector snake \ le corps du serpent
   move-snake eaten? if score+  snake+ false else
   collision? then then until ;
 
- \ initialisation du serpent
-: snake-init ( -- )
-   east head !
-   play-width 2/ play-height 2/ xy>ucoord snake-len @ 0 do
-   dup i snake ! 1- loop drop ;
-
 \ initialisation du jeu
 : game-init ( -- )
-   srand 4 snake-len ! 0 score ! -1 food !
+   srand 4 snake-len ! 0 score !
    snake-init draw-walls ;
 
 \ partie terminee
-: game-over ( -- )
-   1 24 at-xy s" game over <Q> leave" type key ;
+: game-over? ( -- f )
+   1 24 at-xy ." game over <Q> leave" key 'q' = ;
 
 \ lance le jeux.
 : snake-run ( -- )
-   begin game-init game-loop game-over 'q' = until cls ;
+   begin game-init game-loop game-over?  until cls ;
 

@@ -849,8 +849,8 @@ en créant un nouveau mot qui exécute le code commun au 2 définitions et redéfini
 			if 2  \ s: 2
 			else 1 \ s: 1 
 			then
-	   then \ s: points
-	   score +! \ s: points ajoutés à score
+	   then \ s: gain
+	   score +! \ s: gain ajoutés à score
 	   -1 food ! ; \ food=-1
     </textarea><br>
     Ceci est la première version que j'ai écrite puis j'ai réalisé après avoir factorisé <b>in-corner?</b> et <b>on-wall?</b> que je pouvais réécrire
@@ -883,8 +883,8 @@ en créant un nouveau mot qui exécute le code commun au 2 définitions et redéfini
 	<b>snake-len</b> est la variable qui contient la  longueur du serpent. On doit incrémenter cette valeur de 1. On envoie une copie de l'adresse de
 	cette variable sur la pile des retours car on doit lire sa valeur et après l'avoir incrémentée il faut sauvegarder la nouvelle valeur. Bien sur on
 	aurait pu simplement invoqué <b>snake-len</b> 2 fois mais cette façon de faire monte comment on peut utiliser les mots <b>&gt;R</b> et <b>R&gt;</b>
-	pour sauvegarder temporairement une valeur sur la pile des retours pour accéder plus facilement les autres variables locales. Voici la version 
-	simplifiée de ce mot:<br>
+	pour sauvegarder temporairement une valeur sur la pile des retours pour accéder plus facilement les autres variables locales. Voici une autre version 
+	de ce mot:<br>
 	<textarea readonly id="code" style="height:200px;">
 		\ rallonge le serpent
 		: snake+ ( -- )
@@ -906,23 +906,30 @@ en créant un nouveau mot qui exécute le code commun au 2 définitions et redéfini
 	   0 snake @ food @ = ;
     </textarea><br>
     Le mot <b>eaten?</b> Vérifie si la pastille a étée avalée par le serpent.  Il suffit de comparer les <b>ucoord</b> de la variable <b>food</b> et
-    de la tête du serpent <b>0 snake @</b> pour l'égalité.
+    de la tête du serpent <b>0 snake @</b> pour l'égalité. En effet si en se déplaçant la tête du serpent atteint la même position que  la pastille
+    de nourriture on considère celle-ci comme avalée.
 </p>
 <p>
-	<textarea readonly id="code" style="height:200px;">
+	<textarea readonly id="code" style="height:260px;">
 	\ lecture clavier touche 'q' quitte le jeu.
 	: game-exit? ( -- f )
-	   ekey? if ekey case
-	   ar_left of head @ 1- 3 and head ! false endof
-	   ar_right of head @ 1+ 3 and head ! false endof
-	   'q' of true endof
-	   'Q' of true endof
-	   false swap
-	   endcase else false then ;
+	   ekey? \ s: f
+	   if   
+	     ekey  \ s: c
+	     case
+		   ar_left of head @ 1- 3 and head ! false endof
+		   ar_right of head @ 1+ 3 and head ! false endof
+		   'q' of true endof
+		   'Q' of true endof
+		   false swap
+	     endcase 
+	   else 
+	     false 
+	   then ; \ s: f
 </textarea><br>
 	On doit faire une lecture du clavier. C'est le rôle du mot <b>game-exit?</b>. Il s'appelle ainsi car le joueur peut choisir de quitter la partie
 	à n'importe quel moment en enfonçant la touche <b>Q</b>. <b>game-exit?</b> retourne <b>TRUE</b> si le joueur enfonce <b>Q</b> et <b>FALSE</b>
-	autrement. Autrement que la touche <b>Q</b>, <b>game-exit?</b> ne reconnait que les touche <b>&larr;</b> et <b>&rarr;</b> qui font pivoter la
+	autrement. Autrement que la touche <b>Q</b>, <b>game-exit?</b> ne reconnait que les touches <b>&larr;</b> et <b>&rarr;</b> qui font pivoter la
 	tête du serpent vers la gauche ou la droite. On vérifie s'il y a une touche d'enfoncée avec <b>ekey?</b> et si c'est le cas on utilise <b>ekey</b>
 	pour obtenir la valeur de cette touche et ensuite une structure <b>case ... endcase</b> déjà étudiée pour décider de l'action à accomplir. 
 	S'il n'y pas de touche enfoncée on retourne simplement <b>FALSE</b>. Notez que le <b>q</b> est accepté aussi bien que le <b>Q</b>. 
@@ -962,44 +969,68 @@ en créant un nouveau mot qui exécute le code commun au 2 définitions et redéfini
   lorsqu'on arrive à <b>until.</b>.
 </p>
 <p> Mais avant d'exécuter une partie il faut initialiser les variables avec le mot <b>game-init</b> qui appelle <b>snake-init</b>.
-<br><textarea readonly id="code" style="height:200px;">
+<br><textarea readonly id="code" style="height:280px;">
 	 \ initialisation du serpent
 	: snake-init ( -- )
-	   east head !
-	   play-width 2/ play-height 2/ xy&gt;ucoord snake-len @ 0 do
-	   dup i snake ! 1- loop drop ;
+	   east head ! \ déplacement vers l'est.
+	   play-width 2/ play-height 2/ xy&gt;ucoord 
+	   snake-len @ 0 do
+	     dup i snake ! 1- 
+	     loop 
+	   drop ; \ jette ucoord
 
 	\ initialisation du jeu
 	: game-init ( -- )
-	   srand 4 snake-len ! 0 score ! -1 food !
+	   srand \ initialisation PRNG
+	   4 snake-len ! \ longueur initiale serpent=4
+	   0 score ! \ score=0
+	   -1 food ! \ food {-1,-1}
 	   snake-init draw-walls ;
 </textarea><br>
   <b>srand</b> initialise le générateur pseudo hasard (PRNG), c'est indispensable de le faire avant d'appeller <b>rand</b>, sinon ce dernier retourne
   toujours <b>0</b>. Ensuite on initialise <b>snake-len</b> à <b>4</b>, <b>score</b> à <b>0</b> et <b>food</b> à <b>-1</b>. Ensuite on appelle 
   <b>snake-init</b> qui initialise <b>head</b> avec la constante <b>east</b> pour ensuite positionner le serpent au centre de l'écran.
 </p>
-<p>Il ne nous reste que deux petits mots à définir, <b>game-over</b> et <b>snake-run</b>. Le premier affiche un message pour demander au joueur
-s'il veut vraiment quitter en enfonçant la touche <b>Q</b> ou bien jouer une autre partie en enfonçant n'importe qu'elle autre touche. <b>game-over</b>
-retourne la valeur de la touche enfoncée c'est à l'intérieur de <b>snake-run</b> que la décision est prise.<br>
-<textarea readonly id="code" style="height:200px;">
+<p>Il ne nous reste que deux petits mots à définir, <b>game-over?</b> et <b>snake-run</b>. Le premier affiche un message pour demander au joueur
+s'il veut vraiment quitter en enfonçant la touche <b>Q</b> ou bien jouer une autre partie en enfonçant n'importe qu'elle autre touche. <b>game-over?</b>
+retourne un indicateur booléen VRAI si la touche <b>Q</b> a été enfoncée.<br>
+<textarea readonly id="code" style="height:260px;">
 	\ partie terminee
-	: game-over ( -- )
-	   1 24 at-xy ." game over <Q> leave" key ;
+	: game-over? ( -- f )
+	   \ affiche le message à la ligne 24
+	   1 24 at-xy 
+	   ." game over <Q> leave"  
+	   key \ lectureu touche
+	   'q' = ; \ s=f
 
 	\ lance le jeux.
 	: snake-run ( -- )
-	   begin game-init game-loop game-over 'q' = until cls ;
+	   begin 
+	     game-init 
+	     game-loop 
+	     game-over?
+	   until
+	   cls ;
 </textarea><br>
+</p>
+<p>
+	Le jeux est maintenant complété, il comprend 44 définitions. Ce nombre comprends tous les mots ajoutés au dictionnaire c'est à dire les constantes,
+	les variables scalaires et vectorielles ainsi que les fonctions. Le texte <a href="snake.fx" alt="source snake.fx">source</a> au complet comprend 172
+	lignes. 
 </p>
 <h3>demo</h3>
 <p>
 	J'ai utilisé l'utilitaire <a href="blockEdit.html">BLKED</a> pour créer ce jeu sur ForthEx. Le jeu est sauvegardé dans les blocs 1 à 10 de l'eeprom.
 	La vidéo suivante montre comment charger le jeu en mémoire RAM et le lancer. Pour ce démo j'utilise l'ordinateur en remote console et vokoscreen pour
 	enregistrer la session. Le logiciel utilisé pour la console remote est minicom.<br>
-	<iframe width="560" height="315" src="https://www.youtube.com/embed/tCQHK1JTjwA" frameborder="0" allowfullscreen></iframe>
+	<iframe width="560" height="315" src="https://www.youtube.com/embed/ySwkTIv-Nbs" frameborder="0" allowfullscreen></iframe>
 </p>
 <h3>Conclusion</h3>
 <p>
+	Si vous avez bien assimilé ce tutoriel vous comprenez suffisamment le langage ForthEx qui pour l'essentiel se conforme au standard 
+	<a href="https://www.taygeta.com/forth/dpans.html">ANSI FORTH</a>. Il ne vous reste qu'à élargir votre vocabulaire en lisant le reste 
+	de la <a href="index.html#MasterIndex">documentation</a> et à pratiquer. Vous pouvez pratiquer le forth en téléchargeant 
+	gratuitement <a href="https://www.forth.com/download/">swift forth</a> qui fonctionne tout aussi bien sous Windows, Linux et OSX.
 </p>
 </body>
 </html>
