@@ -1,13 +1,14 @@
 <DOCTYPE! html>
 <html lang="fr-CA">
 <head>
+ <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 </head>
 <body id="#top">
 <h1>block</h1><div><a href="#index">index</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <h2 id="description">Description</h2><div style="margin-left:5%;"> 
 </div>
-<div style="margin-left:5%;">   Implémentation des mots de gestion de fichiers par blocs.
+<div style="margin-left:5%;">   ImplÃ©mentation des mots de gestion de fichiers par blocs.
 </div>
 <div style="margin-left:5%;">REF: <a href=" http://lars.nocrew.org/forth2012/block.html
 "> http://lars.nocrew.org/forth2012/block.html
@@ -17,24 +18,24 @@
 </a></div>
 <div style="margin-left:5%;"> NOTES:
 </div>
-<div style="margin-left:5%;">  1) Les blocs sont de 1024 caractères par tradition car à l'époque où
+<div style="margin-left:5%;">  1) Les blocs sont de 1024 caractÃ¨res par tradition car Ã  l'Ã©poque oÃ¹
 </div>
-<div style="margin-left:5%;">     Charles Moore a développé ce système il l'utilisait pour stocker
+<div style="margin-left:5%;">     Charles Moore a dÃ©veloppÃ© ce systÃ¨me il l'utilisait pour stocker
 </div>
-<div style="margin-left:5%;">     les écrans du moniteur sous forme de texte source. Le moniteur qu'il
+<div style="margin-left:5%;">     les Ã©crans du moniteur sous forme de texte source. Le moniteur qu'il
 </div>
-<div style="margin-left:5%;">     utilisait affichait 16 lignes de 64 caractères donc 1024 caractères.
+<div style="margin-left:5%;">     utilisait affichait 16 lignes de 64 caractÃ¨res donc 1024 caractÃ¨res.
 </div>
-<div style="margin-left:5%;">     Son éditeur de texte fonctionnait par pages écran.
+<div style="margin-left:5%;">     Son Ã©diteur de texte fonctionnait par pages Ã©cran.
 </div>
 <div style="margin-left:5%;">    
 </div>
-<div style="margin-left:5%;">  2) La numérotation des blocs de stockage commence à 1.     
+<div style="margin-left:5%;">  2) La numÃ©rotation des blocs de stockage commence Ã  1.     
 </div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="BLK">
 <b>BLK</b>   ( -- a-addr)  
-<div style="margin-left:5%;">   Variable qui contient le no de bloc actuellement interprété.
+<div style="margin-left:5%;">   Variable qui contient le no de bloc actuellement interprÃ©tÃ©.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -47,10 +48,10 @@
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SCR">
 <b>SCR</b> ( -- a-addr )
-<div style="margin-left:5%;">   variable contenant le dernier numéro de bloc affiché à l'écran.
+<div style="margin-left:5%;">   variable contenant le dernier numÃ©ro de bloc affichÃ© Ã  l'Ã©cran.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -63,10 +64,10 @@
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLKDEV">
 <b>BLKDEV</b>  ( -- a-addr )
-<div style="margin-left:5%;">    variable contenant l'adresse du descripteur du périphérique
+<div style="margin-left:5%;">    variable contenant l'adresse du descripteur du pÃ©riphÃ©rique
 </div>
 <div style="margin-left:5%;">    de stockage actif.
 </div>
@@ -83,34 +84,34 @@
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BUFFER">
 <b>BUFFER</b>  ( n+ -- a-addr )
-<div style="margin-left:5%;">   Retourne l'adresse d'un bloc de données. Si aucun buffer n'est disponible
+<div style="margin-left:5%;">   Retourne l'adresse d'un bloc de donnÃ©es. Si aucun buffer n'est disponible
 </div>
-<div style="margin-left:5%;">   libère celui qui à la plus petite valeur UPDATED.
+<div style="margin-left:5%;">   libÃ¨re celui qui Ã  la plus petite valeur UPDATED.
 </div>
-<div style="margin-left:5%;">   Contrairement à BLOCK il n'y a pas de lecture du périphérique de stockage.
+<div style="margin-left:5%;">   Contrairement Ã  BLOCK il n'y a pas de lecture du pÃ©riphÃ©rique de stockage.
 </div>
-<div style="margin-left:5%;">   le contenu du buffer est mis à zéro.    
+<div style="margin-left:5%;">   le contenu du buffer est mis Ã  zÃ©ro.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;    numéro du bloc.
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;    numÃ©ro du bloc.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse début de la zone de données.
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse dÃ©but de la zone de donnÃ©es.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLOCK">
 <b>BLOCK</b>  ( n+ -- a-addr )
-<div style="margin-left:5%;">   Lit un bloc d'un périphérique de stockage vers un buffer. Libère un buffer au besoin.
+<div style="margin-left:5%;">   Lit un bloc d'un pÃ©riphÃ©rique de stockage vers un buffer. LibÃ¨re un buffer au besoin.
 </div>
-<div style="margin-left:5%;">   Le périphérique est celui déterminé par la variable BLKDEV.    
+<div style="margin-left:5%;">   Le pÃ©riphÃ©rique est celui dÃ©terminÃ© par la variable BLKDEV.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -119,36 +120,36 @@
 </div>
 <div style="margin-left:5%;"><b> retourne:    
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse du début de la zone de données.    
+<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse du dÃ©but de la zone de donnÃ©es.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="LOAD">
 <b>LOAD</b> ( i*x n+ -- j*x )
-<div style="margin-left:5%;">   Évalue un bloc. Si le bloc n'est pas déjà dans un buffer il est chargé
+<div style="margin-left:5%;">   Ã‰value un bloc. Si le bloc n'est pas dÃ©jÃ  dans un buffer il est chargÃ©
 </div>
-<div style="margin-left:5%;">   à partir du périphérique désigné par BLKDEV. Le numéro du bloc évalué 
+<div style="margin-left:5%;">   Ã  partir du pÃ©riphÃ©rique dÃ©signÃ© par BLKDEV. Le numÃ©ro du bloc Ã©valuÃ© 
 </div>
-<div style="margin-left:5%;">   est enregistré dans la variable BLK.    
+<div style="margin-left:5%;">   est enregistrÃ© dans la variable BLK.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;  État de la pile des arguments avant l'évalutaion du bloc n+.    
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;  Ã‰tat de la pile des arguments avant l'Ã©valutaion du bloc n+.    
 </div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   Numéro du bloc à évaluer.
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   NumÃ©ro du bloc Ã  Ã©valuer.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;  État de la pile des arguments après l'évaluation du bloc n+.
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;  Ã‰tat de la pile des arguments aprÃ¨s l'Ã©valuation du bloc n+.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SAVE-BUFFERS">
 <b>SAVE-BUFFERS</b> ( -- )  
-<div style="margin-left:5%;">   Sauvegarde tous les buffers qui ont été modifiés.
+<div style="margin-left:5%;">   Sauvegarde tous les buffers qui ont Ã©tÃ© modifiÃ©s.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -161,10 +162,10 @@
 </i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="EMPTY-BUFFERS">
 <b>EMPTY-BUFFERS</b>  ( -- )
-<div style="margin-left:5%;">   Libère tous les buffers sans sauvegarder.
+<div style="margin-left:5%;">   LibÃ¨re tous les buffers sans sauvegarder.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -177,10 +178,10 @@
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="FLUSH">
 <b>FLUSH</b> ( -- )
-<div style="margin-left:5%;">   Sauvegarde tous les buffers et les libères.
+<div style="margin-left:5%;">   Sauvegarde tous les buffers et les libÃ¨res.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
@@ -193,19 +194,19 @@
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="LIST">
 <b>LIST</b> ( n+ -- )
-<div style="margin-left:5%;">   Affiche le contenu du bloc à l'écran. Si le bloc n'est pas déjà dans un buffer
+<div style="margin-left:5%;">   Affiche le contenu du bloc Ã  l'Ã©cran. Si le bloc n'est pas dÃ©jÃ  dans un buffer
 </div>
-<div style="margin-left:5%;">   il est chargé à partir du périphérique désigné par BLKDEV. L'affichage s'arrête
+<div style="margin-left:5%;">   il est chargÃ© Ã  partir du pÃ©riphÃ©rique dÃ©signÃ© par BLKDEV. L'affichage s'arrÃªte
 </div>
-<div style="margin-left:5%;">   sitôt qu'un caractère autre que 32..126|VK_CR est rencontré.    
+<div style="margin-left:5%;">   sitÃ´t qu'un caractÃ¨re autre que 32..126|VK_CR est rencontrÃ©.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  numéro du bloc
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;  numÃ©ro du bloc
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -213,27 +214,27 @@
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="THRU">
 <b>THRU</b>  ( i*x u1 u2 -- j*x )
-<div style="margin-left:5%;">   Interprétation des blocs u1 à u2 . LOAD est appellé pour chacun des blocs dans la séquence.
+<div style="margin-left:5%;">   InterprÃ©tation des blocs u1 Ã  u2 . LOAD est appellÃ© pour chacun des blocs dans la sÃ©quence.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;  État initial de pile.
+<div style="margin-left:5%;"><i>i*x</i>&nbsp;&nbsp;  Ã‰tat initial de pile.
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;   premier bloc à interpréter.
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;   premier bloc Ã  interprÃ©ter.
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;   dernier bloc à interpréter.
+<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;   dernier bloc Ã  interprÃ©ter.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;  État de la pile après l'interprétation des blocs.
+<div style="margin-left:5%;"><i>j*x</i>&nbsp;&nbsp;  Ã‰tat de la pile aprÃ¨s l'interprÃ©tation des blocs.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><h4 id="index">Index</h4>
 <p>
 <ul>
@@ -251,7 +252,7 @@
 </ul>
 </p>
 <hr style="border-width:1px;"><div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 
 </body>
 </html>

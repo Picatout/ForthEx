@@ -1,77 +1,78 @@
 <DOCTYPE! html>
 <html lang="fr-CA">
 <head>
+ <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 </head>
 <body id="#top">
 <h1>blockEdit</h1><div><a href="#index">index</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <h2 id="description">Description</h2><div style="margin-left:5%;"> 
 </div>
-<div style="margin-left:5%;">   Éditeur de texte simple qui travail sur un seul écran à la fois et permet
+<div style="margin-left:5%;">   Ã‰diteur de texte simple qui travail sur un seul Ã©cran Ã  la fois et permet
 </div>
-<div style="margin-left:5%;">   de sauvegarder le texte de cet écran dans un bloc. Ultérieurement ce
+<div style="margin-left:5%;">   de sauvegarder le texte de cet Ã©cran dans un bloc. UltÃ©rieurement ce
 </div>
-<div style="margin-left:5%;">   bloc peut-être évalué avec la commande LOAD. 
+<div style="margin-left:5%;">   bloc peut-Ãªtre Ã©valuÃ© avec la commande LOAD. 
 </div>
-<div style="margin-left:5%;">   L'idée d'un éditeur de bloc viens de l'origine même du langage. Charles Moore
+<div style="margin-left:5%;">   L'idÃ©e d'un Ã©diteur de bloc viens de l'origine mÃªme du langage. Charles Moore
 </div>
-<div style="margin-left:5%;">   Travaillait sur un terminal vidéo de 16 lignes de 64 caractères, ce qui fait qu'un
+<div style="margin-left:5%;">   Travaillait sur un terminal vidÃ©o de 16 lignes de 64 caractÃ¨res, ce qui fait qu'un
 </div>
-<div style="margin-left:5%;">   écran occupait 1024 caractères. Il avait donc eu l'idée de sauvegarder le contenu
+<div style="margin-left:5%;">   Ã©cran occupait 1024 caractÃ¨res. Il avait donc eu l'idÃ©e de sauvegarder le contenu
 </div>
-<div style="margin-left:5%;">   de la mémoire vidéo sur l'unité de stockage permanent sans modification.
+<div style="margin-left:5%;">   de la mÃ©moire vidÃ©o sur l'unitÃ© de stockage permanent sans modification.
 </div>
-<div style="margin-left:5%;">   Chaque écran sauvegardé s'appelait un bloc.
+<div style="margin-left:5%;">   Chaque Ã©cran sauvegardÃ© s'appelait un bloc.
 </div>
-<div style="margin-left:5%;">   Le problème c'est que BLKED utilise un écran de 23 lignes au lieu de 16 ce qui
+<div style="margin-left:5%;">   Le problÃ¨me c'est que BLKED utilise un Ã©cran de 23 lignes au lieu de 16 ce qui
 </div>
-<div style="margin-left:5%;">   fait qu'un bloc serait de 1472 caractères au lieu de 1024. Mais comme le standard
+<div style="margin-left:5%;">   fait qu'un bloc serait de 1472 caractÃ¨res au lieu de 1024. Mais comme le standard
 </div>
-<div style="margin-left:5%;">   ANSI Forth défini toujours les blocs comme étant 1024 caractères je devais trouver
+<div style="margin-left:5%;">   ANSI Forth dÃ©fini toujours les blocs comme Ã©tant 1024 caractÃ¨res je devais trouver
 </div>
-<div style="margin-left:5%;">   une solution pour sauvegarder les écrans dans des blocs. Entre autre solutions il y a
+<div style="margin-left:5%;">   une solution pour sauvegarder les Ã©crans dans des blocs. Entre autre solutions il y a
 </div>
-<div style="margin-left:5%;">   1) M'écarter du standard et modifier la taille des blocs à 1472 octets.
+<div style="margin-left:5%;">   1) M'Ã©carter du standard et modifier la taille des blocs Ã  1472 octets.
 </div>
-<div style="margin-left:5%;">   2) Utiliser 2 blocs standards pour sauvegarder un écran, occasionne une perte d'espace.
+<div style="margin-left:5%;">   2) Utiliser 2 blocs standards pour sauvegarder un Ã©cran, occasionne une perte d'espace.
 </div>
-<div style="margin-left:5%;">   3) Compressser le contenu de l'écran pour le faire entrer dans un bloc standard, gain d'espace.
+<div style="margin-left:5%;">   3) Compressser le contenu de l'Ã©cran pour le faire entrer dans un bloc standard, gain d'espace.
 </div>
-<div style="margin-left:5%;">   J'ai opté pour la 3ième solution.     
+<div style="margin-left:5%;">   J'ai optÃ© pour la 3iÃ¨me solution.     
 </div>
-<div style="margin-left:5%;">   En principe Lorsqu'on écris du code source les lignes ne sont pas pleines.
+<div style="margin-left:5%;">   En principe Lorsqu'on Ã©cris du code source les lignes ne sont pas pleines.
 </div>
-<div style="margin-left:5%;">   Parfois on laisse même des lignes vides pour rendre le texte plus facile à lire.
+<div style="margin-left:5%;">   Parfois on laisse mÃªme des lignes vides pour rendre le texte plus facile Ã  lire.
 </div>
-<div style="margin-left:5%;">   Lors de la sauvegarde dans un bloc les lignes sont tronquées après le dernier caractère
+<div style="margin-left:5%;">   Lors de la sauvegarde dans un bloc les lignes sont tronquÃ©es aprÃ¨s le dernier caractÃ¨re
 </div>
-<div style="margin-left:5%;">   et un caractère de fin de ligne est ajouté. Il y a 23 lignes de texte sur 
+<div style="margin-left:5%;">   et un caractÃ¨re de fin de ligne est ajoutÃ©. Il y a 23 lignes de texte sur 
 </div>
-<div style="margin-left:5%;">   un écran donc BLKED. Donc si la longueur moyenne des lignes est inférieure à
+<div style="margin-left:5%;">   un Ã©cran donc BLKED. Donc si la longueur moyenne des lignes est infÃ©rieure Ã 
 </div>
-<div style="margin-left:5%;">   (BLOCK_SIZE-23)/23 l'écran peut être sauvegardé dans un bloc. Le mot SCR-SIZE
+<div style="margin-left:5%;">   (BLOCK_SIZE-23)/23 l'Ã©cran peut Ãªtre sauvegardÃ© dans un bloc. Le mot SCR-SIZE
 </div>
-<div style="margin-left:5%;">   défini dans le fichier block.s permet de connaître la taille occupée par un écran dans un bloc.
+<div style="margin-left:5%;">   dÃ©fini dans le fichier block.s permet de connaÃ®tre la taille occupÃ©e par un Ã©cran dans un bloc.
 </div>
-<div style="margin-left:5%;">   Il est problable que dans la majorité des cas un écran avec les lignes tronquées après
+<div style="margin-left:5%;">   Il est problable que dans la majoritÃ© des cas un Ã©cran avec les lignes tronquÃ©es aprÃ¨s
 </div>
-<div style="margin-left:5%;">   le dernier caractère répondra à ce critère. Au pire il suffira de raccourcir les commentaires.    
+<div style="margin-left:5%;">   le dernier caractÃ¨re rÃ©pondra Ã  ce critÃ¨re. Au pire il suffira de raccourcir les commentaires.    
 </div>
 <div style="margin-left:5%;"> FONCTIONNEMENT:
 </div>
-<div style="margin-left:5%;">   BLKED réserve la ligne 24 comme ligne d'état donc un bloc de texte occupe les
+<div style="margin-left:5%;">   BLKED rÃ©serve la ligne 24 comme ligne d'Ã©tat donc un bloc de texte occupe les
 </div>
 <div style="margin-left:5%;">   lignes 1..23.     
 </div>
-<div style="margin-left:5%;">   Le curseur peut-être déplacé n'importe où sur l'écran et le texte modifié.
+<div style="margin-left:5%;">   Le curseur peut-Ãªtre dÃ©placÃ© n'importe oÃ¹ sur l'Ã©cran et le texte modifiÃ©.
 </div>
-<div style="margin-left:5%;">   Cependant le curseur ne peut sortir des limites de l'écran, il n'y a pas de défilement.
+<div style="margin-left:5%;">   Cependant le curseur ne peut sortir des limites de l'Ã©cran, il n'y a pas de dÃ©filement.
 </div>
-<div style="margin-left:5%;">   L'éditeur fonctionne en mode écrasement, donc si le curseur est déplacé au dessus d'un
+<div style="margin-left:5%;">   L'Ã©diteur fonctionne en mode Ã©crasement, donc si le curseur est dÃ©placÃ© au dessus d'un
 </div>
-<div style="margin-left:5%;">   caractère il sera remplacé par le caractère tapé à cet endroit. La seule façon d'insérer
+<div style="margin-left:5%;">   caractÃ¨re il sera remplacÃ© par le caractÃ¨re tapÃ© Ã  cet endroit. La seule faÃ§on d'insÃ©rer
 </div>
-<div style="margin-left:5%;">   un caractère au milieu d'un ligne est d'utiliser la touche INSERT suivie du caractère.     
+<div style="margin-left:5%;">   un caractÃ¨re au milieu d'un ligne est d'utiliser la touche INSERT suivie du caractÃ¨re.     
 </div>
 <div style="margin-left:5%;">  <br><table border="single">     
 </div>
@@ -127,21 +128,21 @@
 </div>
 <div style="margin-left:5%;">  </table><br>
 </div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="SAVELINE">
 <b>SAVELINE</b> ( n -- )
-<div style="margin-left:5%;">   Sauvegarde de la ligne d'écran 'n' dans le tampon PAD.
+<div style="margin-left:5%;">   Sauvegarde de la ligne d'Ã©cran 'n' dans le tampon PAD.
 </div>
-<div style="margin-left:5%;">   Pour que RESTORELINE restitue la ligne d'écran à son état original
+<div style="margin-left:5%;">   Pour que RESTORELINE restitue la ligne d'Ã©cran Ã  son Ã©tat original
 </div>
-<div style="margin-left:5%;">   l'application doit éviter d'écraser le contenu des 64 premiers caractères
+<div style="margin-left:5%;">   l'application doit Ã©viter d'Ã©craser le contenu des 64 premiers caractÃ¨res
 </div>
 <div style="margin-left:5%;">   du  PAD entre les 2 appels.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Numéro de ligne {1..24}
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; NumÃ©ro de ligne {1..24}
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -149,15 +150,15 @@
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="RESTORELINE">
 <b>RESTORELINE</b>  ( n -- )
-<div style="margin-left:5%;">   Restaure la ligne d'écran à partir du tampon PAD.
+<div style="margin-left:5%;">   Restaure la ligne d'Ã©cran Ã  partir du tampon PAD.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Numéro de la ligne à restaurer {1..24}.
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; NumÃ©ro de la ligne Ã  restaurer {1..24}.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -165,31 +166,31 @@
 </i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="PROMPT">
 <b>PROMPT</b>  ( c-addr u n -- )
-<div style="margin-left:5%;">   Affiche un message en vidéo inversé sur la ligne 'n' de l'écran.
+<div style="margin-left:5%;">   Affiche un message en vidÃ©o inversÃ© sur la ligne 'n' de l'Ã©cran.
 </div>
 <div style="margin-left:5%;">   Utilise SAVELINE pour conserver le contenu original de cette ligne dans
 </div>
-<div style="margin-left:5%;">   la mémoire tampon PAD.  Les applications qui utilisent PROMPT et doivent restaurer
+<div style="margin-left:5%;">   la mÃ©moire tampon PAD.  Les applications qui utilisent PROMPT et doivent restaurer
 </div>
-<div style="margin-left:5%;">   le contenu original de la ligne utilisée par PROMPT doivent s'assurer
+<div style="margin-left:5%;">   le contenu original de la ligne utilisÃ©e par PROMPT doivent s'assurer
 </div>
-<div style="margin-left:5%;">   de ne pas écraser les 64 premiers caractères du PAD.
+<div style="margin-left:5%;">   de ne pas Ã©craser les 64 premiers caractÃ¨res du PAD.
 </div>
-<div style="margin-left:5%;">   Après l'exécution de PROMPT la sortie vidéo est en mode inversée et le curseur
+<div style="margin-left:5%;">   AprÃ¨s l'exÃ©cution de PROMPT la sortie vidÃ©o est en mode inversÃ©e et le curseur
 </div>
-<div style="margin-left:5%;">   est positionné après le prompt permettant une saisie d'information par l'application.    
+<div style="margin-left:5%;">   est positionnÃ© aprÃ¨s le prompt permettant une saisie d'information par l'application.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractère du message à afficher.
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractÃ¨re du message Ã  afficher.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp; Nombre de caractères du message, maximum 63.
+<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp; Nombre de caractÃ¨res du message, maximum 63.
 </div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Numéro de la ligne sur laquelle le message sera affiché, {1..24}
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; NumÃ©ro de la ligne sur laquelle le message sera affichÃ©, {1..24}
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -197,29 +198,29 @@
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="MSGLINE">
 <b>MSGLINE</b>  ( u1 c-addr u2 n -- )
-<div style="margin-left:5%;">   Affiche un message en inverse vidéo à l'écran et attend une touche au clavier
+<div style="margin-left:5%;">   Affiche un message en inverse vidÃ©o Ã  l'Ã©cran et attend une touche au clavier
 </div>
-<div style="margin-left:5%;">   avant de poursuivre l'exécution l'exécution. Le message doit tenir sur une 
+<div style="margin-left:5%;">   avant de poursuivre l'exÃ©cution l'exÃ©cution. Le message doit tenir sur une 
 </div>
-<div style="margin-left:5%;">   seule ligne d'écran. Cette ligne d'écran est sauvegardée et restaurée à la 
+<div style="margin-left:5%;">   seule ligne d'Ã©cran. Cette ligne d'Ã©cran est sauvegardÃ©e et restaurÃ©e Ã  la 
 </div>
-<div style="margin-left:5%;">   sortie de ce mot. Le curseur texte est retourné à la position qu'il avait 
+<div style="margin-left:5%;">   sortie de ce mot. Le curseur texte est retournÃ© Ã  la position qu'il avait 
 </div>
 <div style="margin-left:5%;">   avant l'appel de MSGLINE.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; Durée maximale d'attente en msec ou zéro pour attendre indéfiniment.    
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; DurÃ©e maximale d'attente en msec ou zÃ©ro pour attendre indÃ©finiment.    
 </div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractère du message.
+<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractÃ¨re du message.
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Longueur du message, limité à 63 caractères.
+<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Longueur du message, limitÃ© Ã  63 caractÃ¨res.
 </div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Numéro de la ligne où doit-être affiché le message.
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  NumÃ©ro de la ligne oÃ¹ doit-Ãªtre affichÃ© le message.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -227,14 +228,14 @@
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SCR-SIZE">
 <b>SCR-SIZE</b> ( -- n )
-<div style="margin-left:5%;">    Calcule la taille que la mémoire tampon vidéo occuperait dans un bloc 
+<div style="margin-left:5%;">    Calcule la taille que la mÃ©moire tampon vidÃ©o occuperait dans un bloc 
 </div>
-<div style="margin-left:5%;">    s'il était sauvegardé avec SCR&gt;BLK. Seul les lignes 1..23 sont sauvegardées.
+<div style="margin-left:5%;">    s'il Ã©tait sauvegardÃ© avec SCR&gt;BLK. Seul les lignes 1..23 sont sauvegardÃ©es.
 </div>
-<div style="margin-left:5%;">    BLKED utilise la ligne 24 comme ligne d'état.    
+<div style="margin-left:5%;">    BLKED utilise la ligne 24 comme ligne d'Ã©tat.    
 </div>
 <div style="margin-left:5%;">        
 </div>
@@ -245,21 +246,21 @@
 </i>&nbsp;&nbsp;</div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Taille qui serait occupée par l'écran dans un bloc.    
+<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Taille qui serait occupÃ©e par l'Ã©cran dans un bloc.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLK&gt;SCR">
 <b>BLK&gt;SCR</b> ( n+ -- )
-<div style="margin-left:5%;">   Copie le contenu d'un bloc dans le tampon d'écran arrête au premier
+<div style="margin-left:5%;">   Copie le contenu d'un bloc dans le tampon d'Ã©cran arrÃªte au premier
 </div>
-<div style="margin-left:5%;">   caractère non valide.
+<div style="margin-left:5%;">   caractÃ¨re non valide.
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Numéro du bloc.
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; NumÃ©ro du bloc.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -267,53 +268,53 @@
 </i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SCR&gt;BLK">
 <b>SCR&gt;BLK</b>  ( n+ -- f )
-<div style="margin-left:5%;">   Sauvegarde de la mémoire tampon de l'écran dans un bloc sur périphérique de stockage.
+<div style="margin-left:5%;">   Sauvegarde de la mÃ©moire tampon de l'Ã©cran dans un bloc sur pÃ©riphÃ©rique de stockage.
 </div>
-<div style="margin-left:5%;">   Seul lignes 1..23 sont sauvegardées.    
+<div style="margin-left:5%;">   Seul lignes 1..23 sont sauvegardÃ©es.    
 </div>
-<div style="margin-left:5%;">   Si le contenu de l'écran n'entre pas dans un bloc, l'opération est abaondonnée et retourne faux.
+<div style="margin-left:5%;">   Si le contenu de l'Ã©cran n'entre pas dans un bloc, l'opÃ©ration est abaondonnÃ©e et retourne faux.
 </div>
-<div style="margin-left:5%;">   Les espaces qui termines les lignes sont supprimés et chaque ligne est complétée
+<div style="margin-left:5%;">   Les espaces qui termines les lignes sont supprimÃ©s et chaque ligne est complÃ©tÃ©e
 </div>
 <div style="margin-left:5%;">   par un VK_CR.
 </div>
 <div style="margin-left:5%;">   * ne fonctionne qu'avec LOCAL CONSOLE. Cependant BLKEDIT utilise le frame buffer
 </div>
-<div style="margin-left:5%;">     local même lorsque la console est en mode REMOTE, donc BLKEDIT peut sauvegarder
+<div style="margin-left:5%;">     local mÃªme lorsque la console est en mode REMOTE, donc BLKEDIT peut sauvegarder
 </div>
-<div style="margin-left:5%;">     le bloc en édition.    
+<div style="margin-left:5%;">     le bloc en Ã©dition.    
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;    numéro du bloc où sera sauvegardé l'écran.
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;    numÃ©ro du bloc oÃ¹ sera sauvegardÃ© l'Ã©cran.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;     indicateur booléen, T si sauvegarde réussie, F si trop grand.
+<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;     indicateur boolÃ©en, T si sauvegarde rÃ©ussie, F si trop grand.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLKED">
 <b>BLKED</b>  ( n+ -- )  
-<div style="margin-left:5%;">   Éditeur de bloc texte. Edite 1 bloc à la fois.
+<div style="margin-left:5%;">   Ã‰diteur de bloc texte. Edite 1 bloc Ã  la fois.
 </div>
-<div style="margin-left:5%;">   Le curseur peut-être déplacé à n'importe qu'elle position sur l'écran et 
+<div style="margin-left:5%;">   Le curseur peut-Ãªtre dÃ©placÃ© Ã  n'importe qu'elle position sur l'Ã©cran et 
 </div>
-<div style="margin-left:5%;">   son contenu modifié à volonté avant de le sauvegarder le bloc sur le
+<div style="margin-left:5%;">   son contenu modifiÃ© Ã  volontÃ© avant de le sauvegarder le bloc sur le
 </div>
-<div style="margin-left:5%;">   périphéirque de stockage actif. Si ce bloc contient du texte source ForthEx
+<div style="margin-left:5%;">   pÃ©riphÃ©irque de stockage actif. Si ce bloc contient du texte source ForthEx
 </div>
-<div style="margin-left:5%;">   il peut-être ultérieurement évalué par la commande LOAD ou THRU.  
+<div style="margin-left:5%;">   il peut-Ãªtre ultÃ©rieurement Ã©valuÃ© par la commande LOAD ou THRU.  
 </div>
 </p>
 <div style="margin-left:5%;"><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   Le numéro du bloc à éditer.
+<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   Le numÃ©ro du bloc Ã  Ã©diter.
 </div>
 <div style="margin-left:5%;"><b> retourne:
 </b></div>
@@ -321,7 +322,7 @@
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><h4 id="index">Index</h4>
 <p>
 <ul>
@@ -336,7 +337,7 @@
 </ul>
 </p>
 <hr style="border-width:1px;"><div><a href="#top">haut</a></div>
-<div><a href="index.html">index principal</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 
 </body>
 </html>

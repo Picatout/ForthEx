@@ -28,6 +28,7 @@ static char* htmlExt=".html";
 static char* ext=".s";
 static char html[1024];
 
+
 int scan(const char *text, char c,int from){
 	while (text[from] && text[from]!=c){
 		from++;
@@ -54,9 +55,11 @@ int word(char *text){
 }
 
 void replaceAngleBrackets(char *text){
-	int i=0,j=0;;
+	int i=0,j=0;
+	unsigned char c;
 	while (text[i]){
-		switch (text[i]){
+		c=text[i++];
+		switch (c){
 			case '<':
 			strcpy(&html[j],"&lt;");
 			j+=4;
@@ -65,11 +68,15 @@ void replaceAngleBrackets(char *text){
 			strcpy(&html[j],"&gt;");
 			j+=4;
 			break;
-			default:
-			html[j++]=text[i];
+			default: // iso-8859-1 to utf-8
+			if ( c<128) {
+				html[j++]=c;
+		    }else{
+				html[j++]=0xC0|(c>>6);
+				html[j++]=0x80|(c&0x3f);
+			}
 			break;
 		}//switch
-		i++;
 	}//while
 	html[j]=0;
 }
@@ -79,7 +86,7 @@ void addHorzLine(FILE *fo,int tickness){
 }
 
 void addMasterRef(FILE* fo){
-	fprintf(fo,"<div><a href=\"index.html\">index principal</a></div>\n");	
+	fprintf(fo,"<div><a href=\"index.html#MasterIndex\">index principal</a></div>\n");	
 }
 
 void addIndexRef(FILE* fo){
@@ -238,7 +245,7 @@ FILE* createHeader(const char *name,FILE *out){
 	out=fopen(name,"w");
 	fputs("<DOCTYPE! html>\n",out);
 	fputs("<html lang=\"fr-CA\">\n",out);
-	fputs("<head>\n",out);
+	fputs("<head>\n <meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\">\n",out);
 	fputs("</head>\n<body id=\"#top\">\n",out);
 	return out;
 }

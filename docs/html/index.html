@@ -1,6 +1,7 @@
 <DOCTYPE! html>
 <html lang="fr-CA">
 <head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" /> 	
 <style>
 .file-item{
 	margin-left:5%;
@@ -14,80 +15,80 @@ p{
 </style>	
 </head>
 <body>
-<h1>Index princal</h1>	
+<h1>Projet ForthEx</h1>	
 <h2>Description</h2>
 <p>
-	Cette page est l'index principal de la documentation du projet ForthEx. La documentation décris chaque mot du dictionnaire forth accessible à l'utilisateur.
-	Il y a une page html par fichier source qui porte le nom de celui-ci. Chaque page décris le module et chacun des mots définis dans le fichier. Cette page
-	est l'index principal qui référence chacune de ces pages. 
+	Cette page est l'index principal de la documentation du projet ForthEx. La documentation dÃ©cris chaque mot du dictionnaire forth accessible Ã  l'utilisateur.
+	Il y a une page html par fichier source qui porte le nom de celui-ci. Chaque page dÃ©cris le module et chacun des mots dÃ©finis dans le fichier. Cette page
+	est l'index principal qui rÃ©fÃ©rence chacune de ces pages. 
 </p>
 <div><a href="#MasterIndex">Liste des fichiers</a></div>
 <h3>Organisation de la documentation</h3>
 <p>
-	Pour chaque fichier source qui contient des définitions du vocabulaires ForthEx il y a un page WEB associée documentant chacun des mots de ce fichiers.
-	La structure est toujours la même. Une présentation initiale du groupe de mots suivit d'une description de chaque mot. A la fin de la page il y a un index
-	des mots du fichiers. A la fin de chaque définition il y a 3 liens, le premier mène à l'index de la page, le second renvoie en haut de la page et le troisième
-	permet de revenir à cet index principal.
+	Pour chaque fichier source qui contient des dÃ©finitions du vocabulaires ForthEx il y a un page WEB associÃ©e documentant chacun des mots de ce fichiers.
+	La structure est toujours la mÃªme. Une prÃ©sentation initiale du groupe de mots suivit d'une description de chaque mot. A la fin de la page il y a un index
+	des mots du fichiers. A la fin de chaque dÃ©finition il y a 3 liens, le premier mÃ¨ne Ã  l'index de la page, le second renvoie en haut de la page et le troisiÃ¨me
+	permet de revenir Ã  cet index principal.
 </p>
 <p>
-	Le commentaire entre parenthèses après le nom du mot est une description de l'état de la pile des arguments avant l'exécution du mot et après ( avant -- après ).
-	par exemple:<br>( u1 -- )<br> signifie que le mot prend un argument de type <b>u</b> (entier simple non signé) et le consomme et ne retourne aucune valeur.<br>
-	Si un mot affecte le contenue de la pile des retours le commentaire ressemble à ceci:<br><b>&gt;R</b> ( n -- R: -- n )<br>
+	Le commentaire entre parenthÃ¨ses aprÃ¨s le nom du mot est une description de l'Ã©tat de la pile des arguments avant l'exÃ©cution du mot et aprÃ¨s ( avant -- aprÃ¨s ).
+	par exemple:<br>( u1 -- )<br> signifie que le mot prend un argument de type <b>u</b> (entier simple non signÃ©) et le consomme et ne retourne aucune valeur.<br>
+	Si un mot affecte le contenue de la pile des retours le commentaire ressemble Ã  ceci:<br><b>&gt;R</b> ( n -- R: -- n )<br>
 	Ceci signifie que le mot <br><b>&gt;R</b> prend l'argument <b>n</b> et le transfert sur la pile des retours.
 </p>
-<h3>Types de données</h3>
+<h3>Types de donnÃ©es</h3>
 <p>
 	<table border="single">
 	<tr><th>notation</th><th>description</th></tr>
-	<tr><td>c</td><td>Caractère ASCII, 8 bits, mais le code ASCII est de 7 bits,{0..127}.</td></tr>
-	<tr><td>n</td><td>Entier simple signé, 16 bits,{-32768..32767}.</td></tr>
-	<tr><td>n+</td><td>Entier simple signé, positif, 16 bits,{1..32767}.</td></tr>
-	<tr><td>u</td><td>Entier simple non signé, 16 bits,{0..65535}.</td></tr>
+	<tr><td>c</td><td>CaractÃ¨re ASCII, 8 bits, mais le code ASCII est de 7 bits,{0..127}.</td></tr>
+	<tr><td>n</td><td>Entier simple signÃ©, 16 bits,{-32768..32767}.</td></tr>
+	<tr><td>n+</td><td>Entier simple signÃ©, positif, 16 bits,{1..32767}.</td></tr>
+	<tr><td>u</td><td>Entier simple non signÃ©, 16 bits,{0..65535}.</td></tr>
 	<tr><td>d</td><td>Entier double, 32 bits,{-2147483648..2147483647}.</td></tr>
-	<tr><td>ud</td><td>Entier double non signé, 32 bits,{0..4294967295}.</td></tr>
-	<tr><td>c-addr</td><td>Adresse alignée sur un octet, peut avoir une valeur impaire, 16 bits,{0..65535}.</td></tr>
-	<tr><td>a-addr</td><td>Adresse alignée sur un mot de 16 bits, doit-être paire, 16 bits,{0..65534}.</td></tr>
+	<tr><td>ud</td><td>Entier double non signÃ©, 32 bits,{0..4294967295}.</td></tr>
+	<tr><td>c-addr</td><td>Adresse alignÃ©e sur un octet, peut avoir une valeur impaire, 16 bits,{0..65535}.</td></tr>
+	<tr><td>a-addr</td><td>Adresse alignÃ©e sur un mot de 16 bits, doit-Ãªtre paire, 16 bits,{0..65534}.</td></tr>
 	</table>
 </p>
 <h3>Lexique</h3>
 <p>
 	<table border="single">
 	<tr><th>symbole</th><td>description</td></tr>
-	<tr><td>cell</td><td> Dimension de base d'un élément de donnée. Pour ForthEx les cellules ont 16 bits.</td></tr>
-	<tr><td>cell-pair</td><td>Deux cellules juxtaposée pour sauvegarder une donnée dont la grandeur est de 32 bits.</td></tr>
-	<tr><td>C:</td><td> Utilisé dans les commentaires pour désigner la pile de contrôle.</td></tr>
+	<tr><td>cell</td><td> Dimension de base d'un Ã©lÃ©ment de donnÃ©e. Pour ForthEx les cellules ont 16 bits.</td></tr>
+	<tr><td>cell-pair</td><td>Deux cellules juxtaposÃ©e pour sauvegarder une donnÃ©e dont la grandeur est de 32 bits.</td></tr>
+	<tr><td>C:</td><td> UtilisÃ© dans les commentaires pour dÃ©signer la pile de contrÃ´le.</td></tr>
 	<tr><td>dictionnaire</td><td>Contient le nom symbolique et un pointeur vers le code des mots du language.</td></tr>
 	<tr><td>DSP</td><td>Data Stack Pointer, pointeur de la pile des arguments.</td></tr>
-	<tr><td>Pile des arguments</td><td>Contient les données passées aux fonctions ainsi que les valeurs retournées.</td></tr>
-	<tr><td>Pile de contrôle</td><td>Utilisée par le compilateur pour conserver les références de branchement à résoudre.</td></tr>
-	<tr><td>Pile des retours</td><td>Utilisée pour conserver les adresses de retour lors des appels de <i>sous-routines.</i><br>
-	 Aussi utilisée pour stocker temporairement des valeurs pour dégager la pile des arguments.</td></tr>
-	<tr><td>R:</td><td> Utilisé dans les commentaires pour désigner la pile des retours.</td></tr>
+	<tr><td>Pile des arguments</td><td>Contient les donnÃ©es passÃ©es aux fonctions ainsi que les valeurs retournÃ©es.</td></tr>
+	<tr><td>Pile de contrÃ´le</td><td>UtilisÃ©e par le compilateur pour conserver les rÃ©fÃ©rences de branchement Ã  rÃ©soudre.</td></tr>
+	<tr><td>Pile des retours</td><td>UtilisÃ©e pour conserver les adresses de retour lors des appels de <i>sous-routines.</i><br>
+	 Aussi utilisÃ©e pour stocker temporairement des valeurs pour dÃ©gager la pile des arguments.</td></tr>
+	<tr><td>R:</td><td> UtilisÃ© dans les commentaires pour dÃ©signer la pile des retours.</td></tr>
 	<tr><td>RSP</td><td>Return Stack Pointer, pointeur de la pile des retours.</td></tr>
-	<tr><td>S:</td><td> Utilisé dans les commentaires pour désigner la pile des arguments.</td></tr>
+	<tr><td>S:</td><td> UtilisÃ© dans les commentaires pour dÃ©signer la pile des arguments.</td></tr>
 	</table>
 </p>		
 <h2 id="MasterIndex">Liste des fichiers</h2>
 <p>
-	<div class="file-item"><a href="presentation.html">Présentation</a> Présentation du projet ForthEx.</div>
-	<div class="file-item"><a href="block.html">block</a> Gestion du stockage de données par blocs sur les périphériques de stockage.</div>
-	<div class="file-item"><a href="blockEdit.html">blockEdit</a> Éditeur de texte en mode bloc.</div>
-	<div class="file-item"><a href="core.html">core</a> Vocabulaire de base du système ForthEx.</div>
+	<div class="file-item"><a href="presentation.html">PrÃ©sentation</a> PrÃ©sentation du projet ForthEx.</div>
+	<div class="file-item"><a href="block.html">block</a> Gestion du stockage de donnÃ©es par blocs sur les pÃ©riphÃ©riques de stockage.</div>
+	<div class="file-item"><a href="blockEdit.html">blockEdit</a> Ã‰diteur de texte en mode bloc.</div>
+	<div class="file-item"><a href="core.html">core</a> Vocabulaire de base du systÃ¨me ForthEx.</div>
 	<div class="file-item"><a href="console.html">console</a> Interface avec la console utilisateur.</div>
-	<div class="file-item"><a href="dynamem.html">dynamem</a> Gestion de la mémoire dynamique.</div>
-	<div class="file-item"><a href="eds.html">eds</a> Accès à la RAM étendue du Microcontrôleur.</div>
-	<div class="file-item"><a href="flash.html">flash</a> Accès à la mémoire flash du microcontrôleur.</div>
-	<div class="file-item"><a href="hardware.html">hardware</a> Configuration matérielle du microcontrôleur.</div>
-	<div class="file-item"><a href="interpret.html">interpret</a> Interpréteur/compilateur. Interface utilisateur en mode console texte.</div>
+	<div class="file-item"><a href="dynamem.html">dynamem</a> Gestion de la mÃ©moire dynamique.</div>
+	<div class="file-item"><a href="eds.html">eds</a> AccÃ¨s Ã  la RAM Ã©tendue du MicrocontrÃ´leur.</div>
+	<div class="file-item"><a href="flash.html">flash</a> AccÃ¨s Ã  la mÃ©moire flash du microcontrÃ´leur.</div>
+	<div class="file-item"><a href="hardware.html">hardware</a> Configuration matÃ©rielle du microcontrÃ´leur.</div>
+	<div class="file-item"><a href="interpret.html">interpret</a> InterprÃ©teur/compilateur. Interface utilisateur en mode console texte.</div>
 	<div class="file-item"><a href="keyboard.html">keyboard</a> Lecture du clavier.</div>
-	<div class="file-item"><a href="math.html">math</a> Fonctions arithmétiques, logiques et comparaisons numériques.</div>
-	<div class="file-item"><a href="sdcard.html">sdcard</a> Accès de base à la carte SD.</div>
-	<div class="file-item"><a href="serial.html">serial</a> Interface port de communication sériel RS-232.</div>
-	<div class="file-item"><a href="store.html">store</a>  Accès RAM et EEPROM externe.</div>
-	<div class="file-item"><a href="strings.html">strings</a> Manipulation des chaînes de caractères et conversion numérique en chaîne.</div>
-	<div class="file-item"><a href="tools.html">tools</a> Support au débogage.</div>
-	<div class="file-item"><a href="tvout.html">tvout</a> Fonctions d'accès au moniteur vidéo local.</div>
-	<div class="file-item"><a href="vt102.html">vt102</a> Fonctions d'accès à un terminal VT102 via le port sériel.</div>
+	<div class="file-item"><a href="math.html">math</a> Fonctions arithmÃ©tiques, logiques et comparaisons numÃ©riques.</div>
+	<div class="file-item"><a href="sdcard.html">sdcard</a> AccÃ¨s de base Ã  la carte SD.</div>
+	<div class="file-item"><a href="serial.html">serial</a> Interface port de communication sÃ©riel RS-232.</div>
+	<div class="file-item"><a href="store.html">store</a>  AccÃ¨s RAM et EEPROM externe.</div>
+	<div class="file-item"><a href="strings.html">strings</a> Manipulation des chaÃ®nes de caractÃ¨res et conversion numÃ©rique en chaÃ®ne.</div>
+	<div class="file-item"><a href="tools.html">tools</a> Support au dÃ©bogage.</div>
+	<div class="file-item"><a href="tvout.html">tvout</a> Fonctions d'accÃ¨s au moniteur vidÃ©o local.</div>
+	<div class="file-item"><a href="vt102.html">vt102</a> Fonctions d'accÃ¨s Ã  un terminal VT102 via le port sÃ©riel.</div>
 	<div class="file-item"><a href="tutoriel.html">tutoriel</a> par la pratique.</div>
 	<div class="file-item"><a href="http://www.forth200x.org/documents/forth16-1.pdf">ANS Forth 200x proposition 16.1 <b>(pdf)</b></a> Proposition de standardisation du langage Forth.</div>
 </p>
