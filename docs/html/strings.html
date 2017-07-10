@@ -2,1195 +2,1195 @@
 <html lang="fr-CA">
 <head>
  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-</head>
+ <link rel="stylesheet" type="text/css" href="css/forthex.css"></head>
 <body id="#top">
 <h1>strings</h1><div><a href="#index">index</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<h2 id="description">Description</h2><div style="margin-left:5%;"> 
+<h2 id="description">Description</h2><div> 
 </div>
-<div style="margin-left:5%;">    Manipulation des chaînes et des caractères.
+<div>    Manipulation des chaînes et des caractères.
 </div>
-<div style="margin-left:5%;">    ForthEx utilise les caractères ASCII.
+<div>    ForthEx utilise les caractères ASCII.
 </div>
-<div style="margin-left:5%;">REF: <a href=" http://www.asciitable.com/
+<div>REF: <a href=" http://www.asciitable.com/
 "> http://www.asciitable.com/
 </a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="BL">
 <b>BL</b>  ( -- c )
-<div style="margin-left:5%;">   Constante qui retourne la valeur ASCII 32 (espace).
+<div>   Constante qui retourne la valeur ASCII 32 (espace).
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>aucun
+<div><i>aucun
 </i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  Valeur ASCII 32  qui représente l'espace.    
+<div><i>c</i>&nbsp;&nbsp;  Valeur ASCII 32  qui représente l'espace.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="&gt;CHAR">
 <b>&gt;CHAR</b>  ( n -- c )    
-<div style="margin-left:5%;">   Vérifie que 'n' est dans l'intervalle ASCII 32..126, sinon remplace c par '_'  
+<div>   Vérifie que 'n' est dans l'intervalle ASCII 32..126, sinon remplace c par '_'  
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Entier à convertir en caractère.
+<div><i>n</i>&nbsp;&nbsp; Entier à convertir en caractère.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; Valeur ASCII entre 32 et 126    
+<div><i>c</i>&nbsp;&nbsp; Valeur ASCII entre 32 et 126    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="CHARS">
 <b>CHARS</b>   ( n1 -- n2 )    
-<div style="margin-left:5%;">   Retourne l'espace occupée par n caractères en octets.
+<div>   Retourne l'espace occupée par n caractères en octets.
 </div>
-<div style="margin-left:5%;">   Puisque ForthEx utilise les caractères ASCII et que ceux-ci occupe 1 seul octet
+<div>   Puisque ForthEx utilise les caractères ASCII et que ceux-ci occupe 1 seul octet
 </div>
-<div style="margin-left:5%;">   n1==n2.    
+<div>   n1==n2.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n1</i>&nbsp;&nbsp;  Nombre de caractères
+<div><i>n1</i>&nbsp;&nbsp;  Nombre de caractères
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n2</i>&nbsp;&nbsp;  Espace requis pour n1 caractères.    
+<div><i>n2</i>&nbsp;&nbsp;  Espace requis pour n1 caractères.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="CHAR+">
 <b>CHAR+</b>   ( c-addr -- c-addr' )  
-<div style="margin-left:5%;">   Incrémente l'adresse de l'espace occupé par un caractère.
+<div>   Incrémente l'adresse de l'espace occupé par un caractère.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse alignée sur un caractère.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse alignée sur un caractère.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp; Adresse alignée sur caractère suivant.  
+<div><i>c-addr'</i>&nbsp;&nbsp; Adresse alignée sur caractère suivant.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="CHAR">
 <b>CHAR</b>   ( cccc -- c )    
-<div style="margin-left:5%;">   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
+<div>   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
 </div>
-<div style="margin-left:5%;">   A la suite de cette opération la variable &gt;IN pointe après le mot.    
+<div>   A la suite de cette opération la variable &gt;IN pointe après le mot.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Chaîne de caractère dans le flux d'entré.
+<div><i>cccc</i>&nbsp;&nbsp;  Chaîne de caractère dans le flux d'entré.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  Le premier caractère du mot extrait du flux d'entrée.
+<div><i>c</i>&nbsp;&nbsp;  Le premier caractère du mot extrait du flux d'entrée.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="[CHAR]">
 <b>[CHAR]</b>   ( ccccc -- )
-<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.    
+<div>   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.    
 </div>
-<div style="margin-left:5%;">   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
+<div>   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
 </div>
-<div style="margin-left:5%;">   Après cette opération la variable &gt;IN pointe après le mot trouvé.
+<div>   Après cette opération la variable &gt;IN pointe après le mot trouvé.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp; Chaîne de caractère dans le flux d'entré.    
+<div><i>cccc</i>&nbsp;&nbsp; Chaîne de caractère dans le flux d'entré.    
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp; 
+<div><i>rien</i>&nbsp;&nbsp; 
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="FILL">
 <b>FILL</b> ( c-addr u c -- )    
-<div style="margin-left:5%;">   Initialise un bloc mémoire RAM de dimension 'u' avec le caractère 'c'.
+<div>   Initialise un bloc mémoire RAM de dimension 'u' avec le caractère 'c'.
 </div>
-<div style="margin-left:5%;">   Si c-addr &gt; 32767 la mémoire réside en EDS.    
+<div>   Si c-addr &gt; 32767 la mémoire réside en EDS.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse du début de la zone RAM.
+<div><i>c-addr</i>&nbsp;&nbsp;   Adresse du début de la zone RAM.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;   Nombre de caractères à remplir.
+<div><i>u</i>&nbsp;&nbsp;   Nombre de caractères à remplir.
 </div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  Caractère de remplissage.    
+<div><i>c</i>&nbsp;&nbsp;  Caractère de remplissage.    
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="-TRAILING">
 <b>-TRAILING</b>  ( c-addr u1 -- c-addr u2 )    
-<div style="margin-left:5%;">   Raccourci la chaîne 'c-addr' 'u1' du nombre d'espace qu'il y a à la fin de celle-ci.
+<div>   Raccourci la chaîne 'c-addr' 'u1' du nombre d'espace qu'il y a à la fin de celle-ci.
 </div>
-<div style="margin-left:5%;">   Tous les caractères &lt;=32 sont considérés comme des espaces.    
+<div>   Tous les caractères &lt;=32 sont considérés comme des espaces.    
 </div>
-<div style="margin-left:5%;">   Si c-addr &gt; 32767 accède la mémoire EDS.    
+<div>   Si c-addr &gt; 32767 accède la mémoire EDS.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du début de la chaîne.    
+<div><i>c-addr</i>&nbsp;&nbsp; Adresse du début de la chaîne.    
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; Longueur initiale de la chaîne.
+<div><i>u1</i>&nbsp;&nbsp; Longueur initiale de la chaîne.
 </div>
-<div style="margin-left:5%;"><b> retourne: 
+<div><b> retourne: 
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du début de la chaîne.     
+<div><i>c-addr</i>&nbsp;&nbsp; Adresse du début de la chaîne.     
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp; Longueur de la chaîne tronquée.    
+<div><i>u2</i>&nbsp;&nbsp; Longueur de la chaîne tronquée.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="/STRING">
 <b>/STRING</b>  ( c-addr1 u1 n -- c-addr2 u2 )   
-<div style="margin-left:5%;">   Avance 'c-addr' de 'n' caractères et réduit 'u' d'autant.
+<div>   Avance 'c-addr' de 'n' caractères et réduit 'u' d'autant.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne.
+<div><i>c-addr1</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne.
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;        Longueur de la chaîne.
+<div><i>u1</i>&nbsp;&nbsp;        Longueur de la chaîne.
 </div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;        Nombre de caractères à avancer.
+<div><i>n</i>&nbsp;&nbsp;        Nombre de caractères à avancer.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;    c-addr1+n
+<div><i>c-addr2</i>&nbsp;&nbsp;    c-addr1+n
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;    u1-n    
+<div><i>u2</i>&nbsp;&nbsp;    u1-n    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="UPPER">
 <b>UPPER</b>   ( c-addr -- c-addr )  
-<div style="margin-left:5%;">   Convertie la chaîne comptée en majuscules. Le vocabulaire de ForthEx est
+<div>   Convertie la chaîne comptée en majuscules. Le vocabulaire de ForthEx est
 </div>
-<div style="margin-left:5%;">   est insensible à la casse. Les noms sont tous convertis en majuscules avant
+<div>   est insensible à la casse. Les noms sont tous convertis en majuscules avant
 </div>
-<div style="margin-left:5%;">   d'être ajoutés dans le dictionnaire.  
+<div>   d'être ajoutés dans le dictionnaire.  
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adressse du début de la chaîne comptée.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adressse du début de la chaîne comptée.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  La même adresse.  
+<div><i>c-addr</i>&nbsp;&nbsp;  La même adresse.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SCAN">
 <b>SCAN</b> ( c-addr1 u1 c -- c-addr1 u2 )  
-<div style="margin-left:5%;">   Recherche du caractère 'c' dans la chaîne débutant à l'adresse
+<div>   Recherche du caractère 'c' dans la chaîne débutant à l'adresse
 </div>
-<div style="margin-left:5%;">  'c-addr1' et de longueur 'u1' octets.
+<div>  'c-addr1' et de longueur 'u1' octets.
 </div>
-<div style="margin-left:5%;">   retourne la position de 'c' et le nombre de caractères restant dans la chaîne.
+<div>   retourne la position de 'c' et le nombre de caractères restant dans la chaîne.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp; Adresse du début de la chaîne.
+<div><i>c-addr1</i>&nbsp;&nbsp; Adresse du début de la chaîne.
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;      Longueur de la chaîne.    
+<div><i>u1</i>&nbsp;&nbsp;      Longueur de la chaîne.    
 </div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;       Caractère recherché.
+<div><i>c</i>&nbsp;&nbsp;       Caractère recherché.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse du premier 'c' trouvé dans la chaîne.
+<div><i>c-addr2</i>&nbsp;&nbsp;  Adresse du premier 'c' trouvé dans la chaîne.
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;       Longueur restante de la chaîne à partir de c-addr2.
+<div><i>u2</i>&nbsp;&nbsp;       Longueur restante de la chaîne à partir de c-addr2.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SKIP">
 <b>SKIP</b> ( c-addr1 u1 c -- c-addr2 u2 )  
-<div style="margin-left:5%;">   Avance au delà de 'c'. Retourne l'adresse du premier caractère
+<div>   Avance au delà de 'c'. Retourne l'adresse du premier caractère
 </div>
-<div style="margin-left:5%;">   différent de 'c' et la longueur restante de la chaîne.    
+<div>   différent de 'c' et la longueur restante de la chaîne.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse début de la chaîne.
+<div><i>c-addr</i>&nbsp;&nbsp; Adresse début de la chaîne.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;     Longueur de la chaîne.
+<div><i>u</i>&nbsp;&nbsp;     Longueur de la chaîne.
 </div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;    Caractère recherché.
+<div><i>c</i>&nbsp;&nbsp;    Caractère recherché.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse premier caractère après 'c'.
+<div><i>c-addr2</i>&nbsp;&nbsp;  Adresse premier caractère après 'c'.
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;      Longueur restante de la chaîne à partir c-addr2.    
+<div><i>u2</i>&nbsp;&nbsp;      Longueur restante de la chaîne à partir c-addr2.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="GETLINE">
 <b>GETLINE</b> ( c-addr u1 -- c-addr u2 )
-<div style="margin-left:5%;">   Scan une mémoire tampon contenant du texte jusqu'au prochain caractère de fin de ligne.
+<div>   Scan une mémoire tampon contenant du texte jusqu'au prochain caractère de fin de ligne.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse du premier caractère.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse du premier caractère.
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp; Longueur du tampon.      
+<div><i>u1</i>&nbsp;&nbsp; Longueur du tampon.      
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractère de la ligne.
+<div><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractère de la ligne.
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp; Longueur de la ligne excluant le caractère de fin de ligne.
+<div><i>u2</i>&nbsp;&nbsp; Longueur de la ligne excluant le caractère de fin de ligne.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="MOVE">
 <b>MOVE</b>  ( c-addr1 c-addr2 u -- )    
-<div style="margin-left:5%;">   Copie un bloc mémoire RAM en évitant la propagation. La propagation se
+<div>   Copie un bloc mémoire RAM en évitant la propagation. La propagation se
 </div>
-<div style="margin-left:5%;">   produit lorsque les 2 régions se superposent et qu'un octet copié est recopié
+<div>   produit lorsque les 2 régions se superposent et qu'un octet copié est recopié
 </div>
-<div style="margin-left:5%;">   parce qu'il a écrasé l'octet original dans la région source.     
+<div>   parce qu'il a écrasé l'octet original dans la région source.     
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;  Adresse de la source.
+<div><i>c-addr1</i>&nbsp;&nbsp;  Adresse de la source.
 </div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse de la destination.
+<div><i>c-addr2</i>&nbsp;&nbsp;  Adresse de la destination.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;      Nombre d'octets à copier.   
+<div><i>u</i>&nbsp;&nbsp;      Nombre d'octets à copier.   
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="CMOVE">
 <b>CMOVE</b>  ( c-addr1 c-addr2 u -- )    
-<div style="margin-left:5%;">   Copie un bloc d'octets RAM.  
+<div>   Copie un bloc d'octets RAM.  
 </div>
-<div style="margin-left:5%;">   Débute la copie à partir de l'adresse du début du bloc en adresse croissante.
+<div>   Débute la copie à partir de l'adresse du début du bloc en adresse croissante.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;  Adresse source.
+<div><i>c-addr1</i>&nbsp;&nbsp;  Adresse source.
 </div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse destination.
+<div><i>c-addr2</i>&nbsp;&nbsp;  Adresse destination.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;      Compte en octets.   
+<div><i>u</i>&nbsp;&nbsp;      Compte en octets.   
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="CMOVE&gt;">
 <b>CMOVE&gt;</b>  ( c-addr1 c-addr2 u -- )    
-<div style="margin-left:5%;">   Copie un bloc d'octets RAM.  
+<div>   Copie un bloc d'octets RAM.  
 </div>
-<div style="margin-left:5%;">   La copie débute à la fin du bloc en adresses décroissantes.    
+<div>   La copie débute à la fin du bloc en adresses décroissantes.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;  Adresse source.
+<div><i>c-addr1</i>&nbsp;&nbsp;  Adresse source.
 </div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse destination.
+<div><i>c-addr2</i>&nbsp;&nbsp;  Adresse destination.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;      Compte en octets.   
+<div><i>u</i>&nbsp;&nbsp;      Compte en octets.   
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="EC@+">
 <b>EC@+</b>   ( c-addr1 -- c-addr2 c )   
-<div style="margin-left:5%;">   Retourne le caractère à l'adresse pointée par 'c-addr1' et avance le pointeur au caractère suivant.
+<div>   Retourne le caractère à l'adresse pointée par 'c-addr1' et avance le pointeur au caractère suivant.
 </div>
-<div style="margin-left:5%;">   À utiliser si 'c-addr1' pointe vers la mémoire RAM ou EDS.    
+<div>   À utiliser si 'c-addr1' pointe vers la mémoire RAM ou EDS.    
 </div>
 </p>
-<div style="margin-left:5%;"><b>  arguments:
+<div><b>  arguments:
 </b></div>
-<div style="margin-left:5%;"><i>	c-addr1</i>&nbsp;&nbsp;  Pointeur sur la chaîne de caractères.
+<div><i>	c-addr1</i>&nbsp;&nbsp;  Pointeur sur la chaîne de caractères.
 </div>
-<div style="margin-left:5%;"><b>  retourne:
+<div><b>  retourne:
 </b></div>
-<div style="margin-left:5%;"><i>addr2</i>&nbsp;&nbsp;   Pointeur avancée d'un caractère.
+<div><i>addr2</i>&nbsp;&nbsp;   Pointeur avancée d'un caractère.
 </div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;       Caractère à l'adresse c-addr1.    
+<div><i>c</i>&nbsp;&nbsp;       Caractère à l'adresse c-addr1.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="C@+">
 <b>C@+</b>   ( c-addr1 -- c-addr2 c )    
-<div style="margin-left:5%;">   Retourne le caractère à l'adresse pointée par 'c-addr1' et avance le pointeur au caractère suivant.
+<div>   Retourne le caractère à l'adresse pointée par 'c-addr1' et avance le pointeur au caractère suivant.
 </div>
-<div style="margin-left:5%;">   À utiliser si 'c-addr1' pointe la mémoire RAM ou FLASH.
+<div>   À utiliser si 'c-addr1' pointe la mémoire RAM ou FLASH.
 </div>
 </p>
-<div style="margin-left:5%;"><b>  arguments:
+<div><b>  arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;  Pointeur sur la chaîne de caractères.
+<div><i>c-addr1</i>&nbsp;&nbsp;  Pointeur sur la chaîne de caractères.
 </div>
-<div style="margin-left:5%;"><b>  retourne:
+<div><b>  retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;   Pointeur avancée d'un caractère.
+<div><i>c-addr'</i>&nbsp;&nbsp;   Pointeur avancée d'un caractère.
 </div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;       Caractère à l'adresse 'c-addr1'.    
+<div><i>c</i>&nbsp;&nbsp;       Caractère à l'adresse 'c-addr1'.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="CSTR&gt;RAM">
 <b>CSTR&gt;RAM</b> ( c-addr1 c-addr2 -- )     
-<div style="margin-left:5%;">   Copie une chaine comptée de la mémoire FLASH vers la mémoire RAM.
+<div>   Copie une chaine comptée de la mémoire FLASH vers la mémoire RAM.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;    Adresse de la chaîne en mémoire flash.
+<div><i>c-addr1</i>&nbsp;&nbsp;    Adresse de la chaîne en mémoire flash.
 </div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;    Adresse destination en mémoire RAM.
+<div><i>c-addr2</i>&nbsp;&nbsp;    Adresse destination en mémoire RAM.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="S=">
 <b>S=</b>    ( c-addr1 u1 c-addr2 u2 -- f )    
-<div style="margin-left:5%;">   Comparaison de 2 chaînes. Retourne VRAI si égales sinon FAUX.
+<div>   Comparaison de 2 chaînes. Retourne VRAI si égales sinon FAUX.
 </div>
-<div style="margin-left:5%;">   Les 2 chaînes doivent-être en mémoire RAM ou EDS.
+<div>   Les 2 chaînes doivent-être en mémoire RAM ou EDS.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne 1.
+<div><i>c-addr1</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne 1.
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;        Longueur de la chaîne 1.    
+<div><i>u1</i>&nbsp;&nbsp;        Longueur de la chaîne 1.    
 </div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne 2.
+<div><i>c-addr2</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne 2.
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;        Longueur de la chaîne 2.    
+<div><i>u2</i>&nbsp;&nbsp;        Longueur de la chaîne 2.    
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f	</i>&nbsp;&nbsp;  Indicateur Booléen d'égalité, vrai si les chaînes sont identiques.    
+<div><i>f	</i>&nbsp;&nbsp;  Indicateur Booléen d'égalité, vrai si les chaînes sont identiques.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLANK">
 <b>BLANK</b>  ( c-addr u -- )
-<div style="margin-left:5%;">   Dépose 'u' caractères espace (BL) à partir de l'adresse c-addr
+<div>   Dépose 'u' caractères espace (BL) à partir de l'adresse c-addr
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse début RAM
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse début RAM
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       Nombre d'espaces à déposer dans cette région.
+<div><i>u</i>&nbsp;&nbsp;       Nombre d'espaces à déposer dans cette région.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien
+<div><i>rien
 </i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="COMPARE">
 <b>COMPARE</b> ( c-addr1 u1 c-addr2 u2 -- -1|0?1 )
-<div style="margin-left:5%;">   Compare la chaîne de caractère débutant à l'adresse 'c-addr1' de longueur 'u1'
+<div>   Compare la chaîne de caractère débutant à l'adresse 'c-addr1' de longueur 'u1'
 </div>
-<div style="margin-left:5%;">   avec la chaîne de caractère débutant à l'adresse 'c-addr2' de longueur 'u2'
+<div>   avec la chaîne de caractère débutant à l'adresse 'c-addr2' de longueur 'u2'
 </div>
-<div style="margin-left:5%;">   Cette comparaison se fait selon l'orde des caractères dans la table ASCII.
+<div>   Cette comparaison se fait selon l'orde des caractères dans la table ASCII.
 </div>
-<div style="margin-left:5%;">   Si 'u1'=='u2' et que tous les caractères correspondent la valeur 0 est retournée,
+<div>   Si 'u1'=='u2' et que tous les caractères correspondent la valeur 0 est retournée,
 </div>
-<div style="margin-left:5%;">   sinon le premier caractère qui diverge détermine la valeur retournée c1&lt;c2 
+<div>   sinon le premier caractère qui diverge détermine la valeur retournée c1&lt;c2 
 </div>
-<div style="margin-left:5%;">    retourne -1 autrement retourne 1.    
+<div>    retourne -1 autrement retourne 1.    
 </div>
-<div style="margin-left:5%;">   Si u1&lt;u2 et que tous les caractères de cette chaîne sont en correspondance avec
+<div>   Si u1&lt;u2 et que tous les caractères de cette chaîne sont en correspondance avec
 </div>
-<div style="margin-left:5%;">   l'autre chaîne la valeur -1 est retournée.
+<div>   l'autre chaîne la valeur -1 est retournée.
 </div>
-<div style="margin-left:5%;">   Si u1&gt;u2 et que tous les caractères de c-addr2 correspondent avec ceux de c-addr1
+<div>   Si u1&gt;u2 et que tous les caractères de c-addr2 correspondent avec ceux de c-addr1
 </div>
-<div style="margin-left:5%;">   la valeur 1 est retournée.
+<div>   la valeur 1 est retournée.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;  Adresse du premier caractère de la chaîne 1.
+<div><i>c-addr1</i>&nbsp;&nbsp;  Adresse du premier caractère de la chaîne 1.
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;       Longueur de la chaîne 1.
+<div><i>u1</i>&nbsp;&nbsp;       Longueur de la chaîne 1.
 </div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse du premier caractère de la chaîne 2.
+<div><i>c-addr2</i>&nbsp;&nbsp;  Adresse du premier caractère de la chaîne 2.
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;       Longueur de la chaîne 2.
+<div><i>u2</i>&nbsp;&nbsp;       Longueur de la chaîne 2.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>-1|0|1</i>&nbsp;&nbsp; Retourne -1 si chaîne1&lt;chaîne2, 0 si chaîne1==chaîne2, 1 si chaîne1&gt;chaîne2    
+<div><i>-1|0|1</i>&nbsp;&nbsp; Retourne -1 si chaîne1&lt;chaîne2, 0 si chaîne1==chaîne2, 1 si chaîne1&gt;chaîne2    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SEARCH">
 <b>SEARCH</b>  ( c-addr1 u1 c-addr2 u2 -- c-addr3 u3 f )
-<div style="margin-left:5%;">   Recherche la chaîne 2 dans la chaîne 1. Si f est vrai c'est que la chaîne 2
+<div>   Recherche la chaîne 2 dans la chaîne 1. Si f est vrai c'est que la chaîne 2
 </div>
-<div style="margin-left:5%;">   est sous-chaîne de la chaîne 1, alors c-addr3 u3 indique la position et le 
+<div>   est sous-chaîne de la chaîne 1, alors c-addr3 u3 indique la position et le 
 </div>
-<div style="margin-left:5%;">   nombre de caractères restants. En cas d'échec c-addr3==c-addr1 et u3==u1.
+<div>   nombre de caractères restants. En cas d'échec c-addr3==c-addr1 et u3==u1.
 </div>
-<div style="margin-left:5%;">   exemple:
+<div>   exemple:
 </div>
-<div style="margin-left:5%;">     : s1 s" A la claire fontaine." ;
+<div>     : s1 s" A la claire fontaine." ;
 </div>
-<div style="margin-left:5%;">     : s2 s" claire" ;
+<div>     : s2 s" claire" ;
 </div>
-<div style="margin-left:5%;">     s1 s2 SEARCH   \  c-addr3=c-addr1+5 u3=16  f=VRAI  
+<div>     s1 s2 SEARCH   \  c-addr3=c-addr1+5 u3=16  f=VRAI  
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp;  Adresse du premier carcactère de la chaîne principale.
+<div><i>c-addr1</i>&nbsp;&nbsp;  Adresse du premier carcactère de la chaîne principale.
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;       Longueur de la chaîne principale.
+<div><i>u1</i>&nbsp;&nbsp;       Longueur de la chaîne principale.
 </div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse du premier caractère de la sous-chaîne recherchée.
+<div><i>c-addr2</i>&nbsp;&nbsp;  Adresse du premier caractère de la sous-chaîne recherchée.
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;       Longueur de la sous-chaîne recherchée.
+<div><i>u2</i>&nbsp;&nbsp;       Longueur de la sous-chaîne recherchée.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr3</i>&nbsp;&nbsp;  Si f est VRAI  Adresse du premier caractère de la sous-chaîne, sinon = c-addr1
+<div><i>c-addr3</i>&nbsp;&nbsp;  Si f est VRAI  Adresse du premier caractère de la sous-chaîne, sinon = c-addr1
 </div>
-<div style="margin-left:5%;"><i>u3</i>&nbsp;&nbsp;       Si f est VRAI nombre de caractère restant dans la chaîne à partir de c-addr3
+<div><i>u3</i>&nbsp;&nbsp;       Si f est VRAI nombre de caractère restant dans la chaîne à partir de c-addr3
 </div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;        Indicateur Booléen succès/échec.  
+<div><i>f</i>&nbsp;&nbsp;        Indicateur Booléen succès/échec.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SLITERAL">
 <b>SLITERAL</b> ( c-addr u -- )
-<div style="margin-left:5%;">   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
+<div>   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
 </div>
-<div style="margin-left:5%;">   Compile une chaîne litérale dont le descripteur est sur la pile des arguments.
+<div>   Compile une chaîne litérale dont le descripteur est sur la pile des arguments.
 </div>
-<div style="margin-left:5%;">   A l'exécution le descripteur est empilée.    
+<div>   A l'exécution le descripteur est empilée.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse du premier caractère de la chaîne.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse du premier caractère de la chaîne.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne.
+<div><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien
+<div><i>rien
 </i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div>
 </div>
-<div style="margin-left:5%;">   Commentaires.
+<div>   Commentaires.
 </div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="(">
 <b>(</b>    ( cccc -- )    
-<div style="margin-left:5%;">   Ce mot introduit un commentaire qui se termine  par ')'.
+<div>   Ce mot introduit un commentaire qui se termine  par ')'.
 </div>
-<div style="margin-left:5%;">   Tous les caractères dans le tampon d'entrée sont sautés jusqu'après le ')'.    
+<div>   Tous les caractères dans le tampon d'entrée sont sautés jusqu'après le ')'.    
 </div>
-<div style="margin-left:5%;">   Il doit y avoir un espace de chaque côté de '(' car c'est un mot Forth.
+<div>   Il doit y avoir un espace de chaque côté de '(' car c'est un mot Forth.
 </div>
-<div style="margin-left:5%;">   Il s'agit d'un mot immédiat, il s'exécute donc même en mode compilation.    
+<div>   Il s'agit d'un mot immédiat, il s'exécute donc même en mode compilation.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  commentaire dans le flux d'entrée terminé par ')'. 
+<div><i>cccc</i>&nbsp;&nbsp;  commentaire dans le flux d'entrée terminé par ')'. 
 </div>
-<div style="margin-left:5%;"><b> retourne:    
+<div><b> retourne:    
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="\">
 <b>\</b>    ( cccc -- )    
-<div style="margin-left:5%;">   Ce mot introduit un commentaire qui se termine à la fin de la ligne.
+<div>   Ce mot introduit un commentaire qui se termine à la fin de la ligne.
 </div>
-<div style="margin-left:5%;">   Tous les caractères dans le tampon d'entré sont sautés jusqu'à la fin de ligne.    
+<div>   Tous les caractères dans le tampon d'entré sont sautés jusqu'à la fin de ligne.    
 </div>
-<div style="margin-left:5%;">   Il s'agit d'un mot immédiat, il s'éxécute donc même en mode compilation.
+<div>   Il s'agit d'un mot immédiat, il s'éxécute donc même en mode compilation.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp;  Caractères dans le flux d'entrée terminé par une fin de ligne. 
+<div><i>cccc</i>&nbsp;&nbsp;  Caractères dans le flux d'entrée terminé par une fin de ligne. 
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id=".(">
 <b>.(</b>   cccc) ( -- )    
-<div style="margin-left:5%;">   Mot immédiat, affiche le texte délimité par ).
+<div>   Mot immédiat, affiche le texte délimité par ).
 </div>
-<div style="margin-left:5%;">   Extrait tous les caractères du flux d'entrée jusqu'après le caractère ')'.
+<div>   Extrait tous les caractères du flux d'entrée jusqu'après le caractère ')'.
 </div>
-<div style="margin-left:5%;">   Le délimiteur ')' n'est pas imprimé.    
+<div>   Le délimiteur ')' n'est pas imprimé.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>cccc</i>&nbsp;&nbsp; Caractères dans le flux d'entrée terminés par ')'.
+<div><i>cccc</i>&nbsp;&nbsp; Caractères dans le flux d'entrée terminés par ')'.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div>
 </div>
-<div style="margin-left:5%;">   Mots utilisés dans la conversion d'entiers en chaînes de caractères.
+<div>   Mots utilisés dans la conversion d'entiers en chaînes de caractères.
 </div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="DIGIT">
 <b>DIGIT</b>  ( u -- c )    
-<div style="margin-left:5%;">   Convertion d'un chiffre en caractère ASCII selon la valeur de BASE.
+<div>   Convertion d'un chiffre en caractère ASCII selon la valeur de BASE.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Un entier entre 0..BASE-1 
+<div><i>u</i>&nbsp;&nbsp;  Un entier entre 0..BASE-1 
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  Représentation ASCII de cet entier qui représente 1 seul digit dans la base active.    
+<div><i>c</i>&nbsp;&nbsp;  Représentation ASCII de cet entier qui représente 1 seul digit dans la base active.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="EXTRACT">
 <b>EXTRACT</b>  ( ud1 u -- ud2 c )    
-<div style="margin-left:5%;">   Extrait le chiffre le moins significatif de 'ud1' et le convertie en caractère
+<div>   Extrait le chiffre le moins significatif de 'ud1' et le convertie en caractère
 </div>
-<div style="margin-left:5%;">   en accord avec la valeur de la base 'u'. 
+<div>   en accord avec la valeur de la base 'u'. 
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp; Entier double non signé qui est le  nombre à convertir en chaîne ASCII.
+<div><i>ud1</i>&nbsp;&nbsp; Entier double non signé qui est le  nombre à convertir en chaîne ASCII.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Entier simple non signé représente la valeur de la base numérique.
+<div><i>u</i>&nbsp;&nbsp;  Entier simple non signé représente la valeur de la base numérique.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp; Entier double qui est le quotient de ud/u, c'est la partie du nombre qui reste à convertir.
+<div><i>ud2</i>&nbsp;&nbsp; Entier double qui est le quotient de ud/u, c'est la partie du nombre qui reste à convertir.
 </div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   Caractère ASCII qui représente le digit résultant de ud%u (modulo de ud par u ).    
+<div><i>c</i>&nbsp;&nbsp;   Caractère ASCII qui représente le digit résultant de ud%u (modulo de ud par u ).    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="&lt;#">
 <b>&lt;#</b>   ( -- )    
-<div style="margin-left:5%;">   Initalise le début de la conversion d'un entier en chaîne ASCII.
+<div>   Initalise le début de la conversion d'un entier en chaîne ASCII.
 </div>
-<div style="margin-left:5%;">   La valeur de la variable HP est modifiée pour pointer à la fin du PAD.
+<div>   La valeur de la variable HP est modifiée pour pointer à la fin du PAD.
 </div>
-<div style="margin-left:5%;">   Lors de la conversion les caractères sont ajoutés de la droite vers la gauche dans le PAD.
+<div>   Lors de la conversion les caractères sont ajoutés de la droite vers la gauche dans le PAD.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>aucun
+<div><i>aucun
 </i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;   
+<div><i>rien</i>&nbsp;&nbsp;   
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="HOLD">
 <b>HOLD</b> ( c -- )    
-<div style="margin-left:5%;">   Dépose le caractère 'c' dans le PAD et recule HP de 1 caractère.
+<div>   Dépose le caractère 'c' dans le PAD et recule HP de 1 caractère.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  Caractère à insérer dans la chaîne.
+<div><i>c</i>&nbsp;&nbsp;  Caractère à insérer dans la chaîne.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="#">
 <b>#</b>  ( ud1 -- ud2 )    
-<div style="margin-left:5%;">   Convertion du digit le moins significatif de ud1 en ASCII et l'ajoute à la chaîne
+<div>   Convertion du digit le moins significatif de ud1 en ASCII et l'ajoute à la chaîne
 </div>
-<div style="margin-left:5%;">   dans PAD.  Retourne le restant de ud1.    
+<div>   dans PAD.  Retourne le restant de ud1.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  Entier double non signé à convertir.
+<div><i>ud1</i>&nbsp;&nbsp;  Entier double non signé à convertir.
 </div>
-<div style="margin-left:5%;"><b> retourne:    
+<div><b> retourne:    
 </b></div>
-<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp;  Entier double non signé restant, i.e. ud1/base    
+<div><i>ud2</i>&nbsp;&nbsp;  Entier double non signé restant, i.e. ud1/base    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="#S">
 <b>#S</b>  ( ud1 -- ud2 )     
-<div style="margin-left:5%;">   Convertie tous les digits d'un entier double en chaîne ASCII.
+<div>   Convertie tous les digits d'un entier double en chaîne ASCII.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp; Entier double non signé à convertir en chaîne.
+<div><i>ud1</i>&nbsp;&nbsp; Entier double non signé à convertir en chaîne.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp; Entier double de valeur nulle qui reste après la conversion.    
+<div><i>ud2</i>&nbsp;&nbsp; Entier double de valeur nulle qui reste après la conversion.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SIGN">
 <b>SIGN</b>  ( n -- )  
-<div style="margin-left:5%;">   Ajoute le signe au début de la chaîne numérique dans le PAD.
+<div>   Ajoute le signe au début de la chaîne numérique dans le PAD.
 </div>
-<div style="margin-left:5%;">   Si 'n' est  négatif alors on ajoute un signe '-' au début de la chaîne.
+<div>   Si 'n' est  négatif alors on ajoute un signe '-' au début de la chaîne.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Entier qui représente le signe du nombre qui a été convertie.
+<div><i>n</i>&nbsp;&nbsp; Entier qui représente le signe du nombre qui a été convertie.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+<div><i>rien</i>&nbsp;&nbsp;  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="#&gt;">
 <b>#&gt;</b>  ( ud -- addr u )  
-<div style="margin-left:5%;">   Termine la conversion d'un entier en chaîne ASCII en empilant le descripteur
+<div>   Termine la conversion d'un entier en chaîne ASCII en empilant le descripteur
 </div>
-<div style="margin-left:5%;">   de la chaîne.
+<div>   de la chaîne.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   N'est pas utilisé c'est le relicat du mot #S. Cette valeur est simplement jetée.
+<div><i>ud</i>&nbsp;&nbsp;   N'est pas utilisé c'est le relicat du mot #S. Cette valeur est simplement jetée.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse du premier caractère de la chaîne numérique.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse du premier caractère de la chaîne numérique.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne.  
+<div><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="STR">
 <b>STR</b> ( d -- c-addr u )  
-<div style="margin-left:5%;">   Convertion d'un entier double en chaîne ASCII, utilise le tampon PAD pour 
+<div>   Convertion d'un entier double en chaîne ASCII, utilise le tampon PAD pour 
 </div>
-<div style="margin-left:5%;">   développer la chaîne ASCII. La variable HP est aussi utilisée dans cette procédure.  
+<div>   développer la chaîne ASCII. La variable HP est aussi utilisée dans cette procédure.  
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;   Entier double à convertir en chaîne ASCII.
+<div><i>d</i>&nbsp;&nbsp;   Entier double à convertir en chaîne ASCII.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse premier caractère de la chaîne.
+<div><i>c-addr</i>&nbsp;&nbsp;   Adresse premier caractère de la chaîne.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Longueur de la chaîne.  
+<div><i>u</i>&nbsp;&nbsp;  Longueur de la chaîne.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="COLFILL">
 <b>COLFILL</b> ( n1+ n2+ -- )  
-<div style="margin-left:5%;">   Ajoute les espaces nécessaires au début de la colonne pour que le nombre
+<div>   Ajoute les espaces nécessaires au début de la colonne pour que le nombre
 </div>
-<div style="margin-left:5%;">   soit aligné à droite d'une colonne de largeur fixe.
+<div>   soit aligné à droite d'une colonne de largeur fixe.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n1+</i>&nbsp;&nbsp; Largeur de la colonne
+<div><i>n1+</i>&nbsp;&nbsp; Largeur de la colonne
 </div>
-<div style="margin-left:5%;"><i>n2+</i>&nbsp;&nbsp; Longueur de la chaîne numérique.
+<div><i>n2+</i>&nbsp;&nbsp; Longueur de la chaîne numérique.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+<div><i>rien</i>&nbsp;&nbsp;  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id=".R">
 <b>.R</b>  ( n n+ -- )  
-<div style="margin-left:5%;">   Affiche un nombre dans un colonne de largeur fixe aligné à droite.
+<div>   Affiche un nombre dans un colonne de largeur fixe aligné à droite.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Nombre à afficher.
+<div><i>n</i>&nbsp;&nbsp;  Nombre à afficher.
 </div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Largeur de la colonne.
+<div><i>n+</i>&nbsp;&nbsp; Largeur de la colonne.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+<div><i>rien</i>&nbsp;&nbsp;  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="U.R">
 <b>U.R</b>  ( u +n -- )    
-<div style="margin-left:5%;">   Affiche un entier non signé dans une colonne de largeur fixe aligné à droite.
+<div>   Affiche un entier non signé dans une colonne de largeur fixe aligné à droite.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u	</i>&nbsp;&nbsp; Entier simple non signé à afficher.    
+<div><i>u	</i>&nbsp;&nbsp; Entier simple non signé à afficher.    
 </div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp;   Largeur de la colonne.
+<div><i>n+</i>&nbsp;&nbsp;   Largeur de la colonne.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="U.">
 <b>U.</b>  ( u -- )  
-<div style="margin-left:5%;">   Affiche un entier simple non signé en format libre.
+<div>   Affiche un entier simple non signé en format libre.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  Entier à afficher.
+<div><i>u</i>&nbsp;&nbsp;  Entier à afficher.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+<div><i>rien</i>&nbsp;&nbsp;  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id=".">
 <b>.</b>  ( n -- )  
-<div style="margin-left:5%;">   Affiche un entier simple signé en format libre.
+<div>   Affiche un entier simple signé en format libre.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp; Entier à afficher.  
+<div><i>n</i>&nbsp;&nbsp; Entier à afficher.  
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+<div><i>rien</i>&nbsp;&nbsp;  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?">
 <b>?</b>  ( addr -- )  
-<div style="margin-left:5%;">   Affiche l'entier simple à l'adresse donnée. On s'assure de l'alignement sur
+<div>   Affiche l'entier simple à l'adresse donnée. On s'assure de l'alignement sur
 </div>
-<div style="margin-left:5%;">   une adresse paire.  Si 'addr' est impaire l'adresse paire précédente est utilisée.
+<div>   une adresse paire.  Si 'addr' est impaire l'adresse paire précédente est utilisée.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>addr</i>&nbsp;&nbsp;  Adresse dont le contenu sera affiché.
+<div><i>addr</i>&nbsp;&nbsp;  Adresse dont le contenu sera affiché.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+<div><i>rien</i>&nbsp;&nbsp;  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="C?">
 <b>C?</b>  ( c-addr )  
-<div style="margin-left:5%;">   Lit et affiche l'octet à l'adresse c-addr.
+<div>   Lit et affiche l'octet à l'adresse c-addr.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse dont le contenu sera affiché.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse dont le contenu sera affiché.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+<div><i>rien</i>&nbsp;&nbsp;  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="UD.">
 <b>UD.</b>  ( ud -- )    
-<div style="margin-left:5%;">   Affiche un entier double non signé en format libre.
+<div>   Affiche un entier double non signé en format libre.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  Entier double non signé.
+<div><i>ud</i>&nbsp;&nbsp;  Entier double non signé.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="D.">
 <b>D.</b>   ( d -- )    
-<div style="margin-left:5%;">   Affiche un entier double signé en format libre.
+<div>   Affiche un entier double signé en format libre.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;   Entier double à afficher.
+<div><i>d</i>&nbsp;&nbsp;   Entier double à afficher.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="D.R">
 <b>D.R</b>  ( d n+ -- )    
-<div style="margin-left:5%;">   Affiche un entier double dans une colonne de largeur fixe alignée à droite.
+<div>   Affiche un entier double dans une colonne de largeur fixe alignée à droite.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>d</i>&nbsp;&nbsp;  Entier double à afficher.
+<div><i>d</i>&nbsp;&nbsp;  Entier double à afficher.
 </div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Largeur de la colonne.
+<div><i>n+</i>&nbsp;&nbsp; Largeur de la colonne.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="UD.R">
 <b>UD.R</b>  ( ud n+ -- )
-<div style="margin-left:5%;">   Affiche un entier double non signé dans une colonne de largeur fixe alignée à droite.
+<div>   Affiche un entier double non signé dans une colonne de largeur fixe alignée à droite.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp; Entier double non signé à afficher.
+<div><i>ud</i>&nbsp;&nbsp; Entier double non signé à afficher.
 </div>
-<div style="margin-left:5%;"><i>n+</i>&nbsp;&nbsp; Largeur de la colonne.
+<div><i>n+</i>&nbsp;&nbsp; Largeur de la colonne.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><h2 id="description">Description</h2><div style="margin-left:5%;">
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div>
 </div>
-<div style="margin-left:5%;">   Mots utilisés dans la conversion d'une chaîne de caractères en entier.
+<div>   Mots utilisés dans la conversion d'une chaîne de caractères en entier.
 </div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="DECIMAL?">
 <b>DECIMAL?</b>  ( c -- f )
-<div style="margin-left:5%;">   vérifie si 'c' est dans l'ensemble ASCII {'0'..'9'}
+<div>   vérifie si 'c' est dans l'ensemble ASCII {'0'..'9'}
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   caractère ASCII à vérifier.
+<div><i>c</i>&nbsp;&nbsp;   caractère ASCII à vérifier.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;   indicateur booléen.
+<div><i>f</i>&nbsp;&nbsp;   indicateur booléen.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="&gt;BASE10">
 <b>&gt;BASE10</b>  ( u1 c -- u2 )
-<div style="margin-left:5%;">   étape de conversion d'une chaîne de caractère en 
+<div>   étape de conversion d'une chaîne de caractère en 
 </div>
-<div style="margin-left:5%;">   entier décimal.
+<div>   entier décimal.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Entier résultant de la conversion d'une chaîne en décimal
+<div><i>u1</i>&nbsp;&nbsp;  Entier résultant de la conversion d'une chaîne en décimal
 </div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;  Caractère ASCII  dans l'intervalle {'0'..'9'}
+<div><i>c</i>&nbsp;&nbsp;  Caractère ASCII  dans l'intervalle {'0'..'9'}
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;  = u1*10+digit(c)
+<div><i>u2</i>&nbsp;&nbsp;  = u1*10+digit(c)
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?DIGIT">
 <b>?DIGIT</b>  ( c -- x 0 | n -1 )    
-<div style="margin-left:5%;">   Vérifie si le caractère est un digit valide dans la base actuelle.
+<div>   Vérifie si le caractère est un digit valide dans la base actuelle.
 </div>
-<div style="margin-left:5%;">   Si valide retourne la valeur du digit et -1
+<div>   Si valide retourne la valeur du digit et -1
 </div>
-<div style="margin-left:5%;">   Si invalide retourne x 0
+<div>   Si invalide retourne x 0
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;   Caractère à convertir dans la base active.
+<div><i>c</i>&nbsp;&nbsp;   Caractère à convertir dans la base active.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>x&nbsp;0</i>&nbsp;&nbsp; Faux et un entier quelconque qui doit-être ignoré car ce n'est pas un digit.
+<div><i>x&nbsp;0</i>&nbsp;&nbsp; Faux et un entier quelconque qui doit-être ignoré car ce n'est pas un digit.
 </div>
-<div style="margin-left:5%;"><i>ou</i>&nbsp;&nbsp;    
+<div><i>ou</i>&nbsp;&nbsp;    
 </div>
-<div style="margin-left:5%;"><i>n&nbsp;-1</i>&nbsp;&nbsp; Vrai et le caractère convertie en digit de la base active.
+<div><i>n&nbsp;-1</i>&nbsp;&nbsp; Vrai et le caractère convertie en digit de la base active.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?DOUBLE">
 <b>?DOUBLE</b>   ( c-addr u -- c-addr' u' f )    
-<div style="margin-left:5%;">   Vérifie si le caractère qui a mis fin à &gt;NUMBER
+<div>   Vérifie si le caractère qui a mis fin à &gt;NUMBER
 </div>
-<div style="margin-left:5%;">   est {'.'|','}. Si c'est le cas il s'agit d'un
+<div>   est {'.'|','}. Si c'est le cas il s'agit d'un
 </div>
-<div style="margin-left:5%;">   nombre double précision. saute le caractère et retourne -1.
+<div>   nombre double précision. saute le caractère et retourne -1.
 </div>
-<div style="margin-left:5%;">   Dans le cas contraire retourne 0.
+<div>   Dans le cas contraire retourne 0.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Pointe vers l'adresse du dernier caractère analysé par &gt;NUMBER
+<div><i>c-addr</i>&nbsp;&nbsp;  Pointe vers l'adresse du dernier caractère analysé par &gt;NUMBER
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne restante.
+<div><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne restante.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp; Adresse incrémentée si le critère {'.'|','} est vrai.
+<div><i>c-addr'</i>&nbsp;&nbsp; Adresse incrémentée si le critère {'.'|','} est vrai.
 </div>
-<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;      Longueur décrémentée si le critère {'.'|','} est vrai.
+<div><i>u'</i>&nbsp;&nbsp;      Longueur décrémentée si le critère {'.'|','} est vrai.
 </div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;       Indicateur Booléen indiquant s'il s'agit d'un entier double.    
+<div><i>f</i>&nbsp;&nbsp;       Indicateur Booléen indiquant s'il s'agit d'un entier double.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="&gt;NUMBER">
 <b>&gt;NUMBER</b>  (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )   
-<div style="margin-left:5%;">   Convertie la chaîne en nombre en utilisant la valeur de BASE.
+<div>   Convertie la chaîne en nombre en utilisant la valeur de BASE.
 </div>
-<div style="margin-left:5%;">   La conversion s'arrête au premier caractère non numérique.
+<div>   La conversion s'arrête au premier caractère non numérique.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:  
+<div><b> arguments:  
 </b></div>
-<div style="margin-left:5%;"><i>'ud1'	</i>&nbsp;&nbsp;    Est initialisé à zéro  
+<div><i>'ud1'	</i>&nbsp;&nbsp;    Est initialisé à zéro  
 </div>
-<div style="margin-left:5%;"><i>c-addr1</i>&nbsp;&nbsp; Adrese du début de la chaîne à convertir en entier.
+<div><i>c-addr1</i>&nbsp;&nbsp; Adrese du début de la chaîne à convertir en entier.
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;      Longueur du tampon à analyser.  
+<div><i>u1</i>&nbsp;&nbsp;      Longueur du tampon à analyser.  
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>ud2</i>&nbsp;&nbsp;     Entier double résultant de la conversion.
+<div><i>ud2</i>&nbsp;&nbsp;     Entier double résultant de la conversion.
 </div>
-<div style="margin-left:5%;"><i>c-addr2</i>&nbsp;&nbsp;  Adresse pointant après le nombre dans le tampon.
+<div><i>c-addr2</i>&nbsp;&nbsp;  Adresse pointant après le nombre dans le tampon.
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;      Longueur restante dans le tampon.  
+<div><i>u2</i>&nbsp;&nbsp;      Longueur restante dans le tampon.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?SIGN">
 <b>?SIGN</b>   ( c-addr u -- c-addr' u' f )   
-<div style="margin-left:5%;">   Vérifie s'il y a un signe '-' à la première postion de la chaîne spécifiée par &lt;c-addr u&gt;
+<div>   Vérifie s'il y a un signe '-' à la première postion de la chaîne spécifiée par &lt;c-addr u&gt;
 </div>
-<div style="margin-left:5%;">   Retourne f=VRAI si '-' sinon f=FAUX.    
+<div>   Retourne f=VRAI si '-' sinon f=FAUX.    
 </div>
-<div style="margin-left:5%;">   S'il y a un signe avance au delà du signe.
+<div>   S'il y a un signe avance au delà du signe.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse où débute l'analyse.
+<div><i>c-addr</i>&nbsp;&nbsp;   Adresse où débute l'analyse.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;        Longueur du tampon à analyser.
+<div><i>u</i>&nbsp;&nbsp;        Longueur du tampon à analyser.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;  Adresse incrémentée au delà du signe '-' s'il y a lieu.
+<div><i>c-addr'</i>&nbsp;&nbsp;  Adresse incrémentée au delà du signe '-' s'il y a lieu.
 </div>
-<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;       Longueur restante dans le tampon.
+<div><i>u'</i>&nbsp;&nbsp;       Longueur restante dans le tampon.
 </div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;        Indicateur Booléen, VRAI s'il le premier caractère est '-'.   
+<div><i>f</i>&nbsp;&nbsp;        Indicateur Booléen, VRAI s'il le premier caractère est '-'.   
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?BASE">
 <b>?BASE</b>  ( c-addr u1 -- c-addr' u1' )  
-<div style="margin-left:5%;">   Vérifie s'il y a un modificateur de base
+<div>   Vérifie s'il y a un modificateur de base
 </div>
-<div style="margin-left:5%;">   Si vrai, modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
+<div>   Si vrai, modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse du début de la chaîne à analyser.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse du début de la chaîne à analyser.
 </div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;      Longueur maximale de la chaîne.
+<div><i>u1</i>&nbsp;&nbsp;      Longueur maximale de la chaîne.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr'</i>&nbsp;&nbsp;  Adresse incrémentée au delà du caractère modificateur de BASE.
+<div><i>c-addr'</i>&nbsp;&nbsp;  Adresse incrémentée au delà du caractère modificateur de BASE.
 </div>
-<div style="margin-left:5%;"><i>u'</i>&nbsp;&nbsp;       Longueur restante de la chaîne.  
+<div><i>u'</i>&nbsp;&nbsp;       Longueur restante de la chaîne.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?QUOTED-CHAR">
 <b>?QUOTED-CHAR</b>  ( c-addr -- c-addr 0 | n -1 )
-<div style="margin-left:5%;">   Vérifie si la chaîne est un caractère entre 2 apostrophe si c'est le cas
+<div>   Vérifie si la chaîne est un caractère entre 2 apostrophe si c'est le cas
 </div>
-<div style="margin-left:5%;">   Empile la valeur ASCII du caractère et TRUE, sinon retourne 'c-addr' et FALSE.
+<div>   Empile la valeur ASCII du caractère et TRUE, sinon retourne 'c-addr' et FALSE.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse de la chaîne comptée.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse de la chaîne comptée.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr&nbsp;0</i>&nbsp;&nbsp; Faux et adresse orignale si ce n'est pas un quoted char.
+<div><i>c-addr&nbsp;0</i>&nbsp;&nbsp; Faux et adresse orignale si ce n'est pas un quoted char.
 </div>
-<div style="margin-left:5%;"><i>ou</i>&nbsp;&nbsp;  
+<div><i>ou</i>&nbsp;&nbsp;  
 </div>
-<div style="margin-left:5%;"><i>n&nbsp;-1</i>&nbsp;&nbsp; Vrai et valeur ASCII du caractère.  
+<div><i>n&nbsp;-1</i>&nbsp;&nbsp; Vrai et valeur ASCII du caractère.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?NUMBER">
 <b>?NUMBER</b>   ( c-addr -- c-addr 0 | n -1 )  
-<div style="margin-left:5%;">   Conversion d'une chaîne en nombre, 'c-addr' indique le début de la chaîne.
+<div>   Conversion d'une chaîne en nombre, 'c-addr' indique le début de la chaîne.
 </div>
-<div style="margin-left:5%;">   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
+<div>   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
 </div>
-<div style="margin-left:5%;">   Accepte aussi un caractère ASCII imprimable entre 2 apostrophes.
+<div>   Accepte aussi un caractère ASCII imprimable entre 2 apostrophes.
 </div>
-<div style="margin-left:5%;">   Dans ce cas la valeur de l'entier est la valeur ASCII du caractère.  
+<div>   Dans ce cas la valeur de l'entier est la valeur ASCII du caractère.  
 </div>
-<div style="margin-left:5%;">   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
+<div>   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
 </div>
-<div style="margin-left:5%;">   à une position quelconque de la chaîne saisie sauf à la première position.
+<div>   à une position quelconque de la chaîne saisie sauf à la première position.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse de la chaîne à analyser.
+<div><i>c-addr</i>&nbsp;&nbsp;   Adresse de la chaîne à analyser.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr&nbsp;0</i>&nbsp;&nbsp;  Faux et l'adresse si ce n'est pas un entier.	
+<div><i>c-addr&nbsp;0</i>&nbsp;&nbsp;  Faux et l'adresse si ce n'est pas un entier.	
 </div>
-<div style="margin-left:5%;"><i>ou</i>&nbsp;&nbsp;  
+<div><i>ou</i>&nbsp;&nbsp;  
 </div>
-<div style="margin-left:5%;"><i>n&nbsp;-1</i>&nbsp;&nbsp;  Vrai et l'entier.  
+<div><i>n&nbsp;-1</i>&nbsp;&nbsp;  Vrai et l'entier.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>

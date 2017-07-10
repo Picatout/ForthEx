@@ -126,7 +126,7 @@ void outputArgLine(char *line,FILE *out){
 	
 	line++;
 	i=word(line);
-	fprintf(out,"<div style=\"margin-left:5%%;\"><i>%s</i>&nbsp;&nbsp;",html);
+	fprintf(out,"<div><i>%s</i>&nbsp;&nbsp;",html);
 	replaceAngleBrackets(&line[i]);
     fprintf(out,"%s</div>\n",html);
 }
@@ -137,7 +137,7 @@ int refLine(char *line,FILE *out){
 	ref=strstr(line,"REF:");
 	if (ref){
 		ref+=4;
-		fprintf(out,"<div style=\"margin-left:5%%;\">REF: <a href=\"%s\">%s</a></div>\n",ref,ref);
+		fprintf(out,"<div>REF: <a href=\"%s\">%s</a></div>\n",ref,ref);
 		return 1;
 	}else{
 		return 0;
@@ -149,7 +149,7 @@ void addEmbeddedHtml(FILE *in, FILE *out){
 	
 	while (fgets(line,255,in) && (*line==';') && !strstr(line,":HTML")){
 		line[0]=' ';
-        fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",line);
+        fprintf(out,"<div>%s</div>\n",line);
 	}
 }
 
@@ -169,7 +169,7 @@ void addEntry(char* line, FILE *in, FILE *out){
 			replaceAngleBrackets(line);
 			ref=strstr(line,"REF:");
 			if (!refLine(line,out)){
-				fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",html);
+				fprintf(out,"<div>%s</div>\n",html);
 			}
 		}
 	}
@@ -177,7 +177,7 @@ void addEntry(char* line, FILE *in, FILE *out){
 		if (strstr(line,"arguments:")){
 		// arguments:
 		line++;
-		fprintf(out,"<div style=\"margin-left:5%%;\"><b>%s</b></div>\n",line);
+		fprintf(out,"<div><b>%s</b></div>\n",line);
 		while ((fgets(line,255,in))&&(*line==';')&&!strstr(line,"retourne:")){
 			outputArgLine(line,out);
 		}
@@ -185,7 +185,7 @@ void addEntry(char* line, FILE *in, FILE *out){
 	if (strstr(line,"retourne:")){ 
 		//retourne:
 		line++;
-		fprintf(out,"<div style=\"margin-left:5%%;\"><b>%s</b></div>\n",line);
+		fprintf(out,"<div><b>%s</b></div>\n",line);
 		while ((fgets(line,255,in))&&(*line==';')){
 			outputArgLine(line,out);
 		}
@@ -203,7 +203,7 @@ void addDescription(char *line,FILE* in, FILE* out){
 	replaceAngleBrackets(line);
 	colon=strchr(line,':');
 	colon++;
-	fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",colon);
+	fprintf(out,"<div>%s</div>\n",colon);
 	line=strchr(line,':');
 	while (fgets(line,255,in) && (*line==';')) {
 		line++;
@@ -212,7 +212,7 @@ void addDescription(char *line,FILE* in, FILE* out){
 		}else{
 			replaceAngleBrackets(line);
 			if (!refLine(line,out)){
-				fprintf(out,"<div style=\"margin-left:5%%;\">%s</div>\n",html);
+				fprintf(out,"<div>%s</div>\n",html);
 			}
 		}
 	}
@@ -246,6 +246,7 @@ FILE* createHeader(const char *name,FILE *out){
 	fputs("<DOCTYPE! html>\n",out);
 	fputs("<html lang=\"fr-CA\">\n",out);
 	fputs("<head>\n <meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\">\n",out);
+	fputs(" <link rel=\"stylesheet\" type=\"text/css\" href=\"css/forthex.css\">",out);
 	fputs("</head>\n<body id=\"#top\">\n",out);
 	return out;
 }

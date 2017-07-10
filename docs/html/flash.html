@@ -2,378 +2,378 @@
 <html lang="fr-CA">
 <head>
  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-</head>
+ <link rel="stylesheet" type="text/css" href="css/forthex.css"></head>
 <body id="#top">
 <h1>flash</h1><div><a href="#index">index</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<h2 id="description">Description</h2><div style="margin-left:5%;">
+<h2 id="description">Description</h2><div>
 </div>
-<div style="margin-left:5%;">  Permet l'accès à des données stockées dans la mémoire flash du MCU.
+<div>  Permet l'accès à des données stockées dans la mémoire flash du MCU.
 </div>
-<div style="margin-left:5%;">  Pour protéger le système l'écriture n'est autorisée qu'à partir de l'adresse 
+<div>  Pour protéger le système l'écriture n'est autorisée qu'à partir de l'adresse 
 </div>
-<div style="margin-left:5%;">  0x8000. Une image de la mémoire RAM utilisateur peut-être sauvegardée dans la
+<div>  0x8000. Une image de la mémoire RAM utilisateur peut-être sauvegardée dans la
 </div>
-<div style="margin-left:5%;">  mémoire flash du MCU avec le mot IMGSAVE.    
+<div>  mémoire flash du MCU avec le mot IMGSAVE.    
 </div>
-<div style="margin-left:5%;">  Cette image est automatiquement récupérée au démarrage du sytème. De plus si
+<div>  Cette image est automatiquement récupérée au démarrage du sytème. De plus si
 </div>
-<div style="margin-left:5%;">  cette image contient une définition appellée AUTORUN celle-ci sera exécutée au
+<div>  cette image contient une définition appellée AUTORUN celle-ci sera exécutée au
 </div>
-<div style="margin-left:5%;">  au démarrage de l'ordinateur ou suite à une commande REBOOT. 
+<div>  au démarrage de l'ordinateur ou suite à une commande REBOOT. 
 </div>
-<div style="margin-left:5%;">  La taille d'une image étant limitée par la RAM utilistateur disponible à 27912 octets
+<div>  La taille d'une image étant limitée par la RAM utilistateur disponible à 27912 octets
 </div>
-<div style="margin-left:5%;">  le reste de la mémoire flash peut-être utilisée pour stocker des données.
+<div>  le reste de la mémoire flash peut-être utilisée pour stocker des données.
 </div>
-<div style="margin-left:5%;">  Il n'y pas de risque d'endommager une image si on enregistre des données à partir
+<div>  Il n'y pas de risque d'endommager une image si on enregistre des données à partir
 </div>
-<div style="margin-left:5%;">  de l'adresse 0xF000 jusqu'à 0x557FE.    
+<div>  de l'adresse 0xF000 jusqu'à 0x557FE.    
 </div>
-<div style="margin-left:5%;">REF: <a href="
+<div>REF: <a href="
 ">
 </a></div>
-<div style="margin-left:5%;">  Pour plus d'information sur la programmation en runtime de la mémoire flash    
+<div>  Pour plus d'information sur la programmation en runtime de la mémoire flash    
 </div>
-<div style="margin-left:5%;">  consultez les documents de référence Microchip: DS70609D et DS70000613D
+<div>  consultez les documents de référence Microchip: DS70609D et DS70000613D
 </div>
-<div style="margin-left:5%;">    
+<div>    
 </div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="FBUFFER">
 <b>FBUFFER</b>  (  -- a-addr )
-<div style="margin-left:5%;">   Réservation d'un bloc de mémoire dynamique pour écriture d'une rangée flash MCU.
+<div>   Réservation d'un bloc de mémoire dynamique pour écriture d'une rangée flash MCU.
 </div>
-<div style="margin-left:5%;">   Pour modifier une rangée on la lit dans ce tampon et lorsque les modifications sont
+<div>   Pour modifier une rangée on la lit dans ce tampon et lorsque les modifications sont
 </div>
-<div style="margin-left:5%;">   complétée, la rangée est effacée et reprogrammée avec le contenu de ce tampon. 
+<div>   complétée, la rangée est effacée et reprogrammée avec le contenu de ce tampon. 
 </div>
-<div style="margin-left:5%;">   Ce bloc de mémoire dynamique peut-être libéré après usage en utilisant FREE il est
+<div>   Ce bloc de mémoire dynamique peut-être libéré après usage en utilisant FREE il est
 </div>
-<div style="margin-left:5%;">   donc important de conserver une copie de son adresse. 
+<div>   donc important de conserver une copie de son adresse. 
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>aucun
+<div><i>aucun
 </i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;   Adresse du premier octet de donnée du tampon.
+<div><i>a-addr</i>&nbsp;&nbsp;   Adresse du premier octet de donnée du tampon.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="F@">
 <b>F@</b>  (  ud1 -- u )    
-<div style="margin-left:5%;">   Lecture d'un mot de 16 bits dans la mémoire FLASH.
+<div>   Lecture d'un mot de 16 bits dans la mémoire FLASH.
 </div>
-<div style="margin-left:5%;">   Si ud1 est pair utilise l'instruction machine TBLRDL pour retourner les bits 15:0
+<div>   Si ud1 est pair utilise l'instruction machine TBLRDL pour retourner les bits 15:0
 </div>
-<div style="margin-left:5%;">   Si ud1 est impair utilise l'instruction machine TBLRDH pour retourner les bits 32:16
+<div>   Si ud1 est impair utilise l'instruction machine TBLRDH pour retourner les bits 32:16
 </div>
-<div style="margin-left:5%;">   les bit 32:24 sont à zéro puisque cet octet n'est pas implémenté dans le MCU.    
+<div>   les bit 32:24 sont à zéro puisque cet octet n'est pas implémenté dans le MCU.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  entier double, adresse dans la mémmoire flash du MCU.
+<div><i>ud1</i>&nbsp;&nbsp;  entier double, adresse dans la mémmoire flash du MCU.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Valeur lue à l'adresse ud1.
+<div><i>u</i>&nbsp;&nbsp;    Valeur lue à l'adresse ud1.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="FC@L">
 <b>FC@L</b> ( ud1 -- c )
-<div style="margin-left:5%;">   Lecture d'un octet dans la partie basse de l'instruction. 
+<div>   Lecture d'un octet dans la partie basse de l'instruction. 
 </div>
-<div style="margin-left:5%;">   Utilise l'instruction machine TBLRDL.B    
+<div>   Utilise l'instruction machine TBLRDL.B    
 </div>
-<div style="margin-left:5%;">    Si ud1 est impair  les bits 15:8 sont retournés, sinon les bits 7:0 sont retournés.
+<div>    Si ud1 est impair  les bits 15:8 sont retournés, sinon les bits 7:0 sont retournés.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp;  Entier double, adresse en mémoire flash.
+<div><i>ud1</i>&nbsp;&nbsp;  Entier double, adresse en mémoire flash.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;    Si impair(ud1) c=bits{15:8}  sinon c=bits{7:0}
+<div><i>c</i>&nbsp;&nbsp;    Si impair(ud1) c=bits{15:8}  sinon c=bits{7:0}
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="FC@H">
 <b>FC@H</b>   ( ud1 -- c )    
-<div style="margin-left:5%;">    Lecture d'un octet dans la mémoire flash du mot fort de l'instruction.
+<div>    Lecture d'un octet dans la mémoire flash du mot fort de l'instruction.
 </div>
-<div style="margin-left:5%;">    Utilise l'instruction machine TBLRDH.B
+<div>    Utilise l'instruction machine TBLRDH.B
 </div>
-<div style="margin-left:5%;">    Si ud1 est impair retourne la valeur 0, sinon retourne les bits 23:16 de l'instruction.    
+<div>    Si ud1 est impair retourne la valeur 0, sinon retourne les bits 23:16 de l'instruction.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud1</i>&nbsp;&nbsp; Entier double, Adresse en mémoire flash.
+<div><i>ud1</i>&nbsp;&nbsp; Entier double, Adresse en mémoire flash.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp; Valeur lue à l'adresse ud1.  c représente les bits 23..16 de l'instruction.
+<div><i>c</i>&nbsp;&nbsp; Valeur lue à l'adresse ud1.  c représente les bits 23..16 de l'instruction.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="I@">
 <b>I@</b>   ( ud -- u1 u2 u3 )    
-<div style="margin-left:5%;">   Lit 1 instruction de la mémoire FLASH du MCU. L'instrucion est séparée en
+<div>   Lit 1 instruction de la mémoire FLASH du MCU. L'instrucion est séparée en
 </div>
-<div style="margin-left:5%;">   3 octets. Accès à la mémoire flash en utilisant les instructions machine TBLRDL et TBLRDH .
+<div>   3 octets. Accès à la mémoire flash en utilisant les instructions machine TBLRDL et TBLRDH .
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:    
+<div><b> arguments:    
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;  Entier double, adresse en  mémoire flash.
+<div><i>ud</i>&nbsp;&nbsp;  Entier double, adresse en  mémoire flash.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>u1</i>&nbsp;&nbsp;  Bits 16:23 
+<div><i>u1</i>&nbsp;&nbsp;  Bits 16:23 
 </div>
-<div style="margin-left:5%;"><i>u2</i>&nbsp;&nbsp;  Bits 8:15
+<div><i>u2</i>&nbsp;&nbsp;  Bits 8:15
 </div>
-<div style="margin-left:5%;"><i>u3</i>&nbsp;&nbsp;  Bits 0:7    
+<div><i>u3</i>&nbsp;&nbsp;  Bits 0:7    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="IC@">
 <b>IC@</b> ( ud u -- c )
-<div style="margin-left:5%;">   Lit 1 octet dans la mémoire flash à l'adresse d'instruction 'ud' et à la position
+<div>   Lit 1 octet dans la mémoire flash à l'adresse d'instruction 'ud' et à la position
 </div>
-<div style="margin-left:5%;">   désignée par 'u'. 'u' est dans l'intervalle {0..2}
+<div>   désignée par 'u'. 'u' est dans l'intervalle {0..2}
 </div>
-<div style="margin-left:5%;">   0 retourne l'octet faible, bits 7:0
+<div>   0 retourne l'octet faible, bits 7:0
 </div>
-<div style="margin-left:5%;">   1 retourne l'octet du milieu, bits 15:8
+<div>   1 retourne l'octet du milieu, bits 15:8
 </div>
-<div style="margin-left:5%;">   2 retourne l'octet fort, bits 23:16
+<div>   2 retourne l'octet fort, bits 23:16
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Entier double, adresse de l'instruction. ud doit-être un nombre pair.
+<div><i>ud</i>&nbsp;&nbsp;   Entier double, adresse de l'instruction. ud doit-être un nombre pair.
 </div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Entier dans l'intervalle {0..2} indiquant quel octet de l'instruction doit-être lu.
+<div><i>u</i>&nbsp;&nbsp;    Entier dans l'intervalle {0..2} indiquant quel octet de l'instruction doit-être lu.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c</i>&nbsp;&nbsp;    Octet lu dans la mémoire flash.
+<div><i>c</i>&nbsp;&nbsp;    Octet lu dans la mémoire flash.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?FLIMITS">
 <b>?FLIMITS</b>   ( ud -- ud f )    
-<div style="margin-left:5%;">   Vérifie si l'adresse 24 bits représsentée par 'ud' est dans la plage
+<div>   Vérifie si l'adresse 24 bits représsentée par 'ud' est dans la plage
 </div>
-<div style="margin-left:5%;">   valide et retourne un indicateur booléen.
+<div>   valide et retourne un indicateur booléen.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Adresse 24 bits à contrôler.
+<div><i>ud</i>&nbsp;&nbsp;   Adresse 24 bits à contrôler.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Adresse contrôlée.
+<div><i>ud</i>&nbsp;&nbsp;   Adresse contrôlée.
 </div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;    Indicateur Booléen, faux si cette adresse n'est pas valide.    
+<div><i>f</i>&nbsp;&nbsp;    Indicateur Booléen, faux si cette adresse n'est pas valide.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ROW&gt;FADR">
 <b>ROW&gt;FADR</b>  ( u -- ud )
-<div style="margin-left:5%;">   Convertie un numéro de rangée en adresse FLASH 24 bits.
+<div>   Convertie un numéro de rangée en adresse FLASH 24 bits.
 </div>
-<div style="margin-left:5%;">   La plus petite plage de mémoire flash qui peut-être effacée est appellée rangée ou page.    
+<div>   La plus petite plage de mémoire flash qui peut-être effacée est appellée rangée ou page.    
 </div>
-<div style="margin-left:5%;">   Pour le PIC24EP512GP202 une rangée représente 1024 instructions machine
+<div>   Pour le PIC24EP512GP202 une rangée représente 1024 instructions machine
 </div>
-<div style="margin-left:5%;">   soit 2048 adresses PC ou 3072 octets.
+<div>   soit 2048 adresses PC ou 3072 octets.
 </div>
-<div style="margin-left:5%;">   donc ud=2048*u    
+<div>   donc ud=2048*u    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;    Numéro de rangée.
+<div><i>u</i>&nbsp;&nbsp;    Numéro de rangée.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;   Entier double, adresse 24 bits de la rangée.    
+<div><i>ud</i>&nbsp;&nbsp;   Entier double, adresse 24 bits de la rangée.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="FERASE">
 <b>FERASE</b>   ( u -- )    
-<div style="margin-left:5%;">   Efface une rangée de mémoire FLASH MCU
+<div>   Efface une rangée de mémoire FLASH MCU
 </div>
-<div style="margin-left:5%;">   Une rangée correspond à 1024 instructions.
+<div>   Une rangée correspond à 1024 instructions.
 </div>
-<div style="margin-left:5%;">   Les instructions étant codées sur 24 bits, 1 rangée correspond à 3072 octets.
+<div>   Les instructions étant codées sur 24 bits, 1 rangée correspond à 3072 octets.
 </div>
-<div style="margin-left:5%;">   Le compteur d'instruction du MCU incrémente par 2 et pointe toujours sur une adresse paire. 
+<div>   Le compteur d'instruction du MCU incrémente par 2 et pointe toujours sur une adresse paire. 
 </div>
-<div style="margin-left:5%;">   Voir ROW&gt;FADR    
+<div>   Voir ROW&gt;FADR    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:      
+<div><b> arguments:      
 </b></div>
-<div style="margin-left:5%;"><i>u</i>&nbsp;&nbsp;  numéro de la rangée.
+<div><i>u</i>&nbsp;&nbsp;  numéro de la rangée.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien
+<div><i>rien
 </i>&nbsp;&nbsp;</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="RAM&gt;FLASH">
 <b>RAM&gt;FLASH</b>  ( c-addr n ud -- )    
-<div style="margin-left:5%;">   Écris en mémoire flash un bloc de données en RAM.
+<div>   Écris en mémoire flash un bloc de données en RAM.
 </div>
-<div style="margin-left:5%;">   Si n n'est pas un  multiple de 6, jusqu'à 5 octets au delà du tampon seront copiés en FLASH. 
+<div>   Si n n'est pas un  multiple de 6, jusqu'à 5 octets au delà du tampon seront copiés en FLASH. 
 </div>
-<div style="margin-left:5%;">   Au besoin remplir les octets excédentaires avec la valeur 0xFF.    
+<div>   Au besoin remplir les octets excédentaires avec la valeur 0xFF.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:    
+<div><b> arguments:    
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse début données en RAM.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse début données en RAM.
 </div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     Nombre d'octets à écrire.
+<div><i>n</i>&nbsp;&nbsp;     Nombre d'octets à écrire.
 </div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;    Entier double, addresse 24 bits en mémoire FLASH.
+<div><i>ud</i>&nbsp;&nbsp;    Entier double, addresse 24 bits en mémoire FLASH.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="FLASH&gt;RAM">
 <b>FLASH&gt;RAM</b>  ( c-addr n ud -- )  
-<div style="margin-left:5%;">  Lecture d'un bloc FLASH dans un tampon en mémoire RAM.
+<div>  Lecture d'un bloc FLASH dans un tampon en mémoire RAM.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:  
+<div><b> arguments:  
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;  Adresse 16 bits début RAM.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse 16 bits début RAM.
 </div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;     Nombre d'octets à lire.
+<div><i>n</i>&nbsp;&nbsp;     Nombre d'octets à lire.
 </div>
-<div style="margin-left:5%;"><i>ud</i>&nbsp;&nbsp;    Entier double, adresse début plage FLASH.
+<div><i>ud</i>&nbsp;&nbsp;    Entier double, adresse début plage FLASH.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+<div><i>rien</i>&nbsp;&nbsp;  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?IMG">
 <b>?IMG</b>  ( -- f )    
-<div style="margin-left:5%;">   Vérifie s'il y a une image disponible en mémoire flash et retourne 
+<div>   Vérifie s'il y a une image disponible en mémoire flash et retourne 
 </div>
-<div style="margin-left:5%;">   un indicateur Booléen vrai|faux.
+<div>   un indicateur Booléen vrai|faux.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>aucun</i>&nbsp;&nbsp;    
+<div><i>aucun</i>&nbsp;&nbsp;    
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>f</i>&nbsp;&nbsp;  Indicateur booléen vrai|faux
+<div><i>f</i>&nbsp;&nbsp;  Indicateur booléen vrai|faux
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="IMGSAVE">
 <b>IMGSAVE</b>   ( -- )    
-<div style="margin-left:5%;">   Sauvegarde une image de la RAM dans la mémoire flash du MCU.
+<div>   Sauvegarde une image de la RAM dans la mémoire flash du MCU.
 </div>
-<div style="margin-left:5%;">   Les données à partir de l'adresse DP0 jusqu'à l'adresse DP-1 sont
+<div>   Les données à partir de l'adresse DP0 jusqu'à l'adresse DP-1 sont
 </div>
-<div style="margin-left:5%;">   sauvegardées dans cette image, ainsi que les valeurs des variables
+<div>   sauvegardées dans cette image, ainsi que les valeurs des variables
 </div>
-<div style="margin-left:5%;">   systèmes LATEST et DP.
+<div>   systèmes LATEST et DP.
 </div>
-<div style="margin-left:5%;">   Si le MCU est reprogrammé l'image est perdue et devra être resauvegardée.    
+<div>   Si le MCU est reprogrammé l'image est perdue et devra être resauvegardée.    
 </div>
-<div style="margin-left:5%;">   l'image est sauvegardée à l'adresse flash 0x8000. Les 8 premiers octets sont
+<div>   l'image est sauvegardée à l'adresse flash 0x8000. Les 8 premiers octets sont
 </div>
-<div style="margin-left:5%;">   une structure de données utilisé par IMGLOAD. Cette structure est la suivante.
+<div>   une structure de données utilisé par IMGLOAD. Cette structure est la suivante.
 </div>
-<div style="margin-left:5%;">  <br><table border="single">    
+<div>  <br><table border="single">    
 </div>
-<div style="margin-left:5%;">  <tr><th>offset</th><th>description</th></tr>
+<div>  <tr><th>offset</th><th>description</th></tr>
 </div>
-<div style="margin-left:5%;">  <tr><td><center>0</center></td><td>signature 0x55AA</td></tr>
+<div>  <tr><td><center>0</center></td><td>signature 0x55AA</td></tr>
 </div>
-<div style="margin-left:5%;">  <tr><td><center>2</center></td><td>valeur de la variable LATEST pour cette image.</td></tr>
+<div>  <tr><td><center>2</center></td><td>valeur de la variable LATEST pour cette image.</td></tr>
 </div>
-<div style="margin-left:5%;">  <tr><td><center>4</center></td><td>valeur de la variable DP pour cette image.</td></tr>
+<div>  <tr><td><center>4</center></td><td>valeur de la variable DP pour cette image.</td></tr>
 </div>
-<div style="margin-left:5%;">  <tr><td><center>6</center></td><td>grandeur du data en octets.</td></tr>
+<div>  <tr><td><center>6</center></td><td>grandeur du data en octets.</td></tr>
 </div>
-<div style="margin-left:5%;">  </table><br>    
+<div>  </table><br>    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>aucun
+<div><i>aucun
 </i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;    
+<div><i>rien</i>&nbsp;&nbsp;    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="IMGLOAD">
 <b>IMGLOAD</b>  ( -- )  
-<div style="margin-left:5%;">    Charge une image système RAM à partir de la mémoire flash du MCU.
+<div>    Charge une image système RAM à partir de la mémoire flash du MCU.
 </div>
-<div style="margin-left:5%;">    Au démarrage de l'ordinateur IMGLOAD est appellé et s'il y a une image
+<div>    Au démarrage de l'ordinateur IMGLOAD est appellé et s'il y a une image
 </div>
-<div style="margin-left:5%;">    système en mémoire flash celle-ci est chargée en mémoire RAM.
+<div>    système en mémoire flash celle-ci est chargée en mémoire RAM.
 </div>
-<div style="margin-left:5%;">    S'il n'y a pas d'image disponible le message "No boot image available."
+<div>    S'il n'y a pas d'image disponible le message "No boot image available."
 </div>
-<div style="margin-left:5%;">    est affiché à l'écran.
+<div>    est affiché à l'écran.
 </div>
-<div style="margin-left:5%;">    Si l'image chargée en RAM contient une définition AUTORUN dans son dictionnaire
+<div>    Si l'image chargée en RAM contient une définition AUTORUN dans son dictionnaire
 </div>
-<div style="margin-left:5%;">    ce mot est exécuté.
+<div>    ce mot est exécuté.
 </div>
-<div style="margin-left:5%;">    IMGLOAD peut-être appellé manuellement pour restaurer l'état système à l'état
+<div>    IMGLOAD peut-être appellé manuellement pour restaurer l'état système à l'état
 </div>
-<div style="margin-left:5%;">    initial au démarrage, dans ce cas AUTORUN n'est pas exécuté.  
+<div>    initial au démarrage, dans ce cas AUTORUN n'est pas exécuté.  
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>aucun
+<div><i>aucun
 </i>&nbsp;&nbsp;</div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>rien</i>&nbsp;&nbsp;  
+<div><i>rien</i>&nbsp;&nbsp;  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>

@@ -2,105 +2,105 @@
 <html lang="fr-CA">
 <head>
  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-</head>
+ <link rel="stylesheet" type="text/css" href="css/forthex.css"></head>
 <body id="#top">
 <h1>eds</h1><div><a href="#index">index</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<h2 id="description">Description</h2><div style="margin-left:5%;"> 
+<h2 id="description">Description</h2><div> 
 </div>
-<div style="margin-left:5%;">   Certains PIC24 et dsPIC33 possèdent de la mémoire RAM au-delà de l'adresse
+<div>   Certains PIC24 et dsPIC33 possèdent de la mémoire RAM au-delà de l'adresse
 </div>
-<div style="margin-left:5%;">   32767 (0x7FFF) Microchip appelle cette mémoire EDS (Extended Data Space).
+<div>   32767 (0x7FFF) Microchip appelle cette mémoire EDS (Extended Data Space).
 </div>
-<div style="margin-left:5%;">   Cette plage d'adresse entre en conflit avec la plage d'adresse PSV (Progam Visibility Space).
+<div>   Cette plage d'adresse entre en conflit avec la plage d'adresse PSV (Progam Visibility Space).
 </div>
-<div style="margin-left:5%;">   Il y a donc un mécanisme qui permet de différencier ces 2 plages en utilisant
+<div>   Il y a donc un mécanisme qui permet de différencier ces 2 plages en utilisant
 </div>
-<div style="margin-left:5%;">   les registres DSRPAG et DSWPAG.  Puisque la machine virtuelle de ForthEx fonctionne
+<div>   les registres DSRPAG et DSWPAG.  Puisque la machine virtuelle de ForthEx fonctionne
 </div>
-<div style="margin-left:5%;">   en lisant des listes d'adresses aussi bien en RAM qu'en FLASH le registre DSRPAG
+<div>   en lisant des listes d'adresses aussi bien en RAM qu'en FLASH le registre DSRPAG
 </div>
-<div style="margin-left:5%;">   qui détermine qu'elle plage sera accédée en lecture est configuré par défaut pour
+<div>   qui détermine qu'elle plage sera accédée en lecture est configuré par défaut pour
 </div>
-<div style="margin-left:5%;">   acccédé la plage {0..32766} de la mémoire FLASH là où réside le système Forth.
+<div>   acccédé la plage {0..32766} de la mémoire FLASH là où réside le système Forth.
 </div>
-<div style="margin-left:5%;">   Cependant il doit exister un mécanisme pour lire la mémoire EDS. Ce mécanisme
+<div>   Cependant il doit exister un mécanisme pour lire la mémoire EDS. Ce mécanisme
 </div>
-<div style="margin-left:5%;">   est constitué d'une série de mots spéciaux qui accèdent cette mémoire en lecture.
+<div>   est constitué d'une série de mots spéciaux qui accèdent cette mémoire en lecture.
 </div>
-<div style="margin-left:5%;">       
+<div>       
 </div>
-<div style="margin-left:5%;">   Pour l'accès en écriture ForthEx est configuré par défaut pour accéder la mémoire
+<div>   Pour l'accès en écriture ForthEx est configuré par défaut pour accéder la mémoire
 </div>
-<div style="margin-left:5%;">   EDS puisque de toute façon on ne peut écrire en mémoire FLASH. Il n'est donc pas
+<div>   EDS puisque de toute façon on ne peut écrire en mémoire FLASH. Il n'est donc pas
 </div>
-<div style="margin-left:5%;">   nécessaire d'avoir de mots spéciaux pour l'écriture dans la mémoire EDS.
+<div>   nécessaire d'avoir de mots spéciaux pour l'écriture dans la mémoire EDS.
 </div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="E@">
 <b>E@</b>  ( a-addr -- n )    
-<div style="margin-left:5%;">   Retourne l'entier contenu à l'adresse a-addr. 
+<div>   Retourne l'entier contenu à l'adresse a-addr. 
 </div>
-<div style="margin-left:5%;">   L'adresse doit-être alignée sur un nombre pair.
+<div>   L'adresse doit-être alignée sur un nombre pair.
 </div>
-<div style="margin-left:5%;">   Les adresses &lt; 32768 accèdes la RAM mais    
+<div>   Les adresses &lt; 32768 accèdes la RAM mais    
 </div>
-<div style="margin-left:5%;">   les adresses &gt;= 32768 accèdent la mémoire EDS.
+<div>   les adresses &gt;= 32768 accèdent la mémoire EDS.
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse à lire.
+<div><i>a-addr</i>&nbsp;&nbsp;  Adresse à lire.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n	Entier</i>&nbsp;&nbsp; contenu à cette adresse.    
+<div><i>n	Entier</i>&nbsp;&nbsp; contenu à cette adresse.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="EC@">
 <b>EC@</b>  ( c-addr -- c )    
-<div style="margin-left:5%;">   Retourne le caractère contenu à l'adressse c-addr.
+<div>   Retourne le caractère contenu à l'adressse c-addr.
 </div>
-<div style="margin-left:5%;">   Cette adresse est alignée sur un octet.    
+<div>   Cette adresse est alignée sur un octet.    
 </div>
-<div style="margin-left:5%;">   Les adresse &lt;32768 accèdent la RAM mais 
+<div>   Les adresse &lt;32768 accèdent la RAM mais 
 </div>
-<div style="margin-left:5%;">   les adresses &gt;= 32768 accès la mémoire EDS.    
+<div>   les adresses &gt;= 32768 accès la mémoire EDS.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>c-addr</i>&nbsp;&nbsp;   Adresse à lire.
+<div><i>c-addr</i>&nbsp;&nbsp;   Adresse à lire.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>c	Caract�re</i>&nbsp;&nbsp; contenu à cette adresse.    
+<div><i>c	Caract�re</i>&nbsp;&nbsp; contenu à cette adresse.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ETBL@">
 <b>ETBL@</b>  ( n a-addr -- n )
-<div style="margin-left:5%;">   Retourne l'élément n d'un vecteur. Les valeurs d'indice débute à zéro.
+<div>   Retourne l'élément n d'un vecteur. Les valeurs d'indice débute à zéro.
 </div>
-<div style="margin-left:5%;">   L'adresse de la table doit-être alignée sur une adresse paire.
+<div>   L'adresse de la table doit-être alignée sur une adresse paire.
 </div>
-<div style="margin-left:5%;">   Les addresses &lt;32768 accèdent la RAM mais 
+<div>   Les addresses &lt;32768 accèdent la RAM mais 
 </div>
-<div style="margin-left:5%;">   les adresses &gt;= 32768 accèdent la mémoire EDS.    
+<div>   les adresses &gt;= 32768 accèdent la mémoire EDS.    
 </div>
 </p>
-<div style="margin-left:5%;"><b> arguments:
+<div><b> arguments:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;  Indice dans le vecteur.
+<div><i>n</i>&nbsp;&nbsp;  Indice dans le vecteur.
 </div>
-<div style="margin-left:5%;"><i>a-addr</i>&nbsp;&nbsp;  Adresse du vecteur.
+<div><i>a-addr</i>&nbsp;&nbsp;  Adresse du vecteur.
 </div>
-<div style="margin-left:5%;"><b> retourne:
+<div><b> retourne:
 </b></div>
-<div style="margin-left:5%;"><i>n</i>&nbsp;&nbsp;    Valeur de l'élément n du vecteur.    
+<div><i>n</i>&nbsp;&nbsp;    Valeur de l'élément n du vecteur.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
