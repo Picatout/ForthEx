@@ -265,43 +265,52 @@ set_size:
     bra 8f
 version1:
 ;C_SIZE
-;This parameter is used to compute the user?s data card capacity (not include the security protected
+;This parameter is used to compute the user data card capacity (not include the security protected
 ;area). The memory capacity of the card is computed from the entries C_SIZE, C_SIZE_MULT and
 ;READ_BL_LEN as follows:
 ;memory capacity = BLOCKNR * BLOCK_LEN
 ;Where
 ; BLOCKNR = (C_SIZE+1) * MULT
-; MULT = 2^C_SIZE_MULT+2
-; (C_SIZE_MULT < 8)
+; MULT = 2^(C_SIZE_MULT+2) , (C_SIZE_MULT < 8)
 ; BLOCK_LEN = 2^READ_BL_LEN , (READ_BL_LEN < 12)
 ;To indicate 2 GByte card, BLOCK_LEN shall be 1024 bytes.
 ;Therefore, the maximal capacity that can be coded is 4096*512*1024 = 2 G bytes.
 ;Example: A 32 Mbyte card with BLOCK_LEN = 512 can be coded by C_SIZE_MULT = 3 and C_SIZE =
 ;2000.    
-    mov #sdc_R+4,W2
-    mov [W2++],W0
+    ; extraction READ_BL_LEN
+    mov #sdc_R+5,W2
+    mov.b [W2++],W0
     and #0xf,W0 ; READ_BL_LEN
     dec W0,W0
     mov  #1,W4
     repeat W0
     sl W4,W4   ; W4=BLOCK_LEN=2^READ_BL_LEN   
-    mov [W2++],W0
-    and #0x3ff,W0
-    mov [W2++],W1
-    sl W1,W3
+    ; extraction C_SIZE
+    mov.b [W2++],W0
+    and #0x3,W0
+    swap W0
+    mov.b [W2++],W1
+    ze W1,W1
+    ior W1,W0,W0
+    mov.b [W2++],W1
+    swap W1
+    sl W1,W1
     rlc W0,W0
-    sl W3,W3
+    sl W1,W1
     rlc W0,W3 ; C_SIZE
     inc W3,W3 ; C_SIZE+1
-    mov [W2],W0
-    sl W0,W0
-    rlc W1,W1 
-    and #7,W1 ; W1=C_SIZE_MULT
-    inc W1,W1
-    mov #1,W0
-    repeat W1 ; 
-    sl W0,W0  ; W0=MULT=2^(C_SIZE_MULT+2)
-    mul.uu W0,W3,W0 ; BLOCKNR=(C_SIZE+1)*MULT
+    ; extraction C_SIZE_MULT
+    mov.b [W2++],W0
+    and #3,W0
+    mov.b [W2],W1
+    swap W1
+    sl W1,W1
+    rlc W0,W0
+    inc W0,W0
+    mov #1,W1
+    repeat W0 ; 
+    sl W1,W1 ; W1=MULT=2^(C_SIZE_MULT+2)
+    mul.uu W1,W3,W0 ; BLOCKNR=(C_SIZE+1)*MULT
     mov W1,W2
     ; BLOCKBR * BLOCK_LEN
     mul.uu W4,W0,W0
@@ -310,7 +319,7 @@ version1:
     ; division par 1Ko pour obtenir le nombre de blocs.
     mov #10,W2
 2:  lsr W1,W1
-    rrc W0,W1
+    rrc W0,W0
     dec W2,W2
     bra nz, 2b
     bra 4f
@@ -328,20 +337,31 @@ version1:
     bra nz, 9f
     inc seg_count
 9:  return
-    
+
+; READ-CSD ( -- f )
+;    Lecture du registre CSD de la carte SD. Les informations se enregistrées
+;    dans SDC-R. Pour en examiner le contenu faire: 
+;    READ-CSD DROP SDC-R 16 DUMP    
+; arguments:
+;   aucun    
 ; retourne:
 ;    f   vrai si succès    
-DEFCODE "READ-CSD",8,,READCSD
+HEADLESS READCSD,CODE    
+;DEFCODE "READ-CSD",8,,READCSD    
     _enable_sdc
     mov #SEND_CSD,W0
     call read_card_register
     call sdc_deselect
     NEXT
-    
-    
+  
+;  READ-CID ( -- f )       
+;    Lecture du registre CID de la carte SD. Les informations se enregistrées
+;    dans SDC-R. Pour en examiner le contenu faire: 
+;    READ-CID DROP SDC-R 16 DUMP    
 ; retourne:
 ;    f   vrai si succès    
-DEFCODE "READ-CID",8,,READCID
+HEADLESS READCID,CODE    
+;DEFCODE "READ-CID",8,,READCID
     _enable_sdc
     mov #SEND_CID,W0
     call read_card_register
