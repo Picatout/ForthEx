@@ -119,13 +119,14 @@ spi_send_address: ; ( ud -- )
 ;  La RAM SPI 23LC1024 a une capacitée de 128Ko.    
 
     
-; nom: XBLK>ADR ; ( u -- ud )
+; XBLK>ADR ; ( u -- ud )
 ;   Convertie un numéro de bloc XRAM en adresse absolue XRAM.    
 ; arguments:
 ;   u  Entier simple non signé, numéro du bloc, {1..MAX_BLOCK}
 ; retourne:
 ;   ud Entier double non signé, adresse début bloc dans la RAM SPI.
-DEFWORD "XBLK>ADR",8,,XBLKTOADR
+HEADLESS XBLKTOADR,HWORD    
+;DEFWORD "XBLK>ADR",8,,XBLKTOADR
     .word ONEMINUS,LIT,BLOCK_SIZE,MSTAR,EXIT
     
     
