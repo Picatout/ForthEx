@@ -22,7 +22,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="XBLK&gt;ADR">
 <b>XBLK&gt;ADR</b> ; ( u -- ud )
-<div>   Convertie un numéro de bloc XRAM en adresse absolue XRAM.    
+<br><div>   Convertie un numéro de bloc XRAM en adresse absolue XRAM.    
 </div>
 </p>
 <div><b> arguments:
@@ -36,16 +36,16 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="XWRITE">
-<b>XWRITE</b> ( u1 n+ ud1 -- )
-<div>   Transfert un bloc d'octets de la RAM du MCU vers la RAM SPI.
+<hr style="border-width:1px;"><p id="RAM&gt;XR">
+<b>RAM&gt;XR</b> ( u1 u2 ud1 -- )
+<br><div>   Transfert un bloc d'octets de la RAM du MCU vers la RAM SPI.
 </div>
 </p>
 <div><b> arguments: 
 </b></div>
 <div><i>u1</i>&nbsp;&nbsp; Adresse début bloc RAM.
 </div>
-<div><i>n+</i>&nbsp;&nbsp; Nombre d'octets à transférer.
+<div><i>u2</i>&nbsp;&nbsp; Nombre d'octets à transférer.
 </div>
 <div><i>ud1</i>&nbsp;&nbsp; Entier double non signé, Adresse destination dans la RAM SPI. 
 </div>
@@ -56,16 +56,16 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="XREAD">
-<b>XREAD</b>  ( u1 n+ ud1 -- )
-<div>   Transfert un bloc d'octets de la RAM SPI vers la RAM du MCU.
+<hr style="border-width:1px;"><p id="XR&gt;RAM">
+<b>XR&gt;RAM</b>  ( u1 u2 ud1 -- )
+<br><div>   Transfert un bloc d'octets de la RAM SPI vers la RAM du MCU.
 </div>
 </p>
 <div><b> arguments: 
 </b></div>
 <div><i>u1</i>&nbsp;&nbsp;  Entier simple non signé, adresse début tampon RAM.
 </div>
-<div><i>n+</i>&nbsp;&nbsp;  Entier simple positif, Nombre d'octets à transféréer.
+<div><i>u2</i>&nbsp;&nbsp;  Entier simple non signé, Nombre d'octets à transféréer.
 </div>
 <div><i>ud1</i>&nbsp;&nbsp; Entier double non signé, adresse début du bloc dans la RAM SPI.
 </div>
@@ -73,38 +73,6 @@
 </b></div>
 <div><i>rien
 </i>&nbsp;&nbsp;</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="XBLKCOUNT">
-<b>XBLKCOUNT</b>  ( -- n )
-<div>   Constante, capacité en nombre de blocs de la RAM SPI.    
-</div>
-</p>
-<div><b> arguments:
-</b></div>
-<div><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div><b> retourne:
-</b></div>
-<div><i>n</i>&nbsp;&nbsp;   Capacité en nombre de blocs de la RAM SPI.    
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="XBOUND">
-<b>XBOUND</b>  ( n+ -- f )
-<div>   Vérifie si le numéro de bloc est dans les limites
-</div>
-</p>
-<div><b> arguments:
-</b></div>
-<div><i>n+</i>&nbsp;&nbsp;   Numéro du bloc à vérifier.
-</div>
-<div><b> retourne:
-</b></div>
-<div><i>f</i>&nbsp;&nbsp;   Indicateur booléen, vrai si le numéro de bloc est valide.
-</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
@@ -123,7 +91,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="?WIP">
 <b>?WIP</b>  ( -- f )    
-<div>   Test le bit WRITE IN PROCESS de l'EEPROM et retourne son état.
+<br><div>   Test le bit WRITE IN PROCESS de l'EEPROM et retourne son état.
 </div>
 </p>
 <div><b> arguments:
@@ -139,7 +107,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="WWIP">
 <b>WWIP</b>   ( -- )    
-<div>   Attend que l'opération d'écriture de l'EEPROM soit complétée.
+<br><div>   Attend que l'opération d'écriture de l'EEPROM soit complétée.
 </div>
 </p>
 <div><b> arguments:
@@ -153,25 +121,9 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="EEBLK&gt;ADR">
-<b>EEBLK&gt;ADR</b>  ( u -- ud )
-<div>   Convertie un numéro de bloc en adresse EEPROM
-</div>
-</p>
-<div><b> arguments:
-</b></div>
-<div><i>u</i>&nbsp;&nbsp; Entier simple non signé, numéro du block {1..MAX_BLOCK}
-</div>
-<div><b> retourne:
-</b></div>
-<div><i>ud</i>&nbsp;&nbsp; Entier double non signé, adresse début bloc dans l'EEPROM
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="RAM&gt;EE">
 <b>RAM&gt;EE</b> ( u1 n+ ud1 -- )
-<div>   Enregistrement d'une plage RAM dans l'EEPROM
+<br><div>   Enregistrement d'une plage RAM dans l'EEPROM
 </div>
 <div> IMPORTANT:
 </div>
@@ -205,16 +157,16 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="EEREAD">
-<b>EEREAD</b>   ( u1 n+ ud -- )
-<div>   Copie d'une plage EEPROM vers la mémoire RAM.
+<hr style="border-width:1px;"><p id="EE&gt;RAM">
+<b>EE&gt;RAM</b>   ( u1 u2 ud -- )
+<br><div>   Copie d'une plage EEPROM vers la mémoire RAM.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>u1</i>&nbsp;&nbsp; Entier simple non signé, adresse 16 bits début RAM.
+<div><i>u1</i>&nbsp;&nbsp; Entier simple non signé, adresse début tampon RAM.
 </div>
-<div><i>n+</i>&nbsp;&nbsp; Entier simple positif, nombre d'octets à copier. 
+<div><i>u2</i>&nbsp;&nbsp; Entier simple non signé, nombre d'octets à copier. 
 </div>
 <div><i>ud</i>&nbsp;&nbsp; Entier double non signé, adresse source dans l'EEPROM.
 </div>
@@ -227,7 +179,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="EPAGE">
 <b>EPAGE</b>  ( -- n )
-<div>   Valeur constante indiquant qu'il s'agit d'une opération d'effacement d'une page.
+<br><div>   Valeur constante indiquant qu'il s'agit d'une opération d'effacement d'une page.
 </div>
 <div>   L'EEPROM peut-être effacée par page,secteur ou au complet. 
 </div>
@@ -245,7 +197,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ESECTOR">
 <b>ESECTOR</b>  ( -- n )
-<div>   Valeur constante indiquant qu'il s'agit d'une opération d'effacement d'un secteur.
+<br><div>   Valeur constante indiquant qu'il s'agit d'une opération d'effacement d'un secteur.
 </div>
 <div>   L'EEPROM peut-être effacée par page,secteur ou au complet. 
 </div>
@@ -263,7 +215,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="EALL">
 <b>EALL</b>  ( -- n )
-<div>   Valeur constante indiquant qu'il s'agit d'une opération d'effacement complet.
+<br><div>   Valeur constante indiquant qu'il s'agit d'une opération d'effacement complet.
 </div>
 <div>   Toute l'EEPROM sera effacée.    
 </div>
@@ -281,7 +233,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="EERASE">
 <b>EERASE</b> ( EALL | n {EPAGE|ESECTOR} -- )    
-<div>   Efface une page, 1 secteur ou l'EEPROM au complet.
+<br><div>   Efface une page, 1 secteur ou l'EEPROM au complet.
 </div>
 <div>   l'argument 'n' est requis que pour les opérations EPAGE ou ESECTOR.    
 </div>
@@ -301,7 +253,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="EEWRITE">
 <b>EEWRITE</b>  ( u1 ud -- )    
-<div>   Écriture d'un bloc RAM dans l'EEPROM externe.
+<br><div>   Écriture d'un bloc RAM dans l'EEPROM externe.
 </div>
 <div>   L'écriture se fait par segment de 256 octets. 
 </div>
@@ -321,38 +273,6 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="EEBLKCOUNT">
-<b>EEBLKCOUNT</b>  ( -- n )  
-<div>   Constante, capacité en nombre de blocs de l'EEPROM.
-</div>
-</p>
-<div><b> arguments:
-</b></div>
-<div><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div><b> retourne:
-</b></div>
-<div><i>n</i>&nbsp;&nbsp;  Capacité en nombre de blocs.  
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="EEBOUND">
-<b>EEBOUND</b>  ( n+ -- f )
-<div>   Vérifie si le numéro de bloc est dans les limites de validité.
-</div>
-</p>
-<div><b> arguments:
-</b></div>
-<div><i>n+</i>&nbsp;&nbsp; Numéro du bloc à vérifier.
-</div>
-<div><b> retourne:
-</b></div>
-<div><i>f</i>&nbsp;&nbsp;  Indicateur booléen, vrai si le numéro de bloc est valide.
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><h2 id="description">Description</h2><div>
 </div>
 <div> Les périphériques de stockage sont définis par une table contenant
@@ -360,117 +280,123 @@
 <div> les CFA des fonctions de bases.  
 </div>
 <div>  <br><table border="single">
+
+  <tr><th>nom</th><th>description</th></tr>  
+
+  <tr><td>DEVID</td><td>Identifiant du périphérique.<br>XRAM =3<br>EEPROM=4<br>
+
+  SDCARD=5</td></tr>  
+
+  <tr><td>READ</td><td>Lecture d'un bloc.</td></tr>
+
+  <tr><td>WRITE</td><td>Écriture d'un bloc.</td></tr>
+
+  <tr><td>BLK&gt;ADR</td><td>Conversion numéro de bloc en adresse.</td></tr>
+
+  <tr><td>BLK-VALID?</td><td>Valide le numéro de bloc.</td></tr>
+
+  </table><br>
+
+</div><div> Il y a 3 périphériques de stockage, XRAM, EEPROM et SDCARD.
 </div>
-<div>  <tr><th>nom</th><th>description</th></tr>  
-</div>
-<div>  <tr><td>DEVID</td><td>Identifiant du p�riph�rique.</td></tr>  
-</div>
-<div>  <tr><td>READ</td><td>CFA de la fonction de lecture d'un bloc.</td></tr>
-</div>
-<div>  <tr><td>WRITE</td><td>CFA de la fonction d'�criture d'un bloc.</td></tr>
-</div>
-<div>  <tr><td>BLK&gt;ADR</td><td>CFA de la fonction de conversion num�ro de bloc en adresse.</td></tr>
-</div>
-<div>  <tr><td>BOUND</td><td>CFA de la fonction qui valide le num�ro de bloc.</td></tr>
-</div>
-<div>  </table><br>
-</div>
-<div> Il y a 3 périphériques de stockage, XRAM, EEPROM et SDCARD.
+<div> XRAM est la RAM SPI externe il s'agit donc d'un stockage temporaire.
 </div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="DEVID">
-<b>DEVID</b>  ( -- n )
-<div>   Constante, accesseur du champ identifiant le périphérique, dans la structure
-</div>
-<div>   descripteur de périphérique bloc.
+<b>DEVID</b>  ( a-addr -- n )
+<br><div>   Constante, Identifiant le périphérique
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>aucun
-</i>&nbsp;&nbsp;</div>
+<div><i>a-addr</i>&nbsp;&nbsp;  Adresse descripteur de périphérique de stockage
+</div>
 <div><b> retourne:
 </b></div>
-<div><i>n</i>&nbsp;&nbsp;  Index du champ dans la table.  
+<div><i>n</i>&nbsp;&nbsp;  Indentifiant du périphérique {SPI_RAM=3,SPI_EEPROM=4,SD_CARD=5}
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="FN_READ">
-<b>FN_READ</b>  ( -- n )
-<div>   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
-</div>
-<div>   Ce champ accède la fonction READ qui effectue la lecture d'un bloc sur le périphérique. 
+<hr style="border-width:1px;"><p id="BLK-READ">
+<b>BLK-READ</b>  ( a-addr1 ud a-addr2 -- )
+<br><div>   Lecture d'un bloc sur le périphérique de stockage.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>aucun
-</i>&nbsp;&nbsp;</div>
+<div><i>a-addr1</i>&nbsp;&nbsp;  Adresse du premier octet du tampon RAM recevant les donnnées
+</div>
+<div><i>ud	Adresse</i>&nbsp;&nbsp; absolue sur le périphérique de stockage
+</div>
+<div><i>a-addr2</i>&nbsp;&nbsp;  Adresse du descripteur de périphérique.    
+</div>
 <div><b> retourne:
 </b></div>
-<div><i>n</i>&nbsp;&nbsp;   Index du champ dans la table.  
+<div><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLK-WRITE">
+<b>BLK-WRITE</b>  ( a-addr1 ud a-addr2 -- n )
+<br><div>   .Écriture d'un bloc sur le périphérique de stockage.
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>a-addr1</i>&nbsp;&nbsp;  Adresse du premier octet du tampon RAM contenant les donnnées.
+</div>
+<div><i>ud	Adresse</i>&nbsp;&nbsp; absolue sur le périphérique de stockage
+</div>
+<div><i>a-addr2</i>&nbsp;&nbsp;  Adresse du descripteur de périphérique.    
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLK&gt;ADR">
+<b>BLK&gt;ADR</b>  ( n+ -- ud )
+<br><div>   Convertie un numéro de bloc en adresse absolue sur le périphérique de stockage.
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>n+	Numéro</i>&nbsp;&nbsp; du bloc.
+</div>
+<div><i>a-addr</i>&nbsp;&nbsp; Adresse du descripteur de périphérique de stockage.    
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>ud</i>&nbsp;&nbsp;    Adresse début du bloc sur le périphérique.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="FN_WRITE">
-<b>FN_WRITE</b>  ( -- n )
-<div>   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
-</div>
-<div>   Ce champ accède la fonction WRITE qui écris un bloc sur périphérique.
+<hr style="border-width:1px;"><p id="BLK-VALID?">
+<b>BLK-VALID?</b>  ( n+ a-addr -- f )
+<br><div>  Vérifie la validité d'un no. de bloc.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>aucun
-</i>&nbsp;&nbsp;</div>
+<div><i>n+</i>&nbsp;&nbsp; Numéro du bloc.
+</div>
+<div><i>a-addr</i>&nbsp;&nbsp; Adresse du descripteur de périphérique.    
+</div>
 <div><b> retourne:
 </b></div>
-<div><i>n</i>&nbsp;&nbsp;    Index du champ dans la table.  
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="FN_BLK&gt;ADR">
-<b>FN_BLK&gt;ADR</b>  ( -- n )
-<div>   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
-</div>
-<div>   Ce champ accède la fonction BLK&gt;ADR  qui convertie un numéro de bloc en adressse absolue. 
-</div>
-</p>
-<div><b> arguments:
-</b></div>
-<div><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div><b> retourne:
-</b></div>
-<div><i>n</i>&nbsp;&nbsp;    Index du champ dans la table.  
-</div>
-<div><a href="#index">index</a></div>
-<div><a href="#top">haut</a></div>
-<div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="FN_BOUND">
-<b>FN_BOUND</b>  ( -- n )
-<div>   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
-</div>
-<div>   Ce champ accède la fonction BOUND  qui vérifie la validité d'un no. de bloc.
-</div>
-</p>
-<div><b> arguments:
-</b></div>
-<div><i>aucun
-</i>&nbsp;&nbsp;</div>
-<div><b> retourne:
-</b></div>
-<div><i>n</i>&nbsp;&nbsp;    Index du champ dans la structure.  
+<div><i>f</i>&nbsp;&nbsp;    Indicateur booléen vrai si le numéro est valide.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="XRAM">
 <b>XRAM</b>   ( -- a-addr )  
-<div>   Retourne l'adresse du descripteur du périphérique RAM SPI.    
+<br><div>   Retourne l'adresse du descripteur du périphérique RAM SPI.    
 </div>
 </p>
 <div><b> arguments:
@@ -479,14 +405,14 @@
 </i>&nbsp;&nbsp;</div>
 <div><b> retourne:
 </b></div>
-<div><i>a-addr</i>&nbsp;&nbsp;   Adresse du descripteur de périphérique.  
+<div><i>a-addr</i>&nbsp;&nbsp;   Adresse du descripteur de périphérique XRAM.  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="EEPROM">
 <b>EEPROM</b>   ( -- a-addr )  
-<div>   Retourne l'adresse du descripteur du périphérique EEPROM.    
+<br><div>   Retourne l'adresse du descripteur du périphérique EEPROM.    
 </div>
 </p>
 <div><b> arguments:
@@ -495,7 +421,7 @@
 </i>&nbsp;&nbsp;</div>
 <div><b> retourne:
 </b></div>
-<div><i>a-addr</i>&nbsp;&nbsp;   Adresse du descripteur de périphérique.  
+<div><i>a-addr</i>&nbsp;&nbsp;   Adresse du descripteur de périphérique EEPROM  
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -504,29 +430,24 @@
 <p>
 <ul>
 <li><a href="#?WIP">?WIP</a></li>
+<li><a href="#BLK&gt;ADR">BLK&gt;ADR</a></li>
+<li><a href="#BLK-READ">BLK-READ</a></li>
+<li><a href="#BLK-VALID?">BLK-VALID?</a></li>
+<li><a href="#BLK-WRITE">BLK-WRITE</a></li>
 <li><a href="#DEVID">DEVID</a></li>
 <li><a href="#EALL">EALL</a></li>
-<li><a href="#EEBLK&gt;ADR">EEBLK&gt;ADR</a></li>
-<li><a href="#EEBLKCOUNT">EEBLKCOUNT</a></li>
-<li><a href="#EEBOUND">EEBOUND</a></li>
+<li><a href="#EE&gt;RAM">EE&gt;RAM</a></li>
 <li><a href="#EEPROM">EEPROM</a></li>
 <li><a href="#EERASE">EERASE</a></li>
-<li><a href="#EEREAD">EEREAD</a></li>
 <li><a href="#EEWRITE">EEWRITE</a></li>
 <li><a href="#EPAGE">EPAGE</a></li>
 <li><a href="#ESECTOR">ESECTOR</a></li>
-<li><a href="#FN_BLK&gt;ADR">FN_BLK&gt;ADR</a></li>
-<li><a href="#FN_BOUND">FN_BOUND</a></li>
-<li><a href="#FN_READ">FN_READ</a></li>
-<li><a href="#FN_WRITE">FN_WRITE</a></li>
 <li><a href="#RAM&gt;EE">RAM&gt;EE</a></li>
+<li><a href="#RAM&gt;XR">RAM&gt;XR</a></li>
 <li><a href="#WWIP">WWIP</a></li>
 <li><a href="#XBLK&gt;ADR">XBLK&gt;ADR</a></li>
-<li><a href="#XBLKCOUNT">XBLKCOUNT</a></li>
-<li><a href="#XBOUND">XBOUND</a></li>
+<li><a href="#XR&gt;RAM">XR&gt;RAM</a></li>
 <li><a href="#XRAM">XRAM</a></li>
-<li><a href="#XREAD">XREAD</a></li>
-<li><a href="#XWRITE">XWRITE</a></li>
 </ul>
 </p>
 <hr style="border-width:1px;"><div><a href="#top">haut</a></div>

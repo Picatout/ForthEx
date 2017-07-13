@@ -1,3 +1,12 @@
+2017-07-12
+-----------
+Travail sur documentation.
+Retravaillé store.s, block.s et sdcard.s
+
+2017-07-11
+----------
+Travail dans sdcard.s
+
 2017-07-03
 ----------
 Travail sur tutoriel.html

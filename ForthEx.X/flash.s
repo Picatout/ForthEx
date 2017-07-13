@@ -593,8 +593,8 @@ DEFWORD "IMGSAVE",7,,IMGSAVE ; ( -- )
 ;   rien  
 DEFWORD "IMGLOAD",7,,IMGLOAD ; ( -- )
     .word QIMG,NOT,QABORT
-    .byte 24
-    .ascii "No boot image available."
+    .byte 23
+    .ascii "No boot image in flash."
     .align 2
     .word IMGHEAD,QSIZE,LIT,BOOT_HEADER_SIZE,PLUS
     .word IMGADDR,FLASHTORAM

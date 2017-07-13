@@ -1,5 +1,5 @@
 ;****************************************************************************
-; Copyright 2015,2016,2017 Jacques Deschenes
+; Copyright 2015,2016,2017 Jacques Deschênes
 ; This file is part of ForthEx.
 ;
 ;     ForthEx is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
 ;
 ;****************************************************************************
 
-;NOM: sdcard.s
-;Date: 2017-03-20
+; NOM: sdcard.s
+; Date: 2017-03-20
 ; DESCRIPTION:  
 ; Interface de bas niveau pour l'accès à la carte SD.
 ; Permet l'initialisation de la carte ainsi que la lecture et l'écriture d'un bloc de
@@ -392,73 +392,72 @@ HEADLESS READCID,CODE
 DEFWORD "CARD-INFO",9,,CARDINFO
     .word QSDCOK,ZBRANCH,9f-$
     .word READCID, ZBRANCH,9f-$
-    .word CR,STRQUOTE
+    .word CR,DOTSTR
     .byte 5
     .ascii "VER: "
     .align 2
-    .word TYPE,LIT,1,QSDC,LIT,F_SDC_V2,AND,ZBRANCH,2f-$,TWOSTAR
+    .word LIT,1,QSDC,LIT,1,LIT,F_SDC_V2,LSHIFT,AND,ZBRANCH,2f-$,TWOSTAR
 2:  .word UDOT,CR
-    .word SDCR,STRQUOTE
+    .word SDCR,DOTSTR
     .byte 4
     .ascii "MID:"
     .align 2
-    .word TYPE, DUP,CFETCH,UDOT,CR
-    .word STRQUOTE
+    .word DUP,CFETCH,UDOT,CR
+    .word DOTSTR
     .byte 5
     .ascii "OID: "
     .align 2
-    .word TYPE,ONEPLUS,DUP,LIT,2,TYPE,CR
-    .word STRQUOTE
+    .word ONEPLUS,DUP,LIT,2,TYPE,CR
+    .word DOTSTR
     .byte 5
     .ascii "PNM: "
     .align 2
-    .word TYPE,TWOPLUS,DUP,LIT,5,TYPE,CR
-    .word STRQUOTE
+    .word TWOPLUS,DUP,LIT,5,TYPE,CR
+    .word DOTSTR
     .byte 4
     .ascii "PRV:"
     .align 2
-    .word TYPE,LIT,5,PLUS,DUP,CFETCH
+    .word LIT,5,PLUS,DUP,CFETCH
     .word DUP,LIT,4,RSHIFT,DOT,LIT,'.',EMIT
     .word LIT,15,AND,DOT,CR
-    .word STRQUOTE
+    .word DOTSTR
     .byte 4
     .ascii "PSN:"
     .align 2
-    .word TYPE,ONEPLUS,DUP,BIDFETCH,UDDOT,CR,LIT,4,PLUS
-    .word STRQUOTE
+    .word ONEPLUS,DUP,BIDFETCH,UDDOT,CR,LIT,4,PLUS
+    .word DOTSTR
     .byte 4
     .ascii "MTD:"
     .align 2
-    .word TYPE,DUP,CFETCH,LIT,4,LSHIFT,TOR,ONEPLUS,CFETCH,DUP,LIT,4,RSHIFT
+    .word DUP,CFETCH,LIT,4,LSHIFT,TOR,ONEPLUS,CFETCH,DUP,LIT,4,RSHIFT
     .word RFROM,PLUS,LIT,2000,PLUS,UDOT,LIT,'/',EMIT
     .word LIT,15,AND,UDOT,CR
-    .word STRQUOTE
+    .word DOTSTR
     .byte 4
     .ascii "BLK:"
     .align 2
-    .word TYPE,LIT,blocks_count,TWOFETCH,UDDOT,STRQUOTE
-    .byte 7
-    .ascii " blocks"
-    .align 2
-    .word TYPE,CR,STRQUOTE
+    .word LIT,blocks_count,TWOFETCH,UDDOT
+    .word CR,DOTSTR
     .byte 4
     .ascii "SEG:"
     .align 2
-    .word TYPE,LIT,seg_count,FETCH,UDOT,STRQUOTE
-    .byte 9
-    .ascii " segments"
-    .align 2
-    .word TYPE,CR
+    .word LIT,seg_count,FETCH,UDOT
+    .word CR
 9:  .word EXIT
   
   
-; nom: SDC-R ( -- a-addr )
+; SDC-R ( -- a-addr )
 ;   Adresse de la mémoire tampon de 16 octets qui reçois les réponses de la carte SD.
 ; arguments:
 ;   aucun
 ; retourne:
 ;   a-addr Adresse du tampon réponse carte SD.
-DEFCONST "SDC-R",5,,SDCR,sdc_R    
+HEADLESS SDCR,CODE
+    DPUSH
+    mov #sdc_R,T
+    NEXT
+    
+;DEFCONST "SDC-R",5,,SDCR,sdc_R    
     
 ; nom: SDC-INIT ( -- f )
 ;   Initialisation carte SD 
@@ -641,7 +640,8 @@ DEFWORD "?SDCOK",6,,QSDCOK ; ( -- f )
     .word QSDC,LIT,1,LIT,F_SDC_OK,LSHIFT,AND,EXIT
     
 ; nom: SDCREAD  ( c-addr ud -- f )    
-;   Lecture d'un secteur de la carte SD, bloc de 512 octets    
+;   Lecture d'un secteur de la carte SD.
+;   Un secteur compte 512 octets.    
 ;  arguments:
 ;   addr Adresse du tampon RAM
 ;   ud  Numéro du secteur sur la carte SD. 
@@ -746,33 +746,65 @@ DEFCODE "SDC-SEGMENTS",12,,SDCSEGMENTS
     NEXT
 
     
-; nom: SDBOUND  ( n+ -- f)
+; SDC-VALID?  ( n+ -- f)
 ;   Vérifie si le numéro de bloc est dans les limites
 ; arguments:
 ;   n+  Numéro du bloc à vérifier. {1..65535}
 ; retourne:
 ;   f   Indicateur booléen.
-DEFWORD "SDBOUND",7,,SDBOUND
-    .word DUP,ZEROEQ,NOT,SWAP
-    .word LIT,blocks_count,TWOFETCH,TBRANCH,8f-$
-    .word UGREATER,NOT,BRANCH,9f-$
-8:  .word DROP,TRUE    
-9:  .word AND,EXIT
+HEADLESS SDCVALIDQ,HWORD    
+;DEFWORD "SDC-VALID?",7,,SDCVALIDQ
+    .word ZEROEQ,NOT,EXIT
     
-; nom: SDC-BLK>ADR  ( u -- ud )
+; SDC-BLK>ADR  ( u -- ud )
 ;   Convertie un numéro de bloc de la carte SD en adresse absolue.
 ;   addresse=(u-1)*adr_factor + segment*66535*adr_factor
-;   adr_factor et 1024 pour les cartes V1 et 2 pour les cartes V2.    
+;   adr_factor est 1024 pour les cartes V1 et 2 pour les cartes V2.    
 ; arguments:
 ;   u    Numéro du bloc {1..65535}
 ; retourne:
 ;   ud   Adresse absolue de 32 bits sur la carte SD.
-    
-DEFWORD "SDC-BLK>ADR",11,,SDBLKTOADR
-    .word ONEMINUS,LIT,BLOCK_SIZE,QSDC,LIT,F_SDC_HC,AND,ZBRANCH,2f-$
+HEADLESS SDCBLKTOADR,HWORD    
+;DEFWORD "SDC-BLK>ADR",11,,SDCBLKTOADR
+    .word ONEMINUS,LIT,BLOCK_SIZE
+    .word QSDC,LIT,1,LIT,F_SDC_HC,LSHIFT,AND,ZBRANCH,2f-$
     .word LIT,SECTOR_SIZE,SLASH
 2:  .word DUP,TOR,UMSTAR,SEGMENTQ,RFROM,UMSTAR,TRUE,UDSTAR,DPLUS
 9:  .word EXIT
+
+;  INCRADR ( ud1 -- ud2 )
+;   Incrémente l'adresse de la carte SDC pour le prochain secteur.
+; arguments:
+;   ud1  Adresse initiale
+; retourne:
+;   ud2 Adresse prochain secteur
+HEADLESS INCRADR,HWORD ;( ud1 -- ud2 )  
+    .word LIT,SECTOR_SIZE,QSDC,LIT,1,LIT,F_SDC_HC,LSHIFT,AND,ZBRANCH,9f-$
+    .word DROP,LIT,1
+9:  .word MPLUS,EXIT
+  
+; SDC-BLK-READ  ( u1 ud1 -- )
+;   Lecture d'un bloc sur la carte SD  
+; arguments:
+;   u1  Adresse tampon RAM
+;   ud1 Adresse sur carte SD
+; retourne:
+;   rien  
+HEADLESS SDCBLKREAD,HWORD ; ( u1 ud1 --  )
+    .word LIT,2,LIT,0,DODO
+1:  .word TWOTOR,DUP,LIT,SECTOR_SIZE,TWORFETCH,SDCREAD,DROP
+    .word LIT,SECTOR_SIZE,PLUS,TWORFROM,INCRADR
+    .word DOLOOP,TWODROP,DROP
+    .word EXIT
+
+; SDC-BLK_WRITE ( u1 ud1 -- )    
+;   Écriture d'un bloc sur la carte SD    
+HEADLESS SDCBLKWRITE,HWORD ; ( u1 ud1 -- )
+    .word LIT,2,LIT,0,DODO
+1:  .word TWOTOR,DUP,LIT,SECTOR_SIZE,TWORFETCH,SDCWRITE
+    .word LIT,SECTOR_SIZE,PLUS,TWORFROM,INCRADR
+    .word DOLOOP,TWODROP,DROP
+    .word EXIT
     
 ; nom: SDCARD  ( -- a-addr )  
 ;   Descripteur de périphérique pour la carte Secure Digital.
@@ -782,7 +814,8 @@ DEFWORD "SDC-BLK>ADR",11,,SDBLKTOADR
 ;   a-addr Adresse du descripteur de périphérique.  
 DEFTABLE "SDCARD",6,,SDCARD
     .word _SDCARD 
-    .word SDCREAD
-    .word SDCWRITE
-    .word SDBLKTOADR
-    .word SDBOUND
+    .word SDCBLKREAD
+    .word SDCBLKWRITE
+    .word SDCBLKTOADR
+    .word SDCVALIDQ
+

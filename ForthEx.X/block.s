@@ -92,13 +92,19 @@ DEFCODE "SCR",3,,SCR
     
 ; nom: BLKDEV  ( -- a-addr )
 ;    variable contenant l'adresse du descripteur du périphérique
-;    de stockage actif.
+;    de stockage actif. Le périphérique de stockage peut-être sélectionné
+;    avec la phrase: 
+;   HTML:    
+;    <i>device</i> <b>BLKEV !</b>
+;  :HTML    
+;   où device est l'un de périphérique suivants: EEPROM, SDCARD, XRAM
+;   XRAM est la RAM externe SPI il s'agit donc d'un stockage temporaire.    
 ; arguments:
 ;   aucun
 ; retourne:
 ;    a-addr  Adresse de la variable BLKDEV
-; HEADLESS BLKDEV,CODE    
 DEFCODE "BLKDEV",6,,BLKDEV
+; HEADLESS BLKDEV,CODE    
     DPUSH
     mov #_block_dev,T
     NEXT
@@ -238,17 +244,17 @@ HEADLESS BLKDEVFETCH,HWORD
 ;DEFWORD "BLKDEV@",7,,BLKDEVFETCH
     .word BLKDEV,FETCH,EXIT
     
-; BLK>ADR ( a-addr -- ud )
+; DEVADR ( a-addr -- ud )
 ;   Convertie un numéro de bloc d'un buffer en adresse 32 bits. Qui correspond
 ;   à la position absolue sur le média de stockage.    
 ; arguments:
 ;    a-addr Adresse de la structure BUFFER.
 ; retourne:
 ;    ud  Adresse 32 bits sur le périphérique de stockage.
-HEADLESS BLKTOADR,HWORD    
-;DEFWORD "BLK>ADR",7,,BLKTOADR
+HEADLESS DEVADR,HWORD    
+;DEFWORD "DEVADR",6,,DEVADR
     .word DUP,TOR,LIT,BLOCK_NBR,SWAP,TBLFETCH
-    .word RFROM,FN_BLKTOADR,VEXEC,EXIT
+    .word LIT,DEVICE,RFROM,TBLFETCH,BLKTOADR,EXIT
     
 ; FIELDS  ( a-addr -- u1 u2 u3 a-addr )
 ;   Obtient les paramètres du buffer à partir de son adresse.
@@ -310,9 +316,9 @@ HEADLESS DATAOUT,HWORD
 2:  .word FIELDS ; S: data  no-block device *BUFFER
     .word TOR,DUP,TOR  ; s: data no-block device r: *BUFFER device
     ; conversion BLK>ADR
-    .word FN_BLKTOADR,VEXEC
+    .word BLKTOADR
     ; écriture
-    .word RFROM,FN_WRITE,VEXEC
+    .word RFROM,BLKWRITE
     ; raz compteur
     .word RFROM,NOUPDATE
     .word EXIT
@@ -329,9 +335,9 @@ HEADLESS TODATA,HWORD
 ;DEFWORD ">DATA",5,,TODATA
     .word FIELDS,TOR,DUP,TOR ; S: data block_nbr device r: a-addr device
     ; conversion BLK>ADR
-    .word FN_BLKTOADR,VEXEC,LIT,BLOCK_SIZE,NROT ; s: data u ud r: a-addr device
+    .word BLKTOADR ; s: data ud r: a-addr device
     ;lecture des  données
-    .word RFROM,FN_READ,VEXEC
+    .word RFROM,BLKREAD
     ;raz compteur
     .word RFROM,NOUPDATE
     .word EXIT
@@ -342,7 +348,7 @@ HEADLESS TODATA,HWORD
 ; arguments:
 ;   n+  numéro du bloc requis.    
 ; retourne:
-;   a-addr   Adresse du début de la zone de données.
+;   a-addr   Adresse structure BUFFER.
 HEADLESS ASSIGN,HWORD    
 ;DEFWORD "ASSIGN",6,,ASSIGN
     ; est-ce que le bloc est déjà dans un buffer?
@@ -361,7 +367,7 @@ HEADLESS ASSIGN,HWORD
     ; mettre champ UPDATE à zéro
     .word RFETCH,NOUPDATE
     .word RFROM
-    .word EXIT ; S: no_buffer
+    .word EXIT ; S: *BUFFER
 
     
 ; nom: BUFFER  ( n+ -- a-addr )

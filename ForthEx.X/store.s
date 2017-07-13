@@ -129,15 +129,15 @@ DEFWORD "XBLK>ADR",8,,XBLKTOADR
     .word ONEMINUS,LIT,BLOCK_SIZE,MSTAR,EXIT
     
     
-; nom: XWRITE ( u1 n+ ud1 -- )
+; nom: RAM>XR ( u1 u2 ud1 -- )
 ;   Transfert un bloc d'octets de la RAM du MCU vers la RAM SPI.
 ; arguments: 
 ;    u1 Adresse début bloc RAM.
-;    n+ Nombre d'octets à transférer.
+;    u2 Nombre d'octets à transférer.
 ;    ud1 Entier double non signé, Adresse destination dans la RAM SPI. 
 ; retourne:    
 ;   rien
-DEFCODE "XWRITE",6,,XWRITE ; ( u1 n+ ud1 -- )
+DEFCODE "RAM>XR",6,,RAMTOXR ; ( u1 n+ ud1 -- )
     SET_EDS
     _enable_sram
     mov #RWRITE,W0
@@ -159,16 +159,18 @@ DEFCODE "XWRITE",6,,XWRITE ; ( u1 n+ ud1 -- )
     RESET_EDS
     NEXT
 
-
-; nom: XREAD  ( u1 n+ ud1 -- )
+HEADLESS XWRITE,HWORD ; ( u1 ud1 -- )
+    .word LIT,BLOCK_SIZE,NROT,RAMTOXR,EXIT
+    
+; nom: XR>RAM  ( u1 u2 ud1 -- )
 ;   Transfert un bloc d'octets de la RAM SPI vers la RAM du MCU.
 ; arguments: 
 ;    u1  Entier simple non signé, adresse début tampon RAM.
-;    n+  Entier simple positif, Nombre d'octets à transféréer.
+;    u2  Entier simple non signé, Nombre d'octets à transféréer.
 ;    ud1 Entier double non signé, adresse début du bloc dans la RAM SPI.
 ; retourne:    
 ;   rien
-DEFCODE "XREAD",5,,XREAD ; ( u1 n+ ud1 -- )
+DEFCODE "XR>RAM",6,,XRTORAM ; ( u1 n+ ud1 -- )
     _enable_sram
     mov #RREAD, W0
     spi_write
@@ -188,21 +190,30 @@ DEFCODE "XREAD",5,,XREAD ; ( u1 n+ ud1 -- )
     _disable_sram
     NEXT
   
-; nom: XBLKCOUNT  ( -- n )
+HEADLESS XREAD,HWORD ; ( u1 ud1 -- )
+    .word LIT,BLOCK_SIZE,NROT,XRTORAM,EXIT
+    
+; XBLKCOUNT  ( -- n )
 ;   Constante, capacité en nombre de blocs de la RAM SPI.    
 ; arguments:
 ;   aucun
 ; retourne:
 ;   n   Capacité en nombre de blocs de la RAM SPI.    
-DEFCONST "XBLKCOUNT",9,,XBLKCOUNT,128    
+HEADLESS XBLKCOUNT,CODE
+    DPUSH
+    mov #128,T
+    NEXT
     
-; nom: XBOUND  ( n+ -- f )
+;DEFCONST "XBLKCOUNT",9,,XBLKCOUNT,128    
+    
+; XVALIDQ  ( n+ -- f )
 ;   Vérifie si le numéro de bloc est dans les limites
 ; arguments:
 ;   n+   Numéro du bloc à vérifier.
 ; retourne:
 ;   f   Indicateur booléen, vrai si le numéro de bloc est valide.
-DEFWORD "XBOUND",6,,XBOUND
+HEADLESS XVALIDQ,HWORD    
+;DEFWORD "XBOUND",6,,XBOUND
     .word DUP,ZBRANCH,9f-$
     .word XBLKCOUNT,UGREATER,NOT
 9:  .word EXIT
@@ -245,13 +256,14 @@ DEFWORD "WWIP",4,,WWIP ; ( -- )
 1: .word QWIP,TBRANCH,1b-$,EXIT
     
 
-; nom: EEBLK>ADR  ( u -- ud )
+; EEBLK>ADR  ( u -- ud )
 ;   Convertie un numéro de bloc en adresse EEPROM
 ; arguments:
 ;   u Entier simple non signé, numéro du block {1..MAX_BLOCK}
 ; retourne:
 ;   ud Entier double non signé, adresse début bloc dans l'EEPROM
-DEFWORD "EEBLK>ADR",9,,EEBLKTOADR
+HEADLESS EEBLKTOADR,HWORD 
+;DEFWORD "EEBLK>ADR",9,,EEBLKTOADR
     .word ONEMINUS,LIT,BLOCK_SIZE,MSTAR,EXIT
  
 ; nom: RAM>EE ( u1 n+ ud1 -- )
@@ -298,15 +310,15 @@ DEFCODE "RAM>EE",6,,RAMTOEE
     RESET_EDS
     NEXT
     
-; nom: EEREAD   ( u1 n+ ud -- )
+; nom: EE>RAM   ( u1 u2 ud -- )
 ;   Copie d'une plage EEPROM vers la mémoire RAM.
 ; arguments:
-;    u1 Entier simple non signé, adresse 16 bits début RAM.
-;    n+ Entier simple positif, nombre d'octets à copier. 
+;    u1 Entier simple non signé, adresse début tampon RAM.
+;    u2 Entier simple non signé, nombre d'octets à copier. 
 ;    ud Entier double non signé, adresse source dans l'EEPROM.
 ; retourne:
 ;   rien    
-DEFCODE "EEREAD",6,,EEREAD   
+DEFCODE "EE>RAM",6,,EETORAM   
      ; on s'assure qu'il n'y a pas d'écriture en cours
     call wait_wip0
     ;envoie de la commande et de l'adresse EEPROM
@@ -327,6 +339,16 @@ DEFCODE "EEREAD",6,,EEREAD
     bra nz, 1b
     _disable_eeprom
     NEXT
+    
+; EEREAD  ( u1 ud -- )
+;   Lecture d'un bloc EEPROM dans un tampon en mémoire RAM    
+; arguments:
+;   u1 Adresse début tampon RAM
+;   ud  Adresse début en EEPROM
+; retourne:
+;   rien
+HEADLESS EEREAD,HWORD
+    .word LIT,BLOCK_SIZE,NROT,EETORAM,EXIT
     
 ; nom: EPAGE  ( -- n )
 ;   Valeur constante indiquant qu'il s'agit d'une opération d'effacement d'une page.
@@ -404,27 +426,34 @@ DEFCODE "EERASE",6,,EERASE ; ( EALL | n {EPAGE|ESECTOR} -- )
 ;   ud Entier double non signé, adresse début dans l'EEPROM.
 ; retourne:
 ;   rien    
-DEFWORD "EEWRITE",7,,EEWRITE 
+HEADLESS EEWRITE,HWORD    
+;DEFWORD "EEWRITE",7,,EEWRITE 
     .word LIT,4,LIT,0,DODO  ; S: u1 ud
 1:  .word TWOTOR,LIT,256,TWODUP,TWORFETCH,RAMTOEE ; S: u1 256 R: ud
     .word PLUS,TWORFROM,LIT,256,MPLUS,DOLOOP,1b-$
     .word TWODROP,DROP,EXIT
 
-; nom: EEBLKCOUNT  ( -- n )  
+; EEBLKCOUNT  ( -- n )  
 ;   Constante, capacité en nombre de blocs de l'EEPROM.
 ; arguments:
 ;   aucun
 ; retourne:
 ;    n  Capacité en nombre de blocs.  
-DEFCONST "EEBLKCOUNT",10,,EEBLKCOUNT,128
+
+HEADLESS EEBLKCOUNT,CODE
+    DPUSH
+    mov #128,T
+    NEXT
+;DEFCONST "EEBLKCOUNT",10,,EEBLKCOUNT,128
   
-; nom: EEBOUND  ( n+ -- f )
+;  EEBOUND  ( n+ -- f )
 ;   Vérifie si le numéro de bloc est dans les limites de validité.
 ; arguments:
 ;   n+ Numéro du bloc à vérifier.
 ; retourne:
 ;   f  Indicateur booléen, vrai si le numéro de bloc est valide.
-DEFWORD "EEBOUND",7,,EEBOUND
+HEADLESS EEVALIDQ,HWORD
+;DEFWORD "EEBOUND",7,,EEBOUND
     .word DUP,ZBRANCH,9f-$
     .word EEBLKCOUNT,UGREATER,NOT
 9:  .word EXIT
@@ -439,87 +468,92 @@ DEFWORD "EEBOUND",7,,EEBOUND
 ; HTML:
 ; <br><table border="single">
 ; <tr><th>nom</th><th>description</th></tr>  
-; <tr><td>DEVID</td><td>Identifiant du périphérique.</td></tr>  
-; <tr><td>READ</td><td>CFA de la fonction de lecture d'un bloc.</td></tr>
-; <tr><td>WRITE</td><td>CFA de la fonction d'écriture d'un bloc.</td></tr>
-; <tr><td>BLK&gt;ADR</td><td>CFA de la fonction de conversion numéro de bloc en adresse.</td></tr>
-; <tr><td>BOUND</td><td>CFA de la fonction qui valide le numéro de bloc.</td></tr>
+; <tr><td>DEVID</td><td>Identifiant du périphérique.<br>XRAM =3<br>EEPROM=4<br>
+; SDCARD=5</td></tr>  
+; <tr><td>READ</td><td>Lecture d'un bloc.</td></tr>
+; <tr><td>WRITE</td><td>Écriture d'un bloc.</td></tr>
+; <tr><td>BLK&gt;ADR</td><td>Conversion numéro de bloc en adresse.</td></tr>
+; <tr><td>BLK-VALID?</td><td>Valide le numéro de bloc.</td></tr>
 ; </table><br>
 ; :HTML  
 ; Il y a 3 périphériques de stockage, XRAM, EEPROM et SDCARD.
+; XRAM est la RAM SPI externe il s'agit donc d'un stockage temporaire.
   
-; acceseurs de champs
-; nom: DEVID  ( -- n )
-;   Constante, accesseur du champ identifiant le périphérique, dans la structure
-;   descripteur de périphérique bloc.
+; nom: DEVID  ( a-addr -- n )
+;   Constante, Identifiant le périphérique
 ; arguments:
-;   aucun
+;   a-addr  Adresse descripteur de périphérique de stockage
 ; retourne:
-;   n  Index du champ dans la table.  
-DEFCONST "DEVID",5,,DEVID,0    
+;   n  Indentifiant du périphérique {SPI_RAM=3,SPI_EEPROM=4,SD_CARD=5}
+DEFWORD "DEVID",5,,DEVID    
+    .word FETCH,EXIT
 
-; opérations
-
-; nom: FN_READ  ( -- n )
-;   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
-;   Ce champ accède la fonction READ qui effectue la lecture d'un bloc sur le périphérique. 
+; nom: BLK-READ  ( a-addr1 ud a-addr2 -- )
+;   Lecture d'un bloc sur le périphérique de stockage.
 ; arguments:
-;   aucun
+;   a-addr1  Adresse du premier octet du tampon RAM recevant les donnnées
+;   ud	Adresse absolue sur le périphérique de stockage
+;   a-addr2  Adresse du descripteur de périphérique.    
 ; retourne:
-;   n   Index du champ dans la table.  
-DEFCONST "FN_READ",7,,FN_READ,1   ; chargement d'un bloc dans un buffer
+;   rien
+DEFWORD "BLK-READ",8,,BLKREAD
+    .word LIT,1,VEXEC,EXIT
+    
+; nom: BLK-WRITE  ( a-addr1 ud a-addr2 -- n )
+;   .Écriture d'un bloc sur le périphérique de stockage.
+; arguments:
+;   a-addr1  Adresse du premier octet du tampon RAM contenant les donnnées.
+;   ud	Adresse absolue sur le périphérique de stockage
+;   a-addr2  Adresse du descripteur de périphérique.    
+; retourne:
+;   rien
+DEFWORD "BLK-WRITE",9,,BLKWRITE
+    .word LIT,2,VEXEC,EXIT
+
+; nom: BLK>ADR  ( n+ -- ud )
+;   Convertie un numéro de bloc en adresse absolue sur le périphérique de stockage.
+; arguments:
+;   n+	Numéro du bloc.
+;   a-addr Adresse du descripteur de périphérique de stockage.    
+; retourne:
+;   ud    Adresse début du bloc sur le périphérique.
+DEFWORD "BLK>ADR",7,,BLKTOADR
+    .word LIT,3,VEXEC,EXIT
   
-; nom: FN_WRITE  ( -- n )
-;   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
-;   Ce champ accède la fonction WRITE qui écris un bloc sur périphérique.
+; nom: BLK-VALID?  ( n+ a-addr -- f )
+;  Vérifie la validité d'un no. de bloc.
 ; arguments:
-;   aucun
+;   n+ Numéro du bloc.
+;   a-addr Adresse du descripteur de périphérique.    
 ; retourne:
-;   n    Index du champ dans la table.  
-DEFCONST "FN_WRITE",8,,FN_WRITE,2 ; écriture d'un buffer dans un bloc device
-
-; nom: FN_BLK>ADR  ( -- n )
-;   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
-;   Ce champ accède la fonction BLK>ADR  qui convertie un numéro de bloc en adressse absolue. 
-; arguments:
-;   aucun
-; retourne:
-;   n    Index du champ dans la table.  
-DEFCONST "FN_BLK>ADR",10,,FN_BLKTOADR,3 ; convertion no. bloc à adresse absolue.
-  
-; nom: FN_BOUND  ( -- n )
-;   Constante, accesseur de champ dans la structure descripteur de périphérique bloc.
-;   Ce champ accède la fonction BOUND  qui vérifie la validité d'un no. de bloc.
-; arguments:
-;   aucun
-; retourne:
-;   n    Index du champ dans la structure.  
-DEFCONST "FN_BOUND",8,,FN_BOUND,4 ; vérifie si le no. de block est dans les limites
+;   f    Indicateur booléen vrai si le numéro est valide.
+DEFWORD "BLK-VALID?",10,,BLKVALIDQ
+    .word LIT,4,VEXEC,EXIT
     
 ; nom: XRAM   ( -- a-addr )  
 ;   Retourne l'adresse du descripteur du périphérique RAM SPI.    
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr   Adresse du descripteur de périphérique.  
+;   a-addr   Adresse du descripteur de périphérique XRAM.  
 DEFTABLE "XRAM",4,,XRAM
     .word _SPIRAM ; RAM SPI externe
     .word XREAD   ; store -> buffer
     .word XWRITE  ; buffer -> store
     .word XBLKTOADR
-    .word XBOUND
+    .word XVALIDQ
     
 ; nom: EEPROM   ( -- a-addr )  
 ;   Retourne l'adresse du descripteur du périphérique EEPROM.    
 ; arguments:
 ;   aucun
 ; retourne:
-;   a-addr   Adresse du descripteur de périphérique.  
+;   a-addr   Adresse du descripteur de périphérique EEPROM  
 DEFTABLE "EEPROM",6,,EEPROM
     .word _SPIEEPROM ; mémoire EEPROM externe
     .word EEREAD    
     .word EEWRITE
     .word EEBLKTOADR
-    .word EEBOUND
+    .word EEVALIDQ
 
     

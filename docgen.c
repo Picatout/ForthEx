@@ -17,6 +17,8 @@
 #include <dirent.h>
 #include <ctype.h>
 
+#define LINE_MAX 512
+
 #define INDEX_SIZE 1024
 static char *words[INDEX_SIZE];
 int idx=0;
@@ -26,8 +28,7 @@ static char* docPath="docs/html/";
 static char* htmlExt=".html";
 
 static char* ext=".s";
-static char html[1024];
-
+static char html[LINE_MAX];
 
 int scan(const char *text, char c,int from){
 	while (text[from] && text[from]!=c){
@@ -54,32 +55,51 @@ int word(char *text){
 	return i;
 }
 
-void replaceAngleBrackets(char *text){
+char *asciiToUtf8(char *ascii,char *utf8){
 	int i=0,j=0;
 	unsigned char c;
+	while (ascii[i]){
+		c=ascii[i++];
+		if ( c<128) {
+			utf8[j++]=c;
+		}else{
+			utf8[j++]=0xC0|(c>>6);
+			utf8[j++]=0x80|(c&0x3f);
+		}
+	}
+	utf8[j]=0;
+	return utf8;
+}
+
+char *readLine(char *utf8,int size,FILE *in){
+	char line[LINE_MAX];
+	if (fgets(line,LINE_MAX,in)){
+		return asciiToUtf8(line,utf8);
+	}else{
+		return NULL;
+	}
+}
+
+void replaceAngleBrackets(char *text){
+	int i=0,j=0;
 	while (text[i]){
-		c=text[i++];
-		switch (c){
+		switch (text[i]){
 			case '<':
-			strcpy(&html[j],"&lt;");
-			j+=4;
-			break;
+				strcpy(&html[j],"&lt;");
+				j+=4;
+				break;
 			case '>':
-			strcpy(&html[j],"&gt;");
-			j+=4;
-			break;
-			default: // iso-8859-1 to utf-8
-			if ( c<128) {
-				html[j++]=c;
-		    }else{
-				html[j++]=0xC0|(c>>6);
-				html[j++]=0x80|(c&0x3f);
-			}
-			break;
+				strcpy(&html[j],"&gt;");
+				j+=4;
+				break;
+			default: 
+				html[j++]=text[i];
 		}//switch
+		i++;
 	}//while
 	html[j]=0;
 }
+
 
 void addHorzLine(FILE *fo,int tickness){
 	fprintf(fo,"<hr style=\"border-width:%dpx;\">",tickness);
@@ -106,7 +126,7 @@ void formatNameLine(char *text,FILE *out){
 	i++;
 	i=skip(text,' ',i);
 	start=&text[i];
-	i=scan(text,' ',i+1);
+	i=scan(text,' ',i);
 	text[i]=0;
 	replaceAngleBrackets(start);
 	if (idx<INDEX_SIZE){
@@ -118,7 +138,7 @@ void formatNameLine(char *text,FILE *out){
 	fprintf(out,"<b>%s</b> ",html);
 	i++;
 	replaceAngleBrackets(&text[i]);
-	fputs(html,out);
+	fprintf(out,"%s<br>",html);
 }
 
 void outputArgLine(char *line,FILE *out){
@@ -145,12 +165,13 @@ int refLine(char *line,FILE *out){
 }
 
 void addEmbeddedHtml(FILE *in, FILE *out){
-	char line[256];
-	
-	while (fgets(line,255,in) && (*line==';') && !strstr(line,":HTML")){
+	char line[LINE_MAX];
+	fputs("<div>",out);
+	while (readLine(line,LINE_MAX,in) && (*line==';') && !strstr(line,":HTML")){
 		line[0]=' ';
-        fprintf(out,"<div>%s</div>\n",line);
+        fprintf(out,"%s\n",line);
 	}
+	fputs("</div>",out);
 }
 
 
@@ -161,14 +182,13 @@ void addEntry(char* line, FILE *in, FILE *out){
 	// nom:
 	formatNameLine(line,out);
 	// description
-	while ((fgets(line,255,in))&&(*line==';') && !strstr(line,"arguments:")){
+	while ((readLine(line,LINE_MAX,in))&&(*line==';') && !strstr(line,"arguments:")){
 		line++;
 		if (strstr(line,"HTML:")) {
 			addEmbeddedHtml(in,out);
 		}else{
 			replaceAngleBrackets(line);
-			ref=strstr(line,"REF:");
-			if (!refLine(line,out)){
+			if (!refLine(html,out)){
 				fprintf(out,"<div>%s</div>\n",html);
 			}
 		}
@@ -178,7 +198,7 @@ void addEntry(char* line, FILE *in, FILE *out){
 		// arguments:
 		line++;
 		fprintf(out,"<div><b>%s</b></div>\n",line);
-		while ((fgets(line,255,in))&&(*line==';')&&!strstr(line,"retourne:")){
+		while ((readLine(line,255,in))&&(*line==';')&&!strstr(line,"retourne:")){
 			outputArgLine(line,out);
 		}
     }
@@ -186,7 +206,7 @@ void addEntry(char* line, FILE *in, FILE *out){
 		//retourne:
 		line++;
 		fprintf(out,"<div><b>%s</b></div>\n",line);
-		while ((fgets(line,255,in))&&(*line==';')){
+		while ((readLine(line,255,in))&&(*line==';')){
 			outputArgLine(line,out);
 		}
     }
@@ -200,18 +220,19 @@ void addEntry(char* line, FILE *in, FILE *out){
 void addDescription(char *line,FILE* in, FILE* out){
 	char *colon;
 	fputs("<h2 id=\"description\">Description</h2>",out);
-	replaceAngleBrackets(line);
 	colon=strchr(line,':');
 	colon++;
-	fprintf(out,"<div>%s</div>\n",colon);
-	line=strchr(line,':');
-	while (fgets(line,255,in) && (*line==';')) {
+	replaceAngleBrackets(colon);
+	if (strlen(html)){
+	   fprintf(out,"<div>%s</div>\n",html);
+    }
+	while (readLine(line,LINE_MAX,in) && (*line==';')) {
 		line++;
 		if (strstr(line,"HTML:")){
 			addEmbeddedHtml(in,out);
 		}else{
 			replaceAngleBrackets(line);
-			if (!refLine(line,out)){
+			if (!refLine(html,out)){
 				fprintf(out,"<div>%s</div>\n",html);
 			}
 		}
@@ -223,12 +244,11 @@ void addDescription(char *line,FILE* in, FILE* out){
 static int wc,fc;
 
 void generateDoc(FILE *in, FILE *out){
-	char line[256];
-    char *desc;
+	char line[LINE_MAX];
     
     fc++;	
-	while (fgets(line,255,in)){
-		if ((desc=strstr(line,"; DESCRIPTION:"))){
+	while (readLine(line,LINE_MAX,in)){
+		if (strstr(line,"; DESCRIPTION:")){
 			addDescription(line,in,out);
 		}else
 		if (strstr(line,"; nom:")){
@@ -240,7 +260,7 @@ void generateDoc(FILE *in, FILE *out){
 
 
 FILE* createHeader(const char *name,FILE *out){
-	char htmlName[256];
+	char htmlName[LINE_MAX];
 
 	out=fopen(name,"w");
 	fputs("<DOCTYPE! html>\n",out);

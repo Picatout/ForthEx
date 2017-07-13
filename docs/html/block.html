@@ -35,7 +35,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="BLK">
 <b>BLK</b>   ( -- a-addr)  
-<div>   Variable qui contient le no de bloc actuellement interprété.
+<br><div>   Variable qui contient le no de bloc actuellement interprété.
 </div>
 </p>
 <div><b> arguments:
@@ -51,7 +51,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SCR">
 <b>SCR</b> ( -- a-addr )
-<div>   variable contenant le dernier numéro de bloc affiché à l'écran.
+<br><div>   variable contenant le dernier numéro de bloc affiché à l'écran.
 </div>
 </p>
 <div><b> arguments:
@@ -67,9 +67,17 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLKDEV">
 <b>BLKDEV</b>  ( -- a-addr )
-<div>    variable contenant l'adresse du descripteur du périphérique
+<br><div>    variable contenant l'adresse du descripteur du périphérique
 </div>
-<div>    de stockage actif.
+<div>    de stockage actif. Le périphérique de stockage peut-être sélectionné
+</div>
+<div>    avec la phrase: 
+</div>
+<div>     <i>device</i> <b>BLKEV !</b>
+
+</div><div>   où device est l'un de périphérique suivants: EEPROM, SDCARD, XRAM
+</div>
+<div>   XRAM est la RAM externe SPI il s'agit donc d'un stockage temporaire.    
 </div>
 </p>
 <div><b> arguments:
@@ -80,14 +88,12 @@
 </b></div>
 <div><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable BLKDEV
 </div>
-<div><i>HEADLESS</i>&nbsp;&nbsp; BLKDEV,CODE    
-</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BUFFER">
 <b>BUFFER</b>  ( n+ -- a-addr )
-<div>   Retourne l'adresse d'un bloc de données. Si aucun buffer n'est disponible
+<br><div>   Retourne l'adresse d'un bloc de données. Si aucun buffer n'est disponible
 </div>
 <div>   libère celui qui à la plus petite valeur UPDATED.
 </div>
@@ -109,7 +115,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLOCK">
 <b>BLOCK</b>  ( n+ -- a-addr )
-<div>   Lit un bloc d'un périphérique de stockage vers un buffer. Libère un buffer au besoin.
+<br><div>   Lit un bloc d'un périphérique de stockage vers un buffer. Libère un buffer au besoin.
 </div>
 <div>   Le périphérique est celui déterminé par la variable BLKDEV.    
 </div>
@@ -127,7 +133,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="LOAD">
 <b>LOAD</b> ( i*x n+ -- j*x )
-<div>   Évalue un bloc. Si le bloc n'est pas déjà dans un buffer il est chargé
+<br><div>   Évalue un bloc. Si le bloc n'est pas déjà dans un buffer il est chargé
 </div>
 <div>   à partir du périphérique désigné par BLKDEV. Le numéro du bloc évalué 
 </div>
@@ -149,7 +155,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SAVE-BUFFERS">
 <b>SAVE-BUFFERS</b> ( -- )  
-<div>   Sauvegarde tous les buffers qui ont été modifiés.
+<br><div>   Sauvegarde tous les buffers qui ont été modifiés.
 </div>
 </p>
 <div><b> arguments:
@@ -165,7 +171,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="EMPTY-BUFFERS">
 <b>EMPTY-BUFFERS</b>  ( -- )
-<div>   Libère tous les buffers sans sauvegarder.
+<br><div>   Libère tous les buffers sans sauvegarder.
 </div>
 </p>
 <div><b> arguments:
@@ -181,7 +187,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="FLUSH">
 <b>FLUSH</b> ( -- )
-<div>   Sauvegarde tous les buffers et les libères.
+<br><div>   Sauvegarde tous les buffers et les libères.
 </div>
 </p>
 <div><b> arguments:
@@ -197,7 +203,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="LIST">
 <b>LIST</b> ( n+ -- )
-<div>   Affiche le contenu du bloc à l'écran. Si le bloc n'est pas déjà dans un buffer
+<br><div>   Affiche le contenu du bloc à l'écran. Si le bloc n'est pas déjà dans un buffer
 </div>
 <div>   il est chargé à partir du périphérique désigné par BLKDEV. L'affichage s'arrête
 </div>
@@ -217,7 +223,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="THRU">
 <b>THRU</b>  ( i*x u1 u2 -- j*x )
-<div>   Interprétation des blocs u1 à u2 . LOAD est appellé pour chacun des blocs dans la séquence.
+<br><div>   Interprétation des blocs u1 à u2 . LOAD est appellé pour chacun des blocs dans la séquence.
 </div>
 </p>
 <div><b> arguments:

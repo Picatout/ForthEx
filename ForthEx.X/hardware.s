@@ -46,7 +46,7 @@
 .global _version,_math_error,_user_aborted,_stack_reset,_unknown_reset
 _version:
 .byte 12    
-.ascii "ForthEx V0.1"    
+.ascii "ForthEx V1.0"    
 _math_error:
 .byte  21
 .ascii "Math exception reset."
