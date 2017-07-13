@@ -68,7 +68,7 @@ sdc_status: .space 2 ; indicateurs booléens carte SD
 blocks_count: .space 4 ; nombre de bloc de 1024 octets
 seg_count: .space 2 ;  nombre de segments de 65535 blocs
 sdc_segment: .space 2 ; segment sélectionné. 
-sdc_R: .space 32; tampon pour la réponse de la carte 
+sdc_R: .space 16; tampon pour la réponse de la carte 
  
  
 INTR
@@ -128,13 +128,14 @@ sdc_wait_ready:
 2:  pop W0
     return
     
-; calcule l'adresse à partir du no de bloc
+; calcule l'adresse à partir du no de secteur.
+; Un secteur est de 512 octets.    
 ; arguments: 
 ;   ud1 Numéro de secteur
 ; retourne:
-;   ud2   Adresse absolue sur la carte SD.    
+;   ud2   Adresse sur la carte SD.    
 sector_to_address: ;   ( ud1 -- ud2 )    
-    mov #BLOCK_SIZE,W2
+    mov #SECTOR_SIZE,W2
     mul.uu T,W2,W0
     mov W0,T
     mul.uu W2,[DSP],W0
@@ -396,7 +397,7 @@ DEFWORD "CARD-INFO",9,,CARDINFO
     .byte 5
     .ascii "VER: "
     .align 2
-    .word LIT,1,QSDC,LIT,1,LIT,F_SDC_V2,LSHIFT,AND,ZBRANCH,2f-$,TWOSTAR
+    .word LIT,1,QSDC,LIT,F_SDC_V2,BITMASK,AND,ZBRANCH,2f-$,TWOSTAR
 2:  .word UDOT,CR
     .word SDCR,DOTSTR
     .byte 4
@@ -456,7 +457,6 @@ HEADLESS SDCR,CODE
     DPUSH
     mov #sdc_R,T
     NEXT
-    
 ;DEFCONST "SDC-R",5,,SDCR,sdc_R    
     
 ; nom: SDC-INIT ( -- f )
@@ -577,8 +577,8 @@ succeed:
 ; nom: SEGMENT ( u -- )
 ;   Détermine quel segment de la carte est actif.
 ;   Le système définit dans block.s ne permet que d'accéder 65535 blocs sur un périphérique
-;   ce qui représente 1024*65535 ou 2^10 * (2^16-1)= 67 107 840 octets hors les plus petites
-;   cartes disponible de nos jours sont de 2Go. ForthEx divise donc les cartes 
+;   ce qui représente 1024*65535 ou 2^10 * (2^16-1)= 67 107 840 octets.
+;   Pour les cartes de plus de 64Mo il faut diviser l'espace de données de la carte
 ;   en segments de 65535 blocs.
 ; arguments:
 ;   u Numéro du segment.
@@ -590,8 +590,8 @@ DEFCODE "SEGMENT",7,,SEGMENT
     cp T,W0
     bra gtu, 9f
     mov T,sdc_segment
-    DPOP
-9:  NEXT
+9:  DPOP
+    NEXT
     
 ; nom: SEGMENT? ( -- u )
 ;   Retourne le numéro du segment actif.
@@ -637,7 +637,7 @@ DEFCODE "?SDC",4,,QSDC ; ( -- u )
 ; retourne:
 ;   n Valeur du bit F_SDC_OK &rarr; {0,2}.    
 DEFWORD "?SDCOK",6,,QSDCOK ; ( -- f )
-    .word QSDC,LIT,1,LIT,F_SDC_OK,LSHIFT,AND,EXIT
+    .word QSDC,LIT,F_SDC_OK,BITMASK,AND,EXIT
     
 ; nom: SDCREAD  ( c-addr ud -- f )    
 ;   Lecture d'un secteur de la carte SD.
@@ -666,7 +666,7 @@ DEFCODE "SDCREAD",7,,SDCREAD ; ( addr ud -- f )
 2:  spi_read
     cp.b W0,#0xfe
     bra nz, 2b
-    mov #BLOCK_SIZE,W4
+    mov #SECTOR_SIZE,W4
 3:  spi_read
     mov.b W0,[W5++]
     dec W4,W4
@@ -702,7 +702,7 @@ DEFCODE "SDCWRITE",8,,SDCWRITE ; ( addr ud -- )
     bra nz, write_failed
     mov.b #0xFE,W0
     spi_write
-    mov #BLOCK_SIZE,W4
+    mov #SECTOR_SIZE,W4
 2:  mov.b [W5++],W0
     spi_write
     dec W4,W4
@@ -726,7 +726,7 @@ write_failed:
 ; arguments:
 ;   aucun
 ; retourne:
-;   ud   Entier double, nombre de blocs.    
+;   ud   Entier double non signé, nombre de blocs.    
 DEFCODE "SDC-BLOCKS",10,,SDCBLOCKS
     DPUSH
     mov blocks_count,T
@@ -758,52 +758,44 @@ HEADLESS SDCVALIDQ,HWORD
     
 ; SDC-BLK>ADR  ( u -- ud )
 ;   Convertie un numéro de bloc de la carte SD en adresse absolue.
-;   addresse=(u-1)*adr_factor + segment*66535*adr_factor
-;   adr_factor est 1024 pour les cartes V1 et 2 pour les cartes V2.    
+;   ud=(u-1)*2
+;   Il suffit de multiplier par 2.    
 ; arguments:
 ;   u    Numéro du bloc {1..65535}
 ; retourne:
 ;   ud   Adresse absolue de 32 bits sur la carte SD.
 HEADLESS SDCBLKTOADR,HWORD    
 ;DEFWORD "SDC-BLK>ADR",11,,SDCBLKTOADR
-    .word ONEMINUS,LIT,BLOCK_SIZE
-    .word QSDC,LIT,1,LIT,F_SDC_HC,LSHIFT,AND,ZBRANCH,2f-$
-    .word LIT,SECTOR_SIZE,SLASH
-2:  .word DUP,TOR,UMSTAR,SEGMENTQ,RFROM,UMSTAR,TRUE,UDSTAR,DPLUS
-9:  .word EXIT
+    .word ONEMINUS,LIT,2,MSTAR
+    .word TRUE,SEGMENTQ,UMSTAR,DPLUS  
+    .word EXIT
 
-;  INCRADR ( ud1 -- ud2 )
-;   Incrémente l'adresse de la carte SDC pour le prochain secteur.
-; arguments:
-;   ud1  Adresse initiale
-; retourne:
-;   ud2 Adresse prochain secteur
-HEADLESS INCRADR,HWORD ;( ud1 -- ud2 )  
-    .word LIT,SECTOR_SIZE,QSDC,LIT,1,LIT,F_SDC_HC,LSHIFT,AND,ZBRANCH,9f-$
-    .word DROP,LIT,1
-9:  .word MPLUS,EXIT
-  
 ; SDC-BLK-READ  ( u1 ud1 -- )
 ;   Lecture d'un bloc sur la carte SD  
 ; arguments:
-;   u1  Adresse tampon RAM
-;   ud1 Adresse sur carte SD
+;   u1 Adresse tampon RAM destination des données.
+;   ud1 Numéro secteur carte SD.
 ; retourne:
 ;   rien  
 HEADLESS SDCBLKREAD,HWORD ; ( u1 ud1 --  )
     .word LIT,2,LIT,0,DODO
-1:  .word TWOTOR,DUP,LIT,SECTOR_SIZE,TWORFETCH,SDCREAD,DROP
-    .word LIT,SECTOR_SIZE,PLUS,TWORFROM,INCRADR
-    .word DOLOOP,TWODROP,DROP
+1:  .word TWOTOR,DUP,TWORFETCH,SDCREAD,DROP
+    .word LIT,SECTOR_SIZE,PLUS,TWORFROM,LIT,1,MPLUS
+    .word DOLOOP,1b-$,TWODROP,DROP
     .word EXIT
 
 ; SDC-BLK_WRITE ( u1 ud1 -- )    
 ;   Écriture d'un bloc sur la carte SD    
+; arguments:
+;   u1  Adresse tampon RAM source des données
+;   ud1 Numéro secteur carte SD.
+; retourne:
+;   rien  
 HEADLESS SDCBLKWRITE,HWORD ; ( u1 ud1 -- )
     .word LIT,2,LIT,0,DODO
-1:  .word TWOTOR,DUP,LIT,SECTOR_SIZE,TWORFETCH,SDCWRITE
-    .word LIT,SECTOR_SIZE,PLUS,TWORFROM,INCRADR
-    .word DOLOOP,TWODROP,DROP
+1:  .word TWOTOR,DUP,TWORFETCH,SDCWRITE
+    .word LIT,SECTOR_SIZE,PLUS,TWORFROM,LIT,1,MPLUS
+    .word DOLOOP,1b-$,TWODROP,DROP
     .word EXIT
     
 ; nom: SDCARD  ( -- a-addr )  

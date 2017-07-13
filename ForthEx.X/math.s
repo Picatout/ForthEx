@@ -739,9 +739,25 @@ DEFCODE "DINVERT",7,,DINVERT
     com T,T
     com [DSP],[DSP]
     NEXT
-    
+
 ; DESCRIPTION:
 ;    opérations logiques bit à bit.
+    
+; nom: BITMASK ( u1 -- u2 )
+;   Convertie la position d'un bit en masque.
+;   Utile pour vérifier l'état du bit à la position u1 avec AND ou le mettre
+;   à 1 avec OR.    
+; arguments:
+;   u1  Position du bit {0..15}
+; retourne:
+;   u2  masque
+DEFCODE "BITMASK",8,,BITMASK
+    mov T,W0
+    dec W0,W0
+    mov #1,T
+    repeat W0
+    sl T,T
+    NEXT
     
 ; nom: AND  ( n1 n2 -- n3 )
 ;   Opération Booléenne bit à bit ET.

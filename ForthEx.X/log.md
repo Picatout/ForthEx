@@ -1,3 +1,8 @@
+2017-07-13
+
+Ajout mot BITMASK dans math.s
+Correction problèmes dans sdcard.s
+
 2017-07-12
 -----------
 Travail sur documentation.
