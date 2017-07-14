@@ -676,7 +676,7 @@ read_failed:
     call sdc_deselect
     NEXT
     
-; nom: SDCWRITE   ( addr ud -- )   
+; nom: SDCWRITE   ( addr ud -- f )   
 ;   Écriture d'un secteur de 512 octets sur la carte SD.
 ; arguments:
 ;   addr Adresse du tampon RAM des données à écrire.
