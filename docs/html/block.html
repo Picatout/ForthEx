@@ -241,13 +241,139 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div>
+</div>
+<div> Les périphériques de stockage sont définis par une table contenant
+</div>
+<div> les CFA des fonctions de bases.  
+</div>
+<div>  <br><table border="single">
+
+  <tr><th>nom</th><th>description</th></tr>  
+
+  <tr><td>DEVID</td><td>Identifiant du périphérique.<br>XRAM =3<br>EEPROM=4<br>
+
+  SDCARD=5</td></tr>  
+
+  <tr><td>READ</td><td>Lecture d'un bloc.</td></tr>
+
+  <tr><td>WRITE</td><td>Écriture d'un bloc.</td></tr>
+
+  <tr><td>BLK&gt;ADR</td><td>Conversion numéro de bloc en adresse.</td></tr>
+
+  <tr><td>BLK-VALID?</td><td>Valide le numéro de bloc.</td></tr>
+
+  </table><br>
+
+</div><div> Il y a 3 périphériques de stockage, XRAM, EEPROM et SDCARD.
+</div>
+<div> XRAM est la RAM SPI externe il s'agit donc d'un stockage temporaire.
+</div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:4px;"><p id="DEVID">
+<b>DEVID</b>  ( a-addr -- n )
+<br><div>   Constante, Identifiant le périphérique
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>a-addr</i>&nbsp;&nbsp;  Adresse descripteur de périphérique de stockage
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>n</i>&nbsp;&nbsp;  Indentifiant du périphérique {SPI_RAM=3,SPI_EEPROM=4,SD_CARD=5}
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLK-READ">
+<b>BLK-READ</b>  ( a-addr1 ud a-addr2 -- )
+<br><div>   Lecture d'un bloc sur le périphérique de stockage.
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>a-addr1</i>&nbsp;&nbsp;  Adresse du premier octet du tampon RAM recevant les donnnées
+</div>
+<div><i>ud	Adresse</i>&nbsp;&nbsp; absolue sur le périphérique de stockage
+</div>
+<div><i>a-addr2</i>&nbsp;&nbsp;  Adresse du descripteur de périphérique.    
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLK-WRITE">
+<b>BLK-WRITE</b>  ( a-addr1 ud a-addr2 -- n )
+<br><div>   .Écriture d'un bloc sur le périphérique de stockage.
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>a-addr1</i>&nbsp;&nbsp;  Adresse du premier octet du tampon RAM contenant les donnnées.
+</div>
+<div><i>ud	Adresse</i>&nbsp;&nbsp; absolue sur le périphérique de stockage
+</div>
+<div><i>a-addr2</i>&nbsp;&nbsp;  Adresse du descripteur de périphérique.    
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>rien
+</i>&nbsp;&nbsp;</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLK&gt;ADR">
+<b>BLK&gt;ADR</b>  ( n+ -- ud )
+<br><div>   Convertie un numéro de bloc en adresse absolue sur le périphérique de stockage.
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>n+	Numéro</i>&nbsp;&nbsp; du bloc.
+</div>
+<div><i>a-addr</i>&nbsp;&nbsp; Adresse du descripteur de périphérique de stockage.    
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>ud</i>&nbsp;&nbsp;    Adresse début du bloc sur le périphérique.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="BLK-VALID?">
+<b>BLK-VALID?</b>  ( n+ a-addr -- f )
+<br><div>  Vérifie la validité d'un no. de bloc.
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>n+</i>&nbsp;&nbsp; Numéro du bloc.
+</div>
+<div><i>a-addr</i>&nbsp;&nbsp; Adresse du descripteur de périphérique.    
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>f</i>&nbsp;&nbsp;    Indicateur booléen vrai si le numéro est valide.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><h4 id="index">Index</h4>
 <p>
 <ul>
 <li><a href="#BLK">BLK</a></li>
+<li><a href="#BLK&gt;ADR">BLK&gt;ADR</a></li>
+<li><a href="#BLK-READ">BLK-READ</a></li>
+<li><a href="#BLK-VALID?">BLK-VALID?</a></li>
+<li><a href="#BLK-WRITE">BLK-WRITE</a></li>
 <li><a href="#BLKDEV">BLKDEV</a></li>
 <li><a href="#BLOCK">BLOCK</a></li>
 <li><a href="#BUFFER">BUFFER</a></li>
+<li><a href="#DEVID">DEVID</a></li>
 <li><a href="#EMPTY-BUFFERS">EMPTY-BUFFERS</a></li>
 <li><a href="#FLUSH">FLUSH</a></li>
 <li><a href="#LIST">LIST</a></li>
