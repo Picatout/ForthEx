@@ -1,7 +1,13 @@
-2017-07-13
+2017-07-14
+----------
+bogue dans BLKED lorsque device est SDCARD
 
+2017-07-13
+----------
 Ajout mot BITMASK dans math.s
 Correction problèmes dans sdcard.s
+
+Corrigé bogue dans ESCTOVK fichier vt102.s
 
 2017-07-12
 -----------
