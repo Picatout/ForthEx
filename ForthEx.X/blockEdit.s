@@ -433,7 +433,7 @@ DEFWORD "BLK>SCR",7,,BLKTOSCR
 ;   Seul lignes 1..23 sont sauvegardées.    
 ;   Si le contenu de l'écran n'entre pas dans un bloc, l'opération est abaondonnée et retourne faux.
 ;   Les espaces qui termines les lignes sont supprimés et chaque ligne est complétée
-;   par un VK_CR.
+;   par un VK_CR (code ASCII 13).
 ;   * ne fonctionne qu'avec LOCAL CONSOLE. Cependant BLKEDIT utilise le frame buffer
 ;     local même lorsque la console est en mode REMOTE, donc BLKEDIT peut sauvegarder
 ;     le bloc en édition.    
@@ -443,9 +443,9 @@ DEFWORD "BLK>SCR",7,,BLKTOSCR
 ;   f     indicateur booléen, T si sauvegarde réussie, F si trop grand.
 DEFWORD "SCR>BLK",7,,SCRTOBLK
     .word SCRSIZE,LIT,BLOCK_SIZE,UGREATER,ZBRANCH,2f-$
-    .word FALSE,EXIT
+    .word DROP,FALSE,EXIT
 2:  .word DUP,BUFFER,SWAP,BLKDEVFETCH,BUFFEREDQ,UPDATE ; s: data
-    .word EDITLN,LIT,0,DODO 
+    .word EDITLN,LIT,0,DODO ; s: data
 1:  .word TOR,DOI,ONEPLUS,LNADR ; S: scrline r: data
     .word LIT,CPL,MINUSTRAILING,TOR ; S: scrline r: data len
     .word TWORFETCH,MOVE ; R: data len

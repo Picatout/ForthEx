@@ -185,7 +185,7 @@ SYSDICT
    .byte 0
    .byte 0
    
-; reçu une séquence ESC[ n  où est une un digit, attend un ~   
+; reçu une séquence ESC[ n  où n est un un digit, attend un ~   
 HEADLESS EXPECT_TILDE,HWORD
     .word SGETC,LIT,'~',EQUAL,ZBRANCH,3f-$
     .word LIT,VK_TILDE,PLUS,CFETCH,EXIT
@@ -209,8 +209,8 @@ HEADLESS ESCTOVK,HWORD ; ( -- u )
     .word LIT,'O',EQUAL,ZBRANCH,9f-$
     .word SGETC,LIT,'F',EQUAL,ZBRANCH,9f-$
     .word LIT,VK_END,EXIT
-2:  .word DROP,SGETC,QDIGIT,ZBRANCH,2f-$
-    .word EXPECT_TILDE,EXIT
+2:  .word DROP,SGETC,DUP,QDIGIT,ZBRANCH,2f-$
+    .word SWAP,DROP,EXPECT_TILDE,EXIT
 2:  .word DROP,ARROWS,EXIT
 9:  .word LIT,0,EXIT
   

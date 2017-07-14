@@ -682,7 +682,7 @@ read_failed:
 ;   addr Adresse du tampon RAM des données à écrire.
 ;   ud	 Numéro du secteur la carte SD où effectuer l'écriture.
 ; retourne:
-;   rien    
+;   f Indicateur booléen succès/échec    
 DEFCODE "SDCWRITE",8,,SDCWRITE ; ( addr ud -- )
     SET_EDS
     _enable_sdc
@@ -784,7 +784,7 @@ HEADLESS SDCBLKREAD,HWORD ; ( u1 ud1 --  )
     .word DOLOOP,1b-$,TWODROP,DROP
     .word EXIT
 
-; SDC-BLK_WRITE ( u1 ud1 -- )    
+; SDC-BLK-WRITE ( u1 ud1 -- )    
 ;   Écriture d'un bloc sur la carte SD    
 ; arguments:
 ;   u1  Adresse tampon RAM source des données
@@ -793,7 +793,7 @@ HEADLESS SDCBLKREAD,HWORD ; ( u1 ud1 --  )
 ;   rien  
 HEADLESS SDCBLKWRITE,HWORD ; ( u1 ud1 -- )
     .word LIT,2,LIT,0,DODO
-1:  .word TWOTOR,DUP,TWORFETCH,SDCWRITE
+1:  .word TWOTOR,DUP,TWORFETCH,SDCWRITE,DROP
     .word LIT,SECTOR_SIZE,PLUS,TWORFROM,LIT,1,MPLUS
     .word DOLOOP,1b-$,TWODROP,DROP
     .word EXIT

@@ -1,6 +1,7 @@
 2017-07-14
 ----------
-bogue dans BLKED lorsque device est SDCARD
+Corrigé bogue dans SDC-BLK-WRITE fichier sdcard.s
+Corrigé bogue dans VTEKEY fichier vt102.s
 
 2017-07-13
 ----------
