@@ -69,7 +69,7 @@ _block_dev: .space 2
 _scr: .space 2
  
 ; nom: BLK   ( -- a-addr)  
-;   Variable qui contient le no de bloc actuellement interprété.
+;   Variable système qui contient le no de bloc actuellement interprété.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -80,7 +80,7 @@ DEFCODE "BLK",3,,BLK
     NEXT
 
 ; nom: SCR ( -- a-addr )
-;   variable contenant le dernier numéro de bloc affiché à l'écran.
+;   variable système contenant le dernier numéro de bloc affiché à l'écran.
 ; arguments:
 ;   aucun    
 ; retourne:
@@ -91,13 +91,13 @@ DEFCODE "SCR",3,,SCR
     NEXT
     
 ; nom: BLKDEV  ( -- a-addr )
-;    variable contenant l'adresse du descripteur du périphérique
+;    variable contenant l'adresse du descripteur de périphérique
 ;    de stockage actif. Le périphérique de stockage peut-être sélectionné
 ;    avec la phrase: 
 ;   HTML:    
 ;    <i>device</i> <b>BLKEV !</b>
 ;  :HTML    
-;   où device est l'un de périphérique suivants: EEPROM, SDCARD, XRAM
+;   où device est l'un des périphériques suivants: EEPROM, SDCARD, XRAM
 ;   XRAM est la RAM externe SPI il s'agit donc d'un stockage temporaire.    
 ; arguments:
 ;   aucun
@@ -394,7 +394,7 @@ DEFWORD "BLOCK",5,,BLOCK
     .word ASSIGN,DUP,TODATA
     .word DATA,EXIT
 
-; TEXT-BLOCK ( n+ -- c-addr u )
+; nom: TEXT-BLOCK ( n+ -- c-addr u )
 ;   Charge un bloc et filtre le bloc pour traitement en mode texte.    
 ;   Le bloc est tronquée au premier caractère non valide.
 ;   Les caractères acceptés sont 32..126|VK_CR
@@ -524,8 +524,8 @@ DEFWORD "THRU",4,,THRU
 ; <tr><th>nom</th><th>description</th></tr>  
 ; <tr><td>DEVID</td><td>Identifiant du périphérique.<br>XRAM =3<br>EEPROM=4<br>
 ; SDCARD=5</td></tr>  
-; <tr><td>READ</td><td>Lecture d'un bloc.</td></tr>
-; <tr><td>WRITE</td><td>Écriture d'un bloc.</td></tr>
+; <tr><td>BLK-READ</td><td>Lecture d'un bloc.</td></tr>
+; <tr><td>BLK-WRITE</td><td>Écriture d'un bloc.</td></tr>
 ; <tr><td>BLK&gt;ADR</td><td>Conversion numéro de bloc en adresse.</td></tr>
 ; <tr><td>BLK-VALID?</td><td>Valide le numéro de bloc.</td></tr>
 ; </table><br>
@@ -534,30 +534,30 @@ DEFWORD "THRU",4,,THRU
 ; XRAM est la RAM SPI externe il s'agit donc d'un stockage temporaire.
   
 ; nom: DEVID  ( a-addr -- n )
-;   Constante, Identifiant le périphérique
+;   Constante, Identifiant le périphérique.
 ; arguments:
-;   a-addr  Adresse descripteur de périphérique de stockage
+;   a-addr  Adresse descripteur de périphérique de stockage.
 ; retourne:
-;   n  Indentifiant du périphérique {SPI_RAM=3,SPI_EEPROM=4,SD_CARD=5}
+;   n  Indentifiant du périphérique {SPI_RAM=3, SPI_EEPROM=4, SD_CARD=5}
 DEFWORD "DEVID",5,,DEVID    
     .word FETCH,EXIT
 
 ; nom: BLK-READ  ( a-addr1 ud a-addr2 -- )
-;   Lecture d'un bloc sur le périphérique de stockage.
+;   Lecture d'un bloc du périphérique de stockage.
 ; arguments:
-;   a-addr1  Adresse du premier octet du tampon RAM recevant les donnnées
-;   ud	Adresse absolue sur le périphérique de stockage
-;   a-addr2  Adresse du descripteur de périphérique.    
+;   a-addr1 Adresse du premier octet du tampon RAM recevant les donnnées.
+;   ud Adresse absolue sur le périphérique de stockage.
+;   a-addr2 Adresse du descripteur de périphérique.    
 ; retourne:
 ;   rien
 DEFWORD "BLK-READ",8,,BLKREAD
     .word LIT,1,VEXEC,EXIT
     
 ; nom: BLK-WRITE  ( a-addr1 ud a-addr2 -- n )
-;   .Écriture d'un bloc sur le périphérique de stockage.
+;   Écriture d'un bloc sur le périphérique de stockage.
 ; arguments:
 ;   a-addr1  Adresse du premier octet du tampon RAM contenant les donnnées.
-;   ud	Adresse absolue sur le périphérique de stockage
+;   ud Adresse absolue sur le périphérique de stockage.
 ;   a-addr2  Adresse du descripteur de périphérique.    
 ; retourne:
 ;   rien
@@ -566,6 +566,8 @@ DEFWORD "BLK-WRITE",9,,BLKWRITE
 
 ; nom: BLK>ADR  ( n+ -- ud )
 ;   Convertie un numéro de bloc en adresse absolue sur le périphérique de stockage.
+;   Dans le cas du périphérique SDCARD c'est le numéro de secteur qui est retourné.
+;   Les secteurs sont numérotés à partir de zéro.    
 ; arguments:
 ;   n+	Numéro du bloc.
 ;   a-addr Adresse du descripteur de périphérique de stockage.    

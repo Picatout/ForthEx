@@ -315,9 +315,9 @@ DEFCONST "RAMEND",6,,RAMEND,RAM_END
 ; nom: ULIMIT   ( -- a-addr )
 ;   Constante système qui retourne l'adresse qui suis la fin de la RAM utilisateur.
 ;   Cette adresse correspond au début de la mémoire HEAP qui est gérée par les définitions dans dynamem.s
-;   Microchip appelle cette de mémoire RAM, débutant à 0x8000, EDS (Extended Data Space).
+;   Microchip appelle cette mémoire RAM, débutant à 0x8000, EDS (Extended Data Space).
 ;   Le mémoire tampon vidéo se trouve à la fin de l'EDS. Le reste de l'EDS constitue
-;   le HEAP. 
+;   le HEAP (mémoire dynamique). 
 ; arguments:
 ;   aucun
 ; retourne:
@@ -367,7 +367,7 @@ DEFCONST "CELL",4,,CELL,CELL_SIZE
 ; nom: DP ( -- a-addr )
 ;   Variable système qui contient la position du pointeur de donnée dans l'esapce utilisateur.
 ;   Lorsqu'une nouvelle définition est créée ou que de l'espace est réservé avec ALLOT ce
-;   pointeur avance à la première position libre. Cette valeur de cette variable est retournée
+;   pointeur avance à la première position libre. La valeur de cette variable est retournée
 ;   par le mot HERE.    
 ; arguments:
 ;   aucun
@@ -378,7 +378,7 @@ DEFUSER "DP",2,,DP
 ; nom: BASE  ( -- a-addr )
 ;   Variable système qui contient la valeur de la base numérique active.
 ;   Le contenu de cette variable est modifiée par les mots HEX et DECIMAL.
-;   peut aussi être modifiée manuellement exemple:
+;   Peut aussi être modifiée manuellement exemple:
 ;   2 BASE ! \ passage en base binaire. 
 ; arguments:
 ;   aucun
@@ -387,7 +387,7 @@ DEFUSER "DP",2,,DP
 DEFUSER "BASE",4,,BASE     ; base numérique
 
 ; nom: SYSLATEST  ( -- a-addr )
-;   Variable système qui contient le NFA du dernier mot défini dans le dictionnaire
+;   Variable système qui contient le NFA (Name Field Address) du dernier mot défini dans le dictionnaire
 ;   système en mémoire FLASH. Le dictionnaire est divisé en 2 parties, la partie système
 ;   qui réside en mémoire FLASH et la partie utilisateur qui réside en mémoire RAM. 
 ; arguments:
@@ -415,8 +415,10 @@ DEFUSER "LATEST",6,,LATEST ; pointer dernier mot dictionnaire
 ;  initial. Mais elle sert aussi à conserver des valeurs temporaires.
 ;  La 3ième pile est utilisée seulement par le compilateur pour conserver des adresses
 ;  de sauts qui doivent-être résolues avant de terminer la compilation.
-;  Les mots suivants servent à manipuler le contenu des 3 piles.
-
+;  Les mots suivants servent à manipuler le contenu des piles.
+;  Lorsqu'il n'y a pas d'indication il s'agit de la pile des arguments autrement,
+;  R: représente la pile des retours et C: la pile de contrôle.
+ 
 ; nom: DUP ( x1 -- x1 x2 )
 ;   Clone la valeur au sommet de la pile.
 ; arguments:
@@ -889,8 +891,7 @@ DEFCODE "TBL!",4,,TBLSTORE ; ( n1 n2 addr -- )
     
 ; nom: !  ( n a-addr -- )    
 ;   Sauvegarde d'un entier dans une variable.
-;   Accède les SFR, la RAM utilisateur et la RAM EDS.
-    
+;   Accède les SFR, la RAM utilisateur et la RAM EDS.    
 ; arguments:
 ;   n    Valeur à sauvegarder.
 ;   a-addr Adresse de la variable.    
@@ -941,18 +942,18 @@ DEFWORD "2>R",3,,TWOTOR ;  S: x1 x2 --  R: -- x1 x2
 ; nom: 2R>   ( S: -- d  R: d -- )    
 ;   Transfert un entier double de la pile des retours vers la pile des arguments.
 ; arguments:
-;   R: d   Entier double à transféré.
+;   d Entier double sur R: à transférer sur S:.
 ; retourne:
-;   d      Entier double ou 2 entiers simple en provenance de R:    
+;   d Entier double en provenance de R:    
 DEFWORD "2R>",3,,TWORFROM ; S: -- x1 x2  R: x1 x2 --
     .word RFROM,RFROM,RFROM,SWAP,ROT,TOR,EXIT
     
 ; nom: 2R@   ( S: -- d  R: d -- d )    
 ;   Copie un entier double de la pile des retours vers la pile des arguments.
 ; arguments:
-;   R: d   Entier double qui sera copié sur S:
+;   d   Entier double sur R: qui sera copié sur S:
 ; retourne:
-;   d      Copie d'un entier double en provenance de R:    
+;   d Copie de l'entier double en provenance de R:    
 DEFWORD "2R@",3,,TWORFETCH ; S: -- x1 x2 R: x1 x2 -- x1 x2    
     .word RFROM,RFROM,RFETCH,OVER,TOR,ROT,TOR
     .word SWAP,EXIT
@@ -982,7 +983,8 @@ DEFCODE "CELLS",5,,CELLS ; ( n -- n*CELL_SIZE )
 
     
 ; nom:  I  ( -- n )    
-;   Retourne le compteur de boucle I.
+;   Utilisé à l'intérieur d'une boucle DO ... LOOP ou +LOOP.    
+;   Retourne le compteur de boucle.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -993,7 +995,8 @@ DEFCODE "I",1,,DOI  ; ( -- n )
     NEXT
 
 ; nom: L  ( -- n )    
-;   Retourne la limite de boucle LIMIT.    
+;   Utilisé à l'intérieur d'une boucle DO ... LOOP ou +LOOP.    
+;   Retourne la limite de boucle.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -1004,19 +1007,21 @@ DEFCODE "L",1,,DOL ; ( -- n )
     NEXT
     
 ; nom: J  ( -- n )    
-;   Retourne le compteur de la boucle qui englobe la boucle actuelle.
+;   Utilisé à l'intérieur d'une boucle DO ... LOOP imbriquée dans une autre.    
+;   Retourne le compteur de la boucle externe.
 ; arguments:
 ;   aucun
 ; retourne:
-;   n   Valeur actuelle de J.
+;   n   Valeur actuelle du compteur de la boucle externe.
 DEFCODE "J",1,,DOJ  ; ( -- n ) R: limitJ indexJ
     DPUSH
     mov [RSP-2],T
     NEXT
   
 ; nom: UNLOOP ( R: n1 n2 -- )
+;   Utilisé à l'interieur d'une boucle DO ... LOOP ou +LOOP.    
 ;   Restore les valeurs des variables I et LIMIT tels qu'elles étaient
-;   avant l'exécution du dernier DO ou ?DO. 
+;   avant l'exécution du dernier DO ou ?DO.    
 ;   Après exécution  LIMIT=n1, I=n2
 ; arguments:
 ;   aucun

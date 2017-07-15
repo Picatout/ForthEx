@@ -35,7 +35,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="BLK">
 <b>BLK</b>   ( -- a-addr)  
-<br><div>   Variable qui contient le no de bloc actuellement interprété.
+<br><div>   Variable système qui contient le no de bloc actuellement interprété.
 </div>
 </p>
 <div><b> arguments:
@@ -51,7 +51,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SCR">
 <b>SCR</b> ( -- a-addr )
-<br><div>   variable contenant le dernier numéro de bloc affiché à l'écran.
+<br><div>   variable système contenant le dernier numéro de bloc affiché à l'écran.
 </div>
 </p>
 <div><b> arguments:
@@ -67,7 +67,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLKDEV">
 <b>BLKDEV</b>  ( -- a-addr )
-<br><div>    variable contenant l'adresse du descripteur du périphérique
+<br><div>    variable contenant l'adresse du descripteur de périphérique
 </div>
 <div>    de stockage actif. Le périphérique de stockage peut-être sélectionné
 </div>
@@ -75,7 +75,7 @@
 </div>
 <div>     <i>device</i> <b>BLKEV !</b>
 
-</div><div>   où device est l'un de périphérique suivants: EEPROM, SDCARD, XRAM
+</div><div>   où device est l'un des périphériques suivants: EEPROM, SDCARD, XRAM
 </div>
 <div>   XRAM est la RAM externe SPI il s'agit donc d'un stockage temporaire.    
 </div>
@@ -127,6 +127,28 @@
 <div><b> retourne:    
 </b></div>
 <div><i>a-addr</i>&nbsp;&nbsp;  Adresse du début de la zone de données.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="TEXT-BLOCK">
+<b>TEXT-BLOCK</b> ( n+ -- c-addr u )
+<br><div>   Charge un bloc et filtre le bloc pour traitement en mode texte.    
+</div>
+<div>   Le bloc est tronquée au premier caractère non valide.
+</div>
+<div>   Les caractères acceptés sont 32..126|VK_CR
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>n+</i>&nbsp;&nbsp;  Numéro du bloc.
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>c-addr</i>&nbsp;&nbsp; Adresse du premier caractère.    
+</div>
+<div><i>u</i>&nbsp;&nbsp; Nombre de caractères.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -255,9 +277,9 @@
 
   SDCARD=5</td></tr>  
 
-  <tr><td>READ</td><td>Lecture d'un bloc.</td></tr>
+  <tr><td>BLK-READ</td><td>Lecture d'un bloc.</td></tr>
 
-  <tr><td>WRITE</td><td>Écriture d'un bloc.</td></tr>
+  <tr><td>BLK-WRITE</td><td>Écriture d'un bloc.</td></tr>
 
   <tr><td>BLK&gt;ADR</td><td>Conversion numéro de bloc en adresse.</td></tr>
 
@@ -272,32 +294,32 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="DEVID">
 <b>DEVID</b>  ( a-addr -- n )
-<br><div>   Constante, Identifiant le périphérique
+<br><div>   Constante, Identifiant le périphérique.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>a-addr</i>&nbsp;&nbsp;  Adresse descripteur de périphérique de stockage
+<div><i>a-addr</i>&nbsp;&nbsp;  Adresse descripteur de périphérique de stockage.
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>n</i>&nbsp;&nbsp;  Indentifiant du périphérique {SPI_RAM=3,SPI_EEPROM=4,SD_CARD=5}
+<div><i>n</i>&nbsp;&nbsp;  Indentifiant du périphérique {SPI_RAM=3, SPI_EEPROM=4, SD_CARD=5}
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLK-READ">
 <b>BLK-READ</b>  ( a-addr1 ud a-addr2 -- )
-<br><div>   Lecture d'un bloc sur le périphérique de stockage.
+<br><div>   Lecture d'un bloc du périphérique de stockage.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>a-addr1</i>&nbsp;&nbsp;  Adresse du premier octet du tampon RAM recevant les donnnées
+<div><i>a-addr1</i>&nbsp;&nbsp; Adresse du premier octet du tampon RAM recevant les donnnées.
 </div>
-<div><i>ud	Adresse</i>&nbsp;&nbsp; absolue sur le périphérique de stockage
+<div><i>ud</i>&nbsp;&nbsp; Adresse absolue sur le périphérique de stockage.
 </div>
-<div><i>a-addr2</i>&nbsp;&nbsp;  Adresse du descripteur de périphérique.    
+<div><i>a-addr2</i>&nbsp;&nbsp; Adresse du descripteur de périphérique.    
 </div>
 <div><b> retourne:
 </b></div>
@@ -308,14 +330,14 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="BLK-WRITE">
 <b>BLK-WRITE</b>  ( a-addr1 ud a-addr2 -- n )
-<br><div>   .Écriture d'un bloc sur le périphérique de stockage.
+<br><div>   Écriture d'un bloc sur le périphérique de stockage.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
 <div><i>a-addr1</i>&nbsp;&nbsp;  Adresse du premier octet du tampon RAM contenant les donnnées.
 </div>
-<div><i>ud	Adresse</i>&nbsp;&nbsp; absolue sur le périphérique de stockage
+<div><i>ud</i>&nbsp;&nbsp; Adresse absolue sur le périphérique de stockage.
 </div>
 <div><i>a-addr2</i>&nbsp;&nbsp;  Adresse du descripteur de périphérique.    
 </div>
@@ -329,6 +351,10 @@
 <hr style="border-width:1px;"><p id="BLK&gt;ADR">
 <b>BLK&gt;ADR</b>  ( n+ -- ud )
 <br><div>   Convertie un numéro de bloc en adresse absolue sur le périphérique de stockage.
+</div>
+<div>   Dans le cas du périphérique SDCARD c'est le numéro de secteur qui est retourné.
+</div>
+<div>   Les secteurs sont numérotés à partir de zéro.    
 </div>
 </p>
 <div><b> arguments:
@@ -380,6 +406,7 @@
 <li><a href="#LOAD">LOAD</a></li>
 <li><a href="#SAVE-BUFFERS">SAVE-BUFFERS</a></li>
 <li><a href="#SCR">SCR</a></li>
+<li><a href="#TEXT-BLOCK">TEXT-BLOCK</a></li>
 <li><a href="#THRU">THRU</a></li>
 </ul>
 </p>

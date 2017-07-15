@@ -40,9 +40,9 @@
 ;   Parfois on laisse même des lignes vides pour rendre le texte plus facile à lire.
 ;   Lors de la sauvegarde dans un bloc les lignes sont tronquées après le dernier caractère
 ;   et un caractère de fin de ligne est ajouté. Il y a 23 lignes de texte sur 
-;   un écran donc BLKED. Donc si la longueur moyenne des lignes est inférieure à
+;   un écran dans BLKED. Donc si la longueur moyenne des lignes est inférieure à
 ;   (BLOCK_SIZE-23)/23 l'écran peut être sauvegardé dans un bloc. Le mot SCR-SIZE
-;   défini dans le fichier block.s permet de connaître la taille occupée par un écran dans un bloc.
+;   permet de connaître la taille occupée par un écran dans un bloc.
 ;   Il est problable que dans la majorité des cas un écran avec les lignes tronquées après
 ;   le dernier caractère répondra à ce critère. Au pire il suffira de raccourcir les commentaires.    
 ; FONCTIONNEMENT:
@@ -192,7 +192,7 @@ DEFWORD "PROMPT",6,,PROMPT ; ( c-addr u n+ -- )
     
 ; nom: MSGLINE  ( u1 c-addr u2 n -- )
 ;   Affiche un message en inverse vidéo à l'écran et attend une touche au clavier
-;   avant de poursuivre l'exécution l'exécution. Le message doit tenir sur une 
+;   avant de poursuivre l'exécution. Le message doit tenir sur une 
 ;   seule ligne d'écran. Cette ligne d'écran est sauvegardée et restaurée à la 
 ;   sortie de ce mot. Le curseur texte est retourné à la position qu'il avait 
 ;   avant l'appel de MSGLINE.    
@@ -357,7 +357,9 @@ HEADLESS LASTPOS,HWORD
 HEADLESS EDPUTC,HWORD ; ( c -- )
     .word LASTPOS,NOT,WRAP
     .word DUP,PUTC,ISLOCAL,ZBRANCH,2f-$,DROP,EXIT
-2:  .word SPUTC,EXIT
+2:  .word SPUTC,GETX,LIT,CPL,UGREATER,ZBRANCH,9f-$
+    .word VTCRLF
+9:  .word EXIT
 
 ; attend une touche au clavier.  
 HEADLESS EDKEY,HWORD

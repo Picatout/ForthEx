@@ -111,11 +111,11 @@
 </div>
 <div>   Cette adresse correspond au début de la mémoire HEAP qui est gérée par les définitions dans dynamem.s
 </div>
-<div>   Microchip appelle cette de mémoire RAM, débutant à 0x8000, EDS (Extended Data Space).
+<div>   Microchip appelle cette mémoire RAM, débutant à 0x8000, EDS (Extended Data Space).
 </div>
 <div>   Le mémoire tampon vidéo se trouve à la fin de l'EDS. Le reste de l'EDS constitue
 </div>
-<div>   le HEAP. 
+<div>   le HEAP (mémoire dynamique). 
 </div>
 </p>
 <div><b> arguments:
@@ -214,7 +214,7 @@
 </div>
 <div>   Lorsqu'une nouvelle définition est créée ou que de l'espace est réservé avec ALLOT ce
 </div>
-<div>   pointeur avance à la première position libre. Cette valeur de cette variable est retournée
+<div>   pointeur avance à la première position libre. La valeur de cette variable est retournée
 </div>
 <div>   par le mot HERE.    
 </div>
@@ -236,7 +236,7 @@
 </div>
 <div>   Le contenu de cette variable est modifiée par les mots HEX et DECIMAL.
 </div>
-<div>   peut aussi être modifiée manuellement exemple:
+<div>   Peut aussi être modifiée manuellement exemple:
 </div>
 <div>   2 BASE ! \ passage en base binaire. 
 </div>
@@ -254,7 +254,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SYSLATEST">
 <b>SYSLATEST</b>  ( -- a-addr )
-<br><div>   Variable système qui contient le NFA du dernier mot défini dans le dictionnaire
+<br><div>   Variable système qui contient le NFA (Name Field Address) du dernier mot défini dans le dictionnaire
 </div>
 <div>   système en mémoire FLASH. Le dictionnaire est divisé en 2 parties, la partie système
 </div>
@@ -310,7 +310,11 @@
 </div>
 <div>  de sauts qui doivent-être résolues avant de terminer la compilation.
 </div>
-<div>  Les mots suivants servent à manipuler le contenu des 3 piles.
+<div>  Les mots suivants servent à manipuler le contenu des piles.
+</div>
+<div>  Lorsqu'il n'y a pas d'indication il s'agit de la pile des arguments autrement,
+</div>
+<div>  R: représente la pile des retours et C: la pile de contrôle.
 </div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="DUP">
@@ -973,9 +977,19 @@
 <b>!</b>  ( n a-addr -- )    
 <br><div>   Sauvegarde d'un entier dans une variable.
 </div>
-<div>   Accède les SFR, la RAM utilisateur et la RAM EDS.
+<div>   Accède les SFR, la RAM utilisateur et la RAM EDS.    
 </div>
 </p>
+<div><b> arguments:
+</b></div>
+<div><i>n</i>&nbsp;&nbsp;    Valeur à sauvegarder.
+</div>
+<div><i>a-addr</i>&nbsp;&nbsp; Adresse de la variable.    
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>rien</i>&nbsp;&nbsp;    
+</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
@@ -1042,11 +1056,11 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>R:</i>&nbsp;&nbsp; d   Entier double à transféré.
+<div><i>d</i>&nbsp;&nbsp; Entier double sur R: à transférer sur S:.
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>d</i>&nbsp;&nbsp;      Entier double ou 2 entiers simple en provenance de R:    
+<div><i>d</i>&nbsp;&nbsp; Entier double en provenance de R:    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -1058,11 +1072,11 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>R:</i>&nbsp;&nbsp; d   Entier double qui sera copié sur S:
+<div><i>d</i>&nbsp;&nbsp;   Entier double sur R: qui sera copié sur S:
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>d</i>&nbsp;&nbsp;      Copie d'un entier double en provenance de R:    
+<div><i>d</i>&nbsp;&nbsp; Copie de l'entier double en provenance de R:    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -1103,7 +1117,9 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="I">
 <b>I</b>  ( -- n )    
-<br><div>   Retourne le compteur de boucle I.
+<br><div>   Utilisé à l'intérieur d'une boucle DO ... LOOP ou +LOOP.    
+</div>
+<div>   Retourne le compteur de boucle.
 </div>
 </p>
 <div><b> arguments:
@@ -1119,7 +1135,9 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="L">
 <b>L</b>  ( -- n )    
-<br><div>   Retourne la limite de boucle LIMIT.    
+<br><div>   Utilisé à l'intérieur d'une boucle DO ... LOOP ou +LOOP.    
+</div>
+<div>   Retourne la limite de boucle.    
 </div>
 </p>
 <div><b> arguments:
@@ -1135,7 +1153,9 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="J">
 <b>J</b>  ( -- n )    
-<br><div>   Retourne le compteur de la boucle qui englobe la boucle actuelle.
+<br><div>   Utilisé à l'intérieur d'une boucle DO ... LOOP imbriquée dans une autre.    
+</div>
+<div>   Retourne le compteur de la boucle externe.
 </div>
 </p>
 <div><b> arguments:
@@ -1144,16 +1164,18 @@
 </i>&nbsp;&nbsp;</div>
 <div><b> retourne:
 </b></div>
-<div><i>n</i>&nbsp;&nbsp;   Valeur actuelle de J.
+<div><i>n</i>&nbsp;&nbsp;   Valeur actuelle du compteur de la boucle externe.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="UNLOOP">
 <b>UNLOOP</b> ( R: n1 n2 -- )
-<br><div>   Restore les valeurs des variables I et LIMIT tels qu'elles étaient
+<br><div>   Utilisé à l'interieur d'une boucle DO ... LOOP ou +LOOP.    
 </div>
-<div>   avant l'exécution du dernier DO ou ?DO. 
+<div>   Restore les valeurs des variables I et LIMIT tels qu'elles étaient
+</div>
+<div>   avant l'exécution du dernier DO ou ?DO.    
 </div>
 <div>   Après exécution  LIMIT=n1, I=n2
 </div>
