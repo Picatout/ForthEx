@@ -58,13 +58,15 @@
 .align 2		     
 ;table de structure BUFFER.
 _blk_buffers: .space MAX_BUFFERS*BUFFER_STRUCT_SIZE
- ; numéro du bloc actuellement en traitement.
+ ; numéro du bloc actuellement en interprétation.
 _blk: .space 2
  ; incrémenté chaque fois qu'un buffer est mis à jour. 
  ; cette valeur incrémentée est copiée dans le champ UPDATED.
 _update_cntr: .space 2 
 ; variable contenant le descripteur du stockage  {EEPROM, XRAM, SDCARD}
 _block_dev: .space 2 
+; adresse de la structure BUFFER du dernier bloc sélectionné avec BLOCK ou BUFFER.
+_current: .space 2 
 ; variable contenant le numéro du dernier bloc listé
 _scr: .space 2
  
@@ -79,6 +81,19 @@ DEFCODE "BLK",3,,BLK
     mov #_blk,T
     NEXT
 
+; CURRENT ( -- n+ )
+;   retourne le numéro du bloc actif c'est à dire le dernier chargé avec BLOCK
+;   ou réservé avec BUFFER.
+; arguments:
+;   aucun
+; retourne:
+;   n+ Numéro du bloc actif.
+HEADLESS CURRENT,CODE    
+;DEFCODE "CURRENT",7,,CURRENT
+    DPUSH
+    mov _current,T
+    NEXT
+    
 ; nom: SCR ( -- a-addr )
 ;   variable système contenant le dernier numéro de bloc affiché à l'écran.
 ; arguments:
@@ -157,6 +172,7 @@ HEADLESS BLOCK_INIT, HWORD
     .word DOLOOP,1b-$
     ; périphérique par défaut EEPROM
     .word EEPROM,BLKDEV,STORE
+    .word FALSE,LIT,_current,STORE
     .word EXIT
  
 ; OWN?  ( n+ u a-addr -- f )
@@ -276,21 +292,24 @@ HEADLESS FIELDS,HWORD
     .word LIT,DEVICE,RFETCH,TBLFETCH
     .word RFROM,EXIT
 
-; UPDATE  ( a-addr -- )
-;    Met à jour le compteur UPDATED avec la valeur incrémentée de _update_cntr.
+; nom: UPDATE  ( -- )
+;    Marque le bloc courant comme étant modifié. Le bloc courant est le dernier
+;    à avoir été passé en paramètre à l'une de fonctions BLOCK ou BUFFER.    
+;    SAVE-BUFFERS ou FLUSH doit-être invoqué pour sauvegarder les modifications.    
 ; arguments:
-;    a-addr   Adresse de la structure BUFFER.
+;    aucun
 ; retourne:    
 ;   rien
-HEADLESS UPDATE,HWORD    
-;DEFWORD "UPDATE",6,,UPDATE
+DEFWORD "UPDATE",6,,UPDATE
+    .word CURRENT,QDUP,ZBRANCH,9f-$
     ; incrémente _update_cntr
     .word LIT,1,LIT,_update_cntr,PLUSSTORE
     .word LIT,_update_cntr,FETCH,QDUP,ZBRANCH,2f-$ ; S: a-addr cntr
     .word LIT,UPDATED,ROT,TBLSTORE,EXIT
 2:  ; si _update_cntr a fait un rollover on sauvegarde
     ; tous les buffers modifiés.
-    .word DROP,SAVEBUFFERS,EXIT
+    .word DROP,SAVEBUFFERS
+9:  .word EXIT
     
 ; NOUPDATE  ( a-addr -- )
 ;    Remet le champ UPDATED de la structure BUFFER à zéro.
@@ -348,13 +367,13 @@ HEADLESS TODATA,HWORD
 ; arguments:
 ;   n+  numéro du bloc requis.    
 ; retourne:
-;   a-addr   Adresse structure BUFFER.
+;   a-addr   Adresse de la structure BUFFER.
 HEADLESS ASSIGN,HWORD    
 ;DEFWORD "ASSIGN",6,,ASSIGN
     ; est-ce que le bloc est déjà dans un buffer?
     .word DUP,BLKDEVFETCH,BUFFEREDQ,QDUP,ZBRANCH,4f-$
     ; oui S: n+ a-addr  
-    .word SWAP,DROP,DUP,DATAOUT,EXIT
+    .word SWAP,DROP,DUP,DATAOUT,BRANCH,9f-$
 4:  ; non il n'est pas dans un buffer S: n+ 
     ;   recherche d'un buffer libre
     .word NOTUSED,QDUP,TBRANCH,6f-$
@@ -367,7 +386,7 @@ HEADLESS ASSIGN,HWORD
     ; mettre champ UPDATE à zéro
     .word RFETCH,NOUPDATE
     .word RFROM
-    .word EXIT ; S: *BUFFER
+9:  .word DUP,LIT,_current,STORE,EXIT ; S: *BUFFER
 
     
 ; nom: BUFFER  ( n+ -- a-addr )

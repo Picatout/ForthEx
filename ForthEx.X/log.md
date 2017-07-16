@@ -1,3 +1,7 @@
+2017-07-16
+----------
+Modification à block.s et blockEdit.s suite à l'ajout de UPDATE.
+
 2017-07-14
 ----------
 Corrigé bogue dans SDC-BLK-WRITE fichier sdcard.s

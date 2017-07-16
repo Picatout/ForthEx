@@ -73,14 +73,14 @@ section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .start.text                  0x200                0x2e            0x45  (69)
 .intr                        0x22e               0x196           0x261  (609)
-.sysdict                     0x3c4              0x3a68          0x579c  (22428)
-.font.const                 0x3e2c               0x400           0x600  (1536)
-.str.const                  0x422c                0x96            0xe1  (225)
-.forth_code.text            0x42c2              0x1556          0x2001  (8193)
-.text                       0x5818               0x376           0x531  (1329)
+.sysdict                     0x3c4              0x3a86          0x57c9  (22473)
+.font.const                 0x3e4a               0x400           0x600  (1536)
+.str.const                  0x424a                0x96            0xe1  (225)
+.forth_code.text            0x42e0              0x1560          0x2010  (8208)
+.text                       0x5840               0x376           0x531  (1329)
 .vars_init                  0x7800                0x22            0x33  (51)
 
-                 Total program memory used (bytes):         0x8688  (34440) 6%
+                 Total program memory used (bytes):         0x86c4  (34500) 6%
 
 
 Ivt Memory  [Origin = 0x4, Length = 0x1fc]
@@ -108,21 +108,21 @@ section                    address      alignment gaps    total length  (dec)
 .paste.bss                  0x1100                   0            0x52  (82)
 .tib.bss                    0x1152                   0            0x50  (80)
 .pad.bss                    0x11a2                   0            0x50  (80)
-.hardware.bss               0x11f2                   0            0x36  (54)
-.serial.bss                 0x1228                   0            0x26  (38)
-.keyboard.bss               0x124e                   0            0x24  (36)
-.sys_vars.bss               0x1272                   0            0x20  (32)
-.sdc.bss                    0x1292                   0            0x1a  (26)
-.tvout.bss                  0x12ac                   0             0xc  (12)
-.heap_vars.bss              0x12b8                   0             0x6  (6)
-.vt102.bss                  0x12be                   0             0x2  (2)
-.sound.bss                  0x12c0                   0             0x2  (2)
+.hardware.bss               0x11f2                   0            0x38  (56)
+.serial.bss                 0x122a                   0            0x26  (38)
+.keyboard.bss               0x1250                   0            0x24  (36)
+.sys_vars.bss               0x1274                   0            0x20  (32)
+.sdc.bss                    0x1294                   0            0x1a  (26)
+.tvout.bss                  0x12ae                   0             0xc  (12)
+.heap_vars.bss              0x12ba                   0             0x6  (6)
+.vt102.bss                  0x12c0                   0             0x2  (2)
+.sound.bss                  0x12c2                   0             0x2  (2)
 .boot.bss                   0x12f8                   0             0x8  (8)
 .user_dict.bss              0x1300                   0          0x6d00  (27904)
 .heap.bss                   0x8000                   0          0x4a00  (18944)
 .tvout.buffer.bss           0xca00                   0           0x600  (1536)
 
-                 Total data memory used (bytes):         0xbfca  (49098) 99%
+                 Total data memory used (bytes):         0xbfcc  (49100) 99%
 
 
 Dynamic Memory Usage
@@ -142,32 +142,32 @@ External Symbols in Data Memory (by address):
                     0x10c0                  cstack
                     0x1152                  tib
                     0x11a2                  pad
-                    0x121c                  systicks
-                    0x121e                  seed
-                    0x1222                  fwarm
-                    0x124e                  kbd_queue
-                    0x126e                  kbd_head
-                    0x1272                  _SYS_VARS
-                    0x1272                  csp
-                    0x1274                  _SYSLATEST
-                    0x1276                  _LATEST
-                    0x1278                  _TIB
-                    0x127a                  _PAD
-                    0x127c                  _PASTE
-                    0x127e                  _TICKSOURCE
-                    0x1280                  _CNTSOURCE
-                    0x1282                  _DP
-                    0x1284                  _BASE
-                    0x1286                  _STATE
-                    0x1288                  _TOIN
-                    0x128a                  _HP
-                    0x1292                  sdc_status
-                    0x12b0                  xpos
-                    0x12b1                  ypos
-                    0x12b2                  cursor_dly
-                    0x12b4                  cursor_sema
-                    0x12b5                  fcursor
-                    0x12c0                  tone_len
+                    0x121e                  systicks
+                    0x1220                  seed
+                    0x1224                  fwarm
+                    0x1250                  kbd_queue
+                    0x1270                  kbd_head
+                    0x1274                  _SYS_VARS
+                    0x1274                  csp
+                    0x1276                  _SYSLATEST
+                    0x1278                  _LATEST
+                    0x127a                  _TIB
+                    0x127c                  _PAD
+                    0x127e                  _PASTE
+                    0x1280                  _TICKSOURCE
+                    0x1282                  _CNTSOURCE
+                    0x1284                  _DP
+                    0x1286                  _BASE
+                    0x1288                  _STATE
+                    0x128a                  _TOIN
+                    0x128c                  _HP
+                    0x1294                  sdc_status
+                    0x12b2                  xpos
+                    0x12b3                  ypos
+                    0x12b4                  cursor_dly
+                    0x12b6                  cursor_sema
+                    0x12b7                  fcursor
+                    0x12c2                  tone_len
                     0x12f8                  _boot_header
                     0x1300                  _user_dict
                     0x8000                  _heap
@@ -175,41 +175,41 @@ External Symbols in Data Memory (by address):
 
 External Symbols in Data Memory (by name):
 
-                    0x1284                  _BASE
-                    0x1280                  _CNTSOURCE
-                    0x1282                  _DP
-                    0x128a                  _HP
-                    0x1276                  _LATEST
-                    0x127a                  _PAD
-                    0x127c                  _PASTE
-                    0x1286                  _STATE
-                    0x1274                  _SYSLATEST
-                    0x1272                  _SYS_VARS
-                    0x1278                  _TIB
-                    0x127e                  _TICKSOURCE
-                    0x1288                  _TOIN
+                    0x1286                  _BASE
+                    0x1282                  _CNTSOURCE
+                    0x1284                  _DP
+                    0x128c                  _HP
+                    0x1278                  _LATEST
+                    0x127c                  _PAD
+                    0x127e                  _PASTE
+                    0x1288                  _STATE
+                    0x1276                  _SYSLATEST
+                    0x1274                  _SYS_VARS
+                    0x127a                  _TIB
+                    0x1280                  _TICKSOURCE
+                    0x128a                  _TOIN
                     0x12f8                  _boot_header
                     0x8000                  _heap
                     0x1300                  _user_dict
                     0xca00                  _video_buffer
-                    0x1272                  csp
+                    0x1274                  csp
                     0x10c0                  cstack
-                    0x12b2                  cursor_dly
-                    0x12b4                  cursor_sema
-                    0x12b5                  fcursor
-                    0x1222                  fwarm
-                    0x126e                  kbd_head
-                    0x124e                  kbd_queue
+                    0x12b4                  cursor_dly
+                    0x12b6                  cursor_sema
+                    0x12b7                  fcursor
+                    0x1224                  fwarm
+                    0x1270                  kbd_head
+                    0x1250                  kbd_queue
                     0x11a2                  pad
                     0x1080                  pstack
                     0x1000                  rstack
-                    0x1292                  sdc_status
-                    0x121e                  seed
-                    0x121c                  systicks
+                    0x1294                  sdc_status
+                    0x1220                  seed
+                    0x121e                  systicks
                     0x1152                  tib
-                    0x12c0                  tone_len
-                    0x12b0                  xpos
-                    0x12b1                  ypos
+                    0x12c2                  tone_len
+                    0x12b2                  xpos
+                    0x12b3                  ypos
 
 External Symbols in Program Memory (by address):
 
@@ -1167,441 +1167,444 @@ External Symbols in Program Memory (by address):
                   0x003058                  BUFFERCOLON
                   0x00306a                  lfa_BLK
                   0x003070                  BLK
-                  0x003072                  lfa_SCR
-                  0x003078                  SCR
-                  0x00307a                  lfa_BLKDEV
-                  0x003084                  BLKDEV
-                  0x003086                  BUFARRAY
-                  0x003088                  STRUCADR
-                  0x003096                  DATA
-                  0x0030a2                  BLOCK_INIT
-                  0x0030c6                  OWNQ
-                  0x0030ee                  BUFFEREDQ
-                  0x00311c                  NOTUSED
-                  0x003148                  OLDEST
-                  0x003186                  UPDATEDFETCH
-                  0x003192                  BLKDEVFETCH
-                  0x00319a                  DEVADR
-                  0x0031b4                  FIELDS
-                  0x0031d4                  UPDATE
-                  0x0031fc                  NOUPDATE
-                  0x00320c                  DATAOUT
-                  0x00322e                  TODATA
-                  0x003244                  ASSIGN
-                  0x003290                  lfa_BUFFER
-                  0x00329a                  BUFFER
-                  0x0032ae                  lfa_BLOCK
-                  0x0032b6                  BLOCK
-                  0x0032c2                  lfa_TEXTBLOCK
-                  0x0032d0                  TEXTBLOCK
-                  0x00331c                  lfa_LOAD
-                  0x003324                  LOAD
-                  0x00333e                  lfa_SAVEBUFFERS
-                  0x00334e                  SAVEBUFFERS
-                  0x003366                  lfa_EMPTYBUFFERS
-                  0x003376                  EMPTYBUFFERS
-                  0x00339e                  lfa_FLUSH
-                  0x0033a6                  FLUSH
-                  0x0033ae                  lfa_LIST
-                  0x0033b6                  LIST
-                  0x0033f8                  lfa_THRU
-                  0x003400                  THRU
-                  0x003412                  lfa_DEVID
-                  0x00341a                  DEVID
-                  0x003420                  lfa_BLKREAD
-                  0x00342c                  BLKREAD
-                  0x003436                  lfa_BLKWRITE
-                  0x003442                  BLKWRITE
-                  0x00344c                  lfa_BLKTOADR
-                  0x003456                  BLKTOADR
-                  0x003460                  lfa_BLKVALIDQ
-                  0x00346e                  BLKVALIDQ
-                  0x003478                  lfa_RPBREAK
-                  0x003482                  RPBREAK
-                  0x003486                  lfa_DBGEN
-                  0x00348e                  DBGEN
-                  0x003492                  lfa_QDSP
-                  0x00349a                  QDSP
-                  0x00349c                  lfa_DOTS
-                  0x0034a2                  DOTS
-                  0x0034cc                  lfa_DOTRTN
-                  0x0034d4                  DOTRTN
-                  0x003502                  lfa_DUMP
-                  0x00350a                  DUMP
-                  0x003562                  lfa_DEBUG
-                  0x00356a                  DEBUG
-                  0x003572                  lfa_BREAK
-                  0x00357a                  BREAK
-                  0x0035ac                  lfa_RESUME
-                  0x0035b6                  RESUME
-                  0x0035d6                  EDITLN
-                  0x0035d8                  TEXTEND
-                  0x003634                  KCASE
-                  0x003646                  lfa_SAVELINE
-                  0x003652                  SAVELINE
-                  0x003662                  lfa_RESTORELINE
-                  0x003670                  RESTORELINE
-                  0x003684                  EDWHITELN
-                  0x003694                  lfa_PROMPT
-                  0x00369e                  PROMPT
-                  0x0036b0                  lfa_MSGLINE
-                  0x0036ba                  MSGLINE
-                  0x0036fe                  SAVEFAILED
-                  0x003726                  SAVESUCCESS
-                  0x003740                  NEXTBLOCK
-                  0x003766                  PREVBLOCK
-                  0x003784                  BLOCKQ
-                  0x0037ec                  OPENBLOCK
-                  0x0037fc                  COPYBLOCK
-                  0x00381a                  EDDEL
-                  0x003828                  EDINSERTBL
-                  0x00384a                  EDEND
-                  0x00385a                  EDHOME
-                  0x003868                  EDUP
-                  0x003876                  EDDOWN
-                  0x003892                  EDCRLF
-                  0x0038aa                  LASTPOS
-                  0x0038c4                  EDPUTC
-                  0x0038ec                  EDKEY
-                  0x00392c                  EDBACKDEL
-                  0x003942                  EDLEFT
-                  0x003950                  EDRIGHT
-                  0x00395e                  EDTOP
-                  0x00396c                  lfa_SCRSIZE
-                  0x003978                  SCRSIZE
-                  0x0039a6                  lfa_BLKTOSCR
-                  0x0039b0                  BLKTOSCR
-                  0x0039f8                  lfa_SCRTOBLK
-                  0x003a02                  SCRTOBLK
-                  0x003a60                  lfa_SAVESCREEN
-                  0x003a6e                  SAVESCREEN
-                  0x003a82                  EDTAB
-                  0x003a92                  DELLN23
-                  0x003abc                  STATUSLN
-                  0x003b16                  EDATXY
-                  0x003b2a                  EDBSLASHW
-                  0x003b3e                  EDINSRTLN
-                  0x003b4c                  EDDELLN
-                  0x003b5a                  EDRMVLN
-                  0x003b68                  EDDELEOL
-                  0x003b76                  EDCLS
-                  0x003b84                  lfa_BLKED
-                  0x003b8c                  BLKED
-                  0x003d38                  INFLOOP
-                  0x003d3a                  QAUTORUN
-                  0x003d4e                  QCOLD
-                  0x003d5a                  HARDWARE_INIT
-                  0x003d78                  TICKS_INIT
-                  0x003d7a                  SET_CLOCK
-                  0x003d7c                  CLR_LOW_RAM
-                  0x003d7e                  CLR_RAM
-                  0x003d80                  IO_LOCK
-                  0x003d82                  VARS_INIT
-                  0x003d84                  lfa_REBOOT
-                  0x003d8e                  REBOOT
-                  0x003d90                  lfa_TICKS
-                  0x003d98                  TICKS
-                  0x003d9a                  lfa_USEC
-                  0x003da2                  USEC
-                  0x003da4                  lfa_MS
-                  0x003daa                  MS
-                  0x003dd4                  lfa_LFSR
-                  0x003ddc                  LFSR
-                  0x003dde                  lfa_RAND
-                  0x003de6                  RAND
-                  0x003de8                  lfa_SRAND
-                  0x003df0                  SRAND
-                  0x003df2                  lfa_CLEAR
-                  0x003dfa                  CLEAR
-                  0x003e0c                  lfa_UNUSED
-                  0x003e16                  UNUSED
-                  0x003e20                  SOUND_INIT
-                  0x003e22                  lfa_TONE
-                  0x003e2a                  TONE
-                  0x003e2c                  _font
-                  0x00422c                  _version
-                  0x004239                  _math_error
-                  0x00424f                  _user_aborted
-                  0x004268                  _stack_reset
-                  0x00427b                  _unknown_reset
-                  0x0042c2                  ENTER
-                  0x0042cc                  DOUSER
-                  0x0042d8                  DOVAR
-                  0x0042e2                  DOCONST
-                  0x0042ec                  code_EXIT
-                  0x0042f4                  code_LIT
-                  0x0042fe                  code_CLIT
-                  0x00430a                  code_BRANCH
-                  0x004312                  code_TBRANCH
-                  0x004320                  code_ZBRANCH
-                  0x00432e                  code_DODO
-                  0x004340                  code_DOQDO
-                  0x004352                  code_DOLOOP
-                  0x00436c                  code_DOPLOOP
-                  0x00438a                  code_VERSION
-                  0x004394                  code_R0
-                  0x00439e                  code_S0
-                  0x0043a8                  code_RAMEND
-                  0x0043b2                  code_ULIMIT
-                  0x0043bc                  code_TRUE
-                  0x0043c6                  code_FALSE
-                  0x0043d0                  code_DP0
-                  0x0043da                  code_CELL
-                  0x0043e4                  code_DUP
-                  0x0043ec                  code_TWODUP
-                  0x0043f8                  code_QDUP
-                  0x004404                  code_DROP
-                  0x00440c                  code_TWODROP
-                  0x004416                  code_RDROP
-                  0x00441e                  code_SWAP
-                  0x00442a                  code_TWOSWAP
-                  0x00443e                  code_ROT
-                  0x004450                  code_NROT
-                  0x004460                  code_OVER
-                  0x00446a                  code_TWOOVER
-                  0x004478                  code_NIP
-                  0x004480                  code_TUCK
-                  0x00448c                  code_TOR
-                  0x004496                  code_RFROM
-                  0x0044a0                  code_IPFETCH
-                  0x0044aa                  code_DEPTH
-                  0x0044b8                  code_PICK
-                  0x0044c6                  code_RFETCH
-                  0x0044d0                  code_SPFETCH
-                  0x0044dc                  code_SPSTORE
-                  0x0044e4                  code_RPFETCH
-                  0x0044ee                  code_RPSTORE
-                  0x0044f8                  code_TOCSTK
-                  0x004506                  code_CSTKFROM
-                  0x004514                  code_FETCH
-                  0x00451c                  code_CFETCH
-                  0x004526                  code_TWOFETCH
-                  0x004532                  code_BIDFETCH
-                  0x004550                  code_TBLFETCH
-                  0x004560                  code_TBLSTORE
-                  0x004574                  code_STORE
-                  0x00457e                  code_CSTORE
-                  0x00458a                  code_TWOSTORE
-                  0x004596                  code_CELLPLUS
-                  0x00459e                  code_CELLS
-                  0x0045a8                  code_DOI
-                  0x0045b2                  code_DOL
-                  0x0045bc                  code_DOJ
-                  0x0045c6                  code_UNLOOP
-                  0x0045d0                  code_EXECUTE
-                  0x0045d8                  code_FETCHEXEC
-                  0x0045dc                  code_VEXEC
-                  0x0045e6                  code_CALL
-                  0x0045f6                  code_IMMED
-                  0x004600                  code_HIDDEN
-                  0x00460a                  code_NMARK
-                  0x004614                  code_LENMASK
-                  0x00461e                  code_TIBSIZE
-                  0x004628                  code_PADSIZE
-                  0x004632                  code_PARSENAME
-                  0x00468c                  code_FIND
-                  0x0046dc                  code_ALIGNED
-                  0x0046e6                  code_SOURCE
-                  0x0046f4                  code_SRCSTORE
-                  0x004702                  FETCH_EXEC
-                  0x00470c                  code_EFETCH
-                  0x00471a                  code_ECFETCH
-                  0x00472a                  code_ETBLFETCH
-                  0x004740                  code_MSB
-                  0x00474a                  code_MAXINT
-                  0x004754                  code_MININT
-                  0x00475e                  code_PLUS
-                  0x004766                  code_MINUS
-                  0x004770                  code_ONEPLUS
-                  0x004778                  code_TWOPLUS
-                  0x004780                  code_ONEMINUS
-                  0x004788                  code_TWOMINUS
-                  0x004790                  code_TWOSTAR
-                  0x004798                  code_TWOSLASH
-                  0x0047a0                  code_LSHIFT
-                  0x0047bc                  code_RSHIFT
-                  0x0047d8                  code_PLUSSTORE
-                  0x0047e6                  code_DPLUS
-                  0x0047f8                  code_DMINUS
-                  0x00480c                  code_MPLUS
-                  0x004820                  code_STAR
-                  0x00482a                  code_MSTAR
-                  0x004836                  code_UMSTAR
-                  0x004842                  code_UDSTAR
-                  0x004856                  code_SLASH
-                  0x004864                  code_MOD
-                  0x004872                  code_STARSLASH
-                  0x004884                  code_STARSLASHMOD
-                  0x004898                  code_SLASHMOD
-                  0x0048a8                  code_UMSLASHMOD
-                  0x0048ba                  code_UDSLASHMOD
-                  0x0048d6                  code_MAX
-                  0x0048e4                  code_MIN
-                  0x0048f2                  code_UMAX
-                  0x004900                  code_UMIN
-                  0x00490e                  code_WITHIN
-                  0x00491c                  code_EVEN
-                  0x00492a                  code_ODD
-                  0x004938                  code_ABS
-                  0x004942                  code_DABS
-                  0x004958                  code_STOD
-                  0x004968                  code_QNEGATE
-                  0x004976                  code_UDREL
-                  0x00499c                  code_NEGATE
-                  0x0049a4                  code_DNEGATE
-                  0x0049b4                  code_INVERT
-                  0x0049bc                  code_DINVERT
-                  0x0049c6                  code_BITMASK
-                  0x0049d6                  code_AND
-                  0x0049de                  code_OR
-                  0x0049e6                  code_XOR
-                  0x0049ee                  code_NOT
-                  0x0049fe                  code_ZEROEQ
-                  0x004a08                  code_ZERODIFF
-                  0x004a18                  code_ZEROLT
-                  0x004a24                  code_ZEROGT
-                  0x004a34                  code_EQUAL
-                  0x004a44                  code_NOTEQ
-                  0x004a54                  code_LESS
-                  0x004a64                  code_GREATER
-                  0x004a74                  code_ULESS
-                  0x004a84                  code_UGREATER
-                  0x004a94                  code_SCRBUF
-                  0x004a9e                  code_HTAB
-                  0x004aa8                  code_TVOUT_INIT
-                  0x004b10                  code_VIDEO
-                  0x004b22                  code_LCBSLASHW
-                  0x004b34                  code_CURENBL
-                  0x004b50                  code_LCCLS
-                  0x004b66                  code_SCRLUP
-                  0x004b70                  code_SCRLDN
-                  0x004b7a                  code_GETX
-                  0x004b88                  code_GETY
-                  0x004b96                  code_SETX
-                  0x004bbc                  code_SETY
-                  0x004be2                  code_CURADR
-                  0x004bf8                  code_SCRCHAR
-                  0x004c20                  code_CHRTOSCR
-                  0x004c4c                  code_LCLEFT
-                  0x004c64                  code_LCRIGHT
-                  0x004c7e                  code_LCHOME
-                  0x004c92                  code_LCUP
-                  0x004caa                  code_LCDOWN
-                  0x004cc4                  code_TGLCHAR
-                  0x004cda                  code_PUTC
-                  0x004d26                  code_LCCRLF
-                  0x004d4a                  code_LCDELLN
-                  0x004d6c                  code_LCEMITQ
-                  0x004d76                  code_SERIAL_INIT
-                  0x004da2                  code_SERENBL
-                  0x004db8                  code_B2400
-                  0x004dc2                  code_B4800
-                  0x004dcc                  code_B9600
-                  0x004dd6                  code_B19200
-                  0x004de0                  code_B38400
-                  0x004dea                  code_B57600
-                  0x004df4                  code_B115200
-                  0x004dfe                  code_BAUD
-                  0x004e10                  code_SPUTC
-                  0x004e24                  code_SGETC
-                  0x004e5c                  code_SREADYQ
-                  0x004e6a                  code_SGETCQ
-                  0x004e78                  code_STORE_INIT
-                  0x004ef6                  code_RAMTOXR
-                  0x004f36                  code_XRTORAM
-                  0x004f70                  code_XBLKCOUNT
-                  0x004f7a                  code_QWIP
-                  0x004fa8                  code_RAMTOEE
-                  0x005006                  code_EETORAM
-                  0x005044                  code_EPAGE
-                  0x00504e                  code_ESECTOR
-                  0x005058                  code_EALL
-                  0x005062                  code_EERASE
-                  0x0050c4                  code_EEBLKCOUNT
-                  0x0050ce                  code_KBD_INIT
-                  0x0050fe                  code_KBD_RESET
-                  0x005118                  code_LCEKEYQ
-                  0x005126                  code_PEEK_KEY
-                  0x005136                  code_GETKEY
-                  0x00514c                  code_LCEKEY
-                  0x005170                  code_LCFILTER
-                  0x00519a                  code_CPOS_STORE
-                  0x0051ac                  code_CPOS_FETCH
-                  0x0051be                  code_COLON1
-                  0x0051c8                  code_INC_COLON
-                  0x0051d6                  code_DEC_COLON
-                  0x0051e4                  code_INC_LINE
-                  0x0051f2                  code_WRAP
-                  0x005204                  code_QWRAP
-                  0x005212                  code_SCROLL
-                  0x005224                  code_FFETCH
-                  0x00523e                  code_FCFETCHL
-                  0x005250                  code_FCFETCHH
-                  0x005262                  code_IFETCH
-                  0x00527c                  code_ICFETCH
-                  0x00529e                  code_FADDR
-                  0x0052ac                  code_FNEXT
-                  0x0052ba                  code_WRITE_LATCH
-                  0x0052e2                  code_FLASH_OP
-                  0x00530c                  code_IMGHEAD
-                  0x005316                  code_MAGIC
-                  0x005320                  code_IMGROW
-                  0x00532a                  code_READCSD
-                  0x00533e                  code_READCID
-                  0x005352                  code_SDCR
-                  0x00535c                  code_SDCINIT
-                  0x005438                  code_SEGMENT
-                  0x00544a                  code_SEGMENTQ
-                  0x005454                  code_QSDC
-                  0x00545e                  code_SDCREAD
-                  0x0054aa                  code_SDCWRITE
-                  0x00551a                  code_SDCBLOCKS
-                  0x005528                  code_SDCSEGMENTS
-                  0x005532                  code_BL
-                  0x00553c                  code_TOCHAR
-                  0x00554e                  code_FILL
-                  0x005566                  code_MINUSTRAILING
-                  0x005586                  code_UPPER
-                  0x0055ae                  code_SCAN
-                  0x0055d2                  code_SKIP
-                  0x0055f4                  code_MOVE
-                  0x0055fc                  code_CMOVE
-                  0x00561c                  code_CMOVETO
-                  0x005640                  code_BLANK
-                  0x005658                  code_HEAP_INIT
-                  0x005672                  code_HEAPSIZE
-                  0x00567c                  code_HEAPFREE
-                  0x005686                  code_FREE_BYTES_STORE
-                  0x005690                  code_FREELIST
-                  0x00569a                  code_USEDLIST
-                  0x0056a4                  code_BLK
-                  0x0056ae                  code_SCR
-                  0x0056b8                  code_BLKDEV
-                  0x0056c2                  code_BUFARRAY
-                  0x0056cc                  code_QDSP
-                  0x0056ea                  code_EDITLN
-                  0x0056f4                  code_INFLOOP
-                  0x0056f6                  code_TICKS_INIT
-                  0x005712                  code_SET_CLOCK
-                  0x005722                  code_CLR_LOW_RAM
-                  0x00572e                  code_CLR_RAM
-                  0x00573a                  code_IO_LOCK
-                  0x005742                  code_VARS_INIT
-                  0x00575c                  code_REBOOT
-                  0x00575e                  code_TICKS
-                  0x005768                  code_USEC
-                  0x005782                  code_LFSR
-                  0x00579a                  code_RAND
-                  0x0057ca                  code_SRAND
-                  0x0057da                  code_SOUND_INIT
-                  0x0057f8                  code_TONE
-                  0x005818                  cursor_blink
-                  0x005828                  toggle_char
-                  0x00584c                  cursor_enable
-                  0x005860                  cursor_disable
-                  0x00586e                  scroll_up
-                  0x0058a2                  scroll_down
-                  0x005b8a                  _code_end
+                  0x003072                  CURRENT
+                  0x003074                  lfa_SCR
+                  0x00307a                  SCR
+                  0x00307c                  lfa_BLKDEV
+                  0x003086                  BLKDEV
+                  0x003088                  BUFARRAY
+                  0x00308a                  STRUCADR
+                  0x003098                  DATA
+                  0x0030a4                  BLOCK_INIT
+                  0x0030d0                  OWNQ
+                  0x0030f8                  BUFFEREDQ
+                  0x003126                  NOTUSED
+                  0x003152                  OLDEST
+                  0x003190                  UPDATEDFETCH
+                  0x00319c                  BLKDEVFETCH
+                  0x0031a4                  DEVADR
+                  0x0031be                  FIELDS
+                  0x0031de                  lfa_UPDATE
+                  0x0031e8                  UPDATE
+                  0x003218                  NOUPDATE
+                  0x003228                  DATAOUT
+                  0x00324a                  TODATA
+                  0x003260                  ASSIGN
+                  0x0032b6                  lfa_BUFFER
+                  0x0032c0                  BUFFER
+                  0x0032d4                  lfa_BLOCK
+                  0x0032dc                  BLOCK
+                  0x0032e8                  lfa_TEXTBLOCK
+                  0x0032f6                  TEXTBLOCK
+                  0x003342                  lfa_LOAD
+                  0x00334a                  LOAD
+                  0x003364                  lfa_SAVEBUFFERS
+                  0x003374                  SAVEBUFFERS
+                  0x00338c                  lfa_EMPTYBUFFERS
+                  0x00339c                  EMPTYBUFFERS
+                  0x0033c4                  lfa_FLUSH
+                  0x0033cc                  FLUSH
+                  0x0033d4                  lfa_LIST
+                  0x0033dc                  LIST
+                  0x00341e                  lfa_THRU
+                  0x003426                  THRU
+                  0x003438                  lfa_DEVID
+                  0x003440                  DEVID
+                  0x003446                  lfa_BLKREAD
+                  0x003452                  BLKREAD
+                  0x00345c                  lfa_BLKWRITE
+                  0x003468                  BLKWRITE
+                  0x003472                  lfa_BLKTOADR
+                  0x00347c                  BLKTOADR
+                  0x003486                  lfa_BLKVALIDQ
+                  0x003494                  BLKVALIDQ
+                  0x00349e                  lfa_RPBREAK
+                  0x0034a8                  RPBREAK
+                  0x0034ac                  lfa_DBGEN
+                  0x0034b4                  DBGEN
+                  0x0034b8                  lfa_QDSP
+                  0x0034c0                  QDSP
+                  0x0034c2                  lfa_DOTS
+                  0x0034c8                  DOTS
+                  0x0034f2                  lfa_DOTRTN
+                  0x0034fa                  DOTRTN
+                  0x003528                  lfa_DUMP
+                  0x003530                  DUMP
+                  0x003588                  lfa_DEBUG
+                  0x003590                  DEBUG
+                  0x003598                  lfa_BREAK
+                  0x0035a0                  BREAK
+                  0x0035d2                  lfa_RESUME
+                  0x0035dc                  RESUME
+                  0x0035fc                  EDITLN
+                  0x0035fe                  TEXTEND
+                  0x00365a                  KCASE
+                  0x00366c                  lfa_SAVELINE
+                  0x003678                  SAVELINE
+                  0x003688                  lfa_RESTORELINE
+                  0x003696                  RESTORELINE
+                  0x0036aa                  EDWHITELN
+                  0x0036ba                  lfa_PROMPT
+                  0x0036c4                  PROMPT
+                  0x0036d6                  lfa_MSGLINE
+                  0x0036e0                  MSGLINE
+                  0x003724                  SAVEFAILED
+                  0x00374c                  SAVESUCCESS
+                  0x003766                  NEXTBLOCK
+                  0x00378c                  PREVBLOCK
+                  0x0037aa                  BLOCKQ
+                  0x003812                  OPENBLOCK
+                  0x003822                  COPYBLOCK
+                  0x003840                  EDDEL
+                  0x00384e                  EDINSERTBL
+                  0x003870                  EDEND
+                  0x003880                  EDHOME
+                  0x00388e                  EDUP
+                  0x00389c                  EDDOWN
+                  0x0038b8                  EDCRLF
+                  0x0038d0                  LASTPOS
+                  0x0038ea                  EDPUTC
+                  0x003912                  EDKEY
+                  0x003952                  EDBACKDEL
+                  0x003968                  EDLEFT
+                  0x003976                  EDRIGHT
+                  0x003984                  EDTOP
+                  0x003992                  lfa_SCRSIZE
+                  0x00399e                  SCRSIZE
+                  0x0039cc                  lfa_BLKTOSCR
+                  0x0039d6                  BLKTOSCR
+                  0x003a1e                  lfa_SCRTOBLK
+                  0x003a28                  SCRTOBLK
+                  0x003a7e                  lfa_SAVESCREEN
+                  0x003a8c                  SAVESCREEN
+                  0x003aa0                  EDTAB
+                  0x003ab0                  DELLN23
+                  0x003ada                  STATUSLN
+                  0x003b34                  EDATXY
+                  0x003b48                  EDBSLASHW
+                  0x003b5c                  EDINSRTLN
+                  0x003b6a                  EDDELLN
+                  0x003b78                  EDRMVLN
+                  0x003b86                  EDDELEOL
+                  0x003b94                  EDCLS
+                  0x003ba2                  lfa_BLKED
+                  0x003baa                  BLKED
+                  0x003d56                  INFLOOP
+                  0x003d58                  QAUTORUN
+                  0x003d6c                  QCOLD
+                  0x003d78                  HARDWARE_INIT
+                  0x003d96                  TICKS_INIT
+                  0x003d98                  SET_CLOCK
+                  0x003d9a                  CLR_LOW_RAM
+                  0x003d9c                  CLR_RAM
+                  0x003d9e                  IO_LOCK
+                  0x003da0                  VARS_INIT
+                  0x003da2                  lfa_REBOOT
+                  0x003dac                  REBOOT
+                  0x003dae                  lfa_TICKS
+                  0x003db6                  TICKS
+                  0x003db8                  lfa_USEC
+                  0x003dc0                  USEC
+                  0x003dc2                  lfa_MS
+                  0x003dc8                  MS
+                  0x003df2                  lfa_LFSR
+                  0x003dfa                  LFSR
+                  0x003dfc                  lfa_RAND
+                  0x003e04                  RAND
+                  0x003e06                  lfa_SRAND
+                  0x003e0e                  SRAND
+                  0x003e10                  lfa_CLEAR
+                  0x003e18                  CLEAR
+                  0x003e2a                  lfa_UNUSED
+                  0x003e34                  UNUSED
+                  0x003e3e                  SOUND_INIT
+                  0x003e40                  lfa_TONE
+                  0x003e48                  TONE
+                  0x003e4a                  _font
+                  0x00424a                  _version
+                  0x004257                  _math_error
+                  0x00426d                  _user_aborted
+                  0x004286                  _stack_reset
+                  0x004299                  _unknown_reset
+                  0x0042e0                  ENTER
+                  0x0042ea                  DOUSER
+                  0x0042f6                  DOVAR
+                  0x004300                  DOCONST
+                  0x00430a                  code_EXIT
+                  0x004312                  code_LIT
+                  0x00431c                  code_CLIT
+                  0x004328                  code_BRANCH
+                  0x004330                  code_TBRANCH
+                  0x00433e                  code_ZBRANCH
+                  0x00434c                  code_DODO
+                  0x00435e                  code_DOQDO
+                  0x004370                  code_DOLOOP
+                  0x00438a                  code_DOPLOOP
+                  0x0043a8                  code_VERSION
+                  0x0043b2                  code_R0
+                  0x0043bc                  code_S0
+                  0x0043c6                  code_RAMEND
+                  0x0043d0                  code_ULIMIT
+                  0x0043da                  code_TRUE
+                  0x0043e4                  code_FALSE
+                  0x0043ee                  code_DP0
+                  0x0043f8                  code_CELL
+                  0x004402                  code_DUP
+                  0x00440a                  code_TWODUP
+                  0x004416                  code_QDUP
+                  0x004422                  code_DROP
+                  0x00442a                  code_TWODROP
+                  0x004434                  code_RDROP
+                  0x00443c                  code_SWAP
+                  0x004448                  code_TWOSWAP
+                  0x00445c                  code_ROT
+                  0x00446e                  code_NROT
+                  0x00447e                  code_OVER
+                  0x004488                  code_TWOOVER
+                  0x004496                  code_NIP
+                  0x00449e                  code_TUCK
+                  0x0044aa                  code_TOR
+                  0x0044b4                  code_RFROM
+                  0x0044be                  code_IPFETCH
+                  0x0044c8                  code_DEPTH
+                  0x0044d6                  code_PICK
+                  0x0044e4                  code_RFETCH
+                  0x0044ee                  code_SPFETCH
+                  0x0044fa                  code_SPSTORE
+                  0x004502                  code_RPFETCH
+                  0x00450c                  code_RPSTORE
+                  0x004516                  code_TOCSTK
+                  0x004524                  code_CSTKFROM
+                  0x004532                  code_FETCH
+                  0x00453a                  code_CFETCH
+                  0x004544                  code_TWOFETCH
+                  0x004550                  code_BIDFETCH
+                  0x00456e                  code_TBLFETCH
+                  0x00457e                  code_TBLSTORE
+                  0x004592                  code_STORE
+                  0x00459c                  code_CSTORE
+                  0x0045a8                  code_TWOSTORE
+                  0x0045b4                  code_CELLPLUS
+                  0x0045bc                  code_CELLS
+                  0x0045c6                  code_DOI
+                  0x0045d0                  code_DOL
+                  0x0045da                  code_DOJ
+                  0x0045e4                  code_UNLOOP
+                  0x0045ee                  code_EXECUTE
+                  0x0045f6                  code_FETCHEXEC
+                  0x0045fa                  code_VEXEC
+                  0x004604                  code_CALL
+                  0x004614                  code_IMMED
+                  0x00461e                  code_HIDDEN
+                  0x004628                  code_NMARK
+                  0x004632                  code_LENMASK
+                  0x00463c                  code_TIBSIZE
+                  0x004646                  code_PADSIZE
+                  0x004650                  code_PARSENAME
+                  0x0046aa                  code_FIND
+                  0x0046fa                  code_ALIGNED
+                  0x004704                  code_SOURCE
+                  0x004712                  code_SRCSTORE
+                  0x004720                  FETCH_EXEC
+                  0x00472a                  code_EFETCH
+                  0x004738                  code_ECFETCH
+                  0x004748                  code_ETBLFETCH
+                  0x00475e                  code_MSB
+                  0x004768                  code_MAXINT
+                  0x004772                  code_MININT
+                  0x00477c                  code_PLUS
+                  0x004784                  code_MINUS
+                  0x00478e                  code_ONEPLUS
+                  0x004796                  code_TWOPLUS
+                  0x00479e                  code_ONEMINUS
+                  0x0047a6                  code_TWOMINUS
+                  0x0047ae                  code_TWOSTAR
+                  0x0047b6                  code_TWOSLASH
+                  0x0047be                  code_LSHIFT
+                  0x0047da                  code_RSHIFT
+                  0x0047f6                  code_PLUSSTORE
+                  0x004804                  code_DPLUS
+                  0x004816                  code_DMINUS
+                  0x00482a                  code_MPLUS
+                  0x00483e                  code_STAR
+                  0x004848                  code_MSTAR
+                  0x004854                  code_UMSTAR
+                  0x004860                  code_UDSTAR
+                  0x004874                  code_SLASH
+                  0x004882                  code_MOD
+                  0x004890                  code_STARSLASH
+                  0x0048a2                  code_STARSLASHMOD
+                  0x0048b6                  code_SLASHMOD
+                  0x0048c6                  code_UMSLASHMOD
+                  0x0048d8                  code_UDSLASHMOD
+                  0x0048f4                  code_MAX
+                  0x004902                  code_MIN
+                  0x004910                  code_UMAX
+                  0x00491e                  code_UMIN
+                  0x00492c                  code_WITHIN
+                  0x00493a                  code_EVEN
+                  0x004948                  code_ODD
+                  0x004956                  code_ABS
+                  0x004960                  code_DABS
+                  0x004976                  code_STOD
+                  0x004986                  code_QNEGATE
+                  0x004994                  code_UDREL
+                  0x0049ba                  code_NEGATE
+                  0x0049c2                  code_DNEGATE
+                  0x0049d2                  code_INVERT
+                  0x0049da                  code_DINVERT
+                  0x0049e4                  code_BITMASK
+                  0x0049f4                  code_AND
+                  0x0049fc                  code_OR
+                  0x004a04                  code_XOR
+                  0x004a0c                  code_NOT
+                  0x004a1c                  code_ZEROEQ
+                  0x004a26                  code_ZERODIFF
+                  0x004a36                  code_ZEROLT
+                  0x004a42                  code_ZEROGT
+                  0x004a52                  code_EQUAL
+                  0x004a62                  code_NOTEQ
+                  0x004a72                  code_LESS
+                  0x004a82                  code_GREATER
+                  0x004a92                  code_ULESS
+                  0x004aa2                  code_UGREATER
+                  0x004ab2                  code_SCRBUF
+                  0x004abc                  code_HTAB
+                  0x004ac6                  code_TVOUT_INIT
+                  0x004b2e                  code_VIDEO
+                  0x004b40                  code_LCBSLASHW
+                  0x004b52                  code_CURENBL
+                  0x004b6e                  code_LCCLS
+                  0x004b84                  code_SCRLUP
+                  0x004b8e                  code_SCRLDN
+                  0x004b98                  code_GETX
+                  0x004ba6                  code_GETY
+                  0x004bb4                  code_SETX
+                  0x004bda                  code_SETY
+                  0x004c00                  code_CURADR
+                  0x004c16                  code_SCRCHAR
+                  0x004c3e                  code_CHRTOSCR
+                  0x004c6a                  code_LCLEFT
+                  0x004c82                  code_LCRIGHT
+                  0x004c9c                  code_LCHOME
+                  0x004cb0                  code_LCUP
+                  0x004cc8                  code_LCDOWN
+                  0x004ce2                  code_TGLCHAR
+                  0x004cf8                  code_PUTC
+                  0x004d44                  code_LCCRLF
+                  0x004d68                  code_LCDELLN
+                  0x004d8a                  code_LCEMITQ
+                  0x004d94                  code_SERIAL_INIT
+                  0x004dc0                  code_SERENBL
+                  0x004dd6                  code_B2400
+                  0x004de0                  code_B4800
+                  0x004dea                  code_B9600
+                  0x004df4                  code_B19200
+                  0x004dfe                  code_B38400
+                  0x004e08                  code_B57600
+                  0x004e12                  code_B115200
+                  0x004e1c                  code_BAUD
+                  0x004e2e                  code_SPUTC
+                  0x004e42                  code_SGETC
+                  0x004e7a                  code_SREADYQ
+                  0x004e88                  code_SGETCQ
+                  0x004e96                  code_STORE_INIT
+                  0x004f14                  code_RAMTOXR
+                  0x004f54                  code_XRTORAM
+                  0x004f8e                  code_XBLKCOUNT
+                  0x004f98                  code_QWIP
+                  0x004fc6                  code_RAMTOEE
+                  0x005024                  code_EETORAM
+                  0x005062                  code_EPAGE
+                  0x00506c                  code_ESECTOR
+                  0x005076                  code_EALL
+                  0x005080                  code_EERASE
+                  0x0050e2                  code_EEBLKCOUNT
+                  0x0050ec                  code_KBD_INIT
+                  0x00511c                  code_KBD_RESET
+                  0x005136                  code_LCEKEYQ
+                  0x005144                  code_PEEK_KEY
+                  0x005154                  code_GETKEY
+                  0x00516a                  code_LCEKEY
+                  0x00518e                  code_LCFILTER
+                  0x0051b8                  code_CPOS_STORE
+                  0x0051ca                  code_CPOS_FETCH
+                  0x0051dc                  code_COLON1
+                  0x0051e6                  code_INC_COLON
+                  0x0051f4                  code_DEC_COLON
+                  0x005202                  code_INC_LINE
+                  0x005210                  code_WRAP
+                  0x005222                  code_QWRAP
+                  0x005230                  code_SCROLL
+                  0x005242                  code_FFETCH
+                  0x00525c                  code_FCFETCHL
+                  0x00526e                  code_FCFETCHH
+                  0x005280                  code_IFETCH
+                  0x00529a                  code_ICFETCH
+                  0x0052bc                  code_FADDR
+                  0x0052ca                  code_FNEXT
+                  0x0052d8                  code_WRITE_LATCH
+                  0x005300                  code_FLASH_OP
+                  0x00532a                  code_IMGHEAD
+                  0x005334                  code_MAGIC
+                  0x00533e                  code_IMGROW
+                  0x005348                  code_READCSD
+                  0x00535c                  code_READCID
+                  0x005370                  code_SDCR
+                  0x00537a                  code_SDCINIT
+                  0x005456                  code_SEGMENT
+                  0x005468                  code_SEGMENTQ
+                  0x005472                  code_QSDC
+                  0x00547c                  code_SDCREAD
+                  0x0054c8                  code_SDCWRITE
+                  0x005538                  code_SDCBLOCKS
+                  0x005546                  code_SDCSEGMENTS
+                  0x005550                  code_BL
+                  0x00555a                  code_TOCHAR
+                  0x00556c                  code_FILL
+                  0x005584                  code_MINUSTRAILING
+                  0x0055a4                  code_UPPER
+                  0x0055cc                  code_SCAN
+                  0x0055f0                  code_SKIP
+                  0x005612                  code_MOVE
+                  0x00561a                  code_CMOVE
+                  0x00563a                  code_CMOVETO
+                  0x00565e                  code_BLANK
+                  0x005676                  code_HEAP_INIT
+                  0x005690                  code_HEAPSIZE
+                  0x00569a                  code_HEAPFREE
+                  0x0056a4                  code_FREE_BYTES_STORE
+                  0x0056ae                  code_FREELIST
+                  0x0056b8                  code_USEDLIST
+                  0x0056c2                  code_BLK
+                  0x0056cc                  code_CURRENT
+                  0x0056d6                  code_SCR
+                  0x0056e0                  code_BLKDEV
+                  0x0056ea                  code_BUFARRAY
+                  0x0056f4                  code_QDSP
+                  0x005712                  code_EDITLN
+                  0x00571c                  code_INFLOOP
+                  0x00571e                  code_TICKS_INIT
+                  0x00573a                  code_SET_CLOCK
+                  0x00574a                  code_CLR_LOW_RAM
+                  0x005756                  code_CLR_RAM
+                  0x005762                  code_IO_LOCK
+                  0x00576a                  code_VARS_INIT
+                  0x005784                  code_REBOOT
+                  0x005786                  code_TICKS
+                  0x005790                  code_USEC
+                  0x0057aa                  code_LFSR
+                  0x0057c2                  code_RAND
+                  0x0057f2                  code_SRAND
+                  0x005802                  code_SOUND_INIT
+                  0x005820                  code_TONE
+                  0x005840                  cursor_blink
+                  0x005850                  toggle_char
+                  0x005874                  cursor_enable
+                  0x005888                  cursor_disable
+                  0x005896                  scroll_up
+                  0x0058ca                  scroll_down
+                  0x005bb2                  _code_end
                   0x007800                  vars_count
                   0x0557fa                  __FGS.sec
 
@@ -1619,7 +1622,7 @@ External Symbols in Program Memory (by name):
                   0x000ba8                  ALLOT
                   0x001444                  AND
                   0x0019c2                  ARROWS
-                  0x003244                  ASSIGN
+                  0x003260                  ASSIGN
                   0x001ff6                  ATXY
                   0x00177a                  B115200
                   0x001756                  B19200
@@ -1638,27 +1641,27 @@ External Symbols in Program Memory (by name):
                   0x0026d0                  BL
                   0x002878                  BLANK
                   0x003070                  BLK
-                  0x003084                  BLKDEV
-                  0x003192                  BLKDEVFETCH
-                  0x003b8c                  BLKED
-                  0x00342c                  BLKREAD
-                  0x003456                  BLKTOADR
-                  0x0039b0                  BLKTOSCR
-                  0x00346e                  BLKVALIDQ
-                  0x003442                  BLKWRITE
-                  0x0032b6                  BLOCK
-                  0x003784                  BLOCKQ
-                  0x0030a2                  BLOCK_INIT
+                  0x003086                  BLKDEV
+                  0x00319c                  BLKDEVFETCH
+                  0x003baa                  BLKED
+                  0x003452                  BLKREAD
+                  0x00347c                  BLKTOADR
+                  0x0039d6                  BLKTOSCR
+                  0x003494                  BLKVALIDQ
+                  0x003468                  BLKWRITE
+                  0x0032dc                  BLOCK
+                  0x0037aa                  BLOCKQ
+                  0x0030a4                  BLOCK_INIT
                   0x0021fe                  BOTTOM
                   0x0003ca                  BRANCH
-                  0x00357a                  BREAK
+                  0x0035a0                  BREAK
                   0x002e4e                  BSIZEFETCH
                   0x002e5a                  BSIZESTORE
                   0x00212e                  BSLASHW
-                  0x003086                  BUFARRAY
-                  0x00329a                  BUFFER
+                  0x003088                  BUFARRAY
+                  0x0032c0                  BUFFER
                   0x003058                  BUFFERCOLON
-                  0x0030ee                  BUFFEREDQ
+                  0x0030f8                  BUFFEREDQ
                   0x000642                  CALL
                   0x0024a4                  CARDINFO
                   0x000eca                  CASE
@@ -1674,11 +1677,11 @@ External Symbols in Program Memory (by name):
                   0x0026f6                  CHARPLUS
                   0x0026e4                  CHARS
                   0x0015a0                  CHRTOSCR
-                  0x003dfa                  CLEAR
+                  0x003e18                  CLEAR
                   0x0009b2                  CLIP
                   0x0003c8                  CLIT
-                  0x003d7c                  CLR_LOW_RAM
-                  0x003d7e                  CLR_RAM
+                  0x003d9a                  CLR_LOW_RAM
+                  0x003d9c                  CLR_RAM
                   0x00210e                  CLS
                   0x0027c6                  CMOVE
                   0x0027d2                  CMOVETO
@@ -1694,7 +1697,7 @@ External Symbols in Program Memory (by name):
                   0x001f78                  CONSEXEC
                   0x001f5a                  CONSOLE
                   0x0010f8                  CONSTANT
-                  0x0037fc                  COPYBLOCK
+                  0x003822                  COPYBLOCK
                   0x000872                  COUNT
                   0x001952                  CPOS_FETCH
                   0x001950                  CPOS_STORE
@@ -1708,14 +1711,15 @@ External Symbols in Program Memory (by name):
                   0x00280a                  CSTRTORAM
                   0x001576                  CURADR
                   0x00150a                  CURENBL
+                  0x003072                  CURRENT
                   0x002f5c                  CUT
                   0x001342                  DABS
-                  0x003096                  DATA
-                  0x00320c                  DATAOUT
-                  0x00348e                  DBGEN
+                  0x003098                  DATA
+                  0x003228                  DATAOUT
+                  0x0034b4                  DBGEN
                   0x002b2c                  DDOT
                   0x002b4a                  DDOTR
-                  0x00356a                  DEBUG
+                  0x003590                  DEBUG
                   0x0011ea                  DECIMAL
                   0x002b82                  DECIMALQ
                   0x001958                  DEC_COLON
@@ -1726,16 +1730,16 @@ External Symbols in Program Memory (by name):
                   0x0020ee                  DELEOL
                   0x0020c6                  DELETE
                   0x002044                  DELLN
-                  0x003a92                  DELLN23
+                  0x003ab0                  DELLN23
                   0x000510                  DEPTH
-                  0x00319a                  DEVADR
-                  0x00341a                  DEVID
+                  0x0031a4                  DEVADR
+                  0x003440                  DEVID
                   0x0029b2                  DIGIT
                   0x001430                  DINVERT
                   0x001260                  DMINUS
                   0x001418                  DNEGATE
                   0x000d88                  DO
-                  0x0042e2                  DOCONST
+                  0x004300                  DOCONST
                   0x0003d0                  DODO
                   0x0010aa                  DOESTO
                   0x000600                  DOI
@@ -1749,44 +1753,44 @@ External Symbols in Program Memory (by name):
                   0x00299e                  DOTPAREN
                   0x000d52                  DOTQUOTE
                   0x002aa8                  DOTR
-                  0x0034d4                  DOTRTN
-                  0x0034a2                  DOTS
+                  0x0034fa                  DOTRTN
+                  0x0034c8                  DOTS
                   0x000d04                  DOTSTR
-                  0x0042cc                  DOUSER
-                  0x0042d8                  DOVAR
+                  0x0042ea                  DOUSER
+                  0x0042f6                  DOVAR
                   0x002194                  DOWN
                   0x00043c                  DP
                   0x00042a                  DP0
                   0x001258                  DPLUS
                   0x00048e                  DROP
-                  0x00350a                  DUMP
+                  0x003530                  DUMP
                   0x000470                  DUP
                   0x00186c                  EALL
                   0x0011a2                  ECFETCH
                   0x0027dc                  ECFETCHPLUS
-                  0x003b16                  EDATXY
-                  0x00392c                  EDBACKDEL
-                  0x003b2a                  EDBSLASHW
-                  0x003b76                  EDCLS
-                  0x003892                  EDCRLF
-                  0x00381a                  EDDEL
-                  0x003b68                  EDDELEOL
-                  0x003b4c                  EDDELLN
-                  0x003876                  EDDOWN
-                  0x00384a                  EDEND
-                  0x00385a                  EDHOME
-                  0x003828                  EDINSERTBL
-                  0x003b3e                  EDINSRTLN
-                  0x0035d6                  EDITLN
-                  0x0038ec                  EDKEY
-                  0x003942                  EDLEFT
-                  0x0038c4                  EDPUTC
-                  0x003950                  EDRIGHT
-                  0x003b5a                  EDRMVLN
-                  0x003a82                  EDTAB
-                  0x00395e                  EDTOP
-                  0x003868                  EDUP
-                  0x003684                  EDWHITELN
+                  0x003b34                  EDATXY
+                  0x003952                  EDBACKDEL
+                  0x003b48                  EDBSLASHW
+                  0x003b94                  EDCLS
+                  0x0038b8                  EDCRLF
+                  0x003840                  EDDEL
+                  0x003b86                  EDDELEOL
+                  0x003b6a                  EDDELLN
+                  0x00389c                  EDDOWN
+                  0x003870                  EDEND
+                  0x003880                  EDHOME
+                  0x00384e                  EDINSERTBL
+                  0x003b5c                  EDINSRTLN
+                  0x0035fc                  EDITLN
+                  0x003912                  EDKEY
+                  0x003968                  EDLEFT
+                  0x0038ea                  EDPUTC
+                  0x003976                  EDRIGHT
+                  0x003b78                  EDRMVLN
+                  0x003aa0                  EDTAB
+                  0x003984                  EDTOP
+                  0x00388e                  EDUP
+                  0x0036aa                  EDWHITELN
                   0x0018a6                  EEBLKCOUNT
                   0x00181e                  EEBLKTOADR
                   0x0018d6                  EEPROM
@@ -1801,11 +1805,11 @@ External Symbols in Program Memory (by name):
                   0x000eb2                  ELSE
                   0x001fd2                  EMIT
                   0x001fe4                  EMITQ
-                  0x003376                  EMPTYBUFFERS
+                  0x00339c                  EMPTYBUFFERS
                   0x0021da                  END
                   0x000f16                  ENDCASE
                   0x000efc                  ENDOF
-                  0x0042c2                  ENTER
+                  0x0042e0                  ENTER
                   0x001856                  EPAGE
                   0x001482                  EQUAL
                   0x0023f0                  ERASEROWS
@@ -1832,15 +1836,15 @@ External Symbols in Program Memory (by name):
                   0x0022ae                  FERASE
                   0x00055c                  FETCH
                   0x00062e                  FETCHEXEC
-                  0x004702                  FETCH_EXEC
+                  0x004720                  FETCH_EXEC
                   0x00222a                  FFETCH
-                  0x0031b4                  FIELDS
+                  0x0031be                  FIELDS
                   0x00274e                  FILL
                   0x00079e                  FIND
                   0x000dd8                  FIXLEAVE
                   0x002326                  FLASHTORAM
                   0x002256                  FLASH_OP
-                  0x0033a6                  FLUSH
+                  0x0033cc                  FLUSH
                   0x001390                  FMSLASHMOD
                   0x002252                  FNEXT
                   0x000c36                  FOREJUMP
@@ -1854,7 +1858,7 @@ External Symbols in Program Memory (by name):
                   0x001534                  GETX
                   0x00153e                  GETY
                   0x001496                  GREATER
-                  0x003d5a                  HARDWARE_INIT
+                  0x003d78                  HARDWARE_INIT
                   0x000fb2                  HEADER
                   0x002e3c                  HEAPFREE
                   0x002e2e                  HEAPSIZE
@@ -1883,20 +1887,20 @@ External Symbols in Program Memory (by name):
                   0x000b24                  IMMEDIATE
                   0x001956                  INC_COLON
                   0x00195a                  INC_LINE
-                  0x003d38                  INFLOOP
+                  0x003d56                  INFLOOP
                   0x00206a                  INSRTLN
                   0x00088c                  INTERPRET
                   0x001424                  INVERT
-                  0x003d80                  IO_LOCK
+                  0x003d9e                  IO_LOCK
                   0x000506                  IPFETCH
                   0x001174                  IS
                   0x001f6c                  ISLOCAL
                   0x0018e2                  KBD_INIT
                   0x0018e4                  KBD_RESET
-                  0x003634                  KCASE
+                  0x00365a                  KCASE
                   0x001f8a                  KEY
                   0x001f9c                  KEYQ
-                  0x0038aa                  LASTPOS
+                  0x0038d0                  LASTPOS
                   0x000466                  LATEST
                   0x000c5a                  LBRACKET
                   0x001578                  LCATXY
@@ -1933,12 +1937,12 @@ External Symbols in Program Memory (by name):
                   0x0021a6                  LEFT
                   0x00064a                  LENMASK
                   0x001490                  LESS
-                  0x003ddc                  LFSR
-                  0x0033b6                  LIST
+                  0x003dfa                  LFSR
+                  0x0033dc                  LIST
                   0x0003c6                  LIT
                   0x000cce                  LITERAL
                   0x00155c                  LNADR
-                  0x003324                  LOAD
+                  0x00334a                  LOAD
                   0x001f3c                  LOCAL
                   0x000e02                  LOOP
                   0x00296c                  LPAREN
@@ -1958,13 +1962,13 @@ External Symbols in Program Memory (by name):
                   0x0012ba                  MOD
                   0x0027bc                  MOVE
                   0x001268                  MPLUS
-                  0x003daa                  MS
+                  0x003dc8                  MS
                   0x0011b4                  MSB
-                  0x0036ba                  MSGLINE
+                  0x0036e0                  MSGLINE
                   0x001276                  MSTAR
                   0x000b60                  NAMEMARK
                   0x00140c                  NEGATE
-                  0x003740                  NEXTBLOCK
+                  0x003766                  NEXTBLOCK
                   0x000aa0                  NFATOCFA
                   0x000a8c                  NFATOLFA
                   0x0004e4                  NIP
@@ -1975,19 +1979,19 @@ External Symbols in Program Memory (by name):
                   0x00106a                  NOP
                   0x00145c                  NOT
                   0x00148a                  NOTEQ
-                  0x00311c                  NOTUSED
-                  0x0031fc                  NOUPDATE
+                  0x003126                  NOTUSED
+                  0x003218                  NOUPDATE
                   0x0004c8                  NROT
                   0x001330                  ODD
                   0x000edc                  OF
                   0x000930                  OK
-                  0x003148                  OLDEST
+                  0x003152                  OLDEST
                   0x001218                  ONEMINUS
                   0x001208                  ONEPLUS
-                  0x0037ec                  OPENBLOCK
+                  0x003812                  OPENBLOCK
                   0x00144c                  OR
                   0x0004d2                  OVER
-                  0x0030c6                  OWNQ
+                  0x0030d0                  OWNQ
                   0x000676                  PAD
                   0x000662                  PADSIZE
                   0x000720                  PARSE
@@ -2002,18 +2006,18 @@ External Symbols in Program Memory (by name):
                   0x001250                  PLUSSTORE
                   0x000ca8                  POSTONE
                   0x002ee4                  PREPEND
-                  0x003766                  PREVBLOCK
-                  0x00369e                  PROMPT
+                  0x00378c                  PREVBLOCK
+                  0x0036c4                  PROMPT
                   0x00161a                  PUTC
                   0x000980                  QABORT
-                  0x003d3a                  QAUTORUN
+                  0x003d58                  QAUTORUN
                   0x002cee                  QBASE
-                  0x003d4e                  QCOLD
+                  0x003d6c                  QCOLD
                   0x000f3a                  QCOMPILE
                   0x002bc8                  QDIGIT
                   0x000da2                  QDO
                   0x002c1a                  QDOUBLE
-                  0x00349a                  QDSP
+                  0x0034c0                  QDSP
                   0x000484                  QDUP
                   0x000b0e                  QEMPTY
                   0x002efe                  QFIT
@@ -2039,18 +2043,18 @@ External Symbols in Program Memory (by name):
                   0x001834                  RAMTOEE
                   0x0022e6                  RAMTOFLASH
                   0x0017ca                  RAMTOXR
-                  0x003de6                  RAND
+                  0x003e04                  RAND
                   0x000c6a                  RBRACKET
                   0x0004a2                  RDROP
                   0x002496                  READCID
                   0x002494                  READCSD
-                  0x003d8e                  REBOOT
+                  0x003dac                  REBOOT
                   0x000d74                  RECURSE
                   0x001f50                  REMOTE
                   0x000e64                  REPEAT
                   0x0009ee                  REPL
-                  0x003670                  RESTORELINE
-                  0x0035b6                  RESUME
+                  0x003696                  RESTORELINE
+                  0x0035dc                  RESUME
                   0x000b84                  REVEAL
                   0x000522                  RFETCH
                   0x0004fe                  RFROM
@@ -2058,7 +2062,7 @@ External Symbols in Program Memory (by name):
                   0x002056                  RMVLN
                   0x0004be                  ROT
                   0x00229a                  ROWTOFADR
-                  0x003482                  RPBREAK
+                  0x0034a8                  RPBREAK
                   0x00053a                  RPFETCH
                   0x000542                  RPSTORE
                   0x001248                  RSHIFT
@@ -2066,20 +2070,20 @@ External Symbols in Program Memory (by name):
                   0x00108a                  RT_DOES
                   0x001046                  RT_MARKER
                   0x0003f6                  S0
-                  0x00334e                  SAVEBUFFERS
-                  0x0036fe                  SAVEFAILED
-                  0x003652                  SAVELINE
-                  0x003a6e                  SAVESCREEN
-                  0x003726                  SAVESUCCESS
+                  0x003374                  SAVEBUFFERS
+                  0x003724                  SAVEFAILED
+                  0x003678                  SAVELINE
+                  0x003a8c                  SAVESCREEN
+                  0x00374c                  SAVESUCCESS
                   0x00278a                  SCAN
-                  0x003078                  SCR
+                  0x00307a                  SCR
                   0x0014b2                  SCRBUF
                   0x001594                  SCRCHAR
                   0x00152a                  SCRLDN
                   0x00151a                  SCRLUP
                   0x00216a                  SCROLL
-                  0x003978                  SCRSIZE
-                  0x003a02                  SCRTOBLK
+                  0x00399e                  SCRSIZE
+                  0x003a28                  SCRTOBLK
                   0x0026be                  SDCARD
                   0x002658                  SDCBLKREAD
                   0x002644                  SDCBLKTOADR
@@ -2101,7 +2105,7 @@ External Symbols in Program Memory (by name):
                   0x00239c                  SETHEADER
                   0x001548                  SETX
                   0x001552                  SETY
-                  0x003d7a                  SET_CLOCK
+                  0x003d98                  SET_CLOCK
                   0x001798                  SGETC
                   0x0017b0                  SGETCQ
                   0x002a14                  SHARP
@@ -2117,7 +2121,7 @@ External Symbols in Program Memory (by name):
                   0x002f08                  SMALLBLK
                   0x002f30                  SMALLEST
                   0x001362                  SMSLASHREM
-                  0x003e20                  SOUND_INIT
+                  0x003e3e                  SOUND_INIT
                   0x000a74                  SOURCE
                   0x002008                  SPACE
                   0x00201c                  SPACES
@@ -2125,21 +2129,21 @@ External Symbols in Program Memory (by name):
                   0x000532                  SPSTORE
                   0x00178e                  SPUTC
                   0x000d2e                  SQUOTE
-                  0x003df0                  SRAND
+                  0x003e0e                  SRAND
                   0x000a80                  SRCSTORE
                   0x0017a4                  SREADYQ
                   0x00126e                  STAR
                   0x0012c2                  STARSLASH
                   0x0012cc                  STARSLASHMOD
                   0x00066c                  STATE
-                  0x003abc                  STATUSLN
+                  0x003ada                  STATUSLN
                   0x00134a                  STOD
                   0x000590                  STORE
                   0x0017b2                  STORE_INIT
                   0x002a6e                  STR
                   0x000d1a                  STRCOMPILE
                   0x000cf6                  STRQUOTE
-                  0x003088                  STRUCADR
+                  0x00308a                  STRUCADR
                   0x0004ac                  SWAP
                   0x001f30                  SYSCONS
                   0x000458                  SYSLATEST
@@ -2147,24 +2151,24 @@ External Symbols in Program Memory (by name):
                   0x000580                  TBLFETCH
                   0x00058a                  TBLSTORE
                   0x0003cc                  TBRANCH
-                  0x0032d0                  TEXTBLOCK
-                  0x0035d8                  TEXTEND
+                  0x0032f6                  TEXTBLOCK
+                  0x0035fe                  TEXTEND
                   0x001610                  TGLCHAR
                   0x000ea2                  THEN
-                  0x003400                  THRU
+                  0x003426                  THRU
                   0x000680                  TIB
                   0x000656                  TIBSIZE
                   0x000bda                  TICK
-                  0x003d98                  TICKS
-                  0x003d78                  TICKS_INIT
+                  0x003db6                  TICKS
+                  0x003d96                  TICKS_INIT
                   0x002baa                  TOBASE10
                   0x000aba                  TOBODY
                   0x0026da                  TOCHAR
                   0x000752                  TOCOUNTED
                   0x00054c                  TOCSTK
-                  0x00322e                  TODATA
+                  0x00324a                  TODATA
                   0x000696                  TOIN
-                  0x003e2a                  TONE
+                  0x003e48                  TONE
                   0x002c5a                  TONUMBER
                   0x0021ea                  TOP
                   0x0004f6                  TOR
@@ -2203,15 +2207,15 @@ External Symbols in Program Memory (by name):
                   0x002e96                  UNLINK
                   0x000618                  UNLOOP
                   0x000e4e                  UNTIL
-                  0x003e16                  UNUSED
+                  0x003e34                  UNUSED
                   0x002182                  UP
-                  0x0031d4                  UPDATE
-                  0x003186                  UPDATEDFETCH
+                  0x0031e8                  UPDATE
+                  0x003190                  UPDATEDFETCH
                   0x002780                  UPPER
-                  0x003da2                  USEC
+                  0x003dc0                  USEC
                   0x002e42                  USEDLIST
                   0x0010e0                  VARIABLE
-                  0x003d82                  VARS_INIT
+                  0x003da0                  VARS_INIT
                   0x0003e6                  VERSION
                   0x000638                  VEXEC
                   0x0014c8                  VIDEO
@@ -2285,282 +2289,283 @@ External Symbols in Program Memory (by name):
                   0x000320                  __U1RXInterrupt
                   0x00036c                  __U2RXInterrupt
                   0x000200                  __reset
-                  0x005b8a                  _code_end
-                  0x003e2c                  _font
-                  0x004239                  _math_error
-                  0x004268                  _stack_reset
-                  0x00427b                  _unknown_reset
-                  0x00424f                  _user_aborted
-                  0x00422c                  _version
-                  0x004938                  code_ABS
-                  0x0046dc                  code_ALIGNED
-                  0x0049d6                  code_AND
-                  0x004df4                  code_B115200
-                  0x004dd6                  code_B19200
-                  0x004db8                  code_B2400
-                  0x004de0                  code_B38400
-                  0x004dc2                  code_B4800
-                  0x004dea                  code_B57600
-                  0x004dcc                  code_B9600
-                  0x004dfe                  code_BAUD
-                  0x004532                  code_BIDFETCH
-                  0x0049c6                  code_BITMASK
-                  0x005532                  code_BL
-                  0x005640                  code_BLANK
-                  0x0056a4                  code_BLK
-                  0x0056b8                  code_BLKDEV
-                  0x00430a                  code_BRANCH
-                  0x0056c2                  code_BUFARRAY
-                  0x0045e6                  code_CALL
-                  0x0043da                  code_CELL
-                  0x004596                  code_CELLPLUS
-                  0x00459e                  code_CELLS
-                  0x00451c                  code_CFETCH
-                  0x004c20                  code_CHRTOSCR
-                  0x0042fe                  code_CLIT
-                  0x005722                  code_CLR_LOW_RAM
-                  0x00572e                  code_CLR_RAM
-                  0x0055fc                  code_CMOVE
-                  0x00561c                  code_CMOVETO
-                  0x0051be                  code_COLON1
-                  0x0051ac                  code_CPOS_FETCH
-                  0x00519a                  code_CPOS_STORE
-                  0x004506                  code_CSTKFROM
-                  0x00457e                  code_CSTORE
-                  0x004be2                  code_CURADR
-                  0x004b34                  code_CURENBL
-                  0x004942                  code_DABS
-                  0x0051d6                  code_DEC_COLON
-                  0x0044aa                  code_DEPTH
-                  0x0049bc                  code_DINVERT
-                  0x0047f8                  code_DMINUS
-                  0x0049a4                  code_DNEGATE
-                  0x00432e                  code_DODO
-                  0x0045a8                  code_DOI
-                  0x0045bc                  code_DOJ
-                  0x0045b2                  code_DOL
-                  0x004352                  code_DOLOOP
-                  0x00436c                  code_DOPLOOP
-                  0x004340                  code_DOQDO
-                  0x0043d0                  code_DP0
-                  0x0047e6                  code_DPLUS
-                  0x004404                  code_DROP
-                  0x0043e4                  code_DUP
-                  0x005058                  code_EALL
-                  0x00471a                  code_ECFETCH
-                  0x0056ea                  code_EDITLN
-                  0x0050c4                  code_EEBLKCOUNT
-                  0x005062                  code_EERASE
-                  0x005006                  code_EETORAM
-                  0x00470c                  code_EFETCH
-                  0x005044                  code_EPAGE
-                  0x004a34                  code_EQUAL
-                  0x00504e                  code_ESECTOR
-                  0x00472a                  code_ETBLFETCH
-                  0x00491c                  code_EVEN
-                  0x0045d0                  code_EXECUTE
-                  0x0042ec                  code_EXIT
-                  0x00529e                  code_FADDR
-                  0x0043c6                  code_FALSE
-                  0x005250                  code_FCFETCHH
-                  0x00523e                  code_FCFETCHL
-                  0x004514                  code_FETCH
-                  0x0045d8                  code_FETCHEXEC
-                  0x005224                  code_FFETCH
-                  0x00554e                  code_FILL
-                  0x00468c                  code_FIND
-                  0x0052e2                  code_FLASH_OP
-                  0x0052ac                  code_FNEXT
-                  0x005690                  code_FREELIST
-                  0x005686                  code_FREE_BYTES_STORE
-                  0x005136                  code_GETKEY
-                  0x004b7a                  code_GETX
-                  0x004b88                  code_GETY
-                  0x004a64                  code_GREATER
-                  0x00567c                  code_HEAPFREE
-                  0x005672                  code_HEAPSIZE
-                  0x005658                  code_HEAP_INIT
-                  0x004600                  code_HIDDEN
-                  0x004a9e                  code_HTAB
-                  0x00527c                  code_ICFETCH
-                  0x005262                  code_IFETCH
-                  0x00530c                  code_IMGHEAD
-                  0x005320                  code_IMGROW
-                  0x0045f6                  code_IMMED
-                  0x0051c8                  code_INC_COLON
-                  0x0051e4                  code_INC_LINE
-                  0x0056f4                  code_INFLOOP
-                  0x0049b4                  code_INVERT
-                  0x00573a                  code_IO_LOCK
-                  0x0044a0                  code_IPFETCH
-                  0x0050ce                  code_KBD_INIT
-                  0x0050fe                  code_KBD_RESET
-                  0x004b22                  code_LCBSLASHW
-                  0x004b50                  code_LCCLS
-                  0x004d26                  code_LCCRLF
-                  0x004d4a                  code_LCDELLN
-                  0x004caa                  code_LCDOWN
-                  0x00514c                  code_LCEKEY
-                  0x005118                  code_LCEKEYQ
-                  0x004d6c                  code_LCEMITQ
-                  0x005170                  code_LCFILTER
-                  0x004c7e                  code_LCHOME
-                  0x004c4c                  code_LCLEFT
-                  0x004c64                  code_LCRIGHT
-                  0x004c92                  code_LCUP
-                  0x004614                  code_LENMASK
-                  0x004a54                  code_LESS
-                  0x005782                  code_LFSR
-                  0x0042f4                  code_LIT
-                  0x0047a0                  code_LSHIFT
-                  0x005316                  code_MAGIC
-                  0x0048d6                  code_MAX
-                  0x00474a                  code_MAXINT
-                  0x0048e4                  code_MIN
-                  0x004754                  code_MININT
-                  0x004766                  code_MINUS
-                  0x005566                  code_MINUSTRAILING
-                  0x004864                  code_MOD
-                  0x0055f4                  code_MOVE
-                  0x00480c                  code_MPLUS
-                  0x004740                  code_MSB
-                  0x00482a                  code_MSTAR
-                  0x00499c                  code_NEGATE
-                  0x004478                  code_NIP
-                  0x00460a                  code_NMARK
-                  0x0049ee                  code_NOT
-                  0x004a44                  code_NOTEQ
-                  0x004450                  code_NROT
-                  0x00492a                  code_ODD
-                  0x004780                  code_ONEMINUS
-                  0x004770                  code_ONEPLUS
-                  0x0049de                  code_OR
-                  0x004460                  code_OVER
-                  0x004628                  code_PADSIZE
-                  0x004632                  code_PARSENAME
-                  0x005126                  code_PEEK_KEY
-                  0x0044b8                  code_PICK
-                  0x00475e                  code_PLUS
-                  0x0047d8                  code_PLUSSTORE
-                  0x004cda                  code_PUTC
-                  0x0056cc                  code_QDSP
-                  0x0043f8                  code_QDUP
-                  0x004968                  code_QNEGATE
-                  0x005454                  code_QSDC
-                  0x004f7a                  code_QWIP
-                  0x005204                  code_QWRAP
-                  0x004394                  code_R0
-                  0x0043a8                  code_RAMEND
-                  0x004fa8                  code_RAMTOEE
-                  0x004ef6                  code_RAMTOXR
-                  0x00579a                  code_RAND
-                  0x004416                  code_RDROP
-                  0x00533e                  code_READCID
-                  0x00532a                  code_READCSD
-                  0x00575c                  code_REBOOT
-                  0x0044c6                  code_RFETCH
-                  0x004496                  code_RFROM
-                  0x00443e                  code_ROT
-                  0x0044e4                  code_RPFETCH
-                  0x0044ee                  code_RPSTORE
-                  0x0047bc                  code_RSHIFT
-                  0x00439e                  code_S0
-                  0x0055ae                  code_SCAN
-                  0x0056ae                  code_SCR
-                  0x004a94                  code_SCRBUF
-                  0x004bf8                  code_SCRCHAR
-                  0x004b70                  code_SCRLDN
-                  0x004b66                  code_SCRLUP
-                  0x005212                  code_SCROLL
-                  0x00551a                  code_SDCBLOCKS
-                  0x00535c                  code_SDCINIT
-                  0x005352                  code_SDCR
-                  0x00545e                  code_SDCREAD
-                  0x005528                  code_SDCSEGMENTS
-                  0x0054aa                  code_SDCWRITE
-                  0x005438                  code_SEGMENT
-                  0x00544a                  code_SEGMENTQ
-                  0x004da2                  code_SERENBL
-                  0x004d76                  code_SERIAL_INIT
-                  0x004b96                  code_SETX
-                  0x004bbc                  code_SETY
-                  0x005712                  code_SET_CLOCK
-                  0x004e24                  code_SGETC
-                  0x004e6a                  code_SGETCQ
-                  0x0055d2                  code_SKIP
-                  0x004856                  code_SLASH
-                  0x004898                  code_SLASHMOD
-                  0x0057da                  code_SOUND_INIT
-                  0x0046e6                  code_SOURCE
-                  0x0044d0                  code_SPFETCH
-                  0x0044dc                  code_SPSTORE
-                  0x004e10                  code_SPUTC
-                  0x0057ca                  code_SRAND
-                  0x0046f4                  code_SRCSTORE
-                  0x004e5c                  code_SREADYQ
-                  0x004820                  code_STAR
-                  0x004872                  code_STARSLASH
-                  0x004884                  code_STARSLASHMOD
-                  0x004958                  code_STOD
-                  0x004574                  code_STORE
-                  0x004e78                  code_STORE_INIT
-                  0x00441e                  code_SWAP
-                  0x004550                  code_TBLFETCH
-                  0x004560                  code_TBLSTORE
-                  0x004312                  code_TBRANCH
-                  0x004cc4                  code_TGLCHAR
-                  0x00461e                  code_TIBSIZE
-                  0x00575e                  code_TICKS
-                  0x0056f6                  code_TICKS_INIT
-                  0x00553c                  code_TOCHAR
-                  0x0044f8                  code_TOCSTK
-                  0x0057f8                  code_TONE
-                  0x00448c                  code_TOR
-                  0x0043bc                  code_TRUE
-                  0x004480                  code_TUCK
-                  0x004aa8                  code_TVOUT_INIT
-                  0x00440c                  code_TWODROP
-                  0x0043ec                  code_TWODUP
-                  0x004526                  code_TWOFETCH
-                  0x004788                  code_TWOMINUS
-                  0x00446a                  code_TWOOVER
-                  0x004778                  code_TWOPLUS
-                  0x004798                  code_TWOSLASH
-                  0x004790                  code_TWOSTAR
-                  0x00458a                  code_TWOSTORE
-                  0x00442a                  code_TWOSWAP
-                  0x004976                  code_UDREL
-                  0x0048ba                  code_UDSLASHMOD
-                  0x004842                  code_UDSTAR
-                  0x004a84                  code_UGREATER
-                  0x004a74                  code_ULESS
-                  0x0043b2                  code_ULIMIT
-                  0x0048f2                  code_UMAX
-                  0x004900                  code_UMIN
-                  0x0048a8                  code_UMSLASHMOD
-                  0x004836                  code_UMSTAR
-                  0x0045c6                  code_UNLOOP
-                  0x005586                  code_UPPER
-                  0x005768                  code_USEC
-                  0x00569a                  code_USEDLIST
-                  0x005742                  code_VARS_INIT
-                  0x00438a                  code_VERSION
-                  0x0045dc                  code_VEXEC
-                  0x004b10                  code_VIDEO
-                  0x00490e                  code_WITHIN
-                  0x0051f2                  code_WRAP
-                  0x0052ba                  code_WRITE_LATCH
-                  0x004f70                  code_XBLKCOUNT
-                  0x0049e6                  code_XOR
-                  0x004f36                  code_XRTORAM
-                  0x004320                  code_ZBRANCH
-                  0x004a08                  code_ZERODIFF
-                  0x0049fe                  code_ZEROEQ
-                  0x004a24                  code_ZEROGT
-                  0x004a18                  code_ZEROLT
-                  0x005818                  cursor_blink
-                  0x005860                  cursor_disable
-                  0x00584c                  cursor_enable
+                  0x005bb2                  _code_end
+                  0x003e4a                  _font
+                  0x004257                  _math_error
+                  0x004286                  _stack_reset
+                  0x004299                  _unknown_reset
+                  0x00426d                  _user_aborted
+                  0x00424a                  _version
+                  0x004956                  code_ABS
+                  0x0046fa                  code_ALIGNED
+                  0x0049f4                  code_AND
+                  0x004e12                  code_B115200
+                  0x004df4                  code_B19200
+                  0x004dd6                  code_B2400
+                  0x004dfe                  code_B38400
+                  0x004de0                  code_B4800
+                  0x004e08                  code_B57600
+                  0x004dea                  code_B9600
+                  0x004e1c                  code_BAUD
+                  0x004550                  code_BIDFETCH
+                  0x0049e4                  code_BITMASK
+                  0x005550                  code_BL
+                  0x00565e                  code_BLANK
+                  0x0056c2                  code_BLK
+                  0x0056e0                  code_BLKDEV
+                  0x004328                  code_BRANCH
+                  0x0056ea                  code_BUFARRAY
+                  0x004604                  code_CALL
+                  0x0043f8                  code_CELL
+                  0x0045b4                  code_CELLPLUS
+                  0x0045bc                  code_CELLS
+                  0x00453a                  code_CFETCH
+                  0x004c3e                  code_CHRTOSCR
+                  0x00431c                  code_CLIT
+                  0x00574a                  code_CLR_LOW_RAM
+                  0x005756                  code_CLR_RAM
+                  0x00561a                  code_CMOVE
+                  0x00563a                  code_CMOVETO
+                  0x0051dc                  code_COLON1
+                  0x0051ca                  code_CPOS_FETCH
+                  0x0051b8                  code_CPOS_STORE
+                  0x004524                  code_CSTKFROM
+                  0x00459c                  code_CSTORE
+                  0x004c00                  code_CURADR
+                  0x004b52                  code_CURENBL
+                  0x0056cc                  code_CURRENT
+                  0x004960                  code_DABS
+                  0x0051f4                  code_DEC_COLON
+                  0x0044c8                  code_DEPTH
+                  0x0049da                  code_DINVERT
+                  0x004816                  code_DMINUS
+                  0x0049c2                  code_DNEGATE
+                  0x00434c                  code_DODO
+                  0x0045c6                  code_DOI
+                  0x0045da                  code_DOJ
+                  0x0045d0                  code_DOL
+                  0x004370                  code_DOLOOP
+                  0x00438a                  code_DOPLOOP
+                  0x00435e                  code_DOQDO
+                  0x0043ee                  code_DP0
+                  0x004804                  code_DPLUS
+                  0x004422                  code_DROP
+                  0x004402                  code_DUP
+                  0x005076                  code_EALL
+                  0x004738                  code_ECFETCH
+                  0x005712                  code_EDITLN
+                  0x0050e2                  code_EEBLKCOUNT
+                  0x005080                  code_EERASE
+                  0x005024                  code_EETORAM
+                  0x00472a                  code_EFETCH
+                  0x005062                  code_EPAGE
+                  0x004a52                  code_EQUAL
+                  0x00506c                  code_ESECTOR
+                  0x004748                  code_ETBLFETCH
+                  0x00493a                  code_EVEN
+                  0x0045ee                  code_EXECUTE
+                  0x00430a                  code_EXIT
+                  0x0052bc                  code_FADDR
+                  0x0043e4                  code_FALSE
+                  0x00526e                  code_FCFETCHH
+                  0x00525c                  code_FCFETCHL
+                  0x004532                  code_FETCH
+                  0x0045f6                  code_FETCHEXEC
+                  0x005242                  code_FFETCH
+                  0x00556c                  code_FILL
+                  0x0046aa                  code_FIND
+                  0x005300                  code_FLASH_OP
+                  0x0052ca                  code_FNEXT
+                  0x0056ae                  code_FREELIST
+                  0x0056a4                  code_FREE_BYTES_STORE
+                  0x005154                  code_GETKEY
+                  0x004b98                  code_GETX
+                  0x004ba6                  code_GETY
+                  0x004a82                  code_GREATER
+                  0x00569a                  code_HEAPFREE
+                  0x005690                  code_HEAPSIZE
+                  0x005676                  code_HEAP_INIT
+                  0x00461e                  code_HIDDEN
+                  0x004abc                  code_HTAB
+                  0x00529a                  code_ICFETCH
+                  0x005280                  code_IFETCH
+                  0x00532a                  code_IMGHEAD
+                  0x00533e                  code_IMGROW
+                  0x004614                  code_IMMED
+                  0x0051e6                  code_INC_COLON
+                  0x005202                  code_INC_LINE
+                  0x00571c                  code_INFLOOP
+                  0x0049d2                  code_INVERT
+                  0x005762                  code_IO_LOCK
+                  0x0044be                  code_IPFETCH
+                  0x0050ec                  code_KBD_INIT
+                  0x00511c                  code_KBD_RESET
+                  0x004b40                  code_LCBSLASHW
+                  0x004b6e                  code_LCCLS
+                  0x004d44                  code_LCCRLF
+                  0x004d68                  code_LCDELLN
+                  0x004cc8                  code_LCDOWN
+                  0x00516a                  code_LCEKEY
+                  0x005136                  code_LCEKEYQ
+                  0x004d8a                  code_LCEMITQ
+                  0x00518e                  code_LCFILTER
+                  0x004c9c                  code_LCHOME
+                  0x004c6a                  code_LCLEFT
+                  0x004c82                  code_LCRIGHT
+                  0x004cb0                  code_LCUP
+                  0x004632                  code_LENMASK
+                  0x004a72                  code_LESS
+                  0x0057aa                  code_LFSR
+                  0x004312                  code_LIT
+                  0x0047be                  code_LSHIFT
+                  0x005334                  code_MAGIC
+                  0x0048f4                  code_MAX
+                  0x004768                  code_MAXINT
+                  0x004902                  code_MIN
+                  0x004772                  code_MININT
+                  0x004784                  code_MINUS
+                  0x005584                  code_MINUSTRAILING
+                  0x004882                  code_MOD
+                  0x005612                  code_MOVE
+                  0x00482a                  code_MPLUS
+                  0x00475e                  code_MSB
+                  0x004848                  code_MSTAR
+                  0x0049ba                  code_NEGATE
+                  0x004496                  code_NIP
+                  0x004628                  code_NMARK
+                  0x004a0c                  code_NOT
+                  0x004a62                  code_NOTEQ
+                  0x00446e                  code_NROT
+                  0x004948                  code_ODD
+                  0x00479e                  code_ONEMINUS
+                  0x00478e                  code_ONEPLUS
+                  0x0049fc                  code_OR
+                  0x00447e                  code_OVER
+                  0x004646                  code_PADSIZE
+                  0x004650                  code_PARSENAME
+                  0x005144                  code_PEEK_KEY
+                  0x0044d6                  code_PICK
+                  0x00477c                  code_PLUS
+                  0x0047f6                  code_PLUSSTORE
+                  0x004cf8                  code_PUTC
+                  0x0056f4                  code_QDSP
+                  0x004416                  code_QDUP
+                  0x004986                  code_QNEGATE
+                  0x005472                  code_QSDC
+                  0x004f98                  code_QWIP
+                  0x005222                  code_QWRAP
+                  0x0043b2                  code_R0
+                  0x0043c6                  code_RAMEND
+                  0x004fc6                  code_RAMTOEE
+                  0x004f14                  code_RAMTOXR
+                  0x0057c2                  code_RAND
+                  0x004434                  code_RDROP
+                  0x00535c                  code_READCID
+                  0x005348                  code_READCSD
+                  0x005784                  code_REBOOT
+                  0x0044e4                  code_RFETCH
+                  0x0044b4                  code_RFROM
+                  0x00445c                  code_ROT
+                  0x004502                  code_RPFETCH
+                  0x00450c                  code_RPSTORE
+                  0x0047da                  code_RSHIFT
+                  0x0043bc                  code_S0
+                  0x0055cc                  code_SCAN
+                  0x0056d6                  code_SCR
+                  0x004ab2                  code_SCRBUF
+                  0x004c16                  code_SCRCHAR
+                  0x004b8e                  code_SCRLDN
+                  0x004b84                  code_SCRLUP
+                  0x005230                  code_SCROLL
+                  0x005538                  code_SDCBLOCKS
+                  0x00537a                  code_SDCINIT
+                  0x005370                  code_SDCR
+                  0x00547c                  code_SDCREAD
+                  0x005546                  code_SDCSEGMENTS
+                  0x0054c8                  code_SDCWRITE
+                  0x005456                  code_SEGMENT
+                  0x005468                  code_SEGMENTQ
+                  0x004dc0                  code_SERENBL
+                  0x004d94                  code_SERIAL_INIT
+                  0x004bb4                  code_SETX
+                  0x004bda                  code_SETY
+                  0x00573a                  code_SET_CLOCK
+                  0x004e42                  code_SGETC
+                  0x004e88                  code_SGETCQ
+                  0x0055f0                  code_SKIP
+                  0x004874                  code_SLASH
+                  0x0048b6                  code_SLASHMOD
+                  0x005802                  code_SOUND_INIT
+                  0x004704                  code_SOURCE
+                  0x0044ee                  code_SPFETCH
+                  0x0044fa                  code_SPSTORE
+                  0x004e2e                  code_SPUTC
+                  0x0057f2                  code_SRAND
+                  0x004712                  code_SRCSTORE
+                  0x004e7a                  code_SREADYQ
+                  0x00483e                  code_STAR
+                  0x004890                  code_STARSLASH
+                  0x0048a2                  code_STARSLASHMOD
+                  0x004976                  code_STOD
+                  0x004592                  code_STORE
+                  0x004e96                  code_STORE_INIT
+                  0x00443c                  code_SWAP
+                  0x00456e                  code_TBLFETCH
+                  0x00457e                  code_TBLSTORE
+                  0x004330                  code_TBRANCH
+                  0x004ce2                  code_TGLCHAR
+                  0x00463c                  code_TIBSIZE
+                  0x005786                  code_TICKS
+                  0x00571e                  code_TICKS_INIT
+                  0x00555a                  code_TOCHAR
+                  0x004516                  code_TOCSTK
+                  0x005820                  code_TONE
+                  0x0044aa                  code_TOR
+                  0x0043da                  code_TRUE
+                  0x00449e                  code_TUCK
+                  0x004ac6                  code_TVOUT_INIT
+                  0x00442a                  code_TWODROP
+                  0x00440a                  code_TWODUP
+                  0x004544                  code_TWOFETCH
+                  0x0047a6                  code_TWOMINUS
+                  0x004488                  code_TWOOVER
+                  0x004796                  code_TWOPLUS
+                  0x0047b6                  code_TWOSLASH
+                  0x0047ae                  code_TWOSTAR
+                  0x0045a8                  code_TWOSTORE
+                  0x004448                  code_TWOSWAP
+                  0x004994                  code_UDREL
+                  0x0048d8                  code_UDSLASHMOD
+                  0x004860                  code_UDSTAR
+                  0x004aa2                  code_UGREATER
+                  0x004a92                  code_ULESS
+                  0x0043d0                  code_ULIMIT
+                  0x004910                  code_UMAX
+                  0x00491e                  code_UMIN
+                  0x0048c6                  code_UMSLASHMOD
+                  0x004854                  code_UMSTAR
+                  0x0045e4                  code_UNLOOP
+                  0x0055a4                  code_UPPER
+                  0x005790                  code_USEC
+                  0x0056b8                  code_USEDLIST
+                  0x00576a                  code_VARS_INIT
+                  0x0043a8                  code_VERSION
+                  0x0045fa                  code_VEXEC
+                  0x004b2e                  code_VIDEO
+                  0x00492c                  code_WITHIN
+                  0x005210                  code_WRAP
+                  0x0052d8                  code_WRITE_LATCH
+                  0x004f8e                  code_XBLKCOUNT
+                  0x004a04                  code_XOR
+                  0x004f54                  code_XRTORAM
+                  0x00433e                  code_ZBRANCH
+                  0x004a26                  code_ZERODIFF
+                  0x004a1c                  code_ZEROEQ
+                  0x004a42                  code_ZEROGT
+                  0x004a36                  code_ZEROLT
+                  0x005840                  cursor_blink
+                  0x005888                  cursor_disable
+                  0x005874                  cursor_enable
                   0x000956                  lfa_ABORT
                   0x000996                  lfa_ABORTQUOTE
                   0x001332                  lfa_ABS
@@ -2589,19 +2594,19 @@ External Symbols in Program Memory (by name):
                   0x0026ca                  lfa_BL
                   0x002870                  lfa_BLANK
                   0x00306a                  lfa_BLK
-                  0x00307a                  lfa_BLKDEV
-                  0x003b84                  lfa_BLKED
-                  0x003420                  lfa_BLKREAD
-                  0x00344c                  lfa_BLKTOADR
-                  0x0039a6                  lfa_BLKTOSCR
-                  0x003460                  lfa_BLKVALIDQ
-                  0x003436                  lfa_BLKWRITE
-                  0x0032ae                  lfa_BLOCK
+                  0x00307c                  lfa_BLKDEV
+                  0x003ba2                  lfa_BLKED
+                  0x003446                  lfa_BLKREAD
+                  0x003472                  lfa_BLKTOADR
+                  0x0039cc                  lfa_BLKTOSCR
+                  0x003486                  lfa_BLKVALIDQ
+                  0x00345c                  lfa_BLKWRITE
+                  0x0032d4                  lfa_BLOCK
                   0x0021f4                  lfa_BOTTOM
-                  0x003572                  lfa_BREAK
+                  0x003598                  lfa_BREAK
                   0x002e44                  lfa_BSIZEFETCH
                   0x002128                  lfa_BSLASHW
-                  0x003290                  lfa_BUFFER
+                  0x0032b6                  lfa_BUFFER
                   0x00304e                  lfa_BUFFERCOLON
                   0x00063a                  lfa_CALL
                   0x002498                  lfa_CARDINFO
@@ -2617,7 +2622,7 @@ External Symbols in Program Memory (by name):
                   0x0026ee                  lfa_CHARPLUS
                   0x0026dc                  lfa_CHARS
                   0x001596                  lfa_CHRTOSCR
-                  0x003df2                  lfa_CLEAR
+                  0x003e10                  lfa_CLEAR
                   0x0009aa                  lfa_CLIP
                   0x002108                  lfa_CLS
                   0x0027be                  lfa_CMOVE
@@ -2642,10 +2647,10 @@ External Symbols in Program Memory (by name):
                   0x00156c                  lfa_CURADR
                   0x001500                  lfa_CURENBL
                   0x00133a                  lfa_DABS
-                  0x003486                  lfa_DBGEN
+                  0x0034ac                  lfa_DBGEN
                   0x002b26                  lfa_DDOT
                   0x002b44                  lfa_DDOTR
-                  0x003562                  lfa_DEBUG
+                  0x003588                  lfa_DEBUG
                   0x0011e0                  lfa_DECIMAL
                   0x002b76                  lfa_DECIMALQ
                   0x001134                  lfa_DEFER
@@ -2655,7 +2660,7 @@ External Symbols in Program Memory (by name):
                   0x0020bc                  lfa_DELETE
                   0x00203c                  lfa_DELLN
                   0x000508                  lfa_DEPTH
-                  0x003412                  lfa_DEVID
+                  0x003438                  lfa_DEVID
                   0x0029aa                  lfa_DIGIT
                   0x001426                  lfa_DINVERT
                   0x00125a                  lfa_DMINUS
@@ -2669,14 +2674,14 @@ External Symbols in Program Memory (by name):
                   0x002998                  lfa_DOTPAREN
                   0x000d4c                  lfa_DOTQUOTE
                   0x002aa2                  lfa_DOTR
-                  0x0034cc                  lfa_DOTRTN
-                  0x00349c                  lfa_DOTS
+                  0x0034f2                  lfa_DOTRTN
+                  0x0034c2                  lfa_DOTS
                   0x00218c                  lfa_DOWN
                   0x000436                  lfa_DP
                   0x000424                  lfa_DP0
                   0x001252                  lfa_DPLUS
                   0x000486                  lfa_DROP
-                  0x003502                  lfa_DUMP
+                  0x003528                  lfa_DUMP
                   0x00046a                  lfa_DUP
                   0x001864                  lfa_EALL
                   0x00119c                  lfa_ECFETCH
@@ -2690,7 +2695,7 @@ External Symbols in Program Memory (by name):
                   0x000eaa                  lfa_ELSE
                   0x001fca                  lfa_EMIT
                   0x001fdc                  lfa_EMITQ
-                  0x003366                  lfa_EMPTYBUFFERS
+                  0x00338c                  lfa_EMPTYBUFFERS
                   0x0021d4                  lfa_END
                   0x000f0c                  lfa_ENDCASE
                   0x000ef4                  lfa_ENDOF
@@ -2716,7 +2721,7 @@ External Symbols in Program Memory (by name):
                   0x002746                  lfa_FILL
                   0x000796                  lfa_FIND
                   0x00231a                  lfa_FLASHTORAM
-                  0x00339e                  lfa_FLUSH
+                  0x0033c4                  lfa_FLUSH
                   0x001386                  lfa_FMSLASHMOD
                   0x000fdc                  lfa_FORGET
                   0x003002                  lfa_FREE
@@ -2756,11 +2761,11 @@ External Symbols in Program Memory (by name):
                   0x000dbe                  lfa_LEAVE
                   0x00219e                  lfa_LEFT
                   0x00148c                  lfa_LESS
-                  0x003dd4                  lfa_LFSR
-                  0x0033ae                  lfa_LIST
+                  0x003df2                  lfa_LFSR
+                  0x0033d4                  lfa_LIST
                   0x000cc4                  lfa_LITERAL
                   0x001554                  lfa_LNADR
-                  0x00331c                  lfa_LOAD
+                  0x003342                  lfa_LOAD
                   0x001f34                  lfa_LOCAL
                   0x000dfa                  lfa_LOOP
                   0x002968                  lfa_LPAREN
@@ -2777,9 +2782,9 @@ External Symbols in Program Memory (by name):
                   0x0012b4                  lfa_MOD
                   0x0027b4                  lfa_MOVE
                   0x001262                  lfa_MPLUS
-                  0x003da4                  lfa_MS
+                  0x003dc2                  lfa_MS
                   0x0011ae                  lfa_MSB
-                  0x0036b0                  lfa_MSGLINE
+                  0x0036d6                  lfa_MSGLINE
                   0x001270                  lfa_MSTAR
                   0x001402                  lfa_NEGATE
                   0x000a96                  lfa_NFATOCFA
@@ -2804,14 +2809,14 @@ External Symbols in Program Memory (by name):
                   0x000e0e                  lfa_PLUSLOOP
                   0x00124a                  lfa_PLUSSTORE
                   0x000c9c                  lfa_POSTONE
-                  0x003694                  lfa_PROMPT
+                  0x0036ba                  lfa_PROMPT
                   0x001612                  lfa_PUTC
                   0x002ce6                  lfa_QBASE
                   0x000f2e                  lfa_QCOMPILE
                   0x002bbe                  lfa_QDIGIT
                   0x000d9c                  lfa_QDO
                   0x002c10                  lfa_QDOUBLE
-                  0x003492                  lfa_QDSP
+                  0x0034b8                  lfa_QDSP
                   0x00047c                  lfa_QDUP
                   0x000b04                  lfa_QEMPTY
                   0x002258                  lfa_QFLIMITS
@@ -2834,15 +2839,15 @@ External Symbols in Program Memory (by name):
                   0x00182a                  lfa_RAMTOEE
                   0x0022da                  lfa_RAMTOFLASH
                   0x0017c0                  lfa_RAMTOXR
-                  0x003dde                  lfa_RAND
+                  0x003dfc                  lfa_RAND
                   0x000c66                  lfa_RBRACKET
                   0x00049a                  lfa_RDROP
-                  0x003d84                  lfa_REBOOT
+                  0x003da2                  lfa_REBOOT
                   0x000d6a                  lfa_RECURSE
                   0x001f46                  lfa_REMOTE
                   0x000e5a                  lfa_REPEAT
-                  0x003662                  lfa_RESTORELINE
-                  0x0035ac                  lfa_RESUME
+                  0x003688                  lfa_RESTORELINE
+                  0x0035d2                  lfa_RESUME
                   0x000b7a                  lfa_REVEAL
                   0x00051c                  lfa_RFETCH
                   0x0004f8                  lfa_RFROM
@@ -2850,23 +2855,23 @@ External Symbols in Program Memory (by name):
                   0x00204e                  lfa_RMVLN
                   0x0004b8                  lfa_ROT
                   0x00228e                  lfa_ROWTOFADR
-                  0x003478                  lfa_RPBREAK
+                  0x00349e                  lfa_RPBREAK
                   0x000534                  lfa_RPFETCH
                   0x00053c                  lfa_RPSTORE
                   0x00123e                  lfa_RSHIFT
                   0x0003f0                  lfa_S0
-                  0x00333e                  lfa_SAVEBUFFERS
-                  0x003646                  lfa_SAVELINE
-                  0x003a60                  lfa_SAVESCREEN
+                  0x003364                  lfa_SAVEBUFFERS
+                  0x00366c                  lfa_SAVELINE
+                  0x003a7e                  lfa_SAVESCREEN
                   0x002782                  lfa_SCAN
-                  0x003072                  lfa_SCR
+                  0x003074                  lfa_SCR
                   0x0014a8                  lfa_SCRBUF
                   0x001588                  lfa_SCRCHAR
                   0x00151c                  lfa_SCRLDN
                   0x00150e                  lfa_SCRLUP
                   0x002160                  lfa_SCROLL
-                  0x00396c                  lfa_SCRSIZE
-                  0x0039f8                  lfa_SCRTOBLK
+                  0x003992                  lfa_SCRSIZE
+                  0x003a1e                  lfa_SCRTOBLK
                   0x0026b4                  lfa_SDCARD
                   0x00261a                  lfa_SDCBLOCKS
                   0x0025b6                  lfa_SDCINIT
@@ -2900,7 +2905,7 @@ External Symbols in Program Memory (by name):
                   0x00052c                  lfa_SPSTORE
                   0x001786                  lfa_SPUTC
                   0x000d28                  lfa_SQUOTE
-                  0x003de8                  lfa_SRAND
+                  0x003e06                  lfa_SRAND
                   0x000a76                  lfa_SRCSTORE
                   0x00179a                  lfa_SREADYQ
                   0x00126a                  lfa_STAR
@@ -2916,21 +2921,21 @@ External Symbols in Program Memory (by name):
                   0x00216c                  lfa_TAB
                   0x000578                  lfa_TBLFETCH
                   0x000582                  lfa_TBLSTORE
-                  0x0032c2                  lfa_TEXTBLOCK
+                  0x0032e8                  lfa_TEXTBLOCK
                   0x001606                  lfa_TGLCHAR
                   0x000e9a                  lfa_THEN
-                  0x0033f8                  lfa_THRU
+                  0x00341e                  lfa_THRU
                   0x00067a                  lfa_TIB
                   0x00064c                  lfa_TIBSIZE
                   0x000bd6                  lfa_TICK
-                  0x003d90                  lfa_TICKS
+                  0x003dae                  lfa_TICKS
                   0x002ba0                  lfa_TOBASE10
                   0x000ab2                  lfa_TOBODY
                   0x0026d2                  lfa_TOCHAR
                   0x000746                  lfa_TOCOUNTED
                   0x000544                  lfa_TOCSTK
                   0x000690                  lfa_TOIN
-                  0x003e22                  lfa_TONE
+                  0x003e40                  lfa_TONE
                   0x002c50                  lfa_TONUMBER
                   0x0021e4                  lfa_TOP
                   0x0004f0                  lfa_TOR
@@ -2967,10 +2972,11 @@ External Symbols in Program Memory (by name):
                   0x001278                  lfa_UMSTAR
                   0x00060e                  lfa_UNLOOP
                   0x000e46                  lfa_UNTIL
-                  0x003e0c                  lfa_UNUSED
+                  0x003e2a                  lfa_UNUSED
                   0x00217c                  lfa_UP
+                  0x0031de                  lfa_UPDATE
                   0x002778                  lfa_UPPER
-                  0x003d9a                  lfa_USEC
+                  0x003db8                  lfa_USEC
                   0x0010d4                  lfa_VARIABLE
                   0x0003dc                  lfa_VERSION
                   0x000630                  lfa_VEXEC
@@ -2994,9 +3000,9 @@ External Symbols in Program Memory (by name):
                   0x00145e                  lfa_ZEROEQ
                   0x001476                  lfa_ZEROGT
                   0x00146e                  lfa_ZEROLT
-                  0x0058a2                  scroll_down
-                  0x00586e                  scroll_up
-                  0x005828                  toggle_char
+                  0x0058ca                  scroll_down
+                  0x005896                  scroll_up
+                  0x005850                  toggle_char
                   0x007800                  vars_count
 
 Configuration mémoire
@@ -3079,9 +3085,9 @@ usercode
 .start.text
  *(.start.txt)
 
-.sysdict            0x83c4       0x3a68
+.sysdict            0x83c4       0x3a86
  *(.sysdict)
- .sysdict           0x83c4       0x3a68 build/default/production/forthex.o
+ .sysdict           0x83c4       0x3a86 build/default/production/forthex.o
                     0x83c4                  EXIT
                     0x83c6                  LIT
                     0x83c8                  CLIT
@@ -4025,157 +4031,159 @@ usercode
                     0xb058                  BUFFERCOLON
                     0xb06a                  lfa_BLK
                     0xb070                  BLK
-                    0xb072                  lfa_SCR
-                    0xb078                  SCR
-                    0xb07a                  lfa_BLKDEV
-                    0xb084                  BLKDEV
-                    0xb086                  BUFARRAY
-                    0xb088                  STRUCADR
-                    0xb096                  DATA
-                    0xb0a2                  BLOCK_INIT
-                    0xb0c6                  OWNQ
-                    0xb0ee                  BUFFEREDQ
-                    0xb11c                  NOTUSED
-                    0xb148                  OLDEST
-                    0xb186                  UPDATEDFETCH
-                    0xb192                  BLKDEVFETCH
-                    0xb19a                  DEVADR
-                    0xb1b4                  FIELDS
-                    0xb1d4                  UPDATE
-                    0xb1fc                  NOUPDATE
-                    0xb20c                  DATAOUT
-                    0xb22e                  TODATA
-                    0xb244                  ASSIGN
-                    0xb290                  lfa_BUFFER
-                    0xb29a                  BUFFER
-                    0xb2ae                  lfa_BLOCK
-                    0xb2b6                  BLOCK
-                    0xb2c2                  lfa_TEXTBLOCK
-                    0xb2d0                  TEXTBLOCK
-                    0xb31c                  lfa_LOAD
-                    0xb324                  LOAD
-                    0xb33e                  lfa_SAVEBUFFERS
-                    0xb34e                  SAVEBUFFERS
-                    0xb366                  lfa_EMPTYBUFFERS
-                    0xb376                  EMPTYBUFFERS
-                    0xb39e                  lfa_FLUSH
-                    0xb3a6                  FLUSH
-                    0xb3ae                  lfa_LIST
-                    0xb3b6                  LIST
-                    0xb3f8                  lfa_THRU
-                    0xb400                  THRU
-                    0xb412                  lfa_DEVID
-                    0xb41a                  DEVID
-                    0xb420                  lfa_BLKREAD
-                    0xb42c                  BLKREAD
-                    0xb436                  lfa_BLKWRITE
-                    0xb442                  BLKWRITE
-                    0xb44c                  lfa_BLKTOADR
-                    0xb456                  BLKTOADR
-                    0xb460                  lfa_BLKVALIDQ
-                    0xb46e                  BLKVALIDQ
-                    0xb478                  lfa_RPBREAK
-                    0xb482                  RPBREAK
-                    0xb486                  lfa_DBGEN
-                    0xb48e                  DBGEN
-                    0xb492                  lfa_QDSP
-                    0xb49a                  QDSP
-                    0xb49c                  lfa_DOTS
-                    0xb4a2                  DOTS
-                    0xb4cc                  lfa_DOTRTN
-                    0xb4d4                  DOTRTN
-                    0xb502                  lfa_DUMP
-                    0xb50a                  DUMP
-                    0xb562                  lfa_DEBUG
-                    0xb56a                  DEBUG
-                    0xb572                  lfa_BREAK
-                    0xb57a                  BREAK
-                    0xb5ac                  lfa_RESUME
-                    0xb5b6                  RESUME
-                    0xb5d6                  EDITLN
-                    0xb5d8                  TEXTEND
-                    0xb634                  KCASE
-                    0xb646                  lfa_SAVELINE
-                    0xb652                  SAVELINE
-                    0xb662                  lfa_RESTORELINE
-                    0xb670                  RESTORELINE
-                    0xb684                  EDWHITELN
-                    0xb694                  lfa_PROMPT
-                    0xb69e                  PROMPT
-                    0xb6b0                  lfa_MSGLINE
-                    0xb6ba                  MSGLINE
-                    0xb6fe                  SAVEFAILED
-                    0xb726                  SAVESUCCESS
-                    0xb740                  NEXTBLOCK
-                    0xb766                  PREVBLOCK
-                    0xb784                  BLOCKQ
-                    0xb7ec                  OPENBLOCK
-                    0xb7fc                  COPYBLOCK
-                    0xb81a                  EDDEL
-                    0xb828                  EDINSERTBL
-                    0xb84a                  EDEND
-                    0xb85a                  EDHOME
-                    0xb868                  EDUP
-                    0xb876                  EDDOWN
-                    0xb892                  EDCRLF
-                    0xb8aa                  LASTPOS
-                    0xb8c4                  EDPUTC
-                    0xb8ec                  EDKEY
-                    0xb92c                  EDBACKDEL
-                    0xb942                  EDLEFT
-                    0xb950                  EDRIGHT
-                    0xb95e                  EDTOP
-                    0xb96c                  lfa_SCRSIZE
-                    0xb978                  SCRSIZE
-                    0xb9a6                  lfa_BLKTOSCR
-                    0xb9b0                  BLKTOSCR
-                    0xb9f8                  lfa_SCRTOBLK
-                    0xba02                  SCRTOBLK
-                    0xba60                  lfa_SAVESCREEN
-                    0xba6e                  SAVESCREEN
-                    0xba82                  EDTAB
-                    0xba92                  DELLN23
-                    0xbabc                  STATUSLN
-                    0xbb16                  EDATXY
-                    0xbb2a                  EDBSLASHW
-                    0xbb3e                  EDINSRTLN
-                    0xbb4c                  EDDELLN
-                    0xbb5a                  EDRMVLN
-                    0xbb68                  EDDELEOL
-                    0xbb76                  EDCLS
-                    0xbb84                  lfa_BLKED
-                    0xbb8c                  BLKED
-                    0xbd38                  INFLOOP
-                    0xbd3a                  QAUTORUN
-                    0xbd4e                  QCOLD
-                    0xbd5a                  HARDWARE_INIT
-                    0xbd78                  TICKS_INIT
-                    0xbd7a                  SET_CLOCK
-                    0xbd7c                  CLR_LOW_RAM
-                    0xbd7e                  CLR_RAM
-                    0xbd80                  IO_LOCK
-                    0xbd82                  VARS_INIT
-                    0xbd84                  lfa_REBOOT
-                    0xbd8e                  REBOOT
-                    0xbd90                  lfa_TICKS
-                    0xbd98                  TICKS
-                    0xbd9a                  lfa_USEC
-                    0xbda2                  USEC
-                    0xbda4                  lfa_MS
-                    0xbdaa                  MS
-                    0xbdd4                  lfa_LFSR
-                    0xbddc                  LFSR
-                    0xbdde                  lfa_RAND
-                    0xbde6                  RAND
-                    0xbde8                  lfa_SRAND
-                    0xbdf0                  SRAND
-                    0xbdf2                  lfa_CLEAR
-                    0xbdfa                  CLEAR
-                    0xbe0c                  lfa_UNUSED
-                    0xbe16                  UNUSED
-                    0xbe20                  SOUND_INIT
-                    0xbe22                  lfa_TONE
-                    0xbe2a                  TONE
+                    0xb072                  CURRENT
+                    0xb074                  lfa_SCR
+                    0xb07a                  SCR
+                    0xb07c                  lfa_BLKDEV
+                    0xb086                  BLKDEV
+                    0xb088                  BUFARRAY
+                    0xb08a                  STRUCADR
+                    0xb098                  DATA
+                    0xb0a4                  BLOCK_INIT
+                    0xb0d0                  OWNQ
+                    0xb0f8                  BUFFEREDQ
+                    0xb126                  NOTUSED
+                    0xb152                  OLDEST
+                    0xb190                  UPDATEDFETCH
+                    0xb19c                  BLKDEVFETCH
+                    0xb1a4                  DEVADR
+                    0xb1be                  FIELDS
+                    0xb1de                  lfa_UPDATE
+                    0xb1e8                  UPDATE
+                    0xb218                  NOUPDATE
+                    0xb228                  DATAOUT
+                    0xb24a                  TODATA
+                    0xb260                  ASSIGN
+                    0xb2b6                  lfa_BUFFER
+                    0xb2c0                  BUFFER
+                    0xb2d4                  lfa_BLOCK
+                    0xb2dc                  BLOCK
+                    0xb2e8                  lfa_TEXTBLOCK
+                    0xb2f6                  TEXTBLOCK
+                    0xb342                  lfa_LOAD
+                    0xb34a                  LOAD
+                    0xb364                  lfa_SAVEBUFFERS
+                    0xb374                  SAVEBUFFERS
+                    0xb38c                  lfa_EMPTYBUFFERS
+                    0xb39c                  EMPTYBUFFERS
+                    0xb3c4                  lfa_FLUSH
+                    0xb3cc                  FLUSH
+                    0xb3d4                  lfa_LIST
+                    0xb3dc                  LIST
+                    0xb41e                  lfa_THRU
+                    0xb426                  THRU
+                    0xb438                  lfa_DEVID
+                    0xb440                  DEVID
+                    0xb446                  lfa_BLKREAD
+                    0xb452                  BLKREAD
+                    0xb45c                  lfa_BLKWRITE
+                    0xb468                  BLKWRITE
+                    0xb472                  lfa_BLKTOADR
+                    0xb47c                  BLKTOADR
+                    0xb486                  lfa_BLKVALIDQ
+                    0xb494                  BLKVALIDQ
+                    0xb49e                  lfa_RPBREAK
+                    0xb4a8                  RPBREAK
+                    0xb4ac                  lfa_DBGEN
+                    0xb4b4                  DBGEN
+                    0xb4b8                  lfa_QDSP
+                    0xb4c0                  QDSP
+                    0xb4c2                  lfa_DOTS
+                    0xb4c8                  DOTS
+                    0xb4f2                  lfa_DOTRTN
+                    0xb4fa                  DOTRTN
+                    0xb528                  lfa_DUMP
+                    0xb530                  DUMP
+                    0xb588                  lfa_DEBUG
+                    0xb590                  DEBUG
+                    0xb598                  lfa_BREAK
+                    0xb5a0                  BREAK
+                    0xb5d2                  lfa_RESUME
+                    0xb5dc                  RESUME
+                    0xb5fc                  EDITLN
+                    0xb5fe                  TEXTEND
+                    0xb65a                  KCASE
+                    0xb66c                  lfa_SAVELINE
+                    0xb678                  SAVELINE
+                    0xb688                  lfa_RESTORELINE
+                    0xb696                  RESTORELINE
+                    0xb6aa                  EDWHITELN
+                    0xb6ba                  lfa_PROMPT
+                    0xb6c4                  PROMPT
+                    0xb6d6                  lfa_MSGLINE
+                    0xb6e0                  MSGLINE
+                    0xb724                  SAVEFAILED
+                    0xb74c                  SAVESUCCESS
+                    0xb766                  NEXTBLOCK
+                    0xb78c                  PREVBLOCK
+                    0xb7aa                  BLOCKQ
+                    0xb812                  OPENBLOCK
+                    0xb822                  COPYBLOCK
+                    0xb840                  EDDEL
+                    0xb84e                  EDINSERTBL
+                    0xb870                  EDEND
+                    0xb880                  EDHOME
+                    0xb88e                  EDUP
+                    0xb89c                  EDDOWN
+                    0xb8b8                  EDCRLF
+                    0xb8d0                  LASTPOS
+                    0xb8ea                  EDPUTC
+                    0xb912                  EDKEY
+                    0xb952                  EDBACKDEL
+                    0xb968                  EDLEFT
+                    0xb976                  EDRIGHT
+                    0xb984                  EDTOP
+                    0xb992                  lfa_SCRSIZE
+                    0xb99e                  SCRSIZE
+                    0xb9cc                  lfa_BLKTOSCR
+                    0xb9d6                  BLKTOSCR
+                    0xba1e                  lfa_SCRTOBLK
+                    0xba28                  SCRTOBLK
+                    0xba7e                  lfa_SAVESCREEN
+                    0xba8c                  SAVESCREEN
+                    0xbaa0                  EDTAB
+                    0xbab0                  DELLN23
+                    0xbada                  STATUSLN
+                    0xbb34                  EDATXY
+                    0xbb48                  EDBSLASHW
+                    0xbb5c                  EDINSRTLN
+                    0xbb6a                  EDDELLN
+                    0xbb78                  EDRMVLN
+                    0xbb86                  EDDELEOL
+                    0xbb94                  EDCLS
+                    0xbba2                  lfa_BLKED
+                    0xbbaa                  BLKED
+                    0xbd56                  INFLOOP
+                    0xbd58                  QAUTORUN
+                    0xbd6c                  QCOLD
+                    0xbd78                  HARDWARE_INIT
+                    0xbd96                  TICKS_INIT
+                    0xbd98                  SET_CLOCK
+                    0xbd9a                  CLR_LOW_RAM
+                    0xbd9c                  CLR_RAM
+                    0xbd9e                  IO_LOCK
+                    0xbda0                  VARS_INIT
+                    0xbda2                  lfa_REBOOT
+                    0xbdac                  REBOOT
+                    0xbdae                  lfa_TICKS
+                    0xbdb6                  TICKS
+                    0xbdb8                  lfa_USEC
+                    0xbdc0                  USEC
+                    0xbdc2                  lfa_MS
+                    0xbdc8                  MS
+                    0xbdf2                  lfa_LFSR
+                    0xbdfa                  LFSR
+                    0xbdfc                  lfa_RAND
+                    0xbe04                  RAND
+                    0xbe06                  lfa_SRAND
+                    0xbe0e                  SRAND
+                    0xbe10                  lfa_CLEAR
+                    0xbe18                  CLEAR
+                    0xbe2a                  lfa_UNUSED
+                    0xbe34                  UNUSED
+                    0xbe3e                  SOUND_INIT
+                    0xbe40                  lfa_TONE
+                    0xbe48                  TONE
 
 __FICD            0x0557f0          0x2
  *(__FICD.sec*)
@@ -4226,11 +4234,11 @@ __FUID3
  *(.debug_abbrev)
  .debug_abbrev    0x000000         0x10 build/default/production/forthex.o
 
-.debug_line       0x000000        0xd0c
+.debug_line       0x000000        0xd11
  *(.debug_line)
  .debug_line      0x000000         0x1a build/default/production/mcu_config_bits.o
- .debug_line      0x00001a        0xcd8 build/default/production/forthex.o
- .debug_line      0x000cf2         0x1a build/default/production/font.o
+ .debug_line      0x00001a        0xcdd build/default/production/forthex.o
+ .debug_line      0x000cf7         0x1a build/default/production/font.o
 
 .debug_frame
  *(.debug_frame)
@@ -5158,59 +5166,59 @@ LOAD FGS
  .pad.bss           0x11a2         0x50 build/default/production/forthex.o
                     0x11a2                  pad
 
-.hardware.bss       0x11f2         0x36
- .hardware.bss      0x11f2         0x36 build/default/production/forthex.o
-                    0x121c                  systicks
-                    0x121e                  seed
-                    0x1222                  fwarm
+.hardware.bss       0x11f2         0x38
+ .hardware.bss      0x11f2         0x38 build/default/production/forthex.o
+                    0x121e                  systicks
+                    0x1220                  seed
+                    0x1224                  fwarm
 
-.serial.bss         0x1228         0x26
- .serial.bss        0x1228         0x26 build/default/production/forthex.o
+.serial.bss         0x122a         0x26
+ .serial.bss        0x122a         0x26 build/default/production/forthex.o
 
-.keyboard.bss       0x124e         0x24
- .keyboard.bss      0x124e         0x24 build/default/production/forthex.o
-                    0x124e                  kbd_queue
-                    0x126e                  kbd_head
+.keyboard.bss       0x1250         0x24
+ .keyboard.bss      0x1250         0x24 build/default/production/forthex.o
+                    0x1250                  kbd_queue
+                    0x1270                  kbd_head
 
-.sys_vars.bss       0x1272         0x20
- .sys_vars.bss      0x1272         0x20 build/default/production/forthex.o
-                    0x1272                  _SYS_VARS
-                    0x1272                  csp
-                    0x1274                  _SYSLATEST
-                    0x1276                  _LATEST
-                    0x1278                  _TIB
-                    0x127a                  _PAD
-                    0x127c                  _PASTE
-                    0x127e                  _TICKSOURCE
-                    0x1280                  _CNTSOURCE
-                    0x1282                  _DP
-                    0x1284                  _BASE
-                    0x1286                  _STATE
-                    0x1288                  _TOIN
-                    0x128a                  _HP
+.sys_vars.bss       0x1274         0x20
+ .sys_vars.bss      0x1274         0x20 build/default/production/forthex.o
+                    0x1274                  _SYS_VARS
+                    0x1274                  csp
+                    0x1276                  _SYSLATEST
+                    0x1278                  _LATEST
+                    0x127a                  _TIB
+                    0x127c                  _PAD
+                    0x127e                  _PASTE
+                    0x1280                  _TICKSOURCE
+                    0x1282                  _CNTSOURCE
+                    0x1284                  _DP
+                    0x1286                  _BASE
+                    0x1288                  _STATE
+                    0x128a                  _TOIN
+                    0x128c                  _HP
 
-.sdc.bss            0x1292         0x1a
- .sdc.bss           0x1292         0x1a build/default/production/forthex.o
-                    0x1292                  sdc_status
+.sdc.bss            0x1294         0x1a
+ .sdc.bss           0x1294         0x1a build/default/production/forthex.o
+                    0x1294                  sdc_status
 
-.tvout.bss          0x12ac          0xc
- .tvout.bss         0x12ac          0xc build/default/production/forthex.o
-                    0x12b0                  xpos
-                    0x12b1                  ypos
-                    0x12b2                  cursor_dly
-                    0x12b4                  cursor_sema
-                    0x12b5                  fcursor
+.tvout.bss          0x12ae          0xc
+ .tvout.bss         0x12ae          0xc build/default/production/forthex.o
+                    0x12b2                  xpos
+                    0x12b3                  ypos
+                    0x12b4                  cursor_dly
+                    0x12b6                  cursor_sema
+                    0x12b7                  fcursor
 
-.heap_vars.bss      0x12b8          0x6
+.heap_vars.bss      0x12ba          0x6
  .heap_vars.bss
-                    0x12b8          0x6 build/default/production/forthex.o
+                    0x12ba          0x6 build/default/production/forthex.o
 
-.vt102.bss          0x12be          0x2
- .vt102.bss         0x12be          0x2 build/default/production/forthex.o
+.vt102.bss          0x12c0          0x2
+ .vt102.bss         0x12c0          0x2 build/default/production/forthex.o
 
-.sound.bss          0x12c0          0x2
- .sound.bss         0x12c0          0x2 build/default/production/forthex.o
-                    0x12c0                  tone_len
+.sound.bss          0x12c2          0x2
+ .sound.bss         0x12c2          0x2 build/default/production/forthex.o
+                    0x12c2                  tone_len
 
 .start.text       0x000200         0x2e
  .start.text      0x000200         0x2e build/default/production/forthex.o
@@ -5265,300 +5273,301 @@ LOAD FGS
  .ivt._INT1Interrupt
                   0x00003c          0x2 build/default/production/forthex.o
 
-.font.const         0xbe2c        0x400 address de chargement 0x003e2c  
- .font.const        0xbe2c        0x400 build/default/production/font.o
-                    0xbe2c                  _font
+.font.const         0xbe4a        0x400 address de chargement 0x003e4a  
+ .font.const        0xbe4a        0x400 build/default/production/font.o
+                    0xbe4a                  _font
 
-.str.const          0xc22c         0x96 address de chargement 0x00422c  
- .str.const         0xc22c         0x96 build/default/production/forthex.o
-                    0xc22c                  _version
-                    0xc239                  _math_error
-                    0xc24f                  _user_aborted
-                    0xc268                  _stack_reset
-                    0xc27b                  _unknown_reset
+.str.const          0xc24a         0x96 address de chargement 0x00424a  
+ .str.const         0xc24a         0x96 build/default/production/forthex.o
+                    0xc24a                  _version
+                    0xc257                  _math_error
+                    0xc26d                  _user_aborted
+                    0xc286                  _stack_reset
+                    0xc299                  _unknown_reset
 
 .forth_code.text
-                  0x0042c2       0x1556
+                  0x0042e0       0x1560
  .forth_code.text
-                  0x0042c2       0x1556 build/default/production/forthex.o
-                  0x0042c2                  ENTER
-                  0x0042cc                  DOUSER
-                  0x0042d8                  DOVAR
-                  0x0042e2                  DOCONST
-                  0x0042ec                  code_EXIT
-                  0x0042f4                  code_LIT
-                  0x0042fe                  code_CLIT
-                  0x00430a                  code_BRANCH
-                  0x004312                  code_TBRANCH
-                  0x004320                  code_ZBRANCH
-                  0x00432e                  code_DODO
-                  0x004340                  code_DOQDO
-                  0x004352                  code_DOLOOP
-                  0x00436c                  code_DOPLOOP
-                  0x00438a                  code_VERSION
-                  0x004394                  code_R0
-                  0x00439e                  code_S0
-                  0x0043a8                  code_RAMEND
-                  0x0043b2                  code_ULIMIT
-                  0x0043bc                  code_TRUE
-                  0x0043c6                  code_FALSE
-                  0x0043d0                  code_DP0
-                  0x0043da                  code_CELL
-                  0x0043e4                  code_DUP
-                  0x0043ec                  code_TWODUP
-                  0x0043f8                  code_QDUP
-                  0x004404                  code_DROP
-                  0x00440c                  code_TWODROP
-                  0x004416                  code_RDROP
-                  0x00441e                  code_SWAP
-                  0x00442a                  code_TWOSWAP
-                  0x00443e                  code_ROT
-                  0x004450                  code_NROT
-                  0x004460                  code_OVER
-                  0x00446a                  code_TWOOVER
-                  0x004478                  code_NIP
-                  0x004480                  code_TUCK
-                  0x00448c                  code_TOR
-                  0x004496                  code_RFROM
-                  0x0044a0                  code_IPFETCH
-                  0x0044aa                  code_DEPTH
-                  0x0044b8                  code_PICK
-                  0x0044c6                  code_RFETCH
-                  0x0044d0                  code_SPFETCH
-                  0x0044dc                  code_SPSTORE
-                  0x0044e4                  code_RPFETCH
-                  0x0044ee                  code_RPSTORE
-                  0x0044f8                  code_TOCSTK
-                  0x004506                  code_CSTKFROM
-                  0x004514                  code_FETCH
-                  0x00451c                  code_CFETCH
-                  0x004526                  code_TWOFETCH
-                  0x004532                  code_BIDFETCH
-                  0x004550                  code_TBLFETCH
-                  0x004560                  code_TBLSTORE
-                  0x004574                  code_STORE
-                  0x00457e                  code_CSTORE
-                  0x00458a                  code_TWOSTORE
-                  0x004596                  code_CELLPLUS
-                  0x00459e                  code_CELLS
-                  0x0045a8                  code_DOI
-                  0x0045b2                  code_DOL
-                  0x0045bc                  code_DOJ
-                  0x0045c6                  code_UNLOOP
-                  0x0045d0                  code_EXECUTE
-                  0x0045d8                  code_FETCHEXEC
-                  0x0045dc                  code_VEXEC
-                  0x0045e6                  code_CALL
-                  0x0045f6                  code_IMMED
-                  0x004600                  code_HIDDEN
-                  0x00460a                  code_NMARK
-                  0x004614                  code_LENMASK
-                  0x00461e                  code_TIBSIZE
-                  0x004628                  code_PADSIZE
-                  0x004632                  code_PARSENAME
-                  0x00468c                  code_FIND
-                  0x0046dc                  code_ALIGNED
-                  0x0046e6                  code_SOURCE
-                  0x0046f4                  code_SRCSTORE
-                  0x004702                  FETCH_EXEC
-                  0x00470c                  code_EFETCH
-                  0x00471a                  code_ECFETCH
-                  0x00472a                  code_ETBLFETCH
-                  0x004740                  code_MSB
-                  0x00474a                  code_MAXINT
-                  0x004754                  code_MININT
-                  0x00475e                  code_PLUS
-                  0x004766                  code_MINUS
-                  0x004770                  code_ONEPLUS
-                  0x004778                  code_TWOPLUS
-                  0x004780                  code_ONEMINUS
-                  0x004788                  code_TWOMINUS
-                  0x004790                  code_TWOSTAR
-                  0x004798                  code_TWOSLASH
-                  0x0047a0                  code_LSHIFT
-                  0x0047bc                  code_RSHIFT
-                  0x0047d8                  code_PLUSSTORE
-                  0x0047e6                  code_DPLUS
-                  0x0047f8                  code_DMINUS
-                  0x00480c                  code_MPLUS
-                  0x004820                  code_STAR
-                  0x00482a                  code_MSTAR
-                  0x004836                  code_UMSTAR
-                  0x004842                  code_UDSTAR
-                  0x004856                  code_SLASH
-                  0x004864                  code_MOD
-                  0x004872                  code_STARSLASH
-                  0x004884                  code_STARSLASHMOD
-                  0x004898                  code_SLASHMOD
-                  0x0048a8                  code_UMSLASHMOD
-                  0x0048ba                  code_UDSLASHMOD
-                  0x0048d6                  code_MAX
-                  0x0048e4                  code_MIN
-                  0x0048f2                  code_UMAX
-                  0x004900                  code_UMIN
-                  0x00490e                  code_WITHIN
-                  0x00491c                  code_EVEN
-                  0x00492a                  code_ODD
-                  0x004938                  code_ABS
-                  0x004942                  code_DABS
-                  0x004958                  code_STOD
-                  0x004968                  code_QNEGATE
-                  0x004976                  code_UDREL
-                  0x00499c                  code_NEGATE
-                  0x0049a4                  code_DNEGATE
-                  0x0049b4                  code_INVERT
-                  0x0049bc                  code_DINVERT
-                  0x0049c6                  code_BITMASK
-                  0x0049d6                  code_AND
-                  0x0049de                  code_OR
-                  0x0049e6                  code_XOR
-                  0x0049ee                  code_NOT
-                  0x0049fe                  code_ZEROEQ
-                  0x004a08                  code_ZERODIFF
-                  0x004a18                  code_ZEROLT
-                  0x004a24                  code_ZEROGT
-                  0x004a34                  code_EQUAL
-                  0x004a44                  code_NOTEQ
-                  0x004a54                  code_LESS
-                  0x004a64                  code_GREATER
-                  0x004a74                  code_ULESS
-                  0x004a84                  code_UGREATER
-                  0x004a94                  code_SCRBUF
-                  0x004a9e                  code_HTAB
-                  0x004aa8                  code_TVOUT_INIT
-                  0x004b10                  code_VIDEO
-                  0x004b22                  code_LCBSLASHW
-                  0x004b34                  code_CURENBL
-                  0x004b50                  code_LCCLS
-                  0x004b66                  code_SCRLUP
-                  0x004b70                  code_SCRLDN
-                  0x004b7a                  code_GETX
-                  0x004b88                  code_GETY
-                  0x004b96                  code_SETX
-                  0x004bbc                  code_SETY
-                  0x004be2                  code_CURADR
-                  0x004bf8                  code_SCRCHAR
-                  0x004c20                  code_CHRTOSCR
-                  0x004c4c                  code_LCLEFT
-                  0x004c64                  code_LCRIGHT
-                  0x004c7e                  code_LCHOME
-                  0x004c92                  code_LCUP
-                  0x004caa                  code_LCDOWN
-                  0x004cc4                  code_TGLCHAR
-                  0x004cda                  code_PUTC
-                  0x004d26                  code_LCCRLF
-                  0x004d4a                  code_LCDELLN
-                  0x004d6c                  code_LCEMITQ
-                  0x004d76                  code_SERIAL_INIT
-                  0x004da2                  code_SERENBL
-                  0x004db8                  code_B2400
-                  0x004dc2                  code_B4800
-                  0x004dcc                  code_B9600
-                  0x004dd6                  code_B19200
-                  0x004de0                  code_B38400
-                  0x004dea                  code_B57600
-                  0x004df4                  code_B115200
-                  0x004dfe                  code_BAUD
-                  0x004e10                  code_SPUTC
-                  0x004e24                  code_SGETC
-                  0x004e5c                  code_SREADYQ
-                  0x004e6a                  code_SGETCQ
-                  0x004e78                  code_STORE_INIT
-                  0x004ef6                  code_RAMTOXR
-                  0x004f36                  code_XRTORAM
-                  0x004f70                  code_XBLKCOUNT
-                  0x004f7a                  code_QWIP
-                  0x004fa8                  code_RAMTOEE
-                  0x005006                  code_EETORAM
-                  0x005044                  code_EPAGE
-                  0x00504e                  code_ESECTOR
-                  0x005058                  code_EALL
-                  0x005062                  code_EERASE
-                  0x0050c4                  code_EEBLKCOUNT
-                  0x0050ce                  code_KBD_INIT
-                  0x0050fe                  code_KBD_RESET
-                  0x005118                  code_LCEKEYQ
-                  0x005126                  code_PEEK_KEY
-                  0x005136                  code_GETKEY
-                  0x00514c                  code_LCEKEY
-                  0x005170                  code_LCFILTER
-                  0x00519a                  code_CPOS_STORE
-                  0x0051ac                  code_CPOS_FETCH
-                  0x0051be                  code_COLON1
-                  0x0051c8                  code_INC_COLON
-                  0x0051d6                  code_DEC_COLON
-                  0x0051e4                  code_INC_LINE
-                  0x0051f2                  code_WRAP
-                  0x005204                  code_QWRAP
-                  0x005212                  code_SCROLL
-                  0x005224                  code_FFETCH
-                  0x00523e                  code_FCFETCHL
-                  0x005250                  code_FCFETCHH
-                  0x005262                  code_IFETCH
-                  0x00527c                  code_ICFETCH
-                  0x00529e                  code_FADDR
-                  0x0052ac                  code_FNEXT
-                  0x0052ba                  code_WRITE_LATCH
-                  0x0052e2                  code_FLASH_OP
-                  0x00530c                  code_IMGHEAD
-                  0x005316                  code_MAGIC
-                  0x005320                  code_IMGROW
-                  0x00532a                  code_READCSD
-                  0x00533e                  code_READCID
-                  0x005352                  code_SDCR
-                  0x00535c                  code_SDCINIT
-                  0x005438                  code_SEGMENT
-                  0x00544a                  code_SEGMENTQ
-                  0x005454                  code_QSDC
-                  0x00545e                  code_SDCREAD
-                  0x0054aa                  code_SDCWRITE
-                  0x00551a                  code_SDCBLOCKS
-                  0x005528                  code_SDCSEGMENTS
-                  0x005532                  code_BL
-                  0x00553c                  code_TOCHAR
-                  0x00554e                  code_FILL
-                  0x005566                  code_MINUSTRAILING
-                  0x005586                  code_UPPER
-                  0x0055ae                  code_SCAN
-                  0x0055d2                  code_SKIP
-                  0x0055f4                  code_MOVE
-                  0x0055fc                  code_CMOVE
-                  0x00561c                  code_CMOVETO
-                  0x005640                  code_BLANK
-                  0x005658                  code_HEAP_INIT
-                  0x005672                  code_HEAPSIZE
-                  0x00567c                  code_HEAPFREE
-                  0x005686                  code_FREE_BYTES_STORE
-                  0x005690                  code_FREELIST
-                  0x00569a                  code_USEDLIST
-                  0x0056a4                  code_BLK
-                  0x0056ae                  code_SCR
-                  0x0056b8                  code_BLKDEV
-                  0x0056c2                  code_BUFARRAY
-                  0x0056cc                  code_QDSP
-                  0x0056ea                  code_EDITLN
-                  0x0056f4                  code_INFLOOP
-                  0x0056f6                  code_TICKS_INIT
-                  0x005712                  code_SET_CLOCK
-                  0x005722                  code_CLR_LOW_RAM
-                  0x00572e                  code_CLR_RAM
-                  0x00573a                  code_IO_LOCK
-                  0x005742                  code_VARS_INIT
-                  0x00575c                  code_REBOOT
-                  0x00575e                  code_TICKS
-                  0x005768                  code_USEC
-                  0x005782                  code_LFSR
-                  0x00579a                  code_RAND
-                  0x0057ca                  code_SRAND
-                  0x0057da                  code_SOUND_INIT
-                  0x0057f8                  code_TONE
+                  0x0042e0       0x1560 build/default/production/forthex.o
+                  0x0042e0                  ENTER
+                  0x0042ea                  DOUSER
+                  0x0042f6                  DOVAR
+                  0x004300                  DOCONST
+                  0x00430a                  code_EXIT
+                  0x004312                  code_LIT
+                  0x00431c                  code_CLIT
+                  0x004328                  code_BRANCH
+                  0x004330                  code_TBRANCH
+                  0x00433e                  code_ZBRANCH
+                  0x00434c                  code_DODO
+                  0x00435e                  code_DOQDO
+                  0x004370                  code_DOLOOP
+                  0x00438a                  code_DOPLOOP
+                  0x0043a8                  code_VERSION
+                  0x0043b2                  code_R0
+                  0x0043bc                  code_S0
+                  0x0043c6                  code_RAMEND
+                  0x0043d0                  code_ULIMIT
+                  0x0043da                  code_TRUE
+                  0x0043e4                  code_FALSE
+                  0x0043ee                  code_DP0
+                  0x0043f8                  code_CELL
+                  0x004402                  code_DUP
+                  0x00440a                  code_TWODUP
+                  0x004416                  code_QDUP
+                  0x004422                  code_DROP
+                  0x00442a                  code_TWODROP
+                  0x004434                  code_RDROP
+                  0x00443c                  code_SWAP
+                  0x004448                  code_TWOSWAP
+                  0x00445c                  code_ROT
+                  0x00446e                  code_NROT
+                  0x00447e                  code_OVER
+                  0x004488                  code_TWOOVER
+                  0x004496                  code_NIP
+                  0x00449e                  code_TUCK
+                  0x0044aa                  code_TOR
+                  0x0044b4                  code_RFROM
+                  0x0044be                  code_IPFETCH
+                  0x0044c8                  code_DEPTH
+                  0x0044d6                  code_PICK
+                  0x0044e4                  code_RFETCH
+                  0x0044ee                  code_SPFETCH
+                  0x0044fa                  code_SPSTORE
+                  0x004502                  code_RPFETCH
+                  0x00450c                  code_RPSTORE
+                  0x004516                  code_TOCSTK
+                  0x004524                  code_CSTKFROM
+                  0x004532                  code_FETCH
+                  0x00453a                  code_CFETCH
+                  0x004544                  code_TWOFETCH
+                  0x004550                  code_BIDFETCH
+                  0x00456e                  code_TBLFETCH
+                  0x00457e                  code_TBLSTORE
+                  0x004592                  code_STORE
+                  0x00459c                  code_CSTORE
+                  0x0045a8                  code_TWOSTORE
+                  0x0045b4                  code_CELLPLUS
+                  0x0045bc                  code_CELLS
+                  0x0045c6                  code_DOI
+                  0x0045d0                  code_DOL
+                  0x0045da                  code_DOJ
+                  0x0045e4                  code_UNLOOP
+                  0x0045ee                  code_EXECUTE
+                  0x0045f6                  code_FETCHEXEC
+                  0x0045fa                  code_VEXEC
+                  0x004604                  code_CALL
+                  0x004614                  code_IMMED
+                  0x00461e                  code_HIDDEN
+                  0x004628                  code_NMARK
+                  0x004632                  code_LENMASK
+                  0x00463c                  code_TIBSIZE
+                  0x004646                  code_PADSIZE
+                  0x004650                  code_PARSENAME
+                  0x0046aa                  code_FIND
+                  0x0046fa                  code_ALIGNED
+                  0x004704                  code_SOURCE
+                  0x004712                  code_SRCSTORE
+                  0x004720                  FETCH_EXEC
+                  0x00472a                  code_EFETCH
+                  0x004738                  code_ECFETCH
+                  0x004748                  code_ETBLFETCH
+                  0x00475e                  code_MSB
+                  0x004768                  code_MAXINT
+                  0x004772                  code_MININT
+                  0x00477c                  code_PLUS
+                  0x004784                  code_MINUS
+                  0x00478e                  code_ONEPLUS
+                  0x004796                  code_TWOPLUS
+                  0x00479e                  code_ONEMINUS
+                  0x0047a6                  code_TWOMINUS
+                  0x0047ae                  code_TWOSTAR
+                  0x0047b6                  code_TWOSLASH
+                  0x0047be                  code_LSHIFT
+                  0x0047da                  code_RSHIFT
+                  0x0047f6                  code_PLUSSTORE
+                  0x004804                  code_DPLUS
+                  0x004816                  code_DMINUS
+                  0x00482a                  code_MPLUS
+                  0x00483e                  code_STAR
+                  0x004848                  code_MSTAR
+                  0x004854                  code_UMSTAR
+                  0x004860                  code_UDSTAR
+                  0x004874                  code_SLASH
+                  0x004882                  code_MOD
+                  0x004890                  code_STARSLASH
+                  0x0048a2                  code_STARSLASHMOD
+                  0x0048b6                  code_SLASHMOD
+                  0x0048c6                  code_UMSLASHMOD
+                  0x0048d8                  code_UDSLASHMOD
+                  0x0048f4                  code_MAX
+                  0x004902                  code_MIN
+                  0x004910                  code_UMAX
+                  0x00491e                  code_UMIN
+                  0x00492c                  code_WITHIN
+                  0x00493a                  code_EVEN
+                  0x004948                  code_ODD
+                  0x004956                  code_ABS
+                  0x004960                  code_DABS
+                  0x004976                  code_STOD
+                  0x004986                  code_QNEGATE
+                  0x004994                  code_UDREL
+                  0x0049ba                  code_NEGATE
+                  0x0049c2                  code_DNEGATE
+                  0x0049d2                  code_INVERT
+                  0x0049da                  code_DINVERT
+                  0x0049e4                  code_BITMASK
+                  0x0049f4                  code_AND
+                  0x0049fc                  code_OR
+                  0x004a04                  code_XOR
+                  0x004a0c                  code_NOT
+                  0x004a1c                  code_ZEROEQ
+                  0x004a26                  code_ZERODIFF
+                  0x004a36                  code_ZEROLT
+                  0x004a42                  code_ZEROGT
+                  0x004a52                  code_EQUAL
+                  0x004a62                  code_NOTEQ
+                  0x004a72                  code_LESS
+                  0x004a82                  code_GREATER
+                  0x004a92                  code_ULESS
+                  0x004aa2                  code_UGREATER
+                  0x004ab2                  code_SCRBUF
+                  0x004abc                  code_HTAB
+                  0x004ac6                  code_TVOUT_INIT
+                  0x004b2e                  code_VIDEO
+                  0x004b40                  code_LCBSLASHW
+                  0x004b52                  code_CURENBL
+                  0x004b6e                  code_LCCLS
+                  0x004b84                  code_SCRLUP
+                  0x004b8e                  code_SCRLDN
+                  0x004b98                  code_GETX
+                  0x004ba6                  code_GETY
+                  0x004bb4                  code_SETX
+                  0x004bda                  code_SETY
+                  0x004c00                  code_CURADR
+                  0x004c16                  code_SCRCHAR
+                  0x004c3e                  code_CHRTOSCR
+                  0x004c6a                  code_LCLEFT
+                  0x004c82                  code_LCRIGHT
+                  0x004c9c                  code_LCHOME
+                  0x004cb0                  code_LCUP
+                  0x004cc8                  code_LCDOWN
+                  0x004ce2                  code_TGLCHAR
+                  0x004cf8                  code_PUTC
+                  0x004d44                  code_LCCRLF
+                  0x004d68                  code_LCDELLN
+                  0x004d8a                  code_LCEMITQ
+                  0x004d94                  code_SERIAL_INIT
+                  0x004dc0                  code_SERENBL
+                  0x004dd6                  code_B2400
+                  0x004de0                  code_B4800
+                  0x004dea                  code_B9600
+                  0x004df4                  code_B19200
+                  0x004dfe                  code_B38400
+                  0x004e08                  code_B57600
+                  0x004e12                  code_B115200
+                  0x004e1c                  code_BAUD
+                  0x004e2e                  code_SPUTC
+                  0x004e42                  code_SGETC
+                  0x004e7a                  code_SREADYQ
+                  0x004e88                  code_SGETCQ
+                  0x004e96                  code_STORE_INIT
+                  0x004f14                  code_RAMTOXR
+                  0x004f54                  code_XRTORAM
+                  0x004f8e                  code_XBLKCOUNT
+                  0x004f98                  code_QWIP
+                  0x004fc6                  code_RAMTOEE
+                  0x005024                  code_EETORAM
+                  0x005062                  code_EPAGE
+                  0x00506c                  code_ESECTOR
+                  0x005076                  code_EALL
+                  0x005080                  code_EERASE
+                  0x0050e2                  code_EEBLKCOUNT
+                  0x0050ec                  code_KBD_INIT
+                  0x00511c                  code_KBD_RESET
+                  0x005136                  code_LCEKEYQ
+                  0x005144                  code_PEEK_KEY
+                  0x005154                  code_GETKEY
+                  0x00516a                  code_LCEKEY
+                  0x00518e                  code_LCFILTER
+                  0x0051b8                  code_CPOS_STORE
+                  0x0051ca                  code_CPOS_FETCH
+                  0x0051dc                  code_COLON1
+                  0x0051e6                  code_INC_COLON
+                  0x0051f4                  code_DEC_COLON
+                  0x005202                  code_INC_LINE
+                  0x005210                  code_WRAP
+                  0x005222                  code_QWRAP
+                  0x005230                  code_SCROLL
+                  0x005242                  code_FFETCH
+                  0x00525c                  code_FCFETCHL
+                  0x00526e                  code_FCFETCHH
+                  0x005280                  code_IFETCH
+                  0x00529a                  code_ICFETCH
+                  0x0052bc                  code_FADDR
+                  0x0052ca                  code_FNEXT
+                  0x0052d8                  code_WRITE_LATCH
+                  0x005300                  code_FLASH_OP
+                  0x00532a                  code_IMGHEAD
+                  0x005334                  code_MAGIC
+                  0x00533e                  code_IMGROW
+                  0x005348                  code_READCSD
+                  0x00535c                  code_READCID
+                  0x005370                  code_SDCR
+                  0x00537a                  code_SDCINIT
+                  0x005456                  code_SEGMENT
+                  0x005468                  code_SEGMENTQ
+                  0x005472                  code_QSDC
+                  0x00547c                  code_SDCREAD
+                  0x0054c8                  code_SDCWRITE
+                  0x005538                  code_SDCBLOCKS
+                  0x005546                  code_SDCSEGMENTS
+                  0x005550                  code_BL
+                  0x00555a                  code_TOCHAR
+                  0x00556c                  code_FILL
+                  0x005584                  code_MINUSTRAILING
+                  0x0055a4                  code_UPPER
+                  0x0055cc                  code_SCAN
+                  0x0055f0                  code_SKIP
+                  0x005612                  code_MOVE
+                  0x00561a                  code_CMOVE
+                  0x00563a                  code_CMOVETO
+                  0x00565e                  code_BLANK
+                  0x005676                  code_HEAP_INIT
+                  0x005690                  code_HEAPSIZE
+                  0x00569a                  code_HEAPFREE
+                  0x0056a4                  code_FREE_BYTES_STORE
+                  0x0056ae                  code_FREELIST
+                  0x0056b8                  code_USEDLIST
+                  0x0056c2                  code_BLK
+                  0x0056cc                  code_CURRENT
+                  0x0056d6                  code_SCR
+                  0x0056e0                  code_BLKDEV
+                  0x0056ea                  code_BUFARRAY
+                  0x0056f4                  code_QDSP
+                  0x005712                  code_EDITLN
+                  0x00571c                  code_INFLOOP
+                  0x00571e                  code_TICKS_INIT
+                  0x00573a                  code_SET_CLOCK
+                  0x00574a                  code_CLR_LOW_RAM
+                  0x005756                  code_CLR_RAM
+                  0x005762                  code_IO_LOCK
+                  0x00576a                  code_VARS_INIT
+                  0x005784                  code_REBOOT
+                  0x005786                  code_TICKS
+                  0x005790                  code_USEC
+                  0x0057aa                  code_LFSR
+                  0x0057c2                  code_RAND
+                  0x0057f2                  code_SRAND
+                  0x005802                  code_SOUND_INIT
+                  0x005820                  code_TONE
 
-.text             0x005818        0x376
- .text            0x005818        0x376 build/default/production/forthex.o
-                  0x005818                  cursor_blink
-                  0x005828                  toggle_char
-                  0x00584c                  cursor_enable
-                  0x005860                  cursor_disable
-                  0x00586e                  scroll_up
-                  0x0058a2                  scroll_down
-                  0x005b8a                  _code_end
+.text             0x005840        0x376
+ .text            0x005840        0x376 build/default/production/forthex.o
+                  0x005840                  cursor_blink
+                  0x005850                  toggle_char
+                  0x005874                  cursor_enable
+                  0x005888                  cursor_disable
+                  0x005896                  scroll_up
+                  0x0058ca                  scroll_down
+                  0x005bb2                  _code_end
