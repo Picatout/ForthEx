@@ -152,10 +152,11 @@ sector_to_address: ;   ( ud1 -- ud2 )
 ;    W3  nombre d'octets supplémentaire dans la réponse
 ;    W4  pointeur tampon réponse  
 ; retourne:
-;    T  R1
-;    réponse de la carte dans sdc_R    
+;    T  R1 réponse de la carte dans sdc_R    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-sdc_cmd:
+sdc_cmd: ; ( -- c )
+    DPUSH
+    setm T
     call sdc_wait_ready
     push W5
     mov W0,W5
@@ -195,28 +196,24 @@ wait_response:
     dec W1,W1
     bra nz, 1b
     bset sdc_status, #F_SDC_TO
-    DPUSH
-    clr T
-    pop W5
-    return
+    bra 9f
 2: ; octet R1 reçu, transfert dans T.
     xor.b #0xFF,W0
-    DPUSH
     ze W0,T
     ; réception autres octets de la réponse.
 3:  cp0 W3
-    bra nz, 4f
-    pop W5
-    return
-4:  spi_read
+    bra z, 9f
+    spi_read
     mov.b W0,[W4++]
     dec W3,W3
     bra 3b
-
+9:  pop W5
+    return
+    
 ; lecture de CSD|CID    
 ; arguments:
 ;  W0 index commande, CMD9|CMD10
-read_card_register:
+read_card_register: ; ( -- f )
     clr W1
     clr W2
     clr W3
@@ -248,10 +245,11 @@ accept_crc:
     return
    
 ; lecture capacité de la carte.
-set_size:    
+set_size: ; ( -- )   
     mov #SEND_CSD,W0
     call read_card_register
     cp0 T
+    DPOP
     bra z, 9f
     btss sdc_status,#F_SDC_HC
     bra version1
@@ -347,7 +345,7 @@ version1:
 ;   aucun    
 ; retourne:
 ;    f   vrai si succès    
-HEADLESS READCSD,CODE    
+HEADLESS READCSD,CODE  ; ( -- f )   
 ;DEFCODE "READ-CSD",8,,READCSD    
     _enable_sdc
     mov #SEND_CSD,W0
@@ -361,7 +359,7 @@ HEADLESS READCSD,CODE
 ;    READ-CID DROP SDC-R 16 DUMP    
 ; retourne:
 ;    f   vrai si succès    
-HEADLESS READCID,CODE    
+HEADLESS READCID,CODE  ; ( -- f )
 ;DEFCODE "READ-CID",8,,READCID
     _enable_sdc
     mov #SEND_CID,W0
@@ -467,13 +465,15 @@ HEADLESS SDCR,CODE
 ; retourne:
 ;    f   Indicateur Booléen, vrai si l'initialisation est réussie.   
 DEFCODE "SDC-INIT",8,,SDCINIT ; ( -- f )
+    DPUSH
+    clr T
     clr sdc_status
     clr sdc_segment
     clr seg_count
     clr blocks_count
     clr blocks_count+2
     btsc SDC_PORT,#SDC_DETECT
-    bra failed
+    bra 9f
     bset sdc_status,#F_SDC_IN
     mov #SCLK_SLOW,W1
     call set_spi_clock
@@ -492,8 +492,7 @@ cmd0:
     call sdc_cmd
     cp.b T,#1
     DPOP
-    bra z, cmd8
-    bra failed
+    bra nz, 8f
 cmd8:
     mov #SEND_IF_COND,W0
     clr W1
@@ -508,7 +507,7 @@ cmd8:
     mov [--W4],W0
     swap W0
     cp W2,W0
-    bra nz, failed
+    bra nz, 8f
     bset sdc_status,#F_SDC_V2
 acmd41:
     mov #1000,W0
@@ -524,12 +523,14 @@ acmd41:
     btsc sdc_status,#F_SDC_V2
     mov #0x4000,W1
     call sdc_cmd
-    cp0 T
+    cp0.b T
     DPOP
     bra z, cmd58
 6:  cp0 tone_len
     bra nz, 5b
-    bra timeout
+timeout:
+    bset sdc_status,#F_SDC_TO
+    bra 8f
 cmd58:
     btss sdc_status, #F_SDC_V2
     bra cmd16
@@ -538,9 +539,9 @@ cmd58:
     clr W2
     mov #4,W3
     call sdc_cmd
-    cp0 T
+    cp0.b T
     DPOP
-    bra nz, failed
+    bra nz, 8f
     btss.b sdc_R,#6
     bra cmd16
     bset sdc_status,#F_SDC_HC
@@ -551,24 +552,15 @@ cmd16:
     mov #0x200,W2
     clr W3
     call sdc_cmd
-    cp0 T
+    cp0.b T
     DPOP
     bra z, query_size
-    bra failed
-timeout:
-    bset sdc_status,#F_SDC_TO
-failed:
-    DPUSH
-    clr T
-    bra 9f
+    bra 8f
 query_size:
     call set_size
-    cp0 T
-    bra z, 9f-$
 succeed:
     bset sdc_status,#F_SDC_OK
-    DPUSH
-    mov #-1,T
+    setm T
 8:  call sdc_deselect
 9:  mov #SCLK_FAST,W1
     call set_spi_clock

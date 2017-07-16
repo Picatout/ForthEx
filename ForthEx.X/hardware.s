@@ -178,12 +178,10 @@ __reset:
 _reboot:
     .word QCOLD,TBRANCH,_cold-$
 _warm:
-    .word LIT,fwarm,DUP,FETCH,LIT,0,ROT,STORE,DP,FETCH,LATEST,FETCH
-    .word SYSCONS,FETCH
-    .word CLS,CLR_LOW_RAM
-    .word HARDWARE_INIT,VARS_INIT
-    .word SYSCONS,STORE
-    .word LATEST,STORE,DP,STORE
+    .word LIT,fwarm,DUP,FETCH,FALSE,ROT,STORE
+    .word DP,FETCH,LATEST,FETCH,SYSCONS,FETCH
+    .word CLR_LOW_RAM, VARS_INIT,HARDWARE_INIT
+1:  .word SYSCONS,STORE, LATEST,STORE, DP,STORE
     .word DUP,LIT,USER_ABORT,EQUAL,ZBRANCH,2f-$
     .word DROP,LIT,_user_aborted,BRANCH,8f-$
 2:  .word DUP,LIT,MATH_EXCEPTION,EQUAL,ZBRANCH,2f-$
@@ -221,18 +219,19 @@ HEADLESS QAUTORUN,HWORD
 ; est-ce un cold reboot    
 HEADLESS QCOLD,HWORD
     .word LIT,fwarm,FETCH,ZEROEQ,EXIT
+ 
     
 ; initialisation matérielle    
 HEADLESS HARDWARE_INIT, HWORD
     .word SET_CLOCK
     .word TICKS_INIT
-    .word HEAP_INIT
     .word TVOUT_INIT
-    .word KBD_INIT
+    .word SOUND_INIT
     .word SERIAL_INIT
+    .word KBD_INIT
+    .word HEAP_INIT
     .word STORE_INIT
     .word BLOCK_INIT
-    .word SOUND_INIT
     .word IO_LOCK
     .word KBD_RESET
     .word SDCINIT,DROP

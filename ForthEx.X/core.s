@@ -927,7 +927,7 @@ DEFCODE "C!",2,,CSTORE
 DEFCODE "2!",2,,TWOSTORE
     mov [DSP--],[++T]
     mov [DSP--],[--T]
-    mov [DSP],T
+    mov [DSP--],T
     NEXT
     
 ; nom: 2>R   ( S: d --  R: -- d )    
@@ -1050,10 +1050,10 @@ exec:
     mov [WP++],W0  ; code address, WP=PFA
     goto W0
 
-; nom: @XT  ( i*x a-addr -- j*x )
+; nom: @EXEC  ( i*x a-addr -- j*x )
 ;   Exécution vectorisée. 
 ;   Lit le contenu d'une adresse qui contient le CFA d'un mot et exécute ce mot.
-;   : @XT @ EXECUTE ;    
+;   : @EXEC @ EXECUTE ;    
 ; arguments:
 ;    i*x   Arguments attendus par la fonction qui sera exécutée.    
 ;    a-addr Adresse qui contient le CFA du code à exécuter. Accès RAM + FLASH

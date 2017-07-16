@@ -1,6 +1,8 @@
 2017-07-16
 ----------
 Modification à block.s et blockEdit.s suite à l'ajout de UPDATE.
+Correction bogue 2!.
+Correction bogue SDC-INIT
 
 2017-07-14
 ----------
