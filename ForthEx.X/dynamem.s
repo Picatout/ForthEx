@@ -332,7 +332,7 @@ DEFWORD "FREE",4,,FREE ; ( addr -- )
     .word FREELIST,PREPEND
     .word EXIT
    
-; nom: BUFFER:  ( n "cccc" --  )
+; nom: BUFFER:  ( "cccc" S: n --  )
 ;   Alloue un bloc de mémoire dynamique de 'n' octets. Cré une constante dont
 ;   le nom "cccc' suis dans le flux d'entrée et assigne l'adresse du buffer à cette constante.
 ;   Ce buffer ne doit pas être libéré à moins que la constante qui le lie soit détruite

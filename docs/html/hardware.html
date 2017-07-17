@@ -13,9 +13,9 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="REBOOT">
 <b>REBOOT</b> ( -- )
-<br><div>   Redémarre le système avec le même effet qu'une mise sous tension
+<br><div>   Redémarre le système avec le même effet qu'une mise sous tension.
 </div>
-<div>   en exécutant l'instruction machine RESET.    
+<div>   Exécute l'instruction machine RESET.    
 </div>
 </p>
 <div><b> arguments:
@@ -71,7 +71,7 @@
 <b>MS</b>  ( u -- )
 <br><div>   Boucle d'attente qui dure au moins u millisecondes. Cette boucle utitise
 </div>
-<div>   le compteur systicks. L'erreur sur la durée est de ± 1msec.    
+<div>   le compteur systicks.
 </div>
 </p>
 <div><b> arguments:
@@ -113,23 +113,27 @@
 </div>
 <div>   la valeur retournée est toujours 0.
 </div>
-<div>   algorithme:
-</div>
-<div>    rand=0
-</div>
-<div>    count=0
-</div>
-<div>    a) rand&lt;&lt;1
-</div>
-<div>    b) si impair(seed) alors seed++
-</div>
-<div>    c) seed=seed*3/2
-</div>
-<div>    d) rand |= seed&1
-</div>
-<div>    e) ++count==16?termine:goto a    
-</div>
-</p>
+<div>    algorithme:<br>
+
+  <ol>    
+
+     <li>rand=0</li>
+
+     <li>count=0
+
+     <li>rand<<1
+
+     <li>si impair(seed) alors seed++
+
+     <li>seed=seed*3/2
+
+     <li>rand |= seed&1
+
+     <li>++count==16?termine:goto 3    
+
+  </ol><br>
+
+</div></p>
 <div><b> arguments:
 </b></div>
 <div><i>aucun

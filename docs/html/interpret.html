@@ -14,7 +14,7 @@
 </div>
 <div>    le point d'entré de cette interface. Une boucle infinie qui consiste à lire
 </div>
-<div>    une ligne de texte, à évaluer le texte contenu dans cette ligne.
+<div>    une ligne de texte et à l'évaluer.
 </div>
 <div>    S'il n'y a pas d'erreur lors de l'évaluation le message ' OK' est affiché
 </div>
@@ -38,7 +38,9 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="TIBSIZE">
 <b>TIBSIZE</b>   ( -- n )
-<br><div>   Constante système qui retourne la longueur du TIB (Transaction Input Buffer)
+<br><div>   Constante système qui retourne la longueur du TIB (Terminal Input Buffer).
+</div>
+<div>   Il s'agit du tampon utilisé pour la saisie d'une ligne de texte par l'utilisateur.
 </div>
 </p>
 <div><b> arguments:
@@ -54,7 +56,11 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="PADSIZE">
 <b>PADSIZE</b>   ( -- n )
-<br><div>   Constante système qui retourne la longueur du tampon PAD.
+<br><div>   Constante système qui retourne la longueur du tampon PAD. Le PAD est un
+</div>
+<div>   tampon de travail utilisé entre autre pour convertir les entiers en chaîne
+</div>
+<div>   pour l'affichage de ceux-ci.    
 </div>
 </p>
 <div><b> arguments:
@@ -167,6 +173,24 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="HP">
+<b>HP</b>   ( -- a-addr )
+<br><div>   Variable système 'Hold Pointer' contenant la position du pointeur de conversion de nombres en chaîne.
+</div>
+<div>   Cette variable est utilisée lors de la conversion d'entiers en chaîne de caractères.    
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div><b> retourne:
+</b></div>
+<div><i>a-addr</i>&nbsp;&nbsp;  Adresse de la variable.    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><h2 id="description">Description</h2><div>
 </div>
 <div>   Mots utilisés par l'intepréteur/compilateur de texte et utilitaires dictionnaire.
@@ -174,7 +198,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="WORDS">
 <b>WORDS</b>   ( -- )  
-<br><div>   Affiche sur la console la liste des mots du dictionnaire. Les mots dont l'attribut F_HIDDEN
+<br><div>   Affiche sur la console la liste des mots du dictionnaire. Les mots dont l'attribut HIDDEN
 </div>
 <div>   est à 1 ne sont pas affichés.
 </div>
@@ -241,7 +265,7 @@
 </div>
 <div><i>n</i>&nbsp;&nbsp; Longueur de la chaîne
 </div>
-<div><i>dest</i>&nbsp;&nbsp; Adresse destination
+<div><i>dest</i>&nbsp;&nbsp; Adresse du tampon destination. Ce dernier va contenir la chaîne comptée.
 </div>
 <div><b> retourne:
 </b></div>
@@ -259,7 +283,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp; Chaîne de caractères dans le flux d'entrée.
+<div><i>cccc</i>&nbsp;&nbsp; Chaîne de caractères dans le texte à évaluer.
 </div>
 <div><b> retourne:
 </b></div>
@@ -276,12 +300,12 @@
 </div>
 <div>   la variable TOIN indique la position courante
 </div>
-<div>   le mot trouvé est copié à la position DP
+<div>   le mot trouvé est copié à la position indiquée par la variable DP.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>c</i>&nbsp;&nbsp;   Caractère délimiteur
+<div><i>c</i>&nbsp;&nbsp;   Caractère séparateur.
 </div>
 <div><b> retourne:    
 </b></div>
@@ -294,7 +318,7 @@
 <b>FIND</b>  ( c-addr -- c-addr 0 | cfa 1 | cfa -1 )   
 <br><div>   Recherche un mot dans le dictionnaire
 </div>
-<div>   ne retourne pas les mots cachés (attribut: F_HIDDEN).
+<div>   ne retourne pas les mots cachés (attribut: HIDDEN).
 </div>
 <div>   La recherche est insensible à la casse.    
 </div>
@@ -305,11 +329,11 @@
 </div>
 <div><b> retourne: 
 </b></div>
-<div><i>c-addr</i>&nbsp;&nbsp; 0 si adresse non trouvée
+<div><i>c-addr	0</i>&nbsp;&nbsp; Si le mot n'est pas dans le dictionnaire.
 </div>
-<div><i>xt</i>&nbsp;&nbsp; 1 trouvé mot immédiat
+<div><i>xt	1</i>&nbsp;&nbsp; Le mot trouvé a l'indicateur IMMED à 1.
 </div>
-<div><i>xt</i>&nbsp;&nbsp; -1 trouvé mot non-immédiat
+<div><i>xt	-1</i>&nbsp;&nbsp; Le mot trouvé a l'indicateur IMMED est à 0.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -347,13 +371,13 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>c-addr</i>&nbsp;&nbsp;   addresse du tampon.
+<div><i>c-addr</i>&nbsp;&nbsp; Addresse du tampon TIB.
 </div>
-<div><i>+n1</i>&nbsp;&nbsp;      longueur du tampon.
+<div><i>+n1</i>&nbsp;&nbsp;   Longueur du tampon.
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>+n2</i>&nbsp;&nbsp;      longueur de la chaîne lue    
+<div><i>+n2</i>&nbsp;&nbsp;  Longueur de la chaîne saisie.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -361,6 +385,10 @@
 <hr style="border-width:1px;"><p id="COUNT">
 <b>COUNT</b>  ( c-addr1 -- c-addr2 u )  
 <br><div>   Retourne la spécification de la chaîne comptée dont l'adresse est c-addr1.
+</div>
+<div>   COUNT n'a pas accès à la mémoire EDS. Pour les chaînes en mémoire EDS il y
+</div>
+<div>   a ECOUNT.  
 </div>
 </p>
 <div><b> arguments:
@@ -380,6 +408,8 @@
 <b>INTERPRET</b>  ( i*x c-addr u -- j*x )   
 <br><div>    Évaluation d'un tampon contenant du texte source par l'interpréteur/compilateur.
 </div>
+<div>    Ce mot est un facteur commun à EVALUATE et QUIT.   
+</div>
 </p>
 <div><b> arguments:
 </b></div>
@@ -387,7 +417,7 @@
 </div>
 <div><i>c-addr</i>&nbsp;&nbsp;   Adresse du premier caractère du tampon.
 </div>
-<div><i>u</i>&nbsp;&nbsp;   Lngueur du tampon.   
+<div><i>u</i>&nbsp;&nbsp;   Longueur du tampon.   
 </div>
 <div><b> retourne:
 </b></div>
@@ -420,9 +450,9 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ABORT">
 <b>ABORT</b> ( -- )  
-<br><div>   Vide la pile dstack et appel QUIT
+<br><div>   Vide la pile des arguments et appel QUIT.
 </div>
-<div>   Si une compilation est en cours annulle les effets de celle-ci  
+<div>   Si une compilation est en cours annulle les effets de celle-ci.  
 </div>
 </p>
 <div><b> arguments:
@@ -438,13 +468,23 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ABORT"">
 <b>ABORT"</b>  ( cccc n -- )     
-<br><div>   Compile Affiche un message d'erreur et apel ABORT 
+<br><div>   Ne s'utilise qu'à l'intérieur d'une définition.  
 </div>
-<div>   si 'n' est différent de zéro.
+<div>   Compile le message cccc et le code qui permet d'afficher ce message suivit d'un ABORT 
 </div>
-<div>   Ne s'utilise qu'à l'intérieur d'une définition.
+<div>   si 'n' est différent de zéro. Le texte cccc est délimité par le caractère ".
 </div>
-</p>
+<div>   exemple:
+</div>
+<div>    : test abort" Ceci est un test!" ;<br>
+
+    0 test \ il ne se passe rien<br>
+
+    1 test <b>ceci est un test!</b><br>
+
+    \ le message a été affiché et ABORT exécuté.<br>
+
+</div></p>
 <div><b> arguments:
 </b></div>
 <div><i>n</i>&nbsp;&nbsp;  Si &lt;&gt; 0 déclenche un ABORT avec message.
@@ -465,7 +505,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>	n+</i>&nbsp;&nbsp; nombre de caractères de la chaîne à copier.
+<div><i>	n+</i>&nbsp;&nbsp; Nombre de caractères de la chaîne à copier.
 </div>
 <div><b> retourne:
 </b></div>
@@ -519,7 +559,9 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="HERE">
 <b>HERE</b>   ( -- addr )    
-<br><div>   Retourne la valeur de la variable système DP (Data Pointer).
+<br><div>   Retourne la valeur de la variable système DP (Data Pointer). Cette adresse
+</div>
+<div>   indique la position du premier octet libre dans la mémoire utlisateur.    
 </div>
 </p>
 <div><b> arguments:
@@ -591,19 +633,40 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="SOURCE!">
 <b>SOURCE!</b>   ( c-addr u -- )    
-<br><div>   sauvegarde les valeur de la SOURCE.
+<br><div>   Sauvegarde les valeurs de la SOURCE.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>c-addr</i>&nbsp;&nbsp;   Adresse du début du tampon qui doit-être évalué.
+<div><i>c-addr</i>&nbsp;&nbsp; Adresse du début du tampon qui doit-être évalué.
 </div>
-<div><i>u</i>&nbsp;&nbsp;        Longueur du tampon.    
+<div><i>u</i>&nbsp;&nbsp;   Longueur du tampon.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="NFA&gt;LFA">
+<hr style="border-width:1px;"><h2 id="description">Description</h2><div>
+</div>
+<div>    L'entête du dictionnaire est une strcucture de la forme suivante:
+</div>
+<div>  <br><table border="single">    
+
+  <tr><th>champ</th><th>description</th></tr>
+
+  <tr><td>LFA</td><td>Contient l'adresse du champ NFA du prochain mot dans le dictionnaire</td></tr>
+
+  <tr><td>NFA</td><td>Champ <b>nom</b> de longueur variable<br>Le premier octet est la longueur du nom et<br>
+
+   contient aussi les attributs HIDDEN et IMMED.<br>Le bit 7 est toujours à 1.</td></tr>
+
+  <tr><td>CFA</td><td>Adresse du code à exécuter pour ce mot.</td></tr>
+
+  <tr><td>PFA</td><td>Paramètres utitlisés par ce mot. Longueur variable.</td></tr>
+
+  </table><br>   
+
+</div><div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:4px;"><p id="NFA&gt;LFA">
 <b>NFA&gt;LFA</b>  ( a-addr1 -- a-addr2 )  
 <br><div>   A partir de l'adresse NFA (Name Field Address) retourne
 </div>
@@ -634,7 +697,7 @@
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>a-addr2</i>&nbsp;&nbsp;  Adresse du CFA dans l'entête du dictionnaire.    
+<div><i>a-addr2</i>&nbsp;&nbsp;  Adresse du champ CFA dans l'entête du dictionnaire.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -646,11 +709,11 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>a-addr1</i>&nbsp;&nbsp;   Adresse du CFA dans l'entête du dictionnaire.
+<div><i>a-addr1</i>&nbsp;&nbsp;   Adresse du champ CFA dans l'entête du dictionnaire.
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>a-addr2</i>&nbsp;&nbsp;   Adresse du PFA (Parameter Field Address).
+<div><i>a-addr2</i>&nbsp;&nbsp;   Adresse du champ PFA (Parameter Field Address).
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -699,7 +762,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="IMMEDIATE">
 <b>IMMEDIATE</b>  ( -- )    
-<br><div>   Met à 1 l'indicateur F_IMMED dans l'entête du dernier mot défini.
+<br><div>   Met l'attribut IMMED à 1 dans l'entête du dernier mot défini.
 </div>
 <div>   Un mot immédiat est un mot qui est exécuté même lorsque STATE est en
 </div>
@@ -719,7 +782,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="HIDE">
 <b>HIDE</b>  ( -- )  
-<br><div>   Met l'indicateur F_HIDDEN à 1 dans l'entête du dernier mot défini dans le dictionnaire.
+<br><div>   Met l'attribut HIDDEN à 1 dans l'entête du dernier mot défini dans le dictionnaire.
 </div>
 <div>   Un mot avec l'attribut HIDDEN de peut-être localisé par FIND.  
 </div>
@@ -737,27 +800,27 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ALLOT">
 <b>ALLOT</b>  ( n -- )  
-<br><div>   Allocation/rendition de mémoire dans le dictionnaire.
+<br><div>   Allocation/libération de mémoire dans le dictionnaire.
 </div>
-<div>   si n est négatif n octets seront rendus.
+<div>   si n est négatif n octets seront libérés. Il s'agit simplement d'un ajustement
 </div>
-<div>   La variable DP est ajustée en conséquence.  
-</div>
-<div> arguements:
-</div>
-<div>   n   Nombre d'octets
-</div>
-<div> retourne:
-</div>
-<div>   rien    Modifie la valeur de DP.  
+<div>   de la valeur de la variable DP.  
 </div>
 </p>
+<div><b> arguments:
+</b></div>
+<div><i>n</i>&nbsp;&nbsp;   Nombre d'octets
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>rien</i>&nbsp;&nbsp;   Modifie la valeur de DP.  
+</div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id=",">
 <b>,</b>   ( x -- )    
-<br><div>   Alloue une cellule pour x à la position DP et copie x dans cette cellule.
+<br><div>   Alloue une cellule pour x à la position DP et dépose x dans cette cellule.
 </div>
 <div>   la Variable DP est incrémentée de la grandeur d'une cellule.
 </div>
@@ -782,7 +845,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>c</i>&nbsp;&nbsp; Caractère à compiler.
+<div><i>c</i>&nbsp;&nbsp; Caractère à sauvegardé dans l'espace de données.
 </div>
 <div><b> retourne:
 </b></div>
@@ -792,25 +855,25 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="'">
-<b>'</b>   ( ccccc -- a-addr )    
-<br><div>   Extrait le mot suivant du flux d'entrée et le recherche dans le dictionnaire.
+<b>'</b>   ( cccc S: -- a-addr )    
+<br><div>   Extrait le mot suivant du texte d'entrée et le recherche dans le dictionnaire.
 </div>
 <div>   Retourne l'adresse du CFA de ce mot.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;   chaîne de caractère dans le flux d'entrée qui représente le mot recherché.
+<div><i>cccc</i>&nbsp;&nbsp;   chaîne de caractère dans le texte d'entrée qui représente le mot recherché.
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>a-addr</i>&nbsp;&nbsp;  Adresse du CFA (Code Field Address) du mot recherché.    
+<div><i>a-addr</i>&nbsp;&nbsp;  Adresse du CFA (Code Field Address) du mot recherché, 0 si non trouvé.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="[']">
-<b>[']</b>   ( cccc -- )  
+<b>[']</b>   ( cccc S: -- )  
 <br><div>   Version immédiate de '  à utiliser à l'intérieur d'une définition pour
 </div>
 <div>   compiler le CFA d'un mot existant dans le dictionnaire.
@@ -818,7 +881,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>ccccc</i>&nbsp;&nbsp;   Chaîne de caractère dans le flux d'entrée qui représente le mot recherché.
+<div><i>cccc</i>&nbsp;&nbsp;   Chaîne de caractère dans le texte d'entrée qui représente le mot recherché.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1835,6 +1898,7 @@
 <li><a href="#GETCLIP">GETCLIP</a></li>
 <li><a href="#HERE">HERE</a></li>
 <li><a href="#HIDE">HIDE</a></li>
+<li><a href="#HP">HP</a></li>
 <li><a href="#IF">IF</a></li>
 <li><a href="#IMMEDIATE">IMMEDIATE</a></li>
 <li><a href="#INTERPRET">INTERPRET</a></li>

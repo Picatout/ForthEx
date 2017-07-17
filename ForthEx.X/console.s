@@ -333,7 +333,7 @@ DEFWORD "SPACE",5,,SPACE
 ; nom: SPACES ( n -- )
 ;   Imprime n espaces sur la console.
 ; arguments:
-;   aucun
+;   n	Nombre d'espaces à imprimer.
 ; retourne:
 ;   rien
 DEFWORD "SPACES",6,,SPACES
@@ -403,7 +403,8 @@ DEFWORD "ETYPE",5,,ETYPE
 9:  .word DROP,EXIT
     
 ; nom: DELETE  ( -- )
-;   Supprime le caractère à la position du curseur.
+;   Supprime le caractère à la position du curseur. Les caractères à droite
+;   sont décalés vers la gauche d'une position.  
 ; arguments:
 ;   rien
 ; retourne:
@@ -412,7 +413,8 @@ DEFWORD "DELETE",6,,DELETE  ; ( -- )
     .word LIT,FN_DELETE,CONSEXEC,EXIT
    
 ; nom: BACKDEL  ( -- )
-;   Déplace le curseur d'un caractère à gauche et supprime le caractère.
+;   Déplace le curseur d'un caractère à gauche et supprime le caractère. Les 
+;   caractères à droite sont décalés vers la gauche d'une position.    
 ; arguments:
 ;   rien
 ; retourne:
@@ -431,8 +433,7 @@ DEFWORD "DELEOL",6,,DELEOL
     
 ; nom: CR ( -- )    
 ;   Renvoie le curseur à la marge gauche de la ligne suivante.
-;   Si le curseur n'est pas après le dernier caractère de la ligne CR ne brise
-;   pas la ligne pour insérer la fin de celle-ci sur la ligne suivante.
+;   Le texte n'est pas modifié il s'agit simplement d'un déplacement du curseur.
 ; arguments:
 ;   rien
 ; retourne:
@@ -442,7 +443,8 @@ DEFWORD "CR",2,,CR ; ( -- )
 
 ; nom: CLS  ( -- )    
 ;   Efface l'écran de la console.
-;   Le standard ANSI Forth utilise le mot PAGE pour cette fonction.
+;   Le standard ANSI Forth utilise le mot PAGE pour cette fonction mais CLS me
+;   semble plus famillier.
 ; arguments:
 ;   rien
 ; retourne:

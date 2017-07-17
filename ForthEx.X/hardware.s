@@ -302,8 +302,8 @@ HEADLESS VARS_INIT
 
     
 ; nom: REBOOT ( -- )
-;   Redémarre le système avec le même effet qu'une mise sous tension
-;   en exécutant l'instruction machine RESET.    
+;   Redémarre le système avec le même effet qu'une mise sous tension.
+;   Exécute l'instruction machine RESET.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -347,7 +347,7 @@ DEFCODE "USEC",4,,USEC
  
 ; nom: MS  ( u -- )
 ;   Boucle d'attente qui dure au moins u millisecondes. Cette boucle utitise
-;   le compteur systicks. L'erreur sur la durée est de ± 1msec.    
+;   le compteur systicks.
 ; arguments:
 ;   u    Durée en millisecondes.
 ; retourne:
@@ -389,14 +389,18 @@ DEFCODE "LFSR",4,,LFSR  ; ( -- )
 ;   Générateur pseudo-hasard qui génère un entier de 16 bits. 
 ;   Ce générateur doit-être initialisé avec SRAND avant utilisation sinon 
 ;   la valeur retournée est toujours 0.
-;   algorithme:
-;    rand=0
-;    count=0
-;    a) rand<<1
-;    b) si impair(seed) alors seed++
-;    c) seed=seed*3/2
-;    d) rand |= seed&1
-;    e) ++count==16?termine:goto a    
+; HTML:    
+;   algorithme:<br>
+; <ol>    
+;    <li>rand=0</li>
+;    <li>count=0
+;    <li>rand<<1
+;    <li>si impair(seed) alors seed++
+;    <li>seed=seed*3/2
+;    <li>rand |= seed&1
+;    <li>++count==16?termine:goto 3    
+; </ol><br>
+; :HTML    
 ; arguments:
 ;   aucun
 ; retourne:    

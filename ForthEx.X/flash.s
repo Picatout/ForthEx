@@ -581,7 +581,7 @@ DEFWORD "IMGSAVE",7,,IMGSAVE ; ( -- )
 ;    Charge une image système RAM à partir de la mémoire flash du MCU.
 ;    Au démarrage de l'ordinateur IMGLOAD est appellé et s'il y a une image
 ;    système en mémoire flash celle-ci est chargée en mémoire RAM.
-;    S'il n'y a pas d'image disponible le message "No boot image available."
+;    S'il n'y a pas d'image disponible le message "No boot image in flash."
 ;    est affiché à l'écran.
 ;    Si l'image chargée en RAM contient une définition AUTORUN dans son dictionnaire
 ;    ce mot est exécuté.

@@ -22,7 +22,7 @@
 ;    Il s'agit de l'interface utilisateur. Au démarrage l'ordinateur ForthEx offre
 ;    cette interface en ligne de commande à l'utilisateur. Le mot QUIT est en fait
 ;    le point d'entré de cette interface. Une boucle infinie qui consiste à lire
-;    une ligne de texte, à évaluer le texte contenu dans cette ligne.
+;    une ligne de texte et à l'évaluer.
 ;    S'il n'y a pas d'erreur lors de l'évaluation le message ' OK' est affiché
 ;    et la boucle recommence. En cas d'erreur un message peut-être affiché avant
 ;    d'appeler le mot ABORT qui réinitialise la pile des retours et Appelle QUIT à nouveau.
@@ -81,7 +81,8 @@ HEADLESS LENMASK,CODE
     NEXT
     
 ; nom: TIBSIZE   ( -- n )
-;   Constante système qui retourne la longueur du TIB (Transaction Input Buffer)
+;   Constante système qui retourne la longueur du TIB (Terminal Input Buffer).
+;   Il s'agit du tampon utilisé pour la saisie d'une ligne de texte par l'utilisateur.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -89,7 +90,9 @@ HEADLESS LENMASK,CODE
 DEFCONST "TIBSIZE",7,,TIBSIZE,TIB_SIZE       ; grandeur tampon TIB
     
 ; nom: PADSIZE   ( -- n )
-;   Constante système qui retourne la longueur du tampon PAD.
+;   Constante système qui retourne la longueur du tampon PAD. Le PAD est un
+;   tampon de travail utilisé entre autre pour convertir les entiers en chaîne
+;   pour l'affichage de ceux-ci.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -148,7 +151,7 @@ DEFUSER "PASTE",5,,PASTE   ; copie de TIB
 ;   a-addr  Adresse de la variable.    
 DEFUSER ">IN",3,,TOIN     ; pointeur position après le dernier mot retourné par WORD
     
-; NOM: HP   ( -- a-addr )
+; nom: HP   ( -- a-addr )
 ;   Variable système 'Hold Pointer' contenant la position du pointeur de conversion de nombres en chaîne.
 ;   Cette variable est utilisée lors de la conversion d'entiers en chaîne de caractères.    
 ; arguments:
@@ -162,7 +165,7 @@ DEFUSER "HP",2,,HP       ; HOLD pointer
     
     
 ; nom: WORDS   ( -- )  
-;   Affiche sur la console la liste des mots du dictionnaire. Les mots dont l'attribut F_HIDDEN
+;   Affiche sur la console la liste des mots du dictionnaire. Les mots dont l'attribut HIDDEN
 ;   est à 1 ne sont pas affichés.
 ; arguments:
 ;   aucun
@@ -212,7 +215,7 @@ DEFWORD "PARSE",5,,PARSE ; c -- c-addr u
 ; arguments:    
 ;   src Addresse chaîne à copiée
 ;   n Longueur de la chaîne
-;   dest Adresse destination
+;   dest Adresse du tampon destination. Ce dernier va contenir la chaîne comptée.
 ; retourne:
 ;   rien 
 DEFWORD ">COUNTED",8,,TOCOUNTED 
@@ -222,7 +225,7 @@ DEFWORD ">COUNTED",8,,TOCOUNTED
 ;   Recherche le prochain mot dans le flux d'entrée
 ;   Tout caractère < 32 est considéré comme un espace
 ; arguments:
-;   cccc Chaîne de caractères dans le flux d'entrée.
+;   cccc Chaîne de caractères dans le texte à évaluer.
 ; retourne:
 ;   c-addr Addresse premier caractère.
 ;   u    Longueur de la chaîne.
@@ -276,9 +279,9 @@ DEFCODE "PARSE-NAME",10,,PARSENAME
 ; nom: WORD  ( c -- c-addr )  
 ;   Localise le prochain mot délimité par 'c'
 ;   la variable TOIN indique la position courante
-;   le mot trouvé est copié à la position DP
+;   le mot trouvé est copié à la position indiquée par la variable DP.
 ; arguments:
-;   c   Caractère délimiteur
+;   c   Caractère séparateur.
 ; retourne:    
 ;   c-addr Adresse chaîne comptée.    
 DEFWORD "WORD",4,,WORD 
@@ -290,14 +293,14 @@ DEFWORD "WORD",4,,WORD
   
 ; nom: FIND  ( c-addr -- c-addr 0 | cfa 1 | cfa -1 )   
 ;   Recherche un mot dans le dictionnaire
-;   ne retourne pas les mots cachés (attribut: F_HIDDEN).
+;   ne retourne pas les mots cachés (attribut: HIDDEN).
 ;   La recherche est insensible à la casse.    
 ; arguments:
 ;   c-addr  Adresse de la chaîne comptée à rechercher.
 ; retourne: 
-;    c-addr 0 si adresse non trouvée
-;    xt 1 trouvé mot immédiat
-;    xt -1 trouvé mot non-immédiat
+;    c-addr	0 Si le mot n'est pas dans le dictionnaire.
+;    xt	1 Le mot trouvé a l'indicateur IMMED à 1.
+;    xt	-1 Le mot trouvé a l'indicateur IMMED est à 0.
 .equ  LFA, W1 ; link field address
 .equ  NFA, W2 ; name field addrress
 .equ  TARGET,W3 ;pointer chaîne recherchée
@@ -372,10 +375,10 @@ not_found:
 ; :HTML
 ;   Les autres touches de contrôles sont ignorées. 
 ; arguments:
-;   c-addr   addresse du tampon.
-;   +n1      longueur du tampon.
+;   c-addr Addresse du tampon TIB.
+;   +n1   Longueur du tampon.
 ; retourne:
-;   +n2      longueur de la chaîne lue    
+;   +n2  Longueur de la chaîne saisie.    
 DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
     .word OVER,PLUS,TOR,DUP  ;  ( c-addr c-addr  R: bound )
 1:  .word EKEY,DUP,QPRTCHAR,ZBRANCH,2f-$
@@ -398,6 +401,8 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
    
 ; nom: COUNT  ( c-addr1 -- c-addr2 u )  
 ;   Retourne la spécification de la chaîne comptée dont l'adresse est c-addr1.
+;   COUNT n'a pas accès à la mémoire EDS. Pour les chaînes en mémoire EDS il y
+;   a ECOUNT.  
 ; arguments:
 ;   c-addr1   Adresse d'une chaîne de caractères débutant par un compteur.
 ; retourne:
@@ -408,10 +413,11 @@ DEFWORD "COUNT",5,,COUNT ; ( c-addr1 -- c-addr2 u )
    
 ; nom: INTERPRET  ( i*x c-addr u -- j*x )   
 ;    Évaluation d'un tampon contenant du texte source par l'interpréteur/compilateur.
+;    Ce mot est un facteur commun à EVALUATE et QUIT.   
 ; arguments:
 ;   i*x État initial de la pile des arguments avant le début de  l'interpréation.   
 ;   c-addr   Adresse du premier caractère du tampon.
-;   u   Lngueur du tampon.   
+;   u   Longueur du tampon.   
 ; retourne:
 ;   j*x  État final de la pile des arguments à la fin de l'interprétation.     
 DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
@@ -454,8 +460,8 @@ HEADLESS OK,HWORD  ; ( -- )
 1:  .word SPACE, LIT, 'O', EMIT, LIT,'K',EMIT, EXIT    
 
 ; nom: ABORT ( -- )  
-;   Vide la pile dstack et appel QUIT
-;   Si une compilation est en cours annulle les effets de celle-ci  
+;   Vide la pile des arguments et appel QUIT.
+;   Si une compilation est en cours annulle les effets de celle-ci.  
 ; arguments:
 ;   aucun
 ; retourne:
@@ -473,21 +479,28 @@ HEADLESS QABORT,HWORD
 9:  .word DROP,EXIT
   
 ; nom: ABORT"  ( cccc n -- )     
-;   Compile Affiche un message d'erreur et apel ABORT 
-;   si 'n' est différent de zéro.
-;   Ne s'utilise qu'à l'intérieur d'une définition.
+;   Ne s'utilise qu'à l'intérieur d'une définition.  
+;   Compile le message cccc et le code qui permet d'afficher ce message suivit d'un ABORT 
+;   si 'n' est différent de zéro. Le texte cccc est délimité par le caractère ".
+;   exemple:
+; HTML:
+;   : test abort" Ceci est un test!" ;<br>
+;   0 test \ il ne se passe rien<br>
+;   1 test <b>ceci est un test!</b><br>
+;   \ le message a été affiché et ABORT exécuté.<br>
+; :HTML  
 ; arguments:
 ;    n  Si <> 0 déclenche un ABORT avec message.
 ; retourne:
 ;    rien  
 DEFWORD "ABORT\"",6,F_IMMED,ABORTQUOTE ; (  --  )
-    .word CFA_COMMA,QABORT,STRCOMPILE,EXIT
+    .word QCOMPILE,CFA_COMMA,QABORT,STRCOMPILE,EXIT
     
 ; nom: CLIP  ( n+ -- )    
 ;   Copie le contenu du tampon TIB dans le tampon PASTE.
 ;   Le contenu de PASTE est une chaîne comptée.
 ; arguments:
-;	n+ nombre de caractères de la chaîne à copier.
+;	n+ Nombre de caractères de la chaîne à copier.
 ; retourne:
 ;   rien    
 DEFWORD "CLIP",4,,CLIP ; ( n+ -- )
@@ -533,7 +546,8 @@ DEFWORD "QUIT",4,,QUIT ; ( -- )
 ;   Mots utilisés par le compilateur.
     
 ; nom: HERE   ( -- addr )    
-;   Retourne la valeur de la variable système DP (Data Pointer).
+;   Retourne la valeur de la variable système DP (Data Pointer). Cette adresse
+;   indique la position du premier octet libre dans la mémoire utlisateur.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -581,10 +595,10 @@ DEFCODE "SOURCE",6,,SOURCE ; ( -- c-addr u )
     NEXT
 
 ; nom: SOURCE!   ( c-addr u -- )    
-;   sauvegarde les valeur de la SOURCE.
+;   Sauvegarde les valeurs de la SOURCE.
 ; arguments:
-;   c-addr   Adresse du début du tampon qui doit-être évalué.
-;   u        Longueur du tampon.    
+;   c-addr Adresse du début du tampon qui doit-être évalué.
+;   u   Longueur du tampon.    
 DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
     mov T,_CNTSOURCE
     DPOP
@@ -592,6 +606,19 @@ DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
     DPOP
     NEXT
 
+; DESCRIPTION:
+;    L'entête du dictionnaire est une strcucture de la forme suivante:
+; HTML:
+; <br><table border="single">    
+; <tr><th>champ</th><th>description</th></tr>
+; <tr><td>LFA</td><td>Contient l'adresse du champ NFA du prochain mot dans le dictionnaire</td></tr>
+; <tr><td>NFA</td><td>Champ <b>nom</b> de longueur variable<br>Le premier octet est la longueur du nom et<br>
+;  contient aussi les attributs HIDDEN et IMMED.<br>Le bit 7 est toujours à 1.</td></tr>
+; <tr><td>CFA</td><td>Adresse du code à exécuter pour ce mot.</td></tr>
+; <tr><td>PFA</td><td>Paramètres utitlisés par ce mot. Longueur variable.</td></tr>
+; </table><br>   
+; :HTML
+    
 ; nom: NFA>LFA  ( a-addr1 -- a-addr2 )  
 ;   A partir de l'adresse NFA (Name Field Address) retourne
 ;   l'adresse LFA  (Link Field Address).  
@@ -608,16 +635,16 @@ DEFWORD "NFA>LFA",7,,NFATOLFA ; ( nfa -- lfa )
 ; arguments:
 ;   a-addr1  Adresse du champ NFA dans l'entête du dictionnaire.
 ; retourne:
-;   a-addr2  Adresse du CFA dans l'entête du dictionnaire.    
+;   a-addr2  Adresse du champ CFA dans l'entête du dictionnaire.    
 DEFWORD "NFA>CFA",7,,NFATOCFA ; ( nfa -- cfa )
     .word DUP,CFETCH,LENMASK,AND,PLUS,ONEPLUS,ALIGNED,EXIT
  
 ; nom: >BODY  ( a-addr1 -- a-addr2 )    
 ;   A partir du CFA (Code Field Address) retourne l'adresse PFA (Parameter Field Address)
 ; arguments:
-;   a-addr1   Adresse du CFA dans l'entête du dictionnaire.
+;   a-addr1   Adresse du champ CFA dans l'entête du dictionnaire.
 ; retourne:
-;   a-addr2   Adresse du PFA (Parameter Field Address).
+;   a-addr2   Adresse du champ PFA (Parameter Field Address).
 DEFWORD ">BODY",5,,TOBODY ; ( cfa -- pfa )
     .word DUP,FETCH,LIT,FETCH_EXEC,EQUAL,ZBRANCH,1f-$
     .word CELLPLUS
@@ -652,7 +679,7 @@ DEFWORD "?EMPTY",6,,QEMPTY ; ( -- f)
     .word DP0,HERE,EQUAL,EXIT 
     
 ; nom: IMMEDIATE  ( -- )    
-;   Met à 1 l'indicateur F_IMMED dans l'entête du dernier mot défini.
+;   Met l'attribut IMMED à 1 dans l'entête du dernier mot défini.
 ;   Un mot immédiat est un mot qui est exécuté même lorsque STATE est en
 ;   mode compilation.
 ; arguments:
@@ -665,7 +692,7 @@ DEFWORD "IMMEDIATE",9,,IMMEDIATE ; ( -- )
 9:  .word EXIT
     
 ; nom: HIDE  ( -- )  
-;   Met l'indicateur F_HIDDEN à 1 dans l'entête du dernier mot défini dans le dictionnaire.
+;   Met l'attribut HIDDEN à 1 dans l'entête du dernier mot défini dans le dictionnaire.
 ;   Un mot avec l'attribut HIDDEN de peut-être localisé par FIND.  
 ; arguments:
 ;   aucun
@@ -686,7 +713,7 @@ HEADLESS NAMEMARK,HWORD
   
 
 ; name: REVEAL  ( -- )
-;   Met à 0 le bit F_HIDDEN dans l'entête du dictionnaire du dernier mot défini.  
+;   Met à 0 l'attribut HIDDEN dans l'entête du dictionnaire du dernier mot défini.  
 ; arguments:
 ;   aucun
 ; retourne:
@@ -697,18 +724,18 @@ DEFWORD "REVEAL",6,,REVEAL ; ( -- )
 9:  .word EXIT
 
 ; nom: ALLOT  ( n -- )  
-;   Allocation/rendition de mémoire dans le dictionnaire.
-;   si n est négatif n octets seront rendus.
-;   La variable DP est ajustée en conséquence.  
-; arguements:
+;   Allocation/libération de mémoire dans le dictionnaire.
+;   si n est négatif n octets seront libérés. Il s'agit simplement d'un ajustement
+;   de la valeur de la variable DP.  
+; arguments:
 ;   n   Nombre d'octets
 ; retourne:
-;   rien    Modifie la valeur de DP.  
+;   rien   Modifie la valeur de DP.  
 DEFWORD "ALLOT",5,,ALLOT ; ( n -- )
     .word DP,PLUSSTORE,EXIT
 
 ; nom: ,   ( x -- )    
-;   Alloue une cellule pour x à la position DP et copie x dans cette cellule.
+;   Alloue une cellule pour x à la position DP et dépose x dans cette cellule.
 ;   la Variable DP est incrémentée de la grandeur d'une cellule.
 ; arguments:
 ;    x   Valeur qui sera sauvegardée dans l'espace de donnée.    
@@ -722,32 +749,32 @@ DEFWORD ",",1,,COMMA  ; ( x -- )
 ;   Alloue l'espace nécessaire pour enregistré le caractère c.
 ;   Le caractère c est sauvegardé à la position DP et DP est incrémenté.
 ; arguments:
-;   c Caractère à compiler.
+;   c Caractère à sauvegardé dans l'espace de données.
 ; retourne:
 ;   rien  
 DEFWORD "C,",2,,CCOMMA ; ( c -- )    
     .word HERE,CSTORE,LIT,1,ALLOT
     .word EXIT
     
-; nom: '   ( ccccc -- a-addr )    
-;   Extrait le mot suivant du flux d'entrée et le recherche dans le dictionnaire.
+; nom: '   ( cccc S: -- a-addr )    
+;   Extrait le mot suivant du texte d'entrée et le recherche dans le dictionnaire.
 ;   Retourne l'adresse du CFA de ce mot.
 ; arguments:
-;    cccc   chaîne de caractère dans le flux d'entrée qui représente le mot recherché.
+;    cccc   chaîne de caractère dans le texte d'entrée qui représente le mot recherché.
 ; retourne:
-;    a-addr  Adresse du CFA (Code Field Address) du mot recherché.    
-DEFWORD "'",1,,TICK ; ( <ccc> -- xt )
+;    a-addr  Adresse du CFA (Code Field Address) du mot recherché, 0 si non trouvé.    
+DEFWORD "'",1,,TICK ; ( <ccc> -- cfa )
     .word BL,WORD,DUP,CFETCH,ZEROEQ,QNAME
     .word UPPER,FIND,ZBRANCH,5f-$
     .word BRANCH,9f-$
 5:  .word COUNT,TYPE,SPACE,LIT,'?',EMIT,CR,ABORT    
 9:  .word EXIT
 
-; nom: [']   ( cccc -- )  
+; nom: [']   ( cccc S: -- )  
 ;   Version immédiate de '  à utiliser à l'intérieur d'une définition pour
 ;   compiler le CFA d'un mot existant dans le dictionnaire.
 ; arguments:
-;   ccccc   Chaîne de caractère dans le flux d'entrée qui représente le mot recherché.
+;   cccc   Chaîne de caractère dans le texte d'entrée qui représente le mot recherché.
 ; retourne:
 ;   rien    Le CFA est compilé.  
 DEFWORD "[']",3,F_IMMED,COMPILETICK ; cccc 

@@ -37,7 +37,7 @@
 ; nom: E@  ( a-addr -- n )    
 ;   Retourne l'entier contenu à l'adresse a-addr. 
 ;   L'adresse doit-être alignée sur un nombre pair.
-;   Les adresses < 32768 accèdes la RAM mais    
+;   Les adresses < 32768 accèdes la RAM standard mais    
 ;   les adresses >= 32768 accèdent la mémoire EDS.
 ; arguments:
 ;   a-addr  Adresse à lire.
@@ -52,12 +52,12 @@ DEFCODE "E@",2,,EFETCH ; ( addr -- n )
 ; nom: EC@  ( c-addr -- c )    
 ;   Retourne le caractère contenu à l'adressse c-addr.
 ;   Cette adresse est alignée sur un octet.    
-;   Les adresse <32768 accèdent la RAM mais 
+;   Les adresse <32768 accèdent la RAM standard mais 
 ;   les adresses >= 32768 accès la mémoire EDS.    
 ; arguments:
 ;   c-addr   Adresse à lire.
 ; retourne:
-;   c	Caractère contenu à cette adresse.    
+;   c	Octet contenu à cette adresse.    
 DEFCODE "EC@",3,,ECFETCH 
     SET_EDS
     mov.b [T],T
@@ -68,7 +68,7 @@ DEFCODE "EC@",3,,ECFETCH
 ; nom: ETBL@  ( n a-addr -- n )
 ;   Retourne l'élément n d'un vecteur. Les valeurs d'indice débute à zéro.
 ;   L'adresse de la table doit-être alignée sur une adresse paire.
-;   Les addresses <32768 accèdent la RAM mais 
+;   Les addresses <32768 accèdent la RAM standard mais 
 ;   les adresses >= 32768 accèdent la mémoire EDS.    
 ; arguments:
 ;   n  Indice dans le vecteur.
@@ -84,5 +84,18 @@ DEFCODE "ETBL@",5,,ETBLFETCH
     mov [W0],T
     RESET_EDS
     NEXT
+
+; nom: ECOUNT  ( c-addr1 -- c-addr2 u )  
+;   Retourne la spécification de la chaîne comptée dont l'adresse est c-addr1.
+;   Pour les adresses < 32768 la mémoire RAM standard est accédée mais pour les
+;   adresses >=32768 c'est la mémoire EDS qui est accédée.  
+; arguments:
+;   c-addr1   Adresse d'une chaîne de caractères débutant par un compteur.
+; retourne:
+;   c-addr2   Adresse du premier caractère de la chaîne.
+;   u  Longueur de la chaîne.  
+DEFWORD "ECOUNT",6,,ECOUNT ; ( c-addr1 -- c-addr2 u )
+   .word DUP,ECFETCH,TOR,ONEPLUS,RFROM,EXIT
+
 
 

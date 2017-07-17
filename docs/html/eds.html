@@ -43,7 +43,7 @@
 </div>
 <div>   L'adresse doit-être alignée sur un nombre pair.
 </div>
-<div>   Les adresses &lt; 32768 accèdes la RAM mais    
+<div>   Les adresses &lt; 32768 accèdes la RAM standard mais    
 </div>
 <div>   les adresses &gt;= 32768 accèdent la mémoire EDS.
 </div>
@@ -65,7 +65,7 @@
 </div>
 <div>   Cette adresse est alignée sur un octet.    
 </div>
-<div>   Les adresse &lt;32768 accèdent la RAM mais 
+<div>   Les adresse &lt;32768 accèdent la RAM standard mais 
 </div>
 <div>   les adresses &gt;= 32768 accès la mémoire EDS.    
 </div>
@@ -76,7 +76,7 @@
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>c	Caractère</i>&nbsp;&nbsp; contenu à cette adresse.    
+<div><i>c	Octet</i>&nbsp;&nbsp; contenu à cette adresse.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -87,7 +87,7 @@
 </div>
 <div>   L'adresse de la table doit-être alignée sur une adresse paire.
 </div>
-<div>   Les addresses &lt;32768 accèdent la RAM mais 
+<div>   Les addresses &lt;32768 accèdent la RAM standard mais 
 </div>
 <div>   les adresses &gt;= 32768 accèdent la mémoire EDS.    
 </div>
@@ -105,11 +105,34 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="ECOUNT">
+<b>ECOUNT</b>  ( c-addr1 -- c-addr2 u )  
+<br><div>   Retourne la spécification de la chaîne comptée dont l'adresse est c-addr1.
+</div>
+<div>   Pour les adresses &lt; 32768 la mémoire RAM standard est accédée mais pour les
+</div>
+<div>   adresses &gt;=32768 c'est la mémoire EDS qui est accédée.  
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>c-addr1</i>&nbsp;&nbsp;   Adresse d'une chaîne de caractères débutant par un compteur.
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>c-addr2</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne.
+</div>
+<div><i>u</i>&nbsp;&nbsp;  Longueur de la chaîne.  
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><h4 id="index">Index</h4>
 <p>
 <ul>
 <li><a href="#E@">E@</a></li>
 <li><a href="#EC@">EC@</a></li>
+<li><a href="#ECOUNT">ECOUNT</a></li>
 <li><a href="#ETBL@">ETBL@</a></li>
 </ul>
 </p>
