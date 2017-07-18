@@ -927,23 +927,25 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?WORD">
-<b>?WORD</b>  ( cccc  -- c-addr 0 | cfa 1 | cfa -1 )    
-<br><div>   Analyse le flux d'entré pour en extraire le prochain mot.
+<b>?WORD</b>  ( cccc S: -- a-addr | cfa 1 | cfa -1 )    
+<br><div>   Analyse le texte d'entré pour en extraire le prochain mot.
 </div>
 <div>   Recherche ce mot dans le dictionnaire.    
 </div>
-<div>   Avorte si le nom n'est pas trouvé dans le dictionnaire.
-</div>
 <div>   Retourne le CFA du nom et un indicateur.
+</div>
+<div>   Si le mot n'est pas dans le dictionnaire affiche le mot avec un point
+</div>
+<div>   d'interrogation et invoque ABORT.    
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>ccccc</i>&nbsp;&nbsp;    mot extrait du flux d'entrée.
+<div><i>cccc</i>&nbsp;&nbsp;  Mot extrait du texte d'entrée.
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>a-addr</i>&nbsp;&nbsp;   Le CFA du mot 
+<div><i>a-addr</i>&nbsp;&nbsp;   Le CFA du mot. 
 </div>
 <div><i>1</i>&nbsp;&nbsp; Si c'est mot immédiat ou
 </div>
@@ -953,15 +955,15 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="POSTPONE">
-<b>POSTPONE</b>   ( ccccc -- ) 
+<b>POSTPONE</b>   ( ccccc S: -- ) 
 <br><div>   Mot immédiat à utiliser dans une définition. 
 </div>
-<div>   Diffère la compilation du mot qui suis dans le flux d'entrée.
+<div>   Diffère la compilation du mot qui suis dans le texte d'entrée.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>ccccc</i>&nbsp;&nbsp;   Mot extrait du flux d'entrée.
+<div><i>cccc</i>&nbsp;&nbsp;   Mot extrait du texte d'entrée.
 </div>
 <div><b> retourne:
 </b></div>
@@ -974,7 +976,7 @@
 <b>LITERAL</b>  ( x -- )
 <br><div>   Mot immédiat qui compile la sémantique runtime d'un entier. Il n'a d'effet 
 </div>
-<div>   qu'en mode compilation. Dans ce cas la valeur sommet de la pile est compilée
+<div>   qu'en mode compilation. Dans ce cas la valeur au sommet de la pile est compilée
 </div>
 <div>   avec la sémantique runtime qui empile un entier.
 </div>
@@ -985,16 +987,16 @@
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>rien</i>&nbsp;&nbsp;    x reste au sommet de la pile en mode interprétation.    
+<div><i>rien</i>&nbsp;&nbsp;    x reste au sommet de la pile lorsque STATE=0 .    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="S"">
-<b>S"</b>   ( ccccc -- )  runtime S: c-addr u 
+<b>S"</b>   ( cccc S: -- ) 
 <br><div>   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.    
 </div>
-<div>   Lecture d'une chaîne litérale dans le flux d'entrée et compilation
+<div>   Lecture d'une chaîne litérale dans le texte d'entrée et compilation
 </div>
 <div>   de cette chaîne dans l'espace de donnée.    
 </div>
@@ -1005,7 +1007,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>ccccc</i>&nbsp;&nbsp;   Chaîne terminée par " dans le flux d'entrée.
+<div><i>cccc</i>&nbsp;&nbsp;   Chaîne terminée par " dans le texte d'entrée.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1015,29 +1017,29 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="C"">
-<b>C"</b>   ( ccccc --  )  runtime S:  c-addr
+<b>C"</b>   ( cccc S: --  )
 <br><div>   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
 </div>
-<div>   Lecture d'une chaîne litérale dans le flux d'entrée et compilation de cette
+<div>   Lecture d'une chaîne litérale dans le texte d'entrée et compilation de cette
 </div>
 <div>   chaîne dans l'espace de donnée.
 </div>
-<div>   La sémantique runtime consiste à compiler l'adresse de la chaîne comptée.
+<div>   La sémantique runtime consiste à empiler l'adresse de la chaîne comptée.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>ccccc</i>&nbsp;&nbsp;  Chaîne de caractères terminée par "  dans le flux d'entrée.
+<div><i>cccc</i>&nbsp;&nbsp;  Chaîne de caractères terminée par "  dans le texte d'entrée.
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>rien</i>&nbsp;&nbsp;    En runtime retourne empile l'adresse du descripteur de la chaîne.    
+<div><i>rien</i>&nbsp;&nbsp;    En runtime empile l'adresse du descripteur de la chaîne.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="."">
-<b>."</b>   ( ccccc -- )
+<b>."</b>   ( cccc S: -- )
 <br><div>   Mot immédiat.    
 </div>
 <div>   Interprétation: imprime la chaîne litérale qui suis dans le flux d'entrée.
@@ -1049,7 +1051,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>ccccc</i>&nbsp;&nbsp;    Chaîne terminée par "  dans le flux d'entrée.
+<div><i>cccc</i>&nbsp;&nbsp;    Chaîne terminée par "  dans le texte d'entrée.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1063,6 +1065,14 @@
 <br><div>   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
 </div>
 <div>   Compile un appel récursif du mot en cour de définition.
+</div>
+<div> exemple:
+</div>
+<div> \ définition de la fonction factorielle par récursion.  
+</div>
+<div>   : fact dup 1 = if exit else dup 1- recurse * then ;
+</div>
+<div>  
 </div>
 </p>
 <div><b> arguments:
@@ -1214,7 +1224,7 @@
 </div>
 <div>   Une boucle créée avec BEGIN ... AGAIN ne peut-être interrompue que
 </div>
-<div>   par ABORT ou ABORT".    
+<div>   par ABORT, ABORT" ou EXIT.    
 </div>
 </p>
 <div><b> arguments:
@@ -1232,7 +1242,7 @@
 <b>UNTIL</b>  compilation ( n -- )
 <br><div>   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
 </div>
-<div>   Compile la fin d'une boucle conditionnelle. Termine la boucle si n est VRAI.
+<div>   Compile la fin d'une boucle conditionnelle. Termine la boucle si n&lt;&gt;0.
 </div>
 </p>
 <div><b> arguments:
@@ -1250,7 +1260,7 @@
 <b>REPEAT</b>  ( -- )    
 <br><div>   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
 </div>
-<div>   S'Utilise avec une structure de boucle BEGIN ... WHILE ... REPEAT
+<div>   S'utilise avec une structure de boucle BEGIN ... WHILE ... REPEAT
 </div>
 <div>   Comme AGAIN effectue un branchement inconditionnel au début de la boucle.
 </div>
@@ -1334,9 +1344,9 @@
 </div>
 <div>   Termine le bloc d'instruction qui débute après un IF.
 </div>
-<div>   Les instructions entre le ELSE et le THEN qui suit sont excéutée si la valeur n contrôlée
+<div>   Les instructions entre le ELSE et le THEN qui suit sont excéutées si la valeur n contrôlée
 </div>
-<div>   par le IF est FAUSSE.    
+<div>   par le IF est 0.    
 </div>
 </p>
 <div><b> arguments:
@@ -1368,7 +1378,7 @@
 </div>
 <div>     2  OF ... ENDOF
 </div>
-<div>     ... ( instructions par défaut ce bloc est optionnel.)
+<div>     \ ... ( instructions par défaut ce bloc est optionnel.)
 </div>
 <div>     ENDCASE
 </div>
@@ -1493,13 +1503,13 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?NAME">
-<b>?NAME</b>  ( f -- )    
-<br><div>   Si f==0 appelle ABORT" avec le message "name missing" 
+<b>?NAME</b>  ( n -- )    
+<br><div>   Si n&lt;&gt;0 appelle ABORT" avec le message "name missing" 
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>f</i>&nbsp;&nbsp;   Indicateur Booléen, si VRAI exécute ABORT" name missing"
+<div><i>n</i>&nbsp;&nbsp;   Si n &lt;&gt; 0 exécute ABORT" name missing"
 </div>
 <div><b> retourne:
 </b></div>
@@ -1540,18 +1550,38 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="FORGET">
-<b>FORGET</b>  ( cccc -- )    
-<br><div>   Extrait du flux d'entrée le mot suivant et supprime du dictionnaire ce mot
+<hr style="border-width:1px;"><p id="HEADER">
+<b>HEADER</b> ( cccc S: -- )    
+<br><div>   Cré une nouvelle entête dans le dictionnaire avec le nom qui suis dans le flux d'entrée.
 </div>
-<div>   ainsi que tous ceux qui ont été définis après lui.
+<div>   Après l'exécution de ce mot HERE retourne l'adresse du CFA de ce mot. Le mot est créé
 </div>
-<div>   Les mots systèmes définis en mémoire FLASH ne peuvent-êtr supprimés.
+<div>   avec l'attribut HIDE activé.    
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;   Mot suivant dans le flux d'entrée.
+<div><i>cccc</i>&nbsp;&nbsp;  Chaîne de caractère dans le texte d'entrée qui représente le nom du mot à créé.
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="FORGET">
+<b>FORGET</b>  ( cccc S: -- )    
+<br><div>   Extrait du texte d'entrée le mot suivant et supprime du dictionnaire ce mot
+</div>
+<div>   ainsi que tous ceux qui ont été définis après lui.
+</div>
+<div>   Les mots systèmes définis en mémoire FLASH ne peuvent-être supprimés.
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>cccc</i>&nbsp;&nbsp;   Mot suivant dans le texte d'entrée.
 </div>
 <div><i>arguments:
 </i>&nbsp;&nbsp;</div>
@@ -1561,17 +1591,17 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="MARKER">
-<b>MARKER</b>  ( cccc -- )    
-<br><div>   Extrait du flux d'entrée le mot suivant et cré un mot portant ce nom
+<b>MARKER</b>  ( cccc S: -- )    
+<br><div>   Extrait du texte d'entrée le mot suivant et cré un mot portant ce nom
 </div>
-<div>   dans le dictionnaire. Lorsque ce mot est invoqué il se suprime lui-même
+<div>   dans le dictionnaire. Lorsque ce mot est invoqué il se supprime lui-même
 </div>
 <div>   ainsi que tous les mots qui ont été définis après lui.    
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;   Mot suivant dans le flux d'entrée.
+<div><i>cccc</i>&nbsp;&nbsp;   Mot suivant dans le texte d'entrée.
 </div>
 <div><i>arguments:
 </i>&nbsp;&nbsp;</div>
@@ -1581,8 +1611,8 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id=":">
-<b>:</b>   ( cccc -- )    
-<br><div>   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans
+<b>:</b>   ( cccc S: -- )    
+<br><div>   Extrait le mot suivant du texte d'entrée et cré une nouvelle entête dans
 </div>
 <div>   le dictionnaire qui porte ce nom. Ce mot introduit une définition de haut niveau.
 </div>
@@ -1601,8 +1631,8 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="CREATE">
-<b>CREATE</b>  ( cccc -- )     
-<br><div>   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans le dictionnaire
+<b>CREATE</b>  ( cccc s: -- )     
+<br><div>   Extrait le mot suivant du texte d'entrée et cré une nouvelle entête dans le dictionnaire
 </div>
 <div>   Lorsque ce nouveau mot est exécuté il retourne l'adresse PFA. Cependant la sémantique
 </div>
@@ -1614,7 +1644,7 @@
 </div>
 <div>	: VECTOR  ( n  -- )
 </div>
-<div>           CREATE CELLS ALLOT DOES&gt; CELLS PLUS ;     
+<div>           CREATE CELLS ALLOT DOES&gt; SWAP CELLS PLUS ;     
 </div>
 <div>       \ utilisation du mot VECTOR pour créer le tableau V1 de 5 éléments.
 </div>
@@ -1627,7 +1657,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;  Mot suivant dans le flux d'entrée.
+<div><i>cccc</i>&nbsp;&nbsp;  Mot suivant dans le texte d'entrée.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1640,7 +1670,7 @@
 <b>DOES&gt;</b>  ( -- )
 <br><div>   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
 </div>
-<div>   Ce mot permet définir l'action d'un mot créé avec CREATE. Surtout utile
+<div>   Ce mot permet de définir l'action d'un mot créé avec CREATE. Surtout utile
 </div>
 <div>   pour définir des mots compilants. Un mot compilant est un mot qui sert à
 </div>
@@ -1648,9 +1678,7 @@
 </div>
 <div>   des mots compilants.    
 </div>
-<div>   Le concept de DOES&gt; est un des plus complexe du langage Forth. Un article
-</div>
-<div>   sera donc consacré à son utilisation.    
+<div>   Voir le mot CREATE.
 </div>
 </p>
 <div><b> arguments:
@@ -1666,7 +1694,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id=";">
 <b>;</b>  ( -- )    
-<br><div>   Termine une définition débutée par ":".
+<br><div>   Termine une définition débutée par ":" ou :NONAME.
 </div>
 <div>   Modifie la valeur de la variable STATE pour passer en mode interprétation.
 </div>
@@ -1683,17 +1711,17 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="VARIABLE">
-<b>VARIABLE</b>  ( cccc -- )    
+<b>VARIABLE</b>  ( cccc S: -- )    
 <br><div>   Mot compilant qui sert à créer des variables dans le dictionnaire.
 </div>
-<div>   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
+<div>   Extrait le mot suivant du texte d'entrée et utilise ce mot comme nom
 </div>
 <div>   de la nouvelle variable. Les variables sont initialisées à 0.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le flux d'entrée. Nom de la variable.
+<div><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le texte d'entrée. Nom de la variable.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1703,7 +1731,7 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="CONSTANT">
-<b>CONSTANT</b>  ( cccc  n -- )    
+<b>CONSTANT</b>  ( cccc  S: n -- )    
 <br><div>   Mot compilant qui sert à créer des constantes dans le dictionnaire.
 </div>
 <div>   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
@@ -1715,7 +1743,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le flux d'entrée. Nom de la constante.
+<div><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le texte d'entrée. Nom de la constante.
 </div>
 <div><i>n</i>&nbsp;&nbsp;      Valeur qui sera assignée à cette constante.    
 </div>
@@ -1727,7 +1755,7 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="DEFER">
-<b>DEFER</b> ( cccc -- )     
+<b>DEFER</b> ( cccc S: -- )     
 <br><div>   Mot compilant.
 </div>
 <div>   Cré un nouveau mot dont l'action ne sera défini ultérieurement.
@@ -1739,7 +1767,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;  Prochain mot dans le flux d'entrée. Nom du nouveau mot.
+<div><i>cccc</i>&nbsp;&nbsp;  Prochain mot dans le texte d'entrée. Nom du nouveau mot.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1769,7 +1797,7 @@
 </b></div>
 <div><i>a-addr1</i>&nbsp;&nbsp;  CFA de l'action que le mot doit exécuter.
 </div>
-<div><i>a-addr2</i>&nbsp;&nbsp;  CFA du mot différé.
+<div><i>a-addr2</i>&nbsp;&nbsp;  PFA du mot différé.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1797,7 +1825,7 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="IS">
-<b>IS</b>    ( cccc a-addr -- )     
+<b>IS</b>    ( cccc S: a-addr -- )     
 <br><div>   Extrait le prochain mot du flux d'entrée. Recherche ce mot dans le dictionnaire.
 </div>
 <div>   Ce mot doit-être  un mot créé avec DEFER. Lorsque ce mot est trouvé,    
@@ -1817,9 +1845,9 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;  Prochain mot dans le flux d'entrée. Correspond au nom d'un mot créé avec DEFER.
+<div><i>cccc</i>&nbsp;&nbsp;  Prochain mot dans le texte d'entrée. Correspond au nom d'un mot créé avec DEFER.
 </div>
-<div><i>a-addr</i>&nbsp;&nbsp;  Adresse du CFA de l'action à assigné à ce mot.
+<div><i>a-addr</i>&nbsp;&nbsp;  CFA de l'action à assigner à ce mot.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1830,7 +1858,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ACTION-OF">
 <b>ACTION-OF</b>   ( cccc -- a-addr )
-<br><div>   Extrait le prochain mot du flux d'entrée et le recherche dans le dictionnaire.
+<br><div>   Extrait le prochain mot du texte d'entrée et le recherche dans le dictionnaire.
 </div>
 <div>   Ce mot doit-être un mot créé avec DEFER. Si le mot est trouvé dans le dictinnaire
 </div>
@@ -1839,7 +1867,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le flux d'entrée. Nom recherché dans le dictionnaire.
+<div><i>cccc</i>&nbsp;&nbsp;   Prochain mot dans le texte d'entrée. Nom recherché dans le dictionnaire.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1896,6 +1924,7 @@
 <li><a href="#FIND">FIND</a></li>
 <li><a href="#FORGET">FORGET</a></li>
 <li><a href="#GETCLIP">GETCLIP</a></li>
+<li><a href="#HEADER">HEADER</a></li>
 <li><a href="#HERE">HERE</a></li>
 <li><a href="#HIDE">HIDE</a></li>
 <li><a href="#HP">HP</a></li>

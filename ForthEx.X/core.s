@@ -160,13 +160,22 @@ DOCONST:
     mov [WP],T
     NEXT
 
+; marqueur fin du dictionnaire.    
+    SYSDICT
+   .word 0 
+0: .word 0    
+
     
-; run time
-;   Mécanisme de sortie d'un mot de haut-niveau.
-;   premier mot du dictionnaire il est cependant caché
-;   à l'utilisateur. 
-;   Le CFA de ce mot est compilé pour terminer une définition de haut-niveau.    
-HEADLESS EXIT,CODE
+; nom: EXIT ( R: a-addr -- )    
+;   A n'utiliser qu'à l'intérieur d'une définition.
+;   Retourne l'exécution à la routine appelante. Lors de l'invocation de EXIT
+;   La pile des retours doit avoir à son sommet l'adresse du point de retour
+;   sinon c'est un plantage assuré.    
+; arguments:
+;   a-addr  Adresse de retour dans la routine appellante au sommet de R:
+; retourne:
+;   rien    
+DEFCODE "EXIT",4,,EXIT
     RPOP IP
     NEXT
 
@@ -270,11 +279,6 @@ HEADLESS DOPLOOP
     bra ge, 1b
 2:  add IP,[IP],IP
     NEXT
-
-; marqueur fin du dictionnaire.    
-    SYSDICT
-   .word 0 
-0: .word 0    
 
 ; DESCRIPTION:
 ; Cette section décris les différentes constantes utilisées par le système ForthEx.

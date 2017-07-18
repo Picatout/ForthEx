@@ -4,6 +4,8 @@ Test console.s
 Test dynamem.s
 Test eds.s  ajout de ECOUNT dans eds.s
 
+Modification dans interpret.s et dans core.s
+
 2017-07-16
 ----------
 Modification à block.s et blockEdit.s suite à l'ajout de UPDATE.

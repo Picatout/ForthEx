@@ -846,26 +846,27 @@ DEFWORD "]",1,F_IMMED,RBRACKET ; ( -- )
     .word LIT,-1,STATE,STORE
     .word EXIT
 
-; nom: ?WORD  ( cccc  -- c-addr 0 | cfa 1 | cfa -1 )    
-;   Analyse le flux d'entré pour en extraire le prochain mot.
+; nom: ?WORD  ( cccc S: -- a-addr | cfa 1 | cfa -1 )    
+;   Analyse le texte d'entré pour en extraire le prochain mot.
 ;   Recherche ce mot dans le dictionnaire.    
-;   Avorte si le nom n'est pas trouvé dans le dictionnaire.
 ;   Retourne le CFA du nom et un indicateur.
+;   Si le mot n'est pas dans le dictionnaire affiche le mot avec un point
+;   d'interrogation et invoque ABORT.    
 ; arguments:
-;   ccccc    mot extrait du flux d'entrée.
+;   cccc  Mot extrait du texte d'entrée.
 ; retourne:
-;    a-addr   Le CFA du mot 
+;    a-addr   Le CFA du mot. 
 ;    1 Si c'est mot immédiat ou
 ;   -1 Si le mot n'est pas immédiat.    
 DEFWORD "?WORD",5,,QWORD ; ( -- c-addr 0 | cfa 1 | cfa -1 )
    .word BL,WORD,UPPER,FIND,QDUP,ZBRANCH,2f-$,EXIT
 2: .word COUNT,TYPE,LIT,'?',EMIT,ABORT
   
-; nom: POSTPONE   ( ccccc -- ) 
+; nom: POSTPONE   ( ccccc S: -- ) 
 ;   Mot immédiat à utiliser dans une définition. 
-;   Diffère la compilation du mot qui suis dans le flux d'entrée.
+;   Diffère la compilation du mot qui suis dans le texte d'entrée.
 ; arguments:
-;   ccccc   Mot extrait du flux d'entrée.
+;   cccc   Mot extrait du texte d'entrée.
 ; retourne:
 ;   rien     
 DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
@@ -879,12 +880,12 @@ DEFWORD "POSTPONE",8,F_IMMED,POSTONE ; ( <ccc> -- )
 
 ; nom: LITERAL  ( x -- )
 ;   Mot immédiat qui compile la sémantique runtime d'un entier. Il n'a d'effet 
-;   qu'en mode compilation. Dans ce cas la valeur sommet de la pile est compilée
+;   qu'en mode compilation. Dans ce cas la valeur au sommet de la pile est compilée
 ;   avec la sémantique runtime qui empile un entier.
 ; arguments:
 ;   x  Valeur au sommet de la pile des arguments.
 ; retourne:
-;   rien    x reste au sommet de la pile en mode interprétation.    
+;   rien    x reste au sommet de la pile lorsque STATE=0 .    
 DEFWORD "LITERAL",7,F_IMMED,LITERAL  ; ( x -- ) 
     .word STATE,FETCH,ZBRANCH,9f-$
     .word CFA_COMMA,LIT,COMMA
@@ -925,40 +926,40 @@ HEADLESS STRCOMPILE, HWORD
 ;DEFWORD "(,\")",4,F_HIDDEN,STRCOMPILE ; ( -- )
     .word SLIT,PLUS,ALIGNED,DP,STORE,EXIT
 
-; nom: S"   ( ccccc -- )  runtime S: c-addr u 
+; nom: S"   ( cccc S: -- ) 
 ;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.    
-;   Lecture d'une chaîne litérale dans le flux d'entrée et compilation
+;   Lecture d'une chaîne litérale dans le texte d'entrée et compilation
 ;   de cette chaîne dans l'espace de donnée.    
 ;   La sémentique rutime consiste à empiler l'adresse du premier caractère de la
 ;   chaîne et la longueur de la chaîne.    
 ; arguments:
-;   ccccc   Chaîne terminée par " dans le flux d'entrée.
+;   cccc   Chaîne terminée par " dans le texte d'entrée.
 ; retourne:
 ;   rien    
 DEFWORD "S\"",2,F_IMMED,SQUOTE ; ccccc" runtime: ( -- | c-addr u)
     .word QCOMPILE
     .word CFA_COMMA,STRQUOTE,STRCOMPILE,EXIT
     
-; nom: C"   ( ccccc --  )  runtime S:  c-addr
+; nom: C"   ( cccc S: --  )
 ;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
-;   Lecture d'une chaîne litérale dans le flux d'entrée et compilation de cette
+;   Lecture d'une chaîne litérale dans le texte d'entrée et compilation de cette
 ;   chaîne dans l'espace de donnée.
-;   La sémantique runtime consiste à compiler l'adresse de la chaîne comptée.
+;   La sémantique runtime consiste à empiler l'adresse de la chaîne comptée.
 ; arguments:
-;   ccccc  Chaîne de caractères terminée par "  dans le flux d'entrée.
+;   cccc  Chaîne de caractères terminée par "  dans le texte d'entrée.
 ; retourne:
-;   rien    En runtime retourne empile l'adresse du descripteur de la chaîne.    
+;   rien    En runtime empile l'adresse du descripteur de la chaîne.    
 DEFWORD "C\"",2,F_IMMED,CQUOTE ; ccccc" runtime ( -- c-addr )
     .word QCOMPILE
     .word CFA_COMMA,RT_CQUOTE,STRCOMPILE,EXIT
     
-; nom: ."   ( ccccc -- )
+; nom: ."   ( cccc S: -- )
 ;   Mot immédiat.    
 ;   Interprétation: imprime la chaîne litérale qui suis dans le flux d'entrée.
 ;   En compilation: compile la chaîne et la sémantique qui permet d'imprimer cette
 ;   chaîne lors de l'exécution du mot en cour de définition.
 ; arguments:
-;   ccccc    Chaîne terminée par "  dans le flux d'entrée.
+;   cccc    Chaîne terminée par "  dans le texte d'entrée.
 ; retourne:
 ;   rien         
 DEFWORD ".\"",2,F_IMMED,DOTQUOTE ; ( -- )
@@ -969,6 +970,10 @@ DEFWORD ".\"",2,F_IMMED,DOTQUOTE ; ( -- )
 ; nom: RECURSE  ( -- )
 ;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
 ;   Compile un appel récursif du mot en cour de définition.
+; exemple:
+; \ définition de la fonction factorielle par récursion.  
+;   : fact dup 1 = if exit else dup 1- recurse * then ;
+;  
 ; arguments:
 ;   aucun
 ; retourne:
@@ -1069,27 +1074,34 @@ DEFWORD "BEGIN",5,F_IMMED,BEGIN ; ( -- a )
 ;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
 ;   Effectue un branchement inconditionnel au début de la boucle.
 ;   Une boucle créée avec BEGIN ... AGAIN ne peut-être interrompue que
-;   par ABORT ou ABORT".    
+;   par ABORT, ABORT" ou EXIT.    
 ; arguments:
 ;   aucun
 ; retourne:
 ;   rien    
 DEFWORD "AGAIN",5,F_IMMED,AGAIN ; ( a -- )
-    .word QCOMPILE,CFA_COMMA,BRANCH,BACKJUMP,EXIT
+    .word QCOMPILE,DEPTH,TBRANCH,2f-$
+1:  .word DOTSTR
+    .byte 21
+    .ascii "Bad control structure"
+    .align 2
+    .word ABORT
+2:  .word CFA_COMMA,BRANCH,BACKJUMP,EXIT
 
 ; nom: UNTIL  compilation ( n -- )
 ;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
-;   Compile la fin d'une boucle conditionnelle. Termine la boucle si n est VRAI.
+;   Compile la fin d'une boucle conditionnelle. Termine la boucle si n<>0.
 ; arguments:
 ;   n  Valeur qui contrôle la boucle. La boucle est terminée si n<>0.
 ; retourne:
 ;   rien    
 DEFWORD "UNTIL",5,F_IMMED,UNTIL ; ( a -- )
-    .word QCOMPILE,CFA_COMMA,ZBRANCH,BACKJUMP,EXIT
+    .word QCOMPILE,DEPTH,ZBRANCH,1b-$
+    .word CFA_COMMA,ZBRANCH,BACKJUMP,EXIT
 
 ; nom: REPEAT  ( -- )    
 ;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
-;   S'Utilise avec une structure de boucle BEGIN ... WHILE ... REPEAT
+;   S'utilise avec une structure de boucle BEGIN ... WHILE ... REPEAT
 ;   Comme AGAIN effectue un branchement inconditionnel au début de la boucle.
 ;   Cependant au moins un WHILE doit-être présent à l'intérieur de la boucle
 ;   car c'est le WHILE qui contrôle la sortie de boucle.
@@ -1098,7 +1110,8 @@ DEFWORD "UNTIL",5,F_IMMED,UNTIL ; ( a -- )
 ; retourne:
 ;   rien    
 DEFWORD "REPEAT",6,F_IMMED,REPEAT ; ( slot a -- )
-    .word QCOMPILE,CFA_COMMA,BRANCH,BACKJUMP,FOREJUMP,EXIT
+    .word QCOMPILE,DEPTH,LIT,2,ULESS,TBRANCH,1b-$
+    .word CFA_COMMA,BRANCH,BACKJUMP,FOREJUMP,EXIT
 
 ; nom: WHILE  ( n -- )    
 ;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
@@ -1135,8 +1148,8 @@ DEFWORD "THEN",4,F_IMMED,THEN ; ( slot -- )
 ; nom: ELSE  ( -- )
 ;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
 ;   Termine le bloc d'instruction qui débute après un IF.
-;   Les instructions entre le ELSE et le THEN qui suit sont excéutée si la valeur n contrôlée
-;   par le IF est FAUSSE.    
+;   Les instructions entre le ELSE et le THEN qui suit sont excéutées si la valeur n contrôlée
+;   par le IF est 0.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -1153,7 +1166,7 @@ DEFWORD "ELSE",4,F_IMMED,ELSE ; ( slot1 -- slot2 )
 ;     CASE 
 ;     1  OF ... ENDOF
 ;     2  OF ... ENDOF
-;     ... ( instructions par défaut ce bloc est optionnel.)
+;     \ ... ( instructions par défaut ce bloc est optionnel.)
 ;     ENDCASE
 ;     3 x     
 ;   Dans cette exemple on définit le mot x et ensuite on l'exécute en lui passant la 
@@ -1237,10 +1250,10 @@ DEFWORD "?COMPILE",8,F_IMMED,QCOMPILE ; ( -- )
     .align 2
     .word EXIT
     
-; nom: ?NAME  ( f -- )    
-;   Si f==0 appelle ABORT" avec le message "name missing" 
+; nom: ?NAME  ( n -- )    
+;   Si n<>0 appelle ABORT" avec le message "name missing" 
 ; arguments:
-;    f   Indicateur Booléen, si VRAI exécute ABORT" name missing"
+;    n   Si n <> 0 exécute ABORT" name missing"
 ; retourne:
 ;   rien    
 DEFWORD "?NAME",5,,QNAME ; ( i*x f -- | i*x )
@@ -1271,25 +1284,26 @@ HEADLESS EXITCOMMA,HWORD
 ;DEFWORD "EXIT,",5,F_IMMED,EXITCOMMA ; ( -- )
     .word  QCOMPILE,CFA_COMMA,EXIT,EXIT
 
-; name: HEADER ( cccc -- )    
+; nom: HEADER ( cccc S: -- )    
 ;   Cré une nouvelle entête dans le dictionnaire avec le nom qui suis dans le flux d'entrée.
-;   Après l'exécution de ce mot HERE retourne l'adresse du CFA de ce mot.
+;   Après l'exécution de ce mot HERE retourne l'adresse du CFA de ce mot. Le mot est créé
+;   avec l'attribut HIDE activé.    
 ; arguments:
-;    cccc  Chaîne de caractère dans le flux d'entrée qui représente ne nom du mot créé.
+;    cccc  Chaîne de caractère dans le texte d'entrée qui représente le nom du mot à créé.
 ; retourne:
 ;   rien    
-DEFWORD "HEADER",6,,HEADER ; ( -- )
+DEFWORD "HEADER",6,,HEADER
     .word LATEST,DUP,FETCH,COMMA,HERE
     .word SWAP,STORE
     .word BL,WORD,UPPER,CFETCH,DUP,ZEROEQ,QNAME
     .word ONEPLUS,ALLOT,ALIGN,NAMEMARK,HIDE,EXIT
  
-; nom: FORGET  ( cccc -- )    
-;   Extrait du flux d'entrée le mot suivant et supprime du dictionnaire ce mot
+; nom: FORGET  ( cccc S: -- )    
+;   Extrait du texte d'entrée le mot suivant et supprime du dictionnaire ce mot
 ;   ainsi que tous ceux qui ont été définis après lui.
-;   Les mots systèmes définis en mémoire FLASH ne peuvent-êtr supprimés.
+;   Les mots systèmes définis en mémoire FLASH ne peuvent-être supprimés.
 ; arguments:
-;   cccc   Mot suivant dans le flux d'entrée.
+;   cccc   Mot suivant dans le texte d'entrée.
 ; arguments:
 ;   rien    
 DEFWORD "FORGET",6,,FORGET ; cccc
@@ -1300,12 +1314,12 @@ DEFWORD "FORGET",6,,FORGET ; cccc
     .align 2
     .word DUP,DP,STORE,FETCH,LATEST,STORE,EXIT    
 
-; nom: MARKER  ( cccc -- )    
-;   Extrait du flux d'entrée le mot suivant et cré un mot portant ce nom
-;   dans le dictionnaire. Lorsque ce mot est invoqué il se suprime lui-même
+; nom: MARKER  ( cccc S: -- )    
+;   Extrait du texte d'entrée le mot suivant et cré un mot portant ce nom
+;   dans le dictionnaire. Lorsque ce mot est invoqué il se supprime lui-même
 ;   ainsi que tous les mots qui ont été définis après lui.    
 ; arguments:
-;   cccc   Mot suivant dans le flux d'entrée.
+;   cccc   Mot suivant dans le texte d'entrée.
 ; arguments:
 ;   rien    
 DEFWORD "MARKER",6,,MARKER ; cccc
@@ -1317,15 +1331,15 @@ HEADLESS  RT_MARKER,HWORD
     .word CFATONFA,NFATOLFA,DUP,DP,STORE,FETCH,LATEST,STORE
     .word EXIT
 
-; nom: :   ( cccc -- )    
-;   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans
+; nom: :   ( cccc S: -- )    
+;   Extrait le mot suivant du texte d'entrée et cré une nouvelle entête dans
 ;   le dictionnaire qui porte ce nom. Ce mot introduit une définition de haut niveau.
 ;   Modifie la variable système STATE pour passer en mode compilation.    
 ; arguments:
 ;   cccc  Mot suivant dans le flux d'entrée.
 ; retourne:
 ;   rien    
-DEFWORD ":",1,,COLON ; ( name --  )
+DEFWORD ":",1,,COLON 
     .word HEADER ; ( -- )
     .word RBRACKET,CFA_COMMA,ENTER,EXIT
 
@@ -1344,20 +1358,20 @@ FETCH_EXEC: ; ( -- pfa )
 HEADLESS NOP,HWORD 
     .word EXIT
      
-; nom: CREATE  ( cccc -- )     
-;   Extrait le mot suivant du flux d'entrée et cré une nouvelle entête dans le dictionnaire
+; nom: CREATE  ( cccc s: -- )     
+;   Extrait le mot suivant du texte d'entrée et cré une nouvelle entête dans le dictionnaire
 ;   Lorsque ce nouveau mot est exécuté il retourne l'adresse PFA. Cependant la sémantique
 ;   du mot peut-être étendue en utilisant le mot DOES>.    
 ; exemple:     
 ;       \ le mot VECTOR sert à créer des tableaux de n éléments.    
 ;	: VECTOR  ( n  -- )
-;           CREATE CELLS ALLOT DOES> CELLS PLUS ;     
+;           CREATE CELLS ALLOT DOES> SWAP CELLS PLUS ;     
 ;       \ utilisation du mot VECTOR pour créer le tableau V1 de 5 éléments.
 ;       5 VECTOR V1
 ;       \ Met la valeur 35 dans l'élément d'indice 2 de V1
 ;       35 2 V1 !    
 ; arguments:
-;   cccc  Mot suivant dans le flux d'entrée.
+;   cccc  Mot suivant dans le texte d'entrée.
 ; retourne:
 ;   rien    
 DEFWORD "CREATE",6,,CREATE ; ( -- hook )
@@ -1374,12 +1388,11 @@ HEADLESS "RT_DOES", HWORD ; ( -- )
     
 ; nom: DOES>  ( -- )
 ;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
-;   Ce mot permet définir l'action d'un mot créé avec CREATE. Surtout utile
+;   Ce mot permet de définir l'action d'un mot créé avec CREATE. Surtout utile
 ;   pour définir des mots compilants. Un mot compilant est un mot qui sert à
 ;   créer une classe de mots. Par exemples les mots VARIABLE et CONSTANT sont
 ;   des mots compilants.    
-;   Le concept de DOES> est un des plus complexe du langage Forth. Un article
-;   sera donc consacré à son utilisation.    
+;   Voir le mot CREATE.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -1390,7 +1403,7 @@ DEFWORD "DOES>",5,F_IMMED,DOESTO  ; ( -- )
     .word EXIT
 
 ; nom: ;  ( -- )    
-;   Termine une définition débutée par ":".
+;   Termine une définition débutée par ":" ou :NONAME.
 ;   Modifie la valeur de la variable STATE pour passer en mode interprétation.
 ; arguments:
 ;   aucun
@@ -1403,24 +1416,24 @@ DEFWORD ";",1,F_IMMED,SEMICOLON  ; ( -- )
     .word LBRACKET,EXIT
     
     
-; nom: VARIABLE  ( cccc -- )    
+; nom: VARIABLE  ( cccc S: -- )    
 ;   Mot compilant qui sert à créer des variables dans le dictionnaire.
-;   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
+;   Extrait le mot suivant du texte d'entrée et utilise ce mot comme nom
 ;   de la nouvelle variable. Les variables sont initialisées à 0.
 ; arguments:
-;   cccc   Prochain mot dans le flux d'entrée. Nom de la variable.
+;   cccc   Prochain mot dans le texte d'entrée. Nom de la variable.
 ; retourne:
 ;   rien    
 DEFWORD "VARIABLE",8,,VARIABLE ; ()
     .word CREATE,LIT,0,COMMA,EXIT
 
-; nom: CONSTANT  ( cccc  n -- )    
+; nom: CONSTANT  ( cccc  S: n -- )    
 ;   Mot compilant qui sert à créer des constantes dans le dictionnaire.
 ;   Extrait le mot suivant du flux d'entrée et utilise ce mot comme nom
 ;   de la nouvelle constante. La constante est initialisée avec la valeur
 ;   qui est au sommet de la pile des arguments au moment de sa création.    
 ; arguments:
-;   cccc   Prochain mot dans le flux d'entrée. Nom de la constante.
+;   cccc   Prochain mot dans le texte d'entrée. Nom de la constante.
 ;   n      Valeur qui sera assignée à cette constante.    
 ; retourne:
 ;   rien    
@@ -1440,13 +1453,13 @@ HEADLESS NOINIT,HWORD
 HEADLESS DEFEREXEC,HWORD
      .word FETCH,EXECUTE,EXIT
      
-; nom: DEFER ( cccc -- )     
+; nom: DEFER ( cccc S: -- )     
 ;   Mot compilant.
 ;   Cré un nouveau mot dont l'action ne sera défini ultérieurement.
 ;   Cependant ce mot possède une action par défaut qui consiste à affiché
 ;   le message "Uninitialized defered word"     
 ; arguments:
-;   cccc  Prochain mot dans le flux d'entrée. Nom du nouveau mot.
+;   cccc  Prochain mot dans le texte d'entrée. Nom du nouveau mot.
 ; retourne:
 ;   rien     
 DEFWORD "DEFER",5,,DEFER ; cccc ( -- )
@@ -1463,7 +1476,7 @@ DEFWORD "DEFER",5,,DEFER ; cccc ( -- )
 ;    
 ; arguments:    
 ;  a-addr1  CFA de l'action que le mot doit exécuter.
-;  a-addr2  CFA du mot différé.
+;  a-addr2  PFA du mot différé.
 ; retourne:
 ;   rien    
 DEFWORD "DEFER!",6,,DEFERSTORE ;  ( xt1 xt2 -- )
@@ -1479,7 +1492,7 @@ DEFWORD "DEFER!",6,,DEFERSTORE ;  ( xt1 xt2 -- )
 DEFWORD "DEFER@",6,,DEFERFETCH ; ( xt1 -- xt2 )
     .word TOBODY,FETCH,EXIT
  
-; nom: IS    ( cccc a-addr -- )     
+; nom: IS    ( cccc S: a-addr -- )     
 ;   Extrait le prochain mot du flux d'entrée. Recherche ce mot dans le dictionnaire.
 ;   Ce mot doit-être  un mot créé avec DEFER. Lorsque ce mot est trouvé,    
 ;   enregistre a-addr dans son PFA. a-addr est le CFA d'une action. 
@@ -1489,8 +1502,8 @@ DEFWORD "DEFER@",6,,DEFERFETCH ; ( xt1 -- xt2 )
 ;     ' * IS MATH   \ maintenant le mot MATH agit comme *
 ;     ' + IS MATH   \ maintenant le mot MATH agit comme +    
 ; arguments:
-;   cccc  Prochain mot dans le flux d'entrée. Correspond au nom d'un mot créé avec DEFER.
-;   a-addr  Adresse du CFA de l'action à assigné à ce mot.
+;   cccc  Prochain mot dans le texte d'entrée. Correspond au nom d'un mot créé avec DEFER.
+;   a-addr  CFA de l'action à assigner à ce mot.
 ; retourne:
 ;   rien    
 DEFWORD "IS",2,,IS 
@@ -1498,18 +1511,13 @@ DEFWORD "IS",2,,IS
     
 
 ; nom: ACTION-OF   ( cccc -- a-addr )
-;   Extrait le prochain mot du flux d'entrée et le recherche dans le dictionnaire.
+;   Extrait le prochain mot du texte d'entrée et le recherche dans le dictionnaire.
 ;   Ce mot doit-être un mot créé avec DEFER. Si le mot est trouvé dans le dictinnaire
 ;   le CFA de son action est empilé.
 ; arguments:
-;   cccc   Prochain mot dans le flux d'entrée. Nom recherché dans le dictionnaire.
+;   cccc   Prochain mot dans le texte d'entrée. Nom recherché dans le dictionnaire.
 ; retourne:
 ;   a-addr Adresse du CFA de l'action du mot différé.    
-DEFWORD "ACTION-OF",9,,ACTIONOF ; ( ccc -- xt2 )
+DEFWORD "ACTION-OF",9,,ACTIONOF 
     .word TICK,TOBODY,FETCH,EXIT
-    
-
-
-    
-
 
