@@ -183,24 +183,25 @@ DEFWORD "WORDS",5,,WORDS ; ( -- )
 8:  .word CR,DOT,EXIT
     
 ; nom: ADR>IN  ( c-addr -- ) 
-;   Ajuste la variable  >IN à partir de la position laissée
-;   par le dernier PARSE
+;   Ajuste la variable  >IN à partir de la position du pointeur de caractère après
+;   l'extraction d'un mot du texte d'entrée par l'analyseur lexical.  
 ; arguments:
-;   c-addr  adresse du pointeur après le dernier PARSE
+;   c-addr  Position de l'analyseur lexical dans le texte d'entrée.
 ; retourne:
 ;   rien
 DEFWORD "ADR>IN",6,,ADRTOIN
     .word SOURCE,ROT,ROT,MINUS,MIN,LIT,0,MAX
     .word TOIN,STORE,EXIT
 
-; nom: PARSE   ( c -- c-addr u )    
-;   Accumule les caractères jusqu'au
-;   prochain 'c'. Met à jour la variable >IN
-; arguments: 
-;   c    caractère délimiteur
+; nom: PARSE   ( cccc S: c -- c-addr u )    
+;   Accumule les caractères jusqu'au prochain 'c'.  Le caractère délimiteur ne fait
+;   pas partie de la chaîne extraite. Met à jour la variable >IN
+; arguments:
+;   cccc  texte à traiter par l'analyseur lexical.    
+;   c  Caractère délimiteur
 ; retourne:
-;   c-addr   adresse du premier caractère de la chaîne
-;   u        longueur de la chaîne.
+;   c-addr   Adresse du premier caractère de la chaîne extraite.
+;   u        Longueur de la chaîne.
 DEFWORD "PARSE",5,,PARSE ; c -- c-addr u
     .word SOURCE,TOIN,FETCH,SLASHSTRING ; c src' u'
     .word OVER,TOR,ROT,SCAN  ; src' u'
@@ -210,7 +211,7 @@ DEFWORD "PARSE",5,,PARSE ; c -- c-addr u
     .word RFROM,TUCK,MINUS,EXIT     
     
 ; nom: >COUNTED ( src n dest -- )   
-;   copie une chaîne dont l'adresse et la longueur sont fournies
+;   Copie une chaîne dont l'adresse et la longueur sont fournies
 ;   en arguments vers une chaîne comptée dont l'adresse est fournie.
 ; arguments:    
 ;   src Addresse chaîne à copiée
@@ -221,11 +222,11 @@ DEFWORD "PARSE",5,,PARSE ; c -- c-addr u
 DEFWORD ">COUNTED",8,,TOCOUNTED 
     .word TWODUP,CSTORE,ONEPLUS,SWAP,MOVE,EXIT
 
-; nom: PARSE-NAME    ( ccccc -- c-addr u ) 
+; nom: PARSE-NAME    ( cccc S: -- c-addr u ) 
 ;   Recherche le prochain mot dans le flux d'entrée
 ;   Tout caractère < 32 est considéré comme un espace
 ; arguments:
-;   cccc Chaîne de caractères dans le texte à évaluer.
+;   cccc Chaîne de caractères dans le texte à analyser.
 ; retourne:
 ;   c-addr Addresse premier caractère.
 ;   u    Longueur de la chaîne.
@@ -276,11 +277,12 @@ DEFCODE "PARSE-NAME",10,,PARSENAME
 9:  add W2,[DSP],W1
     bra 7b
     
-; nom: WORD  ( c -- c-addr )  
+; nom: WORD  ( cccc S: c -- c-addr )  
 ;   Localise le prochain mot délimité par 'c'
-;   la variable TOIN indique la position courante
-;   le mot trouvé est copié à la position indiquée par la variable DP.
+;   La variable TOIN indique la position courante.
+;   Le mot trouvé est copié à la position indiquée par la variable DP.
 ; arguments:
+;   cccc Texte à analyser.    
 ;   c   Caractère séparateur.
 ; retourne:    
 ;   c-addr Adresse chaîne comptée.    
@@ -296,7 +298,7 @@ DEFWORD "WORD",4,,WORD
 ;   ne retourne pas les mots cachés (attribut: HIDDEN).
 ;   La recherche est insensible à la casse.    
 ; arguments:
-;   c-addr  Adresse de la chaîne comptée à rechercher.
+;   c-addr  Adresse de la chaîne comptée recherchée.
 ; retourne: 
 ;    c-addr	0 Si le mot n'est pas dans le dictionnaire.
 ;    xt	1 Le mot trouvé a l'indicateur IMMED à 1.
@@ -401,10 +403,11 @@ DEFWORD "ACCEPT",6,,ACCEPT  ; ( c-addr +n1 -- +n2 )
    
 ; nom: COUNT  ( c-addr1 -- c-addr2 u )  
 ;   Retourne la spécification de la chaîne comptée dont l'adresse est c-addr1.
-;   COUNT n'a pas accès à la mémoire EDS. Pour les chaînes en mémoire EDS il y
-;   a ECOUNT.  
+;   Si c-addr1>=32768 la chaîne est dans la mémoire flash du MCU. 
+;   COUNT n'a pas accès à la mémoire EDS. Pour les chaînes en mémoire EDS il faut
+;   utiliser ECOUNT.  
 ; arguments:
-;   c-addr1   Adresse d'une chaîne de caractères débutant par un compteur.
+;   c-addr1   Adresse d'une chaîne de caractères comptée.
 ; retourne:
 ;   c-addr2   Adresse du premier caractère de la chaîne.
 ;   u  Longueur de la chaîne.  
@@ -436,7 +439,7 @@ DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
 
 ; nom: EVALUATE   ( i*x c-addr u -- j*x )      
 ;   Évaluation d'un texte source. Le contenu de SOURCE est sauvegardé
-;   et restauré à la fin de cette évaluation.
+;   et restauré à la fin de cette évaluation. 
 ; arguments:
 ;   i*x    Contenu initial de la pile des arguments avant l'évalulation de la chaîne.
 ;   c-addr Adresse du premier caractère de la chaîne à évaluer.
@@ -478,7 +481,7 @@ HEADLESS QABORT,HWORD
     .word COUNT,TYPE,CR,ABORT
 9:  .word DROP,EXIT
   
-; nom: ABORT"  ( cccc n -- )     
+; nom: ABORT"  ( cccc S: n -- )     
 ;   Ne s'utilise qu'à l'intérieur d'une définition.  
 ;   Compile le message cccc et le code qui permet d'afficher ce message suivit d'un ABORT 
 ;   si 'n' est différent de zéro. Le texte cccc est délimité par le caractère ".
@@ -500,7 +503,7 @@ DEFWORD "ABORT\"",6,F_IMMED,ABORTQUOTE ; (  --  )
 ;   Copie le contenu du tampon TIB dans le tampon PASTE.
 ;   Le contenu de PASTE est une chaîne comptée.
 ; arguments:
-;	n+ Nombre de caractères de la chaîne à copier.
+;   n+ Nombre de caractères de la chaîne à copier.
 ; retourne:
 ;   rien    
 DEFWORD "CLIP",4,,CLIP ; ( n+ -- )
@@ -513,7 +516,7 @@ DEFWORD "CLIP",4,,CLIP ; ( n+ -- )
 ; arguments:
 ;   aucun
 ; retourne:
-;   n+ longueur de la châine.    
+;   n+ Longueur de la chaîne.    
 DEFWORD "GETCLIP",7,,GETCLIP ; ( -- n+ )
     .word PASTE,FETCH,COUNT,SWAP,OVER 
     .word TIB,FETCH,SWAP,MOVE  
@@ -557,7 +560,7 @@ DEFWORD "HERE",4,,HERE
 
 ; nom: ALIGN  ( -- )    
 ;   Si la variable système DP  (Data Pointer) pointe sur une adresse impaire, 
-;   aligne DP sur l'adresse paire supérieure.
+;   aligne cette valeur sur l'adresse paire supérieure.
 ;   Met 0 dans l'octet sauté.    
 ; arguments:
 ;   aucun
@@ -607,16 +610,26 @@ DEFCODE "SOURCE!",7,,SRCSTORE ; ( c-addr u -- )
     NEXT
 
 ; DESCRIPTION:
-;    L'entête du dictionnaire est une strcucture de la forme suivante:
+;   Le dictionnaire est une liste chaînée, le début de la liste est indiqué par
+;   la variable système LATEST.    
+;   L'entête du dictionnaire est une strcucture de la forme suivante:
 ; HTML:
 ; <br><table border="single">    
 ; <tr><th>champ</th><th>description</th></tr>
-; <tr><td>LFA</td><td>Contient l'adresse du champ NFA du prochain mot dans le dictionnaire</td></tr>
+; <tr><td>LFA</td><td>Contient l'adresse du champ NFA du prochain mot dans le dictionnaire.</td></tr>
 ; <tr><td>NFA</td><td>Champ <b>nom</b> de longueur variable<br>Le premier octet est la longueur du nom et<br>
 ;  contient aussi les attributs HIDDEN et IMMED.<br>Le bit 7 est toujours à 1.</td></tr>
 ; <tr><td>CFA</td><td>Adresse du code à exécuter pour ce mot.</td></tr>
 ; <tr><td>PFA</td><td>Paramètres utitlisés par ce mot. Longueur variable.</td></tr>
-; </table><br>   
+; </table><br>
+; Le premier octet du champ nom est un <i>bitfield</i>:
+; <br><table border="single">
+; <tr><th>bits</th><th>description</th></td>
+; <tr><td>4:0</td><td>Longueur du nom<br>maximum 31 caractères</td></tr>
+; <tr><td>5</td><td>Attribut HIDDEN<br>Si à 1 le mot n'est pas trouvé par FIND</td></tr>
+; <tr><td>6</td><td>Attribut IMMED<br>Si à 1 il s'agit d'un mot immmédiat.</td></tr>
+; <tr><td>7</td><td>F_MARK toujours à 1<br>Permet à CFA&gt;NFA de trouver le début du champ</td></tr>    
+; </table><br>    
 ; :HTML
     
 ; nom: NFA>LFA  ( a-addr1 -- a-addr2 )  
@@ -656,7 +669,8 @@ DEFWORD ">BODY",5,,TOBODY ; ( cfa -- pfa )
 ;   Le bit F_MARK (bit 7) est utilisé pour marquer l'octet à la position NFA
 ;   Le CFA étant immédiatement après le nom, il suffit de 
 ;   reculer octet par octet jusqu'à atteindre un octet avec le bit F_MARK==1
-;   puisque les caractères du nom sont tous < 128.
+;   puisque les caractères du nom sont tous < 128. Le champ nom a une longueur
+;   maximale de 32 caractères incluant l'octet longueur|attributs.  
 ; arguments:
 ;   a-addr1   Adresse du CFA dans l'entête du dictionnaire.
 ; retourne:
@@ -712,7 +726,7 @@ HEADLESS NAMEMARK,HWORD
 9:  .word EXIT
   
 
-; name: REVEAL  ( -- )
+; nom: REVEAL  ( -- )
 ;   Met à 0 l'attribut HIDDEN dans l'entête du dictionnaire du dernier mot défini.  
 ; arguments:
 ;   aucun
@@ -724,7 +738,7 @@ DEFWORD "REVEAL",6,,REVEAL ; ( -- )
 9:  .word EXIT
 
 ; nom: ALLOT  ( n -- )  
-;   Allocation/libération de mémoire dans le dictionnaire.
+;   Allocation/libération de mémoire dans l'espace utilisateur.
 ;   si n est négatif n octets seront libérés. Il s'agit simplement d'un ajustement
 ;   de la valeur de la variable DP.  
 ; arguments:
@@ -742,7 +756,7 @@ DEFWORD "ALLOT",5,,ALLOT ; ( n -- )
 ; retourne:
 ;   rien   
 DEFWORD ",",1,,COMMA  ; ( x -- )
-    .word HERE,STORE,LIT,CELL_SIZE,ALLOT
+    .word HERE,STORE,CELL,ALLOT
     .word EXIT
     
 ; nom: C,  ( c -- )    
@@ -846,7 +860,7 @@ DEFWORD "]",1,F_IMMED,RBRACKET ; ( -- )
     .word LIT,-1,STATE,STORE
     .word EXIT
 
-; nom: ?WORD  ( cccc S: -- a-addr | cfa 1 | cfa -1 )    
+; nom: ?WORD  ( cccc S: -- a-addr 1 | -1 )    
 ;   Analyse le texte d'entré pour en extraire le prochain mot.
 ;   Recherche ce mot dans le dictionnaire.    
 ;   Retourne le CFA du nom et un indicateur.
@@ -862,7 +876,7 @@ DEFWORD "?WORD",5,,QWORD ; ( -- c-addr 0 | cfa 1 | cfa -1 )
    .word BL,WORD,UPPER,FIND,QDUP,ZBRANCH,2f-$,EXIT
 2: .word COUNT,TYPE,LIT,'?',EMIT,ABORT
   
-; nom: POSTPONE   ( ccccc S: -- ) 
+; nom: POSTPONE   ( cccc S: -- ) 
 ;   Mot immédiat à utiliser dans une définition. 
 ;   Diffère la compilation du mot qui suis dans le texte d'entrée.
 ; arguments:
@@ -987,7 +1001,7 @@ DEFWORD "RECURSE",7,F_IMMED,RECURSE ; ( -- )
 
 ; nom: DO  ( n1 n2 -- )
 ;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
-;   Débute une boucle avec compteur. Le valeur du compteur de boucle est incrémentée
+;   Débute une boucle avec compteur. La valeur du compteur de boucle est incrémentée
 ;   à la fin de la boucle et comparée avec la limite. La boucle se termine lorsque
 ;   le compteur atteint ou dépasse la limite. La boucle s'exécute au moins 1 fois.    
 ; arguments:
@@ -1017,7 +1031,9 @@ DEFWORD "?DO",3,F_IMMED,QDO
 ; nom: LEAVE  runtime ( -- )
 ;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.
 ;   LEAVE est utilisé à l'intérieur des boucles avec compteur pour interrompre
-;   prématurément la boucle.    
+;   prématurément la boucle. 
+;   exemple:
+;   : test-leave  5 0 do i 3 > if leave else i . then loop ; \ imprime 0 1 2 3     
 ; arguments:
 ;   aucun
 ; retourne:
@@ -1054,7 +1070,7 @@ DEFWORD "LOOP",4,F_IMMED,LOOP ; ( -- )
 ;   Ensuite cette valeur est comparée à la limite et termine la boucle si 
 ;   la limite est atteinte ou dépassée.    
 ; arguments:
-;    n   Ajoute cette valeur à la variable de contrôle de la boucle. Si I passe LIMIT quitte la boucle.    
+;    n   Ajoute cette valeur au compteur de la boucle. Si I passe LIMIT quitte la boucle.    
 ; retourne:
 ;   rien  
 DEFWORD "+LOOP",5,F_IMMED,PLUSLOOP ; ( -- )
@@ -1088,9 +1104,9 @@ DEFWORD "AGAIN",5,F_IMMED,AGAIN ; ( a -- )
     .word ABORT
 2:  .word CFA_COMMA,BRANCH,BACKJUMP,EXIT
 
-; nom: UNTIL  compilation ( n -- )
+; nom: UNTIL  ( n -- )
 ;   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
-;   Compile la fin d'une boucle conditionnelle. Termine la boucle si n<>0.
+;   Termine la boucle si n<>0.
 ; arguments:
 ;   n  Valeur qui contrôle la boucle. La boucle est terminée si n<>0.
 ; retourne:
@@ -1105,6 +1121,8 @@ DEFWORD "UNTIL",5,F_IMMED,UNTIL ; ( a -- )
 ;   Comme AGAIN effectue un branchement inconditionnel au début de la boucle.
 ;   Cependant au moins un WHILE doit-être présent à l'intérieur de la boucle
 ;   car c'est le WHILE qui contrôle la sortie de boucle.
+;   exemple:
+;   : test-repeat 0 begin dup . 1+ dup 4 < while repeat drop ; \ imprime 0 1 2 3     
 ; arguments:
 ;   aucun
 ; retourne:
@@ -1251,7 +1269,13 @@ DEFWORD "?COMPILE",8,F_IMMED,QCOMPILE ; ( -- )
     .word EXIT
     
 ; nom: ?NAME  ( n -- )    
-;   Si n<>0 appelle ABORT" avec le message "name missing" 
+;   Si n<>0 appelle ABORT" avec le message "name missing" .
+;   ?NAME est utilisé par les mots qui attendent un nom à leur suite.
+;   exemple:
+;   CREATE &lt;ENTER&gt;  name missing 
+;   VARIABLE &lt;ENTER&gt;  name missing
+;   Les mots CREATE et VARIABLE doivent lire un nom à leur suite. ici il n'y avait
+;   rien donc ?NAME a été invoqué.    
 ; arguments:
 ;    n   Si n <> 0 exécute ABORT" name missing"
 ; retourne:
@@ -1287,7 +1311,7 @@ HEADLESS EXITCOMMA,HWORD
 ; nom: HEADER ( cccc S: -- )    
 ;   Cré une nouvelle entête dans le dictionnaire avec le nom qui suis dans le flux d'entrée.
 ;   Après l'exécution de ce mot HERE retourne l'adresse du CFA de ce mot. Le mot est créé
-;   avec l'attribut HIDE activé.    
+;   avec l'attribut HIDDEN activé.    
 ; arguments:
 ;    cccc  Chaîne de caractère dans le texte d'entrée qui représente le nom du mot à créé.
 ; retourne:
@@ -1336,7 +1360,7 @@ HEADLESS  RT_MARKER,HWORD
 ;   le dictionnaire qui porte ce nom. Ce mot introduit une définition de haut niveau.
 ;   Modifie la variable système STATE pour passer en mode compilation.    
 ; arguments:
-;   cccc  Mot suivant dans le flux d'entrée.
+;   cccc  Mot suivant dans le texte d'entrée.
 ; retourne:
 ;   rien    
 DEFWORD ":",1,,COLON 
@@ -1364,7 +1388,7 @@ HEADLESS NOP,HWORD
 ;   du mot peut-être étendue en utilisant le mot DOES>.    
 ; exemple:     
 ;       \ le mot VECTOR sert à créer des tableaux de n éléments.    
-;	: VECTOR  ( n  -- )
+;	: VECTOR  ( cccc S: n  -- )
 ;           CREATE CELLS ALLOT DOES> SWAP CELLS PLUS ;     
 ;       \ utilisation du mot VECTOR pour créer le tableau V1 de 5 éléments.
 ;       5 VECTOR V1
@@ -1374,7 +1398,7 @@ HEADLESS NOP,HWORD
 ;   cccc  Mot suivant dans le texte d'entrée.
 ; retourne:
 ;   rien    
-DEFWORD "CREATE",6,,CREATE ; ( -- hook )
+DEFWORD "CREATE",6,,CREATE
     .word HEADER,REVEAL
     .word LIT,FETCH_EXEC,COMMA
     .word CFA_COMMA,NOP
@@ -1388,9 +1412,9 @@ HEADLESS "RT_DOES", HWORD ; ( -- )
     
 ; nom: DOES>  ( -- )
 ;   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
-;   Ce mot permet de définir l'action d'un mot créé avec CREATE. Surtout utile
+;   Ce mot permet d'étendre l'action d'un mot créé avec CREATE. Surtout utile
 ;   pour définir des mots compilants. Un mot compilant est un mot qui sert à
-;   créer une classe de mots. Par exemples les mots VARIABLE et CONSTANT sont
+;   créer une classe de mots. Par exemple les mots VARIABLE et CONSTANT sont
 ;   des mots compilants.    
 ;   Voir le mot CREATE.
 ; arguments:
@@ -1403,8 +1427,8 @@ DEFWORD "DOES>",5,F_IMMED,DOESTO  ; ( -- )
     .word EXIT
 
 ; nom: ;  ( -- )    
-;   Termine une définition débutée par ":" ou :NONAME.
-;   Modifie la valeur de la variable STATE pour passer en mode interprétation.
+;   Termine une définition débutée par ":" ou :NONAME en compilant EXIT et en
+;   remettant la valeur de la variable STATE à 0 pour passer en mode interprétation.
 ; arguments:
 ;   aucun
 ; retourne:
@@ -1473,10 +1497,9 @@ DEFWORD "DEFER",5,,DEFER ; cccc ( -- )
 ;   :noname  dup * ; \ ( -- a-addr1 )  un mot sans nom viens d'être créé.
 ;   ' p2 DEFER!  \ ' p2 retourne le CFA de p2 et DEFER! affecte a-addr1 au PFA de P2.
 ;   2 p2  4 ok  \ maintenant lorsque p2 est utilisé retourne le carré d'un entier.  
-;    
 ; arguments:    
 ;  a-addr1  CFA de l'action que le mot doit exécuter.
-;  a-addr2  PFA du mot différé.
+;  a-addr2  CFA du mot différé.
 ; retourne:
 ;   rien    
 DEFWORD "DEFER!",6,,DEFERSTORE ;  ( xt1 xt2 -- )
@@ -1510,14 +1533,15 @@ DEFWORD "IS",2,,IS
     .word TICK,TOBODY,STORE,EXIT
     
 
-; nom: ACTION-OF   ( cccc -- a-addr )
+; nom: ACTION-OF   ( cccc -- a-addr|0 )
 ;   Extrait le prochain mot du texte d'entrée et le recherche dans le dictionnaire.
 ;   Ce mot doit-être un mot créé avec DEFER. Si le mot est trouvé dans le dictinnaire
-;   le CFA de son action est empilé.
+;   le CFA de son action est empilé. 
 ; arguments:
 ;   cccc   Prochain mot dans le texte d'entrée. Nom recherché dans le dictionnaire.
 ; retourne:
-;   a-addr Adresse du CFA de l'action du mot différé.    
+;   a-addr Adresse du CFA de l'action du mot différé. 0 si ce n'est pas un mot différé.    
 DEFWORD "ACTION-OF",9,,ACTIONOF 
-    .word TICK,TOBODY,FETCH,EXIT
-
+    .word TICK,DUP,FETCH,LIT,FETCH_EXEC,EQUAL,ZBRANCH,9f-$
+    .word TOBODY,FETCH,EXIT
+9:  .word DROP,FALSE,EXIT

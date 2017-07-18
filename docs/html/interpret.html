@@ -216,14 +216,14 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ADR&gt;IN">
 <b>ADR&gt;IN</b>  ( c-addr -- ) 
-<br><div>   Ajuste la variable  &gt;IN à partir de la position laissée
+<br><div>   Ajuste la variable  &gt;IN à partir de la position du pointeur de caractère après
 </div>
-<div>   par le dernier PARSE
+<div>   l'extraction d'un mot du texte d'entrée par l'analyseur lexical.  
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>c-addr</i>&nbsp;&nbsp;  adresse du pointeur après le dernier PARSE
+<div><i>c-addr</i>&nbsp;&nbsp;  Position de l'analyseur lexical dans le texte d'entrée.
 </div>
 <div><b> retourne:
 </b></div>
@@ -233,28 +233,30 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="PARSE">
-<b>PARSE</b>   ( c -- c-addr u )    
-<br><div>   Accumule les caractères jusqu'au
+<b>PARSE</b>   ( cccc S: c -- c-addr u )    
+<br><div>   Accumule les caractères jusqu'au prochain 'c'.  Le caractère délimiteur ne fait
 </div>
-<div>   prochain 'c'. Met à jour la variable &gt;IN
+<div>   pas partie de la chaîne extraite. Met à jour la variable &gt;IN
 </div>
 </p>
-<div><b> arguments: 
+<div><b> arguments:
 </b></div>
-<div><i>c</i>&nbsp;&nbsp;    caractère délimiteur
+<div><i>cccc</i>&nbsp;&nbsp;  texte à traiter par l'analyseur lexical.    
+</div>
+<div><i>c</i>&nbsp;&nbsp;  Caractère délimiteur
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>c-addr</i>&nbsp;&nbsp;   adresse du premier caractère de la chaîne
+<div><i>c-addr</i>&nbsp;&nbsp;   Adresse du premier caractère de la chaîne extraite.
 </div>
-<div><i>u</i>&nbsp;&nbsp;        longueur de la chaîne.
+<div><i>u</i>&nbsp;&nbsp;        Longueur de la chaîne.
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="&gt;COUNTED">
 <b>&gt;COUNTED</b> ( src n dest -- )   
-<br><div>   copie une chaîne dont l'adresse et la longueur sont fournies
+<br><div>   Copie une chaîne dont l'adresse et la longueur sont fournies
 </div>
 <div>   en arguments vers une chaîne comptée dont l'adresse est fournie.
 </div>
@@ -275,7 +277,7 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="PARSE-NAME">
-<b>PARSE-NAME</b>    ( ccccc -- c-addr u ) 
+<b>PARSE-NAME</b>    ( cccc S: -- c-addr u ) 
 <br><div>   Recherche le prochain mot dans le flux d'entrée
 </div>
 <div>   Tout caractère &lt; 32 est considéré comme un espace
@@ -283,7 +285,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp; Chaîne de caractères dans le texte à évaluer.
+<div><i>cccc</i>&nbsp;&nbsp; Chaîne de caractères dans le texte à analyser.
 </div>
 <div><b> retourne:
 </b></div>
@@ -295,16 +297,18 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="WORD">
-<b>WORD</b>  ( c -- c-addr )  
+<b>WORD</b>  ( cccc S: c -- c-addr )  
 <br><div>   Localise le prochain mot délimité par 'c'
 </div>
-<div>   la variable TOIN indique la position courante
+<div>   La variable TOIN indique la position courante.
 </div>
-<div>   le mot trouvé est copié à la position indiquée par la variable DP.
+<div>   Le mot trouvé est copié à la position indiquée par la variable DP.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
+<div><i>cccc</i>&nbsp;&nbsp; Texte à analyser.    
+</div>
 <div><i>c</i>&nbsp;&nbsp;   Caractère séparateur.
 </div>
 <div><b> retourne:    
@@ -325,7 +329,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>c-addr</i>&nbsp;&nbsp;  Adresse de la chaîne comptée à rechercher.
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse de la chaîne comptée recherchée.
 </div>
 <div><b> retourne: 
 </b></div>
@@ -386,14 +390,16 @@
 <b>COUNT</b>  ( c-addr1 -- c-addr2 u )  
 <br><div>   Retourne la spécification de la chaîne comptée dont l'adresse est c-addr1.
 </div>
-<div>   COUNT n'a pas accès à la mémoire EDS. Pour les chaînes en mémoire EDS il y
+<div>   Si c-addr1&gt;=32768 la chaîne est dans la mémoire flash du MCU. 
 </div>
-<div>   a ECOUNT.  
+<div>   COUNT n'a pas accès à la mémoire EDS. Pour les chaînes en mémoire EDS il faut
+</div>
+<div>   utiliser ECOUNT.  
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>c-addr1</i>&nbsp;&nbsp;   Adresse d'une chaîne de caractères débutant par un compteur.
+<div><i>c-addr1</i>&nbsp;&nbsp;   Adresse d'une chaîne de caractères comptée.
 </div>
 <div><b> retourne:
 </b></div>
@@ -430,7 +436,7 @@
 <b>EVALUATE</b>   ( i*x c-addr u -- j*x )      
 <br><div>   Évaluation d'un texte source. Le contenu de SOURCE est sauvegardé
 </div>
-<div>   et restauré à la fin de cette évaluation.
+<div>   et restauré à la fin de cette évaluation. 
 </div>
 </p>
 <div><b> arguments:
@@ -467,7 +473,7 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ABORT"">
-<b>ABORT"</b>  ( cccc n -- )     
+<b>ABORT"</b>  ( cccc S: n -- )     
 <br><div>   Ne s'utilise qu'à l'intérieur d'une définition.  
 </div>
 <div>   Compile le message cccc et le code qui permet d'afficher ce message suivit d'un ABORT 
@@ -505,7 +511,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>	n+</i>&nbsp;&nbsp; Nombre de caractères de la chaîne à copier.
+<div><i>n+</i>&nbsp;&nbsp; Nombre de caractères de la chaîne à copier.
 </div>
 <div><b> retourne:
 </b></div>
@@ -527,7 +533,7 @@
 </i>&nbsp;&nbsp;</div>
 <div><b> retourne:
 </b></div>
-<div><i>n+</i>&nbsp;&nbsp; longueur de la châine.    
+<div><i>n+</i>&nbsp;&nbsp; Longueur de la chaîne.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -579,7 +585,7 @@
 <b>ALIGN</b>  ( -- )    
 <br><div>   Si la variable système DP  (Data Pointer) pointe sur une adresse impaire, 
 </div>
-<div>   aligne DP sur l'adresse paire supérieure.
+<div>   aligne cette valeur sur l'adresse paire supérieure.
 </div>
 <div>   Met 0 dans l'octet sauté.    
 </div>
@@ -647,13 +653,17 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><h2 id="description">Description</h2><div>
 </div>
-<div>    L'entête du dictionnaire est une strcucture de la forme suivante:
+<div>   Le dictionnaire est une liste chaînée, le début de la liste est indiqué par
+</div>
+<div>   la variable système LATEST.    
+</div>
+<div>   L'entête du dictionnaire est une strcucture de la forme suivante:
 </div>
 <div>  <br><table border="single">    
 
   <tr><th>champ</th><th>description</th></tr>
 
-  <tr><td>LFA</td><td>Contient l'adresse du champ NFA du prochain mot dans le dictionnaire</td></tr>
+  <tr><td>LFA</td><td>Contient l'adresse du champ NFA du prochain mot dans le dictionnaire.</td></tr>
 
   <tr><td>NFA</td><td>Champ <b>nom</b> de longueur variable<br>Le premier octet est la longueur du nom et<br>
 
@@ -663,7 +673,23 @@
 
   <tr><td>PFA</td><td>Paramètres utitlisés par ce mot. Longueur variable.</td></tr>
 
-  </table><br>   
+  </table><br>
+
+  Le premier octet du champ nom est un <i>bitfield</i>:
+
+  <br><table border="single">
+
+  <tr><th>bits</th><th>description</th></td>
+
+  <tr><td>4:0</td><td>Longueur du nom<br>maximum 31 caractères</td></tr>
+
+  <tr><td>5</td><td>Attribut HIDDEN<br>Si à 1 le mot n'est pas trouvé par FIND</td></tr>
+
+  <tr><td>6</td><td>Attribut IMMED<br>Si à 1 il s'agit d'un mot immmédiat.</td></tr>
+
+  <tr><td>7</td><td>F_MARK toujours à 1<br>Permet à CFA&gt;NFA de trouver le début du champ</td></tr>    
+
+  </table><br>    
 
 </div><div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="NFA&gt;LFA">
@@ -730,7 +756,9 @@
 </div>
 <div>   reculer octet par octet jusqu'à atteindre un octet avec le bit F_MARK==1
 </div>
-<div>   puisque les caractères du nom sont tous &lt; 128.
+<div>   puisque les caractères du nom sont tous &lt; 128. Le champ nom a une longueur
+</div>
+<div>   maximale de 32 caractères incluant l'octet longueur|attributs.  
 </div>
 </p>
 <div><b> arguments:
@@ -798,9 +826,25 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="REVEAL">
+<b>REVEAL</b>  ( -- )
+<br><div>   Met à 0 l'attribut HIDDEN dans l'entête du dictionnaire du dernier mot défini.  
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>aucun
+</i>&nbsp;&nbsp;</div>
+<div><b> retourne:
+</b></div>
+<div><i>rien</i>&nbsp;&nbsp;    
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ALLOT">
 <b>ALLOT</b>  ( n -- )  
-<br><div>   Allocation/libération de mémoire dans le dictionnaire.
+<br><div>   Allocation/libération de mémoire dans l'espace utilisateur.
 </div>
 <div>   si n est négatif n octets seront libérés. Il s'agit simplement d'un ajustement
 </div>
@@ -927,7 +971,7 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?WORD">
-<b>?WORD</b>  ( cccc S: -- a-addr | cfa 1 | cfa -1 )    
+<b>?WORD</b>  ( cccc S: -- a-addr 1 | -1 )    
 <br><div>   Analyse le texte d'entré pour en extraire le prochain mot.
 </div>
 <div>   Recherche ce mot dans le dictionnaire.    
@@ -955,7 +999,7 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="POSTPONE">
-<b>POSTPONE</b>   ( ccccc S: -- ) 
+<b>POSTPONE</b>   ( cccc S: -- ) 
 <br><div>   Mot immédiat à utiliser dans une définition. 
 </div>
 <div>   Diffère la compilation du mot qui suis dans le texte d'entrée.
@@ -1090,7 +1134,7 @@
 <b>DO</b>  ( n1 n2 -- )
 <br><div>   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
 </div>
-<div>   Débute une boucle avec compteur. Le valeur du compteur de boucle est incrémentée
+<div>   Débute une boucle avec compteur. La valeur du compteur de boucle est incrémentée
 </div>
 <div>   à la fin de la boucle et comparée avec la limite. La boucle se termine lorsque
 </div>
@@ -1140,7 +1184,11 @@
 </div>
 <div>   LEAVE est utilisé à l'intérieur des boucles avec compteur pour interrompre
 </div>
-<div>   prématurément la boucle.    
+<div>   prématurément la boucle. 
+</div>
+<div>   exemple:
+</div>
+<div>   : test-leave  5 0 do i 3 &gt; if leave else i . then loop ; \ imprime 0 1 2 3     
 </div>
 </p>
 <div><b> arguments:
@@ -1189,7 +1237,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>n</i>&nbsp;&nbsp;   Ajoute cette valeur à la variable de contrôle de la boucle. Si I passe LIMIT quitte la boucle.    
+<div><i>n</i>&nbsp;&nbsp;   Ajoute cette valeur au compteur de la boucle. Si I passe LIMIT quitte la boucle.    
 </div>
 <div><b> retourne:
 </b></div>
@@ -1239,10 +1287,10 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="UNTIL">
-<b>UNTIL</b>  compilation ( n -- )
+<b>UNTIL</b>  ( n -- )
 <br><div>   Mot immédiat à utiliser seulement à l'intérieur d'une définition.
 </div>
-<div>   Compile la fin d'une boucle conditionnelle. Termine la boucle si n&lt;&gt;0.
+<div>   Termine la boucle si n&lt;&gt;0.
 </div>
 </p>
 <div><b> arguments:
@@ -1267,6 +1315,10 @@
 <div>   Cependant au moins un WHILE doit-être présent à l'intérieur de la boucle
 </div>
 <div>   car c'est le WHILE qui contrôle la sortie de boucle.
+</div>
+<div>   exemple:
+</div>
+<div>   : test-repeat 0 begin dup . 1+ dup 4 &lt; while repeat drop ; \ imprime 0 1 2 3     
 </div>
 </p>
 <div><b> arguments:
@@ -1504,7 +1556,19 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="?NAME">
 <b>?NAME</b>  ( n -- )    
-<br><div>   Si n&lt;&gt;0 appelle ABORT" avec le message "name missing" 
+<br><div>   Si n&lt;&gt;0 appelle ABORT" avec le message "name missing" .
+</div>
+<div>   ?NAME est utilisé par les mots qui attendent un nom à leur suite.
+</div>
+<div>   exemple:
+</div>
+<div>   CREATE &lt;ENTER&gt;  name missing 
+</div>
+<div>   VARIABLE &lt;ENTER&gt;  name missing
+</div>
+<div>   Les mots CREATE et VARIABLE doivent lire un nom à leur suite. ici il n'y avait
+</div>
+<div>   rien donc ?NAME a été invoqué.    
 </div>
 </p>
 <div><b> arguments:
@@ -1556,7 +1620,7 @@
 </div>
 <div>   Après l'exécution de ce mot HERE retourne l'adresse du CFA de ce mot. Le mot est créé
 </div>
-<div>   avec l'attribut HIDE activé.    
+<div>   avec l'attribut HIDDEN activé.    
 </div>
 </p>
 <div><b> arguments:
@@ -1621,7 +1685,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;  Mot suivant dans le flux d'entrée.
+<div><i>cccc</i>&nbsp;&nbsp;  Mot suivant dans le texte d'entrée.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1642,7 +1706,7 @@
 </div>
 <div>       \ le mot VECTOR sert à créer des tableaux de n éléments.    
 </div>
-<div>	: VECTOR  ( n  -- )
+<div>	: VECTOR  ( cccc S: n  -- )
 </div>
 <div>           CREATE CELLS ALLOT DOES&gt; SWAP CELLS PLUS ;     
 </div>
@@ -1670,11 +1734,11 @@
 <b>DOES&gt;</b>  ( -- )
 <br><div>   Mot immédiat qui ne peut-être utilisé qu'à l'intérieur d'une définition.    
 </div>
-<div>   Ce mot permet de définir l'action d'un mot créé avec CREATE. Surtout utile
+<div>   Ce mot permet d'étendre l'action d'un mot créé avec CREATE. Surtout utile
 </div>
 <div>   pour définir des mots compilants. Un mot compilant est un mot qui sert à
 </div>
-<div>   créer une classe de mots. Par exemples les mots VARIABLE et CONSTANT sont
+<div>   créer une classe de mots. Par exemple les mots VARIABLE et CONSTANT sont
 </div>
 <div>   des mots compilants.    
 </div>
@@ -1694,9 +1758,9 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id=";">
 <b>;</b>  ( -- )    
-<br><div>   Termine une définition débutée par ":" ou :NONAME.
+<br><div>   Termine une définition débutée par ":" ou :NONAME en compilant EXIT et en
 </div>
-<div>   Modifie la valeur de la variable STATE pour passer en mode interprétation.
+<div>   remettant la valeur de la variable STATE à 0 pour passer en mode interprétation.
 </div>
 </p>
 <div><b> arguments:
@@ -1790,14 +1854,12 @@
 </div>
 <div>   2 p2  4 ok  \ maintenant lorsque p2 est utilisé retourne le carré d'un entier.  
 </div>
-<div>    
-</div>
 </p>
 <div><b> arguments:    
 </b></div>
 <div><i>a-addr1</i>&nbsp;&nbsp;  CFA de l'action que le mot doit exécuter.
 </div>
-<div><i>a-addr2</i>&nbsp;&nbsp;  PFA du mot différé.
+<div><i>a-addr2</i>&nbsp;&nbsp;  CFA du mot différé.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1857,12 +1919,12 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="ACTION-OF">
-<b>ACTION-OF</b>   ( cccc -- a-addr )
+<b>ACTION-OF</b>   ( cccc -- a-addr|0 )
 <br><div>   Extrait le prochain mot du texte d'entrée et le recherche dans le dictionnaire.
 </div>
 <div>   Ce mot doit-être un mot créé avec DEFER. Si le mot est trouvé dans le dictinnaire
 </div>
-<div>   le CFA de son action est empilé.
+<div>   le CFA de son action est empilé. 
 </div>
 </p>
 <div><b> arguments:
@@ -1871,7 +1933,7 @@
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>a-addr</i>&nbsp;&nbsp; Adresse du CFA de l'action du mot différé.    
+<div><i>a-addr</i>&nbsp;&nbsp; Adresse du CFA de l'action du mot différé. 0 si ce n'est pas un mot différé.    
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -1948,6 +2010,7 @@
 <li><a href="#QUIT">QUIT</a></li>
 <li><a href="#RECURSE">RECURSE</a></li>
 <li><a href="#REPEAT">REPEAT</a></li>
+<li><a href="#REVEAL">REVEAL</a></li>
 <li><a href="#S"">S"</a></li>
 <li><a href="#SOURCE">SOURCE</a></li>
 <li><a href="#SOURCE!">SOURCE!</a></li>
