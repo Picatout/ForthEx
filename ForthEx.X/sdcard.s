@@ -567,13 +567,13 @@ succeed:
     NEXT
 
 ; nom: SEGMENT ( u -- )
-;   Détermine quel segment de la carte est actif.
+;   Sélectionne le segment de la carte SD.
 ;   Le système définit dans block.s ne permet que d'accéder 65535 blocs sur un périphérique
 ;   ce qui représente 1024*65535 ou 2^10 * (2^16-1)= 67 107 840 octets.
 ;   Pour les cartes de plus de 64Mo il faut diviser l'espace de données de la carte
 ;   en segments de 65535 blocs.
 ; arguments:
-;   u Numéro du segment.
+;   u Numéro du segment qui devient le segment actif.
 ; retourne:
 ;   rien    
 DEFCODE "SEGMENT",7,,SEGMENT 
@@ -621,15 +621,14 @@ DEFCODE "?SDC",4,,QSDC ; ( -- u )
     mov sdc_status,T
     NEXT
 
-; nom: ?SDCOK  ( -- n )    
-;   Retourne la valeur du bit F_SDC_OK. La valeur 2 indique qu'il y a une carte
-;   dans la fente et qu'elle est initialisée.    
+; nom: ?SDCOK  ( -- f )    
+;   Retourne vrai s'il y a une carte dans la fente et qu'elle est initialisée.
 ; arguments:
 ;   aucun
 ; retourne:
-;   n Valeur du bit F_SDC_OK &rarr; {0,2}.    
+;   f Indicateur booléen, vrai si la carte est intialisée.    
 DEFWORD "?SDCOK",6,,QSDCOK ; ( -- f )
-    .word QSDC,LIT,F_SDC_OK,BITMASK,AND,EXIT
+    .word QSDC,LIT,F_SDC_OK,BITMASK,AND,ZERODIFF,EXIT
     
 ; nom: SDCREAD  ( c-addr ud -- f )    
 ;   Lecture d'un secteur de la carte SD.

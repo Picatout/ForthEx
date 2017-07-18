@@ -511,10 +511,13 @@ DEFCODE "UMIN",4,,UMIN
     exch T,W0
 1:  NEXT
     
-; nom: WITHIN  ( n1|u1 n2|u2 n3|u3 -- f ) 
-;   Vérifie si l'entier n1|u1<=n2|u2<n3|u3.
-;   La vérification doit fonctionner aussi bien avec les entiers
-;   signés et non signés.    
+; nom: WITHIN  ( n1|u1 n2|u2 n3|u3 -- f )
+;   Compare n1|u1 avec la borne inférieur n2|u2 et supérieure n3|u3.    
+;   Retourne vrai si l'une des 2 conditions suivante est rencontrée.
+;   Si n2|u2<n3|u3 et que n2|u2<=n1|u1<n3 ou
+;   Si n2|u2>n3|u3 et que n2|u2<=n1|u1 ou n1|u1<n3|u3
+;   Toute autre condition retourne faux.    
+;   Les 3 entiers doivent-être considérés de même type soit signés ou non signés.
 ; arguments:
 ;   n1|u1   Entier à vérifier,signé ou non.
 ;   n2|u2   Borne inférieure fermée,signé ou non.
@@ -751,7 +754,7 @@ DEFCODE "DINVERT",7,,DINVERT
 ;   u1  Position du bit {0..15}
 ; retourne:
 ;   u2  masque
-DEFCODE "BITMASK",8,,BITMASK
+DEFCODE "BITMASK",7,,BITMASK
     mov T,W0
     dec W0,W0
     mov #1,T

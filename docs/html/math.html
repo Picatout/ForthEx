@@ -660,12 +660,18 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="WITHIN">
-<b>WITHIN</b>  ( n1|u1 n2|u2 n3|u3 -- f ) 
-<br><div>   Vérifie si l'entier n1|u1&lt;=n2|u2&lt;n3|u3.
+<b>WITHIN</b>  ( n1|u1 n2|u2 n3|u3 -- f )
+<br><div>   Compare n1|u1 avec la borne inférieur n2|u2 et supérieure n3|u3.    
 </div>
-<div>   La vérification doit fonctionner aussi bien avec les entiers
+<div>   Retourne vrai si l'une des 2 conditions suivante est rencontrée.
 </div>
-<div>   signés et non signés.    
+<div>   Si n2|u2&lt;n3|u3 et que n2|u2&lt;=n1|u1&lt;n3 ou
+</div>
+<div>   Si n2|u2&gt;n3|u3 et que n2|u2&lt;=n1|u1 ou n1|u1&lt;n3|u3
+</div>
+<div>   Toute autre condition retourne faux.    
+</div>
+<div>   Les 3 entiers doivent-être considérés de même type soit signés ou non signés.
 </div>
 </p>
 <div><b> arguments:

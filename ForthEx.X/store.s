@@ -21,9 +21,8 @@
 ; DATE: 2015-10-06
 ; DESCRIPTION:  
 ; Interface de base avec les mémoire externe RAM SPI et EEPROM SPI.
-; Le stockage se fait par bloc de 1024 octets.
-; Le terme XRAM réfère à la mémoire RAM SPI.
-    
+; Le terme XRAM réfère à la mémoire RAM SPI 23LC1024.
+; Le terme EEPROM réfère à la mémoire EEPROM SPI 25LC1024.    
 .include "store.inc"
     
  .text
@@ -117,7 +116,6 @@ spi_send_address: ; ( ud -- )
 ;   interface SPI RAM
 ; DESCRIPTION:
 ;  La RAM SPI 23LC1024 a une capacitée de 128Ko.    
-
     
 ; XBLK>ADR ; ( u -- ud )
 ;   Convertie un numéro de bloc XRAM en adresse absolue XRAM.    
@@ -131,11 +129,11 @@ HEADLESS XBLKTOADR,HWORD
     
     
 ; nom: RAM>XR ( u1 u2 ud1 -- )
-;   Transfert un bloc d'octets de la RAM du MCU vers la RAM SPI.
+;   Transfert un bloc d'octets de la RAM du MCU vers la XRAM.
 ; arguments: 
-;    u1 Adresse début bloc RAM.
+;    u1 Adresse début bloc dans la XRAM.
 ;    u2 Nombre d'octets à transférer.
-;    ud1 Entier double non signé, Adresse destination dans la RAM SPI. 
+;    ud1 Entier double non signé, Adresse destination dans la XRAM. 
 ; retourne:    
 ;   rien
 DEFCODE "RAM>XR",6,,RAMTOXR ; ( u1 n+ ud1 -- )
@@ -164,11 +162,11 @@ HEADLESS XWRITE,HWORD ; ( u1 ud1 -- )
     .word LIT,BLOCK_SIZE,NROT,RAMTOXR,EXIT
     
 ; nom: XR>RAM  ( u1 u2 ud1 -- )
-;   Transfert un bloc d'octets de la RAM SPI vers la RAM du MCU.
+;   Transfert un bloc d'octets de la XRAM vers la RAM du MCU.
 ; arguments: 
 ;    u1  Entier simple non signé, adresse début tampon RAM.
 ;    u2  Entier simple non signé, Nombre d'octets à transféréer.
-;    ud1 Entier double non signé, adresse début du bloc dans la RAM SPI.
+;    ud1 Entier double non signé, adresse début du bloc dans la XRAM.
 ; retourne:    
 ;   rien
 DEFCODE "XR>RAM",6,,XRTORAM ; ( u1 n+ ud1 -- )
@@ -195,7 +193,7 @@ HEADLESS XREAD,HWORD ; ( u1 ud1 -- )
     .word LIT,BLOCK_SIZE,NROT,XRTORAM,EXIT
     
 ; XBLKCOUNT  ( -- n )
-;   Constante, capacité en nombre de blocs de la RAM SPI.    
+;   Constante, capacité le la XRAM en nombre de blocs de 1024 octets.    
 ; arguments:
 ;   aucun
 ; retourne:

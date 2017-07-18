@@ -2,6 +2,8 @@
 ----------
 Documentation interpret.s
 Modifié ACTION-OF maintenant retourne 0 si le mot recherché n'est pas un mot créé avec CREATE.
+Documentation math.s
+Documentation store.s
 
 2017-07-17
 ----------
