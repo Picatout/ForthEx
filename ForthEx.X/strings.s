@@ -45,11 +45,10 @@ DEFCODE "BL",2,,BL
 ; retourne:
 ;   c Valeur ASCII entre 32 et 126    
 DEFCODE ">CHAR",5,,TOCHAR 
-    mov #126,W0
-    cp W0,T
-    bra gtu,1f
-    cp T,#32
-    bra geu, 2f
+    cp.b T,#32
+    bra ltu,1f
+    cp.b T,#127
+    bra ltu, 2f
 1:  mov #'_',T
 2:  NEXT
  
@@ -73,7 +72,7 @@ DEFWORD "CHARS",5,,CHARS ; ( n1 -- n2 )
 DEFWORD "CHAR+",5,,CHARPLUS ; ( addr -- addr' )  
     .word LIT,CHAR_SIZE,PLUS,EXIT
   
-; nom: CHAR   ( cccc -- c )    
+; nom: CHAR   ( cccc S: -- c )    
 ;   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
 ;   A la suite de cette opération la variable >IN pointe après le mot.    
 ; arguments:
@@ -88,10 +87,14 @@ DEFWORD "CHAR",4,,CHAR ; cccc ( -- c )
     .align 2
     .word ONEPLUS,CFETCH,EXIT
 
-; nom: [CHAR]   ( ccccc -- )
+; nom: [CHAR]   ( cccc S: -- )
 ;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.    
 ;   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
 ;   Après cette opération la variable >IN pointe après le mot trouvé.
+;   Lors de L'exécution de cette définition le caractère compilé est empilé.   
+;   exemple:
+;   : test [char] Hello ;
+;   test \ S: H     
 ; arguments:
 ;   cccc Chaîne de caractère dans le flux d'entré.    
 ; retourne:
@@ -334,7 +337,7 @@ move_dn:
 ;  retourne:
 ;     addr2   Pointeur avancée d'un caractère.
 ;     c       Caractère à l'adresse c-addr1.    
-DEFWORD "EC@+",5,,ECFETCHPLUS
+DEFWORD "EC@+",4,,ECFETCHPLUS
     .word DUP,ECFETCH,TOR,CHARPLUS,RFROM,EXIT
     
 ; nom: C@+   ( c-addr1 -- c-addr2 c )    
@@ -345,7 +348,7 @@ DEFWORD "EC@+",5,,ECFETCHPLUS
 ;  retourne:
 ;   c-addr'   Pointeur avancée d'un caractère.
 ;     c       Caractère à l'adresse 'c-addr1'.    
-DEFWORD "C@+",4,,CFETCHPLUS
+DEFWORD "C@+",3,,CFETCHPLUS
     .word DUP,CFETCH,TOR,CHARPLUS,RFROM,EXIT
     
 ; nom: CSTR>RAM ( c-addr1 c-addr2 -- )     
@@ -403,6 +406,33 @@ DEFCODE "BLANK",5,,BLANK
     DPOP
     NEXT
  
+; nom: C-COMP ( c1 c2 -- -1|0|1 )
+;   Compare les 2 caractères et retourne une des 3 valeur suivante:
+;   -1 si c1 < c2
+;    0 si c1==c2
+;    1 si c1>c2
+; arguments:
+;   c1 Premier caractère à comparer
+;   c2 Deuxième caractère à comparer
+; retourne:
+;   -1|0|1  Indique la relation entre les 2 caractères.
+DEFCODE "C-COMP",6,,CCOMP
+    mov.b T,W0
+    DPOP
+    cp.b T,W0
+    bra z,c_equal
+    bra ltu,c1_less
+    mov #1, T
+    bra 9f
+c_equal:
+    clr T
+    bra 9f
+c1_less:
+    setm T
+9:  NEXT
+    
+    
+    
 ; nom: COMPARE ( c-addr1 u1 c-addr2 u2 -- -1|0?1 )
 ;   Compare la chaîne de caractère débutant à l'adresse 'c-addr1' de longueur 'u1'
 ;   avec la chaîne de caractère débutant à l'adresse 'c-addr2' de longueur 'u2'
@@ -423,14 +453,12 @@ DEFCODE "BLANK",5,,BLANK
 ;   -1|0|1 Retourne -1 si chaîne1<chaîne2, 0 si chaîne1==chaîne2, 1 si chaîne1>chaîne2    
 DEFWORD "COMPARE",7,,COMPARE
     .word ROT,TWODUP,TWOTOR,UMIN,FALSE,DODO ; s: c-addr1 c-addr2 r: u2 u1
-1:  .word TOR,ECFETCHPLUS,RFROM,ECFETCHPLUS,ROT,TWODUP,EQUAL,ZBRANCH,8f-$
-    .word TWODROP,DOLOOP,1b-$
-    .word TWODROP,TWORFROM ; S: u2 u1
+1:  .word TOR,ECFETCHPLUS,RFROM,ECFETCHPLUS,ROT,SWAP,CCOMP,QDUP,ZBRANCH,2f-$
+    .word NROT,TWODROP,TWORFROM,TWODROP,UNLOOP,EXIT
+2:  .word DOLOOP,1b-$,TWODROP,TWORFROM ; S: u2 u1
     .word TWODUP,EQUAL,ZBRANCH,2f-$,TWODROP,FALSE,EXIT
 2:  .word UGREATER,ZBRANCH,4f-$,TRUE,EXIT
 4:  .word LIT,1,EXIT
-8:  .word RDROP,RDROP,TWOSWAP,TWODROP,ULESS,ZBRANCH,9f-$,TRUE,EXIT
-9:  .word LIT,1,EXIT
   
 
 ; nom: SEARCH  ( c-addr1 u1 c-addr2 u2 -- c-addr3 u3 f )
@@ -467,37 +495,41 @@ DEFWORD "SEARCH",6,,SEARCH ; ( c-addr1 u1 c-addr2 u2 -- c-addr3 u3 f )
     
 ; nom: SLITERAL ( c-addr u -- )
 ;   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
-;   Compile une chaîne litérale dont le descripteur est sur la pile des arguments.
-;   A l'exécution le descripteur est empilée.    
+;   Compile le descripteur d'une chaîne qui est sur la pile des arguments.
+;   A l'exécution le descripteur est empilé.
+;   exemple:
+;   : s1 s" test" ; immediate
+;   : type-s1 s1 sliteral type ;
+;   type-s1  test  OK
 ; arguments:
 ;   c-addr  Adresse du premier caractère de la chaîne.
 ;   u       Longueur de la chaîne.
 ; retourne:
 ;    rien
 DEFWORD "SLITERAL",8,F_IMMED,SLITERAL
-    .word QCOMPILE,SWAP,CFA_COMMA,LIT,COMMA,CFA_COMMA,LIT,COMMA,EXIT
+    .word QCOMPILE,SWAP,LITERAL,LITERAL,EXIT
     
 ; DESCRIPTION:
 ;   Commentaires.
 
-; nom: (    ( cccc -- )    
+; nom: (    ( cccc S: -- )    
 ;   Ce mot introduit un commentaire qui se termine  par ')'.
 ;   Tous les caractères dans le tampon d'entrée sont sautés jusqu'après le ')'.    
 ;   Il doit y avoir un espace de chaque côté de '(' car c'est un mot Forth.
 ;   Il s'agit d'un mot immédiat, il s'exécute donc même en mode compilation.    
 ; arguments:
-;   cccc  commentaire dans le flux d'entrée terminé par ')'. 
+;   cccc  commentaire dans le texte d'entrée terminé par ')'. 
 ; retourne:    
 ;   rien    
 DEFWORD "(",1,F_IMMED,LPAREN ; parse ccccc)
     .word LIT,')',PARSE,TWODROP,EXIT
 
-; nom: \    ( cccc -- )    
+; nom: \    ( cccc S: -- )    
 ;   Ce mot introduit un commentaire qui se termine à la fin de la ligne.
 ;   Tous les caractères dans le tampon d'entré sont sautés jusqu'à la fin de ligne.    
 ;   Il s'agit d'un mot immédiat, il s'éxécute donc même en mode compilation.
 ; arguments:
-;   cccc  Caractères dans le flux d'entrée terminé par une fin de ligne. 
+;   cccc  Caractères dans le texte d'entrée terminé par une fin de ligne. 
 ; retourne:
 ;   rien    
 DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
@@ -507,10 +539,10 @@ DEFWORD "\\",1,F_IMMED,COMMENT ; ( -- )
 
 ; nom: .(   cccc) ( -- )    
 ;   Mot immédiat, affiche le texte délimité par ).
-;   Extrait tous les caractères du flux d'entrée jusqu'après le caractère ')'.
+;   Extrait tous les caractères du texte d'entrée jusqu'après le caractère ')'.
 ;   Le délimiteur ')' n'est pas imprimé.    
 ; arguments:
-;   cccc Caractères dans le flux d'entrée terminés par ')'.
+;   cccc Caractères dans le texte d'entrée terminés par ')'.
 ; retourne:
 ;   rien    
 DEFWORD ".(",2,F_IMMED,DOTPAREN ; ccccc    

@@ -85,7 +85,7 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="CHAR">
-<b>CHAR</b>   ( cccc -- c )    
+<b>CHAR</b>   ( cccc S: -- c )    
 <br><div>   Recherche le prochain mot dans le flux d'entrée et empile le premier caractère de ce mot.
 </div>
 <div>   A la suite de cette opération la variable &gt;IN pointe après le mot.    
@@ -103,12 +103,20 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="[CHAR]">
-<b>[CHAR]</b>   ( ccccc -- )
+<b>[CHAR]</b>   ( cccc S: -- )
 <br><div>   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.    
 </div>
 <div>   Mot compilant le premier caractère du mot suivant dans le flux d'entré.
 </div>
 <div>   Après cette opération la variable &gt;IN pointe après le mot trouvé.
+</div>
+<div>   Lors de L'exécution de cette définition le caractère compilé est empilé.   
+</div>
+<div>   exemple:
+</div>
+<div>   : test [char] Hello ;
+</div>
+<div>   test \ S: H     
 </div>
 </p>
 <div><b> arguments:
@@ -448,6 +456,30 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="C-COMP">
+<b>C-COMP</b> ( c1 c2 -- -1|0|1 )
+<br><div>   Compare les 2 caractères et retourne une des 3 valeur suivante:
+</div>
+<div>   -1 si c1 &lt; c2
+</div>
+<div>    0 si c1==c2
+</div>
+<div>    1 si c1&gt;c2
+</div>
+</p>
+<div><b> arguments:
+</b></div>
+<div><i>c1</i>&nbsp;&nbsp; Premier caractère à comparer
+</div>
+<div><i>c2</i>&nbsp;&nbsp; Deuxième caractère à comparer
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>-1|0|1</i>&nbsp;&nbsp;  Indique la relation entre les 2 caractères.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="COMPARE">
 <b>COMPARE</b> ( c-addr1 u1 c-addr2 u2 -- -1|0?1 )
 <br><div>   Compare la chaîne de caractère débutant à l'adresse 'c-addr1' de longueur 'u1'
@@ -530,9 +562,17 @@
 <b>SLITERAL</b> ( c-addr u -- )
 <br><div>   Mot immédiat à n'utiliser qu'à l'intérieur d'une définition.
 </div>
-<div>   Compile une chaîne litérale dont le descripteur est sur la pile des arguments.
+<div>   Compile le descripteur d'une chaîne qui est sur la pile des arguments.
 </div>
-<div>   A l'exécution le descripteur est empilée.    
+<div>   A l'exécution le descripteur est empilé.
+</div>
+<div>   exemple:
+</div>
+<div>   : s1 s" test" ; immediate
+</div>
+<div>   : type-s1 s1 sliteral type ;
+</div>
+<div>   type-s1  test  OK
 </div>
 </p>
 <div><b> arguments:
@@ -554,7 +594,7 @@
 </div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="(">
-<b>(</b>    ( cccc -- )    
+<b>(</b>    ( cccc S: -- )    
 <br><div>   Ce mot introduit un commentaire qui se termine  par ')'.
 </div>
 <div>   Tous les caractères dans le tampon d'entrée sont sautés jusqu'après le ')'.    
@@ -566,7 +606,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;  commentaire dans le flux d'entrée terminé par ')'. 
+<div><i>cccc</i>&nbsp;&nbsp;  commentaire dans le texte d'entrée terminé par ')'. 
 </div>
 <div><b> retourne:    
 </b></div>
@@ -576,7 +616,7 @@
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="\">
-<b>\</b>    ( cccc -- )    
+<b>\</b>    ( cccc S: -- )    
 <br><div>   Ce mot introduit un commentaire qui se termine à la fin de la ligne.
 </div>
 <div>   Tous les caractères dans le tampon d'entré sont sautés jusqu'à la fin de ligne.    
@@ -586,7 +626,7 @@
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp;  Caractères dans le flux d'entrée terminé par une fin de ligne. 
+<div><i>cccc</i>&nbsp;&nbsp;  Caractères dans le texte d'entrée terminé par une fin de ligne. 
 </div>
 <div><b> retourne:
 </b></div>
@@ -599,14 +639,14 @@
 <b>.(</b>   cccc) ( -- )    
 <br><div>   Mot immédiat, affiche le texte délimité par ).
 </div>
-<div>   Extrait tous les caractères du flux d'entrée jusqu'après le caractère ')'.
+<div>   Extrait tous les caractères du texte d'entrée jusqu'après le caractère ')'.
 </div>
 <div>   Le délimiteur ')' n'est pas imprimé.    
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>cccc</i>&nbsp;&nbsp; Caractères dans le flux d'entrée terminés par ')'.
+<div><i>cccc</i>&nbsp;&nbsp; Caractères dans le texte d'entrée terminés par ')'.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1220,6 +1260,7 @@
 <li><a href="#?SIGN">?SIGN</a></li>
 <li><a href="#BL">BL</a></li>
 <li><a href="#BLANK">BLANK</a></li>
+<li><a href="#C-COMP">C-COMP</a></li>
 <li><a href="#C?">C?</a></li>
 <li><a href="#C@+">C@+</a></li>
 <li><a href="#CHAR">CHAR</a></li>

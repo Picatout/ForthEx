@@ -1,3 +1,11 @@
+2017-07-19
+----------
+Test et Documentation string.s
+Correction bogue dans >CHAR
+Ajout C-COMP danst string.s
+Correction bogue dans COMPARE
+Correcton SLITERAL
+
 2017-07-18
 ----------
 Documentation interpret.s
