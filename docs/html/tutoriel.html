@@ -37,7 +37,7 @@ ainsi que les 4 premiers paragraphes de l'<a href="index.html">index principal</
    Puisqu'il s'agit d'un écran texte, les pixels ici sont représentés par l'espace d'un caractère. Sur la première ligne de
    l'écran s'affiche le pointage <b>SCORE:</b>, et la longueur du serpent <b>LENGTH:</b>. Ces compteurs augmentent chaque fois qu'il mange.</p>
 <h3>Analyse du programme.</h3>   
-<p>Essayons de voir de quoi nous avons besoins pour réaliser ce jeux. Notez que le langage ForthEx est insensible à la casse. On peut écrire les 
+<p>Essayons de voir de quoi nous avons besoins pour réaliser ce jeu. Notez que le langage ForthEx est insensible à la casse. On peut écrire les 
 identificateurs en minuscule,majuscules ou un mélange des deux. Les indentificateurs sont convertis en majuscules avant d'être ajouter au dictionnaire.</p>
 <h4>Variables</h4>
 <p>
@@ -182,7 +182,7 @@ un nombre et empiler ce nombre autrement arrêter et signaler une erreur.
     mot suivit d'un point d'interrogation.
 </p>
 <p>
-	Il existe une forme de commentaire qui sert à décrire en abrégé l'interface d'un mot (fonction). Vous rencontrerai cett forme de commentaires
+	Il existe une forme de commentaire qui sert à décrire en abrégé l'interface d'un mot (fonction). Vous rencontrerez cett forme de commentaires
 	en lisant la description de chaque mot du langage ForthEx. Voici un exemple:<br>
 	<textarea readonly id="code" style="height:200px;">
 	\ conversion couple {x,y}
@@ -226,7 +226,7 @@ un nombre et empiler ce nombre autrement arrêter et signaler une erreur.
 </p>
 <h3>La notation préfixée.</h3>
 <p> Autre particularité de la syntaxe Forth est que les arguments ( sauf exception ) sont énoncés avant la fonction. C'est ce qu'on appelle la
-notation préfixée. exemple.
+notation préfixée. exemple.<br>
    <textarea readonly id="code" style="height:100px;">
 	   34 56 *  \ multipliation de 34 par 56
 	   21 7 /  \ division de 21 par 7
@@ -235,7 +235,7 @@ notation préfixée. exemple.
 </p>
 <h3>Débutons le codage</h3>
 <p>
-	À ce point çi nous disposons suffisamment d'information pour débuter l'écriture du code. Si nous avons manquer un point nous nous ajusterons en
+	À ce point çi nous disposons suffisamment d'information pour débuter l'écriture du code. Si nous avons manqué un point nous nous ajusterons en
 	cours de route. Mais d'abord il faut répondre à quelques questions.
 	<div><ul>
 	<li>Quel sera la longueur initiale du serpent? J'ai opté pour 4.</li>
@@ -263,8 +263,8 @@ notation préfixée. exemple.
 	144 constant vk_right \ code touche fleche droite	
 	</textarea><br>
 	Sans surprise les variables sont créées à l'aide du  mot <b>VARIABLE</b>. Lorsqu'une variable est invoquée c'est son adresse qui est déposée
-	au sommet de la pile. Ce qui permet de lire sa valeur avec le mot <b>@</b> <i>(prononcé fetch)</i> ou bien de modifier cette valeur avec le mot <b>!</b>
-	<i>(prononcé store)</i>.<br>
+	au sommet de la pile. Ce qui permet de lire sa valeur avec le mot <b>@</b> <i>(prononcé <b>fetch</b>)</i> ou bien de modifier cette valeur avec le mot <b>!</b>
+	<i>(prononcé <b>store</b>)</i>.<br>
 	<textarea readonly id="code" style="height:180px;">
 	\ création des variables, elles sont inialisée à 0 lors de
 	\ leur création.
@@ -318,7 +318,7 @@ notation préfixée. exemple.
 		<li><b>CREATE</b>, Lit le prochain mot dans le texte d'entré et cré une nouvelle définition dans le dictionnaire avec ce nom. Lorsqu'un mot
 		qui a été créé par <b>CREATE</b> est invoqué son action est de déposer au sommet de la pile l'adresse du premier octet de donnée, ce
 		qu'on appelle <b>PFA</b> pour <i>Parameter Field Address</i>.</li>
-		<li><b>CELLS</b>, Multiplie la valeur qui est au sommet de la pile par le nombre d'octets d'une cellule. En ForthEx l'on l'a dit
+		<li><b>CELLS</b>, Multiplie la valeur qui est au sommet de la pile par le nombre d'octets d'une cellule. En ForthEx on l'a dit
 		les cellules sont de 16 bits donc 2 octets. Donc la valeur au sommet de la pile est multipliée par 2.</li>
 		<li><b>ALLOT</b>, Consomme la valeur au sommet de la pile des arguments et se sert de cette valeur pour réserver l'espace nécessaire 
 		dans l'espace de données pour stocker le nombre d'octets indiqué par cette valeur. La variable système <b>DP</b> <i>( Data Pointer )</i>
@@ -326,12 +326,12 @@ notation préfixée. exemple.
 		<b>HERE</b> empile la valeur de la variable système <b>DP</b>. La constante système <b>DP0</b> indique l'adresse du début de l'espace
 		de donneés. Si on entre à la console la phrase:<br>
 		 <b>here dp0 - u.</b> <br>
-		Le nombre qui apparaît à l'écran suite à cette commande est le nombre octets déjà alloués.</li>
+		Le nombre qui apparaît à l'écran suite à cette commande est le nombre d'octets déjà alloués.</li>
 	</ul><br></div>
 <p>	
 	Nous allons maintenant créer 2 variables de type <i>vecteur</i>. Le mot <b>vector</b> consomme 1 argument qui est la taille du vecteur, c'est
 	à dire le nombre de cellules qui faut réservés dans L'espace de données pour son usage. Le mot <b>vector</b> lit le mot qui le suis dans le 
-	texte d'entrée et l'utilise comme nom du vecteur nouvellement créé.
+	texte d'entrée et l'utilise comme nom du vecteur nouvellement créé.<br>
 	<textarea readonly id="code" style="height:200px;">
 	\ creation des variables vecteur.		
 	\ tableau de 4 caracteres representant la tete du serpent.
@@ -343,9 +343,9 @@ notation préfixée. exemple.
 	'&lt;' east c-head !
 	'W' south c-head !
 	'&gt;' west c-head !
-	'M' north c-head !
+	'V' north c-head !
 	</textarea><br>
-	Prenons l'exemple de <b>C-HEAD</b>. On empile la valeur <b>4</b> qui sera consommé par <b>VECTOR</b> qui est de <b>C-HEAD</b>. 
+	Prenons l'exemple de <b>C-HEAD</b>. On empile la valeur <b>4</b> qui sera consommé par <b>VECTOR</b> et qui est la taille de <b>C-HEAD</b>. 
 	Une fois que l'interpréteur a lu cette phrase il y a donc un nouveau mot dans le dictionnaire appellé <b>C-HEAD</b>. 
 	L'initialisation de <b>C-HEAD</b> nous montre comment utiliser un vecteur. 	On accède aux éléments d'un vecteur en indiquant 
 	l'indice de l'élément suivit du nom du vecteur. Comme en <b>C</b> les indices commencent à zéro. L'adresse de l'élément est
@@ -396,7 +396,7 @@ notation préfixée. exemple.
 </p>
 <h3>Premiers mots du jeu</h3>
 <p>
-	On va maintenant définir quelques mots qui seront utilisés dans les graphismes du jeu. Chaque définition d'un mot commence 
+	On va maintenant définir quelques mots qui seront utilisés dans l'affichage du jeu. Chaque définition d'un mot commence 
 	par le mot <b>:</b> et se termine par le mot <b>;</b>.<br>
 	Pour sauver de l'espace de données le jeu snake conserve le couple de coordonnées {x,y} en 1 seul entier plutôt que 2. Il nous
 	faut donc une fonction pour convertir le couple <b>{x,y}</b> en entier unique <b>u</b>. Tout a long de ce tutoriel je vais 
@@ -438,9 +438,9 @@ notation préfixée. exemple.
 	   true b/w
 	   'O' swap ucoord>xy draw-pixel false b/w ;
 	</textarea><br>
-	Le mot <b>draw-ring</b> sert à dessiner une pastille en inverse vidéo. Ces pastilles représente à la fois la nourriture et les anneaux qui 
+	Le mot <b>draw-ring</b> sert à dessiner une pastille en inverse vidéo. Ces pastilles représentent à la fois la nourriture et les anneaux qui 
 	construisent le corps du serpent. Le mot <b>b/w</b> consomme un argument booléen et met le mode vidéo en noir sur fond blanc lorsque cette valeur
-	est vrai on en vidéo normale si elle est fausse. <b>b/w</b> signifit <i>Black on White</i>. Puisqu'on dessine les anneaux en inverse vidéo
+	est vrai ou en vidéo normale si elle est fausse. <b>b/w</b> signifit <i>Black on White</i>. Puisqu'on dessine les anneaux en inverse vidéo
 	on fait donc <b>true b/w</b>. <b>draw-ring</b> consomme un argument <b>u</b> qui est l'<i>ucoord</i> de la position.  On convertie cette valeur
 	en couple<b>{x,y}</b> avant d'appeller <b>draw-pixel.</b> Finalement on retourne au mode vidéo normal avec <b>false b/w</b>.
 	<br>
@@ -677,7 +677,7 @@ fois on utilise une boucle avec compteur <b>do ... loop</b>. Mais avant d'entrer
  L'intérieur de la boucle est très similaire à ce qui se passe dans <b>valid-food?</b>. <b>i snake @ over = if swap drop true swap leave then</b>. Pour chaque
  élément <i>i</i> on compare <i>ucoord(0)</i> et <i>ucoord(i)</i> pour l'égalité et en cas d'égalité en remplace la constante <b>FALSE</b> en deuxième position
  de la pile par la constante <b>TRUE</b> et on quitte la boucle avec <b>LEAVE</b>. A la sortie de la boucle on jette la valeur <i>ucoord(0)</i> qui restait
- sur la pile pour ne conserver que l'indiccateur booléen <i>vrai/faux</i>.
+ sur la pile pour ne conserver que l'indicateur booléen <i>vrai/faux</i>.
 <br>
 	<br><textarea readonly id="code" style="height:150px;">
 	\ verification collision avec mur
@@ -686,9 +686,11 @@ fois on utilise une boucle avec compteur <b>do ... loop</b>. Mais avant d'entrer
 	   swap  play-width 1- u> or ;
     </textarea><br>
  Le mot <b>wall-bang?</b> vérifie l'autre type de collision, i.e. serpent et mur. Cette détection ne requiert aucune boucle. Il suffit simplement de s'assurer
- que les coordonnées <b>x</b> et <b>y</b> de la tête du serpent sont dans l'aire de jeux. On n'a qu'à lire <i>l'ucoord(0)</i> avec <b>0 snake @</b>, convertir
+ que les coordonnées <b>x</b> et <b>y</b> de la tête du serpent sont dans l'aire de jeu. On n'a qu'à lire <i>l'ucoord(0)</i> avec <b>0 snake @</b>, convertir
  cette valeur en couple <i>{x,y}</i> et ensuite faire la vérifaction <i>(x&gt;(play-width-1))||(y&gt;(play-height-1))</i> ce qui se traduit en Forth par:
- <b> play-height 1- u&gt; swap  play-width 1- u&gt; or</b>
+ <b> play-height 1- u&gt; swap  play-width 1- u&gt; or</b>. Notez l'astuce ici, on considère les coordonnées comme des entiers non signés ce qui évite d'avoir
+ à vérifier que <i>x</i> ou <i>y</i> est plus petit que zéro. En effet si l'une où l'autre des coordonnées devient négative en considérant cette valeur comme
+ non signée elle sera plus grande que 127.
  <table>
 	 <tr><th>mot<br>exécuté</th><th>S:</th></tr>
 	 <tr><td>0</td><td>0</td></tr>
@@ -830,7 +832,7 @@ en créant un nouveau mot qui exécute le code commun au 2 définitions et redé
 			if 2* then \ si y le long d'un mur
 			score +! -1 food ! ;
 	</textarea><br>
-	On commence par indiquer un point puis pour chaque indicateur vrai retourné par <b>borders?</b> on multiplie le gain par 2. après le dernier <b>then</b>
+	On commence par accorder un point puis pour chaque indicateur vrai retourné par <b>borders?</b> on multiplie le gain par 2. après le dernier <b>then</b>
 	on se retrouve avec le gain au sommet de la pile, il suffit de l'ajouté au pointage avec la phrase <b>score +!</b>. Finalement on met la valeur
 	<b>-1</b> dans la variable <b>food</b> pour indiquer qu'il n'y a plus de pastille en jeu. La factorisation nous a fait sauver encore plus de 
 	code que je l'envisageais au départ.
@@ -848,7 +850,7 @@ en créant un nouveau mot qui exécute le code commun au 2 définitions et redé
 	</textarea> <br>
 	<b>snake-len</b> est la variable qui contient la  longueur du serpent. On doit incrémenter cette valeur de 1. On envoie une copie de l'adresse de
 	cette variable sur la pile des retours car on doit lire sa valeur et après l'avoir incrémentée il faut sauvegarder la nouvelle valeur. Bien sur on
-	aurait pu simplement invoqué <b>snake-len</b> 2 fois mais cette façon de faire monte comment on peut utiliser les mots <b>&gt;R</b> et <b>R&gt;</b>
+	aurait pu simplement invoqué <b>snake-len</b> 2 fois mais cette façon de faire montre comment on peut utiliser les mots <b>&gt;R</b> et <b>R&gt;</b>
 	pour sauvegarder temporairement une valeur sur la pile des retours pour accéder plus facilement les autres variables locales. Voici une autre version 
 	de ce mot:<br>
 	<textarea readonly id="code" style="height:200px;">

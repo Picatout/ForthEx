@@ -551,7 +551,9 @@ DEFWORD ".(",2,F_IMMED,DOTPAREN ; ccccc
     
 ; DESCRIPTION:
 ;   Mots utilisés dans la conversion d'entiers en chaînes de caractères.
-
+;   La chaîne est construite à la fin dun tampon PAD. La variable HP (Hold Pointer)
+;   est utilisée pour indiquée l'endroit où doit-être déposé le prochain caractère
+;   de la chaîne construite.     
     
 ; nom: DIGIT  ( u -- c )    
 ;   Convertion d'un chiffre en caractère ASCII selon la valeur de BASE.
@@ -568,7 +570,7 @@ DEFWORD "DIGIT",5,,DIGIT ; ( u -- c )
 ;   en accord avec la valeur de la base 'u'. 
 ; arguments:
 ;   ud1 Entier double non signé qui est le  nombre à convertir en chaîne ASCII.
-;   u  Entier simple non signé représente la valeur de la base numérique.
+;   u  Entier simple non signé, valeur de la base numérique.
 ; retourne:
 ;   ud2 Entier double qui est le quotient de ud/u, c'est la partie du nombre qui reste à convertir.
 ;   c   Caractère ASCII qui représente le digit résultant de ud%u (modulo de ud par u ).    
@@ -578,7 +580,8 @@ DEFWORD "EXTRACT",7,,EXTRACT ; ( ud u -- ud2 c )
 ; nom: <#   ( -- )    
 ;   Initalise le début de la conversion d'un entier en chaîne ASCII.
 ;   La valeur de la variable HP est modifiée pour pointer à la fin du PAD.
-;   Lors de la conversion les caractères sont ajoutés de la droite vers la gauche dans le PAD.
+;   Lors de la conversion les caractères sont ajoutés de la fin vers le début.
+;   À chaque caractère ajouté  à la chaîne la variable HP est décrémentée.    
 ; arguments:
 ;   aucun
 ; retourne:
@@ -588,7 +591,7 @@ DEFWORD "<#",2,,LTSHARP ; ( -- )
     .word EXIT
  
 ; nom: HOLD ( c -- )    
-;   Dépose le caractère 'c' dans le PAD et recule HP de 1 caractère.
+;   Dépose le caractère 'c' dans le PAD et décrémente la variable HP.
 ; arguments:
 ;   c  Caractère à insérer dans la chaîne.
 ; retourne:
@@ -782,7 +785,7 @@ DEFWORD "DECIMAL?",8,,DECIMALQ
   
     
 ; nom: >BASE10  ( u1 c -- u2 )
-;   étape de conversion d'une chaîne de caractère en 
+;   étape de conversion d'une chaîne de caractères en 
 ;   entier décimal.
 ; arguments:
 ;   u1  Entier résultant de la conversion d'une chaîne en décimal
@@ -793,7 +796,7 @@ DEFWORD ">BASE10",7,,TOBASE10
     .word LIT,'0',MINUS,LIT,10,ROT,STAR
     .word PLUS,EXIT
    
-; nom: ?DIGIT  ( c -- x 0 | n -1 )    
+; nom: DIGIT?  ( c -- x 0 | n -1 )    
 ;   Vérifie si le caractère est un digit valide dans la base actuelle.
 ;   Si valide retourne la valeur du digit et -1
 ;   Si invalide retourne x 0
@@ -803,7 +806,7 @@ DEFWORD ">BASE10",7,,TOBASE10
 ;   x&nbsp;0 Faux et un entier quelconque qui doit-être ignoré car ce n'est pas un digit.
 ;   ou    
 ;   n&nbsp;-1 Vrai et le caractère convertie en digit de la base active.
-DEFWORD "?DIGIT",6,,QDIGIT ; ( c -- x 0 | n -1 )
+DEFWORD "DIGIT?",6,,DIGITQ ; ( c -- x 0 | n -1 )
     .word DUP,LIT,'a'-1,UGREATER,ZBRANCH,1f-$
     .word LIT,32,MINUS ; convertie en majuscule.
 1:  .word DUP,LIT,'9',UGREATER,ZBRANCH,3f-$
@@ -813,33 +816,32 @@ DEFWORD "?DIGIT",6,,QDIGIT ; ( c -- x 0 | n -1 )
 3:  .word LIT,'0',MINUS
     .word DUP,BASE,FETCH,ULESS,EXIT
  
-; nom: ?DOUBLE   ( c-addr u -- c-addr' u' f )    
-;   Vérifie si le caractère qui a mis fin à >NUMBER
-;   est {'.'|','}. Si c'est le cas il s'agit d'un
-;   nombre double précision. saute le caractère et retourne -1.
-;   Dans le cas contraire retourne 0.
+; nom: PONCT?  ( c -- f )
+;  Vérifie si le caractère 'c' est un point ou une virgule et retourne un 
+;  indicateur vrai si c'est le cas.
 ; arguments:
-;   c-addr  Pointe vers l'adresse du dernier caractère analysé par >NUMBER
-;   u       Longueur de la chaîne restante.
+;  c Caractère à vérifier.
 ; retourne:
-;   c-addr' Adresse incrémentée si le critère {'.'|','} est vrai.
-;   u'      Longueur décrémentée si le critère {'.'|','} est vrai.
-;   f       Indicateur Booléen indiquant s'il s'agit d'un entier double.    
-DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
-    .word OVER,CFETCH,LIT,'.',EQUAL,ZBRANCH,2f-$
-1:  .word LIT,1,SLASHSTRING,LIT,-1,BRANCH,9f-$
-2:  .word OVER,CFETCH,LIT,',',EQUAL,ZBRANCH,8f-$
-    .word BRANCH,1b-$
-8:  .word LIT,0
-9:  .word EXIT  
+;  f Indicateur booléen, vrai si c est ','|'.'
+DEFCODE "PONCT?",6,,PONCTQ
+    mov T,W0
+    setm T
+    cp.b W0,#'.'
+    bra z, 9f
+    cp.b W0,#','
+    bra z,9f
+    clr T
+9:  NEXT
+    
   
 ; nom: >NUMBER  (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )   
 ;   Convertie la chaîne en nombre en utilisant la valeur de BASE.
 ;   La conversion s'arrête au premier caractère non numérique.
+;     
 ; arguments:  
 ; 'ud1'	    Est initialisé à zéro  
-;  c-addr1 Adrese du début de la chaîne à convertir en entier.
-;  u1      Longueur du tampon à analyser.  
+;  c-addr1 Adresse du début de la chaîne à convertir en entier.
+;  u1      Longueur de la chaîne à analyser.  
 ; retourne:
 ;  ud2     Entier double résultant de la conversion.
 ;  c-addr2  Adresse pointant après le nombre dans le tampon.
@@ -847,12 +849,11 @@ DEFWORD "?DOUBLE",7,,QDOUBLE ; ( c-addr u -- c-addr' u' f )
 DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
 1:   .word LIT,0,TOR ; indique si le dernier caractère était un digit
 2:   .word DUP,ZBRANCH,7f-$
-     .word OVER,CFETCH,QDIGIT  ; ud1 c-addr u1 n|x f
+     .word OVER,CFETCH,DIGITQ  ; ud1 c-addr u1 n|x f
      .word TBRANCH,4f-$
      .word RFROM,ZBRANCH,8f-$
-     .word DROP,QDOUBLE,ZBRANCH,9f-$
-     .word RFROM,RFROM,LIT,2,OR,TOR,TOR ; on change le flag du signe pour ajouter le flag double
-     .word BRANCH,1b-$
+     .word DROP,OVER,CFETCH,PONCTQ,ZBRANCH,9f-$
+     .word SWAP,CHARPLUS,SWAP,ONEMINUS,BRANCH,1b-$
 4:   .word RDROP,LIT,-1,TOR ; dernier caractère était un digit
      .word TOR,TWOSWAP,BASE,FETCH,UDSTAR
      .word RFROM,MPLUS,TWOSWAP
@@ -861,33 +862,33 @@ DEFWORD ">NUMBER",7,,TONUMBER ; (ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
 8:   .word DROP
 9:   .word EXIT
    
-; nom: ?SIGN   ( c-addr u -- c-addr' u' f )   
+; nom: NEG?   ( c-addr u -- c-addr' u' f )   
 ;   Vérifie s'il y a un signe '-' à la première postion de la chaîne spécifiée par <c-addr u>
 ;   Retourne f=VRAI si '-' sinon f=FAUX.    
 ;   S'il y a un signe avance au delà du signe.
 ; arguments:
 ;   c-addr   Adresse où débute l'analyse.
-;   u        Longueur du tampon à analyser.
+;   u        Longueur de la chaîne à analyser.
 ; retourne:
 ;   c-addr'  Adresse incrémentée au delà du signe '-' s'il y a lieu.
 ;   u'       Longueur restante dans le tampon.
 ;   f        Indicateur Booléen, VRAI s'il le premier caractère est '-'.   
-DEFWORD "?SIGN",5,,QSIGN ; ( c-addr u -- c-addr' u' f )
+DEFWORD "NEG?",5,,SIGNQ ; ( c-addr u -- c-addr' u' f )
     .word OVER,CFETCH,CLIT,'-',EQUAL,TBRANCH,8f-$
-    .word LIT,0,BRANCH,9f-$
-8:  .word LIT,1,SLASHSTRING,LIT,1
+    .word FALSE,EXIT
+8:  .word LIT,1,SLASHSTRING,TRUE
 9:  .word EXIT
     
-; nom: ?BASE  ( c-addr u1 -- c-addr' u1' )  
+; nom: BASE-MOD?  ( c-addr u1 -- c-addr' u1' )  
 ;   Vérifie s'il y a un modificateur de base
 ;   Si vrai, modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
 ; arguments:
 ;   c-addr  Adresse du début de la chaîne à analyser.
-;   u1      Longueur maximale de la chaîne.
+;   u1      Longueur de la chaîne.
 ; retourne:
 ;   c-addr'  Adresse incrémentée au delà du caractère modificateur de BASE.
 ;   u'       Longueur restante de la chaîne.  
-DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
+DEFWORD "BASE-MOD?",8,,BASEMODQ ; ( c-addr u1 -- c-addr' u1'  )
     .word OVER,CFETCH,CLIT,'$',EQUAL,ZBRANCH,1f-$
     .word LIT,16,BASE,STORE,BRANCH,8f-$
 1:  .word OVER,CFETCH,CLIT,'#',EQUAL,ZBRANCH,2f-$
@@ -897,7 +898,7 @@ DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
 8:  .word SWAP,ONEPLUS,SWAP,ONEMINUS    
 9:  .word EXIT
 
-; nom: ?QUOTED-CHAR  ( c-addr -- c-addr 0 | n -1 )
+; nom: QUOTED-CHAR?  ( c-addr -- c-addr 0 | n -1 )
 ;   Vérifie si la chaîne est un caractère entre 2 apostrophe si c'est le cas
 ;   Empile la valeur ASCII du caractère et TRUE, sinon retourne 'c-addr' et FALSE.
 ; arguments:
@@ -906,7 +907,7 @@ DEFWORD "?BASE",5,,QBASE ; ( c-addr u1 -- c-addr' u1'  )
 ;   c-addr&nbsp;0 Faux et adresse orignale si ce n'est pas un quoted char.
 ;   ou  
 ;   n&nbsp;-1 Vrai et valeur ASCII du caractère.  
-DEFWORD "?QUOTED-CHAR",12,,QQUOTEDCHAR
+DEFWORD "QUOTED-CHAR?",12,,QUOTEDCHARQ
     .word DUP,COUNT,LIT,3,EQUAL,ZBRANCH,9f-$
     ; s: c-addr c-addr+1
     .word DUP,CFETCH,DUP,LIT,'\'',EQUAL,ZBRANCH,8f-$
@@ -919,32 +920,54 @@ DEFWORD "?QUOTED-CHAR",12,,QQUOTEDCHAR
 8:  .word DROP  
 9:  .word DROP,FALSE,EXIT
   
-; nom: ?NUMBER   ( c-addr -- c-addr 0 | n -1 )  
-;   Conversion d'une chaîne en nombre, 'c-addr' indique le début de la chaîne.
-;   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
-;   Accepte aussi un caractère ASCII imprimable entre 2 apostrophes.
+
+; nom: DOUBLE? ( c-addr -- f )
+;   Vérifie si le mot contient un point ou une virgule et retourne vrai
+;   si c'est le cas.
+; arguments:  
+;   c-addr  Adresse de la chaîne comptée qui contient le mot à vérifier.
+; retourne:
+;   f Retourne vrai si la chaîne contient un point ou une virgule.
+DEFWORD "DOUBLE?",7,,DOUBLEQ
+    .word COUNT,LIT,0,DODO
+1:  .word DUP,CFETCH,PONCTQ,TBRANCH,6f-$
+    .word CHARPLUS,DOLOOP,1b-$,DROP,FALSE,EXIT
+6:  .word DROP,TRUE,UNLOOP,EXIT
+  
+; nom: NUMBER?   ( c-addr -- c-addr 0 | n -1 )  
+;   Conversion d'un mot extrait par PARSE-NAME en entier. Ce mot est invoqué par
+;   INTERPRET lorsqu'un mot n'a pas été trouvé dans le dictionnaire. L'interpréteur
+;   s'attend donc à ce que le mot soit un entier (simple ou double). ?NUMBER
+;   invoque >NUMBER et s'attend à ce que >NUMBER retourne 0 au sommet de la pile
+;   car si >NUMBER ne convertie pas tous les caractères ça signifit que le mot
+;   n'est pas un entier valide.  
+;   NUMBER? utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
+;   NUMBER? accepte aussi un caractère ASCII imprimable entre 2 apostrophes.
 ;   Dans ce cas la valeur de l'entier est la valeur ASCII du caractère.  
 ;   Pour entrer un nombre double précision il faut mettre un point ou une virgule 
 ;   à une position quelconque de la chaîne saisie sauf à la première position.
+;   Il peut y avoir pleusieurs ponctuations, par exemple 12,267,324 est une 
+;   entier double valide.  
 ; arguments:
-;   c-addr   Adresse de la chaîne à analyser.
+;   c-addr   Adresse du mot à analyser.
 ; retourne:
 ;   c-addr&nbsp;0  Faux et l'adresse si ce n'est pas un entier.	
 ;   ou  
 ;   n&nbsp;-1  Vrai et l'entier.  
-DEFWORD "?NUMBER",7,,QNUMBER ; ( c-addr -- c-addr 0 | n -1 )
-    .word QQUOTEDCHAR,ZBRANCH,2f-$
+DEFWORD "NUMBER?",7,,NUMBERQ ; ( c-addr -- c-addr 0 | n -1 )
+    .word QUOTEDCHARQ,ZBRANCH,2f-$
     .word TRUE,EXIT  
 2:  .word BASE,FETCH,TOR ; sauvegarde la valeur de BASE 
-    .word DUP,LIT,0,DUP,ROT,COUNT,QBASE  ; c-addr 0 0 c-addr' u'
-    .word QSIGN,TOR  ; c-addr 0 0 c-addr' u' R: signFlag
-4:  .word TONUMBER ; c-addr n1 n2 c-addr' u'
+    .word DUP,DOUBLEQ,TOR ;S: c-addr R: base fDouble
+    .word DUP,LIT,0,DUP,ROT,COUNT,BASEMODQ  ; c-addr 0 0 c-addr' u'
+    .word SIGNQ,TOR  ; c-addr 0 0 c-addr' u' R: base fDouble fSign
+4:  .word TONUMBER ; c-addr ud c-addr' u' R: base fDouble fSign
     .word ZBRANCH,1f-$ 
-    .word RFROM,TWODROP,TWODROP,LIT,0,BRANCH,8f-$
+    .word DROP,TWODROP,TWORFROM,TWODROP,FALSE,BRANCH,8f-$
 1:  .word DROP,ROT,DROP
-    .word RFETCH,ODD,ZBRANCH,2f-$
+    .word RFROM,ZBRANCH,2f-$
     .word DNEGATE
-2:  .word RFROM,LIT,2,AND,TBRANCH,3f-$
+2:  .word RFROM,TBRANCH,3f-$
     .word DROP
 3:  .word LIT,-1
 8:  .word RFROM,BASE,STORE ; restitue la valeur de BASE

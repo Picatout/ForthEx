@@ -1,3 +1,10 @@
+2017-07-21
+----------
+Test et Documentation
+Modfication à NUMBER? et mots associés.
+Correction bogues dans tvout.s
+
+
 2017-07-19
 ----------
 Test et Documentation string.s

@@ -432,7 +432,7 @@ DEFWORD "INTERPRET",9,,INTERPRET ; ( c-addr u -- )
         .word EXECUTE,BRANCH,1b-$
 2:      .word COMMA
 3:      .word BRANCH,1b-$
-4:      .word QNUMBER,ZBRANCH,5f-$
+4:      .word NUMBERQ,ZBRANCH,5f-$
         .word LITERAL,BRANCH,1b-$
 5:      .word COUNT,TYPE,LIT,'?',EMIT,CR,ABORT
 9:      .word DROP,EXIT

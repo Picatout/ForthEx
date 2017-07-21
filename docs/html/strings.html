@@ -659,6 +659,12 @@
 </div>
 <div>   Mots utilisés dans la conversion d'entiers en chaînes de caractères.
 </div>
+<div>   La chaîne est construite à la fin dun tampon PAD. La variable HP (Hold Pointer)
+</div>
+<div>   est utilisée pour indiquée l'endroit où doit-être déposé le prochain caractère
+</div>
+<div>   de la chaîne construite.     
+</div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:4px;"><p id="DIGIT">
 <b>DIGIT</b>  ( u -- c )    
@@ -687,7 +693,7 @@
 </b></div>
 <div><i>ud1</i>&nbsp;&nbsp; Entier double non signé qui est le  nombre à convertir en chaîne ASCII.
 </div>
-<div><i>u</i>&nbsp;&nbsp;  Entier simple non signé représente la valeur de la base numérique.
+<div><i>u</i>&nbsp;&nbsp;  Entier simple non signé, valeur de la base numérique.
 </div>
 <div><b> retourne:
 </b></div>
@@ -704,7 +710,9 @@
 </div>
 <div>   La valeur de la variable HP est modifiée pour pointer à la fin du PAD.
 </div>
-<div>   Lors de la conversion les caractères sont ajoutés de la droite vers la gauche dans le PAD.
+<div>   Lors de la conversion les caractères sont ajoutés de la fin vers le début.
+</div>
+<div>   À chaque caractère ajouté  à la chaîne la variable HP est décrémentée.    
 </div>
 </p>
 <div><b> arguments:
@@ -720,7 +728,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="HOLD">
 <b>HOLD</b> ( c -- )    
-<br><div>   Dépose le caractère 'c' dans le PAD et recule HP de 1 caractère.
+<br><div>   Dépose le caractère 'c' dans le PAD et décrémente la variable HP.
 </div>
 </p>
 <div><b> arguments:
@@ -1039,7 +1047,7 @@
 <div><a href="index.html#MasterIndex">index principal</a></div>
 <hr style="border-width:1px;"><p id="&gt;BASE10">
 <b>&gt;BASE10</b>  ( u1 c -- u2 )
-<br><div>   étape de conversion d'une chaîne de caractère en 
+<br><div>   étape de conversion d'une chaîne de caractères en 
 </div>
 <div>   entier décimal.
 </div>
@@ -1057,8 +1065,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="?DIGIT">
-<b>?DIGIT</b>  ( c -- x 0 | n -1 )    
+<hr style="border-width:1px;"><p id="DIGIT?">
+<b>DIGIT?</b>  ( c -- x 0 | n -1 )    
 <br><div>   Vérifie si le caractère est un digit valide dans la base actuelle.
 </div>
 <div>   Si valide retourne la valeur du digit et -1
@@ -1081,30 +1089,20 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="?DOUBLE">
-<b>?DOUBLE</b>   ( c-addr u -- c-addr' u' f )    
-<br><div>   Vérifie si le caractère qui a mis fin à &gt;NUMBER
+<hr style="border-width:1px;"><p id="PONCT?">
+<b>PONCT?</b>  ( c -- f )
+<br><div>  Vérifie si le caractère 'c' est un point ou une virgule et retourne un 
 </div>
-<div>   est {'.'|','}. Si c'est le cas il s'agit d'un
-</div>
-<div>   nombre double précision. saute le caractère et retourne -1.
-</div>
-<div>   Dans le cas contraire retourne 0.
+<div>  indicateur vrai si c'est le cas.
 </div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>c-addr</i>&nbsp;&nbsp;  Pointe vers l'adresse du dernier caractère analysé par &gt;NUMBER
-</div>
-<div><i>u</i>&nbsp;&nbsp;       Longueur de la chaîne restante.
+<div><i>c</i>&nbsp;&nbsp; Caractère à vérifier.
 </div>
 <div><b> retourne:
 </b></div>
-<div><i>c-addr'</i>&nbsp;&nbsp; Adresse incrémentée si le critère {'.'|','} est vrai.
-</div>
-<div><i>u'</i>&nbsp;&nbsp;      Longueur décrémentée si le critère {'.'|','} est vrai.
-</div>
-<div><i>f</i>&nbsp;&nbsp;       Indicateur Booléen indiquant s'il s'agit d'un entier double.    
+<div><i>f</i>&nbsp;&nbsp; Indicateur booléen, vrai si c est ','|'.'
 </div>
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
@@ -1115,14 +1113,16 @@
 </div>
 <div>   La conversion s'arrête au premier caractère non numérique.
 </div>
+<div>     
+</div>
 </p>
 <div><b> arguments:  
 </b></div>
 <div><i>'ud1'	</i>&nbsp;&nbsp;    Est initialisé à zéro  
 </div>
-<div><i>c-addr1</i>&nbsp;&nbsp; Adrese du début de la chaîne à convertir en entier.
+<div><i>c-addr1</i>&nbsp;&nbsp; Adresse du début de la chaîne à convertir en entier.
 </div>
-<div><i>u1</i>&nbsp;&nbsp;      Longueur du tampon à analyser.  
+<div><i>u1</i>&nbsp;&nbsp;      Longueur de la chaîne à analyser.  
 </div>
 <div><b> retourne:
 </b></div>
@@ -1135,8 +1135,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="?SIGN">
-<b>?SIGN</b>   ( c-addr u -- c-addr' u' f )   
+<hr style="border-width:1px;"><p id="NEG?">
+<b>NEG?</b>   ( c-addr u -- c-addr' u' f )   
 <br><div>   Vérifie s'il y a un signe '-' à la première postion de la chaîne spécifiée par &lt;c-addr u&gt;
 </div>
 <div>   Retourne f=VRAI si '-' sinon f=FAUX.    
@@ -1148,7 +1148,7 @@
 </b></div>
 <div><i>c-addr</i>&nbsp;&nbsp;   Adresse où débute l'analyse.
 </div>
-<div><i>u</i>&nbsp;&nbsp;        Longueur du tampon à analyser.
+<div><i>u</i>&nbsp;&nbsp;        Longueur de la chaîne à analyser.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1161,8 +1161,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="?BASE">
-<b>?BASE</b>  ( c-addr u1 -- c-addr' u1' )  
+<hr style="border-width:1px;"><p id="BASE-MOD?">
+<b>BASE-MOD?</b>  ( c-addr u1 -- c-addr' u1' )  
 <br><div>   Vérifie s'il y a un modificateur de base
 </div>
 <div>   Si vrai, modifie la valeur de BASE en conséquence et  avance le pointeur c-addr.
@@ -1172,7 +1172,7 @@
 </b></div>
 <div><i>c-addr</i>&nbsp;&nbsp;  Adresse du début de la chaîne à analyser.
 </div>
-<div><i>u1</i>&nbsp;&nbsp;      Longueur maximale de la chaîne.
+<div><i>u1</i>&nbsp;&nbsp;      Longueur de la chaîne.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1183,8 +1183,8 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="?QUOTED-CHAR">
-<b>?QUOTED-CHAR</b>  ( c-addr -- c-addr 0 | n -1 )
+<hr style="border-width:1px;"><p id="QUOTED-CHAR?">
+<b>QUOTED-CHAR?</b>  ( c-addr -- c-addr 0 | n -1 )
 <br><div>   Vérifie si la chaîne est un caractère entre 2 apostrophe si c'est le cas
 </div>
 <div>   Empile la valeur ASCII du caractère et TRUE, sinon retourne 'c-addr' et FALSE.
@@ -1205,13 +1205,41 @@
 <div><a href="#index">index</a></div>
 <div><a href="#top">haut</a></div>
 <div><a href="index.html#MasterIndex">index principal</a></div>
-<hr style="border-width:1px;"><p id="?NUMBER">
-<b>?NUMBER</b>   ( c-addr -- c-addr 0 | n -1 )  
-<br><div>   Conversion d'une chaîne en nombre, 'c-addr' indique le début de la chaîne.
+<hr style="border-width:1px;"><p id="DOUBLE?">
+<b>DOUBLE?</b> ( c-addr -- f )
+<br><div>   Vérifie si le mot contient un point ou une virgule et retourne vrai
 </div>
-<div>   Utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
+<div>   si c'est le cas.
 </div>
-<div>   Accepte aussi un caractère ASCII imprimable entre 2 apostrophes.
+</p>
+<div><b> arguments:  
+</b></div>
+<div><i>c-addr</i>&nbsp;&nbsp;  Adresse de la chaîne comptée qui contient le mot à vérifier.
+</div>
+<div><b> retourne:
+</b></div>
+<div><i>f</i>&nbsp;&nbsp; Retourne vrai si la chaîne contient un point ou une virgule.
+</div>
+<div><a href="#index">index</a></div>
+<div><a href="#top">haut</a></div>
+<div><a href="index.html#MasterIndex">index principal</a></div>
+<hr style="border-width:1px;"><p id="NUMBER?">
+<b>NUMBER?</b>   ( c-addr -- c-addr 0 | n -1 )  
+<br><div>   Conversion d'un mot extrait par PARSE-NAME en entier. Ce mot est invoqué par
+</div>
+<div>   INTERPRET lorsqu'un mot n'a pas été trouvé dans le dictionnaire. L'interpréteur
+</div>
+<div>   s'attend donc à ce que le mot soit un entier (simple ou double). ?NUMBER
+</div>
+<div>   invoque &gt;NUMBER et s'attend à ce que &gt;NUMBER retourne 0 au sommet de la pile
+</div>
+<div>   car si &gt;NUMBER ne convertie pas tous les caractères ça signifit que le mot
+</div>
+<div>   n'est pas un entier valide.  
+</div>
+<div>   NUMBER? utilise la base active sauf si la chaîne débute par '$'|'#'|'%'
+</div>
+<div>   NUMBER? accepte aussi un caractère ASCII imprimable entre 2 apostrophes.
 </div>
 <div>   Dans ce cas la valeur de l'entier est la valeur ASCII du caractère.  
 </div>
@@ -1219,10 +1247,14 @@
 </div>
 <div>   à une position quelconque de la chaîne saisie sauf à la première position.
 </div>
+<div>   Il peut y avoir pleusieurs ponctuations, par exemple 12,267,324 est une 
+</div>
+<div>   entier double valide.  
+</div>
 </p>
 <div><b> arguments:
 </b></div>
-<div><i>c-addr</i>&nbsp;&nbsp;   Adresse de la chaîne à analyser.
+<div><i>c-addr</i>&nbsp;&nbsp;   Adresse du mot à analyser.
 </div>
 <div><b> retourne:
 </b></div>
@@ -1252,12 +1284,7 @@
 <li><a href="#.R">.R</a></li>
 <li><a href="#/STRING">/STRING</a></li>
 <li><a href="#?">?</a></li>
-<li><a href="#?BASE">?BASE</a></li>
-<li><a href="#?DIGIT">?DIGIT</a></li>
-<li><a href="#?DOUBLE">?DOUBLE</a></li>
-<li><a href="#?NUMBER">?NUMBER</a></li>
-<li><a href="#?QUOTED-CHAR">?QUOTED-CHAR</a></li>
-<li><a href="#?SIGN">?SIGN</a></li>
+<li><a href="#BASE-MOD?">BASE-MOD?</a></li>
 <li><a href="#BL">BL</a></li>
 <li><a href="#BLANK">BLANK</a></li>
 <li><a href="#C-COMP">C-COMP</a></li>
@@ -1275,12 +1302,18 @@
 <li><a href="#D.R">D.R</a></li>
 <li><a href="#DECIMAL?">DECIMAL?</a></li>
 <li><a href="#DIGIT">DIGIT</a></li>
+<li><a href="#DIGIT?">DIGIT?</a></li>
+<li><a href="#DOUBLE?">DOUBLE?</a></li>
 <li><a href="#EC@+">EC@+</a></li>
 <li><a href="#EXTRACT">EXTRACT</a></li>
 <li><a href="#FILL">FILL</a></li>
 <li><a href="#GETLINE">GETLINE</a></li>
 <li><a href="#HOLD">HOLD</a></li>
 <li><a href="#MOVE">MOVE</a></li>
+<li><a href="#NEG?">NEG?</a></li>
+<li><a href="#NUMBER?">NUMBER?</a></li>
+<li><a href="#PONCT?">PONCT?</a></li>
+<li><a href="#QUOTED-CHAR?">QUOTED-CHAR?</a></li>
 <li><a href="#S=">S=</a></li>
 <li><a href="#SCAN">SCAN</a></li>
 <li><a href="#SEARCH">SEARCH</a></li>

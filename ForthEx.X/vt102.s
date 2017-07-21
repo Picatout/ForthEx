@@ -209,7 +209,7 @@ HEADLESS ESCTOVK,HWORD ; ( -- u )
     .word LIT,'O',EQUAL,ZBRANCH,9f-$
     .word SGETC,LIT,'F',EQUAL,ZBRANCH,9f-$
     .word LIT,VK_END,EXIT
-2:  .word DROP,SGETC,DUP,QDIGIT,ZBRANCH,2f-$
+2:  .word DROP,SGETC,DUP,DIGITQ,ZBRANCH,2f-$
     .word SWAP,DROP,EXPECT_TILDE,EXIT
 2:  .word DROP,ARROWS,EXIT
 9:  .word LIT,0,EXIT
@@ -559,7 +559,9 @@ HEADLESS VTWHITELN,HWORD
     
 ; nom: VT-PRTINV  ( c-addr u n -- )
 ;   Imprime sur la REMOTE console la ligne de texte 'c-addr' sur la ligne 'n'.
-;   Si 'f' est vrai imprime noir/blanc, sinon imprime blanc/noir.
+;   Imprime en inverse vidéo, blanc/noir. L'affichage demeure en inverse vidéeo.
+;   Pour revenir en vidéo normal il faut faire la phrase: FALSE B/W
+;   L'inversion vidéo affecte aussi la console LOCAL.    
 ; arguments:
 ;   c-addr Adresse du premier caractère à imprimer.
 ;   u Nombre de caractères
