@@ -37,3 +37,8 @@ utiliser la carte SD est complété ainsi que pour la RAM externe, l'EEPROM exte
 2017-06-21
 ==========
 La documentation des 443 mots du dictionnaire est complétée. Il resterais à créer un tutoriel ForthEx.
+
+2020-06-20
+==========
+Modificiation du readme.md pour ajouter le lien vers le site WEB du projet. Le site contient la référence du langage ainsi qu'un tutoriel.
+
