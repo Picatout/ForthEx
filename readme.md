@@ -9,11 +9,12 @@ Caractéristiques
  * mémoire RAM SPI  128Ko pour fichier temporaire
  
  Le système Forth sera développé en assembleur et en Forth seulement.
+
+[sie web du projet](http://picatout.github.io/ForthEx/)
  
 Schématique
 ===========
 
-![sie web du projet](http://picatout.github.io/ForthEx/)
 
 ![circuit principal](/docs/html/img/forthex_schematic.png)
 
