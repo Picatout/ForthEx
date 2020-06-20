@@ -13,6 +13,8 @@ Caractéristiques
 Schématique
 ===========
 
+![sie web du projet](http://picatout.github.io/ForthEx/)
+
 ![circuit principal](/docs/html/img/forthex_schematic.png)
 
 ![interface clavier](/docs/html/img/forthex_schematic_ps2.png)
